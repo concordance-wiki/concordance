@@ -164,11 +164,69 @@ for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("findings.yaml
   }
 }
 
+// 8. The organisation home page is a single hand-written HTML document: every
+//    tag closed, absolute links, one inline script for the showcase slider, and
+//    nothing fetched from a third party: the fonts ship next to it.
+const home = join(root, "docs/site/index.html");
+const page = readFileSync(home, "utf8");
+const voidTags = new Set([
+  "meta",
+  "link",
+  "br",
+  "hr",
+  "img",
+  "input",
+  "path",
+  "rect",
+  "circle",
+  "line",
+]);
+const opened = new Map();
+for (const match of page.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)[^>]*?(\/?)>/g)) {
+  const [, closing, name, selfClosing] = match;
+  const tag = name.toLowerCase();
+  if (voidTags.has(tag) || selfClosing) continue;
+  opened.set(tag, (opened.get(tag) ?? 0) + (closing ? -1 : 1));
+}
+for (const [tag, balance] of [...opened].sort()) {
+  if (balance !== 0)
+    fail(`docs/site/index.html: <${tag}> opened and closed an unequal number of times`);
+}
+if (!/^<!doctype html>/i.test(page)) fail("docs/site/index.html: must start with <!doctype html>");
+if (!/<title>[^<]+<\/title>/.test(page)) fail("docs/site/index.html: missing <title>");
+if ((page.match(/<script[\s>]/gi) ?? []).length > 1) {
+  fail("docs/site/index.html: carries more than the one inline script of the slider");
+}
+if (/<script\b[^>]*\bsrc=/i.test(page)) fail("docs/site/index.html: must not load a script");
+for (const match of page.matchAll(/<link\b[^>]*href="([^"]*)"/g)) {
+  if (!match[1].startsWith("data:")) {
+    fail(`docs/site/index.html: link ${match[1]} is not an inline asset`);
+  }
+}
+if (/<img\b/i.test(page)) fail("docs/site/index.html: must not reference an image file");
+for (const match of page.matchAll(/url\("([^"]*)"\)/g)) {
+  if (
+    !/^fonts\/[a-z0-9-]+\.woff2$/.test(match[1]) ||
+    !existsSync(join(root, "docs/site", match[1]))
+  ) {
+    fail(`docs/site/index.html: url(${match[1]}) is not a shipped font`);
+  }
+}
+for (const match of page.matchAll(/<a\b[^>]*href="([^"]*)"/g)) {
+  if (
+    !/^https:\/\/[^\s"]+$/.test(match[1]) &&
+    !/^#[a-z][a-z0-9-]*$/.test(match[1]) &&
+    match[1] !== "#"
+  ) {
+    fail(`docs/site/index.html: link ${match[1]} is not an absolute https URL`);
+  }
+}
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, templates, links, message catalogues and check pages are valid",
+  "schemas, profile, theme, fixtures, templates, links, message catalogues, check pages and home page are valid",
 );
