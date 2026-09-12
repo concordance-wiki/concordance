@@ -5,10 +5,10 @@ Reference corpora for the tests. Every corpus is fictional: a generic personal i
 | Corpus | Purpose |
 |---|---|
 | `corpora/minimal` | a dozen files covering every implemented type, every typing path and the main inference methods; the first corpus every story runs against |
-| `corpora/faulty` | one file per expected finding; the checks and the linter are tested here |
-| `corpora/realistic` | a few hundred files with documents, transcripts, duplicates and deliberate errors; built by the golden corpus story |
+| `corpora/faulty` | one file per expected finding, for every check a single file can trigger; the checks and the linter are tested here |
+| `corpora/realistic` | 120 notes per language about a fictional insurer, covering every implemented type, every inference method and every file-level check, with the expected model and findings; see its [README](corpora/realistic/README.md) |
 | `generate` | a synthetic corpus generator for load tests |
 | `plugins/example` | the smallest plugin that exercises every contribution point of the plugin API; loaded by the core tests, never published |
 | `plugins/theme-example` | a theme plugin overriding the `Footer` slot alone; resolved through the registry and rendered by the site tests, never published |
 
-Each corpus folder holds a `concordance.yaml` that declares its sources as local paths, and an `expected/` folder with the result the engine must produce. `expected/` changes only through a pull request that justifies the change.
+Each corpus folder holds a `concordance.yaml` that declares its sources as local paths, and an `expected/` folder with the result the engine must produce: `entities.yaml` (identifier, type, type origin, application, domain), `links.yaml` (a minimum of links with their method and confidence), `findings.yaml` (every intended finding) and `keywords.yaml` (expressions above and below the keyword page threshold). `scripts/validate.mjs` checks that the expected files name things that exist, and the parity tests check that the `en` and `fr` corpora have the same structure. `expected/` changes only through a pull request that justifies the change.

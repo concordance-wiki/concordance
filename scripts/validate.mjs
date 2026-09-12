@@ -222,11 +222,93 @@ for (const match of page.matchAll(/<a\b[^>]*href="([^"]*)"/g)) {
   }
 }
 
+// 9. Every expected result of a corpus names things that exist: an entity names a file of its
+//    source, a link joins two entities (or an application, or a non-markdown resource), a finding
+//    with a path names a file. The identifiers follow the derivation of the engine: source name,
+//    slugified path segments, type suffix or extension stripped from the file name.
+const slugify = (segment) =>
+  segment
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+function corpusIdentifiers(configPath, config) {
+  const ids = new Map();
+  for (const source of config.sources) {
+    if (!source.path) continue;
+    const folder = resolve(dirname(configPath), source.path);
+    const suffixes = (source.rules ?? []).flatMap((rule) =>
+      rule.match.suffix ? [rule.match.suffix] : [],
+    );
+    for (const file of walk(folder, () => true)) {
+      const segments = relative(folder, file).split("/");
+      const name = segments.pop();
+      const suffix = suffixes
+        .filter((s) => name.endsWith(s) && name.length > s.length)
+        .sort((a, b) => b.length - a.length)[0];
+      const base = suffix ? name.slice(0, -suffix.length) : name.replace(/\.[^.]+$/, "");
+      const id = [source.name, ...segments.map(slugify), slugify(base)].join("/");
+      ids.set(id, {
+        source: source.name,
+        path: relative(folder, file),
+        markdown: name.endsWith(".md"),
+      });
+    }
+  }
+  return ids;
+}
+for (const path of walk(join(root, "fixtures/corpora"), (p) =>
+  p.endsWith("/expected/entities.yaml"),
+)) {
+  const corpus = resolve(dirname(path), "..");
+  const configPath = join(corpus, "concordance.yaml");
+  const config = readYaml(configPath);
+  const ids = corpusIdentifiers(configPath, config);
+  const applications = new Set((config.applications ?? []).map((application) => application.id));
+  const entities = new Set();
+  for (const entity of readYaml(path) ?? []) {
+    entities.add(entity.id);
+    const found = ids.get(entity.id);
+    if (!found || !found.markdown)
+      fail(`${relative(root, path)}: entity ${entity.id} names no markdown file`);
+  }
+  const linksPath = join(corpus, "expected/links.yaml");
+  if (existsSync(linksPath)) {
+    for (const link of readYaml(linksPath) ?? []) {
+      for (const end of [link.from, link.to]) {
+        if (!entities.has(end) && !applications.has(end) && !ids.has(end)) {
+          fail(
+            `${relative(root, linksPath)}: ${end} is neither an expected entity, an application nor a resource`,
+          );
+        }
+      }
+    }
+  }
+  const findingsPath = join(corpus, "expected/findings.yaml");
+  if (existsSync(findingsPath)) {
+    for (const finding of readYaml(findingsPath) ?? []) {
+      if (!finding.path) continue;
+      const source = finding.source
+        ? config.sources.find((candidate) => candidate.name === finding.source)
+        : config.sources.find((candidate) => finding.path.startsWith(`${candidate.name}/`));
+      const rest = finding.source
+        ? finding.path
+        : finding.path.slice((source?.name.length ?? 0) + 1);
+      if (!source || !existsSync(resolve(dirname(configPath), source.path, rest))) {
+        fail(
+          `${relative(root, findingsPath)}: finding ${finding.check} names a missing file ${finding.path}`,
+        );
+      }
+    }
+  }
+}
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, templates, links, message catalogues, check pages and home page are valid",
+  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages and home page are valid",
 );

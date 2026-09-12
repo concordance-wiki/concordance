@@ -60,7 +60,7 @@ interface ExpectedEntity {
 }
 
 /** `path` is `<source>/<path>` of the file; the corpus-wide vocabulary findings, filtered out, have none. */
-interface ExpectedFinding {
+interface ExpectedMinimalFinding {
   check: string;
   path: string;
 }
@@ -81,10 +81,10 @@ function expectedEntities(corpus: string): ExpectedEntity[] {
   }));
 }
 
-function expectedFindings(corpus: string): ExpectedFinding[] {
+function expectedFindings(corpus: string): ExpectedMinimalFinding[] {
   const text = nodeFileSystem.readText(posix.join(corpora, corpus, "expected/findings.yaml"));
   // Same fixture discipline as the entities.
-  const findings = parse(text) as ExpectedFinding[];
+  const findings = parse(text) as ExpectedMinimalFinding[];
   return findings
     .filter((finding) => !LATER_CHECKS.has(finding.check))
     .map(({ check, path }) => ({ check, path }));
@@ -143,36 +143,59 @@ describe("the minimal corpus typed through the real file system", () => {
   });
 });
 
+interface ExpectedFinding {
+  check: string;
+  source: string | undefined;
+  path: string | undefined;
+  entity: string | undefined;
+}
+
+const TYPING_CHECKS = new Set([
+  "E-ID-DUP",
+  "E-ID-INVALID",
+  "E-TYPE-CONFLICT",
+  "W-APP-MISSING",
+  "W-ATTRIBUTE-UNKNOWN",
+  "W-DOMAIN-UNCLASSIFIED",
+  "W-TYPE-UNKNOWN",
+]);
+
+/** The typing findings of expected/findings.yaml, in the canonical order of the file. */
+function expectedTypingFindings(corpus: string): ExpectedFinding[] {
+  const text = nodeFileSystem.readText(posix.join(corpora, corpus, "expected/findings.yaml"));
+  // The fixture is reviewed by hand and validated by the repository scripts.
+  const findings = parse(text) as ExpectedFinding[];
+  return findings
+    .filter((finding) => TYPING_CHECKS.has(finding.check))
+    .map(({ check, source, path, entity }) => ({ check, source, path, entity }));
+}
+
 describe("the faulty corpus typed through the real file system", () => {
-  it("reports E-TYPE-CONFLICT, E-ID-DUP, W-APP-MISSING on orphan/no-application.md and W-DOMAIN-UNCLASSIFIED on misc/unclassified.md", async () => {
+  it.each(["en", "fr"])(
+    "reports exactly the typing findings of expected/findings.yaml on the %s corpus",
+    async (locale) => {
+      const result = await typeCorpus(`faulty/${locale}`);
+      expect(
+        result.findings.map(({ check, source, path, entity }) => ({ check, source, path, entity })),
+      ).toEqual(expectedTypingFindings(`faulty/${locale}`));
+    },
+  );
+
+  it("keeps the frontmatter type on a conflict and the first file on a duplicate", async () => {
     const result = await typeCorpus("faulty/en");
-    expect(
-      result.findings.map(({ check, source, path, entity }) => ({ check, source, path, entity })),
-    ).toEqual([
-      { check: "E-ID-DUP", source: "notes", path: "dup/a.rule.md", entity: "notes/dup/a" },
-      {
-        check: "E-TYPE-CONFLICT",
-        source: "notes",
-        path: "type-conflict.rule.md",
-        entity: undefined,
-      },
-      {
-        check: "W-APP-MISSING",
-        source: "orphan",
-        path: "no-application.md",
-        entity: "orphan/no-application",
-      },
-      {
-        check: "W-DOMAIN-UNCLASSIFIED",
-        source: "notes",
-        path: "misc/unclassified.md",
-        entity: "notes/misc/unclassified",
-      },
-    ]);
     const conflict = result.entities.find((entity) => entity.id === "notes/type-conflict");
     expect([conflict?.type, conflict?.type_origin]).toEqual(["screen", "frontmatter"]);
     expect(result.entities.find((entity) => entity.id === "notes/dup/a")?.source.path).toBe(
       "dup/a.md",
+    );
+  });
+
+  it("falls back to document on an unknown type and to the path on an invalid identifier", async () => {
+    const result = await typeCorpus("faulty/en");
+    const unknown = result.entities.find((entity) => entity.id === "notes/unknown-type");
+    expect([unknown?.type, unknown?.type_origin]).toEqual(["document", "frontmatter"]);
+    expect(result.entities.find((entity) => entity.id === "notes/invalid-id")?.source.path).toBe(
+      "invalid-id.md",
     );
   });
 });

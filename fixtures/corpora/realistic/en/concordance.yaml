@@ -1,0 +1,104 @@
+version: 1
+project:
+  name: Realistic corpus
+  locale: en
+applications:
+  - id: policy-admin
+    title: Policy administration
+    status: active
+  - id: member-portal
+    title: Member portal
+    status: target
+domains:
+  - id: membership
+    title: Membership
+    match: ["**/*member*", "**/*enrol*", "**/*household*"]
+  - id: payments
+    title: Payments
+    match:
+      - "**/*payment*"
+      - "**/*premium*"
+      - "**/*refund*"
+      - "**/*direct-debit*"
+      - "**/*settlement*"
+      - "**/*value-date*"
+      - "**/*balance*"
+      - "**/statement*"
+      - "**/*interest-rate*"
+      - "**/*grace*"
+      - "**/*cap*"
+    subdomains:
+      - id: caps
+        title: Caps
+        match: ["**/*cap*"]
+  - id: claims
+    title: Claims
+    match: ["**/*claim*", "**/*indemnit*", "**/*deductible*", "**/*assessor*", "**/*reserve*"]
+  - id: contracts
+    title: Contracts
+    match:
+      - "**/*contract*"
+      - "**/*cover*"
+      - "**/*beneficiar*"
+      - "**/*quote*"
+      - "**/*rider*"
+      - "**/*subscription*"
+      - "**/*renewal*"
+      - "**/*termination*"
+      - "**/*cooling-off*"
+      - "**/*expiry*"
+      - "**/*suspension*"
+      - "**/*lapse*"
+      - "**/*exclusion*"
+      - "**/*effective-date*"
+      - "**/*policy*"
+      - "**/*general-conditions*"
+privacy:
+  exclude: ["**/private/**"]
+sources:
+  - name: glossary
+    path: ./glossary
+    type: term
+    glossary: true
+    application: policy-admin
+  - name: specs
+    path: ./specs
+    application: policy-admin
+    rules:
+      - match: { path: "screens/**" }
+        set: { type: screen }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { path: "objects/**" }
+        set: { type: business_object }
+      - match: { path: "processes/**" }
+        set: { type: process }
+      - match: { path: "roles/**" }
+        set: { type: role }
+      - match: { path: "batches/**" }
+        set: { type: batch }
+      - match: { path: "endpoints/**" }
+        set: { type: endpoint }
+      - match: { suffix: ".rule.md" }
+        set: { type: rule }
+      - match: { suffix: ".table.md" }
+        set: { type: data_object }
+      - match: { path: "screens/portal/**" }
+        set: { type: screen, application: member-portal }
+  - name: decisions
+    path: ./decisions
+    type: decision
+    application: policy-admin
+  - name: meetings
+    path: ./meetings
+    default_type: meeting
+    application: policy-admin
+  - name: framing
+    path: ./framing
+    default_type: document
+    convert: true
+inference:
+  cross_source_links: true
+  keyword_pages: { min_occurrences: 3, min_files: 2 }
+staleness:
+  warn_after_days: { default: 60, glossary: 120 }

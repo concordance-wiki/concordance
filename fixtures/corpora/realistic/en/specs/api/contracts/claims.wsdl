@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="ClaimsService"
+  targetNamespace="urn:example:claims"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:tns="urn:example:claims"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <types>
+    <xsd:schema targetNamespace="urn:example:claims">
+      <xsd:element name="DeclareClaimRequest" type="xsd:string"/>
+      <xsd:element name="DeclareClaimResponse" type="xsd:string"/>
+      <xsd:element name="GetClaimStatusRequest" type="xsd:string"/>
+      <xsd:element name="GetClaimStatusResponse" type="xsd:string"/>
+    </xsd:schema>
+  </types>
+  <message name="DeclareClaimInput"><part name="body" element="tns:DeclareClaimRequest"/></message>
+  <message name="DeclareClaimOutput"><part name="body" element="tns:DeclareClaimResponse"/></message>
+  <message name="GetClaimStatusInput"><part name="body" element="tns:GetClaimStatusRequest"/></message>
+  <message name="GetClaimStatusOutput"><part name="body" element="tns:GetClaimStatusResponse"/></message>
+  <portType name="ClaimsPortType">
+    <operation name="DeclareClaim">
+      <input message="tns:DeclareClaimInput"/>
+      <output message="tns:DeclareClaimOutput"/>
+    </operation>
+    <operation name="GetClaimStatus">
+      <input message="tns:GetClaimStatusInput"/>
+      <output message="tns:GetClaimStatusOutput"/>
+    </operation>
+  </portType>
+  <binding name="ClaimsBinding" type="tns:ClaimsPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="DeclareClaim">
+      <soap:operation soapAction="urn:example:claims:DeclareClaim"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="GetClaimStatus">
+      <soap:operation soapAction="urn:example:claims:GetClaimStatus"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="ClaimsService">
+    <port name="ClaimsPort" binding="tns:ClaimsBinding">
+      <soap:address location="http://claims.example.invalid/soap"/>
+    </port>
+  </service>
+</definitions>

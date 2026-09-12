@@ -1,0 +1,110 @@
+version: 1
+project:
+  name: Corpus réaliste
+  locale: fr
+applications:
+  - id: gestion-contrats
+    title: Gestion des contrats
+    status: active
+  - id: portail-adherent
+    title: Portail adhérent
+    status: target
+domains:
+  - id: adhesion
+    title: Adhésion
+    match: ["**/*adherent*", "**/*adhesion*", "**/*foyer*"]
+  - id: versements
+    title: Versements
+    match:
+      - "**/*versement*"
+      - "**/*paiement*"
+      - "**/*cotisation*"
+      - "**/*rembourse*"
+      - "**/*prelevement*"
+      - "**/*reglement*"
+      - "**/*date-de-valeur*"
+      - "**/*solde*"
+      - "**/releve*"
+      - "**/*taux-d-interet*"
+      - "**/*delai-de-grace*"
+      - "**/*plafond*"
+    subdomains:
+      - id: plafonds
+        title: Plafonds
+        match: ["**/*plafond*"]
+  - id: sinistres
+    title: Sinistres
+    match: ["**/*sinistre*", "**/*indemnit*", "**/*franchise*", "**/*expert*", "**/*provision*"]
+  - id: contrats
+    title: Contrats
+    match:
+      - "**/*contrat*"
+      - "**/*garantie*"
+      - "**/*beneficiaire*"
+      - "**/*devis*"
+      - "**/*avenant*"
+      - "**/*souscription*"
+      - "**/*renouvellement*"
+      - "**/*resiliation*"
+      - "**/*retractation*"
+      - "**/echeance*"
+      - "**/*suspension*"
+      - "**/decheance*"
+      - "**/*exclusion*"
+      - "**/*date-d-effet*"
+      - "**/*conditions-particulieres*"
+      - "**/*conditions-generales*"
+privacy:
+  exclude: ["**/prive/**"]
+sources:
+  - name: glossaire
+    path: ./glossaire
+    locale: fr
+    type: term
+    glossary: true
+    application: gestion-contrats
+  - name: specs
+    path: ./specs
+    locale: fr
+    application: gestion-contrats
+    rules:
+      - match: { path: "ecrans/**" }
+        set: { type: screen }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { path: "objets/**" }
+        set: { type: business_object }
+      - match: { path: "processus/**" }
+        set: { type: process }
+      - match: { path: "roles/**" }
+        set: { type: role }
+      - match: { path: "batchs/**" }
+        set: { type: batch }
+      - match: { path: "operations/**" }
+        set: { type: endpoint }
+      - match: { suffix: ".regle.md" }
+        set: { type: rule }
+      - match: { suffix: ".table.md" }
+        set: { type: data_object }
+      - match: { path: "ecrans/portail/**" }
+        set: { type: screen, application: portail-adherent }
+  - name: decisions
+    path: ./decisions
+    locale: fr
+    type: decision
+    application: gestion-contrats
+  - name: reunions
+    path: ./reunions
+    locale: fr
+    default_type: meeting
+    application: gestion-contrats
+  - name: cadrage
+    path: ./cadrage
+    locale: fr
+    default_type: document
+    convert: true
+inference:
+  cross_source_links: true
+  keyword_pages: { min_occurrences: 3, min_files: 2 }
+staleness:
+  warn_after_days: { default: 60, glossaire: 120 }

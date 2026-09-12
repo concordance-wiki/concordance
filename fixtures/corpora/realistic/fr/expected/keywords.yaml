@@ -1,0 +1,8 @@
+# Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
+# A minimum: other everyday expressions may cross the threshold, none of the unpublished ones may.
+published:
+  - { text: délai de carence, min_occurrences: 9, min_files: 4 }
+unpublished:
+  - { text: versement exceptionnel, reason: "2 occurrences in 2 files" }
+  - { text: cadre contractuel, reason: "1 occurrence" }
+  - { text: marge technique, reason: "defined in the glossary; its only citation is excluded by privacy.exclude" }

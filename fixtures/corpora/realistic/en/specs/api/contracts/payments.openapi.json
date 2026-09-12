@@ -1,0 +1,25 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Payments API", "version": "2.0.0" },
+  "paths": {
+    "/payments": {
+      "get": {
+        "operationId": "listPayments",
+        "summary": "List the payments of a contract",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "operationId": "createPayment",
+        "summary": "Create a payment",
+        "responses": { "201": { "description": "Created" }, "409": { "description": "Cap exceeded" } }
+      }
+    },
+    "/payments/{id}": {
+      "get": {
+        "operationId": "getPayment",
+        "summary": "Read a payment",
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  }
+}
