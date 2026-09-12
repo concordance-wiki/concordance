@@ -101,7 +101,31 @@ for (const [type, definition] of Object.entries(profile.types)) {
   }
 }
 
-// 5. Relative markdown links resolve, except in the faulty corpus, which breaks one on purpose.
+// 5. The copy the command line ships equals docs/templates, file for file
+//    (scripts/sync-templates.mjs refreshes it).
+const shippedDir = join(root, "packages/cli/templates");
+const shipped = existsSync(shippedDir) ? readdirSync(shippedDir).sort() : [];
+const published = readdirSync(templateDir).sort();
+for (const name of published) {
+  if (!shipped.includes(name)) {
+    fail(`packages/cli/templates/${name}: missing, run node scripts/sync-templates.mjs`);
+  } else if (
+    readFileSync(join(shippedDir, name), "utf8") !== readFileSync(join(templateDir, name), "utf8")
+  ) {
+    fail(
+      `packages/cli/templates/${name}: differs from docs/templates, run node scripts/sync-templates.mjs`,
+    );
+  }
+}
+for (const name of shipped) {
+  if (!published.includes(name)) {
+    fail(
+      `packages/cli/templates/${name}: not in docs/templates, run node scripts/sync-templates.mjs`,
+    );
+  }
+}
+
+// 6. Relative markdown links resolve, except in the faulty corpus, which breaks one on purpose.
 const linkPattern = /\[[^\]]*\]\(([^)\s]+)\)/g;
 for (const path of walk(
   root,
@@ -118,7 +142,7 @@ for (const path of walk(
   }
 }
 
-// 6. Every message catalogue is a well-formed JSON object with sorted keys:
+// 7. Every message catalogue is a well-formed JSON object with sorted keys:
 //    the source carries a default message and a description per entry, a
 //    translation a string per entry. Parity between locales is a unit test.
 const messageDir = join(root, "packages/i18n/messages");
@@ -148,7 +172,7 @@ for (const name of readdirSync(messageDir).sort()) {
   }
 }
 
-// 7. Every check page carries a valid identifier, and every check named in the
+// 8. Every check page carries a valid identifier, and every check named in the
 //    fixtures has a page.
 const checkDir = join(root, "docs/checks");
 const pages = new Set(
@@ -167,7 +191,7 @@ for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("findings.yaml
   }
 }
 
-// 8. The organisation home page is a single hand-written HTML document: every
+// 9. The organisation home page is a single hand-written HTML document: every
 //    tag closed, absolute links, one inline script for the showcase slider, and
 //    nothing fetched from a third party: the fonts ship next to it.
 const home = join(root, "docs/site/index.html");
@@ -225,7 +249,7 @@ for (const match of page.matchAll(/<a\b[^>]*href="([^"]*)"/g)) {
   }
 }
 
-// 9. Every expected result of a corpus names things that exist: an entity names a file of its
+// 10. Every expected result of a corpus names things that exist: an entity names a file of its
 //    source, a link joins two entities (or an application, or a non-markdown resource), a finding
 //    with a path names a file. The identifiers follow the derivation of the engine: source name,
 //    slugified path segments, type suffix or extension stripped from the file name.
@@ -307,7 +331,7 @@ for (const path of walk(join(root, "fixtures/corpora"), (p) =>
   }
 }
 
-// 10. Every workspace package carries the licence of the project.
+// 11. Every workspace package carries the licence of the project.
 const licence = "GPL-3.0-or-later";
 for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
   const manifest = JSON.parse(readFileSync(path, "utf8"));
@@ -316,7 +340,7 @@ for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
   }
 }
 
-// 11. The distribution forms expose their documented inputs and pin the version of the command line.
+// 12. The distribution forms expose their documented inputs and pin the version of the command line.
 for (const message of checkDistribution(root)) fail(message);
 
 if (failures.length > 0) {
@@ -325,5 +349,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages, home page, licences and distribution manifests are valid",
+  "schemas, profile, theme, fixtures, expected results, templates and their copy, links, message catalogues, check pages, home page, licences and distribution manifests are valid",
 );

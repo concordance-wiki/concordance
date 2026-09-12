@@ -10,3 +10,5 @@ fixtures/
 brand/
 packages/profile/default.yaml
 *.md
+# A byte-for-byte copy of docs/templates, refreshed by scripts/sync-templates.mjs.
+packages/cli/templates/

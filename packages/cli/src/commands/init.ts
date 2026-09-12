@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
+import { templatesDirectory } from "../templates.js";
 import { defaultConfigFile } from "./validate-config.js";
 
 export const initialConfig = `# Concordance configuration. Reference: docs/guides/configuration.md
@@ -33,8 +34,35 @@ build:
   output: ./dist
 `;
 
-export function initCommand(argv: string[], io: CommandIo): ExitCode {
-  const { positionals } = parseArgs({ args: argv, allowPositionals: true });
+/** Folder of the configuration repository that receives the note templates under `--templates`. */
+export const templatesFolder = "templates";
+
+/** Copies every shipped template that does not exist yet; an existing file is kept and reported. */
+function writeTemplates(directory: string, io: CommandIo, templates: string): ExitCode {
+  let code: ExitCode = exitCodes.ok;
+  for (const name of io.fs.listFiles(templates)) {
+    const file = resolve(directory, templatesFolder, name);
+    if (io.fs.exists(file)) {
+      io.err(`${file}: already exists, kept`);
+      code = exitCodes.failure;
+      continue;
+    }
+    io.fs.writeText(file, io.fs.readText(resolve(templates, name)));
+    io.out(`${file}: written`);
+  }
+  return code;
+}
+
+export function initCommand(
+  argv: string[],
+  io: CommandIo,
+  templates: string = templatesDirectory(),
+): ExitCode {
+  const { values, positionals } = parseArgs({
+    args: argv,
+    options: { templates: { type: "boolean", default: false } },
+    allowPositionals: true,
+  });
   const directory = resolve(io.cwd, positionals[0] ?? ".");
   const file = resolve(directory, defaultConfigFile);
   if (io.fs.exists(file)) {
@@ -43,5 +71,5 @@ export function initCommand(argv: string[], io: CommandIo): ExitCode {
   }
   io.fs.writeText(file, initialConfig);
   io.out(`${file}: written`);
-  return exitCodes.ok;
+  return values.templates ? writeTemplates(directory, io, templates) : exitCodes.ok;
 }
