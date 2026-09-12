@@ -54,8 +54,8 @@ for (const name of readdirSync(schemaDir).sort()) {
 // 2. The default profile and the brand theme validate.
 validateAgainst(
   "profile.schema.json",
-  join(root, "profiles/default.yaml"),
-  readYaml(join(root, "profiles/default.yaml")),
+  join(root, "packages/profile/default.yaml"),
+  readYaml(join(root, "packages/profile/default.yaml")),
 );
 validateAgainst(
   "theme.schema.json",
@@ -77,7 +77,7 @@ for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("concordance.y
 
 // 4. Every profile type that is active in the first version has a template,
 //    and every template declares a type known to the profile.
-const profile = readYaml(join(root, "profiles/default.yaml"));
+const profile = readYaml(join(root, "packages/profile/default.yaml"));
 const templateDir = join(root, "docs/templates");
 const templates = readdirSync(templateDir).filter((n) => n.endsWith(".md") && n !== "README.md");
 const frontmatter = (text) => {

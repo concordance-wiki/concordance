@@ -5,7 +5,7 @@
 # `status: planned` are part of the meta-model but not yet rendered by the
 # first version; a project may enable them without any code change.
 #
-# Validated by schemas/profile.schema.json.
+# Validated by packages/core/schemas/profile.schema.json.
 
 profile: default
 version: 1

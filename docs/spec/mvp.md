@@ -76,7 +76,7 @@ A single command, `concordance build`, chains eight deterministic steps. Each is
 
 ## 3. Meta-model reduced to the MVP
 
-The default profile defines thirty-six types and twenty relations. The MVP implements a subset, but the engine stays generic: the reduction is a matter of `status` in `profiles/default.yaml`, not of code. A project can reintroduce the missing types without modifying the engine.
+The default profile defines thirty-six types and twenty relations. The MVP implements a subset, but the engine stays generic: the reduction is a matter of `status` in `packages/profile/default.yaml`, not of code. A project can reintroduce the missing types without modifying the engine.
 
 ### 3.1 Implemented types
 

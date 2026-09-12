@@ -8,5 +8,5 @@ coverage/
 docs/
 fixtures/
 brand/
-profiles/
+packages/profile/default.yaml
 *.md

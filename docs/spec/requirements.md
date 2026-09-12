@@ -116,7 +116,7 @@ Every design decision that contradicts a principle requires a recorded decision.
 
 ## 5. Meta-model
 
-The default profile, `profiles/default.yaml`, is inspired by a lightened ArchiMate 3.2. Slugs are English; labels are translated.
+The default profile, `packages/profile/default.yaml`, is inspired by a lightened ArchiMate 3.2. Slugs are English; labels are translated.
 
 ### 5.1 Types
 

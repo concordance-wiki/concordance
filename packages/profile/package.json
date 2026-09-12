@@ -11,12 +11,15 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "default.yaml"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"
   },
   "dependencies": {
-    "@concordance-wiki/core": "workspace:*"
+    "@concordance-wiki/core": "workspace:*",
+    "ajv": "8.17.1",
+    "yaml": "2.8.1"
   }
 }
