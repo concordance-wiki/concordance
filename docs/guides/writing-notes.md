@@ -83,6 +83,8 @@ broader: payment
 A payment made at the member's request, outside any schedule.
 ```
 
+Spellings are compared without regard to case, accents or the plural: "Free Payment", "free payments" and "free payment" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "contract" is not found inside "contractual".
+
 Two notes with the same title are homonyms. The tool keeps both and links occurrences to each at half confidence; a `## Not to be confused with` section helps readers.
 
 ## Profile

@@ -13,4 +13,6 @@ plural:
   - { ending: shes, singular: sh, min_length: 6 }
   - { ending: ches, singular: ch, min_length: 6 }
   - { ending: xes, singular: x, min_length: 5 }
+  # A word in -ss is a singular ("address"): this rule keeps it from the -s rule below.
+  - { ending: ss, singular: ss }
   - { ending: s, singular: "", min_length: 4 }
