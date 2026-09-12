@@ -1,0 +1,13 @@
+{
+  "name": "@concordance-wiki/fixture-plugin-theme-example",
+  "version": "0.0.0",
+  "description": "Example theme plugin overriding one slot of the site; used by the site tests.",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "exports": "./index.mjs",
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "preact": "10.29.8"
+  }
+}

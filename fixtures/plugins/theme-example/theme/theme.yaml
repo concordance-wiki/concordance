@@ -1,0 +1,4 @@
+name: Example
+radius: 4
+light: { bg: "#FFFFFF", surface: "#FFFFFF", border: "#DDDDDD", ink: "#111111", muted: "#555555", accent: "#0055AA" }
+dark: { bg: "#111111", surface: "#1A1A1A", border: "#333333", ink: "#EEEEEE", muted: "#AAAAAA", accent: "#66AAFF" }

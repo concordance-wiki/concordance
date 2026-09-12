@@ -102,6 +102,7 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 - [Writing notes](docs/guides/writing-notes.md): what a note is, what frontmatter adds, which sections mean something.
 - [Configuration](docs/guides/configuration.md): sources, typing rules, domains, thresholds, pipelines.
 - [Publishing transcripts](docs/guides/publishing-transcripts.md): what the build hides, what it cannot decide, what to settle first.
+- [Theming](docs/guides/theming.md): the slots of the site, their view models, overriding one from a plugin, the stylesheet layers.
 - [Architecture](docs/guides/architecture.md): the decisions behind the tool, for contributors.
 - [MVP specification](docs/spec/mvp.md): every feature, with its acceptance criteria.
 

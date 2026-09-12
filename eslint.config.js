@@ -46,4 +46,9 @@ export default tseslint.config(
     files: ["packages/cli/src/**"],
     rules: { "no-console": "off" },
   },
+  {
+    // Components of the site are TSX compiled for Preact; the same strict rules apply to them.
+    files: ["packages/site/**/*.tsx"],
+    languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+  },
 );

@@ -4,7 +4,10 @@
     "composite": false,
     "noEmit": true,
     "rootDir": ".",
-    "types": ["node"]
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": ["src", "test"],
   "references": [

@@ -71,7 +71,7 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 | `check` | `checks` | `id` (`E-`, `W-` or `I-`), `severity`, `description`, `remediation`, `documentation` URL | `run(input) → findings[]` |
 | `projection` | `projections` | `id`, lowercase identifier | `render(input) → { html, json }` |
 | `ui component` | `uiComponents` | `slot`, `bundle` | none: the site loads the bundle on demand |
-| `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet after its own and renders the overridden slots with the theme's components |
+| `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet in the `project` layer and renders the overridden slots with the theme's components |
 
 The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution (a reader receives the raw bytes of the file as a `Uint8Array` and returns the metadata it extracted plus the full text, the material of recognition and search); the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context: a `PluginContext` carries the file system, the clock and, when the build has network access, a `fetch` function; a contribution never reads the clock or the network on its own. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
 
@@ -101,9 +101,44 @@ A converter receives `{ path, payload }` where the payload is typed (`ConverterP
 
 It returns `{ representations, findings }`: one `{ path }` per produced representation (`pdf`, `thumbnails`, `text`), each a file under the cache that the pipeline reads later, and the findings of the conversion. A conversion that fails produces no representation and a [`W-CONV-FAILED`](../checks/W-CONV-FAILED.md) finding: the document remains a downloadable entity. A PDF without extractable text from a large source carries a [`W-CONV-SUSPECT`](../checks/W-CONV-SUSPECT.md) finding. The pipeline runs converters through a pool of `conversion.parallelism` workers and keeps the results in input order.
 
-### Readers
+#### Readers
 
 A reader receives a `ReaderInput`: the `path` of the file relative to its source, used to pick the format and to name the file in errors, and `payload.bytes`, its raw content as a `Uint8Array`. It returns a `ReaderOutput`: `metadata`, a flat record of the native properties of the resource (title, author, subject, keywords, `created` and `modified` dates as ISO 8601 strings, counts), and `text`, the readable content, empty when the format has no extractable text yet. A reader is synchronous and pure: it reads nothing but the bytes it is given, never git, the file system or the clock, so the dates it returns are the document's own and stay distinct from the commit date the ingested file carries. When the bytes cannot be read it throws a plain `Error` whose message names the file; the pipeline turns that failure into a finding. Personal data such as authors is returned raw: pseudonymisation applies downstream, on the model, when it is enabled.
+
+#### Themes
+
+A theme names a `theme.yaml`, an optional stylesheet and assets folder, and `components`: a map from slot name to the path of a module, relative to the plugin package, whose default export is a Preact component receiving the view model of that slot. Slots the theme does not name keep the default component; when several plugins override the same slot, the last one declared wins. Slot names and view models are in the [theming guide](theming.md).
+
+```js
+import { definePlugin } from "@concordance-wiki/core";
+
+export default definePlugin({
+  name: "@example/plugin-theme-corporate",
+  version: "0.1.0",
+  apiVersion: "1",
+  contributes: {
+    themes: [
+      {
+        name: "corporate",
+        tokens: "./theme/theme.yaml",
+        stylesheet: "./theme/theme.css",
+        components: { Footer: "./theme/footer.js", Header: "./theme/header.js" },
+      },
+    ],
+  },
+});
+```
+
+```js
+// theme/footer.js
+import { h } from "preact";
+
+export default function Footer({ version, generatedAt, links }) {
+  return h("footer", { class: "site-footer" }, `version ${version}, built on ${generatedAt}`);
+}
+```
+
+The example under [`fixtures/plugins/theme-example`](../../fixtures/plugins/theme-example/index.mjs) overrides the footer alone and is rendered end to end by the site tests. An override for a name that is not a slot, or a module whose default export is not a function, is a `ThemeResolutionError` naming the plugin and the theme.
 
 ### System dependencies
 

@@ -5,6 +5,8 @@ import { defineConfig } from "vitest/config";
 const packages = fileURLToPath(new URL("./packages/", import.meta.url));
 
 export default defineConfig({
+  // Components of the site are TSX compiled for Preact; the setting applies to every package.
+  oxc: { jsx: { runtime: "automatic", importSource: "preact" } },
   // Tests exercise sources across packages, so that coverage and mutation testing see every file once.
   resolve: {
     alias: [
@@ -19,7 +21,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: "v8",
-      include: ["packages/*/src/**/*.ts", "plugins/*/src/**/*.ts", "presets/*/src/**/*.ts"],
+      include: ["packages/*/src/**/*.{ts,tsx}", "plugins/*/src/**/*.ts", "presets/*/src/**/*.ts"],
       // The executable wrapper only wires process to main(); it is exercised by the pipeline, not by unit tests.
       exclude: ["packages/cli/src/bin.ts"],
       reporter: ["text", "lcov"],
