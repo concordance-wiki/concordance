@@ -50,3 +50,5 @@ jobs:
         env:
           HYGIENE_COMMIT_RANGE: ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || 'HEAD~20..HEAD' }}
         run: node scripts/hygiene.mjs
+      - name: Licences
+        run: pnpm licenses:check

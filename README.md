@@ -108,8 +108,8 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The bar is high on purpose: strict TypeScript, pure functions, full test coverage, deterministic output. Security reports go through [SECURITY.md](SECURITY.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The bar is high on purpose: strict TypeScript, pure functions, full test coverage, deterministic output. Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md). Security reports go through [SECURITY.md](SECURITY.md); releases follow the [release guide](docs/guides/releasing.md).
 
 ## Licence
 
-[GNU General Public License, version 3 or later](LICENSE).
+[GNU General Public License, version 3 or later](LICENSE), for every package of this repository. The [licence inventory](docs/licenses.md) lists the third-party dependencies and their licences.

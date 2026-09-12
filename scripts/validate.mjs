@@ -1,6 +1,7 @@
 // Validates what the repository publishes without any engine code: the JSON
 // schemas themselves, the default profile, the brand theme, the fixture
-// configurations, the note templates and the relative links of the docs.
+// configurations, the note templates, the relative links of the docs, the
+// licence of every workspace package.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
@@ -304,11 +305,20 @@ for (const path of walk(join(root, "fixtures/corpora"), (p) =>
   }
 }
 
+// 10. Every workspace package carries the licence of the project.
+const licence = "GPL-3.0-or-later";
+for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
+  const manifest = JSON.parse(readFileSync(path, "utf8"));
+  if (manifest.license !== licence) {
+    fail(`${relative(root, path)}: license must be ${licence}, found ${manifest.license}`);
+  }
+}
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages and home page are valid",
+  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages, home page and licences are valid",
 );

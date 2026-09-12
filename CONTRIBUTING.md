@@ -4,7 +4,8 @@ Thank you for considering a contribution. This page says how the repository work
 
 ## Before you start
 
-- Open an issue for anything larger than a typo, so that the scope is agreed before the code exists.
+- Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
+- Open an issue for anything larger than a typo, so that the scope is agreed before the code exists. Bug reports and feature requests have templates; a security issue goes through the [security policy](SECURITY.md), never through a public issue.
 - Read the [MVP specification](docs/spec/mvp.md) and the [architecture guide](docs/guides/architecture.md). Every change must fit them; a change that contradicts them starts with a discussion, not a pull request.
 - Everything in this repository is in English: code, comments, tests, commits, documentation, fixtures. Labels shown in the generated site go through the i18n catalogue (`en`, `fr`).
 
@@ -26,7 +27,8 @@ pnpm check
 | `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation |
 | `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85% |
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
-| `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte) and the hygiene scan |
+| `pnpm licenses:update` | regenerate the [licence inventory](docs/licenses.md) from the installed dependencies; `pnpm licenses:check` verifies that it is current and that every licence is in the allow-list of `scripts/licenses.mjs` |
+| `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte), the hygiene scan and the licence check |
 
 A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests (`tsc -b`, so that referenced packages are built first) and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose. Under Vitest, `@concordance-wiki/*` imports resolve to the sources of the workspace, so cross-package tests count for coverage and mutation testing without a build.
 
@@ -38,7 +40,7 @@ A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/`
 - Inference and checks are pure functions. Git, file system, network, LibreOffice and the clock are injected interfaces, replaced by doubles in tests.
 - Deterministic output: canonical sorting everywhere (`sortCanonically` with the comparators of `core`), no timestamp outside the `build` block of `model.json` and the `at` field of the build log, no random value. Parallel steps sort their results before writing. `SOURCE_DATE_EPOCH` pins the clock; the determinism step relies on it.
 - No proper noun anywhere: no person, company, client or real project in code, fixtures, tests or labels. The fictional corpus is a generic personal insurer with invented names.
-- A new dependency needs a justification in the pull request: function, size, licence compatible with GPL-3.0-or-later, maintenance.
+- A new dependency needs a justification in the pull request: function, size, licence compatible with GPL-3.0-or-later, maintenance. Pin the exact version, run `pnpm licenses:update` and commit the regenerated inventory; a licence outside the allow-list of `scripts/licenses.mjs` fails the check, and widening the allow-list is a decision for the maintainers, not a side effect of a pull request.
 
 ## Code style
 
@@ -60,11 +62,21 @@ The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict
 
 The pull request template carries the checklist. In short: tests named after the acceptance criteria, golden corpus snapshot updated and justified or declared unchanged, no coverage exclusion added, no dependency added without justification, labels through i18n, no proper noun, documentation up to date, changeset present.
 
+One pull request does one thing. A pull request that fixes a bug and renames a module is two pull requests. Keep the description factual: what changes, why, and what a reviewer should look at first.
+
 A pull request from a fork runs every blocking test without any secret or private repository.
+
+## Review
+
+- Every pull request needs a green pipeline and one approval from a maintainer before it is merged. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
+- Expect a first answer within a week. A pull request without activity for a month is closed and can be reopened.
+- Reviewers check the acceptance criteria against the tests first, then the documentation, then the code. A comment says whether it blocks the merge or is a suggestion.
+- Discussions about the design happen in the issue, before the code; the review is about whether the code delivers what the issue agreed on.
+- A pull request is merged as it is, with its history: that is why its commits are squashed into a progression before the review starts.
 
 ## Releases
 
-Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`). Releases are cut by the maintainers following the [releasing guide](docs/guides/releasing.md).
+Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`) that names the packages, the bump and one sentence for the changelog. Releases are cut by the maintainers following the [release guide](docs/guides/releasing.md).
 
 ## Licence
 
