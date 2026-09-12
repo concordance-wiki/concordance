@@ -79,7 +79,7 @@ With the `contract-openapi` plugin declared in the configuration, the build read
 
 ## Sections that mean something
 
-Some section headings are mapped to relations in the profile. A mention under such a heading counts more (0.70) than a mention in a paragraph (0.60).
+Some section headings are mapped to relations in the profile. A mention under such a heading counts more (0.70, method `section_mention`, with the section and the line as provenance) than a mention in a paragraph (0.60, method `glossary_occurrence`, with the line as provenance).
 
 | Type | Sections |
 |---|---|
@@ -90,7 +90,9 @@ Some section headings are mapped to relations in the profile. A mention under su
 | rule | `## Applies to` (constrains) |
 | decision | `## Affects` (affects) |
 
-French headings (`## Objets`, `## Étapes`, `## Règles`) are recognised in sources whose locale is `fr`.
+A heading is matched against the labels of every locale of the profile and against the section key itself, whatever the locale of the source: `## Objects`, `## Objets` and `## objects` all map to the `objects` section of a screen. The comparison ignores case, accents and surrounding or repeated whitespace (`## OBJECTS`, `## Regles`, `## S'APPLIQUE A`), and nothing else: `## Objects and more` maps to nothing. Only the H2 sections of the note count, and the mapping is that of the type of the note: `## Applies to` under a screen, or `## Objects` under a rule, is an ordinary section.
+
+Under a mapped section, every recognised mention of another note gives the declared relation from the note to the mentioned entity, or the other way round when the profile marks the section `inverse` (a rule listed under `## Rules` of a screen constrains the screen), with the attributes of the section (`## Writes` of a batch gives `accesses` in `write` mode). A mention whose two types the relation does not join, such as a glossary term listed under `## Objects`, counts as a plain mention. A note that mentions itself gives no link. Outside a mapped section, or when the section relation does not apply, the mention gives a `related` link at 0.60 until the relation typing step refines it; `related` being undirected, that link goes from the smaller identifier to the larger, so that two notes mentioning each other share one link. Several mentions of the same note in the same relation make one link with one provenance per mention.
 
 ## What is not read
 
