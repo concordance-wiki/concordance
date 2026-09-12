@@ -40,7 +40,8 @@ jobs:
           path: coverage/lcov.info
           if-no-files-found: error
       - name: Mutation testing
-        run: pnpm mutation
+        # A pull request mutates only the files it changed; main mutates everything.
+        run: ${{ github.event_name == 'pull_request' && format('node scripts/mutation.mjs --since origin/{0}', github.event.pull_request.base.ref) || 'pnpm mutation' }}
       - name: Determinism
         run: node scripts/determinism.mjs
       - name: Hygiene
