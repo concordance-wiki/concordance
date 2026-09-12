@@ -66,9 +66,16 @@ export function parseSources(
 
 export function formatSummary(summary: BuildLog["summary"]): string[] {
   const { bySeverity, byCheck } = summary.findings;
+  const { keywords } = summary;
   return [
     `sources: ${String(summary.sources)}`,
     `files: ${String(summary.files)}`,
+    ...(keywords === undefined
+      ? []
+      : [
+          `keyword pages: ${String(keywords.published)}`,
+          `expressions under the threshold: ${String(keywords.discarded)}`,
+        ]),
     `findings: error ${String(bySeverity.error)}, warning ${String(bySeverity.warning)}, info ${String(bySeverity.info)}`,
     ...Object.entries(byCheck).map(([check, count]) => `  ${check}: ${String(count)}`),
   ];

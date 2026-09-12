@@ -10,6 +10,13 @@ export interface BuildSummary {
   /** Links per inference method; empty until inference exists. */
   links: Record<string, number>;
   findings: { bySeverity: Record<Severity, number>; byCheck: Record<string, number> };
+  /** Keyword pages published and expressions under the threshold; absent while the build computes none. */
+  keywords?: KeywordCounts;
+}
+
+export interface KeywordCounts {
+  published: number;
+  discarded: number;
 }
 
 /** What `dist/build.log.json` holds; the same `findings` array goes into `model.json`. */
@@ -34,6 +41,7 @@ export function summarize(input: {
   sources: number;
   files: number;
   findings: readonly Finding[];
+  keywords?: KeywordCounts;
 }): BuildSummary {
   const bySeverity: Record<Severity, number> = { error: 0, warning: 0, info: 0 };
   const counts = new Map<string, number>();
@@ -51,6 +59,9 @@ export function summarize(input: {
     entities: {},
     links: {},
     findings: { bySeverity, byCheck },
+    ...(input.keywords === undefined
+      ? {}
+      : { keywords: { published: input.keywords.published, discarded: input.keywords.discarded } }),
   };
 }
 
@@ -114,6 +125,14 @@ export function serializeBuildLog(log: BuildLog): string {
         },
         byCheck: log.summary.findings.byCheck,
       },
+      ...(log.summary.keywords === undefined
+        ? {}
+        : {
+            keywords: {
+              published: log.summary.keywords.published,
+              discarded: log.summary.keywords.discarded,
+            },
+          }),
     },
     contracts: log.contracts === undefined ? undefined : [...log.contracts].sort(compareContracts),
     // Absent keys stay absent: JSON.stringify drops undefined values.

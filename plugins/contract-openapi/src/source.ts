@@ -139,7 +139,9 @@ function endpointOf({ api, location }: Declared, operation: OpenApiOperation, id
       path: location,
       line: 1,
       ...(api.source.commit === undefined ? {} : { commit: api.source.commit }),
-      last_modified: api.source.last_modified,
+      ...(api.source.last_modified === undefined
+        ? {}
+        : { last_modified: api.source.last_modified }),
     },
   };
 }
