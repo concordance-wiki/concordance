@@ -17,4 +17,9 @@ describe("the link model", () => {
     expect([...link.provenance].sort(compareProvenances)).toEqual([first, later]);
     expect(compareLinks(link, { ...link, to: "specs/c" })).toBe(-1);
   });
+
+  it("carries the number of shared paragraphs of a co-occurrence", () => {
+    const provenance: Provenance = { method: "cooccurrence", confidence: 0.4, count: 3 };
+    expect(provenance.count).toBe(3);
+  });
 });

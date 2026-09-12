@@ -50,6 +50,10 @@ A content anomaly becomes a finding: identifier, severity, file, line, message, 
 
 Co-occurrence is accumulated per paragraph, never as a full matrix. Only the K best neighbours of each node are kept (50 by default, `inference.neighbours.k`), ranked by count then by identifier.
 
+Two entities named in the same paragraph (same source, file and line) are neighbours once, however many times each is mentioned there; their count is the number of such paragraphs. Each node keeps its own row of counts; a row is trimmed to its best K by count then by identifier whenever it grows past 2K, so memory is proportional to the number of nodes times K, never to the square of the number of nodes. A neighbour dropped by a trim starts again from zero if it reappears: a count is never overestimated, and the K retained are the true best K as soon as the frequent pairs stand out from the occasional ones, which is what a bounded neighbourhood is for. Paragraphs are visited in `(source, path, line)` order, so the result depends on the set of occurrences alone. A paragraph naming more than 200 distinct entities is a list or a table rather than prose: only its first 200 identifiers are paired.
+
+Each pair gives one undirected `related` link at the `cooccurrence` confidence, emitted once from the lower identifier, with the number of shared paragraphs as the `count` of its single provenance; the relation typing step may refine `related` from the type pair. The `neighbours` block of `model.json` lists, per identifier and in identifier order, the retained neighbours best first, for the mini-map and the accompanying-words panel.
+
 ## Keyword page threshold
 
 A keyword page exists from three occurrences in at least two files (`inference.keyword_pages`). Below the threshold the word is searchable but has no page. The build summary reports pages generated and expressions discarded.

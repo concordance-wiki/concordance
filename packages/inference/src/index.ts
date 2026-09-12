@@ -5,3 +5,13 @@ export type {
   LinkableEntity,
   SourceResource,
 } from "./explicit/types.js";
+export { accumulateCooccurrences } from "./neighbourhood/accumulate.js";
+export { cooccurrenceLinks } from "./neighbourhood/links.js";
+export { neighbourhoodOptions } from "./neighbourhood/options.js";
+export { neighbourhoodToModel } from "./neighbourhood/serialize.js";
+export type {
+  Neighbour,
+  Neighbourhood,
+  NeighbourhoodOptions,
+  OccurrenceLike,
+} from "./neighbourhood/types.js";
