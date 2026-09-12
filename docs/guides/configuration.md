@@ -212,6 +212,17 @@ build:
 
 `--output` on the command line overrides `output`; the folder receives `build.log.json` with the summary and every finding, sorted.
 
+## `site`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `neighbourhood.size` | 6 | nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes (see the [architecture guide](architecture.md#displayed-neighbourhood)) |
+
+```yaml
+site:
+  neighbourhood: { size: 8 }
+```
+
 ## `checks`
 
 Enable, disable or re-severitise a check:

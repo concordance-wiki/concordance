@@ -461,6 +461,50 @@
           }
         }
       }
+    },
+    "displayed_neighbourhood": {
+      "type": "object",
+      "description": "One-hop neighbours shown on the page of each entity identifier, best first, at most site.neighbourhood.size of them",
+      "additionalProperties": {
+        "type": "array",
+        "maxItems": 12,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "title", "type", "kind", "relation", "direction", "confidence"],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "enum": ["entity", "keyword"],
+              "description": "keyword for a noteless word, entity for a typed entity"
+            },
+            "relation": {
+              "type": "string",
+              "description": "relation of the most confident link between the two nodes"
+            },
+            "direction": {
+              "type": "string",
+              "enum": ["out", "in", "both"],
+              "description": "where the links point, seen from the entity whose page this is"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "largest confidence over the links between the two nodes"
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -2,6 +2,18 @@ export { combineConfidences, glossaryConfidence } from "./combine/confidence.js"
 export type { GlossaryCombination } from "./combine/confidence.js";
 export { combineLinks, combineOptions } from "./combine/links.js";
 export type { CombineOptions } from "./combine/links.js";
+export { MAX_DISPLAYED_NEIGHBOURS, displayedNeighbourhood } from "./display/neighbourhood.js";
+export { displayOptions } from "./display/options.js";
+export { displayedNeighbourhoodToModel } from "./display/serialize.js";
+export type {
+  DisplayableEntity,
+  DisplayOptions,
+  DisplayedNeighbour,
+  DisplayedNeighbourhood,
+  DisplayedNeighbourhoodInput,
+  NeighbourDirection,
+  NeighbourKind,
+} from "./display/types.js";
 export { explicitLinks } from "./explicit/links.js";
 export type {
   ExplicitLinksInput,
