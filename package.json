@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run --coverage",
-    "lint": "eslint . && prettier --check . && pnpm -r typecheck && node scripts/validate.mjs",
+    "lint": "eslint . && prettier --check . && pnpm -r --workspace-concurrency 1 typecheck && node scripts/validate.mjs",
     "format": "prettier --write .",
     "mutation": "stryker run",
     "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/hygiene.mjs"
