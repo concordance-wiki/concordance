@@ -137,6 +137,10 @@ importers:
       '@concordance-wiki/profile':
         specifier: workspace:*
         version: link:../profile
+    devDependencies:
+      '@concordance-wiki/typing':
+        specifier: workspace:*
+        version: link:../typing
 
   packages/ingest:
     dependencies:

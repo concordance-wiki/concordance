@@ -15,3 +15,15 @@ export type {
   NeighbourhoodOptions,
   OccurrenceLike,
 } from "./neighbourhood/types.js";
+export {
+  frontmatterLinks,
+  type FrontmatterLinksInput,
+  type FrontmatterLinksResult,
+} from "./frontmatter/links.js";
+export {
+  indexEntities,
+  resolveReference,
+  type EntityIndex,
+  type ReferenceResolution,
+  type ResolveContext,
+} from "./frontmatter/resolve.js";

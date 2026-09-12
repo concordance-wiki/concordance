@@ -130,7 +130,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Family | Checks |
 |---|---|
 | Sources | `W-SOURCE-UNREACHABLE` |
-| Links | `E-LINK-BROKEN`, `W-LINK-CROSS-SOURCE` |
+| Links | `E-LINK-BROKEN`, `W-LINK-CROSS-SOURCE`, `W-REF-UNRESOLVED` |
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`, `W-TYPE-UNKNOWN`, `W-ATTRIBUTE-UNKNOWN` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-DOMAIN-UNKNOWN`, `W-APP-MISSING`, `W-APP-UNKNOWN`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-TERM-HOMONYM`, `I-PII-DETECTED` |
@@ -360,7 +360,7 @@ As an author, I want to declare relations in the note header so that I can struc
 - Reference-typed attributes of the profile are resolved by identifier, by path, then by exact title.
 - The produced relation is the one the profile associates with the attribute, with its attributes; thus `reads` yields `accesses` in `read` mode.
 - Confidence 0.90, method `frontmatter_ref`, provenance on the attribute name.
-- An unresolved reference yields a finding and no link.
+- An unresolved reference yields a `W-REF-UNRESOLVED` finding and no link.
 
 Depends on: L0-08, L1-05.
 

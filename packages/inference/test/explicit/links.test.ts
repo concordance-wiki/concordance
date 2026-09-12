@@ -26,6 +26,8 @@ function corpus(notes: Note[], extraResources: SourceResource[] = []): Corpus {
   const entities = notes.map((note): LinkableEntity => ({
     id: `${note.source}/${note.path.replace(/\.md$/, "")}`,
     type: note.type,
+    title: note.path,
+    attributes: {},
     source: { name: note.source, path: note.path },
   }));
   const resources = [

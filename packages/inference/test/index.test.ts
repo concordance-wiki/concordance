@@ -8,8 +8,11 @@ describe("@concordance-wiki/inference", () => {
       "accumulateCooccurrences",
       "cooccurrenceLinks",
       "explicitLinks",
+      "frontmatterLinks",
+      "indexEntities",
       "neighbourhoodOptions",
       "neighbourhoodToModel",
+      "resolveReference",
     ]);
   });
 });

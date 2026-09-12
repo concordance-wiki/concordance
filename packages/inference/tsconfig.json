@@ -19,6 +19,9 @@
     },
     {
       "path": "../profile/tsconfig.build.json"
+    },
+    {
+      "path": "../typing/tsconfig.build.json"
     }
   ]
 }
