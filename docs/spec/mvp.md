@@ -578,6 +578,44 @@ As a writer, I want a page listing what is missing so that I know where to start
 
 Depends on: L2-04, L1-12.
 
+#### L2-12 Islands architecture and slot registry
+
+As a reader, I want pages that read without JavaScript and interactive components that load only what they need so that the site is fast and robust everywhere.
+
+- HTML is rendered at build time by Preact components (`preact-render-to-string`); the published HTML contains the full content of every page.
+- Only interactive components are hydrated (islands), each with its props serialised in the page; a page without an island loads no framework JavaScript.
+- Client bundles are produced by esbuild, one per island, with hashed names, `modulepreload` and `defer`; two builds give byte-identical bundles.
+- The site is a set of named slots (`Shell`, `Header`, `Footer`, `Home`, `EntityPage`, `KeywordPage`, `MentionsPanel`, `Neighbourhood`, `SearchResults`, `Index`, `Todo`) with a typed, documented view model; the default theme implements every slot.
+- A theme brought by a plugin (`theme` contribution, `components` field) overrides any slot with a component receiving the same props; slots it does not provide come from the default theme; an example theme in the fixtures overrides one slot and is tested.
+- Native CSS: cascade layers `tokens, base, components, project`, custom properties generated from `theme.yaml`, `color-scheme`, `prefers-reduced-motion`; the project's `stylesheet:` enters the `project` layer.
+- A budget measured in CI: 150 kB per page excluding previews, the size of each island bundle announced in the build summary.
+
+Depends on: L2-02, L2-08.
+
+#### L2-13 Component gallery
+
+As a theme author, I want to see every slot rendered with representative data so that I can restyle the site without building a corpus.
+
+- A `concordance gallery` command (or a `--gallery` build flag) renders every slot with fixture view models into a static page set.
+- Every theme override is visible there.
+- The gallery is built in CI and its pages pass the accessibility checks of L2-09.
+
+Depends on: L2-12.
+
+#### L2-14 Interface localisation
+
+As a French- or English-speaking reader, I want a site entirely in my language, dates and plurals included.
+
+- Every label comes from a per-locale message catalogue in ICU MessageFormat, FormatJS JSON (`messages/en.json` source with `defaultMessage` and `description`, flat translations per locale); no visible string is hard-coded in a component.
+- Message identifiers are typed from the source catalogue: a missing key or variable is a compile error.
+- A test verifies each shipped locale carries every key of the source with the same variables; `en` and `fr` ship complete.
+- Messages are resolved at build; the published HTML carries the final strings and no localisation library runs in the browser; islands receive their labels as props.
+- Dates, numbers and relative durations go through `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` of the project locale.
+- `theme.yaml › labels` overrides any message with the same syntax; an invalid override (unknown variable) is a configuration error.
+- The page language (`lang`) and direction (`dir`) are set on the document; stylesheets use logical properties.
+
+Depends on: L2-03, L2-08.
+
 ### L3 — Search
 
 Exit criterion: a search on the golden corpus returns results in under 100 ms after typing, without a server, and facet counts match the number of filtered results exactly.

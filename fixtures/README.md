@@ -9,5 +9,6 @@ Reference corpora for the tests. Every corpus is fictional: a generic personal i
 | `corpora/realistic` | a few hundred files with documents, transcripts, duplicates and deliberate errors; built by the golden corpus story |
 | `generate` | a synthetic corpus generator for load tests |
 | `plugins/example` | the smallest plugin that exercises every contribution point of the plugin API; loaded by the core tests, never published |
+| `plugins/theme-example` | a theme plugin overriding the `Footer` slot alone; resolved through the registry and rendered by the site tests, never published |
 
 Each corpus folder holds a `concordance.yaml` that declares its sources as local paths, and an `expected/` folder with the result the engine must produce. `expected/` changes only through a pull request that justifies the change.

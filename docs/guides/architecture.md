@@ -10,6 +10,14 @@ Concordance reads CommonMark, GFM (tables, task lists) and optional YAML frontma
 
 `concordance build` is a pipeline command that produces `dist/` and `model.json`. The site is static: the main content of every page is in the served HTML, JavaScript is progressive, and the site works over `file://`. Fragments that load on demand (mentions beyond the first twenty, search) are JSON files generated at build. An optional HTTP and MCP service will consume the same `model.json` later; nothing in the site depends on it.
 
+## Rendering: slots, islands, layers
+
+Pages are rendered at build by Preact components through `preact-render-to-string`; the published HTML carries the full content of every page. The site is a set of named slots (`Shell`, `Header`, `Footer`, `Home`, `EntityPage`, `KeywordPage`, `MentionsPanel`, `Neighbourhood`, `SearchResults`, `Index`, `Todo`), each with a typed view model that is the contract between the generator and a theme. The default theme implements every slot; a plugin's `theme` contribution replaces any of them with a component receiving the same props, and the slots it does not provide stay default.
+
+Only interactive components are hydrated: an island is served as its static markup wrapped in a `<concordance-island>` element carrying its props, and a small hydration entry mounts the same component on it. esbuild bundles one minified module per island, named after a hash of its content, loaded with `modulepreload` and a deferred module script only by the pages that use it; a page without an island loads no framework JavaScript, and two builds give byte-identical bundles. Without JavaScript the content stays reachable: the mentions beyond the inline threshold sit in a `<details>` element until the island takes over.
+
+Styling is native CSS in four cascade layers, `tokens, base, components, project`: custom properties generated from `theme.yaml` (colours of both modes, fonts, radius, spacing), the document defaults, one block per slot, then the project's own stylesheet, which wins every cascade by construction. `color-scheme` follows the system preference and a remembered mode, `prefers-reduced-motion` is honoured, and properties are logical so that a right-to-left locale needs no second stylesheet. A budget is measured on every build: 150 kB per page excluding previews, and the size of each island bundle appears in the build summary. See the [theming guide](theming.md).
+
 ## Declarative profile, generic engine
 
 The meta-model is a YAML profile validated by a schema: types, attributes, relations with their allowed pairs, mapped sections, confidence scale, display rules. The engine only knows "type, attributes, relations, score". Adding a type, an attribute or a relation pair is a profile change, never a code change, and a test enforces it. Relation labels shown in the site come from the profile.

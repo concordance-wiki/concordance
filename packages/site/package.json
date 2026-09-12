@@ -1,7 +1,7 @@
 {
   "name": "@concordance-wiki/site",
   "version": "0.0.0",
-  "description": "Site generation: templates, theme, i18n catalogue, search index.",
+  "description": "Site generation: slots, default theme, islands, stylesheet and page budget.",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "exports": {
@@ -11,13 +11,20 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
-    "@concordance-wiki/profile": "workspace:*"
+    "@concordance-wiki/profile": "workspace:*",
+    "esbuild": "0.28.2",
+    "preact": "10.29.8",
+    "preact-render-to-string": "6.7.0"
+  },
+  "devDependencies": {
+    "@concordance-wiki/fixture-plugin-theme-example": "workspace:*"
   }
 }
