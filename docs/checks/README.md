@@ -18,6 +18,7 @@ Every check listed here is registered once, with its default severity, descripti
 |---|---|---|
 | [`E-LINK-BROKEN`](E-LINK-BROKEN.md) | error | A markdown link points to a file that does not exist in the source. |
 | [`W-LINK-CROSS-SOURCE`](W-LINK-CROSS-SOURCE.md) | warning | A markdown link points to a file of another source while `inference.cross_source_links` is off. |
+| [`W-REF-UNRESOLVED`](W-REF-UNRESOLVED.md) | warning | A frontmatter reference matches no note by identifier, path or title, several notes by title, or a note of a type the attribute does not accept. |
 
 ## Identifiers and types
 

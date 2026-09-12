@@ -36,7 +36,13 @@ Common keys: `title` (overrides the H1), `aliases` (other names, used for recogn
 
 `application` and `domain` file the note where the configuration would not. The application otherwise comes from the source or from a typing rule; the domain otherwise comes from the globs the integrator declares globally, across every source. A frontmatter value wins over both, and names a domain by its identifier (`payments`) or by its identifier path (`membership/payments`). A note that nothing files goes to the `unclassified` domain (`W-DOMAIN-UNCLASSIFIED`) or has no application (`W-APP-MISSING`); a value the configuration does not declare is kept as written and reported (`W-DOMAIN-UNKNOWN`, `W-APP-UNKNOWN`).
 
-Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`) accept an identifier, a path or an exact title, and produce a typed relation at confidence 0.90.
+Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `broader`, `business_object`) accept one value or a list of values and produce the relation the profile attaches to the key at confidence 0.90, method `frontmatter_ref`, with the key name as provenance: `reads: [objects/payment]` on a screen gives `accesses` in `read` mode, `roles: [roles/account-manager]` gives `assigned_to` from the role to the screen. Each value is resolved in this order, the first match winning:
+
+1. by identifier: the full identifier (`specs/roles/account-manager`), or the identifier relative to the source of the note (`roles/account-manager`);
+2. by path relative to the source root, extension included (`roles/account-manager.md`, `rules/annual-cap.rule.md`); a path written differently from the file name resolves through the identifier it derives (`Roles/Account Manager.md`);
+3. by exact title, after trimming, case-sensitively (`Annual cap`).
+
+A value that matches nothing, a title shared by several notes, or a note of a type the key does not accept (a rule under `reads`) is reported (`W-REF-UNRESOLVED`) and gives no link. Several values naming the same note give one link with one provenance per value.
 
 ## Links are authoritative
 

@@ -51,6 +51,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "Set inference.cross_source_links to true in concordance.yaml, or link to a note of the same source.",
   ),
   step(
+    "W-REF-UNRESOLVED",
+    "warning",
+    "links",
+    "A frontmatter reference matches no note by identifier, path or title, several notes by title, or a note of a type the attribute does not accept.",
+    "Write the identifier, the path relative to the source root or the exact title of an existing note of a type the attribute accepts, or remove the reference.",
+  ),
+  step(
     "W-TYPE-UNKNOWN",
     "warning",
     "identifiers-and-types",

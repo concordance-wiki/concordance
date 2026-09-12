@@ -2,10 +2,13 @@ import type { Finding, InferenceConfig, Link } from "@concordance-wiki/core";
 import type { ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
-/** What inference needs of a typed entity: its identifier, its type and the file it comes from. */
+/** What inference needs of a typed entity: its identifier, its type, its title, its frontmatter and the file it comes from. */
 export interface LinkableEntity {
   id: string;
   type: string;
+  title: string;
+  /** Frontmatter keys that are not common attributes; references are raw strings or lists of strings. */
+  attributes: Record<string, unknown>;
   source: {
     name: string;
     /** Forward-slash path relative to the source root. */

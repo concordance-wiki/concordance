@@ -90,7 +90,13 @@ async function runCorpus(corpus: string): Promise<ExplicitLinksResult> {
       const id = identifierFor({ source: source.name, path: file.path, typeSuffixes }).id;
       const type = typeOf(id);
       if (type !== undefined) {
-        entities.push({ id, type, source: { name: source.name, path: file.path } });
+        entities.push({
+          id,
+          type,
+          title: file.path,
+          attributes: {},
+          source: { name: source.name, path: file.path },
+        });
       }
       const read = readMarkdown({ fs: nodeFileSystem }, file.absolutePath, file.path);
       if (read.ok) documents.set(`${source.name}/${file.path}`, read.document);
