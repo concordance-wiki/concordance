@@ -1,0 +1,97 @@
+name: Concordance lint
+description: Checks a knowledge repository with the Concordance linter and shows the findings in the diff of the pull request.
+author: Concordance
+branding:
+  icon: check-square
+  color: blue
+
+inputs:
+  version:
+    description: Version of @concordance-wiki/cli to run. The default is the version this action was released with; every form of the linter pins the same one.
+    required: false
+    default: "0.0.0"
+  fail-on:
+    description: "Severity from which a finding fails the step: error, warning or info."
+    required: false
+    default: error
+  source:
+    description: Name of the source this repository is declared as in a concordance.yaml, so that its rules apply. Empty for none.
+    required: false
+    default: ""
+  config:
+    description: Path of the concordance.yaml that declares the source, relative to the working directory. Empty for none.
+    required: false
+    default: ""
+  working-directory:
+    description: Root of the knowledge repository to lint.
+    required: false
+    default: "."
+  format:
+    description: "Report format: sarif, json, junit or text."
+    required: false
+    default: sarif
+  output:
+    description: File the report is written to, relative to the working directory.
+    required: false
+    default: concordance.sarif
+  upload:
+    description: Uploads a SARIF report to code scanning, which needs the security-events write permission. Set to "false" to keep the file only.
+    required: false
+    default: "true"
+  node-version:
+    description: Node.js version installed to run the linter.
+    required: false
+    default: "22"
+  command:
+    description: Command that runs the linter instead of npx with the pinned version. Used to run the action on an unpublished build; leave empty otherwise.
+    required: false
+    default: ""
+
+outputs:
+  report:
+    description: Absolute path of the report.
+    value: ${{ steps.lint.outputs.report }}
+  exit-code:
+    description: "Exit code of the linter: 0 without a finding at the fail-on severity, 1 with one."
+    value: ${{ steps.lint.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - id: lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        CONCORDANCE_VERSION: ${{ inputs.version }}
+        CONCORDANCE_COMMAND: ${{ inputs.command }}
+        CONCORDANCE_FAIL_ON: ${{ inputs.fail-on }}
+        CONCORDANCE_SOURCE: ${{ inputs.source }}
+        CONCORDANCE_CONFIG: ${{ inputs.config }}
+        CONCORDANCE_FORMAT: ${{ inputs.format }}
+        CONCORDANCE_OUTPUT: ${{ inputs.output }}
+      run: |
+        command="${CONCORDANCE_COMMAND:-npx --yes @concordance-wiki/cli@$CONCORDANCE_VERSION}"
+        options=(lint --scope repo --fail-on "$CONCORDANCE_FAIL_ON" --format "$CONCORDANCE_FORMAT" --output "$CONCORDANCE_OUTPUT")
+        if [ -n "$CONCORDANCE_SOURCE" ]; then options+=(--source "$CONCORDANCE_SOURCE"); fi
+        if [ -n "$CONCORDANCE_CONFIG" ]; then options+=(--config "$CONCORDANCE_CONFIG"); fi
+        set +e
+        $command "${options[@]}"
+        status=$?
+        set -e
+        if [ -f "$CONCORDANCE_OUTPUT" ]; then echo "report=$(realpath "$CONCORDANCE_OUTPUT")" >> "$GITHUB_OUTPUT"; fi
+        echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+        # 2 means the lint could not run; 1 is reported after the upload so that the findings reach the diff.
+        if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then exit "$status"; fi
+    - if: inputs.upload == 'true' && inputs.format == 'sarif'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.lint.outputs.report }}
+        category: concordance-lint
+    - if: steps.lint.outputs.exit-code == '1'
+      shell: bash
+      run: |
+        echo "concordance lint found at least one finding at the ${{ inputs.fail-on }} severity"
+        exit 1

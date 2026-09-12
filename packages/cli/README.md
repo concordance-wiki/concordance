@@ -10,6 +10,10 @@ The `concordance` command (alias `conc`).
 | `build [--config file] [--output dir]` | validates the configuration and the profile, fetches the sources, parses the markdown, types the notes, resolves the written links, writes `build.log.json` and `model.json` under the output folder (`--output`, else `build.output`, else `./dist` next to the configuration) and prints the summary: entities per type, links per method, findings per severity and per check | 1 invalid configuration or profile, or failing findings according to `build.fail_on`; 2 execution error, including the steps not implemented yet |
 | `export [--format cypher] [--model dist/model.json] [--output file]` | validates the model against the published schema and writes it as a Cypher script, on stdout unless `--output` names a file | 0 written, 1 model rejected by the schema, 2 missing model or unknown format |
 
+## Executables
+
+The package declares two executables, `concordance` and `conc`, both `dist/bin.js`; `dist` and `package.json` are all it ships. `npx --yes @concordance-wiki/cli@<version> lint` runs the linter without installing anything else, and `npm install --save-dev @concordance-wiki/cli` makes `concordance` available to the scripts of a repository. The same command line is distributed as a standalone binary, a GitHub action, a GitLab CI/CD component, a container image and a pre-commit hook: see [Distributing the linter](../../docs/guides/lint-distribution.md).
+
 Set `SOURCE_DATE_EPOCH` (seconds since the epoch) to pin the only timestamp of the outputs, the `at` field of `build.log.json` and of the `build` block of `model.json`; two builds of unchanged sources are then byte-identical. Any other value leaves the system clock.
 
 Part of [Concordance](../../README.md).

@@ -7,3 +7,4 @@ coverage/
 coverage/
 .stryker-tmp/
 reports/
+dist-bin/

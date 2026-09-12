@@ -395,3 +395,5 @@ lint:
 ```
 
 Both examples run the linter at the root of the knowledge repository; pass `--config` and `--source` when the repository is declared in a `concordance.yaml` whose rules must apply. The exit code is the same whatever the format: 0 without a finding at the `--fail-on` severity, 1 with one, 2 when the lint could not run.
+
+The GitHub action `concordance-wiki/lint-action` and the GitLab CI/CD component `concordance-wiki/lint/lint` wrap these two examples in one line each, with the version of the linter pinned; [Distributing the linter](lint-distribution.md) shows them, with the standalone binary, the container image and the pre-commit hook.

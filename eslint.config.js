@@ -30,7 +30,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.{js,mjs}"],
+    files: ["**/*.{js,mjs,cjs}"],
     ...tseslint.configs.disableTypeChecked,
     rules: {
       ...tseslint.configs.disableTypeChecked.rules,
@@ -41,6 +41,15 @@ export default tseslint.config(
     files: ["scripts/**/*.mjs", "*.mjs"],
     languageOptions: { globals: { console: "readonly", process: "readonly", URL: "readonly" } },
     rules: { "no-console": "off" },
+  },
+  {
+    // The main script of the standalone binary: Node.js runs it as CommonJS.
+    files: ["scripts/**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { Buffer: "readonly", process: "readonly", require: "readonly" },
+    },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   {
     files: ["packages/cli/src/**"],

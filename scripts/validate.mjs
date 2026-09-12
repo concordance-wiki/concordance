@@ -8,6 +8,8 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { parse as parseYaml } from "yaml";
 
+import { checkDistribution } from "./check-distribution.mjs";
+
 const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
 const failures = [];
 const fail = (message) => failures.push(message);
@@ -314,11 +316,14 @@ for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
   }
 }
 
+// 11. The distribution forms expose their documented inputs and pin the version of the command line.
+for (const message of checkDistribution(root)) fail(message);
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages, home page and licences are valid",
+  "schemas, profile, theme, fixtures, expected results, templates, links, message catalogues, check pages, home page, licences and distribution manifests are valid",
 );
