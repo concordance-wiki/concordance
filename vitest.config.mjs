@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const packages = fileURLToPath(new URL("./packages/", import.meta.url));
+const plugins = fileURLToPath(new URL("./plugins/", import.meta.url));
 
 export default defineConfig({
   // Components of the site are TSX compiled for Preact; the setting applies to every package.
@@ -10,6 +11,10 @@ export default defineConfig({
   // Tests exercise sources across packages, so that coverage and mutation testing see every file once.
   resolve: {
     alias: [
+      {
+        find: /^@concordance-wiki\/plugin-([a-z0-9-]+)$/,
+        replacement: `${plugins}$1/src/index.ts`,
+      },
       { find: /^@concordance-wiki\/([a-z0-9-]+)$/, replacement: `${packages}$1/src/index.ts` },
     ],
   },

@@ -222,11 +222,17 @@ types:
     group: application
     status: active
     glyph: endpoint
+    # An imported operation carries `operation_id`, `summary` and `style` whatever the contract,
+    # then `method` and `path` from an OpenAPI contract, `port`, `binding` and `soap_action` from a WSDL.
     attributes:
       method: { type: string }
       path: { type: string }
       api: { type: ref, target: api }
       operation_id: { type: string }
+      style: { type: enum, values: [http, soap] }
+      port: { type: string }
+      binding: { type: string }
+      soap_action: { type: string }
     sections:
       consumers:
         heading: { en: Consumers, fr: Consommateurs }

@@ -22,4 +22,6 @@ Frontmatter carries what qualifies the note, nothing more. Sections whose headin
 | document | [document.md](document.md) | — |
 | meeting | [meeting.md](meeting.md) | — |
 
+The `api` template declares [openapi.example.json](openapi.example.json) as its contract; [wsdl.example.wsdl](wsdl.example.wsdl) is its WSDL twin, the same two operations as a SOAP service, so that both contract plugins can be tried on the same API.
+
 `concordance init` will copy these templates into the configuration repository once the templates story ships.

@@ -135,7 +135,7 @@ The default profile, `packages/profile/default.yaml`, is inspired by a lightened
 | Business | `representation` | `format`, `channel` |
 | Application | `screen` | `roles[]`, `reads[]`, `writes[]`, `actions[]` (label, to, condition), `rules[]`, `url_pattern` |
 | Application | `api` | `protocol` (rest, soap, graphql, grpc), `exposure` (apim, direct, internal), `contract`, `consumers[]`, `objects[]`, `version` |
-| Application | `endpoint` | `method`, `path`, `api` (imported from the contract) |
+| Application | `endpoint` | `api`, `operation_id`, `style` (`http` or `soap`), then `method`, `path` for HTTP and `port`, `binding`, `soap_action` for SOAP (imported from the contract) |
 | Application | `function` | `execution`, `triggers[]` |
 | Application | `batch` | `schedule` (cron), `window`, `depends_on[]`, `reads[]`, `writes[]` |
 | Application | `channel` | `technology`, `guarantee`, `owner` |

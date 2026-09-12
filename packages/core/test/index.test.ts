@@ -5,9 +5,14 @@ import * as entry from "../src/index.js";
 describe("@concordance-wiki/core", () => {
   it("exposes exactly its public API", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "CONTRACT_METHOD",
+      "CONTRACT_RELATION",
+      "CONTRACT_UNREACHABLE",
+      "DEFAULT_CONTRACT_CONFIDENCE",
       "PLUGIN_API_VERSION",
       "PluginDefinitionError",
       "PluginLoadError",
+      "cachedContractPath",
       "commandExists",
       "compareContracts",
       "compareEntities",
@@ -16,16 +21,19 @@ describe("@concordance-wiki/core", () => {
       "compareProvenances",
       "compileGlobs",
       "createSpeakerNumbering",
+      "declaredContracts",
       "definePlugin",
       "describeSchemaError",
       "detectPersonalMentions",
       "epochClock",
+      "fingerprintOf",
       "fixedClock",
       "formatIssue",
       "formatValidation",
       "identifierFor",
       "importPlugin",
       "isWellFormedGlob",
+      "loadContracts",
       "loadPlugins",
       "loadPseudonymDictionary",
       "memoryFileSystem",
@@ -37,6 +45,7 @@ describe("@concordance-wiki/core", () => {
       "pseudonymizeSpeaker",
       "pseudonymizeText",
       "pseudonymizeTranscript",
+      "readCachedContract",
       "readSchema",
       "resolveDuplicates",
       "serializeBuildLog",
@@ -47,6 +56,8 @@ describe("@concordance-wiki/core", () => {
       "systemClock",
       "transcriptsPublished",
       "validateConfig",
+      "writeCachedContract",
+      "xmlRootOf",
     ]);
   });
 });

@@ -77,6 +77,19 @@ contract: ./payments.openapi.json
 
 With the `contract-openapi` plugin declared in the configuration, the build reads the OpenAPI 3.x document and produces one operation per path and method, linked to the API at confidence 0.95 with the contract location and the operation name as provenance: the operations are never copied into the note. The schemas the contract references are offered as candidate objects, not linked. The version the contract declares is recorded with its import date. A contract that cannot be fetched, read or parsed is reported (`W-CONTRACT-UNREACHABLE`) and the note keeps the operations written by hand; the build goes on.
 
+The same attribute accepts a WSDL, so that a SOAP service is inventoried like the others:
+
+```markdown
+---
+type: api
+protocol: soap
+contract: https://legacy.example.invalid/orders?wsdl
+---
+# Orders service
+```
+
+With the `contract-wsdl` plugin declared, the build reads the WSDL 1.1 or 2.0 document and produces one operation per port type operation, titled `operation (port)`, with its port, binding and SOAP action; the XSD elements and types its messages reference are offered as candidate objects. The plugins tell the two formats apart by content, not by extension: an XML document whose root is `definitions` or `description` goes to the WSDL plugin, anything else to the OpenAPI plugin. An operation imported from either carries `operation_id`, `summary` and `style` (`http` or `soap`) and is handled the same way afterwards.
+
 ## Sections that mean something
 
 Some section headings are mapped to relations in the profile. A mention under such a heading counts more (0.70, method `section_mention`, with the section and the line as provenance) than a mention in a paragraph (0.60, method `glossary_occurrence`, with the line as provenance).

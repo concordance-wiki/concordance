@@ -6,16 +6,17 @@ Imports the OpenAPI 3.x contract an `api` note declares, so that the operations 
 
 One `source` of kind `openapi`, with no system dependency. For every `api` entity whose `contract` attribute names a contract, as a URL or as a path relative to the note, the source produces:
 
-- one `endpoint` entity per operation (path × method among `get`, `put`, `post`, `delete`, `options`, `head`, `patch`, `trace`), identified as `<api id>/<operationId>` slugified, or `<api id>/<method-path>` when the operation declares no identifier, titled `METHOD /path`, with `type_origin: contract` and the attributes `method`, `path`, `operation_id`, `summary` and `tags`; the operation identifier is an alias, so that a note that names it is recognised;
+- one `endpoint` entity per operation (path × method among `get`, `put`, `post`, `delete`, `options`, `head`, `patch`, `trace`), identified as `<api id>/<operationId>` slugified, or `<api id>/<method-path>` when the operation declares no identifier, titled `METHOD /path`, with `type_origin: contract` and the attributes `method`, `path`, `operation_id`, `summary`, `tags` and `style: http`; the operation identifier is an alias, so that a note that names it is recognised;
 - one `exposes` link from the API to each endpoint, at the `contract_import` confidence of the profile (0.95), with a provenance that carries the contract location and the operation name;
 - one candidate object per component schema the operations reference, offered under `candidates.objects` without being linked to anything: the author decides which ones deserve a note;
 - one contract record with the title and the version the contract declares, the fingerprint of its bytes and the import date from the injected clock, recorded under `build.contracts` of the model and in the build log.
 
-Paths are sorted and methods follow the fixed order above, so that two builds on the same contract give the same entities in the same order.
+Paths are sorted and methods follow the fixed order above, so that two builds on the same contract give the same entities in the same order. An endpoint imported from an OpenAPI contract has the same shape as one imported by the [WSDL plugin](../contract-wsdl/README.md): only the protocol-specific attributes differ.
 
 ## Behaviour
 
-- A `http://` or `https://` location is fetched through the `fetch` of the plugin context; without one, the build runs offline and the contract is reported as unreachable. Any other location is a path resolved from the folder of the API note inside its source, read through the injected file system.
+- The loading is the one `@concordance-wiki/core` shares between the contract plugins (`loadContracts` with a `ContractReader`); this plugin brings the reader. A `http://` or `https://` location is fetched through the `fetch` of the plugin context; without one, the build runs offline and the contract is reported as unreachable. Any other location is a path resolved from the folder of the API note inside its source, read through the injected file system.
+- The plugin decides on content whether a contract is its business: any text that is not an XML document is read as OpenAPI; an XML document is left to the WSDL plugin, without a finding.
 - The cache key is the SHA-256 of the contract text: the contract is read on every build, and one whose bytes are unchanged is not parsed again; the extracted operations are kept under `<cache>/contracts/<sha256>.json`. Nothing is written next to the note.
 - A contract that cannot be fetched (HTTP error, network failure, no network access), read (missing file) or parsed (neither JSON nor YAML, not an object, no `openapi` key, or a version other than 3.x) yields a [`W-CONTRACT-UNREACHABLE`](../../docs/checks/W-CONTRACT-UNREACHABLE.md) finding naming the reason; nothing is imported for that API, the other contracts are still imported and the build goes on. An unparsable contract is not cached, so that the next build reads it again.
 - Two operations whose names slugify alike get numbered identifiers (`get-payment`, `get-payment-2`), in contract order.

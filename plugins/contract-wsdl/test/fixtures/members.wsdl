@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<description xmlns="http://www.w3.org/ns/wsdl"
+    targetNamespace="urn:example:members"
+    xmlns:tns="urn:example:members"
+    xmlns:wsoap="http://www.w3.org/ns/wsdl/soap"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <documentation>Members API</documentation>
+  <types>
+    <xs:schema targetNamespace="urn:example:members">
+      <xs:element name="getMember" type="tns:MemberQuery"/>
+      <xs:complexType name="MemberQuery">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="member" type="tns:Member"/>
+      <xs:complexType name="Member">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+  </types>
+  <interface name="MembersInterface">
+    <operation name="ping" pattern="http://www.w3.org/ns/wsdl/in-only">
+      <input element="#none"/>
+    </operation>
+    <operation name="getMember" pattern="http://www.w3.org/ns/wsdl/in-out">
+      <documentation>Read a member</documentation>
+      <input element="tns:getMember"/>
+      <output element="tns:member"/>
+    </operation>
+  </interface>
+  <binding name="MembersSoapBinding" interface="tns:MembersInterface" type="http://www.w3.org/ns/wsdl/soap">
+    <operation ref="tns:getMember" wsoap:action="urn:example:members:getMember"/>
+  </binding>
+  <service name="MembersService" interface="tns:MembersInterface">
+    <endpoint name="MembersEndpoint" binding="tns:MembersSoapBinding" address="https://members.example.invalid/soap"/>
+  </service>
+</description>

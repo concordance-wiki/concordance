@@ -276,6 +276,19 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
 
+  plugins/contract-wsdl:
+    dependencies:
+      '@concordance-wiki/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      fast-xml-parser:
+        specifier: 5.11.1
+        version: 5.11.1
+    devDependencies:
+      '@concordance-wiki/plugin-contract-openapi':
+        specifier: workspace:*
+        version: link:../contract-openapi
+
   plugins/convert-libreoffice:
     dependencies:
       '@concordance-wiki/core':
