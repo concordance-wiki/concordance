@@ -31,3 +31,10 @@ export {
   type ReferenceResolution,
   type ResolveContext,
 } from "./frontmatter/resolve.js";
+export {
+  mentionLinks,
+  type MentionLinksInput,
+  type MentionLinksResult,
+  type MentionOccurrence,
+} from "./mentions/links.js";
+export { foldHeading, mappedSection, type MappedSection } from "./mentions/sections.js";
