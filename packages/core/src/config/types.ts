@@ -81,6 +81,18 @@ export interface InferenceConfig {
   keyword_pages?: { min_occurrences?: number; min_files?: number };
   neighbours?: { k?: number };
   candidate_score?: number;
+  duplicates?: DuplicatesConfig;
+}
+
+/** `inference.duplicates`: how twin resources of one document are reconciled. */
+export interface DuplicatesConfig {
+  mode?: "estimate" | "exact" | "auto";
+  exact_above?: number;
+  size_ratio_min?: number;
+  shingle_size?: number;
+  minhash_functions?: number;
+  merge_above?: number;
+  candidate_above?: number;
 }
 
 export interface ConversionConfig {

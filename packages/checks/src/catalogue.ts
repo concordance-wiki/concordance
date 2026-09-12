@@ -139,7 +139,7 @@ export const catalogue: readonly CheckDefinition[] = [
     "info",
     "documents",
     "Two resources look like representations of the same document, but not enough to merge them.",
-    "Declare the twin in the markdown frontmatter under source, or record the pair as separated in the lock file.",
+    "Declare the twin in the markdown frontmatter under source, or record the pair as merged or separated in the lock file.",
   ),
   step(
     "W-TERM-UNDEFINED",

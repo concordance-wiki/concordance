@@ -17,6 +17,15 @@ export interface EntitySource {
   last_modified?: string;
 }
 
+/** One file of an entity that several resources represent: a note, its deck, its transcript. */
+export interface EntityRepresentation {
+  /** Forward-slash path relative to the source root. */
+  path: string;
+  /** `markdown` for a note, otherwise the lowercase extension. */
+  format: string;
+  preview?: string;
+}
+
 /** One node of the model, as serialised under `entities` in `model.json`. */
 export interface Entity {
   id: string;
@@ -35,6 +44,10 @@ export interface Entity {
   source: EntitySource;
   /** `true` for a keyword page without a note, located on the first mention of its expression. */
   keyword?: boolean;
+  /** Present when several resources were merged into this entity. */
+  representations?: EntityRepresentation[];
+  /** What merged the representations, for the page to name it. */
+  grouped_by?: string;
 }
 
 /** Canonical order of entities: by identifier, code unit by code unit. */

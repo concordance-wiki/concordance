@@ -14,6 +14,7 @@ export default mergeConfig(
         "packages/lint/test/scale.test.ts",
         "packages/inference/test/neighbourhood/load.test.ts",
         "packages/nlp/test/scan/performance.test.ts",
+        "packages/inference/test/duplicates/scale.test.ts",
       ],
     },
   }),

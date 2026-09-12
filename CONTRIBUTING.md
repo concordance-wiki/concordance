@@ -18,7 +18,7 @@ pnpm install
 pnpm check
 ```
 
-`pnpm check` runs everything the continuous integration runs. It must pass before every commit. Tests that start an external program (LibreOffice) run only with `CONCORDANCE_INTEGRATION=1`, which the pipeline sets; set it locally when you touch the converter. The three tests that assert a wall-clock budget (`packages/lint/test/scale.test.ts`, `packages/inference/test/neighbourhood/load.test.ts`, `packages/nlp/test/scan/performance.test.ts`) run in `pnpm test` but not under mutation testing, whose instrumented suite is several times slower (`vitest.stryker.config.mjs`).
+`pnpm check` runs everything the continuous integration runs. It must pass before every commit. Tests that start an external program (LibreOffice) run only with `CONCORDANCE_INTEGRATION=1`, which the pipeline sets; set it locally when you touch the converter. The tests that assert a wall-clock budget (`packages/lint/test/scale.test.ts`, `packages/inference/test/neighbourhood/load.test.ts`, `packages/nlp/test/scan/performance.test.ts`, `packages/inference/test/duplicates/scale.test.ts`) run in `pnpm test` but not under mutation testing, whose instrumented suite is several times slower (`vitest.stryker.config.mjs`).
 
 | Command | Effect |
 |---|---|
