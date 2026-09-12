@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": ["src", "test"],
+  "references": [
+    {
+      "path": "../core/tsconfig.build.json"
+    },
+    {
+      "path": "../profile/tsconfig.build.json"
+    },
+    {
+      "path": "../ingest/tsconfig.build.json"
+    },
+    {
+      "path": "../typing/tsconfig.build.json"
+    },
+    {
+      "path": "../nlp/tsconfig.build.json"
+    },
+    {
+      "path": "../inference/tsconfig.build.json"
+    },
+    {
+      "path": "../checks/tsconfig.build.json"
+    },
+    {
+      "path": "../site/tsconfig.build.json"
+    }
+  ]
+}

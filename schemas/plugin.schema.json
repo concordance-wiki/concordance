@@ -5,12 +5,7 @@
   "description": "Schema of the manifest returned by definePlugin.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "name",
-    "version",
-    "apiVersion",
-    "contributes"
-  ],
+  "required": ["name", "version", "apiVersion", "contributes"],
   "properties": {
     "name": {
       "type": "string",
@@ -28,10 +23,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "name",
-          "check"
-        ],
+        "required": ["name", "check"],
         "properties": {
           "name": {
             "type": "string"
@@ -55,9 +47,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "extensions"
-            ],
+            "required": ["extensions"],
             "properties": {
               "extensions": {
                 "type": "array",
@@ -73,10 +63,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "extensions",
-              "produces"
-            ],
+            "required": ["extensions", "produces"],
             "properties": {
               "extensions": {
                 "type": "array",
@@ -89,11 +76,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "enum": [
-                    "pdf",
-                    "thumbnails",
-                    "text"
-                  ]
+                  "enum": ["pdf", "thumbnails", "text"]
                 }
               }
             }
@@ -103,9 +86,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "kind"
-            ],
+            "required": ["kind"],
             "properties": {
               "kind": {
                 "type": "string"
@@ -117,9 +98,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "method"
-            ],
+            "required": ["method"],
             "properties": {
               "method": {
                 "type": "string",
@@ -132,13 +111,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "id",
-              "severity",
-              "description",
-              "remediation",
-              "documentation"
-            ],
+            "required": ["id", "severity", "description", "remediation", "documentation"],
             "properties": {
               "id": {
                 "type": "string",
@@ -146,11 +119,7 @@
               },
               "severity": {
                 "type": "string",
-                "enum": [
-                  "error",
-                  "warning",
-                  "info"
-                ]
+                "enum": ["error", "warning", "info"]
               },
               "description": {
                 "type": "string"
@@ -169,9 +138,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "required": ["id"],
             "properties": {
               "id": {
                 "type": "string",
@@ -184,10 +151,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "slot",
-              "bundle"
-            ],
+            "required": ["slot", "bundle"],
             "properties": {
               "slot": {
                 "type": "string"

@@ -1,6 +1,6 @@
 # packages
 
-Core packages, published under `@concordance-wiki/*`. Empty until the first development story; this page states what each one owns.
+Core packages, published under `@concordance-wiki/*`. Each one compiles and exposes its entry point; the public API grows story by story. This page states what each one owns.
 
 | Package | Owns | Depends on |
 |---|---|---|
@@ -16,4 +16,4 @@ Core packages, published under `@concordance-wiki/*`. Empty until the first deve
 | `cli` | `build`, `render`, `init`, `validate-config`, `lint` | all |
 | `lint` | distributable linter and its packagings | core, profile, typing, checks, ingest |
 
-Rules that apply to every package: strict TypeScript, ESM, one entry point, 100% line and branch coverage, no dependency on any office format or system tool, no import of a plugin.
+Rules that apply to every package: strict TypeScript, ESM, one entry point, 100% line and branch coverage, no dependency on any office format or system tool, no import of a plugin. Layout: `src/` compiled to `dist/`, `test/` run by Vitest against the sources, `tsconfig.json` for type checking and `tsconfig.build.json` for emitting.

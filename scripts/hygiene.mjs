@@ -6,8 +6,24 @@ import { execFileSync } from "node:child_process";
 const failures = [];
 
 const allowedDotPaths = [/^\.github\//, /^\.changeset\//];
-const allowedDotFiles = new Set([".gitignore", ".nvmrc", ".editorconfig", ".prettierrc", ".prettierignore", ".npmrc", ".gitkeep"]);
-const allowedUppercaseMarkdown = new Set(["README.md", "CHANGELOG.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", "LICENSE.md", "PULL_REQUEST_TEMPLATE.md"]);
+const allowedDotFiles = new Set([
+  ".gitignore",
+  ".nvmrc",
+  ".editorconfig",
+  ".prettierrc",
+  ".prettierignore",
+  ".npmrc",
+  ".gitkeep",
+]);
+const allowedUppercaseMarkdown = new Set([
+  "README.md",
+  "CHANGELOG.md",
+  "CONTRIBUTING.md",
+  "CODE_OF_CONDUCT.md",
+  "SECURITY.md",
+  "LICENSE.md",
+  "PULL_REQUEST_TEMPLATE.md",
+]);
 const checkPage = /^docs\/checks\/[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*\.md$/;
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);
@@ -18,22 +34,33 @@ for (const path of tracked) {
   if (dotSegment && !allowedDotPaths.some((re) => re.test(path)) && !allowedDotFiles.has(base)) {
     failures.push(`unexpected dot file or directory: ${path}`);
   }
-  if (/^[A-Z][A-Z_-]+\.md$/.test(base) && !allowedUppercaseMarkdown.has(base) && !checkPage.test(path)) {
+  if (
+    /^[A-Z][A-Z_-]+\.md$/.test(base) &&
+    !allowedUppercaseMarkdown.has(base) &&
+    !checkPage.test(path)
+  ) {
     failures.push(`unexpected uppercase markdown file: ${path}`);
   }
 }
 
 const range = process.env.HYGIENE_COMMIT_RANGE ?? "HEAD~20..HEAD";
-let messages = "";
-try {
-  messages = execFileSync("git", ["log", "--format=%H%n%B%n--end--", range], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-} catch {
+const commitMessages = (revisions) =>
+  execFileSync("git", ["log", "--format=%H%n%B%n--end--", ...revisions], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  });
+const readMessages = () => {
   try {
-    messages = execFileSync("git", ["log", "--format=%H%n%B%n--end--"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    return commitMessages([range]);
   } catch {
-    messages = "";
+    try {
+      return commitMessages([]);
+    } catch {
+      return "";
+    }
   }
-}
+};
+const messages = readMessages();
 for (const block of messages.split("--end--")) {
   const lines = block.trim().split("\n");
   if (lines.length < 2) continue;
@@ -49,4 +76,6 @@ if (failures.length > 0) {
   for (const message of failures) console.error(message);
   process.exit(1);
 }
-console.log("no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file");
+console.log(
+  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file",
+);

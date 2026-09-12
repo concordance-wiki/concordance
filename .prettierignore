@@ -1,4 +1,12 @@
 pnpm-lock.yaml
 CHANGELOG.md
 LICENSE
-fixtures/corpora/**/expected/
+CODE_OF_CONDUCT.md
+dist/
+coverage/
+.stryker-tmp/
+docs/
+fixtures/
+brand/
+profiles/
+*.md
