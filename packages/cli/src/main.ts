@@ -15,9 +15,9 @@ export const usage = [
   "usage: concordance <command> [options]",
   "",
   "commands:",
-  "  build [--config file]            validate the configuration and build the site",
-  "  init [directory]                 write a minimal configuration file",
-  "  validate-config [--config file]  check the configuration and report its errors",
+  "  build [--config file] [--output dir]  validate the configuration and build the site",
+  "  init [directory]                      write a minimal configuration file",
+  "  validate-config [--config file]       check the configuration and report its errors",
   "",
   "exit codes: 0 ok, 1 invalid configuration or findings, 2 execution error",
 ];

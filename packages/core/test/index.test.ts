@@ -24,6 +24,9 @@ describe("@concordance-wiki/core", () => {
       "nodeGit",
       "parseConfig",
       "readSchema",
+      "serializeBuildLog",
+      "shouldFail",
+      "summarize",
       "systemClock",
       "validateConfig",
     ]);

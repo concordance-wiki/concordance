@@ -5,7 +5,8 @@ export interface Finding {
   check: string;
   severity: Severity;
   message: string;
-  remediation?: string;
+  /** What the author can do about it; every finding has one. */
+  remediation: string;
   source?: string;
   path?: string;
   line?: number;
