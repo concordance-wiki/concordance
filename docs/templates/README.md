@@ -22,4 +22,4 @@ Frontmatter carries what qualifies the note, nothing more. Sections whose headin
 | document | [document.md](document.md) | — |
 | meeting | [meeting.md](meeting.md) | — |
 
-`concordance init` copies these templates into the configuration repository.
+`concordance init` will copy these templates into the configuration repository once the templates story ships.

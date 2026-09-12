@@ -1,0 +1,12 @@
+# Schemas
+
+The JSON schemas of Concordance live with the package that validates them: [`packages/core/schemas/`](../packages/core/schemas/). They are published with `@concordance-wiki/core` and served at `https://concordance-wiki.github.io/concordance/schemas/`.
+
+| Schema | Validates |
+|---|---|
+| `config.schema.json` | `concordance.yaml` |
+| `profile.schema.json` | `profiles/default.yaml` and project profiles |
+| `model.schema.json` | `dist/model.json` |
+| `lock.schema.json` | `concordance.lock.yaml` |
+| `theme.schema.json` | `theme.yaml` |
+| `plugin.schema.json` | the manifest returned by `definePlugin` |

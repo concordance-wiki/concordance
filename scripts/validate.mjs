@@ -40,7 +40,7 @@ function validateAgainst(schemaName, path, data) {
 }
 
 // 1. Schemas compile under strict mode.
-const schemaDir = join(root, "schemas");
+const schemaDir = join(root, "packages/core/schemas");
 for (const name of readdirSync(schemaDir).sort()) {
   const schema = JSON.parse(readFileSync(join(schemaDir, name), "utf8"));
   try {

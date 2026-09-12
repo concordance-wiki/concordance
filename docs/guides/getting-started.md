@@ -34,7 +34,7 @@ git init
 concordance init
 ```
 
-`concordance init` writes a minimal, commented `concordance.yaml`, a `theme.yaml`, the stopword files and the note templates. Edit `concordance.yaml` to declare your sources:
+`concordance init` writes a minimal, commented `concordance.yaml` and refuses to overwrite one that exists. Edit it to declare your sources:
 
 ```yaml
 version: 1
@@ -61,6 +61,8 @@ sources:
 concordance validate-config
 concordance build
 ```
+
+`validate-config` checks the file against the published schema and prints one line per problem: the path of the faulty key, the value received, the values expected. It exits with 0 when the configuration is valid, 1 when it is not, 2 when the file cannot be read. `build` runs the same validation as its first step and stops there when it fails.
 
 The build clones the sources at depth 1, parses the markdown, types the notes, records the occurrences, runs the checks and writes `dist/`. The summary at the end reports entities per type, links per method, findings per severity, keyword pages generated, and the weight of the index and the site.
 

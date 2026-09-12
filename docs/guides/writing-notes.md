@@ -87,7 +87,7 @@ Two notes with the same title are homonyms. The tool keeps both and links occurr
 
 ## Profile
 
-A project profile (`profile.yaml`) adds types, attributes, relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../profiles/default.yaml) is the reference; [`schemas/profile.schema.json`](../../schemas/profile.schema.json) validates it.
+A project profile (`profile.yaml`) adds types, attributes, relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../profiles/default.yaml) is the reference; [`schemas/profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
 
 ```yaml
 types:

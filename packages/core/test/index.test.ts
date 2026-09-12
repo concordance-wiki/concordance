@@ -3,7 +3,16 @@ import { describe, expect, it } from "vitest";
 import * as entry from "../src/index.js";
 
 describe("@concordance-wiki/core", () => {
-  it("exposes its entry point without any public export yet", () => {
-    expect(Object.keys(entry)).toEqual([]);
+  it("exposes exactly its public API", () => {
+    expect(Object.keys(entry).sort()).toEqual([
+      "formatIssue",
+      "formatValidation",
+      "isWellFormedGlob",
+      "memoryFileSystem",
+      "nodeFileSystem",
+      "parseConfig",
+      "readSchema",
+      "validateConfig",
+    ]);
   });
 });
