@@ -115,7 +115,37 @@ for (const path of walk(
   }
 }
 
-// 6. Every check page carries a valid identifier, and every check named in the
+// 6. Every message catalogue is a well-formed JSON object with sorted keys:
+//    the source carries a default message and a description per entry, a
+//    translation a string per entry. Parity between locales is a unit test.
+const messageDir = join(root, "packages/i18n/messages");
+for (const name of readdirSync(messageDir).sort()) {
+  const file = `packages/i18n/messages/${name}`;
+  let catalogue;
+  try {
+    catalogue = JSON.parse(readFileSync(join(messageDir, name), "utf8"));
+  } catch (error) {
+    fail(`${file}: ${error.message}`);
+    continue;
+  }
+  if (typeof catalogue !== "object" || catalogue === null || Array.isArray(catalogue)) {
+    fail(`${file}: not a JSON object`);
+    continue;
+  }
+  const keys = Object.keys(catalogue);
+  if (keys.some((key, index) => index > 0 && keys[index - 1] > key)) {
+    fail(`${file}: keys are not sorted`);
+  }
+  for (const [id, entry] of Object.entries(catalogue)) {
+    const valid =
+      name === "en.json"
+        ? typeof entry?.defaultMessage === "string" && typeof entry?.description === "string"
+        : typeof entry === "string";
+    if (!valid) fail(`${file}: entry ${id} is malformed`);
+  }
+}
+
+// 7. Every check page carries a valid identifier, and every check named in the
 //    fixtures has a page.
 const checkDir = join(root, "docs/checks");
 const pages = new Set(
@@ -139,4 +169,6 @@ if (failures.length > 0) {
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
-console.log("schemas, profile, theme, fixtures, templates, links and check pages are valid");
+console.log(
+  "schemas, profile, theme, fixtures, templates, links, message catalogues and check pages are valid",
+);

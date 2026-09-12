@@ -7,7 +7,9 @@ const packages = fileURLToPath(new URL("./packages/", import.meta.url));
 export default defineConfig({
   // Tests exercise sources across packages, so that coverage and mutation testing see every file once.
   resolve: {
-    alias: [{ find: /^@concordance-wiki\/([a-z-]+)$/, replacement: `${packages}$1/src/index.ts` }],
+    alias: [
+      { find: /^@concordance-wiki\/([a-z0-9-]+)$/, replacement: `${packages}$1/src/index.ts` },
+    ],
   },
   test: {
     include: [

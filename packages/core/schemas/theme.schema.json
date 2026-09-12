@@ -135,6 +135,7 @@
       "type": "string"
     },
     "labels": {
+      "description": "Interface labels to override, by language of a shipped catalogue then by message identifier. A value is an ICU MessageFormat message that must use exactly the variables of the source message; the build refuses an unknown identifier, a syntax error or a different set of variables.",
       "type": "object",
       "propertyNames": {
         "type": "string",
