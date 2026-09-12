@@ -260,7 +260,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["check", "severity", "message"],
+        "required": ["check", "severity", "message", "remediation"],
         "properties": {
           "check": {
             "type": "string",

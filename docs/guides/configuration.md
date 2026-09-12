@@ -175,6 +175,15 @@ staleness:
 | `mentions_inline` | 20 | mentions served in the HTML before the JSON fragment |
 | `extracted_text_max_chars` | 20000 | extracted text indexed per document |
 
+`fail_on` is the only thing that makes the build fail on content: an anomaly is always recorded as a finding and the build goes on. With the defaults, one error finding is enough to exit with code 1, and so is the eleventh unconverted document; the log and the summary are written either way. A project that wants a site whatever the state of its notes declares:
+
+```yaml
+build:
+  fail_on: { errors: false, unconverted_max: 100 }
+```
+
+`--output` on the command line overrides `output`; the folder receives `build.log.json` with the summary and every finding, sorted.
+
 ## `checks`
 
 Enable, disable or re-severitise a check:

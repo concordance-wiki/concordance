@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { compareFindings, type Finding } from "../../src/model/finding.js";
 
-const base: Finding = { check: "W-STALE", severity: "warning", message: "m" };
+const base: Finding = { check: "W-STALE", severity: "warning", message: "m", remediation: "r" };
 
 describe("compareFindings", () => {
   it("orders by check, then source, then path, then line, then message", () => {

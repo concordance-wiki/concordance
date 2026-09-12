@@ -14,6 +14,13 @@ export {
 } from "./io/file-system.js";
 export type { FileHistory, GitClient } from "./io/git.js";
 export { nodeGit } from "./io/node-git.js";
+export {
+  serializeBuildLog,
+  shouldFail,
+  summarize,
+  type BuildLog,
+  type BuildSummary,
+} from "./model/build-log.js";
 export { compareFindings, type Finding, type Severity } from "./model/finding.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
 export type * from "./plugin/api.js";

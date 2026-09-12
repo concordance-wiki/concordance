@@ -62,9 +62,15 @@ concordance validate-config
 concordance build
 ```
 
-`validate-config` checks the file against the published schema and prints one line per problem: the path of the faulty key, the value received, the values expected. It exits with 0 when the configuration is valid, 1 when it is not, 2 when the file cannot be read. `build` runs the same validation as its first step and stops there when it fails, then fetches every source into `.concordance-cache/sources/` (depth 1, updated on the next build) without ever writing into a source. A source it cannot reach is reported and skipped; see [private repositories](configuration.md#private-repositories) for credentials.
+`validate-config` checks the file against the published schema and prints one line per problem: the path of the faulty key, the value received, the values expected. It exits with 0 when the configuration is valid, 1 when it is not, 2 when the file cannot be read. `build` runs the same validation as its first step and stops there when it fails, then fetches every source into `.concordance-cache/sources/` (depth 1, updated on the next build) without ever writing into a source, and parses every markdown file. A source it cannot reach is reported and skipped; see [private repositories](configuration.md#private-repositories) for credentials.
 
 The build clones the sources at depth 1, parses the markdown, types the notes, records the occurrences, runs the checks and writes `dist/`. The summary at the end reports entities per type, links per method, findings per severity, keyword pages generated, and the weight of the index and the site.
+
+### Findings and exit codes
+
+A content anomaly never stops the build: a file that is not UTF-8, a broken frontmatter or an unreachable source becomes a finding with an identifier, a severity, the file and line, a message and a remediation (see the [check pages](../checks/README.md)). Every finding is printed on stderr, and the summary on stdout counts sources, files, findings per severity and per check. The findings and the summary are written to `dist/build.log.json` (the folder is `--output`, else `build.output`, else `dist/` next to the configuration); the same `findings` array is embedded in `model.json`. The only timestamp in the log is its `at` field.
+
+Whether the build fails is decided by `build.fail_on` alone: by default it fails when any error finding exists and when more than ten documents could not be converted (`fail_on.errors`, `fail_on.unconverted_max`, see the [configuration guide](configuration.md#build)). Exit codes: 0 when the build succeeds, 1 when the configuration is invalid or the findings exceed `build.fail_on`, 2 on an execution error. In this version the build still stops after parsing with exit code 2, once the log is written.
 
 Open `dist/index.html` in a browser. The site works over `file://`; no server is needed.
 
