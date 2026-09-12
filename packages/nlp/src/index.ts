@@ -23,3 +23,23 @@ export type {
   DictionarySource,
   DictionaryTarget,
 } from "./dictionary/types.js";
+export {
+  buildAutomaton,
+  longestMatches,
+  scan,
+  type Automaton,
+  type AutomatonState,
+  type Pattern,
+  type RawMatch,
+} from "./scan/automaton.js";
+export { tokenize, type Token } from "./scan/tokens.js";
+export {
+  compareOccurrences,
+  occurrenceConfidence,
+  scanDocument,
+  type Occurrence,
+  type OccurrenceScale,
+  type ScanDocumentInput,
+  type ScannedDocument,
+  type ScannedParagraph,
+} from "./scan/occurrences.js";
