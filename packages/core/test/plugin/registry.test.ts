@@ -246,7 +246,7 @@ describe("loadPlugins", () => {
           {
             extensions: [".docx"],
             produces: ["pdf"],
-            convert: () => Promise.resolve({ representations: {} }),
+            convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
       },
@@ -255,7 +255,7 @@ describe("loadPlugins", () => {
           {
             extensions: [".docx"],
             produces: ["text"],
-            convert: () => Promise.resolve({ representations: {} }),
+            convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
       },
@@ -334,7 +334,7 @@ describe("loadPlugins", () => {
           {
             extensions: [".one"],
             produces: ["pdf"],
-            convert: () => Promise.resolve({ representations: {} }),
+            convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
         sources: [{ kind: "one", load: () => Promise.resolve({ entities: [] }) }],
@@ -358,7 +358,7 @@ describe("loadPlugins", () => {
           {
             extensions: [".two"],
             produces: ["pdf"],
-            convert: () => Promise.resolve({ representations: {} }),
+            convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
         sources: [{ kind: "two", load: () => Promise.resolve({ entities: [] }) }],
@@ -404,8 +404,15 @@ describe("loadPlugins", () => {
       metadata: { path: "a.example" },
       text: "example",
     });
-    expect(await converter?.convert({ path: "a.example", payload: null })).toEqual({
-      representations: { text: "a.example" },
+    const payload = {
+      bytes: new Uint8Array(),
+      sha256: "",
+      cacheDirectory: "/cache",
+      options: { timeoutMs: 1, maxSizeBytes: 1 },
+    };
+    expect(await converter?.convert({ path: "a.example", payload })).toEqual({
+      representations: { text: { path: "a.example" } },
+      findings: [],
     });
     expect(await source?.load({ name: "contracts", payload: null })).toEqual({
       entities: ["contracts"],

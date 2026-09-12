@@ -4,15 +4,15 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 
 ## Official plugins
 
-| Package | Contributes | System dependency |
-|---|---|---|
-| `@concordance-wiki/plugin-reader-vtt` | reader for `.vtt` and `.srt` transcripts | none |
-| `@concordance-wiki/plugin-reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none |
-| `@concordance-wiki/plugin-convert-libreoffice` | converter to PDF, thumbnails, text extraction | LibreOffice |
-| `@concordance-wiki/plugin-contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none |
-| `@concordance-wiki/plugin-contract-wsdl` | source of `endpoint` entities from WSDL | none |
-| `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none |
-| `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none |
+| Package | Contributes | System dependency | Status |
+|---|---|---|---|
+| `@concordance-wiki/plugin-reader-vtt` | reader for `.vtt` and `.srt` transcripts | none | planned |
+| `@concordance-wiki/plugin-reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none | planned |
+| `@concordance-wiki/plugin-convert-libreoffice` | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text extraction later | LibreOffice | available |
+| `@concordance-wiki/plugin-contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none | planned |
+| `@concordance-wiki/plugin-contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
+| `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none | planned |
+| `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
 The `concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this. The core never imports a plugin; a test walks its sources and its `package.json` to verify it.
 
@@ -65,7 +65,7 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 | Point | Manifest key | Data validated | Runtime part |
 |---|---|---|---|
 | `reader` | `readers` | `extensions`, each starting with `.` | `read(input) → { metadata, text }` |
-| `converter` | `converters` | `extensions`, `produces` among `pdf`, `thumbnails`, `text` | `convert(input) → Promise<{ representations }>` |
+| `converter` | `converters` | `extensions`, `produces` among `pdf`, `thumbnails`, `text` | `convert(input) → Promise<{ representations, findings }>` |
 | `source` | `sources` | `kind` | `load(input) → Promise<{ entities }>` |
 | `inference method` | `inferenceMethods` | `method`, lowercase identifier | `infer(input) → { links }` |
 | `check` | `checks` | `id` (`E-`, `W-` or `I-`), `severity`, `description`, `remediation`, `documentation` URL | `run(input) → findings[]` |
@@ -74,6 +74,19 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 | `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet after its own and renders the overridden slots with the theme's components |
 
 The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution; the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
+
+#### Converters
+
+A converter receives `{ path, payload }` where the payload is typed (`ConverterPayload`):
+
+| Field | Meaning |
+|---|---|
+| `bytes` | the source file |
+| `sha256` | hex SHA-256 of the bytes, the key of the conversion cache |
+| `cacheDirectory` | the pipeline cache (`conversion.cache`); the converter keeps its temporary and cached files under it, never next to the source |
+| `options.timeoutMs`, `options.maxSizeBytes` | `conversion.timeout_s` and `conversion.max_size_mb`, converted |
+
+It returns `{ representations, findings }`: one `{ path }` per produced representation (`pdf`, `thumbnails`, `text`), each a file under the cache that the pipeline reads later, and the findings of the conversion. A conversion that fails produces no representation and a [`W-CONV-FAILED`](../checks/W-CONV-FAILED.md) finding: the document remains a downloadable entity. A PDF without extractable text from a large source carries a [`W-CONV-SUSPECT`](../checks/W-CONV-SUSPECT.md) finding. The pipeline runs converters through a pool of `conversion.parallelism` workers and keeps the results in input order.
 
 ### System dependencies
 

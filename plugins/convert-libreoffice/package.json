@@ -1,0 +1,23 @@
+{
+  "name": "@concordance-wiki/plugin-convert-libreoffice",
+  "version": "0.0.0",
+  "description": "Converts docx, pptx and xlsx documents to PDF through headless LibreOffice, with a fingerprint cache.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "pdfjs-dist": "6.3.289"
+  }
+}

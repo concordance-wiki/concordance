@@ -33,6 +33,9 @@
     },
     {
       "path": "packages/lint/tsconfig.build.json"
+    },
+    {
+      "path": "plugins/convert-libreoffice/tsconfig.build.json"
     }
   ]
 }

@@ -165,6 +165,8 @@ staleness:
 | `cache` | `.concordance-cache` | cache folder, outside `dist/` |
 | `parallelism` | number of cores | concurrent conversions |
 
+The converted files are keyed by the SHA-256 of their source under `<cache>/convert/`, so that an unchanged document is never reconverted, even when it moves. The cache never enters `dist/`: keep it in the pipeline cache between builds, and delete it to force a full reconversion. A document above `max_size_mb` or past `timeout_s` yields a [`W-CONV-FAILED`](../checks/W-CONV-FAILED.md) finding and stays downloadable; `parallelism` changes the build time, never the output.
+
 ## `build`
 
 | Key | Default | Meaning |

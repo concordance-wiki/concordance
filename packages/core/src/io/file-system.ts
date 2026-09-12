@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 
 /** The file system operations the tool needs, injected so that tests run against doubles. */
@@ -8,6 +16,9 @@ export interface FileSystem {
   /** Raw content, for callers that decide how to decode it. */
   readBytes(path: string): Uint8Array;
   writeText(path: string, content: string): void;
+  writeBytes(path: string, bytes: Uint8Array): void;
+  /** Deletes a file, or a folder with everything under it; a missing path is not an error. */
+  remove(path: string): void;
   /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` folders are skipped. */
   listFiles(directory: string): string[];
   /** ISO 8601 modification date of a file. */
@@ -34,6 +45,13 @@ export const nodeFileSystem: FileSystem = {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content, "utf8");
   },
+  writeBytes: (path, bytes) => {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, bytes);
+  },
+  remove: (path) => {
+    rmSync(path, { recursive: true, force: true });
+  },
   listFiles: (directory) => {
     const files: string[] = [];
     walk(directory, directory, files);
@@ -45,8 +63,6 @@ export const nodeFileSystem: FileSystem = {
 export interface MemoryFileSystem extends FileSystem {
   files: Map<string, string>;
   dates: Map<string, string>;
-  /** Stores raw bytes, so that a test can seed content that is not valid text. */
-  writeBytes(path: string, bytes: Uint8Array): void;
 }
 
 const encoder = new TextEncoder();
@@ -88,6 +104,14 @@ export function memoryFileSystem(
     writeBytes: (path, bytes) => {
       store.delete(path);
       blobs.set(path, bytes);
+    },
+    remove: (path) => {
+      for (const key of paths()) {
+        if (key === path || key.startsWith(`${path}/`)) {
+          store.delete(key);
+          blobs.delete(key);
+        }
+      }
     },
     listFiles: (directory) => {
       const prefix = `${directory}/`;

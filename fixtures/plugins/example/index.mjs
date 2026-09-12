@@ -17,7 +17,8 @@ export default definePlugin({
       {
         extensions: [".example"],
         produces: ["text"],
-        convert: (input) => Promise.resolve({ representations: { text: input.path } }),
+        convert: (input) =>
+          Promise.resolve({ representations: { text: { path: input.path } }, findings: [] }),
       },
     ],
     sources: [{ kind: "example", load: (input) => Promise.resolve({ entities: [input.name] }) }],
