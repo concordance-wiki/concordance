@@ -5,9 +5,7 @@
   "description": "Schema of concordance.lock.yaml, the record of human decisions. Only rejected_terms is read by the first version.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version"
-  ],
+  "required": ["version"],
   "properties": {
     "version": {
       "const": 1
@@ -21,11 +19,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "from",
-              "to",
-              "rel"
-            ],
+            "required": ["from", "to", "rel"],
             "properties": {
               "from": {
                 "type": "string"
@@ -52,11 +46,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "from",
-              "to",
-              "rel"
-            ],
+            "required": ["from", "to", "rel"],
             "properties": {
               "from": {
                 "type": "string"

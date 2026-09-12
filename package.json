@@ -10,14 +10,27 @@
   },
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "build": "node scripts/workspace.mjs build",
-    "test": "node scripts/workspace.mjs test",
-    "lint": "node scripts/workspace.mjs lint && node scripts/validate.mjs",
-    "check": "pnpm lint && pnpm build && pnpm test && node scripts/determinism.mjs && node scripts/hygiene.mjs"
+    "build": "tsc -b",
+    "test": "vitest run --coverage",
+    "lint": "eslint . && prettier --check . && pnpm -r typecheck && node scripts/validate.mjs",
+    "format": "prettier --write .",
+    "mutation": "stryker run",
+    "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/hygiene.mjs"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.2",
+    "@eslint/js": "10.0.1",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
+    "@types/node": "22.20.2",
+    "@vitest/coverage-v8": "4.1.11",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0",
+    "vitest": "4.1.11",
     "yaml": "2.8.1"
   }
 }

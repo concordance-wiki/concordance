@@ -5,12 +5,7 @@
   "description": "Schema of the meta-model profile (profiles/default.yaml and project overrides).",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "types",
-    "relations",
-    "confidence"
-  ],
+  "required": ["version", "types", "relations", "confidence"],
   "properties": {
     "profile": {
       "type": "string"
@@ -27,16 +22,12 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "label"
-        ],
+        "required": ["label"],
         "properties": {
           "label": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "en"
-            ],
+            "required": ["en"],
             "properties": {
               "en": {
                 "type": "string"
@@ -58,9 +49,7 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "type"
-        ],
+        "required": ["type"],
         "properties": {
           "type": {
             "type": "string",
@@ -122,17 +111,12 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "label",
-          "group"
-        ],
+        "required": ["label", "group"],
         "properties": {
           "label": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "en"
-            ],
+            "required": ["en"],
             "properties": {
               "en": {
                 "type": "string"
@@ -148,10 +132,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "active",
-              "planned"
-            ],
+            "enum": ["active", "planned"],
             "default": "active"
           },
           "glyph": {
@@ -159,10 +140,7 @@
           },
           "graph": {
             "type": "string",
-            "enum": [
-              "full",
-              "documents-only"
-            ]
+            "enum": ["full", "documents-only"]
           },
           "attributes": {
             "type": "object",
@@ -173,9 +151,7 @@
             "additionalProperties": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "type"
-              ],
+              "required": ["type"],
               "properties": {
                 "type": {
                   "type": "string",
@@ -237,18 +213,12 @@
             "additionalProperties": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "heading",
-                "parse",
-                "produces"
-              ],
+              "required": ["heading", "parse", "produces"],
               "properties": {
                 "heading": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "en"
-                  ],
+                  "required": ["en"],
                   "properties": {
                     "en": {
                       "type": "string"
@@ -260,12 +230,7 @@
                 },
                 "parse": {
                   "type": "string",
-                  "enum": [
-                    "ordered-list",
-                    "bullet-list",
-                    "paragraphs",
-                    "table"
-                  ]
+                  "enum": ["ordered-list", "bullet-list", "paragraphs", "table"]
                 },
                 "produces": {
                   "type": "string",
@@ -312,18 +277,12 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "label",
-          "directed",
-          "allowed"
-        ],
+        "required": ["label", "directed", "allowed"],
         "properties": {
           "label": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "en"
-            ],
+            "required": ["en"],
             "properties": {
               "en": {
                 "type": "string"
@@ -338,10 +297,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "active",
-              "planned"
-            ]
+            "enum": ["active", "planned"]
           },
           "cap": {
             "type": "number",
@@ -350,10 +306,7 @@
           },
           "target_kind": {
             "type": "string",
-            "enum": [
-              "entity",
-              "type"
-            ]
+            "enum": ["entity", "type"]
           },
           "attributes": {
             "type": "object",
@@ -364,9 +317,7 @@
             "additionalProperties": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "type"
-              ],
+              "required": ["type"],
               "properties": {
                 "type": {
                   "type": "string",
@@ -472,11 +423,7 @@
         "glossary_occurrence": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "base",
-            "per_occurrence",
-            "cap"
-          ],
+          "required": ["base", "per_occurrence", "cap"],
           "properties": {
             "base": {
               "type": "number",
@@ -521,10 +468,7 @@
       "type": "object",
       "propertyNames": {
         "type": "string",
-        "enum": [
-          "en",
-          "fr"
-        ]
+        "enum": ["en", "fr"]
       },
       "additionalProperties": {
         "type": "object",

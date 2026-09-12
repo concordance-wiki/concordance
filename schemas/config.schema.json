@@ -5,11 +5,7 @@
   "description": "Schema of concordance.yaml.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "project",
-    "sources"
-  ],
+  "required": ["version", "project", "sources"],
   "properties": {
     "version": {
       "const": 1
@@ -17,9 +13,7 @@
     "project": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name"
-      ],
+      "required": ["name"],
       "properties": {
         "name": {
           "type": "string",
@@ -27,10 +21,7 @@
         },
         "locale": {
           "type": "string",
-          "enum": [
-            "en",
-            "fr"
-          ]
+          "enum": ["en", "fr"]
         },
         "theme": {
           "type": "string"
@@ -54,9 +45,7 @@
           {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "name"
-            ],
+            "required": ["name"],
             "properties": {
               "name": {
                 "type": "string",
@@ -75,9 +64,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
@@ -88,11 +75,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "active",
-              "legacy",
-              "target"
-            ]
+            "enum": ["active", "legacy", "target"]
           }
         }
       }
@@ -148,9 +131,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "properties": {
           "name": {
             "type": "string",
@@ -169,18 +150,11 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "git",
-              "path",
-              "tracker"
-            ]
+            "enum": ["git", "path", "tracker"]
           },
           "locale": {
             "type": "string",
-            "enum": [
-              "en",
-              "fr"
-            ]
+            "enum": ["en", "fr"]
           },
           "type": {
             "type": "string",
@@ -206,11 +180,7 @@
           "defaults": {
             "type": "object",
             "additionalProperties": {
-              "type": [
-                "string",
-                "number",
-                "boolean"
-              ]
+              "type": ["string", "number", "boolean"]
             }
           },
           "rules": {
@@ -218,10 +188,7 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "match",
-                "set"
-              ],
+              "required": ["match", "set"],
               "properties": {
                 "match": {
                   "type": "object",
@@ -249,11 +216,7 @@
                 "set": {
                   "type": "object",
                   "additionalProperties": {
-                    "type": [
-                      "string",
-                      "number",
-                      "boolean"
-                    ]
+                    "type": ["string", "number", "boolean"]
                   },
                   "minProperties": 1
                 }
@@ -269,9 +232,7 @@
         },
         "oneOf": [
           {
-            "required": [
-              "git"
-            ],
+            "required": ["git"],
             "properties": {
               "git": {
                 "type": "string"
@@ -279,9 +240,7 @@
             }
           },
           {
-            "required": [
-              "path"
-            ],
+            "required": ["path"],
             "properties": {
               "path": {
                 "type": "string"
@@ -289,9 +248,7 @@
             }
           },
           {
-            "required": [
-              "kind"
-            ],
+            "required": ["kind"],
             "properties": {
               "kind": {
                 "const": "tracker"
@@ -470,11 +427,7 @@
         "properties": {
           "severity": {
             "type": "string",
-            "enum": [
-              "error",
-              "warning",
-              "info"
-            ]
+            "enum": ["error", "warning", "info"]
           },
           "enabled": {
             "type": "boolean"
@@ -490,9 +443,7 @@
     "domain": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id"
-      ],
+      "required": ["id"],
       "properties": {
         "id": {
           "type": "string",

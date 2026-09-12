@@ -52,8 +52,16 @@ for (const name of readdirSync(schemaDir).sort()) {
 }
 
 // 2. The default profile and the brand theme validate.
-validateAgainst("profile.schema.json", join(root, "profiles/default.yaml"), readYaml(join(root, "profiles/default.yaml")));
-validateAgainst("theme.schema.json", join(root, "brand/theme.yaml"), readYaml(join(root, "brand/theme.yaml")));
+validateAgainst(
+  "profile.schema.json",
+  join(root, "profiles/default.yaml"),
+  readYaml(join(root, "profiles/default.yaml")),
+);
+validateAgainst(
+  "theme.schema.json",
+  join(root, "brand/theme.yaml"),
+  readYaml(join(root, "brand/theme.yaml")),
+);
 
 // 3. Every fixture configuration validates, and its sources exist.
 for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("concordance.yaml"))) {
@@ -79,8 +87,10 @@ const frontmatter = (text) => {
 for (const name of templates) {
   const fm = frontmatter(readFileSync(join(templateDir, name), "utf8"));
   const type = name.replace(/\.md$/, "");
-  if (fm.type !== type) fail(`docs/templates/${name}: frontmatter type ${fm.type} does not match the file name`);
-  if (!profile.types[type]) fail(`docs/templates/${name}: type ${type} is not in the default profile`);
+  if (fm.type !== type)
+    fail(`docs/templates/${name}: frontmatter type ${fm.type} does not match the file name`);
+  if (!profile.types[type])
+    fail(`docs/templates/${name}: type ${type} is not in the default profile`);
 }
 for (const [type, definition] of Object.entries(profile.types)) {
   if (definition.status !== "planned" && !templates.includes(`${type}.md`)) {
@@ -90,7 +100,10 @@ for (const [type, definition] of Object.entries(profile.types)) {
 
 // 5. Relative markdown links resolve, except in the faulty corpus, which breaks one on purpose.
 const linkPattern = /\[[^\]]*\]\(([^)\s]+)\)/g;
-for (const path of walk(root, (p) => p.endsWith(".md") && !p.includes("/fixtures/corpora/faulty/"))) {
+for (const path of walk(
+  root,
+  (p) => p.endsWith(".md") && !p.includes("/fixtures/corpora/faulty/"),
+)) {
   const text = readFileSync(path, "utf8").replace(/```[\s\S]*?```/g, "");
   for (const match of text.matchAll(linkPattern)) {
     const target = match[1];
@@ -105,13 +118,19 @@ for (const path of walk(root, (p) => p.endsWith(".md") && !p.includes("/fixtures
 // 6. Every check page carries a valid identifier, and every check named in the
 //    fixtures has a page.
 const checkDir = join(root, "docs/checks");
-const pages = new Set(readdirSync(checkDir).filter((n) => n !== "README.md").map((n) => n.replace(/\.md$/, "")));
+const pages = new Set(
+  readdirSync(checkDir)
+    .filter((n) => n !== "README.md")
+    .map((n) => n.replace(/\.md$/, "")),
+);
 for (const id of pages) {
-  if (!/^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$/.test(id)) fail(`docs/checks/${id}.md: invalid check identifier`);
+  if (!/^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$/.test(id))
+    fail(`docs/checks/${id}.md: invalid check identifier`);
 }
 for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("findings.yaml"))) {
   for (const finding of readYaml(path) ?? []) {
-    if (!pages.has(finding.check)) fail(`${relative(root, path)}: check ${finding.check} has no documentation page`);
+    if (!pages.has(finding.check))
+      fail(`${relative(root, path)}: check ${finding.check} has no documentation page`);
   }
 }
 

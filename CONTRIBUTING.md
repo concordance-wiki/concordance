@@ -21,10 +21,14 @@ pnpm check
 
 | Command | Effect |
 |---|---|
-| `pnpm build` | compile every package |
-| `pnpm test` | unit and integration tests with coverage |
-| `pnpm lint` | ESLint, Prettier, type check, schema and fixture validation |
-| `pnpm check` | all of the above, plus the determinism build, mutation testing and the hygiene scan |
+| `pnpm build` | compile every package (`tsc -b`) |
+| `pnpm test` | every test with coverage; fails under 100% lines, branches, functions and statements |
+| `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation |
+| `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85% |
+| `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
+| `pnpm check` | all of the above, plus the determinism build and the hygiene scan |
+
+A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose.
 
 ## Quality bar
 
@@ -38,7 +42,7 @@ pnpm check
 
 ## Code style
 
-The tooling enforces the style: `tsconfig.base.json`, `.prettierrc`, `.editorconfig`, and `eslint.config.js` once the first package exists. Beyond that:
+The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict, type-checked), `.prettierrc`, `.editorconfig`. Beyond that:
 
 - Comment only when the "why" is not obvious. No docstring that repeats the signature. No file header summarising the file.
 - Names are explicit English. Check identifiers follow `E-`, `W-` or `I-` plus `AREA-SUBJECT`.

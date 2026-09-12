@@ -21,12 +21,21 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Lint, type check, schemas and fixtures
+      - name: Lint, format, type check, schemas and fixtures
         run: pnpm lint
       - name: Build
         run: pnpm build
-      - name: Test with coverage
+      - name: Test with full coverage
         run: pnpm test
+      - name: Publish coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          if-no-files-found: error
+      - name: Mutation testing
+        run: pnpm mutation
       - name: Determinism
         run: node scripts/determinism.mjs
       - name: Hygiene

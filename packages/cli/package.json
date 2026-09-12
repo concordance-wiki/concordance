@@ -1,0 +1,29 @@
+{
+  "name": "@concordance-wiki/cli",
+  "version": "0.0.0",
+  "description": "The concordance command: build, render, init, validate-config, lint.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "@concordance-wiki/profile": "workspace:*",
+    "@concordance-wiki/ingest": "workspace:*",
+    "@concordance-wiki/typing": "workspace:*",
+    "@concordance-wiki/nlp": "workspace:*",
+    "@concordance-wiki/inference": "workspace:*",
+    "@concordance-wiki/checks": "workspace:*",
+    "@concordance-wiki/site": "workspace:*"
+  }
+}

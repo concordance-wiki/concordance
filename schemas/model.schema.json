@@ -5,14 +5,7 @@
   "description": "Schema of dist/model.json, the canonical serialised model.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "build",
-    "entities",
-    "links",
-    "findings",
-    "candidates"
-  ],
+  "required": ["version", "build", "entities", "links", "findings", "candidates"],
   "properties": {
     "version": {
       "const": 1
@@ -20,12 +13,7 @@
     "build": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "tool",
-        "at",
-        "profile_hash",
-        "sources"
-      ],
+      "required": ["tool", "at", "profile_hash", "sources"],
       "properties": {
         "tool": {
           "type": "string"
@@ -42,9 +30,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "name"
-            ],
+            "required": ["name"],
             "properties": {
               "name": {
                 "type": "string"
@@ -54,10 +40,7 @@
               },
               "locale": {
                 "type": "string",
-                "enum": [
-                  "en",
-                  "fr"
-                ]
+                "enum": ["en", "fr"]
               },
               "files": {
                 "type": "integer",
@@ -76,13 +59,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "id",
-          "type",
-          "title",
-          "source",
-          "type_origin"
-        ],
+        "required": ["id", "type", "title", "source", "type_origin"],
         "properties": {
           "id": {
             "type": "string",
@@ -103,10 +80,7 @@
           },
           "locale": {
             "type": "string",
-            "enum": [
-              "en",
-              "fr"
-            ]
+            "enum": ["en", "fr"]
           },
           "application": {
             "type": "string",
@@ -131,10 +105,7 @@
           "source": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "name",
-              "path"
-            ],
+            "required": ["name", "path"],
             "properties": {
               "name": {
                 "type": "string"
@@ -159,10 +130,7 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": [
-                "path",
-                "format"
-              ],
+              "required": ["path", "format"],
               "properties": {
                 "path": {
                   "type": "string"
@@ -188,13 +156,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "from",
-          "to",
-          "relation",
-          "confidence",
-          "provenance"
-        ],
+        "required": ["from", "to", "relation", "confidence", "provenance"],
         "properties": {
           "from": {
             "type": "string",
@@ -221,10 +183,7 @@
             "minItems": 1,
             "items": {
               "type": "object",
-              "required": [
-                "method",
-                "confidence"
-              ],
+              "required": ["method", "confidence"],
               "properties": {
                 "method": {
                   "type": "string",
@@ -271,10 +230,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": [
-                      "line",
-                      "context"
-                    ],
+                    "required": ["line", "context"],
                     "properties": {
                       "line": {
                         "type": "integer",
@@ -304,11 +260,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "check",
-          "severity",
-          "message"
-        ],
+        "required": ["check", "severity", "message"],
         "properties": {
           "check": {
             "type": "string",
@@ -316,11 +268,7 @@
           },
           "severity": {
             "type": "string",
-            "enum": [
-              "error",
-              "warning",
-              "info"
-            ]
+            "enum": ["error", "warning", "info"]
           },
           "message": {
             "type": "string"
@@ -348,21 +296,13 @@
     "candidates": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "terms",
-        "duplicates"
-      ],
+      "required": ["terms", "duplicates"],
       "properties": {
         "terms": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "text",
-              "score",
-              "occurrences",
-              "documents"
-            ],
+            "required": ["text", "score", "occurrences", "documents"],
             "properties": {
               "text": {
                 "type": "string"
@@ -386,11 +326,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "path",
-                    "line",
-                    "context"
-                  ],
+                  "required": ["path", "line", "context"],
                   "properties": {
                     "path": {
                       "type": "string"
@@ -411,10 +347,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "resources",
-              "score"
-            ],
+            "required": ["resources", "score"],
             "properties": {
               "resources": {
                 "type": "array",
@@ -446,10 +379,7 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": [
-            "id",
-            "count"
-          ],
+          "required": ["id", "count"],
           "properties": {
             "id": {
               "type": "string"

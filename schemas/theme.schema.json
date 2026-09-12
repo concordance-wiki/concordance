@@ -5,11 +5,7 @@
   "description": "Schema of theme.yaml.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "name",
-    "light",
-    "dark"
-  ],
+  "required": ["name", "light", "dark"],
   "properties": {
     "name": {
       "type": "string",
@@ -43,14 +39,7 @@
     "light": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "bg",
-        "surface",
-        "border",
-        "ink",
-        "muted",
-        "accent"
-      ],
+      "required": ["bg", "surface", "border", "ink", "muted", "accent"],
       "properties": {
         "bg": {
           "type": "string",
@@ -81,14 +70,7 @@
     "dark": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "bg",
-        "surface",
-        "border",
-        "ink",
-        "muted",
-        "accent"
-      ],
+      "required": ["bg", "surface", "border", "ink", "muted", "accent"],
       "properties": {
         "bg": {
           "type": "string",
@@ -118,11 +100,7 @@
     },
     "default_mode": {
       "type": "string",
-      "enum": [
-        "light",
-        "dark",
-        "system"
-      ],
+      "enum": ["light", "dark", "system"],
       "default": "system"
     },
     "footer": {
@@ -136,10 +114,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "label",
-              "url"
-            ],
+            "required": ["label", "url"],
             "properties": {
               "label": {
                 "type": "string"
@@ -163,10 +138,7 @@
       "type": "object",
       "propertyNames": {
         "type": "string",
-        "enum": [
-          "en",
-          "fr"
-        ]
+        "enum": ["en", "fr"]
       },
       "additionalProperties": {
         "type": "object",

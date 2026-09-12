@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "packages/core/src/**/*.ts",
+    "packages/typing/src/**/*.ts",
+    "packages/nlp/src/**/*.ts",
+    "packages/inference/src/**/*.ts",
+    "packages/checks/src/**/*.ts"
+  ],
+  "thresholds": {
+    "high": 95,
+    "low": 90,
+    "break": 85
+  },
+  "reporters": ["clear-text", "progress"],
+  "tempDirName": ".stryker-tmp"
+}

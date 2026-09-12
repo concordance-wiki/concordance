@@ -1,0 +1,24 @@
+{
+  "name": "@concordance-wiki/inference",
+  "version": "0.0.0",
+  "description": "Link production, confidence combination, relation typing, bounded neighbourhood, term candidates.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "@concordance-wiki/nlp": "workspace:*",
+    "@concordance-wiki/profile": "workspace:*"
+  }
+}
