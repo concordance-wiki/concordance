@@ -13,7 +13,7 @@ Required. Schema version, currently `1`.
 | Key | Type | Default | Meaning |
 |---|---|---|---|
 | `name` | string | required | displayed in the site |
-| `locale` | `en`, `fr` | `en` | interface language and default source locale |
+| `locale` | `en`, `fr` | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
 | `theme` | path | `./theme.yaml` | theme file |
 | `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders |
 
@@ -78,7 +78,7 @@ One entry per repository or local folder. Names are unique.
 | `git` | repository URL; cloned at depth 1 |
 | `ref` | branch, tag or commit; `main` by default |
 | `path` | local folder, for development; exclusive with `git` |
-| `locale` | `en` or `fr`; defaults to `project.locale` |
+| `locale` | `en` or `fr`; defaults to `project.locale`. Selects the language pack of the source: text normalisation, default stopwords, the words that announce a type and the collation of its indexes. Other locales will come through plugins, which register their pack; the schema accepts `en` and `fr` today |
 | `type` | forces the type of every markdown file |
 | `default_type` | type when nothing else applies; `document` by default |
 | `application` | default application for the source |
@@ -147,9 +147,9 @@ staleness:
 | Key | Default | Meaning |
 |---|---|---|
 | `glossary_sources` | sources with `glossary: true` | priority sources for the dictionary |
-| `stopwords` | language pack | extra stopword files, one word per line |
+| `stopwords` | language pack | extra stopword files, one word per line, `#` starts a comment; added on top of the defaults of the language pack |
 | `short_terms` | `[]` | allow-list of terms shorter than three characters |
-| `type_prefixes` | language pack | words that announce a type (`screen`, `API`, `table`) and add 0.1 confidence |
+| `type_prefixes` | language pack | words that announce a type (`screen`, `API`, `table`) and add 0.1 confidence; the defaults are those of the profile for the locale of the source |
 | `cross_source_links` | `false` | resolve markdown links across sources with a `source:` prefix |
 | `ngrams` | `{ min: 1, max: 4, min_occurrences: 3, min_documents: 2 }` | candidate expression discovery |
 | `keyword_pages` | `{ min_occurrences: 3, min_files: 2 }` | publication threshold of a keyword page |

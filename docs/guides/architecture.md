@@ -60,7 +60,7 @@ The core packages read markdown and produce JSON. They depend on no office forma
 
 ## Locale per source
 
-Each source declares `locale: en | fr`, defaulting to the project locale. The locale selects normalisation, plural rules, default stopwords, type prefixes and collation. The `en` and `fr` packs are in the core; other languages are plugins.
+Each source declares `locale: en | fr`, defaulting to the project locale. The locale selects a language pack: normalisation, plural rules, default stopwords, type prefixes and collation. The `en` and `fr` packs are in the core, in `@concordance-wiki/nlp`; other languages are plugins that register their pack in the language pack registry (`registerLanguagePack`), and a locale no pack serves is a configuration error. Every ingested source carries its resolved locale, which the entities built from it inherit.
 
 ## Search
 
