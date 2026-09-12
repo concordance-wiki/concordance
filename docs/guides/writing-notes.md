@@ -150,4 +150,6 @@ Merge semantics: objects are merged key by key at every depth, so a project can 
 npx concordance lint --scope repo
 ```
 
-The linter reports broken links, duplicate identifiers, invalid frontmatter, type conflicts and missing sections, with a link to the [page of each check](../checks/README.md). `--fix` applies the safe corrections (frontmatter normalisation, key order, deduced type); it never writes an inferred link.
+The linter reports broken links, duplicate identifiers, invalid frontmatter, type conflicts and missing sections, with a link to the [page of each check](../checks/README.md).
+
+`--fix` applies the safe corrections and prints each of them before writing: it adds the `type` the filing rules deduce to a frontmatter that has none, orders the frontmatter keys (`id`, `type`, `title`, `aliases`, `status`, then the rest alphabetically) and points a link to a missing file at the only file carrying that name. It refuses, and says so, when several files carry the name; it leaves an invalid frontmatter and a note without frontmatter as they are; it never writes an inferred link and never touches the body of a note. `--dry-run` lists the corrections without writing. See the [getting started guide](getting-started.md#safe-fixes).

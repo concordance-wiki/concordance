@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import * as entry from "../src/index.js";
 
 describe("@concordance-wiki/lint", () => {
-  it("exposes the local lint, its overrides, the report and the machine formats", () => {
+  it("exposes the local lint, its overrides, the safe fixes, the report and the machine formats", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "CANONICAL_KEY_ORDER",
       "DEFAULT_SOURCE_NAME",
       "JUNIT_CLEAN_CASE",
       "JUNIT_SUITE_NAME",
@@ -16,7 +17,9 @@ describe("@concordance-wiki/lint", () => {
       "SOURCE_ROOT_ID",
       "TOOL_NAME",
       "countBySeverity",
+      "deduceType",
       "documentationOf",
+      "fixRepository",
       "formatFinding",
       "formatFindings",
       "formatFindingsAs",
@@ -27,8 +30,10 @@ describe("@concordance-wiki/lint", () => {
       "isOutputFormat",
       "lintRepository",
       "locationOf",
+      "normalizeFrontmatter",
       "parseLintConfig",
       "readLintOverrides",
+      "rewriteRenamedLinks",
     ]);
   });
 });

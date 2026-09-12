@@ -115,13 +115,33 @@ Options:
 | `--fail-on error\|warning\|info` | `error` | the severity from which a finding makes the command fail |
 | `--format text\|json\|sarif\|junit` | `text` | the shape of the report; see [Reports for forges](#reports-for-forges) |
 | `--output <file>` | none | writes the report to that file instead of standard output; the only file the command ever writes |
-| `--fix` | | not available in this version; the flag is refused |
+| `--fix` | | applies the safe corrections before the check, after printing each of them; see [Safe fixes](#safe-fixes) |
+| `--dry-run` | | lists the corrections `--fix` would apply, prefixed with `would fix`, and writes nothing; implies `--fix` |
 
 What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package.
 
-In this mode the command never opens a network connection and writes nothing but the report named by `--output`. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
+In this mode the command never opens a network connection, and it writes nothing but the report named by `--output` and, under `--fix`, the corrected files. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
 
-Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option or format, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--fix`, `--scope global`).
+Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option or format, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--scope global`).
+
+### Safe fixes
+
+`--fix` corrects what is mechanical and certain, then runs the check on the corrected files. Every correction is printed as `fix: <path>:<line>: <description>` before the first file is written, so that a log shows what changed:
+
+```
+fix: notes/entry.md:1: add the deduced "type: rule" to the frontmatter
+fix: notes/entry.md:1: order the frontmatter keys: id, type, title, status
+fix: notes/entry.md:7: rewrite link "cap.rule.md" to "../rules/cap.rule.md", the only file named cap.rule.md
+refused: notes/entry.md:9: link "cap.md" matches several files: archive/cap.md, rules/cap.md; choose one
+```
+
+Three corrections exist:
+
+- the deduced type: when a note has a frontmatter block without `type` and the source given by `--source` and `--config` deduces one (`default_type`, then `type`, then the `rules` in order, the last match winning), `type: <deduced>` is added. A note without frontmatter is left alone, since its type already comes from where it is filed, and the implicit `document` default is never written;
+- the key order: the frontmatter keys are written as `id`, `type`, `title`, `aliases`, `status`, then the rest alphabetically. Comments travel with their key. A frontmatter that is not valid YAML is left untouched: `E-FM-INVALID` reports it;
+- a renamed target: a link to a missing file is pointed at the only file of the repository carrying the same name and extension, as a path relative to the note, the anchor kept. Only the destination characters between `](` and `)` are replaced.
+
+The fixer refuses, and says so on a `refused:` line, when several files carry the name, or when the destination is written between angle brackets. It never adds a link, never removes one, never touches the body of a note, and never writes a relation the tool inferred: the diff of a fixed file only shows the frontmatter block and existing link destinations. A second `--fix` on a fixed repository changes nothing.
 
 The linter uses the same checks as the build. See the [check pages](../checks/README.md) for what each finding means and how to fix it; every finding line ends with the URL of its page.
 
@@ -144,7 +164,7 @@ The [configuration guide](configuration.md#continuous-integration) shows how to 
 
 ## What the tool does not do
 
-- It never writes into a knowledge repository.
+- It never writes into a knowledge repository, except `lint --fix`, which writes only the corrections it printed.
 - It does not read source code.
 - It does not run a server; anything that needs one (semantic search, questions in natural language, merge request creation) belongs to a separate, optional service that is not part of the first version.
 - It does not correct typos in search: matching is by prefix.

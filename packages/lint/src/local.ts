@@ -35,7 +35,7 @@ function typeSuffixes(source: SourceConfig | undefined): string[] {
 }
 
 /** A target that climbs above the repository may exist in another source; only the global mode can tell. */
-function leavesRoot(path: string): boolean {
+export function leavesRoot(path: string): boolean {
   return path === ".." || path.startsWith("../");
 }
 
