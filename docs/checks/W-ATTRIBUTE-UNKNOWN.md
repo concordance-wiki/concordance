@@ -10,20 +10,20 @@ The attribute is kept as-is in the model and shown in the side panel of the page
 
 ```
 ---
-url_pattern: /contract/:id/pay
+url_pattern: /entities/:id
 colour: blue
 ---
-# Free payment entry
-(file: screens/free-payment-entry.md, typed screen)
+# Entity page
+(file: screens/entity-page.md, typed screen)
 ```
 
 ## After
 
 ```
 ---
-url_pattern: /contract/:id/pay
+url_pattern: /entities/:id
 ---
-# Free payment entry
+# Entity page
 ```
 
 ## How to fix

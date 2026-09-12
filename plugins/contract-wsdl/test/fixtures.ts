@@ -18,9 +18,12 @@ export function fixture(relative: string): string {
 export const orders = fixture("./fixtures/orders.wsdl");
 /** A WSDL 2.0 contract with one interface, one binding and one endpoint. */
 export const members = fixture("./fixtures/members.wsdl");
-/** The WSDL twin of the OpenAPI example of the API note template. */
-export const payments = fixture("../../../docs/templates/wsdl.example.wsdl");
-export const paymentsOpenApi = fixture("../../../docs/templates/openapi.example.json");
+/** The WSDL example shipped with the note templates: the forge bridge, a SOAP service. */
+export const forgeBridge = fixture("../../../docs/templates/wsdl.example.wsdl");
+/** The OpenAPI twin of the forge bridge: the same two operations as a REST service. */
+export const forgeBridgeOpenApi = fixture("./fixtures/forge-bridge.openapi.json");
+/** The OpenAPI example shipped with the note templates: the model query contract. */
+export const modelQueryOpenApi = fixture("../../../docs/templates/openapi.example.json");
 
 export function api(overrides: Partial<Entity> = {}): Entity {
   return {

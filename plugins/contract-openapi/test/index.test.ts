@@ -60,104 +60,71 @@ describe("@concordance-wiki/plugin-contract-openapi", () => {
     const { input } = harness({ "/repos/specs/api/openapi.example.json": example });
     const source = registry.sources()[0];
     const output = await source?.load(
-      input([api({ attributes: { contract: "./openapi.example.json" } })]),
+      input([
+        api({
+          id: "specs/api/model-query",
+          application: "concordance-service",
+          domain: "publication",
+          attributes: { contract: "./openapi.example.json" },
+        }),
+      ]),
     );
+    const endpoint = (operation: string, path: string, summary: string) => ({
+      id: `specs/api/model-query/${operation.toLowerCase()}`,
+      type: "endpoint",
+      title: `GET ${path}`,
+      aliases: [operation],
+      locale: "en",
+      application: "concordance-service",
+      domain: "publication",
+      status: "valid",
+      summary,
+      type_origin: "contract",
+      graph: "full",
+      attributes: {
+        method: "GET",
+        path,
+        operation_id: operation,
+        summary,
+        tags: [],
+        style: "http",
+      },
+      source: {
+        name: "specs",
+        path: "./openapi.example.json",
+        line: 1,
+        commit: "abc123",
+        last_modified: "2026-03-01T00:00:00.000Z",
+      },
+    });
+    const exposes = (operation: string) => ({
+      from: "specs/api/model-query",
+      to: `specs/api/model-query/${operation.toLowerCase()}`,
+      relation: "exposes",
+      confidence: 0.95,
+      provenance: [
+        {
+          method: "contract_import",
+          confidence: 0.95,
+          path: "./openapi.example.json",
+          operation,
+        },
+      ],
+    });
     expect(output).toEqual({
       entities: [
-        {
-          id: "specs/api/payments/createpayment",
-          type: "endpoint",
-          title: "POST /payments",
-          aliases: ["createPayment"],
-          locale: "en",
-          application: "payments",
-          domain: "payments",
-          status: "valid",
-          summary: "Create a payment",
-          type_origin: "contract",
-          graph: "full",
-          attributes: {
-            method: "POST",
-            path: "/payments",
-            operation_id: "createPayment",
-            summary: "Create a payment",
-            tags: [],
-            style: "http",
-          },
-          source: {
-            name: "specs",
-            path: "./openapi.example.json",
-            line: 1,
-            commit: "abc123",
-            last_modified: "2026-03-01T00:00:00.000Z",
-          },
-        },
-        {
-          id: "specs/api/payments/getpayment",
-          type: "endpoint",
-          title: "GET /payments/{id}",
-          aliases: ["getPayment"],
-          locale: "en",
-          application: "payments",
-          domain: "payments",
-          status: "valid",
-          summary: "Read a payment",
-          type_origin: "contract",
-          graph: "full",
-          attributes: {
-            method: "GET",
-            path: "/payments/{id}",
-            operation_id: "getPayment",
-            summary: "Read a payment",
-            tags: [],
-            style: "http",
-          },
-          source: {
-            name: "specs",
-            path: "./openapi.example.json",
-            line: 1,
-            commit: "abc123",
-            last_modified: "2026-03-01T00:00:00.000Z",
-          },
-        },
+        endpoint("getEntity", "/entities/{id}", "Read an entity"),
+        endpoint("listEntities", "/entities", "List entities"),
+        endpoint("searchModel", "/search", "Search the model"),
       ],
-      links: [
-        {
-          from: "specs/api/payments",
-          to: "specs/api/payments/createpayment",
-          relation: "exposes",
-          confidence: 0.95,
-          provenance: [
-            {
-              method: "contract_import",
-              confidence: 0.95,
-              path: "./openapi.example.json",
-              operation: "createPayment",
-            },
-          ],
-        },
-        {
-          from: "specs/api/payments",
-          to: "specs/api/payments/getpayment",
-          relation: "exposes",
-          confidence: 0.95,
-          provenance: [
-            {
-              method: "contract_import",
-              confidence: 0.95,
-              path: "./openapi.example.json",
-              operation: "getPayment",
-            },
-          ],
-        },
-      ],
+      links: [exposes("getEntity"), exposes("listEntities"), exposes("searchModel")],
       candidates: [],
       contracts: [
         {
-          api: "specs/api/payments",
+          api: "specs/api/model-query",
           location: "./openapi.example.json",
-          title: "Payments API",
-          version: "2.0.0",
+          title: "Model query API",
+          version: "1.0.0",
           fingerprint: fingerprintOf(example),
           imported_at: "2026-09-12T10:00:00.000Z",
         },

@@ -9,15 +9,15 @@ The two sides disagree. One of them is out of date.
 ## Before
 
 ```
-api/payments.md declares consumers: [screens/member-search]
-screens/member-search.md never mentions the Payments API
+api/model-query.md declares consumers: [screens/alphabetical-index]
+screens/alphabetical-index.md never mentions the Model query API
 ```
 
 ## After
 
 ```
-api/payments.md declares consumers: [screens/free-payment-entry]
-screens/free-payment-entry.md: "calls the [Payments API](../api/payments.md)"
+api/model-query.md declares consumers: [screens/search-results]
+screens/search-results.md: "calls the [Model query API](../api/model-query.md)"
 ```
 
 ## How to fix

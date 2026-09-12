@@ -128,7 +128,7 @@ npx concordance lint
 The command reads every markdown file under the current directory, one file at a time, and prints one line per finding, sorted by check, path and line, then a count:
 
 ```
-error: notes/entry.md:3: E-LINK-BROKEN: link "cap.md" in notes/entry.md points to notes/cap.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
+error: screens/entity-page.md:3: E-LINK-BROKEN: link "threshold.md" in screens/entity-page.md points to screens/threshold.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
 1 finding: 1 error, 0 warnings, 0 info
 ```
 
@@ -156,10 +156,10 @@ Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` sever
 `--fix` corrects what is mechanical and certain, then runs the check on the corrected files. Every correction is printed as `fix: <path>:<line>: <description>` before the first file is written, so that a log shows what changed:
 
 ```
-fix: notes/entry.md:1: add the deduced "type: rule" to the frontmatter
-fix: notes/entry.md:1: order the frontmatter keys: id, type, title, status
-fix: notes/entry.md:7: rewrite link "cap.rule.md" to "../rules/cap.rule.md", the only file named cap.rule.md
-refused: notes/entry.md:9: link "cap.md" matches several files: archive/cap.md, rules/cap.md; choose one
+fix: screens/entity-page.md:1: add the deduced "type: screen" to the frontmatter
+fix: screens/entity-page.md:1: order the frontmatter keys: id, type, title, status
+fix: screens/entity-page.md:7: rewrite link "threshold.rule.md" to "../rules/threshold.rule.md", the only file named threshold.rule.md
+refused: screens/entity-page.md:9: link "threshold.md" matches several files: archive/threshold.md, glossary/threshold.md; choose one
 ```
 
 Three corrections exist:

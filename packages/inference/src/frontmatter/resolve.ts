@@ -46,7 +46,7 @@ function byIdentifier(value: string, context: ResolveContext): LinkableEntity | 
 
 /**
  * A path carries its extension; it is tried as written, then through the identifier it derives, so
- * that `Roles/Account Manager.md` names `roles/account-manager`.
+ * that `Roles/Glossary Owner.md` names `roles/glossary-owner`.
  */
 function byPath(value: string, context: ResolveContext): LinkableEntity | undefined {
   if (!value.endsWith(".md")) return undefined;

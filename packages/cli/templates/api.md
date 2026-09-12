@@ -1,18 +1,18 @@
 ---
 type: api
 protocol: rest
-exposure: apim
-version: "2"
+exposure: internal
+version: "1"
 contract: ./openapi.example.json
 ---
-# Payments API
+# Model query API
 
-Records and reads [payments](business_object.md) on a contract. Since the [cap checked server-side](decision.md) decision it is the only place that checks the [annual cap](rule.md).
+Lists, reads and searches the entities of the canonical model, [keyword pages](business_object.md) included. Since the [threshold checked server-side](decision.md) decision it is the only place that checks the [publication threshold](rule.md).
 
 ## Consumers
 
-- [Free payment entry](screen.md)
+- [To-do page](screen.md)
 
 ## Objects
 
-- [Payment](business_object.md)
+- [Keyword page](business_object.md)

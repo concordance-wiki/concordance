@@ -9,9 +9,9 @@ The link is not recorded. A link leaves its source either with the `<source>:<pa
 ## Before
 
 ```
-# Payments workshop
+# Keyword page threshold review
 
-See [cap checked server-side](decisions:cap-checked-server-side.md).
+See [static site with islands](decisions:static-site-with-islands.md).
 ```
 
 with

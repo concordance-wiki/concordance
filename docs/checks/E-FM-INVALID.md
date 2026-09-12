@@ -10,20 +10,20 @@ The body of the file is still processed, but every attribute of the frontmatter 
 
 ```
 ---
-title: Free payment
-aliases: [FP, free contribution
+title: Keyword page
+aliases: [word page, generated page
 ---
-# Free payment
+# Keyword page
 ```
 
 ## After
 
 ```
 ---
-title: Free payment
-aliases: [FP, free contribution]
+title: Keyword page
+aliases: [word page, generated page]
 ---
-# Free payment
+# Keyword page
 ```
 
 ## How to fix

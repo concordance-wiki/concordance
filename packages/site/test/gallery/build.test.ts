@@ -88,7 +88,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(fileSystem.readText("/out/shell-rtl.html")).toContain('<html lang="ar" dir="rtl">');
     expect(fileSystem.readText("/out/header-logo.html")).toContain('<img class="site-logo"');
     expect(fileSystem.readText("/out/footer-text.html")).toContain(
-      "Internal documentation of the claims department.",
+      "Documentation of the build pipeline, kept by its maintainers.",
     );
   });
 

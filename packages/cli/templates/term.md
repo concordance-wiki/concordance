@@ -1,12 +1,12 @@
 ---
 type: term
-aliases: [FP, free contribution]
-broader: payment
+aliases: [candidate, recurring expression]
+broader: keyword page
 ---
-# Free payment
+# Candidate expression
 
-A [payment](business_object.md) made at the member's request, outside any schedule, on a running contract. It differs from a scheduled payment by the absence of periodicity.
+A [keyword page](business_object.md) proposed by the recogniser for an expression that recurs across the corpus without a note defining it. It differs from a glossary term by the absence of a definition.
 
 ## Not to be confused with
 
-An exceptional payment, which sits outside the contractual frame and is validated by a branch manager.
+A rejected expression, which the glossary owner has turned down and which the recogniser never proposes again.

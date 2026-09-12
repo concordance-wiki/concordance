@@ -23,7 +23,7 @@ An endpoint imported from a WSDL has the same shape as one imported from an Open
 
 ## What is read, and what is not
 
-WSDL 1.1 is read in full for what the entity carries: the operations of every `portType`, their `documentation` (whitespace collapsed, absent when empty) as summary, the `binding` whose `type` names the port type and the first `service/port` (by service name, then port name) whose `binding` names it as `port` and `binding`, and the `soapAction` of the `soap:operation` (SOAP 1.1 or 1.2) of the bound operation, absent when empty. Namespace prefixes are ignored on element and attribute names and stripped from the values that reference a name (`tns:Payment` is `Payment`).
+WSDL 1.1 is read in full for what the entity carries: the operations of every `portType`, their `documentation` (whitespace collapsed, absent when empty) as summary, the `binding` whose `type` names the port type and the first `service/port` (by service name, then port name) whose `binding` names it as `port` and `binding`, and the `soapAction` of the `soap:operation` (SOAP 1.1 or 1.2) of the bound operation, absent when empty. Namespace prefixes are ignored on element and attribute names and stripped from the values that reference a name (`tns:BuildReport` is `BuildReport`).
 
 WSDL 2.0 is read for its `interface` operations: their names and `documentation`, the `element` of their `input` and `output` (`#none` and `#any` skipped), and, when the document declares them, the `binding` whose `interface` names the interface, the first `service/endpoint` bound to it and the `wsoap:action` of the bound operation. Message exchange patterns, HTTP bindings and features are not read.
 

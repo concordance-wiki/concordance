@@ -9,15 +9,15 @@ Domains are declared globally by globs evaluated on the path of every file insid
 ## Before
 
 ```
-specs/screens/free-payment-entry.md  (no domain glob matches screens/free-payment-entry.md)
+specs/screens/keyword-page.md  (no domain glob matches screens/keyword-page.md)
 ```
 
 ## After
 
 ```
 domains:
-  - id: payments
-    match: ["**/*payment*", "**/payments/**"]
+  - id: publication
+    match: ["**/*page*", "**/publication/**"]
 ```
 
 ## How to fix

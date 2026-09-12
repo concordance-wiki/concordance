@@ -12,7 +12,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   return {
     theme: defaultTheme,
     locale: "en",
-    title: "Free payment",
+    title: "Keyword page",
     stylesheets: ["../assets/site.css"],
     islands: [bundle],
     assetsBase: "../assets/",
@@ -27,7 +27,7 @@ describe("renderPage", () => {
     const html = renderPage("Todo", todo, options());
     expect(html.startsWith('<!doctype html>\n<html lang="en" dir="ltr">')).toBe(true);
     expect(html).toContain('<meta charset="utf-8"');
-    expect(html).toContain("<title>Free payment</title>");
+    expect(html).toContain("<title>Keyword page</title>");
     expect(html).toContain('<link rel="stylesheet" href="../assets/site.css"');
     expect(html.endsWith("</html>\n")).toBe(true);
     expectBalanced(html);

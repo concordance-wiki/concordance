@@ -12,7 +12,7 @@ describe("EntityPage", () => {
   it("imposes the order: badge and highlights, title, then the rendered markdown", () => {
     const html = renderSlot("EntityPage", entityPage, defaultTheme);
     const badge = html.indexOf('<span class="badge">term</span>');
-    const title = html.indexOf("<h1>Free payment</h1>");
+    const title = html.indexOf("<h1>Keyword page</h1>");
     const body = html.indexOf('<div class="entity-body">');
     const panel = html.indexOf('<aside class="entity-panel"');
     expect(badge).toBeGreaterThan(0);
@@ -25,9 +25,9 @@ describe("EntityPage", () => {
   it("renders the highlights next to the badge, linked when they have a target", () => {
     const html = renderSlot("EntityPage", entityPage, defaultTheme);
     expect(html).toContain(
-      '<span class="highlight-label">aliases</span> <span class="value">FP</span><span class="value">free contribution</span>',
+      '<span class="highlight-label">aliases</span> <span class="value">word page</span>',
     );
-    expect(html).toContain('<a class="value" href="../payment/">payment</a>');
+    expect(html).toContain('<a class="value" href="../page/">page</a>');
   });
 
   it("caps the highlights at five", () => {
@@ -44,10 +44,10 @@ describe("EntityPage", () => {
   it("keeps the markdown of every section as is, under its heading when it has one", () => {
     const html = renderSlot("EntityPage", entityPage, defaultTheme);
     expect(html).toContain(
-      '<section id="definition"><div class="markdown"><p>A <a class="written" href="../payment/">payment</a>',
+      '<section id="definition"><div class="markdown"><p>A <a class="written" href="../page/">page</a>',
     );
     expect(html).toContain(
-      '<section id="not-to-be-confused-with"><h2>Not to be confused with</h2><div class="markdown"><p>An exceptional payment.</p></div></section>',
+      '<section id="not-to-be-confused-with"><h2>Not to be confused with</h2><div class="markdown"><p>An entity page.</p></div></section>',
     );
     expect(html).toContain('<span class="legend-written">link written in the note</span>');
   });
@@ -57,7 +57,9 @@ describe("EntityPage", () => {
     expect(html).toContain(
       '<aside class="entity-panel" aria-labelledby="entity-properties"><h2 id="entity-properties">Properties</h2>',
     );
-    expect(html).toContain('<dt>Owner</dt><dd><a class="value" href="../claims/">Claims</a></dd>');
+    expect(html).toContain(
+      '<dt>Owner</dt><dd><a class="value" href="../publication/">Publication</a></dd>',
+    );
     expect(renderSlot("EntityPage", { ...entityPage, attributes: [] }, defaultTheme)).not.toContain(
       "entity-panel",
     );
@@ -80,7 +82,7 @@ describe("EntityPage", () => {
   it("shows the source path and the edit link in the footer, the link only when the forge is known", () => {
     const html = renderSlot("EntityPage", entityPage, defaultTheme);
     expect(html).toContain(
-      '<p class="entity-source"><code>glossary/free-payment.md</code><a class="entity-edit" href="https://forge.example/edit/glossary/free-payment.md">Edit in the forge</a></p>',
+      '<p class="entity-source"><code>glossary/keyword-page.md</code><a class="entity-edit" href="https://forge.example/edit/glossary/keyword-page.md">Edit in the forge</a></p>',
     );
     const without = renderSlot(
       "EntityPage",

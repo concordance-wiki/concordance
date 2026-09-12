@@ -2,7 +2,7 @@ import { loadContracts as loadOpenApi } from "@concordance-wiki/plugin-contract-
 import { describe, expect, it } from "vitest";
 
 import { loadContracts as loadWsdl } from "../src/source.js";
-import { api, harness, payments, paymentsOpenApi } from "./fixtures.js";
+import { api, forgeBridge, forgeBridgeOpenApi, harness } from "./fixtures.js";
 
 /** The attribute keys each protocol adds to the common `operation_id`, `summary` and `style`. */
 const HTTP_ONLY = ["method", "path", "tags"];
@@ -15,31 +15,31 @@ function without(keys: string[], excluded: string[]): string[] {
 describe("an imported WSDL and an imported OpenAPI", () => {
   it("produce entities of the same shape: same keys, type_origin, link and provenance shape, attributes differing only in the protocol keys", async () => {
     const { input } = harness({
-      "/repos/specs/api/payments.openapi.json": paymentsOpenApi,
-      "/repos/specs/api/payments.wsdl": payments,
+      "/repos/specs/api/forge-bridge.openapi.json": forgeBridgeOpenApi,
+      "/repos/specs/api/forge-bridge.wsdl": forgeBridge,
     });
     const note = api({
-      id: "specs/api/payments",
-      application: "payments",
-      domain: "payments",
+      id: "specs/api/forge-bridge",
+      application: "concordance-service",
+      domain: "quality",
       source: {
         name: "specs",
-        path: "api/payments.md",
+        path: "api/forge-bridge.md",
         line: 1,
         commit: "abc123",
         last_modified: "2026-03-01T00:00:00.000Z",
       },
     });
     const http = await loadOpenApi(
-      input([api({ ...note, attributes: { contract: "./payments.openapi.json" } })]),
+      input([api({ ...note, attributes: { contract: "./forge-bridge.openapi.json" } })]),
     );
     const soap = await loadWsdl(
-      input([api({ ...note, attributes: { contract: "./payments.wsdl" } })]),
+      input([api({ ...note, attributes: { contract: "./forge-bridge.wsdl" } })]),
     );
 
     expect(http.entities.map((entity) => entity.id)).toEqual([
-      "specs/api/payments/createpayment",
-      "specs/api/payments/getpayment",
+      "specs/api/forge-bridge/fetchfindings",
+      "specs/api/forge-bridge/notifybuild",
     ]);
     expect(soap.entities.map((entity) => entity.id)).toEqual(http.entities.map((e) => e.id));
     expect(Object.keys(soap)).toEqual(Object.keys(http));
@@ -92,8 +92,8 @@ describe("an imported WSDL and an imported OpenAPI", () => {
       http.links.map((link) => link.provenance.map((p) => [p.method, p.confidence, p.operation])),
     );
     expect(soap.links.map((link) => link.provenance[0]?.path)).toEqual([
-      "./payments.wsdl",
-      "./payments.wsdl",
+      "./forge-bridge.wsdl",
+      "./forge-bridge.wsdl",
     ]);
 
     expect(soap.contracts.map((record) => Object.keys(record))).toEqual(
@@ -115,22 +115,22 @@ describe("an imported WSDL and an imported OpenAPI", () => {
 
   it("each leave the other's contract alone, so that both plugins enabled together import each contract once", async () => {
     const { input } = harness({
-      "/repos/specs/api/payments.openapi.json": paymentsOpenApi,
-      "/repos/specs/api/payments.wsdl": payments,
+      "/repos/specs/api/forge-bridge.openapi.json": forgeBridgeOpenApi,
+      "/repos/specs/api/forge-bridge.wsdl": forgeBridge,
     });
     const notes = [
-      api({ id: "specs/api/rest", attributes: { contract: "./payments.openapi.json" } }),
-      api({ id: "specs/api/soap", attributes: { contract: "./payments.wsdl" } }),
+      api({ id: "specs/api/rest", attributes: { contract: "./forge-bridge.openapi.json" } }),
+      api({ id: "specs/api/soap", attributes: { contract: "./forge-bridge.wsdl" } }),
     ];
     const http = await loadOpenApi(input(notes));
     const soap = await loadWsdl(input(notes));
     expect(http.contracts.map((record) => record.api)).toEqual(["specs/api/rest"]);
     expect(soap.contracts.map((record) => record.api)).toEqual(["specs/api/soap"]);
     expect([...http.entities, ...soap.entities].map((entity) => entity.id).sort()).toEqual([
-      "specs/api/rest/createpayment",
-      "specs/api/rest/getpayment",
-      "specs/api/soap/createpayment",
-      "specs/api/soap/getpayment",
+      "specs/api/rest/fetchfindings",
+      "specs/api/rest/notifybuild",
+      "specs/api/soap/fetchfindings",
+      "specs/api/soap/notifybuild",
     ]);
     expect([...http.findings, ...soap.findings]).toEqual([]);
   });

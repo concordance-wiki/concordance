@@ -76,7 +76,7 @@ function automatonOf(dictionary: Dictionary, pack: LanguagePack): Automaton<Dict
   }
   let automaton = byPack.get(pack);
   if (automaton === undefined) {
-    // Keys are tokenised like the texts, so that "versement-libre" matches its two tokens.
+    // Keys are tokenised like the texts, so that "mot-clé" matches its two tokens.
     const patterns = [...dictionary.entries.values()].map((entry) => ({
       key: entry,
       words: tokenize(entry.key, pack).map((token) => token.word),

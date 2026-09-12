@@ -9,17 +9,17 @@ The link is not recorded and the reader lands on nothing. The broken target is o
 ## Before
 
 ```
-# Free payment entry
+# Keyword page
 
-The amount is checked against the [annual cap](../rules/anual-cap.rule.md).
+The count is checked against the [publication threshold](../rules/publication-treshold.rule.md).
 ```
 
 ## After
 
 ```
-# Free payment entry
+# Keyword page
 
-The amount is checked against the [annual cap](../rules/annual-cap.rule.md).
+The count is checked against the [publication threshold](../rules/publication-threshold.rule.md).
 ```
 
 ## How to fix

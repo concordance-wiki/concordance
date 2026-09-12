@@ -9,7 +9,7 @@ Speakers are pseudonymised from the dictionary; a name pattern found in the text
 ## Before
 
 ```
-00:12:04 Speaker 1: as the head of branch said in the meeting with Firstname Lastname...
+00:12:04 Speaker 1: as the glossary owner said in the meeting with Firstname Lastname...
 ```
 
 ## After

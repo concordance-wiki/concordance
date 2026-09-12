@@ -40,7 +40,7 @@ A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/`
 - Strict TypeScript, no `any`, no non-null assertion, no dead code, no `TODO` without an issue.
 - Inference and checks are pure functions. Git, file system, network, LibreOffice and the clock are injected interfaces, replaced by doubles in tests.
 - Deterministic output: canonical sorting everywhere (`sortCanonically` with the comparators of `core`), no timestamp outside the `build` block of `model.json` and the `at` field of the build log, no random value. Parallel steps sort their results before writing. `SOURCE_DATE_EPOCH` pins the clock; the determinism step relies on it.
-- No proper noun anywhere: no person, company, client or real project in code, fixtures, tests or labels. The fictional corpus is a generic personal insurer with invented names.
+- No proper noun anywhere: no person, company, client or real project in code, fixtures, tests or labels. Corpora, templates, examples and gallery samples take Concordance itself as their subject, with pseudonymous participants.
 - A new dependency needs a justification in the pull request: function, size, licence compatible with GPL-3.0-or-later, maintenance. Pin the exact version, run `pnpm licenses:update` and commit the regenerated inventory; a licence outside the allow-list of `scripts/licenses.mjs` fails the check, and widening the allow-list is a decision for the maintainers, not a side effect of a pull request.
 
 ## Code style

@@ -1,18 +1,18 @@
 ---
 type: endpoint
-method: POST
-path: /payments
+method: GET
+path: /entities
 api: api
-operation_id: createPayment
+operation_id: listEntities
 ---
-# Create a payment
+# List entities
 
-Checks the [annual cap](rule.md) before creating the [payment](business_object.md). Refuses with a 409 and the reason, which the screen displays as-is.
+Checks the [publication threshold](rule.md) before listing [keyword pages](business_object.md). Leaves out the pages under it and returns their count, which the screen displays as-is.
 
 ## Consumers
 
-- [Free payment entry](screen.md)
+- [To-do page](screen.md)
 
 ## Rules
 
-- [Annual cap](rule.md)
+- [Publication threshold](rule.md)

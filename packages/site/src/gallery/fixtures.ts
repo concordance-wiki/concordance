@@ -71,25 +71,25 @@ export const footer: SlotProps["Footer"] = {
 export const footerWithText: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
-  text: "Internal documentation of the claims department.",
+  text: "Documentation of the build pipeline, kept by its maintainers.",
   links: [],
   mentionTool: false,
 };
 
 export const neighbourhood: SlotProps["Neighbourhood"] = {
-  centre: "Free payment",
+  centre: "Keyword page",
   neighbours: [
     {
-      id: "glossary/payment",
-      label: "payment",
-      href: "../payment/",
+      id: "glossary/page",
+      label: "page",
+      href: "../page/",
       typeLabel: "term",
       weight: 12,
     },
     {
-      id: "objects/free-payment-entry",
-      label: "Free payment entry",
-      href: "../free-payment-entry/",
+      id: "specs/screens/mentions-panel",
+      label: "Mentions panel",
+      href: "../mentions-panel/",
       relation: "displays",
       weight: 4,
     },
@@ -98,66 +98,66 @@ export const neighbourhood: SlotProps["Neighbourhood"] = {
 
 export const entityPage: SlotProps["EntityPage"] = {
   entity: {
-    id: "glossary/free-payment",
+    id: "glossary/keyword-page",
     type: "term",
     typeLabel: "term",
-    title: "Free payment",
+    title: "Keyword page",
     locale: "en",
   },
   highlights: [
-    { name: "aliases", label: "aliases", values: [{ text: "FP" }, { text: "free contribution" }] },
-    { name: "broader", label: "broader", values: [{ text: "payment", href: "../payment/" }] },
+    { name: "aliases", label: "aliases", values: [{ text: "word page" }] },
+    { name: "broader", label: "broader", values: [{ text: "page", href: "../page/" }] },
   ],
   sections: [
     {
       id: "definition",
-      html: '<p>A <a class="written" href="../payment/">payment</a> made at the member\'s request.</p>',
+      html: '<p>A <a class="written" href="../page/">page</a> built for every word above the threshold.</p>',
     },
     {
       id: "not-to-be-confused-with",
       heading: "Not to be confused with",
-      html: "<p>An exceptional payment.</p>",
+      html: "<p>An entity page.</p>",
     },
   ],
   attributes: [
     { name: "status", label: "Status", values: [{ text: "active" }] },
-    { name: "owner", label: "Owner", values: [{ text: "Claims", href: "../claims/" }] },
+    { name: "owner", label: "Owner", values: [{ text: "Publication", href: "../publication/" }] },
   ],
   neighbours: neighbourhood,
   mentions: { mentions: mentions(3), initial: 20 },
   sources: [
     {
-      path: "glossary/free-payment.md",
-      editHref: "https://forge.example/edit/glossary/free-payment.md",
+      path: "glossary/keyword-page.md",
+      editHref: "https://forge.example/edit/glossary/keyword-page.md",
     },
   ],
 };
 
 export const keywordPage: SlotProps["KeywordPage"] = {
-  entity: { id: "keywords/annual-cap", title: "annual cap", locale: "en" },
+  entity: { id: "keywords/build-summary", title: "build summary", locale: "en" },
   counts: { occurrences: 7, files: 3, sources: 2 },
   passages: [
     {
-      file: { label: "processes/record-a-payment.md", href: "../record-a-payment/" },
+      file: { label: "processes/build-pipeline.md", href: "../build-pipeline/" },
       passages: [
-        { context: "the annual cap applies", line: 12, href: "../record-a-payment/#L12" },
-        { context: "above the annual cap", line: 40, href: "../record-a-payment/#L40" },
+        { context: "the build summary is printed", line: 12, href: "../build-pipeline/#L12" },
+        { context: "after the build summary", line: 40, href: "../build-pipeline/#L40" },
       ],
     },
   ],
   companions: [
-    { label: "payment", href: "../payment/", weight: 5 },
-    { label: "ceiling", weight: 2 },
+    { label: "build log", href: "../build-log/", weight: 5 },
+    { label: "counts", weight: 2 },
   ],
-  similar: [{ label: "annual caps", href: "../annual-caps/" }],
+  similar: [{ label: "build summaries", href: "../build-summaries/" }],
 };
 
 export const home: SlotProps["Home"] = {
   title: "My wiki",
   search: { action: "search/", placeholder: "Search a word of your business" },
   shortcuts: [
-    { label: "payment", href: "glossary/payment/" },
-    { label: "contract", href: "glossary/contract/" },
+    { label: "entity", href: "glossary/entity/" },
+    { label: "source", href: "glossary/source/" },
   ],
   stats: { sources: 7, files: 1894, builtAt: "2024-05-01T10:00:00.000Z" },
   entries: [
@@ -178,7 +178,7 @@ export const home: SlotProps["Home"] = {
       title: "Latest changes",
       href: "recent/",
       items: [
-        { label: "Free payment", href: "glossary/free-payment/", date: "2024-04-30" },
+        { label: "Keyword page", href: "glossary/keyword-page/", date: "2024-04-30" },
         { label: "Old rule", href: "rules/old-rule/", date: "2023-01-01", stale: true },
       ],
     },
@@ -186,22 +186,22 @@ export const home: SlotProps["Home"] = {
 };
 
 export const searchResults: SlotProps["SearchResults"] = {
-  query: "payment",
+  query: "threshold",
   total: 2,
   results: [
     {
-      title: "Free payment",
-      href: "../glossary/free-payment/",
+      title: "Publication threshold",
+      href: "../glossary/publication-threshold/",
       typeLabel: "term",
-      snippet: "A payment made at the member's request.",
+      snippet: "Three occurrences in two files before a word gets a page.",
     },
-    { title: "Record a payment", href: "../processes/record-a-payment/" },
+    { title: "Keyword page threshold review", href: "../meetings/threshold-review/" },
   ],
   facets: [
     {
       name: "type",
       label: "Type",
-      values: [{ value: "term", count: 1, href: "?q=payment&type=term" }],
+      values: [{ value: "term", count: 1, href: "?q=threshold&type=term" }],
     },
   ],
 };
@@ -209,20 +209,20 @@ export const searchResults: SlotProps["SearchResults"] = {
 export const index: SlotProps["Index"] = {
   letters: [
     { letter: "A", href: "../index/a/", count: 3 },
-    { letter: "B", count: 0 },
-    { letter: "C", href: "../index/c/", count: 1 },
+    { letter: "B", href: "../index/b/", count: 2 },
+    { letter: "C", count: 0 },
   ],
-  current: "A",
+  current: "B",
   entries: [
-    { label: "annual cap", href: "../keywords/annual-cap/", count: 7 },
-    { label: "application", href: "../glossary/application/", glyph: "T", count: 3 },
+    { label: "build log", href: "../glossary/build-log/", glyph: "T", count: 3 },
+    { label: "build summary", href: "../keywords/build-summary/", count: 7 },
   ],
 };
 
 export const todo: SlotProps["Todo"] = {
-  documents: [{ label: "contracts/terms.docx", href: "../contracts/terms/", count: 3 }],
+  documents: [{ label: "framing/vision.docx", href: "../framing/vision/", count: 3 }],
   terms: [
-    { label: "annual cap", href: "../keywords/annual-cap/", count: 7 },
-    { label: "branch manager", href: "../keywords/branch-manager/", count: 4 },
+    { label: "build summary", href: "../keywords/build-summary/", count: 7 },
+    { label: "cold start", href: "../keywords/cold-start/", count: 4 },
   ],
 };

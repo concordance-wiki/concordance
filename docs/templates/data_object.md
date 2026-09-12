@@ -1,8 +1,8 @@
 ---
 type: data_object
 business_object: business_object
-fields: [PAYMENT_ID, CONTRACT_ID, AMOUNT, VALUE_DATE, STATUS]
+fields: [ID, TYPE, TITLE, LOCALE, APPLICATION, DOMAIN, TYPE_ORIGIN]
 ---
-# PAYMENT table
+# ENTITIES table
 
-Stores one row per [payment](business_object.md). Written by the [nightly settlement](batch.md) and read by the [Payments API](api.md).
+Stores one row per entity of the canonical model, [keyword pages](business_object.md) included. Written by the [nightly build](batch.md) and read by the [Model query API](api.md).
