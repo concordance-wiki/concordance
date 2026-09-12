@@ -3,9 +3,13 @@ locale: fr
 language: Français
 apostrophes: ["’", "ʼ"]
 collation: { sensitivity: base, numeric: true }
+# The first matching rule wins: -eaux comes before -aux so that "bateaux" gives "bateau".
+# Other words in -x ("prix", "voix", "taux") are invariant and match no rule.
 plural:
-  - { ending: aux, singular: al, min_length: 6 }
   - { ending: eaux, singular: eau, min_length: 6 }
-  - { ending: eux, singular: eu, min_length: 5 }
-  - { ending: x, singular: "", min_length: 4 }
+  - { ending: aux, singular: al, min_length: 6 }
+  - { ending: eux, singular: eu, min_length: 4 }
+  - { ending: oux, singular: ou, min_length: 5 }
+  # A word in -ss is a singular ("stress"): this rule keeps it from the -s rule below.
+  - { ending: ss, singular: ss }
   - { ending: s, singular: "", min_length: 4 }

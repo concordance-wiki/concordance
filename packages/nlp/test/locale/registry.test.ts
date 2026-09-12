@@ -55,7 +55,14 @@ describe("the locale selects a language pack built from data files", () => {
     expect(pack.language).toBe("Français");
     expect(pack.normalize("Règle")).toBe("regle");
     expect(pack.stopwords.has("les")).toBe(true);
-    expect(pack.plural.map((rule) => rule.ending)).toEqual(["aux", "eaux", "eux", "x", "s"]);
+    expect(pack.plural.map((rule) => rule.ending)).toEqual([
+      "eaux",
+      "aux",
+      "eux",
+      "oux",
+      "ss",
+      "s",
+    ]);
     expect(pack.compare("eau", "écran")).toBeLessThan(0);
   });
 
