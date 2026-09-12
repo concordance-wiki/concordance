@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { nodeGit } from "../../src/io/node-git.js";
+import { nodeGit, parseLog } from "../../src/io/node-git.js";
 
 // Every test spawns several git processes; the default budget is meant for unit tests.
 vi.setConfig({ testTimeout: 60_000 });
@@ -183,6 +183,39 @@ describe("nodeGit.head", () => {
     const directory = freshDirectory();
     mkdirSync(directory);
     await expect(nodeGit.head(directory)).rejects.toThrow(/not a git repository/);
+  });
+});
+
+describe("parseLog", () => {
+  const newer = "1111111111111111111111111111111111111111 2024-02-02T00:00:00Z";
+  const older = "0000000000000000000000000000000000000000 2024-01-01T00:00:00Z";
+  const entry = (header: string) => ({ commit: header.slice(0, 40), modifiedAt: header.slice(41) });
+
+  it("returns an empty map for an empty log", () => {
+    expect(parseLog("")).toEqual(new Map());
+  });
+
+  it("keeps the newest commit of each path and skips commits without files", () => {
+    const log = `${newer}\0\nREADME.md\0docs/b.md\0${older}\0${older}\0\nREADME.md\0docs/a.md\0`;
+    expect([...parseLog(log)]).toEqual([
+      ["README.md", entry(newer)],
+      ["docs/b.md", entry(newer)],
+      ["docs/a.md", entry(older)],
+    ]);
+  });
+
+  it("does not mistake a path that starts or ends like a header for one", () => {
+    const log = `${newer}\0\nREADME.md\0${older} tail.md\0x${older}\0`;
+    expect([...parseLog(log)]).toEqual([
+      ["README.md", entry(newer)],
+      [`${older} tail.md`, entry(newer)],
+      [`x${older}`, entry(newer)],
+    ]);
+  });
+
+  it("strips only the newline that introduces the first path of a commit", () => {
+    const log = `${newer}\0\nfirst\nline.md\0second\nline.md\0`;
+    expect([...parseLog(log).keys()]).toEqual(["first\nline.md", "second\nline.md"]);
   });
 });
 
