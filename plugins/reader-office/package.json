@@ -1,0 +1,24 @@
+{
+  "name": "@concordance-wiki/plugin-reader-office",
+  "version": "0.0.0",
+  "description": "Metadata reader for docx, pptx, xlsx and pdf files: properties, dates, counts and slide titles.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "fast-xml-parser": "5.11.1",
+    "fflate": "0.8.3"
+  }
+}
