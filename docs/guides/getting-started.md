@@ -172,6 +172,8 @@ The fixer refuses, and says so on a `refused:` line, when several files carry th
 
 The linter uses the same checks as the build. See the [check pages](../checks/README.md) for what each finding means and how to fix it; every finding line ends with the URL of its page.
 
+`npx` is one of six forms of the linter: a standalone binary, a GitHub action, a GitLab CI/CD component, the container image and a pre-commit hook run the same command line and produce the same report. [Distributing the linter](lint-distribution.md) gives a copyable example of each.
+
 ### Reports for forges
 
 `--format` picks a machine-readable report so that a merge request shows the findings where they belong instead of in a pipeline log. Each report holds the whole run alone on standard output, without the summary line, and `--output <file>` writes it to a file instead; the findings are sorted the same way in every format, so two reports of the same tree are byte-identical.

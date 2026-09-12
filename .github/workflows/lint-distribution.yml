@@ -1,0 +1,139 @@
+name: lint-distribution
+
+# Every form of the linter runs the same command line on the same repository
+# and must produce the same report. The forms continuous integration can run
+# end to end lint the faulty corpus and their JSON reports are compared byte
+# for byte; the GitLab component and the pre-commit hook are checked
+# structurally, with the version pin that ties every form to packages/cli.
+
+on:
+  pull_request:
+    paths:
+      - packages/cli/**
+      - packages/lint/**
+      - packages/checks/**
+      - distribution/**
+      - .pre-commit-hooks.yaml
+      - scripts/build-binary.mjs
+      - scripts/sea-loader.cjs
+      - scripts/check-distribution.mjs
+      - scripts/compare-distribution.mjs
+      - .github/workflows/lint-distribution.yml
+  push:
+    tags:
+      - "@concordance-wiki/cli@*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-distribution-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The source of the faulty corpus every form lints, with the configuration that declares it.
+  REPOSITORY: fixtures/corpora/faulty/en/notes
+  LINT_OPTIONS: --config ../concordance.yaml --source notes --format json
+
+jobs:
+  same-output:
+    name: Same report from every form
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: mkdir -p reports
+
+      - name: Built command line
+        working-directory: ${{ env.REPOSITORY }}
+        run: |
+          set +e
+          node "$GITHUB_WORKSPACE/packages/cli/dist/bin.js" lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/cli.json"
+          test $? -eq 1
+
+      - name: npx package
+        # The package as npm installs it: deployed with its production dependencies, installed
+        # into an empty project without any registry, run through npx.
+        run: |
+          pnpm --filter @concordance-wiki/cli deploy --prod --legacy --config.node-linker=hoisted "$RUNNER_TEMP/runtime"
+          mkdir "$RUNNER_TEMP/project"
+          cd "$RUNNER_TEMP/project"
+          echo '{ "name": "project", "private": true }' > package.json
+          npm install --no-save --offline --no-audit --no-fund --ignore-scripts "$RUNNER_TEMP/runtime"
+          cp -r "$GITHUB_WORKSPACE/fixtures/corpora/faulty/en" repo
+          cd repo/notes
+          set +e
+          npx --no-install concordance lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/npx.json"
+          test $? -eq 1
+
+      - name: Standalone binary
+        run: pnpm build:binary
+      - name: Standalone binary on the faulty corpus
+        working-directory: ${{ env.REPOSITORY }}
+        run: |
+          set +e
+          "$GITHUB_WORKSPACE/dist-bin/concordance-linux-x64" lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/binary.json"
+          test $? -eq 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: concordance-linux-x64
+          path: dist-bin/
+          if-no-files-found: error
+
+      # Container image: once the image workflow publishes concordancewiki/concordance, this step
+      # runs the same lint through it and adds reports/image.json to the comparison.
+      # - name: Container image
+      #   run: |
+      #     set +e
+      #     docker run --rm -v "$PWD/fixtures/corpora/faulty/en:/wiki" -w /wiki/notes concordancewiki/concordance lint $LINT_OPTIONS --output /wiki/image.json
+      #     test $? -eq 1
+      #     mv fixtures/corpora/faulty/en/image.json reports/image.json
+
+      - name: GitHub action
+        id: action
+        uses: ./distribution/github-action
+        continue-on-error: true
+        with:
+          command: node ${{ github.workspace }}/packages/cli/dist/bin.js
+          working-directory: ${{ env.REPOSITORY }}
+          config: ../concordance.yaml
+          source: notes
+          format: json
+          output: ${{ github.workspace }}/reports/action.json
+          upload: "false"
+      - name: GitHub action fails on the errors of the faulty corpus
+        run: |
+          test "${{ steps.action.outcome }}" = failure
+          test "${{ steps.action.outputs.exit-code }}" = 1
+          test "${{ steps.action.outputs.report }}" = "$GITHUB_WORKSPACE/reports/action.json"
+
+      - name: Compare the reports
+        run: node scripts/compare-distribution.mjs reports/cli.json reports/npx.json reports/binary.json reports/action.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-reports
+          path: reports/
+          if-no-files-found: error
+
+  structure:
+    name: GitLab component and pre-commit hook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Inputs, reports and version pins of the three manifests
+        run: node scripts/check-distribution.mjs
+      - name: pre-commit manifest
+        run: pipx run pre-commit validate-manifest .pre-commit-hooks.yaml

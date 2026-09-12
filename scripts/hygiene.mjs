@@ -15,6 +15,8 @@ const allowedDotFiles = new Set([
   ".npmrc",
   ".gitkeep",
   ".dockerignore",
+  // The pre-commit hook manifest; pre-commit reads it at the root of the repository named by `repo:`.
+  ".pre-commit-hooks.yaml",
 ]);
 const allowedUppercaseMarkdown = new Set([
   "README.md",

@@ -1,0 +1,46 @@
+spec:
+  inputs:
+    version:
+      description: Version of @concordance-wiki/cli to run. The default is the version this component was released with; every form of the linter pins the same one.
+      default: "0.0.0"
+    fail_on:
+      description: Severity from which a finding fails the job.
+      default: error
+      options: [error, warning, info]
+    source:
+      description: Name of the source this repository is declared as in a concordance.yaml, so that its rules apply. Empty for none.
+      default: ""
+    config:
+      description: Path of the concordance.yaml that declares the source, relative to the repository root. Empty for none.
+      default: ""
+    stage:
+      description: Stage the job runs in.
+      default: test
+    image:
+      description: Image the job runs in; any image with Node.js 22 and npm.
+      default: node:22
+---
+concordance-lint:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    CONCORDANCE_VERSION: "$[[ inputs.version ]]"
+    CONCORDANCE_FAIL_ON: "$[[ inputs.fail_on ]]"
+    CONCORDANCE_SOURCE: "$[[ inputs.source ]]"
+    CONCORDANCE_CONFIG: "$[[ inputs.config ]]"
+  script:
+    - options="--scope repo --fail-on $CONCORDANCE_FAIL_ON"
+    - if [ -n "$CONCORDANCE_SOURCE" ]; then options="$options --source $CONCORDANCE_SOURCE"; fi
+    - if [ -n "$CONCORDANCE_CONFIG" ]; then options="$options --config $CONCORDANCE_CONFIG"; fi
+    # The same run twice, once per report: the linter is deterministic and reads nothing but the repository.
+    - status=0
+    - npx --yes "@concordance-wiki/cli@$CONCORDANCE_VERSION" lint $options --format junit --output concordance-junit.xml || status=$?
+    - npx --yes "@concordance-wiki/cli@$CONCORDANCE_VERSION" lint $options --format sarif --output concordance.sarif || true
+    - exit $status
+  artifacts:
+    when: always
+    paths:
+      - concordance.sarif
+      - concordance-junit.xml
+    reports:
+      junit: concordance-junit.xml
