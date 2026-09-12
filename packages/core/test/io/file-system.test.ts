@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -27,6 +27,22 @@ describe("nodeFileSystem", () => {
     const file = join(directory, "raw.bin");
     writeFileSync(file, Uint8Array.from([0x61, 0xff, 0x62]));
     expect([...nodeFileSystem.readBytes(file)]).toEqual([0x61, 0xff, 0x62]);
+  });
+
+  it("writes raw bytes, creating their folders", () => {
+    const file = join(directory, "nested/raw.bin");
+    nodeFileSystem.writeBytes(file, Uint8Array.from([0x00, 0xff]));
+    expect([...readFileSync(file)]).toEqual([0x00, 0xff]);
+  });
+
+  it("removes a file, a folder with its content, or nothing when the path is missing", () => {
+    nodeFileSystem.writeText(join(directory, "folder/a/b.txt"), "");
+    nodeFileSystem.writeText(join(directory, "file.txt"), "");
+    nodeFileSystem.remove(join(directory, "folder"));
+    nodeFileSystem.remove(join(directory, "file.txt"));
+    nodeFileSystem.remove(join(directory, "missing"));
+    expect(nodeFileSystem.exists(join(directory, "folder"))).toBe(false);
+    expect(nodeFileSystem.exists(join(directory, "file.txt"))).toBe(false);
   });
 
   it("lists files recursively as sorted forward-slash paths, skipping .git", () => {
@@ -86,6 +102,17 @@ describe("memoryFileSystem", () => {
     expect(fs.readText("/root/a.txt")).toBe("b");
     expect([...fs.readBytes("/root/a.txt")]).toEqual([0x62]);
     expect(fs.listFiles("/root")).toEqual(["a.txt"]);
+  });
+
+  it("removes a file, a folder with its content, or nothing when the path is missing", () => {
+    const fs = memoryFileSystem({ "/root/a.txt": "a", "/root/sub/b.txt": "b", "/rooted.txt": "c" });
+    fs.writeBytes("/root/sub/c.bin", Uint8Array.from([1]));
+    fs.remove("/root/sub");
+    expect(fs.listFiles("/root")).toEqual(["a.txt"]);
+    fs.remove("/root/a.txt");
+    fs.remove("/missing");
+    expect(fs.exists("/root")).toBe(false);
+    expect(fs.exists("/rooted.txt")).toBe(true);
   });
 
   it("reports a directory as existing when a file lives under it", () => {

@@ -1,15 +1,15 @@
 # plugins
 
-Official plugins, published under `@concordance-wiki/plugin-*`. Empty so far: the plugin API exists in the core and an example plugin lives under [`fixtures/plugins/example`](../fixtures/plugins/example/index.mjs); this page states what each official plugin will contribute.
+Official plugins, published under `@concordance-wiki/plugin-*`. An example plugin lives under [`fixtures/plugins/example`](../fixtures/plugins/example/index.mjs); this page states what each official plugin contributes, or will.
 
-| Plugin | Contributes | System dependency |
-|---|---|---|
-| `reader-vtt` | reader for `.vtt` and `.srt` | none |
-| `reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none |
-| `convert-libreoffice` | converter to PDF, thumbnails and text | LibreOffice |
-| `contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none |
-| `contract-wsdl` | source of `endpoint` entities from WSDL | none |
-| `viewer-pdf` | UI component: pdf.js viewer and thumbnail rail | none |
-| `viewer-swagger` | UI component: Swagger UI and WSDL rendering | none |
+| Plugin | Contributes | System dependency | Status |
+|---|---|---|---|
+| `reader-vtt` | reader for `.vtt` and `.srt` | none | planned |
+| `reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none | planned |
+| [`convert-libreoffice`](convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text later | LibreOffice | available |
+| `contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none | planned |
+| `contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
+| `viewer-pdf` | UI component: pdf.js viewer and thumbnail rail | none | planned |
+| `viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
-A plugin imports `@concordance-wiki/core` and `@concordance-wiki/profile` only. Its integration tests live in its own folder. See the [plugin guide](../docs/guides/plugins.md).
+A plugin imports `@concordance-wiki/core` and `@concordance-wiki/profile` only, plus the libraries of its format. It follows the layout of a core package (`src/` compiled to `dist/`, `test/` run by Vitest against the sources, 100% coverage) and its integration tests live in its own folder, skipped when the system dependency is absent. See the [plugin guide](../docs/guides/plugins.md).

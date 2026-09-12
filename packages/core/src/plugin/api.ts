@@ -29,15 +29,36 @@ export interface Reader {
 
 export type Representation = "pdf" | "thumbnails" | "text";
 
-/** A resource to convert; the payload carries the source bytes and the cache once conversion defines them. */
-export interface ConverterInput {
-  path: string;
-  payload: unknown;
+export interface ConversionLimits {
+  timeoutMs: number;
+  /** Larger sources are not converted. */
+  maxSizeBytes: number;
 }
 
-/** One entry per produced representation; the payload is the produced bytes or text. */
+/** What the pipeline hands to a converter: the source, its fingerprint, the cache and the limits. */
+export interface ConverterPayload {
+  bytes: Uint8Array;
+  /** Hex SHA-256 of the bytes, the key of the conversion cache. */
+  sha256: string;
+  /** Folder of the pipeline cache; a converter keeps its temporary and cached files under it, never next to the source. */
+  cacheDirectory: string;
+  options: ConversionLimits;
+}
+
+export interface ConverterInput {
+  path: string;
+  payload: ConverterPayload;
+}
+
+/** A produced representation, as a file under the cache that the pipeline reads later. */
+export interface RepresentationFile {
+  path: string;
+}
+
+/** One entry per produced representation; a failed conversion has no entry and a finding instead. */
 export interface ConverterOutput {
-  representations: Partial<Record<Representation, unknown>>;
+  representations: Partial<Record<Representation, RepresentationFile>>;
+  findings: Finding[];
 }
 
 export interface Converter {

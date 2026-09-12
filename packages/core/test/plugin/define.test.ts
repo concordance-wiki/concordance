@@ -60,7 +60,7 @@ describe("definePlugin", () => {
             {
               extensions: [".docx"],
               produces: ["pdf", "thumbnails", "text"],
-              convert: () => Promise.resolve({ representations: {} }),
+              convert: () => Promise.resolve({ representations: {}, findings: [] }),
             },
           ],
           sources: [{ kind: "openapi", load: () => Promise.resolve({ entities: [] }) }],
