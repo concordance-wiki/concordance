@@ -95,7 +95,7 @@ broader: payment
 A payment made at the member's request, outside any schedule.
 ```
 
-Spellings are compared without regard to case, accents or the plural: "Free Payment", "free payments" and "free payment" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "contract" is not found inside "contractual".
+Spellings are compared without regard to case, accents or the plural: "Free Payment", "free payments" and "free payment" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "contract" is not found inside "contractual". A mention is recognised on whole words, the longest expression wins ("free payment" counts once, not as "free payment" plus "payment"), and a type prefix written right before it ("screen Free payment entry", "l'écran Saisie de versement libre"; the words are listed per locale under `type_prefixes` in the profile) raises its confidence by 0.10 and tells the tool which type of note to expect.
 
 Two entities with the same title or alias, once spellings are compared, are homonyms: a glossary term and a business object both called "Contract", or two terms whose aliases meet. The tool keeps both, reports `I-TERM-HOMONYM` with the form and the entities, and links every occurrence to each entity at half confidence, glossary entities first; a `## Not to be confused with` section helps readers. Aliases shorter than three characters (`FP`) are ignored unless `inference.short_terms` lists them, and a title or alias that is a stopword of the language is never recognised.
 
