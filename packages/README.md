@@ -9,7 +9,7 @@ Core packages, published under `@concordance-wiki/*`. Each one compiles and expo
 | `ingest` | git clone at depth 1, cache, file reading, markdown and frontmatter parsing | core |
 | `typing` | type cascade, identifiers, application and domain resolution | core, profile |
 | `nlp` | normalisation, Aho-Corasick, n-grams, C-value, MinHash, language packs `en` and `fr` | core |
-| `inference` | link production, confidence combination, relation typing, bounded neighbourhood, term candidates | core, nlp, profile |
+| `inference` | link production, confidence combination, relation typing, bounded neighbourhood, term candidates | core, ingest, nlp, profile |
 | `checks` | check registry shared by build and linter | core, profile |
 | `site` | site generation, templates, theme, i18n catalogue, search index | core, profile |
 | `ui` | client components: mentions panel, mini-map, viewer slots, trail | — |

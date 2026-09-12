@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
+    "@concordance-wiki/ingest": "workspace:*",
     "@concordance-wiki/nlp": "workspace:*",
     "@concordance-wiki/profile": "workspace:*"
   }

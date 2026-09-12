@@ -150,7 +150,7 @@ staleness:
 | `stopwords` | language pack | extra stopword files, one word per line, `#` starts a comment; added on top of the defaults of the language pack |
 | `short_terms` | `[]` | allow-list of terms shorter than three characters |
 | `type_prefixes` | language pack | words that announce a type (`screen`, `API`, `table`) and add 0.1 confidence; the defaults are those of the profile for the locale of the source |
-| `cross_source_links` | `false` | resolve markdown links across sources with a `source:` prefix |
+| `cross_source_links` | `false` | resolve markdown links across sources, written with a `source:` prefix or as a relative path climbing into a sibling source; `W-LINK-CROSS-SOURCE` otherwise |
 | `ngrams` | `{ min: 1, max: 4, min_occurrences: 3, min_documents: 2 }` | candidate expression discovery |
 | `keyword_pages` | `{ min_occurrences: 3, min_files: 2 }` | publication threshold of a keyword page |
 | `neighbours` | `{ k: 50 }` | neighbours kept per node |

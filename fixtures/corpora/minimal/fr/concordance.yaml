@@ -52,4 +52,5 @@ sources:
     default_type: meeting
     application: gestion-contrats
 inference:
+  cross_source_links: true
   keyword_pages: { min_occurrences: 3, min_files: 2 }

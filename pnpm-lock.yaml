@@ -113,6 +113,9 @@ importers:
       '@concordance-wiki/core':
         specifier: workspace:*
         version: link:../core
+      '@concordance-wiki/ingest':
+        specifier: workspace:*
+        version: link:../ingest
       '@concordance-wiki/nlp':
         specifier: workspace:*
         version: link:../nlp

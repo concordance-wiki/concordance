@@ -17,6 +17,7 @@ Every check listed here is registered once, with its default severity, descripti
 | Check | Severity | Meaning |
 |---|---|---|
 | [`E-LINK-BROKEN`](E-LINK-BROKEN.md) | error | A markdown link points to a file that does not exist in the source. |
+| [`W-LINK-CROSS-SOURCE`](W-LINK-CROSS-SOURCE.md) | warning | A markdown link points to a file of another source while `inference.cross_source_links` is off. |
 
 ## Identifiers and types
 
