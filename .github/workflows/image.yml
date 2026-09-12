@@ -1,0 +1,161 @@
+name: image
+
+# Builds the container image, checks that a build inside the container gives
+# the same files as a build outside, measures the image and, on a release tag,
+# publishes it to Docker Hub.
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - packages/**
+      - plugins/**
+      - presets/**
+      - pnpm-lock.yaml
+      - scripts/compare-builds.mjs
+      - .github/workflows/image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  IMAGE: concordancewiki/concordance
+  CORPUS: fixtures/corpora/minimal/en
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      size: ${{ steps.size.outputs.size }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve the version
+        id: version
+        # A tag v1.2.3 gives 1.2.3; any other run is identified by its commit.
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=0.0.0-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE }}:ci
+          build-args: VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Check the entry point, the user and the system tools
+        run: |
+          docker run --rm "$IMAGE:ci" | grep -q '^usage: concordance'
+          test "$(docker run --rm --entrypoint id "$IMAGE:ci" -u)" = 1000
+          test "$(docker run --rm --entrypoint id "$IMAGE:ci" -un)" = concordance
+          docker run --rm --entrypoint soffice "$IMAGE:ci" --version
+          docker run --rm --entrypoint git "$IMAGE:ci" --version
+          docker run --rm --entrypoint fc-list "$IMAGE:ci" | grep -qi carlito
+          docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$IMAGE:ci" \
+            | grep -qxF "${{ steps.version.outputs.version }}"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Build the golden corpus inside and outside the container
+        # The build still stops after parsing with exit code 2 once its log is
+        # written, as the determinism check accepts; any other failure fails here.
+        run: |
+          accept() {
+            set +e
+            "$@" 2> build.stderr
+            local status=$?
+            set -e
+            cat build.stderr >&2
+            if [ "$status" -eq 0 ] || { [ "$status" -eq 2 ] && grep -q "not implemented in this version" build.stderr; }; then
+              return 0
+            fi
+            echo "the build exited with $status"
+            return 1
+          }
+          work=$(mktemp -d)
+          cp -R "$CORPUS" "$work/wiki"
+          chmod -R a+rwX "$work/wiki"
+          accept env SOURCE_DATE_EPOCH=0 node packages/cli/dist/bin.js build --config "$PWD/$CORPUS/concordance.yaml" --output "$work/outside"
+          accept docker run --rm -v "$work/wiki:/wiki" -e SOURCE_DATE_EPOCH=0 "$IMAGE:ci" build
+          test -f "$work/wiki/dist/build.log.json"
+          node scripts/compare-builds.mjs "$work/outside" "$work/wiki/dist"
+      - name: Check that the container writes nothing but dist and the cache
+        run: |
+          work=$(mktemp -d)
+          cp -R "$CORPUS" "$work/wiki"
+          chmod -R a+rwX "$work/wiki"
+          (cd "$work/wiki" && find . -type f | sort) > "$work/before"
+          docker run --rm -v "$work/wiki:/wiki" "$IMAGE:ci" build || true
+          (cd "$work/wiki" && find . -type f -not -path './dist/*' -not -path './.concordance-cache/*' | sort) > "$work/after"
+          diff "$work/before" "$work/after"
+      - name: Measure the image
+        id: size
+        run: |
+          size=$(docker image inspect --format '{{.Size}}' "$IMAGE:ci")
+          human=$(numfmt --to=iec-i --suffix=B "$size")
+          echo "size=$human ($size bytes)" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Container image"
+            echo
+            echo "| Image | Version | Size |"
+            echo "|---|---|---|"
+            echo "| \`$IMAGE\` | ${{ steps.version.outputs.version }} | $human ($size bytes) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Save the image for publication
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: docker save "$IMAGE:ci" | gzip > image.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: image
+          path: image.tar.gz
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    # Enabled by the maintainer at the first release: replace `false` with
+    # `startsWith(github.ref, 'refs/tags/v')` once the Docker Hub repository and
+    # the DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets exist.
+    if: false
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: image
+      - run: docker load --input image.tar.gz
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish the image tested above under its version and latest
+        run: |
+          docker tag "$IMAGE:ci" "$IMAGE:${{ needs.build.outputs.version }}"
+          docker tag "$IMAGE:ci" "$IMAGE:latest"
+          docker push "$IMAGE:${{ needs.build.outputs.version }}"
+          docker push "$IMAGE:latest"
+      - name: Announce the publication
+        run: |
+          {
+            echo "## Release"
+            echo
+            echo "Published \`$IMAGE:${{ needs.build.outputs.version }}\` and \`$IMAGE:latest\`, ${{ needs.build.outputs.size }}."
+          } >> "$GITHUB_STEP_SUMMARY"

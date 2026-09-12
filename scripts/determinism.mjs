@@ -5,32 +5,15 @@
 // after parsing with exit code 2 once its log is written: that outcome is
 // accepted; any other failure, or any differing file, fails the step.
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+
+import { compareTrees } from "./compare-builds.mjs";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
 const bin = resolve(root, "packages/cli/dist/bin.js");
 const config = resolve(root, "fixtures/corpora/minimal/en/concordance.yaml");
-
-/** Forward-slash relative path to content hash, for every file under the tree. */
-function listTree(tree) {
-  const entries = new Map();
-  const walk = (directory) => {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const absolute = join(directory, entry.name);
-      if (entry.isDirectory()) {
-        walk(absolute);
-      } else {
-        const path = relative(tree, absolute).split("\\").join("/");
-        entries.set(path, createHash("sha256").update(readFileSync(absolute)).digest("hex"));
-      }
-    }
-  };
-  walk(tree);
-  return entries;
-}
 
 function build(output) {
   return spawnSync(process.execPath, [bin, "build", "--config", config, "--output", output], {
@@ -53,17 +36,11 @@ try {
     }
   }
 
-  const [first, second] = outputs.map(listTree);
-  const paths = [...new Set([...first.keys(), ...second.keys()])].sort();
-  const differences = paths.filter((path) => first.get(path) !== second.get(path));
+  const [first, second] = outputs;
+  const { paths, differences } = compareTrees(first, second);
   if (differences.length > 0) {
     console.error("determinism: two builds of the golden corpus differ");
-    for (const path of differences) {
-      const where = first.has(path)
-        ? second.has(path)
-          ? "differs"
-          : "missing from the second build"
-        : "missing from the first build";
+    for (const { path, where } of differences) {
       console.error(`  ${path}: ${where}`);
     }
     process.exit(1);
