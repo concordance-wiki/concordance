@@ -21,6 +21,8 @@
     "@concordance-wiki/profile": "workspace:*",
     "@concordance-wiki/typing": "workspace:*",
     "@concordance-wiki/checks": "workspace:*",
-    "@concordance-wiki/ingest": "workspace:*"
+    "@concordance-wiki/ingest": "workspace:*",
+    "ajv": "8.17.1",
+    "yaml": "2.8.1"
   }
 }

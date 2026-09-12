@@ -92,13 +92,36 @@ The repository verifies this on every change: the golden corpus is built twice a
 
 ## Lint a knowledge repository
 
-Each source can check itself before pushing, without the global build:
+Each source can check itself before pushing, without the global build. From the root of the repository:
 
 ```bash
-npx concordance lint --scope repo --source specs
+npx concordance lint
 ```
 
-The linter uses the same checks as the build. See the [check pages](../checks/README.md) for what each finding means and how to fix it.
+The command reads every markdown file under the current directory, one file at a time, and prints one line per finding, sorted by check, path and line, then a count:
+
+```
+error: notes/entry.md:3: E-LINK-BROKEN: link "cap.md" in notes/entry.md points to notes/cap.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
+1 finding: 1 error, 0 warnings, 0 info
+```
+
+Options:
+
+| Option | Default | Effect |
+|---|---|---|
+| `--scope repo` | `repo` | checks the current repository alone; `global` is not available in this version and is refused |
+| `--source <name>` | none | names the source this repository is declared as, so that its rules apply: the type suffixes of its `rules` are stripped from identifiers; without `--config`, the name only prefixes the identifiers |
+| `--config <file>` | none | the `concordance.yaml` that declares the source; its `privacy.exclude` and `checks` blocks apply |
+| `--fail-on error\|warning\|info` | `error` | the severity from which a finding makes the command fail |
+| `--fix` | | not available in this version; the flag is refused |
+
+What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package.
+
+In this mode the command never opens a network connection and never writes a file. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
+
+Exit codes: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--fix`, `--scope global`).
+
+The linter uses the same checks as the build. See the [check pages](../checks/README.md) for what each finding means and how to fix it; every finding line ends with the URL of its page.
 
 ## What the tool does not do
 
