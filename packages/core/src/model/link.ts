@@ -33,6 +33,8 @@ export interface Provenance {
   url?: string;
   operation?: string;
   occurrences?: ProvenanceOccurrence[];
+  /** Number of paragraphs where both entities appear, for `cooccurrence`. */
+  count?: number;
 }
 
 export interface Link {

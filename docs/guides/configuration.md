@@ -179,7 +179,7 @@ staleness:
 | `cross_source_links` | `false` | resolve markdown links across sources, written with a `source:` prefix or as a relative path climbing into a sibling source; `W-LINK-CROSS-SOURCE` otherwise |
 | `ngrams` | `{ min: 1, max: 4, min_occurrences: 3, min_documents: 2 }` | candidate expression discovery |
 | `keyword_pages` | `{ min_occurrences: 3, min_files: 2 }` | publication threshold of a keyword page |
-| `neighbours` | `{ k: 50 }` | neighbours kept per node |
+| `neighbours` | `{ k: 50 }` | `k` is the number of co-occurrence neighbours kept per node, ranked by the number of shared paragraphs then by identifier; it bounds the memory of the accumulation and the size of the `neighbours` block of `model.json` (see the [architecture guide](architecture.md#bounded-neighbourhood)) |
 | `candidate_score` | 4.0 | score above which a candidate yields `W-TERM-UNDEFINED` |
 
 ## `conversion`

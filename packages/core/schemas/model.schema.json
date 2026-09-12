@@ -234,6 +234,11 @@
                 "operation": {
                   "type": "string"
                 },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Number of paragraphs where both entities appear, for cooccurrence"
+                },
                 "occurrences": {
                   "type": "array",
                   "items": {
