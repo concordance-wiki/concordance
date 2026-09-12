@@ -146,9 +146,9 @@ staleness:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `glossary_sources` | sources with `glossary: true` | priority sources for the dictionary |
-| `stopwords` | language pack | extra stopword files, one word per line, `#` starts a comment; added on top of the defaults of the language pack |
-| `short_terms` | `[]` | allow-list of terms shorter than three characters |
+| `glossary_sources` | sources with `glossary: true` | names of the sources whose entities take priority in the recognition dictionary: when the same form names several entities, theirs come first. When the key is present, even empty, it replaces the `glossary: true` marks |
+| `stopwords` | language pack | extra stopword files, resolved against the folder of `concordance.yaml`, one word per line, `#` starts a comment; added on top of the defaults of the language pack. A title or alias that is a stopword, or a phrase made only of stopwords, never enters the dictionary; stopwords are compared on the same normalised form as terms. A file that does not exist fails the build |
+| `short_terms` | `[]` | allow-list of terms whose normalised form is shorter than three characters (`[FP, VL]`); every other such title or alias is left out of the dictionary. Compared without regard to case or accents |
 | `type_prefixes` | language pack | words that announce a type (`screen`, `API`, `table`) and add 0.1 confidence; the defaults are those of the profile for the locale of the source |
 | `cross_source_links` | `false` | resolve markdown links across sources, written with a `source:` prefix or as a relative path climbing into a sibling source; `W-LINK-CROSS-SOURCE` otherwise |
 | `ngrams` | `{ min: 1, max: 4, min_occurrences: 3, min_documents: 2 }` | candidate expression discovery |

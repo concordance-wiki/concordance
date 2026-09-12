@@ -1,6 +1,9 @@
 # Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
 # further I-REL-AMBIGUOUS findings on other prose mentions are allowed.
 - { check: I-REL-AMBIGUOUS, path: specs/screens/free-payment-entry.md, note: "free payment (term) mentioned in prose falls back to related" }
+- { check: I-TERM-HOMONYM, form: contract, entities: [glossary/contract, specs/objects/contract] }
+- { check: I-TERM-HOMONYM, form: member, entities: [glossary/member, specs/objects/member] }
+- { check: I-TERM-HOMONYM, form: payment, entities: [glossary/payment, specs/objects/payment] }
 - { check: W-DOMAIN-UNCLASSIFIED, path: decisions/cap-checked-server-side.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: glossary/contract.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: specs/objects/contract.md }

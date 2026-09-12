@@ -93,7 +93,7 @@ A payment made at the member's request, outside any schedule.
 
 Spellings are compared without regard to case, accents or the plural: "Free Payment", "free payments" and "free payment" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "contract" is not found inside "contractual".
 
-Two notes with the same title are homonyms. The tool keeps both and links occurrences to each at half confidence; a `## Not to be confused with` section helps readers.
+Two entities with the same title or alias, once spellings are compared, are homonyms: a glossary term and a business object both called "Contract", or two terms whose aliases meet. The tool keeps both, reports `I-TERM-HOMONYM` with the form and the entities, and links every occurrence to each entity at half confidence, glossary entities first; a `## Not to be confused with` section helps readers. Aliases shorter than three characters (`FP`) are ignored unless `inference.short_terms` lists them, and a title or alias that is a stopword of the language is never recognised.
 
 ## Profile
 
