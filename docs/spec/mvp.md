@@ -129,6 +129,7 @@ Four families, plus the contract checks. Each check is a pure function `(model) 
 
 | Family | Checks |
 |---|---|
+| Sources | `W-SOURCE-UNREACHABLE` |
 | Links | `E-LINK-BROKEN` |
 | Identifiers and types | `E-ID-DUP`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |

@@ -111,6 +111,28 @@ sources:
 
 The full cascade, increasing precedence: `default_type`, `type`, `rules` in order, frontmatter. The origin is kept on the entity (`type_origin`) and shown in the site.
 
+### Private repositories
+
+Concordance never stores a token and never asks for one: `concordance.yaml` is versioned and often public. Credentials come from the git environment of the machine or pipeline, like any `git clone`, and the build disables git's terminal prompt so that a repository it cannot reach fails immediately with a `W-SOURCE-UNREACHABLE` finding instead of waiting for a password.
+
+GitHub Actions, repositories of the same organisation, with a token stored as a secret:
+
+```yaml
+      - run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+        env:
+          TOKEN: ${{ secrets.KNOWLEDGE_READ_TOKEN }}
+      - run: concordance build
+```
+
+GitLab CI, repositories of the same instance:
+
+```yaml
+  before_script:
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://${CI_SERVER_HOST}/"
+```
+
+SSH: declare the source with a `git@` URL and give the pipeline a read-only deploy key. On a workstation, the credential helper of the operating system applies.
+
 ## `staleness`
 
 Days after which a source or a note is flagged `W-STALE`, with a default and per-source overrides:

@@ -5,13 +5,18 @@ import * as entry from "../src/index.js";
 describe("@concordance-wiki/core", () => {
   it("exposes exactly its public API", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "compareFindings",
+      "compileGlobs",
+      "fixedClock",
       "formatIssue",
       "formatValidation",
       "isWellFormedGlob",
       "memoryFileSystem",
       "nodeFileSystem",
+      "nodeGit",
       "parseConfig",
       "readSchema",
+      "systemClock",
       "validateConfig",
     ]);
   });

@@ -3,7 +3,7 @@ import { initCommand } from "./commands/init.js";
 import { validateConfigCommand } from "./commands/validate-config.js";
 import { exitCodes, type CommandIo, type ExitCode } from "./io.js";
 
-type Command = (argv: string[], io: CommandIo) => ExitCode;
+type Command = (argv: string[], io: CommandIo) => ExitCode | Promise<ExitCode>;
 
 const commands: Record<string, Command> = {
   build: buildCommand,
@@ -22,7 +22,7 @@ export const usage = [
   "exit codes: 0 ok, 1 invalid configuration or findings, 2 execution error",
 ];
 
-export function main(argv: string[], io: CommandIo): ExitCode {
+export async function main(argv: string[], io: CommandIo): Promise<ExitCode> {
   const [name, ...rest] = argv;
   if (name === undefined || name === "--help" || name === "-h") {
     for (const line of usage) io.out(line);
@@ -35,7 +35,7 @@ export function main(argv: string[], io: CommandIo): ExitCode {
     return exitCodes.failure;
   }
   try {
-    return command(rest, io);
+    return await command(rest, io);
   } catch (error) {
     io.err(error instanceof Error ? error.message : String(error));
     return exitCodes.failure;
