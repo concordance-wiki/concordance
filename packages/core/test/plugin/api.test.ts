@@ -4,7 +4,7 @@ import { readSchema } from "../../src/config/schema.js";
 import { PLUGIN_API_VERSION } from "../../src/plugin/api.js";
 
 describe("plugin API", () => {
-  it("exposes a versioned plugin API with seven contribution points", () => {
+  it("exposes a versioned plugin API with eight contribution points", () => {
     expect(PLUGIN_API_VERSION).toBe("1");
     const schema = readSchema("plugin") as {
       properties: { contributes: { properties: Record<string, unknown> } };
@@ -17,6 +17,7 @@ describe("plugin API", () => {
       "checks",
       "projections",
       "uiComponents",
+      "themes",
     ]);
   });
 });

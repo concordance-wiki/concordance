@@ -32,6 +32,10 @@ export default tseslint.config(
   {
     files: ["**/*.{js,mjs}"],
     ...tseslint.configs.disableTypeChecked,
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+    },
   },
   {
     files: ["scripts/**/*.mjs", "*.mjs"],

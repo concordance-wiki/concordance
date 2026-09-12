@@ -271,7 +271,7 @@ Depends on: L0-05, L0-09.
 
 As a contributor, I want to add a format reader or an importer without touching the core so that the core stays installable everywhere.
 
-- `@concordance-wiki/core` exposes a versioned plugin API (`apiVersion`) with seven contribution points: `reader`, `converter`, `source`, `inference method`, `check`, `projection`, `ui component`.
+- `@concordance-wiki/core` exposes a versioned plugin API (`apiVersion`) with eight contribution points: `reader`, `converter`, `source`, `inference method`, `check`, `projection`, `ui component`, `theme`.
 - A plugin is a package exporting a `definePlugin` function that returns a manifest validated by `schemas/plugin.schema.json`: name, version, `apiVersion`, contributions, declared system dependencies.
 - Plugins are declared in `concordance.yaml` under `plugins:` (package name and options); they are loaded in declared order and registered in a deterministic registry.
 - A plugin whose declared system dependency is missing disables itself with a finding; the build continues.

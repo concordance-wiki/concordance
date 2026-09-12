@@ -25,7 +25,7 @@ plugins:
     options: { timeout_s: 120 }
 ```
 
-An entry is a package name, or an object with the package name and its `options`. Plugins load in the declared order and register in a deterministic registry: every list the registry exposes (`plugins()`, `readers()`, `converters()`, `sources()`, `inferenceMethods()`, `checks()`, `projections()`, `uiComponents()`) follows the declaration order, and two runs on the same configuration give the same registry. The options are kept on the registration (`registrations()`); no contribution reads them yet.
+An entry is a package name, or an object with the package name and its `options`. Plugins load in the declared order and register in a deterministic registry: every list the registry exposes (`plugins()`, `readers()`, `converters()`, `sources()`, `inferenceMethods()`, `checks()`, `projections()`, `uiComponents()`, `themes()`) follows the declaration order, and two runs on the same configuration give the same registry. The options are kept on the registration (`registrations()`); no contribution reads them yet.
 
 Before a plugin is registered, the build runs `<command> --version` for every system dependency its manifest declares.
 
@@ -71,8 +71,9 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 | `check` | `checks` | `id` (`E-`, `W-` or `I-`), `severity`, `description`, `remediation`, `documentation` URL | `run(input) → findings[]` |
 | `projection` | `projections` | `id`, lowercase identifier | `render(input) → { html, json }` |
 | `ui component` | `uiComponents` | `slot`, `bundle` | none: the site loads the bundle on demand |
+| `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet after its own and renders the overridden slots with the theme's components |
 
-The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution; the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`) say what is known today. Every contribution is a pure function of its inputs plus the injected context. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
+The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution; the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
 
 ### System dependencies
 

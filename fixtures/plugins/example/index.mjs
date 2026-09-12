@@ -34,5 +34,14 @@ export default definePlugin({
     ],
     projections: [{ id: "example", render: () => ({ html: "<p>example</p>", json: {} }) }],
     uiComponents: [{ slot: "example", bundle: "./ui/example.js" }],
+    themes: [
+      {
+        name: "example",
+        tokens: "./theme/theme.yaml",
+        stylesheet: "./theme/theme.css",
+        assets: "./theme/assets",
+        components: { Footer: "./theme/footer.js" },
+      },
+    ],
   },
 });

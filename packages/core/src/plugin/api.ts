@@ -113,6 +113,19 @@ export interface UiComponent {
   bundle: string;
 }
 
+/** A distributable theme: tokens, stylesheet, assets and component overrides, all paths relative to the plugin package. */
+export interface ThemeContribution {
+  name: string;
+  /** Path of a `theme.yaml` (see the theme schema). */
+  tokens: string;
+  /** Path of a stylesheet loaded after the tool's own, in the `project` cascade layer. */
+  stylesheet?: string;
+  /** Path of a folder copied as-is into the site (fonts, icons). */
+  assets?: string;
+  /** Component overrides by slot name: path of a module whose default export renders that slot. */
+  components?: Record<string, string>;
+}
+
 export interface Contributions {
   readers?: Reader[];
   converters?: Converter[];
@@ -121,6 +134,7 @@ export interface Contributions {
   checks?: CheckContribution[];
   projections?: Projection[];
   uiComponents?: UiComponent[];
+  themes?: ThemeContribution[];
 }
 
 export interface PluginManifest {

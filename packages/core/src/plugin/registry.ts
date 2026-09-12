@@ -9,6 +9,7 @@ import {
   type Projection,
   type Reader,
   type SourceProvider,
+  type ThemeContribution,
   type UiComponent,
 } from "./api.js";
 import { isPluginManifest } from "./define.js";
@@ -38,6 +39,7 @@ export interface PluginRegistry {
   checks: () => CheckContribution[];
   projections: () => Projection[];
   uiComponents: () => UiComponent[];
+  themes: () => ThemeContribution[];
 }
 
 export interface PluginLoaderDependencies {
@@ -109,6 +111,7 @@ function claimsOf(manifest: PluginManifest): string[] {
     ...(contributes.checks ?? []).map((c) => `check ${c.id}`),
     ...(contributes.projections ?? []).map((p) => `projection ${p.id}`),
     ...(contributes.uiComponents ?? []).map((u) => `ui slot ${u.slot}`),
+    ...(contributes.themes ?? []).map((t) => `theme ${t.name}`),
   ];
 }
 
@@ -137,6 +140,7 @@ function createRegistry(registered: PluginRegistration[]): PluginRegistry {
     checks: () => collect((manifest) => manifest.contributes.checks),
     projections: () => collect((manifest) => manifest.contributes.projections),
     uiComponents: () => collect((manifest) => manifest.contributes.uiComponents),
+    themes: () => collect((manifest) => manifest.contributes.themes),
   };
 }
 
