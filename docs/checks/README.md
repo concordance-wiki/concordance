@@ -51,6 +51,7 @@ Every check listed here is registered once, with its default severity, descripti
 | [`W-APP-MISSING`](W-APP-MISSING.md) | warning | An entity resolves to no application. |
 | [`W-STALE`](W-STALE.md) | warning | A source or a note has not changed for longer than the configured threshold. |
 | [`I-REL-AMBIGUOUS`](I-REL-AMBIGUOUS.md) | info | A link between two entities fell back to the generic `related` relation. |
+| [`I-TERM-HOMONYM`](I-TERM-HOMONYM.md) | info | Two entities share a title or an alias once spellings are compared; occurrences link to each at half confidence. |
 | [`I-PII-DETECTED`](I-PII-DETECTED.md) | info | A personal name was detected in a transcript outside the pseudonymisation dictionary. |
 
 ## Contracts

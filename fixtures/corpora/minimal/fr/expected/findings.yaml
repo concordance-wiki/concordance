@@ -1,5 +1,8 @@
 # Findings the engine must produce, sorted by check then path. A minimum: further I-REL-AMBIGUOUS findings on other prose mentions are allowed.
 - { check: I-REL-AMBIGUOUS, path: specs/ecrans/saisie-versement-libre.md, note: "versement libre (term) mentioned in prose falls back to related" }
+- { check: I-TERM-HOMONYM, form: adherent, entities: [glossaire/adherent, specs/objets/adherent] }
+- { check: I-TERM-HOMONYM, form: contrat, entities: [glossaire/contrat, specs/objets/contrat] }
+- { check: I-TERM-HOMONYM, form: versement, entities: [glossaire/versement, specs/objets/versement] }
 - { check: W-DOMAIN-UNCLASSIFIED, path: decisions/plafond-controle-cote-serveur.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: glossaire/contrat.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: specs/objets/contrat.md }

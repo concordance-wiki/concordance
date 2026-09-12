@@ -143,6 +143,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "Create a term note in the glossary, or add the expression to rejected_terms in the lock file.",
   ),
   step(
+    "I-TERM-HOMONYM",
+    "info",
+    "vocabulary-and-filing",
+    "Two entities share the same normalised title or alias; occurrences link to each at half confidence.",
+    "Rename one of them, add a distinguishing alias, or accept the shared form and its halved confidence.",
+  ),
+  step(
     "W-TERM-UNUSED",
     "info",
     "vocabulary-and-filing",

@@ -31,6 +31,7 @@ const specified = [
   "W-DOC-NOMD",
   "W-DUP-CANDIDATE",
   "W-TERM-UNDEFINED",
+  "I-TERM-HOMONYM",
   "W-TERM-UNUSED",
   "W-DOMAIN-UNCLASSIFIED",
   "W-APP-MISSING",

@@ -133,7 +133,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Links | `E-LINK-BROKEN`, `W-LINK-CROSS-SOURCE` |
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`, `W-TYPE-UNKNOWN`, `W-ATTRIBUTE-UNKNOWN` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
-| Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED` |
+| Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-TERM-HOMONYM`, `I-PII-DETECTED` |
 | Contracts | `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
 | Plugins | `W-PLUGIN-DISABLED` |
 
