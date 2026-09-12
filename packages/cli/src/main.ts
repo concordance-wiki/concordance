@@ -20,6 +20,7 @@ export const usage = [
   "  build [--config file] [--output dir]  validate the configuration and build the site",
   "  init [directory]                      write a minimal configuration file",
   "  lint [--scope repo] [--source name] [--config file] [--fail-on error|warning|info]",
+  "       [--format text|json|sarif|junit] [--output file]",
   "                                        check the current repository without any network access",
   "  validate-config [--config file]       check the configuration and report its errors",
   "",

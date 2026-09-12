@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import { createRegistry } from "@concordance-wiki/checks";
 import {
   formatValidation,
   parseConfig,
@@ -8,9 +9,16 @@ import {
   type Severity,
   type SourceConfig,
 } from "@concordance-wiki/core";
-import { formatFindings, hasFindingAtOrAbove, lintRepository } from "@concordance-wiki/lint";
+import {
+  formatFindingsAs,
+  hasFindingAtOrAbove,
+  isOutputFormat,
+  lintRepository,
+  OUTPUT_FORMATS,
+} from "@concordance-wiki/lint";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
+import { toolVersion } from "../version.js";
 
 const severities: readonly Severity[] = ["error", "warning", "info"];
 
@@ -33,7 +41,11 @@ function readConfig(io: CommandIo, option: string): Config | undefined {
   return undefined;
 }
 
-/** Only the local scope exists yet: nothing is fetched and nothing is written, whatever the options. */
+function listed(values: readonly string[]): string {
+  return `${values.slice(0, -1).join(", ")} or ${String(values.at(-1))}`;
+}
+
+/** Only the local scope exists yet: nothing is fetched, and the only write is the report under `--output`. */
 export function lintCommand(argv: string[], io: CommandIo): ExitCode {
   const { values } = parseArgs({
     args: argv,
@@ -42,6 +54,8 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
       source: { type: "string" },
       config: { type: "string", short: "c" },
       "fail-on": { type: "string", default: "error" },
+      format: { type: "string", default: "text" },
+      output: { type: "string", short: "o" },
       fix: { type: "boolean", default: false },
     },
   });
@@ -55,7 +69,12 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
   }
   const failOn = values["fail-on"];
   if (!isSeverity(failOn)) {
-    io.err(`--fail-on ${failOn} is not a severity; expected error, warning or info`);
+    io.err(`--fail-on ${failOn} is not a severity; expected ${listed(severities)}`);
+    return exitCodes.failure;
+  }
+  const format = values.format;
+  if (!isOutputFormat(format)) {
+    io.err(`--format ${format} is not a format; expected ${listed(OUTPUT_FORMATS)}`);
     return exitCodes.failure;
   }
   let config: Config | undefined;
@@ -80,6 +99,15 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
     ...(config === undefined ? {} : { config }),
     fs: io.fs,
   });
-  for (const line of formatFindings(findings)) io.out(line);
+  const document = formatFindingsAs(format, findings, {
+    root: io.cwd,
+    version: toolVersion(),
+    registry: createRegistry(),
+  });
+  if (values.output === undefined) {
+    for (const line of document.replace(/\n$/u, "").split("\n")) io.out(line);
+  } else {
+    io.fs.writeText(resolve(io.cwd, values.output), document);
+  }
   return hasFindingAtOrAbove(findings, failOn) ? exitCodes.invalid : exitCodes.ok;
 }

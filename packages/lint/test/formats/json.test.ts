@@ -1,0 +1,84 @@
+import { describe, expect, it } from "vitest";
+
+import { formatJson, type JsonReport } from "../../src/formats/json.js";
+import { broken, context, DOCUMENTATION, duplicate, findings, unreachable } from "./fixture.js";
+
+describe("formatJson", () => {
+  it("prints the tool, the sorted findings with their documentation URL and the counts, two-space indented", () => {
+    expect(formatJson(findings, context)).toBe(
+      `${JSON.stringify(
+        {
+          version: 1,
+          tool: { name: "concordance", version: "1.2.3" },
+          findings: [
+            {
+              check: "E-ID-DUP",
+              severity: "warning",
+              source: "notes",
+              path: "dup/a.rule.md",
+              entity: "notes/dup/a",
+              message: duplicate.message,
+              remediation: "Rename one of the files.",
+              documentation: `${DOCUMENTATION}/E-ID-DUP.md`,
+            },
+            {
+              check: "E-LINK-BROKEN",
+              severity: "error",
+              source: "notes",
+              path: "specs/entry.md",
+              line: 3,
+              message: broken.message,
+              remediation: "Fix the path.",
+              documentation: `${DOCUMENTATION}/E-LINK-BROKEN.md`,
+            },
+            {
+              check: "W-SOURCE-UNREACHABLE",
+              severity: "info",
+              message: unreachable.message,
+              remediation: "Fix the path.",
+              documentation: `${DOCUMENTATION}/W-SOURCE-UNREACHABLE.md`,
+            },
+          ],
+          summary: { error: 1, warning: 1, info: 1 },
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  });
+
+  it("keeps the key order stable whatever the order of the fields on the finding", () => {
+    const reordered = {
+      path: "b.md",
+      remediation: "r",
+      message: "m",
+      severity: "error",
+      check: "E-X",
+    } as const;
+    const document = formatJson([reordered, { ...reordered, path: "a.md" }], context);
+    // The formatter just produced the document: it has the report's shape.
+    const parsed = JSON.parse(document) as JsonReport;
+    expect(Object.keys(parsed)).toEqual(["version", "tool", "findings", "summary"]);
+    expect(parsed.findings.map((finding) => finding.path)).toEqual(["a.md", "b.md"]);
+    expect(parsed.findings.map((finding) => Object.keys(finding))).toEqual([
+      ["check", "severity", "path", "message", "remediation", "documentation"],
+      ["check", "severity", "path", "message", "remediation", "documentation"],
+    ]);
+  });
+
+  it("escapes the message and ends with a newline", () => {
+    const document = formatJson([unreachable], context);
+    expect(document).toContain('"message": "source <notes> & \\"friends\\" could not be read"');
+    expect(document.endsWith("}\n")).toBe(true);
+    expect(JSON.parse(document)).toMatchObject({ summary: { error: 0, warning: 0, info: 1 } });
+  });
+
+  it("prints an empty list and zero counts when there is no finding", () => {
+    expect(JSON.parse(formatJson([], context))).toEqual({
+      version: 1,
+      tool: { name: "concordance", version: "1.2.3" },
+      findings: [],
+      summary: { error: 0, warning: 0, info: 0 },
+    });
+  });
+});

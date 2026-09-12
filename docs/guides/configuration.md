@@ -289,3 +289,39 @@ pages:
 ```
 
 Add LibreOffice to the image when office conversion is wanted. Keep `.concordance-cache` in the pipeline cache so that unchanged documents are not reconverted.
+
+### Lint a knowledge repository in its merge requests
+
+Each knowledge repository checks itself on every merge request with `concordance lint`; `--format` gives the forge a report it annotates the diff with. On GitHub, upload the SARIF log to code scanning: each finding then appears in the margin of the diff, on its file and line, and the pipeline still fails according to `--fail-on`.
+
+```yaml
+name: lint
+on: { pull_request: {} }
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, security-events: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: lts/* }
+      - run: npx concordance lint --format sarif --output concordance.sarif
+        continue-on-error: true
+      - uses: github/codeql-action/upload-sarif@v3
+        with: { sarif_file: concordance.sarif }
+```
+
+On GitLab, publish the JUnit report: the merge request lists each finding as a failed test, with its message, remediation and documentation URL.
+
+```yaml
+lint:
+  image: node:lts
+  script:
+    - npx concordance lint --format junit --output concordance-junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: concordance-junit.xml
+```
+
+Both examples run the linter at the root of the knowledge repository; pass `--config` and `--source` when the repository is declared in a `concordance.yaml` whose rules must apply. The exit code is the same whatever the format: 0 without a finding at the `--fail-on` severity, 1 with one, 2 when the lint could not run.

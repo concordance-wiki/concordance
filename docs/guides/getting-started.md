@@ -113,15 +113,34 @@ Options:
 | `--source <name>` | none | names the source this repository is declared as, so that its rules apply: the type suffixes of its `rules` are stripped from identifiers; without `--config`, the name only prefixes the identifiers |
 | `--config <file>` | none | the `concordance.yaml` that declares the source; its `privacy.exclude` and `checks` blocks apply |
 | `--fail-on error\|warning\|info` | `error` | the severity from which a finding makes the command fail |
+| `--format text\|json\|sarif\|junit` | `text` | the shape of the report; see [Reports for forges](#reports-for-forges) |
+| `--output <file>` | none | writes the report to that file instead of standard output; the only file the command ever writes |
 | `--fix` | | not available in this version; the flag is refused |
 
 What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package.
 
-In this mode the command never opens a network connection and never writes a file. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
+In this mode the command never opens a network connection and writes nothing but the report named by `--output`. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
 
-Exit codes: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--fix`, `--scope global`).
+Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option or format, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--fix`, `--scope global`).
 
 The linter uses the same checks as the build. See the [check pages](../checks/README.md) for what each finding means and how to fix it; every finding line ends with the URL of its page.
+
+### Reports for forges
+
+`--format` picks a machine-readable report so that a merge request shows the findings where they belong instead of in a pipeline log. Each report holds the whole run alone on standard output, without the summary line, and `--output <file>` writes it to a file instead; the findings are sorted the same way in every format, so two reports of the same tree are byte-identical.
+
+| Format | Content | Use it for |
+|---|---|---|
+| `json` | `{ version: 1, tool, findings, summary }`; each finding carries its check, severity, source, path, line, entity, message, remediation and documentation URL; `summary` counts errors, warnings and info | scripts and dashboards |
+| `sarif` | a SARIF 2.1.0 log with one run: one rule per check met (description, documentation URL, default level) and one result per finding pointing at the file relative to the repository (`%SRCROOT%`) and the line; `info` findings are `note` results | the code-scanning upload of GitHub, the SARIF viewers of editors |
+| `junit` | one `concordance lint` test suite with one test case per finding, named `<check>` and `<path>:<line>`; errors and warnings fail their case, an info finding is only reported in its output; a clean repository gives one passing case named `no finding` | the test report of GitLab and of most pipeline runners |
+
+```bash
+npx concordance lint --format sarif --output concordance.sarif
+npx concordance lint --format junit --output concordance-junit.xml
+```
+
+The [configuration guide](configuration.md#continuous-integration) shows how to upload the SARIF log to GitHub and the JUnit report to GitLab.
 
 ## What the tool does not do
 
