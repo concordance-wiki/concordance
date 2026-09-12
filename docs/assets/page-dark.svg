@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" width="1200" height="660" font-family="Instrument Sans, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <clipPath id="w"><rect x="0.5" y="0.5" width="1199" height="659" rx="14"/></clipPath>
+    <filter id="s" x="-2%" y="-2%" width="104%" height="106%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/></filter>
+  </defs>
+  <g filter="url(#s)"><rect x="0.5" y="0.5" width="1199" height="659" rx="14" fill="#0E0F11" stroke="#26292E"/></g>
+  <g clip-path="url(#w)">
+    <!-- top bar -->
+    <rect x="0" y="0" width="1200" height="56" fill="#16181B"/>
+    <line x1="0" y1="56.5" x2="1200" y2="56.5" stroke="#26292E"/>
+    <g transform="translate(28,16)">
+      <rect x="3.5" y="5.5" width="13.5" height="3" rx="1.5" fill="#E8E6E1"/><rect x="2.5" y="10.5" width="15.5" height="3" rx="1.5" fill="#E8E6E1"/><rect x="5.5" y="15.5" width="13" height="3" rx="1.5" fill="#E8E6E1"/><rect x="10" y="2.5" width="4" height="19" rx="2" fill="#E8703A"/>
+    </g>
+    <text x="60" y="35" font-size="17" font-weight="600" fill="#E8E6E1">My wiki</text>
+    <text x="140" y="35" font-size="13" fill="#8B9199">7 sources · 1 894 files · built 2 h ago</text>
+    <rect x="720" y="14" width="300" height="28" rx="7" fill="#0E0F11" stroke="#26292E"/>
+    <text x="736" y="33" font-size="13" fill="#6B7280">Search a word of your business…</text>
+    <text x="998" y="33" font-size="12" fill="#6B7280">/</text>
+    <text x="1046" y="34" font-size="13" fill="#8B9199">Index</text>
+    <text x="1104" y="34" font-size="13" fill="#8B9199">To do</text>
+    <rect x="1148" y="24" width="8" height="8" rx="4" fill="#E8703A"/><text x="1162" y="34" font-size="13" fill="#8B9199">12</text>
+
+    <!-- trail -->
+    <text x="40" y="92" font-size="12" fill="#6B7280">glossary / free-payment.md</text>
+
+    <!-- badge -->
+    <rect x="40" y="108" width="52" height="22" rx="6" fill="#E8E6E1"/>
+    <text x="52" y="123" font-size="12" font-weight="600" fill="#0E0F11">term</text>
+    <text x="104" y="123" font-size="12" fill="#8B9199">aliases  FP, free contribution</text>
+    <text x="304" y="123" font-size="12" fill="#8B9199">broader  payment</text>
+
+    <!-- title -->
+    <text x="40" y="176" font-size="40" font-family="Instrument Serif, Georgia, 'Times New Roman', serif" fill="#E8E6E1">Free payment</text>
+
+    <!-- body -->
+    <text font-size="16" fill="#D6D4CF" xml:space="preserve">
+      <tspan x="40" y="220">A </tspan><tspan fill="#E8703A" text-decoration="underline">payment</tspan><tspan> made at the member's request, outside any schedule, on a</tspan>
+      <tspan x="40" y="246">running </tspan><tspan fill="#E8703A" text-decoration="underline">contract</tspan><tspan>. It differs from the </tspan><tspan fill="#E8E6E1" font-weight="600">scheduled payment</tspan><tspan> by the</tspan>
+      <tspan x="40" y="272">absence of periodicity.</tspan>
+    </text>
+    <text x="40" y="322" font-size="20" font-weight="600" fill="#E8E6E1">Not to be confused with</text>
+    <text font-size="16" fill="#D6D4CF" xml:space="preserve">
+      <tspan x="40" y="352">An </tspan><tspan fill="#E8E6E1" font-weight="600">exceptional payment</tspan><tspan>, which sits outside the contractual frame and is</tspan>
+      <tspan x="40" y="378">validated by the branch manager.</tspan>
+    </text>
+
+    <!-- legend -->
+    <line x1="52" y1="431" x2="72" y2="431" stroke="#E8703A" stroke-width="2"/>
+    <text x="80" y="435" font-size="12" fill="#8B9199">link written in the note</text>
+    <text x="230" y="435" font-size="12" fill="#8B9199" xml:space="preserve"><tspan fill="#E8E6E1" font-weight="600">word</tspan> recognised at indexing</text>
+    <text x="40" y="475" font-size="12" fill="#6B7280">Something wrong? Edit in the forge ↗</text>
+
+    <!-- neighbourhood mini map -->
+    <text x="40" y="530" font-size="13" font-weight="600" fill="#E8E6E1">Neighbourhood</text>
+    <g stroke="#26292E" stroke-width="1.5">
+      <line x1="150" y1="595" x2="80" y2="565"/><line x1="150" y1="595" x2="90" y2="630"/><line x1="150" y1="595" x2="240" y2="560"/><line x1="150" y1="595" x2="250" y2="628" stroke-dasharray="4 3"/>
+    </g>
+    <circle cx="150" cy="595" r="9" fill="#E8703A"/>
+    <circle cx="80" cy="565" r="6" fill="#E8E6E1"/><text x="20" y="553" font-size="11" fill="#D6D4CF">payment</text>
+    <circle cx="90" cy="630" r="6" fill="#E8E6E1"/><text x="44" y="650" font-size="11" fill="#D6D4CF">annual cap</text>
+    <rect x="234" y="554" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="252" y="565" font-size="11" fill="#D6D4CF">Free payment entry</text>
+    <circle cx="250" cy="628" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5" stroke-dasharray="2 2"/><text x="262" y="632" font-size="11" fill="#8B9199">exceptional payment</text>
+
+    <!-- mentions panel -->
+    <rect x="610" y="80" width="550" height="560" rx="10" fill="#16181B" stroke="#26292E"/>
+    <text x="634" y="114" font-size="16" font-weight="600" fill="#E8E6E1">Mentions</text>
+    <rect x="720" y="98" width="34" height="22" rx="11" fill="#0E0F11"/><text x="729" y="113" font-size="12" font-weight="600" fill="#8B9199">47</text>
+    <text x="1048" y="113" font-size="12" fill="#6B7280">sort · filter · fold</text>
+
+    <text x="634" y="154" font-size="11" font-weight="600" letter-spacing="1" fill="#E8703A">WRITTEN IN NOTES · 16</text>
+    <g font-size="14" fill="#E8E6E1">
+      <rect x="634" y="170" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="181">Free payment entry</text><text x="820" y="181" font-size="12" fill="#6B7280">screen · Objects</text>
+      <rect x="634" y="200" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="211">Record a payment</text><text x="820" y="211" font-size="12" fill="#6B7280">process · step 2</text>
+      <circle cx="640" cy="236" r="6" fill="#E8E6E1"/><text x="656" y="241">Annual cap</text><text x="820" y="241" font-size="12" fill="#6B7280">rule · Applies to</text>
+      <path d="M634 260 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="271">Cap checked server-side</text><text x="850" y="271" font-size="12" fill="#6B7280">decision · Affects</text>
+      <text x="656" y="301" font-size="12" fill="#6B7280">12 more</text>
+    </g>
+
+    <line x1="634" y1="322" x2="1136" y2="322" stroke="#26292E"/>
+    <text x="634" y="352" font-size="11" font-weight="600" letter-spacing="1" fill="#8B9199">SIMPLY CITED · 31</text>
+    <g font-size="14" fill="#E8E6E1">
+      <circle cx="640" cy="374" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="379">Payments workshop</text><text x="820" y="379" font-size="12" fill="#6B7280">meeting · 7</text>
+      <text x="676" y="401" font-size="12" fill="#8B9199" xml:space="preserve">12:04  “…the scheduled payment, the <tspan fill="#E8E6E1" font-weight="600">free payment</tspan>, and the exceptional…”</text>
+      <text x="676" y="421" font-size="12" fill="#8B9199" xml:space="preserve">13:02  “On the <tspan fill="#E8E6E1" font-weight="600">free payment</tspan>, the cap stays server-side.”</text>
+      <rect x="634" y="442" width="12" height="12" rx="1" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="453">Payments framing v3</text><text x="820" y="453" font-size="12" fill="#6B7280">slides · 5</text>
+      <text x="676" y="475" font-size="12" fill="#8B9199" xml:space="preserve">slide 12  “Out of scope for V1: the exceptional payment…”</text>
+      <circle cx="640" cy="500" r="6" fill="#E8E6E1"/><text x="656" y="505">Annual cap</text><text x="820" y="505" font-size="12" fill="#6B7280">rule · 6</text>
+      <path d="M634 524 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="535">Payments API</text><text x="820" y="535" font-size="12" fill="#6B7280">api · 3</text>
+    </g>
+    <rect x="634" y="560" width="502" height="40" rx="8" fill="#0E0F11" stroke="#26292E"/>
+    <text x="885" y="585" font-size="13" font-weight="600" fill="#E8E6E1" text-anchor="middle">24 more files</text>
+  </g>
+</svg>
