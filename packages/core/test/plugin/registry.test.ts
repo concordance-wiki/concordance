@@ -400,7 +400,7 @@ describe("loadPlugins", () => {
     const method = registry.inferenceMethods()[0];
     const check = registry.checks()[0];
     const projection = registry.projections()[0];
-    expect(reader?.read({ path: "a.example", payload: null })).toEqual({
+    expect(reader?.read({ path: "a.example", payload: { bytes: new Uint8Array() } })).toEqual({
       metadata: { path: "a.example" },
       text: "example",
     });

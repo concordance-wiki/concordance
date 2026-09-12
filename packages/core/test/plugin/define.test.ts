@@ -29,7 +29,12 @@ describe("definePlugin", () => {
     const input = manifest();
     const defined = definePlugin(input);
     expect(defined).toBe(input);
-    expect(defined.contributes.readers?.[0]?.read({ path: "a.csv", payload: null })).toEqual({
+    expect(
+      defined.contributes.readers?.[0]?.read({
+        path: "a.csv",
+        payload: { bytes: new Uint8Array() },
+      }),
+    ).toEqual({
       metadata: {},
       text: "",
     });

@@ -222,6 +222,12 @@ importers:
         specifier: 6.3.289
         version: 6.3.289
 
+  plugins/reader-vtt:
+    dependencies:
+      '@concordance-wiki/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
 packages:
 
   '@babel/code-frame@8.0.0':
