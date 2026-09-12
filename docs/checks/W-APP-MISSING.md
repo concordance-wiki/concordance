@@ -4,7 +4,7 @@
 
 An entity resolves to no application.
 
-The application comes from the source declaration, a typing rule or the frontmatter. Without one, the entity cannot be composed into anything.
+The application comes from the source declaration, a typing rule or the frontmatter. Without one, the entity cannot be composed into anything. Applications and domains themselves are containers and are never reported.
 
 ## Before
 

@@ -2,7 +2,9 @@
 
 Every finding produced by the build or the linter carries one of these identifiers. Severity prefixes: `E-` error, `W-` warning, `I-` info. Each page shows the situation before and after the fix.
 
-Severities can be overridden under `checks:` in `concordance.yaml` or, per repository, in `concordance-lint.yaml`. The build fails according to `build.fail_on`; the linter fails according to `--fail-on`, `error` by default.
+Severities can be overridden under `checks:` in `concordance.yaml` or, per repository, in `concordance-lint.yaml`; see the [configuration guide](../guides/configuration.md#checks) for what `enabled` and `severity` do. The build fails according to `build.fail_on`; the linter fails according to `--fail-on`, `error` by default.
+
+Every check listed here is registered once, with its default severity, description and remediation, in the [`@concordance-wiki/checks`](../../packages/checks/README.md) package, which the build and the linter consume identically. A plugin adds its own checks through the `checks` contribution of its manifest; they join the same registry, under a new identifier, with their own page.
 
 ## Sources
 

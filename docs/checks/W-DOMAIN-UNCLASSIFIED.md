@@ -4,7 +4,7 @@
 
 A note matches no declared domain.
 
-Domains are declared globally by globs across sources, and a frontmatter `domain` overrides them. The note is attached to the unclassified domain.
+Domains are declared globally by globs across sources, and a frontmatter `domain` overrides them. The note is attached to the unclassified domain. Applications and domains themselves are containers and are never reported.
 
 ## Before
 
