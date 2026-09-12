@@ -1,3 +1,12 @@
+export {
+  CANONICAL_KEY_ORDER,
+  normalizeFrontmatter,
+  type NormalizeFrontmatterOptions,
+} from "./fix/frontmatter.js";
+export { fixRepository, type FixRepositoryInput, type FixRepositoryResult } from "./fix/index.js";
+export { rewriteRenamedLinks } from "./fix/links.js";
+export { deduceType, type DeduceTypeInput } from "./fix/type.js";
+export type { FixChange, FixKind, FixRefusal } from "./fix/types.js";
 export { REPOSITORY_URL, TOOL_NAME, type FormatContext } from "./formats/context.js";
 export {
   formatFindingsAs,

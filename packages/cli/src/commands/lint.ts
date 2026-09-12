@@ -10,11 +10,13 @@ import {
   type SourceConfig,
 } from "@concordance-wiki/core";
 import {
+  fixRepository,
   formatFindingsAs,
   hasFindingAtOrAbove,
   isOutputFormat,
   lintRepository,
   OUTPUT_FORMATS,
+  type FixRefusal,
 } from "@concordance-wiki/lint";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
@@ -45,7 +47,14 @@ function listed(values: readonly string[]): string {
   return `${values.slice(0, -1).join(", ")} or ${String(values.at(-1))}`;
 }
 
-/** Only the local scope exists yet: nothing is fetched, and the only write is the report under `--output`. */
+function where(change: FixRefusal): string {
+  return [change.path, change.line]
+    .filter((part) => part !== undefined)
+    .map(String)
+    .join(":");
+}
+
+/** Only the local scope exists yet: nothing is fetched; `--fix` writes after announcing every change, and `--output` writes the report. */
 export function lintCommand(argv: string[], io: CommandIo): ExitCode {
   const { values } = parseArgs({
     args: argv,
@@ -57,12 +66,9 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
       format: { type: "string", default: "text" },
       output: { type: "string", short: "o" },
       fix: { type: "boolean", default: false },
+      "dry-run": { type: "boolean", default: false },
     },
   });
-  if (values.fix) {
-    io.err("--fix is not available in this version");
-    return exitCodes.failure;
-  }
   if (values.scope !== "repo") {
     io.err(`--scope ${values.scope} is not available in this version; only --scope repo is`);
     return exitCodes.failure;
@@ -93,12 +99,27 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
       return exitCodes.failure;
     }
   }
-  const findings = lintRepository({
+  const repository = {
     root: io.cwd,
     ...(source === undefined ? {} : { source }),
     ...(config === undefined ? {} : { config }),
     fs: io.fs,
-  });
+  };
+  const dryRun = values["dry-run"];
+  if (values.fix || dryRun) {
+    const prefix = dryRun ? "would fix" : "fix";
+    const fixes = fixRepository({
+      ...repository,
+      dryRun,
+      announce: (change) => {
+        io.out(`${prefix}: ${where(change)}: ${change.description}`);
+      },
+    });
+    for (const refusal of fixes.refused) {
+      io.out(`refused: ${where(refusal)}: ${refusal.description}`);
+    }
+  }
+  const findings = lintRepository(repository);
   const document = formatFindingsAs(format, findings, {
     root: io.cwd,
     version: toolVersion(),

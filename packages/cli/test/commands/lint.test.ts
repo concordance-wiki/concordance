@@ -88,13 +88,6 @@ describe("concordance lint", () => {
       expect(io.stdout).toEqual([]);
     });
 
-    it("rejects --fix with a clear message and exit code 2", () => {
-      const io = repository();
-      expect(lintCommand(["--fix"], io)).toBe(2);
-      expect(io.stderr).toEqual(["--fix is not available in this version"]);
-      expect(io.stdout).toEqual([]);
-    });
-
     it("rejects --scope global with a clear message and exit code 2", () => {
       const io = repository();
       expect(lintCommand(["--scope", "global"], io)).toBe(2);
@@ -151,6 +144,75 @@ describe("concordance lint", () => {
       const io = repository({ "/work/concordance-lint.yaml": "checks: { W-NOPE: {} }\n" });
       expect(await main(["lint"], io)).toBe(2);
       expect(io.stderr).toEqual(["checks: W-NOPE is not a registered check"]);
+    });
+  });
+
+  describe("--fix applies the safe corrections after announcing them; --dry-run only lists them", () => {
+    const renamed = () =>
+      repository({
+        "/work/notes/entry.md":
+          "---\nstatus: draft\nid: notes/entry\n---\n# Entry\n\nSee [cap](cap.rule.md#limits).\n",
+        "/work/concordance.yaml": config,
+      });
+    const fixedEntry =
+      "---\nid: notes/entry\nstatus: draft\n---\n# Entry\n\nSee [cap](../rules/cap.rule.md#limits).\n";
+
+    it("prints one fix line per change before writing, then lints the fixed repository", () => {
+      const io = renamed();
+      let printedBeforeWrite = 0;
+      vi.spyOn(io.fs, "writeText").mockImplementationOnce((path, content) => {
+        printedBeforeWrite = io.stdout.length;
+        io.fs.files.set(path, content);
+      });
+      expect(lintCommand(["--fix", "--config", "concordance.yaml", "--source", "notes"], io)).toBe(
+        1,
+      );
+      expect(printedBeforeWrite).toBe(2);
+      expect(io.stdout).toEqual([
+        "fix: notes/entry.md:1: order the frontmatter keys: id, status",
+        'fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
+        `error: rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
+        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)`,
+        "2 findings: 1 error, 1 warning, 0 info",
+      ]);
+      expect(io.fs.readText("/work/notes/entry.md")).toBe(fixedEntry);
+      expect(io.stderr).toEqual([]);
+    });
+
+    it("prints the same lines with a would fix prefix on --dry-run and writes nothing", () => {
+      const io = renamed();
+      const write = vi.spyOn(io.fs, "writeText");
+      expect(lintCommand(["--dry-run"], io)).toBe(1);
+      expect(io.stdout.slice(0, 2)).toEqual([
+        "would fix: notes/entry.md:1: order the frontmatter keys: id, status",
+        'would fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
+      ]);
+      expect(io.stdout[2]).toMatch(/^error: notes\/entry\.md:7: E-LINK-BROKEN: /);
+      expect(io.stdout[3]).toMatch(/^error: README\.md:3: E-LINK-BROKEN: /);
+      expect(write).not.toHaveBeenCalled();
+    });
+
+    it("reports a refused fix as such and leaves the exit code to the findings", () => {
+      const io = repository({
+        "/work/entry.md": "# Entry\n\nSee [cap](cap.md).\n",
+        "/work/archive/cap.md": "# Old cap\n",
+        "/work/concordance-lint.yaml": "checks: { E-LINK-BROKEN: { severity: info } }\n",
+      });
+      expect(lintCommand(["--fix"], io)).toBe(0);
+      expect(io.stdout[0]).toBe(
+        'refused: entry.md:3: link "cap.md" matches several files: archive/cap.md, rules/cap.md; choose one',
+      );
+    });
+
+    it("exits 0 once the fixes leave nothing to report", () => {
+      const io = recordedIo({
+        "/work/entry.md": "---\ntitle: Entry\nid: repo/entry\n---\n# Entry\n",
+      });
+      expect(lintCommand(["--fix"], io)).toBe(0);
+      expect(io.stdout).toEqual([
+        "fix: entry.md:1: order the frontmatter keys: id, title",
+        "0 findings: 0 errors, 0 warnings, 0 info",
+      ]);
     });
   });
 
