@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/pseudonyms.schema.json",
+  "title": "Concordance pseudonyms",
+  "description": "Schema of pseudonyms.yaml, the mapping from real names to pseudonyms. Read at build time, never versioned in a public repository, never written into the output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "people"],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "people": {
+      "type": "object",
+      "description": "One entry per real name, matched case-insensitively and accent-insensitively on word boundaries.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pseudonym"],
+        "properties": {
+          "pseudonym": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

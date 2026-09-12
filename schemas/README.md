@@ -11,3 +11,4 @@ The JSON schemas of Concordance live with the package that validates them: [`pac
 | `theme.schema.json` | `theme.yaml` |
 | `plugin.schema.json` | the manifest returned by `definePlugin` |
 | `language-pack.schema.json` | the `pack.yaml` of a language pack |
+| `pseudonyms.schema.json` | `pseudonyms.yaml`, the pseudonymisation dictionary; read at build time, never published |
