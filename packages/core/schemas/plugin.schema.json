@@ -161,6 +161,37 @@
               }
             }
           }
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "tokens"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "tokens": {
+                "type": "string"
+              },
+              "stylesheet": {
+                "type": "string"
+              },
+              "assets": {
+                "type": "string"
+              },
+              "components": {
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^[A-Z][A-Za-z0-9]*$"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     }

@@ -77,10 +77,19 @@ describe("definePlugin", () => {
           ],
           projections: [{ id: "csv_table", render: () => ({ html: "", json: null }) }],
           uiComponents: [{ slot: "viewer", bundle: "./viewer.js" }],
+          themes: [
+            {
+              name: "slate",
+              tokens: "./theme.yaml",
+              stylesheet: "./theme.css",
+              assets: "./assets",
+              components: { Footer: "./footer.js" },
+            },
+          ],
         },
       }),
     );
-    expect(Object.keys(defined.contributes)).toHaveLength(7);
+    expect(Object.keys(defined.contributes)).toHaveLength(8);
   });
 
   it("rejects a missing apiVersion with the path of the missing key", () => {

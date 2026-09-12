@@ -110,6 +110,7 @@ describe("loadPlugins", () => {
     expect(registry.checks()).toEqual([]);
     expect(registry.projections()).toEqual([]);
     expect(registry.uiComponents()).toEqual([]);
+    expect(registry.themes()).toEqual([]);
     expect(findings).toEqual([]);
   });
 
@@ -306,6 +307,11 @@ describe("loadPlugins", () => {
       { uiComponents: [{ slot: "viewer", bundle: "./a.js" }] },
       { uiComponents: [{ slot: "viewer", bundle: "./b.js" }] },
     ],
+    [
+      "theme slate",
+      { themes: [{ name: "slate", tokens: "./a.yaml" }] },
+      { themes: [{ name: "slate", tokens: "./b.yaml" }] },
+    ],
   ] satisfies [string, Contributions, Contributions][])(
     "rejects two plugins contributing the same %s instead of overriding silently",
     async (label, first, second) => {
@@ -410,6 +416,15 @@ describe("loadPlugins", () => {
     ]);
     expect(projection?.render({ payload: null })).toEqual({ html: "<p>example</p>", json: {} });
     expect(registry.uiComponents()).toEqual([{ slot: "example", bundle: "./ui/example.js" }]);
+    expect(registry.themes()).toEqual([
+      {
+        name: "example",
+        tokens: "./theme/theme.yaml",
+        stylesheet: "./theme/theme.css",
+        assets: "./theme/assets",
+        components: { Footer: "./theme/footer.js" },
+      },
+    ]);
   });
 
   it("disables the example plugin when git is reported missing", async () => {
