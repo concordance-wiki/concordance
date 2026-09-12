@@ -7,6 +7,7 @@ describe("@concordance-wiki/core", () => {
     expect(Object.keys(entry).sort()).toEqual([
       "compareFindings",
       "compileGlobs",
+      "describeSchemaError",
       "fixedClock",
       "formatIssue",
       "formatValidation",
