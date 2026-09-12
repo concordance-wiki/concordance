@@ -28,7 +28,7 @@ pnpm check
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
 | `pnpm check` | all of the above, plus the determinism build and the hygiene scan |
 
-A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose.
+A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests (`tsc -b`, so that referenced packages are built first) and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose.
 
 ## Quality bar
 
