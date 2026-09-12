@@ -21,6 +21,7 @@ Severities can be overridden under `checks:` in `concordance.yaml` or, per repos
 | Check | Severity | Meaning |
 |---|---|---|
 | [`E-ID-DUP`](E-ID-DUP.md) | error | Two entities resolve to the same identifier. |
+| [`E-ID-INVALID`](E-ID-INVALID.md) | error | A frontmatter `id` does not follow the identifier pattern; the file path gives the identifier instead. |
 | [`E-TYPE-CONFLICT`](E-TYPE-CONFLICT.md) | error | The frontmatter `type` contradicts the type given by the file suffix. |
 | [`E-FM-INVALID`](E-FM-INVALID.md) | error | The YAML frontmatter cannot be parsed. |
 | [`E-META-REL`](E-META-REL.md) | error | A declared relation is not allowed between these two types by the profile. |
