@@ -10,13 +10,13 @@ export interface SystemDependency {
   optional?: boolean;
 }
 
-/** A file handed to a reader; the payload carries the bytes or text once ingestion defines them. */
+/** A file handed to a reader: its path in the source and its raw bytes. */
 export interface ReaderInput {
   path: string;
-  payload: unknown;
+  payload: { bytes: Uint8Array };
 }
 
-/** Metadata and text of a resource; the shape follows the model, not fixed yet. */
+/** Metadata of a resource and its full text, the material of recognition and search. */
 export interface ReaderOutput {
   metadata: Record<string, unknown>;
   text: string;
