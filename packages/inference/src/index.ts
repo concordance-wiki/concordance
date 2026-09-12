@@ -1,3 +1,7 @@
+export { combineConfidences, glossaryConfidence } from "./combine/confidence.js";
+export type { GlossaryCombination } from "./combine/confidence.js";
+export { combineLinks, combineOptions } from "./combine/links.js";
+export type { CombineOptions } from "./combine/links.js";
 export { explicitLinks } from "./explicit/links.js";
 export type {
   ExplicitLinksInput,

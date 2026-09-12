@@ -26,6 +26,12 @@ The meta-model is a YAML profile validated by a schema: types, attributes, relat
 
 Every link carries a confidence in [0, 1] and at least one provenance (method, file, line, context). When several methods produce the same source-target-relation triple, the confidence becomes `1 − Π(1 − cᵢ)`, capped at 1, and every provenance is kept. The scale per method lives in the profile. In the first version the score orders mentions and decides what is displayed; it is stored, not shown.
 
+### Combining confidences
+
+Every producer (explicit links, frontmatter references, section mentions, glossary occurrences, co-occurrence) emits its own links; a combination step then folds them into one link per source, target, relation and attributes, so that a `reads` and a `writes` link between the same notes stay apart. Within a group, every provenance is a method whose confidence is the probability that it is right on its own, and the group keeps the probability that at least one of them is: `1 − Π(1 − cᵢ)`, which two methods at 0.90 and 0.60 bring to 0.96 and three at 1.00, 0.70 and 0.40 to 1. The glossary occurrences of a group are the same term mentioned again and again rather than independent methods: they count as one method whose confidence starts at the base of the first and gains `confidence.glossary_occurrence.per_occurrence` (0.05) per additional occurrence up to `cap` (0.80), so a term found once is at 0.60 and five times at 0.80. Confidences are rounded to four decimals because `model.json` serialises them and a build must not differ by a floating-point tail.
+
+Every provenance of the group is kept in canonical order (method, path, line, section); only an exact duplicate, the same method at the same path, line and section, is listed once. The function is pure and idempotent: combining an already combined model changes nothing, and the output does not depend on the order the producers ran in.
+
 ## Preview through PDF conversion at build
 
 Office documents are converted to PDF by headless LibreOffice, rendered by pdf.js, with PNG thumbnails per slide. The cache is addressed by the SHA-256 of the source file and lives in the pipeline cache, not in the published artefact. Text is extracted from the converted PDF, the single extraction path. An unconvertible document stays an entity with its metadata, a download link and a finding.
