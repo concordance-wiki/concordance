@@ -30,6 +30,7 @@ export {
   type BuildLog,
   type BuildSummary,
 } from "./model/build-log.js";
+export { compareContracts, type CandidateObject, type ContractRecord } from "./model/contract.js";
 export {
   compareEntities,
   type Entity,

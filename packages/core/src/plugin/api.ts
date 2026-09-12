@@ -1,4 +1,9 @@
+import type { Clock } from "../io/clock.js";
+import type { FileSystem } from "../io/file-system.js";
+import type { CandidateObject, ContractRecord } from "../model/contract.js";
+import type { Entity } from "../model/entity.js";
 import type { Finding, Severity } from "../model/finding.js";
+import type { Link, ProvenanceMethod } from "../model/link.js";
 
 /** Bumped by a core release that changes the shape of any contribution. */
 export const PLUGIN_API_VERSION = "1";
@@ -71,15 +76,37 @@ export interface Converter {
   convert: (input: ConverterInput) => Promise<ConverterOutput>;
 }
 
-/** A source declaration of the configuration; the payload is the declaration itself once sources are typed. */
-export interface SourceInput {
-  name: string;
-  payload: unknown;
+/** The effects a contribution runs through, injected by the pipeline so that tests run against doubles. */
+export interface PluginContext {
+  fs: FileSystem;
+  clock: Clock;
+  /** Absent when the build runs without network access; a contribution then reports what it could not fetch. */
+  fetch?: typeof fetch;
 }
 
-/** Entities produced by a source; their shape follows the model, not fixed yet. */
+/** What the pipeline hands to a source: the entities read from the notes, where each declared source lives and the cache. */
+export interface SourcePayload {
+  entities: Entity[];
+  /** Absolute folder of each declared source by name, against which the paths written in notes resolve. */
+  roots: Record<string, string>;
+  /** Folder of the pipeline cache; a source keeps what it fetched under it, never next to the notes. */
+  cacheDirectory: string;
+  /** Confidence of each provenance method, as the profile declares it. */
+  confidence: Partial<Record<ProvenanceMethod, number>>;
+}
+
+export interface SourceInput {
+  payload: SourcePayload;
+  context: PluginContext;
+}
+
+/** What a source adds to the model; a contract it could not read is a finding, never an exception. */
 export interface SourceOutput {
-  entities: unknown[];
+  entities: Entity[];
+  links: Link[];
+  candidates: CandidateObject[];
+  contracts: ContractRecord[];
+  findings: Finding[];
 }
 
 export interface SourceProvider {

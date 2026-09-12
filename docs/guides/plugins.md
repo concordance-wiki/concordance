@@ -9,7 +9,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | [`@concordance-wiki/plugin-reader-vtt`](../../plugins/reader-vtt/README.md) | reader for `.vtt` and `.srt` transcripts: cues, speakers, duration, language, HTML with addressable timecodes | none | available |
 | [`@concordance-wiki/plugin-reader-office`](../../plugins/reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
 | `@concordance-wiki/plugin-convert-libreoffice` | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text extraction later | LibreOffice | available |
-| `@concordance-wiki/plugin-contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none | planned |
+| [`@concordance-wiki/plugin-contract-openapi`](../../plugins/contract-openapi/README.md) | source of `endpoint` entities from the OpenAPI 3.x contract an API note declares, candidate objects from its schemas, cached by fingerprint | none | available |
 | `@concordance-wiki/plugin-contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
 | `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none | planned |
 | `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
@@ -66,14 +66,27 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 |---|---|---|---|
 | `reader` | `readers` | `extensions`, each starting with `.` | `read({ path, payload: { bytes } }) → { metadata, text }` |
 | `converter` | `converters` | `extensions`, `produces` among `pdf`, `thumbnails`, `text` | `convert(input) → Promise<{ representations, findings }>` |
-| `source` | `sources` | `kind` | `load(input) → Promise<{ entities }>` |
+| `source` | `sources` | `kind` | `load({ payload, context }) → Promise<{ entities, links, candidates, contracts, findings }>` |
 | `inference method` | `inferenceMethods` | `method`, lowercase identifier | `infer(input) → { links }` |
 | `check` | `checks` | `id` (`E-`, `W-` or `I-`), `severity`, `description`, `remediation`, `documentation` URL | `run(input) → findings[]` |
 | `projection` | `projections` | `id`, lowercase identifier | `render(input) → { html, json }` |
 | `ui component` | `uiComponents` | `slot`, `bundle` | none: the site loads the bundle on demand |
 | `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet after its own and renders the overridden slots with the theme's components |
 
-The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution (a reader receives the raw bytes of the file as a `Uint8Array` and returns the metadata it extracted plus the full text, the material of recognition and search); the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
+The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution (a reader receives the raw bytes of the file as a `Uint8Array` and returns the metadata it extracted plus the full text, the material of recognition and search); the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context: a `PluginContext` carries the file system, the clock and, when the build has network access, a `fetch` function; a contribution never reads the clock or the network on its own. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
+
+#### Sources
+
+A source receives `{ payload, context }` where the payload is typed (`SourcePayload`):
+
+| Field | Meaning |
+|---|---|
+| `entities` | the entities read from the notes; a source picks the ones it enriches |
+| `roots` | the absolute folder of each declared source by name, against which the paths written in notes resolve |
+| `cacheDirectory` | the pipeline cache (`conversion.cache`); a source keeps what it fetched under it |
+| `confidence` | the confidence of each provenance method, as the profile declares it |
+
+and the context (`PluginContext`) carries `fs`, `clock` and an optional `fetch`, absent when the build runs offline. It returns `{ entities, links, candidates, contracts, findings }`: the entities it produces with `type_origin: contract`, the links that attach them with their provenance, the candidate objects it offers without linking them, one record per contract it read (title, version, fingerprint, import date) and its findings. A contract that cannot be read is a [`W-CONTRACT-UNREACHABLE`](../checks/W-CONTRACT-UNREACHABLE.md) finding; the other contracts are still imported.
 
 #### Converters
 

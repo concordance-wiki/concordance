@@ -1,4 +1,5 @@
 import type { BuildConfig } from "../config/types.js";
+import { compareContracts, type ContractRecord } from "./contract.js";
 import { compareFindings, type Finding, type Severity } from "./finding.js";
 
 export interface BuildSummary {
@@ -18,6 +19,8 @@ export interface BuildLog {
   /** ISO 8601 date of the build, from the injected clock: the only timestamp of the log. */
   at: string;
   summary: BuildSummary;
+  /** The contracts imported by the build, with their version and import date; absent until one is read. */
+  contracts?: ContractRecord[];
   findings: Finding[];
 }
 
@@ -112,6 +115,7 @@ export function serializeBuildLog(log: BuildLog): string {
         byCheck: log.summary.findings.byCheck,
       },
     },
+    contracts: log.contracts === undefined ? undefined : [...log.contracts].sort(compareContracts),
     // Absent keys stay absent: JSON.stringify drops undefined values.
     findings: [...log.findings].sort(compareFindings).map(canonicalFinding),
   };

@@ -98,6 +98,7 @@ The default profile defines thirty-five types and twenty relations. The MVP impl
 | `composes` | application → screen, api, process, batch | — |
 | `assigned_to` | role → process, screen | — |
 | `serves` | api → screen; endpoint → screen; screen → process | — |
+| `exposes` | api → endpoint | — |
 | `accesses` | screen, api, batch → business_object, data_object | `mode` |
 | `triggers` | screen → screen | `condition`, `label` |
 | `constrains` | rule → screen, process, business_object, api | — |
@@ -134,7 +135,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`, `W-TYPE-UNKNOWN`, `W-ATTRIBUTE-UNKNOWN` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-DOMAIN-UNKNOWN`, `W-APP-MISSING`, `W-APP-UNKNOWN`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-TERM-HOMONYM`, `I-PII-DETECTED` |
-| Contracts | `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
+| Contracts | `W-CONTRACT-UNREACHABLE`, `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
 | Plugins | `W-PLUGIN-DISABLED` |
 
 ## 4. Batches and stories

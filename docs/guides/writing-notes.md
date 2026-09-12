@@ -62,6 +62,21 @@ See [cap checked server-side](decisions:cap-checked-server-side.md).
 
 A relative link that climbs above the source root into a sibling source (`../decisions/cap-checked-server-side.md` from a source that is a folder next to `decisions/`) counts as the same thing. Both resolve only when `inference.cross_source_links` is `true` in `concordance.yaml`; otherwise the link is flagged (`W-LINK-CROSS-SOURCE`) and not recorded.
 
+## An API note declares its contract
+
+An `api` note names its contract in the `contract` attribute, as a URL or as a path relative to the note:
+
+```markdown
+---
+type: api
+protocol: rest
+contract: ./payments.openapi.json
+---
+# Payments API
+```
+
+With the `contract-openapi` plugin declared in the configuration, the build reads the OpenAPI 3.x document and produces one operation per path and method, linked to the API at confidence 0.95 with the contract location and the operation name as provenance: the operations are never copied into the note. The schemas the contract references are offered as candidate objects, not linked. The version the contract declares is recorded with its import date. A contract that cannot be fetched, read or parsed is reported (`W-CONTRACT-UNREACHABLE`) and the note keeps the operations written by hand; the build goes on.
+
 ## Sections that mean something
 
 Some section headings are mapped to relations in the profile. A mention under such a heading counts more (0.70) than a mention in a paragraph (0.60).

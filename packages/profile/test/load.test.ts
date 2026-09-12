@@ -61,7 +61,7 @@ describe("loadDefaultProfile", () => {
     expect(profile.profile).toBe("default");
     expect(profile.version).toBe(1);
     expect(Object.keys(profile.types)).toHaveLength(35);
-    expect(Object.keys(profile.relations)).toHaveLength(20);
+    expect(Object.keys(profile.relations)).toHaveLength(21);
     expect(validateProfile(profile)).toEqual({ ok: true, profile, issues: [] });
   });
 

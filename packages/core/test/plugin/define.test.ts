@@ -68,7 +68,19 @@ describe("definePlugin", () => {
               convert: () => Promise.resolve({ representations: {}, findings: [] }),
             },
           ],
-          sources: [{ kind: "openapi", load: () => Promise.resolve({ entities: [] }) }],
+          sources: [
+            {
+              kind: "openapi",
+              load: () =>
+                Promise.resolve({
+                  entities: [],
+                  links: [],
+                  candidates: [],
+                  contracts: [],
+                  findings: [],
+                }),
+            },
+          ],
           inferenceMethods: [{ method: "by_title", infer: () => ({ links: [] }) }],
           checks: [
             {

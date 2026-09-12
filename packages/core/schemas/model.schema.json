@@ -51,6 +51,38 @@
         },
         "counts": {
           "type": "object"
+        },
+        "contracts": {
+          "type": "array",
+          "description": "The contracts imported by the build, with the version each one declares and its import date",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["api", "location", "title", "version", "fingerprint", "imported_at"],
+            "properties": {
+              "api": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+              },
+              "location": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "fingerprint": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "imported_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
         }
       }
     },
@@ -352,6 +384,31 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        },
+        "objects": {
+          "type": "array",
+          "description": "Objects named by an imported contract that have no note; offered, never linked automatically",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "name", "from", "contract"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["object"]
+              },
+              "name": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+              },
+              "contract": {
+                "type": "string"
               }
             }
           }

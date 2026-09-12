@@ -241,6 +241,15 @@ importers:
 
   packages/ui: {}
 
+  plugins/contract-openapi:
+    dependencies:
+      '@concordance-wiki/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      yaml:
+        specifier: 2.8.1
+        version: 2.8.1
+
   plugins/convert-libreoffice:
     dependencies:
       '@concordance-wiki/core':

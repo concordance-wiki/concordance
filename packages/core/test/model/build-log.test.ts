@@ -204,6 +204,39 @@ describe("serializeBuildLog", () => {
     expect(serializeBuildLog(log)).toBe(serializeBuildLog(structuredClone(log)));
   });
 
+  it("records the imported contracts between the summary and the findings, in canonical order", () => {
+    const record = {
+      api: "specs/api/payments",
+      location: "./openapi.json",
+      title: "Payments API",
+      version: "2.0.0",
+      fingerprint: "a".repeat(64),
+      imported_at: "2026-09-12T12:00:00.000Z",
+    };
+    const earlier = { ...record, api: "specs/api/members", location: "https://example.invalid/b" };
+    const first = { ...earlier, location: "https://example.invalid/a" };
+    const text = serializeBuildLog({ ...log, contracts: [record, earlier, first] });
+    expect(parse(text).contracts).toEqual([first, earlier, record]);
+    expect(Object.keys(parse(text))).toEqual([
+      "version",
+      "tool",
+      "at",
+      "summary",
+      "contracts",
+      "findings",
+    ]);
+  });
+
+  it("omits the contracts key of a build that imported none", () => {
+    expect(Object.keys(parse(serializeBuildLog(log)))).toEqual([
+      "version",
+      "tool",
+      "at",
+      "summary",
+      "findings",
+    ]);
+  });
+
   it("omits the optional location keys a finding does not have", () => {
     const parsed = parse(serializeBuildLog({ ...log, findings: [unreachable] }));
     expect(parsed.findings).toEqual([unreachable]);

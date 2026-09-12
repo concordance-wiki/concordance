@@ -168,6 +168,7 @@ Common attributes: `id`, `type`, `title`, `aliases`, `application`, `domain`, `s
 | `assigned_to` | role → process, screen; actor → role | yes | — |
 | `realizes` | process → business_service; function → business_service | yes | — |
 | `serves` | api → screen; endpoint → screen; screen → process | yes | — |
+| `exposes` | api → endpoint | yes | — |
 | `accesses` | screen, api, batch, function → business_object, data_object | yes | `mode` (read, write, create, delete) |
 | `triggers` | business_event → process; screen → screen; milestone → work_package | yes | `condition`, `label` |
 | `flows_to` | process → process; batch → batch | yes | `object` |
