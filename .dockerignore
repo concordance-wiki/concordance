@@ -1,0 +1,9 @@
+.git
+.worktrees
+.stryker-tmp
+**/node_modules
+**/dist
+**/coverage
+**/reports
+**/*.tsbuildinfo
+**/.concordance-cache

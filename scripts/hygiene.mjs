@@ -14,6 +14,7 @@ const allowedDotFiles = new Set([
   ".prettierignore",
   ".npmrc",
   ".gitkeep",
+  ".dockerignore",
 ]);
 const allowedUppercaseMarkdown = new Set([
   "README.md",
