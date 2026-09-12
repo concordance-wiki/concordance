@@ -55,27 +55,71 @@ interface ExpectedEntity {
   id: string;
   type: string;
   type_origin: string;
+  application: string;
+  domain: string;
 }
+
+/** `path` is `<source>/<path>` of the file; the corpus-wide vocabulary findings, filtered out, have none. */
+interface ExpectedFinding {
+  check: string;
+  path: string;
+}
+
+/** The checks of later stories: relations, vocabulary. */
+const LATER_CHECKS = new Set(["I-REL-AMBIGUOUS", "W-TERM-UNDEFINED", "I-TERM-HOMONYM"]);
 
 function expectedEntities(corpus: string): ExpectedEntity[] {
   const text = nodeFileSystem.readText(posix.join(corpora, corpus, "expected/entities.yaml"));
   // The fixture is reviewed by hand and validated by the repository scripts.
   const entities = parse(text) as ExpectedEntity[];
-  return entities.map(({ id, type, type_origin }) => ({ id, type, type_origin }));
+  return entities.map(({ id, type, type_origin, application, domain }) => ({
+    id,
+    type,
+    type_origin,
+    application,
+    domain,
+  }));
+}
+
+function expectedFindings(corpus: string): ExpectedFinding[] {
+  const text = nodeFileSystem.readText(posix.join(corpora, corpus, "expected/findings.yaml"));
+  // Same fixture discipline as the entities.
+  const findings = parse(text) as ExpectedFinding[];
+  return findings
+    .filter((finding) => !LATER_CHECKS.has(finding.check))
+    .map(({ check, path }) => ({ check, path }));
 }
 
 describe("the minimal corpus typed through the real file system", () => {
   it.each(["en", "fr"])(
-    "gives every %s entity the type and origin of expected/entities.yaml without any finding",
+    "gives every %s entity the type, origin, application and domain of expected/entities.yaml",
     async (locale) => {
       const result = await typeCorpus(`minimal/${locale}`);
-      expect(result.findings).toEqual([]);
       expect(
-        result.entities.map(({ id, type, type_origin }) => ({ id, type, type_origin })),
+        result.entities.map(({ id, type, type_origin, application, domain }) => ({
+          id,
+          type,
+          type_origin,
+          application,
+          domain,
+        })),
       ).toEqual(expectedEntities(`minimal/${locale}`));
       expect(result.entities.map((entity) => entity.locale)).toEqual(
         result.entities.map(() => locale),
       );
+    },
+  );
+
+  it.each(["en", "fr"])(
+    "reports on the %s corpus exactly the W-DOMAIN-UNCLASSIFIED findings of expected/findings.yaml",
+    async (locale) => {
+      const result = await typeCorpus(`minimal/${locale}`);
+      expect(
+        result.findings.map((finding) => ({
+          check: finding.check,
+          path: `${finding.source ?? ""}/${finding.path ?? ""}`,
+        })),
+      ).toEqual(expectedFindings(`minimal/${locale}`));
     },
   );
 
@@ -100,7 +144,7 @@ describe("the minimal corpus typed through the real file system", () => {
 });
 
 describe("the faulty corpus typed through the real file system", () => {
-  it("reports E-TYPE-CONFLICT on type-conflict.rule.md and E-ID-DUP on dup/a.rule.md", async () => {
+  it("reports E-TYPE-CONFLICT, E-ID-DUP, W-APP-MISSING on orphan/no-application.md and W-DOMAIN-UNCLASSIFIED on misc/unclassified.md", async () => {
     const result = await typeCorpus("faulty/en");
     expect(
       result.findings.map(({ check, source, path, entity }) => ({ check, source, path, entity })),
@@ -111,6 +155,18 @@ describe("the faulty corpus typed through the real file system", () => {
         source: "notes",
         path: "type-conflict.rule.md",
         entity: undefined,
+      },
+      {
+        check: "W-APP-MISSING",
+        source: "orphan",
+        path: "no-application.md",
+        entity: "orphan/no-application",
+      },
+      {
+        check: "W-DOMAIN-UNCLASSIFIED",
+        source: "notes",
+        path: "misc/unclassified.md",
+        entity: "notes/misc/unclassified",
       },
     ]);
     const conflict = result.entities.find((entity) => entity.id === "notes/type-conflict");

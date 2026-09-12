@@ -34,7 +34,9 @@ const specified = [
   "I-TERM-HOMONYM",
   "W-TERM-UNUSED",
   "W-DOMAIN-UNCLASSIFIED",
+  "W-DOMAIN-UNKNOWN",
   "W-APP-MISSING",
+  "W-APP-UNKNOWN",
   "W-STALE",
   "I-REL-AMBIGUOUS",
   "I-PII-DETECTED",
@@ -97,13 +99,7 @@ describe("catalogue", () => {
 
   it("computes from the model exactly the checks whose data the model carries today", () => {
     const computed = catalogue.filter((d) => d.kind === "model").map((d) => d.id);
-    expect(computed).toEqual([
-      "W-DOMAIN-UNCLASSIFIED",
-      "W-APP-MISSING",
-      "I-REL-AMBIGUOUS",
-      "W-API-NOCONSUMER",
-      "W-API-CONSUMER-MISMATCH",
-    ]);
+    expect(computed).toEqual(["I-REL-AMBIGUOUS", "W-API-NOCONSUMER", "W-API-CONSUMER-MISMATCH"]);
     const others = catalogue.filter((d) => !computed.includes(d.id));
     expect(others.map((d) => d.kind)).toEqual(others.map(() => "step"));
   });

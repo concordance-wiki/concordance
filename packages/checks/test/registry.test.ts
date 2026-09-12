@@ -11,7 +11,7 @@ const orphan = entity("specs/rules/annual-cap", "rule", { application: "apps/pol
 const related = link("specs/rules/annual-cap", "specs/api/payments", "related");
 const model = input({ entities: [payments, orphan], links: [related] });
 
-const expectedChecks = ["I-REL-AMBIGUOUS", "W-API-NOCONSUMER", "W-DOMAIN-UNCLASSIFIED"];
+const expectedChecks = ["I-REL-AMBIGUOUS", "W-API-NOCONSUMER"];
 
 const stale: Finding = {
   check: "W-STALE",
@@ -141,7 +141,7 @@ describe("run", () => {
 
   it("skips a check disabled through configuration", () => {
     const findings = createRegistry().run(model, { "W-API-NOCONSUMER": { enabled: false } });
-    expect(findings.map((f) => f.check)).toEqual(["I-REL-AMBIGUOUS", "W-DOMAIN-UNCLASSIFIED"]);
+    expect(findings.map((f) => f.check)).toEqual(["I-REL-AMBIGUOUS"]);
   });
 
   it("keeps a check explicitly enabled through configuration", () => {
@@ -154,7 +154,6 @@ describe("run", () => {
     expect(findings.map((f) => [f.check, f.severity])).toEqual([
       ["I-REL-AMBIGUOUS", "info"],
       ["W-API-NOCONSUMER", "error"],
-      ["W-DOMAIN-UNCLASSIFIED", "info"],
     ]);
   });
 

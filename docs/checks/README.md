@@ -48,7 +48,9 @@ Every check listed here is registered once, with its default severity, descripti
 | [`W-TERM-UNDEFINED`](W-TERM-UNDEFINED.md) | warning | A recurring expression is used across files without any note defining it. |
 | [`W-TERM-UNUSED`](W-TERM-UNUSED.md) | info | A glossary term is never cited anywhere. |
 | [`W-DOMAIN-UNCLASSIFIED`](W-DOMAIN-UNCLASSIFIED.md) | info | A note matches no declared domain. |
+| [`W-DOMAIN-UNKNOWN`](W-DOMAIN-UNKNOWN.md) | warning | A frontmatter `domain` names no declared domain; it is kept as written. |
 | [`W-APP-MISSING`](W-APP-MISSING.md) | warning | An entity resolves to no application. |
+| [`W-APP-UNKNOWN`](W-APP-UNKNOWN.md) | warning | The resolved application is not declared in the configuration; it is kept as written. |
 | [`W-STALE`](W-STALE.md) | warning | A source or a note has not changed for longer than the configured threshold. |
 | [`I-REL-AMBIGUOUS`](I-REL-AMBIGUOUS.md) | info | A link between two entities fell back to the generic `related` relation. |
 | [`I-TERM-HOMONYM`](I-TERM-HOMONYM.md) | info | Two entities share a title or an alias once spellings are compared; occurrences link to each at half confidence. |
