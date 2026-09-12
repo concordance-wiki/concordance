@@ -1,5 +1,6 @@
 import {
   identifierFor,
+  type ApplicationConfig,
   type Entity,
   type EntitySource,
   type Finding,
@@ -8,7 +9,10 @@ import {
 import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
+import { resolveApplication } from "./application.js";
 import { resolveType } from "./cascade.js";
+import { resolveDomain, type DomainMatcher } from "./domains.js";
+import { filingFindings } from "./filing.js";
 
 export interface BuildEntityInput {
   file: IngestedFile;
@@ -16,6 +20,8 @@ export interface BuildEntityInput {
   sourceConfig: SourceConfig;
   document: ParsedMarkdown;
   profile: Profile;
+  applications: readonly ApplicationConfig[];
+  domains: DomainMatcher;
 }
 
 export interface BuiltEntity {
@@ -82,7 +88,11 @@ function attributesOf(
   frontmatter: Record<string, unknown>,
   defaults: Record<string, unknown>,
 ): Record<string, unknown> {
-  const merged: Record<string, unknown> = { ...defaults };
+  const merged: Record<string, unknown> = {};
+  // A rule's application feeds the application cascade, not the attributes.
+  for (const [key, value] of Object.entries(defaults)) {
+    if (key !== "application") merged[key] = value;
+  }
   for (const [key, value] of Object.entries(frontmatter)) {
     if (!COMMON_KEYS.has(key)) merged[key] = value;
   }
@@ -127,7 +137,7 @@ function unknownAttributes(input: BuildEntityInput, type: string, id: string): F
 }
 
 export function buildEntity(input: BuildEntityInput): BuiltEntity {
-  const { file, source, sourceConfig, document, profile } = input;
+  const { file, source, sourceConfig, document, profile, applications, domains } = input;
   const { frontmatter } = document;
   const identifier = identifierFor({
     source: source.name,
@@ -136,12 +146,21 @@ export function buildEntity(input: BuildEntityInput): BuiltEntity {
     frontmatterId: frontmatter["id"],
   });
   const resolved = resolveType({ source: sourceConfig, path: file.path, frontmatter, profile });
+  const application = resolveApplication({
+    source: sourceConfig,
+    ruleDefaults: resolved.defaults,
+    frontmatterApplication: frontmatter["application"],
+    applications,
+  });
+  const domain = resolveDomain(file.path, frontmatter["domain"], domains);
   const entity: Entity = {
     id: identifier.id,
     type: resolved.type,
     title: titleOf(frontmatter, document, file.path),
     aliases: aliasesOf(frontmatter),
     locale: source.locale,
+    ...(application.application === undefined ? {} : { application: application.application }),
+    domain: domain.domain,
     status: statusOf(frontmatter, profile),
     type_origin: resolved.origin,
     graph: profile.types[resolved.type]?.graph ?? "full",
@@ -154,6 +173,15 @@ export function buildEntity(input: BuildEntityInput): BuiltEntity {
     ...(identifier.finding === undefined ? [] : [identifier.finding]),
     ...resolved.findings,
     ...unknownAttributes(input, resolved.type, identifier.id),
+    ...filingFindings({
+      id: identifier.id,
+      type: resolved.type,
+      source: source.name,
+      path: file.path,
+      profile,
+      application,
+      domain,
+    }),
   ];
   return { entity, findings };
 }

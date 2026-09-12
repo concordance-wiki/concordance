@@ -8,6 +8,8 @@ import {
 } from "@concordance-wiki/core";
 import type { Profile } from "@concordance-wiki/profile";
 
+import { declaredString } from "./frontmatter.js";
+
 /** The type every markdown file gets when neither the source nor a rule nor the frontmatter says otherwise. */
 export const FALLBACK_TYPE = "document";
 
@@ -48,10 +50,6 @@ function ruleOrigin(rule: TypingRule, index: number): TypeOrigin {
   if (rule.match.suffix !== undefined) return "suffix";
   // A 1-based decimal position always satisfies the `rule#<digits>` member of TypeOrigin.
   return `rule#${String(index + 1)}` as TypeOrigin;
-}
-
-function declaredType(value: unknown): string {
-  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function typeConflict(input: ResolveTypeInput, bySuffix: string, byFrontmatter: string): Finding {
@@ -100,8 +98,8 @@ export function resolveType(input: ResolveTypeInput): ResolvedType {
       }
     }
   });
-  if (frontmatter["type"] !== undefined) {
-    const type = declaredType(frontmatter["type"]);
+  const type = declaredString(frontmatter["type"]);
+  if (type !== undefined) {
     if (step.origin === "suffix" && type !== step.type) {
       findings.push(typeConflict(input, step.type, type));
     }

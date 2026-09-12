@@ -1,4 +1,4 @@
-import type { SourceConfig } from "@concordance-wiki/core";
+import type { ApplicationConfig, DomainConfig, SourceConfig } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
@@ -43,6 +43,8 @@ export function profile(overrides: Partial<Profile> = {}, withCommon = true): Pr
     ? {
         common_attributes: {
           title: { type: "string" },
+          application: { type: "ref", target: "application" },
+          domain: { type: "ref", target: "domain" },
           status: { type: "enum", values: ["draft", "valid"], default: "draft" },
         },
       }
@@ -59,9 +61,26 @@ export function profile(overrides: Partial<Profile> = {}, withCommon = true): Pr
         attributes: { url_pattern: { type: "string" }, roles: { type: "ref[]" } },
       },
       rule: { label: { en: "Rule" }, group: "business" },
+      application: { label: { en: "Application" }, group: "container" },
+      domain: { label: { en: "Domain" }, group: "container" },
     },
     relations: {},
     confidence: {},
     ...overrides,
   };
 }
+
+export const APPLICATIONS: ApplicationConfig[] = [
+  { id: "policy-admin", title: "Policy administration", status: "active" },
+  { id: "billing" },
+];
+
+/** A root domain with a subdomain, and a second root whose globs overlap the first. */
+export const DOMAINS: DomainConfig[] = [
+  {
+    id: "membership",
+    match: ["**/*member*"],
+    subdomains: [{ id: "payments", match: ["**/*payment*", "**/member-payments/**"] }],
+  },
+  { id: "contracts", match: ["contracts/**"] },
+];

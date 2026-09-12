@@ -10,8 +10,15 @@ import {
 import type { IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
+import { compileDomains } from "./domains.js";
 import { buildEntity } from "./entity.js";
 
+export {
+  resolveApplication,
+  type ApplicationOrigin,
+  type ResolveApplicationInput,
+  type ResolvedApplication,
+} from "./application.js";
 export {
   FALLBACK_TYPE,
   resolveType,
@@ -19,7 +26,17 @@ export {
   type ResolvedType,
   type ResolveTypeInput,
 } from "./cascade.js";
+export {
+  compileDomains,
+  resolveDomain,
+  UNCLASSIFIED_DOMAIN,
+  type CompiledDomain,
+  type DomainMatcher,
+  type DomainOrigin,
+  type ResolvedDomain,
+} from "./domains.js";
 export { buildEntity, typeSuffixesOf, type BuildEntityInput, type BuiltEntity } from "./entity.js";
+export { filingFindings, type FilingInput } from "./filing.js";
 
 export interface TypeSourcesInput {
   sources: IngestedSource[];
@@ -49,9 +66,14 @@ function configOf(config: Config, name: string): SourceConfig {
   return found;
 }
 
-/** Builds one entity per parsed markdown file, resolves duplicate identifiers and sorts everything canonically. */
+/**
+ * Builds one entity per parsed markdown file, files it under its application and domain,
+ * resolves duplicate identifiers and sorts everything canonically.
+ */
 export function typeSources(input: TypeSourcesInput): TypedSources {
   const { sources, documents, config, profile } = input;
+  const applications = config.applications ?? [];
+  const domains = compileDomains(config.domains ?? []);
   const candidates: Candidate[] = [];
   const findings: Finding[] = [];
   for (const source of sources) {
@@ -59,7 +81,15 @@ export function typeSources(input: TypeSourcesInput): TypedSources {
     for (const file of source.files) {
       const document = documents.get(`${source.name}/${file.path}`);
       if (!file.path.endsWith(".md") || document === undefined) continue;
-      const built = buildEntity({ file, source, sourceConfig, document, profile });
+      const built = buildEntity({
+        file,
+        source,
+        sourceConfig,
+        document,
+        profile,
+        applications,
+        domains,
+      });
       candidates.push({
         id: built.entity.id,
         source: source.name,

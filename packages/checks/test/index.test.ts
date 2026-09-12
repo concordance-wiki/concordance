@@ -9,11 +9,9 @@ describe("@concordance-wiki/checks", () => {
       "DOCUMENTATION_BASE_URL",
       "apiConsumerMismatch",
       "apiWithoutConsumer",
-      "applicationMissing",
       "catalogue",
       "createRegistry",
       "documentationUrl",
-      "domainUnclassified",
       "isCheckId",
       "relationAmbiguous",
     ]);

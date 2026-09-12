@@ -4,12 +4,12 @@
 
 A note matches no declared domain.
 
-Domains are declared globally by globs across sources, and a frontmatter `domain` overrides them. The note is attached to the unclassified domain. Applications and domains themselves are containers and are never reported.
+Domains are declared globally by globs evaluated on the path of every file inside its source, and a frontmatter `domain` overrides them. The note is attached to the `unclassified` domain, which the entity records as its `domain`. Applications and domains themselves are containers and are never reported.
 
 ## Before
 
 ```
-specs/screens/free-payment-entry.md  (no domain glob matches specs/screens/)
+specs/screens/free-payment-entry.md  (no domain glob matches screens/free-payment-entry.md)
 ```
 
 ## After
@@ -17,7 +17,7 @@ specs/screens/free-payment-entry.md  (no domain glob matches specs/screens/)
 ```
 domains:
   - id: payments
-    match: ["**/payment*", "**/payments/**"]
+    match: ["**/*payment*", "**/payments/**"]
 ```
 
 ## How to fix

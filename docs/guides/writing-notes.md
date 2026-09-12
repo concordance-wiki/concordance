@@ -34,6 +34,8 @@ Frontmatter carries what qualifies the note, at most a handful of keys. The site
 
 Common keys: `title` (overrides the H1), `aliases` (other names, used for recognition), `application`, `domain`, `status` (`draft`, `proposed`, `valid`, `obsolete`), `tags`, `summary`, `superseded_by`. A key that neither the type nor the common attributes declare is kept as-is and reported (`W-ATTRIBUTE-UNKNOWN`).
 
+`application` and `domain` file the note where the configuration would not. The application otherwise comes from the source or from a typing rule; the domain otherwise comes from the globs the integrator declares globally, across every source. A frontmatter value wins over both, and names a domain by its identifier (`payments`) or by its identifier path (`membership/payments`). A note that nothing files goes to the `unclassified` domain (`W-DOMAIN-UNCLASSIFIED`) or has no application (`W-APP-MISSING`); a value the configuration does not declare is kept as written and reported (`W-DOMAIN-UNKNOWN`, `W-APP-UNKNOWN`).
+
 Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`) accept an identifier, a path or an exact title, and produce a typed relation at confidence 0.90.
 
 ## Links are authoritative

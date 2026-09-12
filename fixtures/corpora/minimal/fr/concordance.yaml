@@ -9,10 +9,10 @@ applications:
 domains:
   - id: adhesion
     title: Adhésion
-    match: ["**/adherent*"]
+    match: ["**/*adherent*"]
   - id: versements
     title: Versements
-    match: ["**/versement*", "**/traitement-de-nuit*", "**/plafond-annuel*"]
+    match: ["**/*versement*", "**/traitement-de-nuit*", "**/plafond-annuel*"]
 sources:
   - name: glossaire
     path: ./glossaire

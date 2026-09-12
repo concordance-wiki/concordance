@@ -9,10 +9,10 @@ applications:
 domains:
   - id: membership
     title: Membership
-    match: ["**/member*"]
+    match: ["**/*member*"]
   - id: payments
     title: Payments
-    match: ["**/payment*", "**/settlement*", "**/annual-cap*"]
+    match: ["**/*payment*", "**/*settlement*", "**/annual-cap*"]
 sources:
   - name: glossary
     path: ./glossary

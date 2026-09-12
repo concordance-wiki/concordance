@@ -1,7 +1,6 @@
 import type { Severity } from "@concordance-wiki/core";
 
 import { apiConsumerMismatch, apiWithoutConsumer } from "./checks/api-consumers.js";
-import { applicationMissing, domainUnclassified } from "./checks/filing.js";
 import { relationAmbiguous } from "./checks/relations.js";
 import type { CheckDefinition, CheckFamily, CheckId } from "./definition.js";
 import type { Check } from "./model.js";
@@ -156,21 +155,33 @@ export const catalogue: readonly CheckDefinition[] = [
     "A glossary term is never cited anywhere.",
     "Add the spellings people use as aliases, or mark the term obsolete.",
   ),
-  model(
+  step(
     "W-DOMAIN-UNCLASSIFIED",
     "info",
     "vocabulary-and-filing",
     "A note matches no declared domain.",
     "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
-    domainUnclassified,
   ),
-  model(
+  step(
+    "W-DOMAIN-UNKNOWN",
+    "warning",
+    "vocabulary-and-filing",
+    "A frontmatter domain is not declared in the configuration; it is kept as written.",
+    "Declare the domain under domains in concordance.yaml, or name a declared domain by its id or its id path.",
+  ),
+  step(
     "W-APP-MISSING",
     "warning",
     "vocabulary-and-filing",
     "An entity resolves to no application.",
     "Set application on the source, in a typing rule, or in the note's frontmatter.",
-    applicationMissing,
+  ),
+  step(
+    "W-APP-UNKNOWN",
+    "warning",
+    "vocabulary-and-filing",
+    "The resolved application is not declared in the configuration; it is kept as written.",
+    "Declare the application under applications in concordance.yaml, or fix the source, the rule or the frontmatter that sets it.",
   ),
   step(
     "W-STALE",

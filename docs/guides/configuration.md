@@ -34,7 +34,7 @@ plugins:
 
 ## `applications`
 
-Containers of first level. Every entity is resolved to one; an entity without one yields `W-APP-MISSING`.
+Containers of first level. Every entity is resolved to one, in increasing precedence: the source's `application`, a typing rule's `set: { application }` (the last matching rule wins), the note's frontmatter `application`. An entity without one yields `W-APP-MISSING`; an identifier that `applications:` does not declare is kept as written and yields `W-APP-UNKNOWN`. Applications and domains declared as notes are containers and are exempt from `W-APP-MISSING`.
 
 ```yaml
 applications:
@@ -45,7 +45,9 @@ applications:
 
 ## `domains`
 
-Global business domains, orthogonal to sources. Globs are evaluated on every source. Subdomains are resolved after their parent; the most specific wins. A frontmatter `domain` overrides globs. A note outside every domain goes to the unclassified domain and yields `W-DOMAIN-UNCLASSIFIED`.
+Global business domains, orthogonal to sources. The globs of every domain are evaluated on the path of every file relative to its source root, whatever the source; a glob such as `**/*payment*` therefore files `glossary/payment.md` and `specs/screens/free-payment-entry.md` together. A subdomain's globs are evaluated on their own, after its parent's: the deepest matching domain wins, and between domains of the same depth the last declared. The entity records the full identifier path of its domain, `membership/payments` below.
+
+A frontmatter `domain` overrides the globs; it names a domain by its identifier (`payments`, the first declared with it) or by its identifier path (`membership/payments`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
 
 ```yaml
 domains:
@@ -105,7 +107,7 @@ One entry per repository or local folder. Names are unique.
 | `locale` | BCP 47 tag (`en`, `fr`, `fr-CA`…); defaults to `project.locale`. Selects the language pack of the source: text normalisation, default stopwords, plural rules, word segmentation and the collation of its indexes, plus the profile's type prefixes for that locale. The engine ships `en` and `fr`; a regional variant uses the pack of its language; other languages come from plugins, which register their pack. A tag with no pack is a build error |
 | `type` | forces the type of every markdown file |
 | `default_type` | type when nothing else applies; `document` by default |
-| `application` | default application for the source |
+| `application` | default application for the source; a rule's `set: { application }` and the frontmatter override it |
 | `glossary` | `true` marks the source as a glossary: its titles and aliases take priority in the recognition dictionary |
 | `convert` | `true` enables office conversion for this source |
 | `previews` | `false` keeps previews out of the artefact for this source |

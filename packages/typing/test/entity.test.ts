@@ -2,13 +2,25 @@ import type { Entity, Finding } from "@concordance-wiki/core";
 import { loadDefaultProfile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
 
+import { compileDomains } from "../src/domains.js";
 import { buildEntity, typeSuffixesOf, type BuildEntityInput } from "../src/entity.js";
-import { document, file, MODIFIED_AT, profile, source, sourceConfig } from "./helpers.js";
+import {
+  APPLICATIONS,
+  document,
+  DOMAINS,
+  file,
+  MODIFIED_AT,
+  profile,
+  source,
+  sourceConfig,
+} from "./helpers.js";
 
 const specs = sourceConfig({
+  application: "policy-admin",
   rules: [
     { match: { path: "screens/**" }, set: { type: "screen", audience: "internal" } },
     { match: { suffix: ".rule.md" }, set: { type: "rule" } },
+    { match: { path: "billing/**" }, set: { application: "billing" } },
   ],
 });
 
@@ -20,6 +32,8 @@ function build(overrides: Partial<BuildEntityInput> = {}): { entity: Entity; fin
     sourceConfig: specs,
     document: document({ title: "Free payment entry" }),
     profile: profile(),
+    applications: APPLICATIONS,
+    domains: compileDomains(DOMAINS),
     ...overrides,
   });
 }
@@ -119,8 +133,78 @@ describe("buildEntity", () => {
       url_pattern: "/pay",
     });
     expect(build().entity.attributes).toEqual({ audience: "internal" });
-    expect(built.entity.application).toBeUndefined();
-    expect(built.entity.domain).toBeUndefined();
+    expect([built.entity.application, built.entity.domain]).toEqual([
+      "policy-admin",
+      "membership/payments",
+    ]);
+  });
+
+  it("files the entity under its application and domain and keeps a rule's application out of the attributes", () => {
+    const built = build();
+    expect([built.entity.application, built.entity.domain]).toEqual([
+      "policy-admin",
+      "membership/payments",
+    ]);
+    expect(Object.keys(built.entity)).toEqual([
+      "id",
+      "type",
+      "title",
+      "aliases",
+      "locale",
+      "application",
+      "domain",
+      "status",
+      "type_origin",
+      "graph",
+      "attributes",
+      "source",
+    ]);
+    const byRule = build({ file: file("billing/invoice.md") });
+    expect([byRule.entity.application, byRule.entity.attributes]).toEqual(["billing", {}]);
+    const declared = build({
+      document: document({ frontmatter: { application: "billing", domain: "contracts" } }),
+    });
+    expect([declared.entity.application, declared.entity.domain]).toEqual(["billing", "contracts"]);
+    expect(declared.findings).toEqual([]);
+  });
+
+  it("yields W-APP-MISSING and W-DOMAIN-UNCLASSIFIED after the type and attribute findings", () => {
+    const orphan = build({
+      sourceConfig: sourceConfig(),
+      file: file("misc/thing.md"),
+      document: document({ frontmatter: { type: "gadget", colour: "blue" } }),
+    });
+    expect("application" in orphan.entity).toBe(false);
+    expect(orphan.entity.domain).toBe("unclassified");
+    expect(orphan.findings.map((finding) => [finding.check, finding.entity])).toEqual([
+      ["W-TYPE-UNKNOWN", undefined],
+      ["W-ATTRIBUTE-UNKNOWN", "specs/misc/thing"],
+      ["W-APP-MISSING", "specs/misc/thing"],
+      ["W-DOMAIN-UNCLASSIFIED", "specs/misc/thing"],
+    ]);
+  });
+
+  it("reports an undeclared application or domain of the frontmatter and keeps both as written", () => {
+    const built = build({
+      document: document({ frontmatter: { application: "claims", domain: "claims" } }),
+    });
+    expect([built.entity.application, built.entity.domain]).toEqual(["claims", "claims"]);
+    expect(built.findings.map((finding) => finding.check)).toEqual([
+      "W-APP-UNKNOWN",
+      "W-DOMAIN-UNKNOWN",
+    ]);
+  });
+
+  it("exempts applications and domains, which are containers, from the filing findings", () => {
+    const container = build({
+      sourceConfig: sourceConfig({ type: "application" }),
+      file: file("apps/policy-admin.md"),
+    });
+    expect([container.entity.type, container.entity.domain]).toEqual([
+      "application",
+      "unclassified",
+    ]);
+    expect(container.findings).toEqual([]);
   });
 
   it("copies the file location, its commit when known and its last change", () => {
@@ -169,8 +253,8 @@ describe("buildEntity", () => {
     });
     const built = build({
       profile: withoutDocument,
-      sourceConfig: sourceConfig(),
-      file: file("a.md"),
+      sourceConfig: sourceConfig({ application: "policy-admin" }),
+      file: file("member.md"),
     });
     expect([built.entity.type, built.entity.graph]).toEqual(["document", "full"]);
     expect(built.findings.map((finding) => finding.check)).toEqual(["W-TYPE-UNKNOWN"]);
@@ -235,12 +319,12 @@ describe("buildEntity", () => {
     );
     const built = build({
       profile: bare,
-      sourceConfig: sourceConfig(),
-      file: file("a.md"),
+      sourceConfig: sourceConfig({ application: "policy-admin" }),
+      file: file("member.md"),
       document: document({ frontmatter: { id: "specs/a", type: "document", title: "A" } }),
     });
     expect(built.findings.map((finding) => finding.message)).toEqual([
-      'frontmatter attribute "title" of a.md is not declared for type document; it is kept as-is',
+      'frontmatter attribute "title" of member.md is not declared for type document; it is kept as-is',
     ]);
   });
 });
