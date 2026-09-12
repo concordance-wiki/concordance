@@ -1,0 +1,12 @@
+{
+  "name": "@concordance-wiki/fixture-plugin-example",
+  "version": "0.0.0",
+  "description": "Example plugin exercising every contribution point; used by the core tests.",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "exports": "./index.mjs",
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*"
+  }
+}

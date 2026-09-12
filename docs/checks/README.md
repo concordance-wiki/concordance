@@ -53,3 +53,9 @@ Severities can be overridden under `checks:` in `concordance.yaml` or, per repos
 |---|---|---|
 | [`W-API-NOCONSUMER`](W-API-NOCONSUMER.md) | warning | An API has no consumer, declared or inferred. |
 | [`W-API-CONSUMER-MISMATCH`](W-API-CONSUMER-MISMATCH.md) | warning | An API declares a consumer that never cites it, or a note cites an API that does not list it. |
+
+## Plugins
+
+| Check | Severity | Meaning |
+|---|---|---|
+| [`W-PLUGIN-DISABLED`](W-PLUGIN-DISABLED.md) | warning | A declared plugin needs a system tool that is not installed, so it was not registered; `info` when the tool is optional. |

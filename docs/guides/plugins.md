@@ -14,7 +14,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none |
 | `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none |
 
-The `concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this.
+The `concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this. The core never imports a plugin; a test walks its sources and its `package.json` to verify it.
 
 ## Declaring plugins
 
@@ -25,11 +25,24 @@ plugins:
     options: { timeout_s: 120 }
 ```
 
-Plugins load in the declared order and register in a deterministic registry. A plugin whose declared system dependency is missing disables itself with a finding; the build continues. A plugin whose `apiVersion` is incompatible with the installed core is a configuration error.
+An entry is a package name, or an object with the package name and its `options`. Plugins load in the declared order and register in a deterministic registry: every list the registry exposes (`plugins()`, `readers()`, `converters()`, `sources()`, `inferenceMethods()`, `checks()`, `projections()`, `uiComponents()`) follows the declaration order, and two runs on the same configuration give the same registry. The options are kept on the registration (`registrations()`); no contribution reads them yet.
+
+Before a plugin is registered, the build runs `<command> --version` for every system dependency its manifest declares.
+
+| Situation | Effect |
+|---|---|
+| a required dependency is missing | the plugin is not registered; finding [`W-PLUGIN-DISABLED`](../checks/W-PLUGIN-DISABLED.md), severity `warning`; the build continues |
+| an `optional` dependency is missing | the plugin is registered; the same finding with severity `info` |
+| the package has no default export returned by `definePlugin` | configuration error naming the package; the build stops |
+| the manifest targets another `apiVersion` than the installed core | configuration error naming both versions; the build stops |
+| the same plugin is declared twice | configuration error; the build stops |
+| two plugins contribute the same reader extension, converter extension, source kind, inference method, check identifier, projection identifier or UI slot | configuration error naming both plugins; nothing is overridden silently |
+
+Configuration errors are raised as `PluginLoadError`; a manifest that fails its schema is a `PluginDefinitionError` raised by `definePlugin` when the package is imported. Both carry a message that names the plugin and what is wrong.
 
 ## Writing a plugin
 
-A plugin is a package that exports a `definePlugin` call returning a manifest validated by [`schemas/plugin.schema.json`](../../packages/core/schemas/plugin.schema.json).
+A plugin is a package whose default export is the manifest returned by `definePlugin`, validated by [`schemas/plugin.schema.json`](../../packages/core/schemas/plugin.schema.json): a name, a version, the `apiVersion` it targets, its system dependencies and its contributions. The functions of the contributions are not part of the schema; only the data around them is validated.
 
 ```ts
 import { definePlugin } from "@concordance-wiki/core";
@@ -38,27 +51,33 @@ export default definePlugin({
   name: "@example/plugin-reader-csv",
   version: "0.1.0",
   apiVersion: "1",
-  systemDependencies: [],
+  systemDependencies: [{ name: "csv toolkit", check: "csvtool", optional: true }],
   contributes: {
     readers: [{ extensions: [".csv"], read: readCsv }],
   },
 });
 ```
 
+A manifest names at least one contribution point. `definePlugin` throws when the manifest is invalid, listing every issue with its path, the value received and what was expected, and returns the same object marked so that the registry recognises it. The example under [`fixtures/plugins/example`](../../fixtures/plugins/example/index.mjs) is the smallest plugin that touches every contribution point.
+
 ### Contribution points
 
-| Point | Signature | Used by |
-|---|---|---|
-| `reader` | `(file, context) → resource` : metadata and text for an extension | ingestion |
-| `converter` | `(resource, cache) → representations` : previews and extracted text | conversion |
-| `source` | `(declaration, context) → entities[]` : entities from something that is not a markdown file, such as a contract | ingestion |
-| `inference method` | `(model, texts) → links[]` with a method name and a confidence from the profile | inference |
-| `check` | `(model) → findings[]` with an identifier, a default severity, a description, a remediation and a documentation URL | checks, linter |
-| `projection` | `(model) → { html, json }` : a view of the model | rendering |
-| `ui component` | a slot name and a client bundle loaded on demand | site |
+| Point | Manifest key | Data validated | Runtime part |
+|---|---|---|---|
+| `reader` | `readers` | `extensions`, each starting with `.` | `read(input) → { metadata, text }` |
+| `converter` | `converters` | `extensions`, `produces` among `pdf`, `thumbnails`, `text` | `convert(input) → Promise<{ representations }>` |
+| `source` | `sources` | `kind` | `load(input) → Promise<{ entities }>` |
+| `inference method` | `inferenceMethods` | `method`, lowercase identifier | `infer(input) → { links }` |
+| `check` | `checks` | `id` (`E-`, `W-` or `I-`), `severity`, `description`, `remediation`, `documentation` URL | `run(input) → findings[]` |
+| `projection` | `projections` | `id`, lowercase identifier | `render(input) → { html, json }` |
+| `ui component` | `uiComponents` | `slot`, `bundle` | none: the site loads the bundle on demand |
 
-Every contribution is a pure function of its inputs plus the injected context (file system, fetcher, cache, clock). A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention (`E-`, `W-`, `I-`) and need a documentation page.
+The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution; the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`) say what is known today. Every contribution is a pure function of its inputs plus the injected context. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
+
+### System dependencies
+
+`systemDependencies` lists the tools a plugin needs outside the package registry: a `name` shown in findings, the `check` command run with `--version` to detect it, and `optional: true` when the plugin can run without it. Keep the list to what the plugin actually calls.
 
 ### Versioning
 
-The plugin API is versioned from the first release. A core release that changes the API bumps `apiVersion`; a plugin declares the versions it supports. Official plugins are released together with the core through Changesets.
+The plugin API is versioned from the first release: `PLUGIN_API_VERSION` is `"1"`. A core release that changes the shape of any contribution bumps it; a plugin declares the version it targets in `apiVersion`, and the registry refuses any other. Official plugins are released together with the core through Changesets.

@@ -125,7 +125,7 @@ Relation type determination: mapped section → typed frontmatter attribute → 
 
 ### 3.4 Checks
 
-Four families, plus the contract checks. Each check is a pure function `(model) → findings[]` in a registry shared by the build and the linter, with an identifier, a default severity, a description, a remediation and a [documentation page](../checks/README.md).
+Four families, plus the contract checks and the plugin checks. Each check is a pure function `(model) → findings[]` in a registry shared by the build and the linter, with an identifier, a default severity, a description, a remediation and a [documentation page](../checks/README.md).
 
 | Family | Checks |
 |---|---|
@@ -135,6 +135,7 @@ Four families, plus the contract checks. Each check is a pure function `(model) 
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED` |
 | Contracts | `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
+| Plugins | `W-PLUGIN-DISABLED` |
 
 ## 4. Batches and stories
 
