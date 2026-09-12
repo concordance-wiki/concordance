@@ -26,7 +26,7 @@ pnpm check
 | `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation |
 | `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85% |
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
-| `pnpm check` | all of the above, plus the determinism build and the hygiene scan |
+| `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte) and the hygiene scan |
 
 A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests (`tsc -b`, so that referenced packages are built first) and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose. Under Vitest, `@concordance-wiki/*` imports resolve to the sources of the workspace, so cross-package tests count for coverage and mutation testing without a build.
 
@@ -36,7 +36,7 @@ A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/`
 - Every branch has a test that verifies a behaviour, not one that merely executes it. Mutation testing runs on `core`, `typing`, `nlp`, `inference` and `checks` with an 85% threshold.
 - Strict TypeScript, no `any`, no non-null assertion, no dead code, no `TODO` without an issue.
 - Inference and checks are pure functions. Git, file system, network, LibreOffice and the clock are injected interfaces, replaced by doubles in tests.
-- Deterministic output: canonical sorting everywhere, no timestamp outside the `build` block of `model.json`, no random value.
+- Deterministic output: canonical sorting everywhere (`sortCanonically` with the comparators of `core`), no timestamp outside the `build` block of `model.json` and the `at` field of the build log, no random value. Parallel steps sort their results before writing. `SOURCE_DATE_EPOCH` pins the clock; the determinism step relies on it.
 - No proper noun anywhere: no person, company, client or real project in code, fixtures, tests or labels. The fictional corpus is a generic personal insurer with invented names.
 - A new dependency needs a justification in the pull request: function, size, licence compatible with GPL-3.0-or-later, maintenance.
 

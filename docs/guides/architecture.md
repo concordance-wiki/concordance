@@ -34,6 +34,10 @@ Strict TypeScript, ESM, Node LTS from `.nvmrc`, pnpm workspaces, packages publis
 
 The graph is built in memory and serialised to `model.json`, canonically sorted and schema-validated. `concordance render` reads it without touching the sources. A Cypher export is provided for those who want the graph elsewhere.
 
+## Reproducible builds
+
+Two builds of the same sources write the same bytes. Every list is sorted canonically before it is written: findings by check, source, path, line and message; entities by identifier; links by the source, target and relation triple; provenances by method, path and line (`compareFindings`, `compareLinks`, `compareProvenances` and `sortCanonically` in `@concordance-wiki/core`). A step that runs in parallel sorts its results before writing them, so that scheduling never shows in the outputs. Nothing random is ever written, and the only timestamp is the `at` field of the build log, which will also be the `build` block of `model.json`. It comes from the injected `Clock`; when `SOURCE_DATE_EPOCH` is set, the command line pins that clock to the given instant, following the reproducible-builds convention, and two builds are byte-identical. A double-build test and a continuous-integration step compare every file of two builds of the golden corpus.
+
 ## Deterministic identifiers
 
 An entity's identifier is `<source>/<relative path without extension or type suffix>`, slugified segment by segment: lowercase, accents removed, every other run of characters replaced by one hyphen. The longest type suffix declared by the source's rules is stripped, otherwise the extension; an undeclared suffix stays in the slug as a hyphen. A frontmatter `id` takes precedence when it follows the identifier pattern of the model schema; otherwise it yields `E-ID-INVALID` and the path applies. Never a UUID, never anything that depends on processing order. Duplicates yield `E-ID-DUP`; the first in `(source, path)` order is kept. The identifier is the page URL: the page of an entity is written at `<id>/index.html`, so that `<id>/` resolves on a hosted site as well as from `file://`.

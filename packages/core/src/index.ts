@@ -13,7 +13,7 @@ export {
   type IdentifierResult,
 } from "./identity/identifier.js";
 export { slugify } from "./identity/slug.js";
-export { fixedClock, systemClock, type Clock } from "./io/clock.js";
+export { epochClock, fixedClock, systemClock, type Clock } from "./io/clock.js";
 export { commandExists } from "./io/command.js";
 export {
   memoryFileSystem,
@@ -31,6 +31,13 @@ export {
   type BuildSummary,
 } from "./model/build-log.js";
 export { compareFindings, type Finding, type Severity } from "./model/finding.js";
+export {
+  compareLinks,
+  compareProvenances,
+  sortCanonically,
+  type LinkOrder,
+  type ProvenanceOrder,
+} from "./model/order.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
 export type * from "./plugin/api.js";
 export { definePlugin, PluginDefinitionError } from "./plugin/define.js";
