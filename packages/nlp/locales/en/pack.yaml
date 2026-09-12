@@ -1,0 +1,16 @@
+# Language pack: everything the engine needs to know about a language, as data.
+locale: en
+language: English
+# Apostrophe characters unified to the plain one before matching.
+apostrophes: ["’", "ʼ"]
+# Intl.Collator options for every alphabetical order of this locale.
+collation: { sensitivity: base, numeric: true }
+# Suffix rules that bring a plural form back to its singular; the first matching
+# rule wins, `min_length` guards short words. Applied by the occurrence scan.
+plural:
+  - { ending: ies, singular: y, min_length: 5 }
+  - { ending: sses, singular: ss, min_length: 6 }
+  - { ending: shes, singular: sh, min_length: 6 }
+  - { ending: ches, singular: ch, min_length: 6 }
+  - { ending: xes, singular: x, min_length: 5 }
+  - { ending: s, singular: "", min_length: 4 }

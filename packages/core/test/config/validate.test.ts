@@ -61,17 +61,24 @@ describe("validateConfig against the published schema", () => {
   });
 
   it("reports a value outside an enumeration with the received and expected values", () => {
-    const result = validateConfig({ ...minimal, project: { name: "W", locale: "de" } });
+    const result = validateConfig({ ...minimal, applications: [{ id: "a", status: "gone" }] });
     expect(result.ok).toBe(false);
     expect(result.issues).toEqual([
       {
         severity: "error",
-        path: "project.locale",
+        path: "applications[0].status",
         message: "value is not allowed",
-        received: "de",
-        expected: 'one of "en", "fr"',
+        received: "gone",
+        expected: 'one of "active", "legacy", "target"',
       },
     ]);
+  });
+
+  it("accepts any BCP 47 language tag as a locale and rejects a malformed one", () => {
+    expect(validateConfig({ ...minimal, project: { name: "W", locale: "fr-CA" } }).ok).toBe(true);
+    expect(
+      issuesOf({ ...minimal, project: { name: "W", locale: "French" } }).map((issue) => issue.path),
+    ).toEqual(["project.locale"]);
   });
 
   it("reports a wrong schema version as a constant mismatch", () => {

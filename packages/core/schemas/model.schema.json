@@ -40,7 +40,7 @@
               },
               "locale": {
                 "type": "string",
-                "enum": ["en", "fr"]
+                "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
               },
               "files": {
                 "type": "integer",
@@ -80,7 +80,7 @@
           },
           "locale": {
             "type": "string",
-            "enum": ["en", "fr"]
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
           },
           "application": {
             "type": "string",

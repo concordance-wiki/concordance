@@ -1,4 +1,5 @@
-export type Locale = "en" | "fr";
+/** A BCP 47 language tag; the engine ships packs for `en` and `fr`, plugins may add others. */
+export type Locale = string;
 
 export interface ProjectConfig {
   name: string;

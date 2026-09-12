@@ -21,7 +21,8 @@
         },
         "locale": {
           "type": "string",
-          "enum": ["en", "fr"]
+          "description": "BCP 47 language tag; the engine ships en and fr, plugins may add others.",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
         },
         "theme": {
           "type": "string"
@@ -154,7 +155,8 @@
           },
           "locale": {
             "type": "string",
-            "enum": ["en", "fr"]
+            "description": "BCP 47 language tag; the engine ships en and fr, plugins may add others.",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
           },
           "type": {
             "type": "string",
