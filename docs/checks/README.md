@@ -4,6 +4,12 @@ Every finding produced by the build or the linter carries one of these identifie
 
 Severities can be overridden under `checks:` in `concordance.yaml` or, per repository, in `concordance-lint.yaml`. The build fails according to `build.fail_on`; the linter fails according to `--fail-on`, `error` by default.
 
+## Sources
+
+| Check | Severity | Meaning |
+|---|---|---|
+| [`W-SOURCE-UNREACHABLE`](W-SOURCE-UNREACHABLE.md) | warning | A declared source could not be fetched or read, so the build went on without it. |
+
 ## Links
 
 | Check | Severity | Meaning |

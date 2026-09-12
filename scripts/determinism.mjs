@@ -12,7 +12,7 @@ const config = resolve(root, "fixtures/corpora/minimal/en/concordance.yaml");
 const run = spawnSync(process.execPath, [bin, "build", "--config", config], { encoding: "utf8" });
 
 if (run.status === 2 && run.stderr.includes("not implemented in this version")) {
-  console.log("determinism: the build stops after configuration, nothing to compare yet");
+  console.log("determinism: the build stops before rendering, nothing to compare yet");
   process.exit(0);
 }
 

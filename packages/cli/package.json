@@ -21,13 +21,13 @@
     "typecheck": "tsc -b tsconfig.json"
   },
   "dependencies": {
-    "@concordance-wiki/core": "workspace:*",
-    "@concordance-wiki/profile": "workspace:*",
-    "@concordance-wiki/ingest": "workspace:*",
-    "@concordance-wiki/typing": "workspace:*",
-    "@concordance-wiki/nlp": "workspace:*",
-    "@concordance-wiki/inference": "workspace:*",
     "@concordance-wiki/checks": "workspace:*",
-    "@concordance-wiki/site": "workspace:*"
+    "@concordance-wiki/core": "workspace:*",
+    "@concordance-wiki/inference": "workspace:*",
+    "@concordance-wiki/ingest": "workspace:*",
+    "@concordance-wiki/nlp": "workspace:*",
+    "@concordance-wiki/profile": "workspace:*",
+    "@concordance-wiki/site": "workspace:*",
+    "@concordance-wiki/typing": "workspace:*"
   }
 }

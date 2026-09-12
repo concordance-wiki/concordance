@@ -1,8 +1,10 @@
-import type { FileSystem } from "@concordance-wiki/core";
+import type { Clock, FileSystem, GitClient } from "@concordance-wiki/core";
 
 /** Everything a command touches outside its arguments, injected so that tests observe it. */
 export interface CommandIo {
   fs: FileSystem;
+  git: GitClient;
+  clock: Clock;
   cwd: string;
   out: (line: string) => void;
   err: (line: string) => void;
