@@ -23,6 +23,9 @@
       "path": "packages/checks/tsconfig.build.json"
     },
     {
+      "path": "packages/i18n/tsconfig.build.json"
+    },
+    {
       "path": "packages/site/tsconfig.build.json"
     },
     {

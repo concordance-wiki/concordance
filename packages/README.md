@@ -11,6 +11,7 @@ Core packages, published under `@concordance-wiki/*`. Each one compiles and expo
 | `nlp` | normalisation, Aho-Corasick, n-grams, C-value, MinHash, language packs `en` and `fr` | core |
 | `inference` | link production, confidence combination, relation typing, bounded neighbourhood, term candidates | core, ingest, nlp, profile |
 | `checks` | check registry shared by build and linter | core, profile |
+| `i18n` | message catalogues of the site (`en`, `fr`), typed identifiers, build-time resolution, platform date, number and relative time formatting | core |
 | `site` | site generation, templates, theme, i18n catalogue, search index | core, profile |
 | `ui` | client components: mentions panel, mini-map, viewer slots, trail | — |
 | `cli` | `build`, `render`, `init`, `validate-config`, `lint` | all |

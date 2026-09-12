@@ -244,7 +244,22 @@ Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages
 
 ## `theme.yaml`
 
-See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example. Name, logo, favicon, fonts, radius, light and dark palettes, default mode, optional footer and an optional additional stylesheet. The accent colour never carries information on its own.
+See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example. Name, logo, favicon, fonts, radius, light and dark palettes, default mode, optional footer, an optional additional stylesheet and optional label overrides. The accent colour never carries information on its own.
+
+### `labels`
+
+Every label of the generated site comes from a message catalogue per language, shipped by [`@concordance-wiki/i18n`](../../packages/i18n/README.md) in ICU MessageFormat: `en` is the source, `fr` a complete translation, and a project whose locale has no catalogue gets the source labels. The `labels` block overrides any message, by language of a shipped catalogue then by message identifier; the identifiers are the keys of [`messages/en.json`](../../packages/i18n/messages/en.json), whose `description` says where each label appears.
+
+```yaml
+labels:
+  en:
+    site.home: Start
+    entity.mentionsCount: "{count, plural, one {# citation} other {# citations}}"
+  fr:
+    site.home: Début
+```
+
+An override is written in the same syntax as the message it replaces and must use exactly the variables of the source message. An unknown identifier, a syntax error or a missing or extra variable is a configuration error that names the faulty key (`labels.fr.site.home` style), reported with the other theme errors. The block of the language the build uses is the only one applied: a project in `fr-CA` takes `labels.fr`.
 
 ## Continuous integration
 

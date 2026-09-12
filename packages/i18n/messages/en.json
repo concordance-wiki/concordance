@@ -1,0 +1,234 @@
+{
+  "document.download": {
+    "defaultMessage": "Download the original",
+    "description": "Link to the original file of a converted document."
+  },
+  "document.pages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "Number of pages of a converted document."
+  },
+  "document.preview": {
+    "defaultMessage": "Preview",
+    "description": "Link to the rendered preview of a converted document."
+  },
+  "entity.application": {
+    "defaultMessage": "Application",
+    "description": "Label of the application an entity belongs to."
+  },
+  "entity.attributes": {
+    "defaultMessage": "Attributes",
+    "description": "Heading of the attribute table of an entity page."
+  },
+  "entity.confidence": {
+    "defaultMessage": "Confidence: {value, number, percent}",
+    "description": "Confidence of an inferred link, as a percentage between 0 and 1."
+  },
+  "entity.domain": {
+    "defaultMessage": "Domain",
+    "description": "Label of the domain an entity belongs to."
+  },
+  "entity.mentions": {
+    "defaultMessage": "Mentions",
+    "description": "Heading of the mentions panel of an entity page."
+  },
+  "entity.mentionsCount": {
+    "defaultMessage": "{count, plural, one {# mention} other {# mentions}}",
+    "description": "Number of mentions of an entity, with the plural handled by the message."
+  },
+  "entity.neighbours": {
+    "defaultMessage": "Neighbourhood",
+    "description": "Heading of the one-hop neighbourhood of an entity."
+  },
+  "entity.relatedTo": {
+    "defaultMessage": "Related to",
+    "description": "Heading of the list of entities linked to the current one."
+  },
+  "entity.showLess": {
+    "defaultMessage": "Show less",
+    "description": "Button that collapses an expanded list."
+  },
+  "entity.showMore": {
+    "defaultMessage": "Show more",
+    "description": "Button that expands a truncated list."
+  },
+  "entity.sources": {
+    "defaultMessage": "Sources",
+    "description": "Heading of the list of sources an entity comes from."
+  },
+  "entity.status": {
+    "defaultMessage": "Status",
+    "description": "Label of the lifecycle status of an entity."
+  },
+  "entity.type": {
+    "defaultMessage": "Type",
+    "description": "Label of the type of an entity."
+  },
+  "footer.builtWith": {
+    "defaultMessage": "Built with Concordance",
+    "description": "Optional discreet mention of the tool in the footer."
+  },
+  "index.empty": {
+    "defaultMessage": "No entry under this letter",
+    "description": "Notice shown when a letter of the index has no entry."
+  },
+  "index.letters": {
+    "defaultMessage": "Browse by initial letter",
+    "description": "Label of the letter navigation of the index."
+  },
+  "keyword.createNote": {
+    "defaultMessage": "Create a note",
+    "description": "Call to action that opens the note template for a keyword."
+  },
+  "keyword.documents": {
+    "defaultMessage": "{count, plural, one {# document} other {# documents}}",
+    "description": "Number of documents a keyword appears in."
+  },
+  "keyword.occurrences": {
+    "defaultMessage": "{count, plural, one {# occurrence} other {# occurrences}}",
+    "description": "Number of occurrences of a keyword across the corpus."
+  },
+  "keyword.title": {
+    "defaultMessage": "Keyword",
+    "description": "Heading of a keyword page."
+  },
+  "keyword.undefinedExpression": {
+    "defaultMessage": "Expression without a note",
+    "description": "Notice that a keyword has no note of its own yet."
+  },
+  "mentions.atLine": {
+    "defaultMessage": "line {line, number}",
+    "description": "Location of a mention inside a document, given by its line number."
+  },
+  "mentions.explicit": {
+    "defaultMessage": "Explicit mentions",
+    "description": "Group heading for mentions written as links in the sources."
+  },
+  "mentions.inSection": {
+    "defaultMessage": "in section {section}",
+    "description": "Location of a mention inside a document, given by its section heading."
+  },
+  "mentions.inferred": {
+    "defaultMessage": "Inferred mentions",
+    "description": "Group heading for mentions found by inference."
+  },
+  "nav.applications": {
+    "defaultMessage": "Applications",
+    "description": "Navigation entry for the list of applications."
+  },
+  "nav.domains": {
+    "defaultMessage": "Domains",
+    "description": "Navigation entry for the domain hierarchy."
+  },
+  "nav.types": {
+    "defaultMessage": "Types",
+    "description": "Navigation entry for the list of entity types."
+  },
+  "search.clear": {
+    "defaultMessage": "Clear filters",
+    "description": "Button that resets every facet of the search."
+  },
+  "search.facet.application": {
+    "defaultMessage": "Application",
+    "description": "Facet that filters search results by application."
+  },
+  "search.facet.domain": {
+    "defaultMessage": "Domain",
+    "description": "Facet that filters search results by domain."
+  },
+  "search.facet.type": {
+    "defaultMessage": "Type",
+    "description": "Facet that filters search results by entity type."
+  },
+  "search.facets": {
+    "defaultMessage": "Filters",
+    "description": "Heading of the facet filters of the search page."
+  },
+  "search.noResult": {
+    "defaultMessage": "No result",
+    "description": "Notice shown when a search matches nothing."
+  },
+  "search.results": {
+    "defaultMessage": "{count, plural, one {# result} other {# results}}",
+    "description": "Number of results of a search."
+  },
+  "site.generatedAt": {
+    "defaultMessage": "Generated on {date, date, long}",
+    "description": "Footer line giving the day the site was built."
+  },
+  "site.home": {
+    "defaultMessage": "Home",
+    "description": "Link to the landing page of the site."
+  },
+  "site.index": {
+    "defaultMessage": "Index",
+    "description": "Link to the alphabetical index of entries."
+  },
+  "site.search": {
+    "defaultMessage": "Search",
+    "description": "Label of the search field and of the search page."
+  },
+  "site.searchPlaceholder": {
+    "defaultMessage": "Search entities and keywords…",
+    "description": "Placeholder shown inside the empty search field."
+  },
+  "site.skipToContent": {
+    "defaultMessage": "Skip to content",
+    "description": "Link that jumps over the navigation to the main content."
+  },
+  "site.todo": {
+    "defaultMessage": "To do",
+    "description": "Link to the page listing the findings of the build."
+  },
+  "site.version": {
+    "defaultMessage": "Version",
+    "description": "Label preceding the version of the generated site."
+  },
+  "time.updatedAgo": {
+    "defaultMessage": "Updated {when}",
+    "description": "Frame around a relative duration rendered separately, such as three days ago."
+  },
+  "todo.findings": {
+    "defaultMessage": "{count, plural, one {# finding} other {# findings}}",
+    "description": "Number of findings listed on the to-do page."
+  },
+  "todo.severity.error": {
+    "defaultMessage": "Error",
+    "description": "Severity label of a finding that fails the build."
+  },
+  "todo.severity.info": {
+    "defaultMessage": "Information",
+    "description": "Severity label of a finding given for information only."
+  },
+  "todo.severity.warning": {
+    "defaultMessage": "Warning",
+    "description": "Severity label of a finding that is reported but tolerated."
+  },
+  "todo.title": {
+    "defaultMessage": "To do",
+    "description": "Heading of the page listing the findings of the build."
+  },
+  "trail.empty": {
+    "defaultMessage": "No page pinned yet",
+    "description": "Notice shown when the trail holds no page."
+  },
+  "trail.pin": {
+    "defaultMessage": "Pin",
+    "description": "Button that keeps the current page in the trail."
+  },
+  "trail.title": {
+    "defaultMessage": "Trail",
+    "description": "Heading of the navigation trail panel."
+  },
+  "trail.unpin": {
+    "defaultMessage": "Unpin",
+    "description": "Button that removes the current page from the trail."
+  },
+  "transcript.duration": {
+    "defaultMessage": "Duration",
+    "description": "Label of the total duration of a transcript."
+  },
+  "transcript.speakers": {
+    "defaultMessage": "Speakers",
+    "description": "Heading of the list of speakers of a transcript."
+  }
+}
