@@ -2,6 +2,7 @@
 # Exactly these findings, plus any I-REL-AMBIGUOUS produced by other prose mentions.
 - { check: E-FM-INVALID, source: notes, path: invalid-frontmatter.md, line: 3 }
 - { check: E-ID-DUP, source: notes, path: dup/a.rule.md, entity: notes/dup/a }
+- { check: E-ID-INVALID, source: notes, path: invalid-id.md, entity: notes/invalid-id }
 - { check: E-LINK-BROKEN, source: notes, path: broken-link.md, line: 3 }
 - { check: E-META-REL, source: notes, path: screens/meta-rel.md, entity: notes/screens/meta-rel }
 - { check: E-TYPE-CONFLICT, source: notes, path: type-conflict.rule.md }
@@ -9,7 +10,10 @@
 - { check: W-API-CONSUMER-MISMATCH, source: notes, path: api/mismatch.md }
 - { check: W-API-NOCONSUMER, source: notes, path: api/mismatch.md }
 - { check: W-API-NOCONSUMER, source: notes, path: api/no-consumer.md }
-- { check: W-APP-MISSING, source: orphan, path: no-application.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: notes, path: misc/unclassified.md }
+- { check: W-APP-MISSING, source: orphan, path: no-application.md, entity: orphan/no-application }
+- { check: W-ATTRIBUTE-UNKNOWN, source: notes, path: screens/unknown-attribute.md, entity: notes/screens/unknown-attribute }
+- { check: W-DOMAIN-UNCLASSIFIED, source: notes, path: misc/unclassified.md, entity: notes/misc/unclassified }
+- { check: W-LINK-CROSS-SOURCE, source: notes, path: cross-source.md, line: 3 }
 - { check: W-TERM-UNDEFINED, text: recurring expression, min_occurrences: 3, min_files: 2 }
 - { check: W-TERM-UNUSED, source: notes, path: terms/never-cited.md }
+- { check: W-TYPE-UNKNOWN, source: notes, path: unknown-type.md }

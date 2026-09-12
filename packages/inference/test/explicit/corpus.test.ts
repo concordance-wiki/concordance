@@ -111,11 +111,11 @@ async function runCorpus(corpus: string): Promise<ExplicitLinksResult> {
   });
 }
 
-describe("the minimal corpus", () => {
+describe.each(["minimal", "realistic"])("the %s corpus", (name) => {
   it.each(["en", "fr"])(
     "produces every expected explicit_link of the %s corpus on from and to at its minimum confidence, the relation being refined by a later step",
     async (locale) => {
-      const corpus = `minimal/${locale}`;
+      const corpus = `${name}/${locale}`;
       const { links, findings } = await runCorpus(corpus);
       const expected = readExpected<ExpectedLink>(posix.join(corpora, corpus), "links.yaml").filter(
         (link) => link.method === "explicit_link",
@@ -134,7 +134,9 @@ describe("the minimal corpus", () => {
       expect(findings).toEqual([]);
     },
   );
+});
 
+describe("the minimal corpus", () => {
   it("resolves the links that climb into a sibling source because its configuration allows cross-source links", async () => {
     const { links } = await runCorpus("minimal/en");
     expect(
@@ -148,19 +150,38 @@ describe("the minimal corpus", () => {
   });
 });
 
+describe("the realistic corpus", () => {
+  it("resolves a link written with the source prefix and a link to a contract file", async () => {
+    const { links } = await runCorpus("realistic/en");
+    expect(
+      links
+        .filter((link) => link.from === "meetings/2026-03-12-payments-workshop")
+        .map((link) => [link.to, link.relation]),
+    ).toEqual([
+      ["decisions/cap-checked-server-side", "documents"],
+      ["specs/batches/nightly-settlement", "documents"],
+    ]);
+    expect(
+      links.filter((link) => link.from.startsWith("specs/api/contracts/")).map((link) => link.to),
+    ).toEqual(["specs/api/claims", "specs/api/payments"]);
+  });
+});
+
+const LINK_CHECKS = new Set(["E-LINK-BROKEN", "W-LINK-CROSS-SOURCE"]);
+
 describe("the faulty corpus", () => {
-  it.each([
-    ["en", "broken-link.md"],
-    ["fr", "lien-casse.md"],
-  ])(
-    "yields E-LINK-BROKEN on line 3 of the broken note of the %s corpus and no other link finding",
-    async (locale, path) => {
+  it.each(["en", "fr"])(
+    "yields exactly the link findings of expected/findings.yaml on the %s corpus",
+    async (locale) => {
       const root = posix.join(corpora, "faulty", locale);
       const { findings } = await runCorpus(`faulty/${locale}`);
-      const expected = readExpected<ExpectedFinding>(root, "findings.yaml").filter(
-        (finding) => finding.check === "E-LINK-BROKEN",
+      const expected = readExpected<ExpectedFinding>(root, "findings.yaml").filter((finding) =>
+        LINK_CHECKS.has(finding.check),
       );
-      expect(expected).toEqual([{ check: "E-LINK-BROKEN", source: "notes", path, line: 3 }]);
+      expect(expected.map((finding) => finding.check)).toEqual([
+        "E-LINK-BROKEN",
+        "W-LINK-CROSS-SOURCE",
+      ]);
       expect(
         findings.map((finding) => ({
           check: finding.check,

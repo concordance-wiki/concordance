@@ -1,0 +1,18 @@
+# Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
+# further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
+# No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
+- { check: I-REL-AMBIGUOUS, path: specs/screens/free-payment-entry.md, note: "free payment (term) mentioned in prose falls back to related" }
+- { check: W-API-CONSUMER-MISMATCH, path: specs/api/claims.md, note: "declares screens/claim-review as a consumer, which never cites it" }
+- { check: W-API-NOCONSUMER, path: specs/api/member-directory.md }
+- { check: W-APP-MISSING, source: framing, path: portal-vision.md }
+- { check: W-ATTRIBUTE-UNKNOWN, source: decisions, path: member-directory-exposed.md, entity: decisions/member-directory-exposed, note: "owner is not an attribute of decision" }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: branch.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: reinstatement.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: subrogation.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: technical-margin.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/account-manager.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/branch-manager.md }
+- { check: W-TERM-UNDEFINED, text: waiting period, min_occurrences: 9, min_files: 4 }
+- { check: W-TERM-UNUSED, path: glossary/reinstatement.md }
+- { check: W-TERM-UNUSED, path: glossary/subrogation.md }
+- { check: W-TERM-UNUSED, path: glossary/technical-margin.md, note: "cited only under framing/private/, which privacy.exclude removes before anything is read" }
