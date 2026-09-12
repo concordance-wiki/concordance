@@ -31,7 +31,7 @@ function parseHeader(line: string): FileHistory {
 }
 
 /** Newest commit per path, from `git log --name-only -z` output; the first path of each commit starts with "\n". */
-function parseLog(output: string): Map<string, FileHistory> {
+export function parseLog(output: string): Map<string, FileHistory> {
   const touched = new Map<string, FileHistory>();
   let current = parseHeader("");
   for (const token of output.split("\0")) {
