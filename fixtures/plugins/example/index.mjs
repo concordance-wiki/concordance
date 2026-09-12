@@ -21,7 +21,29 @@ export default definePlugin({
           Promise.resolve({ representations: { text: { path: input.path } }, findings: [] }),
       },
     ],
-    sources: [{ kind: "example", load: (input) => Promise.resolve({ entities: [input.name] }) }],
+    sources: [
+      {
+        kind: "example",
+        load: (input) =>
+          Promise.resolve({
+            entities: input.payload.entities,
+            links: [],
+            candidates: [],
+            contracts: [],
+            findings:
+              input.context.fetch === undefined
+                ? [
+                    {
+                      check: "I-EXAMPLE-ALWAYS",
+                      severity: "info",
+                      message: "no network",
+                      remediation: "none",
+                    },
+                  ]
+                : [],
+          }),
+      },
+    ],
     inferenceMethods: [{ method: "example", infer: () => ({ links: [] }) }],
     checks: [
       {

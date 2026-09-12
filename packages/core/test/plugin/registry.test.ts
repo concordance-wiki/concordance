@@ -4,7 +4,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import type { PluginConfig } from "../../src/config/types.js";
+import { fixedClock } from "../../src/io/clock.js";
 import { commandExists } from "../../src/io/command.js";
+import { memoryFileSystem } from "../../src/io/file-system.js";
 import type { Contributions, PluginManifest } from "../../src/plugin/api.js";
 import { definePlugin } from "../../src/plugin/define.js";
 import { importPlugin } from "../../src/plugin/node-loader.js";
@@ -262,8 +264,36 @@ describe("loadPlugins", () => {
     ],
     [
       "source kind openapi",
-      { sources: [{ kind: "openapi", load: () => Promise.resolve({ entities: [] }) }] },
-      { sources: [{ kind: "openapi", load: () => Promise.resolve({ entities: [] }) }] },
+      {
+        sources: [
+          {
+            kind: "openapi",
+            load: () =>
+              Promise.resolve({
+                entities: [],
+                links: [],
+                candidates: [],
+                contracts: [],
+                findings: [],
+              }),
+          },
+        ],
+      },
+      {
+        sources: [
+          {
+            kind: "openapi",
+            load: () =>
+              Promise.resolve({
+                entities: [],
+                links: [],
+                candidates: [],
+                contracts: [],
+                findings: [],
+              }),
+          },
+        ],
+      },
     ],
     [
       "inference method by_title",
@@ -337,7 +367,19 @@ describe("loadPlugins", () => {
             convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
-        sources: [{ kind: "one", load: () => Promise.resolve({ entities: [] }) }],
+        sources: [
+          {
+            kind: "one",
+            load: () =>
+              Promise.resolve({
+                entities: [],
+                links: [],
+                candidates: [],
+                contracts: [],
+                findings: [],
+              }),
+          },
+        ],
         inferenceMethods: [{ method: "one", infer: () => ({ links: [] }) }],
         checks: [
           {
@@ -361,7 +403,19 @@ describe("loadPlugins", () => {
             convert: () => Promise.resolve({ representations: {}, findings: [] }),
           },
         ],
-        sources: [{ kind: "two", load: () => Promise.resolve({ entities: [] }) }],
+        sources: [
+          {
+            kind: "two",
+            load: () =>
+              Promise.resolve({
+                entities: [],
+                links: [],
+                candidates: [],
+                contracts: [],
+                findings: [],
+              }),
+          },
+        ],
         inferenceMethods: [{ method: "two", infer: () => ({ links: [] }) }],
         checks: [
           {
@@ -414,9 +468,19 @@ describe("loadPlugins", () => {
       representations: { text: { path: "a.example" } },
       findings: [],
     });
-    expect(await source?.load({ name: "contracts", payload: null })).toEqual({
-      entities: ["contracts"],
+    const sourcePayload = { entities: [], roots: {}, cacheDirectory: "/cache", confidence: {} };
+    const context = { fs: memoryFileSystem(), clock: fixedClock("2026-01-01T00:00:00Z") };
+    expect(await source?.load({ payload: sourcePayload, context })).toEqual({
+      entities: [],
+      links: [],
+      candidates: [],
+      contracts: [],
+      findings: [
+        { check: "I-EXAMPLE-ALWAYS", severity: "info", message: "no network", remediation: "none" },
+      ],
     });
+    const online = { ...context, fetch: () => Promise.reject(new Error("never called")) };
+    expect((await source?.load({ payload: sourcePayload, context: online }))?.findings).toEqual([]);
     expect(method?.infer({ payload: null })).toEqual({ links: [] });
     expect(check?.run({ payload: null })).toEqual([
       { check: "I-EXAMPLE-ALWAYS", severity: "info", message: "example" },

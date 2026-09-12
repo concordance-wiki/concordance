@@ -511,6 +511,11 @@ relations:
       - [api, batch]
       - [endpoint, screen]
       - [screen, process]
+  exposes:
+    label: { en: exposes, fr: expose }
+    directed: true
+    allowed:
+      - [api, endpoint]
   accesses:
     label: { en: accesses, fr: accède à }
     directed: true

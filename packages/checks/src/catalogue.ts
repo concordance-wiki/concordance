@@ -212,6 +212,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "A personal name was detected in a transcript outside the pseudonymisation dictionary.",
     "Add the name to pseudonyms.yaml, or edit the transcript in its source repository.",
   ),
+  step(
+    "W-CONTRACT-UNREACHABLE",
+    "warning",
+    "contracts",
+    "The contract an API note declares could not be fetched, read or parsed, so the note keeps its manual operations.",
+    "Fix the contract URL or path, give the build network access, or check that the file is an OpenAPI 3.x document.",
+  ),
   model(
     "W-API-NOCONSUMER",
     "warning",

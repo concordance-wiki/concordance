@@ -1,0 +1,23 @@
+{
+  "name": "@concordance-wiki/plugin-contract-openapi",
+  "version": "0.0.0",
+  "description": "Source of endpoint entities from OpenAPI 3.x contracts declared by API notes, cached by fingerprint.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "yaml": "2.8.1"
+  }
+}
