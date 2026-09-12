@@ -38,7 +38,7 @@ Office documents are converted to PDF by headless LibreOffice, rendered by pdf.j
 
 ## Lock file for human decisions
 
-`concordance.lock.yaml`, in the configuration repository, records accepted and rejected links, merged and separated duplicates, and rejected term candidates. The first version reads `rejected_terms` only; the other keys are accepted by the schema and ignored with a warning. Nothing is ever written into a knowledge repository.
+`concordance.lock.yaml`, in the configuration repository, records accepted and rejected links, merged and separated duplicates, and rejected term candidates. The first version reads `rejected_terms` only; the other keys are accepted by the schema and ignored with a warning, except that the [twin resources](#twin-resources) reconciliation applies the `merged` and `separated` pairs it is given. Nothing is ever written into a knowledge repository.
 
 ## TypeScript monorepo
 
@@ -88,6 +88,12 @@ Each pair gives one undirected `related` link at the `cooccurrence` confidence, 
 ## Displayed neighbourhood
 
 The mini-map of a page shows the one-hop neighbours of its entity, precomputed at build from the links of the model and served with the page: the browser computes nothing. Both ends of every link are neighbours of each other, whatever the direction of the link; a typed entity and a noteless keyword page are equally eligible, and each neighbour carries its `kind` (`entity` or `keyword`) so that the rendering can distinguish them. A neighbour reached through several links keeps the largest confidence and the relation of the most confident link, the first in code-unit order on a tie, and its `direction` is `out`, `in` or `both`, seen from the page. Neighbours are sorted by decreasing confidence then by identifier and truncated to `site.neighbourhood.size` (6 by default); the computation never shows more than 12 whatever the value, and the configuration schema rejects a larger one. The merge is commutative, so the result depends on the set of links alone. The `displayed_neighbourhood` block of `model.json` lists, per identifier and in identifier order, every entity with its neighbours best first, an empty list for one that has none. The type-driven neighbour order of the profile (`display.neighbours_order`) reorders this list at rendering time and is not applied here.
+
+## Twin resources
+
+A workshop exists as a deck, as notes and as a transcript; the reader must see one page. The reconciliation scores every pair of resources by adding independent signals, capped at 1: an explicit frontmatter declaration (1.0), the same base name in the same folder (0.7) or elsewhere (0.5), close base names at Jaro-Winkler 0.9 or more (those weights times 0.8), the property title of one equal to the heading of the other (0.6), similar text (0.7 from a Jaccard index of 0.8, 0.4 from 0.6), the same commit (0.3) and the folder proximity, the depth of the common prefix over the deeper folder, up to 0.2. Above 0.9 the resources merge into one entity carrying every representation and the criterion that grouped them, for the page to name; from 0.5 they stay separate with a `W-DUP-CANDIDATE` finding that lists every signal. The commit and the folder never create a pair on their own: an initial import puts every file in one commit.
+
+Text similarity works on extracted text, never on binary content. Each text goes to its comparison form (the language pack normalises, cuts words and drops stopwords), then to 5-word shingles, then to a MinHash signature of 128 functions under a fixed seed. LSH banding, four rows per band, enumerates the candidate pairs: two signatures that share no band are never compared, so the full matrix is never built. In `auto` mode the pairs estimated at 0.5 or more have their exact Jaccard index recomputed on the full shingle sets, and the finding gives the share of lines in common. A pair whose word counts differ by more than half is an inclusion rather than a duplicate: its content signal is capped at 0.4 and the finding says so. The lock file wins over the score: `merged` pairs merge, `separated` pairs neither merge nor report. Resources are sorted by identifier before anything else and every output is sorted, so two runs, or a shuffled input, give the same result.
 
 ## Keyword page threshold
 

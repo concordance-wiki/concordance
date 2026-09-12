@@ -362,6 +362,51 @@
         "candidate_score": {
           "type": "number",
           "minimum": 0
+        },
+        "duplicates": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["estimate", "exact", "auto"],
+              "default": "auto"
+            },
+            "exact_above": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            },
+            "size_ratio_min": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            },
+            "shingle_size": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 5
+            },
+            "minhash_functions": {
+              "type": "integer",
+              "minimum": 4,
+              "default": 128
+            },
+            "merge_above": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.9
+            },
+            "candidate_above": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            }
+          }
         }
       }
     },

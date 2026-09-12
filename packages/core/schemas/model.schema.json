@@ -185,6 +185,10 @@
               }
             }
           },
+          "grouped_by": {
+            "type": "string",
+            "description": "what merged the representations of this entity, for the page to name it"
+          },
           "keyword": {
             "type": "boolean",
             "description": "true for a keyword page without a note"

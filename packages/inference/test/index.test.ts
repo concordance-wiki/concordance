@@ -5,6 +5,8 @@ import * as entry from "../src/index.js";
 describe("@concordance-wiki/inference", () => {
   it("exposes exactly its public API", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "DUPLICATE_CHECK",
+      "DUPLICATE_DEFAULTS",
       "MAX_DISPLAYED_NEIGHBOURS",
       "accumulateCooccurrences",
       "combineConfidences",
@@ -14,8 +16,10 @@ describe("@concordance-wiki/inference", () => {
       "displayOptions",
       "displayedNeighbourhood",
       "displayedNeighbourhoodToModel",
+      "duplicateOptions",
       "explicitLinks",
       "foldHeading",
+      "formatDuplicateStats",
       "frontmatterLinks",
       "glossaryConfidence",
       "indexEntities",
@@ -23,6 +27,7 @@ describe("@concordance-wiki/inference", () => {
       "mentionLinks",
       "neighbourhoodOptions",
       "neighbourhoodToModel",
+      "resolveDuplicateResources",
       "resolveReference",
     ]);
   });

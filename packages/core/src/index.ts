@@ -36,6 +36,7 @@ export {
   compareEntities,
   type Entity,
   type EntityGraph,
+  type EntityRepresentation,
   type EntitySource,
   type TypeOrigin,
 } from "./model/entity.js";

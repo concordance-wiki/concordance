@@ -14,6 +14,25 @@ export type {
   NeighbourDirection,
   NeighbourKind,
 } from "./display/types.js";
+export { duplicateOptions, DUPLICATE_DEFAULTS } from "./duplicates/options.js";
+export {
+  DUPLICATE_CHECK,
+  formatDuplicateStats,
+  resolveDuplicateResources,
+} from "./duplicates/resolve.js";
+export type {
+  DuplicateGroup,
+  DuplicateInput,
+  DuplicateLock,
+  DuplicateMode,
+  DuplicateOptions,
+  DuplicatePair,
+  DuplicateRepresentation,
+  DuplicateResource,
+  DuplicateResult,
+  DuplicateSignal,
+  DuplicateStats,
+} from "./duplicates/types.js";
 export { explicitLinks } from "./explicit/links.js";
 export type {
   ExplicitLinksInput,

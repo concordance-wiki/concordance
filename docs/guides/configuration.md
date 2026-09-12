@@ -181,6 +181,24 @@ staleness:
 | `keyword_pages` | `{ min_occurrences: 3, min_files: 2 }` | publication threshold of a keyword page: a discovered expression gets a page under `keywords/<slug>` only from `min_occurrences` occurrences in `min_files` distinct files. Below the threshold it stays in the output for the search index but has no page. Distinct from `ngrams`: `ngrams.min_occurrences` and `ngrams.min_documents` decide which expressions the discovery keeps at all (and can report as `W-TERM-UNDEFINED`), `keyword_pages` decides which of them become pages; lowering `keyword_pages` below `ngrams` has no effect. The build summary reports `keyword pages` and `expressions under the threshold` |
 | `neighbours` | `{ k: 50 }` | `k` is the number of co-occurrence neighbours kept per node, ranked by the number of shared paragraphs then by identifier; it bounds the memory of the accumulation and the size of the `neighbours` block of `model.json` (see the [architecture guide](architecture.md#bounded-neighbourhood)) |
 | `candidate_score` | 4.0 | score from which a candidate yields [`W-TERM-UNDEFINED`](../checks/W-TERM-UNDEFINED.md); the score is the C-value of the expression multiplied by its IDF, both described on the check page |
+| `duplicates` | see below | how the twin resources of one document (a deck, its notes, its transcript) are reconciled |
+
+### `inference.duplicates`
+
+Two resources are scored by adding their signals, capped at 1: an explicit frontmatter `source` declaration (1.0), the same base name in the same folder (0.7) or elsewhere (0.5), base names at Jaro-Winkler 0.9 or more (those weights times 0.8), the property title of one equal to the level-one heading of the other (0.6), similar extracted text (0.7 from an estimated Jaccard index of 0.8, 0.4 from 0.6), the same commit (0.3) and the folder proximity (up to 0.2). Above `merge_above` the resources become one entity with several representations; from `candidate_above` they stay separate and a [`W-DUP-CANDIDATE`](../checks/W-DUP-CANDIDATE.md) finding names the score and every signal. The commit and the folder only reinforce a pair found by a declaration, a base name, a title or its text. See the [architecture guide](architecture.md#twin-resources).
+
+| Key | Default | Meaning |
+|---|---|---|
+| `mode` | `auto` | `estimate` never recomputes the exact Jaccard index and reports the MinHash estimate; `exact` recomputes it on every pair the LSH banding brings together; `auto` recomputes it on the pairs estimated at `exact_above` or more |
+| `exact_above` | 0.5 | estimated index from which `auto` recomputes the exact one, on the full shingle sets, and adds the share of common lines to the finding |
+| `size_ratio_min` | 0.5 | word-count ratio (shorter over longer text) under which the content signal is capped at 0.4 and the finding says the pair looks like an inclusion rather than a duplicate |
+| `shingle_size` | 5 | words per shingle of the comparison form |
+| `minhash_functions` | 128 | hash functions of a signature, four per LSH band |
+| `merge_above` | 0.9 | score strictly above which resources merge |
+| `candidate_above` | 0.5 | score from which a finding is produced |
+
+Build time against precision: the estimate alone visits every candidate pair once through its 128-value signature, the exact index re-reads the two full shingle sets of a pair, and `auto` spends that only on the pairs that are already close. Lowering `exact_above` or choosing `exact` makes the index in the findings exact on more pairs at the cost of build time, `estimate` makes the build fastest with an index accurate to about one tenth. The build summary reports the pairs brought together by the banding, the pairs scored, the exact verifications and the time spent.
+
 
 ## `conversion`
 
@@ -251,7 +269,7 @@ An entry replaces the entry of the same check given under `checks` in the `conco
 
 ## `lock`
 
-Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages/core/schemas/lock.schema.json). Only `rejected_terms` is read in the first version.
+Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages/core/schemas/lock.schema.json). Only `rejected_terms` is read in the first version. Under `duplicates`, `merged` lists pairs of resource identifiers that merge whatever their score, and `separated` pairs that never merge and produce no finding; the reconciliation engine (`resolveDuplicateResources` of the inference package) applies both pairs it is given.
 
 ## `theme.yaml`
 
