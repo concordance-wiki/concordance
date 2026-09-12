@@ -74,6 +74,18 @@ Whether the build fails is decided by `build.fail_on` alone: by default it fails
 
 Open `dist/index.html` in a browser. The site works over `file://`; no server is needed.
 
+### Reproducible builds
+
+Two builds of unchanged sources write byte-identical files, so that `dist/` can be committed and diffed. Every list is written in a canonical order and nothing in the outputs depends on the clock, except the `at` field of the build log (and, later, the `build` block of `model.json`). To pin that field too, set `SOURCE_DATE_EPOCH` to a number of seconds since the epoch, as reproducible-builds tooling does:
+
+```bash
+SOURCE_DATE_EPOCH=0 concordance build --output first
+SOURCE_DATE_EPOCH=0 concordance build --output second
+diff -r first second
+```
+
+The repository verifies this on every change: the golden corpus is built twice and every file under the two output folders is compared.
+
 ## Publish
 
 `dist/` is a static folder. Copy it to GitHub Pages, GitLab Pages or any bucket. Pipeline examples for both forges are in the [configuration guide](configuration.md#continuous-integration).
