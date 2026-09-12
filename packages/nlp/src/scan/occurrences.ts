@@ -1,5 +1,6 @@
 import type { Dictionary, DictionaryEntry, DictionaryTarget } from "../dictionary/types.js";
 import type { LanguagePack } from "../locale/pack.js";
+import { contextAround } from "../text/context.js";
 import {
   buildAutomaton,
   longestMatches,
@@ -59,7 +60,6 @@ export interface ScanDocumentInput {
 }
 
 const contextWidth = 80;
-const ellipsis = "…";
 
 function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
@@ -119,13 +119,6 @@ function spanOf(
   };
 }
 
-function contextOf(text: string, start: number, end: number): string {
-  const centre = Math.floor((start + end) / 2);
-  const from = Math.max(0, Math.min(centre - contextWidth / 2, text.length - contextWidth));
-  const to = Math.min(text.length, from + contextWidth);
-  return `${from > 0 ? ellipsis : ""}${text.slice(from, to)}${to < text.length ? ellipsis : ""}`;
-}
-
 /** Canonical order of occurrences: path, line, position, target, then key. */
 export function compareOccurrences(a: Occurrence, b: Occurrence): number {
   return (
@@ -164,7 +157,7 @@ export function scanDocument(input: ScanDocumentInput): Occurrence[] {
         line: paragraph.line,
         position: span.start,
         ...(paragraph.section === undefined ? {} : { section: paragraph.section }),
-        context: contextOf(paragraph.text, span.start, span.end),
+        context: contextAround(paragraph.text, span.start, span.end, contextWidth),
         ...(expectedType === undefined ? {} : { expectedType }),
         confidence: (scale.base + announced) * factor,
       };

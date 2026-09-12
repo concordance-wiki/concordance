@@ -43,3 +43,29 @@ export {
   type ScannedDocument,
   type ScannedParagraph,
 } from "./scan/occurrences.js";
+export {
+  extractNgrams,
+  keywordForm,
+  keywordForms,
+  type ExtractNgramsOptions,
+  type KeywordUnit,
+  type NgramOccurrence,
+} from "./keywords/ngrams.js";
+export {
+  compareMentions,
+  scoreCandidates,
+  type KeywordCandidate,
+  type KeywordMention,
+  type ScoreCandidatesOptions,
+} from "./keywords/score.js";
+export {
+  UNDEFINED_TERM_CHECK,
+  undefinedTermFindings,
+  type UndefinedTermOptions,
+} from "./keywords/findings.js";
+export {
+  keywordDefaults,
+  keywordOptions,
+  type KeywordLock,
+  type KeywordOptions,
+} from "./keywords/options.js";
