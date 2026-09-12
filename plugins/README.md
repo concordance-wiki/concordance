@@ -8,7 +8,7 @@ Official plugins, published under `@concordance-wiki/plugin-*`. An example plugi
 | [`reader-office`](reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
 | [`convert-libreoffice`](convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text later | LibreOffice | available |
 | [`contract-openapi`](contract-openapi/README.md) | source of `endpoint` entities from the OpenAPI 3.x contract an API note declares, candidate objects from its schemas, cached by fingerprint | none | available |
-| `contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
+| [`contract-wsdl`](contract-wsdl/README.md) | source of `endpoint` entities from the WSDL 1.1 or 2.0 contract an API note declares, candidate objects from its XSD types, cached by fingerprint | none | available |
 | `viewer-pdf` | UI component: pdf.js viewer and thumbnail rail | none | planned |
 | `viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 

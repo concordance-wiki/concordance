@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { Entity } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
-import { declaredContracts, loadContracts } from "../src/source.js";
+import { loadContracts, openApiReader } from "../src/source.js";
 import { api, contractText, harness, stubFetch } from "./fixtures.js";
 
 const fingerprint = createHash("sha256").update(contractText).digest("hex");
@@ -11,25 +11,18 @@ const cachePath = `/pipeline/.concordance-cache/contracts/${fingerprint}.json`;
 
 const localFile = { "/repos/specs/api/payments.openapi.json": contractText };
 
-describe("declaredContracts", () => {
-  it("declares the contract through the contract attribute of an api note, as a URL or a file path", () => {
-    const url = api({
-      id: "specs/api/members",
-      attributes: { contract: "https://x.invalid/o.json" },
-    });
-    const screen = api({ id: "specs/screens/entry", type: "screen" });
-    const none = api({ id: "specs/api/none", attributes: {} });
-    const empty = api({ id: "specs/api/empty", attributes: { contract: "" } });
-    const number = api({ id: "specs/api/number", attributes: { contract: 3 } });
-    expect(declaredContracts([url, screen, none, api(), empty, number])).toEqual([
-      { api: url, location: "https://x.invalid/o.json" },
-      { api: api(), location: "./payments.openapi.json" },
-    ]);
+describe("openApiReader", () => {
+  it("accepts any text that is not an XML document, so that a WSDL contract is left to its own plugin", () => {
+    expect(openApiReader.accepts(contractText)).toBe(true);
+    expect(openApiReader.accepts("openapi: 3.1.0\n")).toBe(true);
+    expect(openApiReader.accepts("")).toBe(true);
+    expect(openApiReader.accepts('<?xml version="1.0"?>\n<definitions/>')).toBe(false);
+    expect(openApiReader.accepts("<schema/>")).toBe(false);
   });
 });
 
 describe("loadContracts", () => {
-  it("produces one endpoint entity per operation, carrying its method, path, summary and operation identifier", async () => {
+  it("produces one endpoint entity per operation, carrying its method, path, summary, operation identifier and the http style", async () => {
     const { input } = harness(localFile);
     const output = await loadContracts(input([api()]));
     expect(output.entities).toEqual([
@@ -51,6 +44,7 @@ describe("loadContracts", () => {
           operation_id: "createPayment",
           summary: "Create a payment",
           tags: ["payments"],
+          style: "http",
         },
         source: {
           name: "specs",
@@ -71,7 +65,7 @@ describe("loadContracts", () => {
         status: "valid",
         type_origin: "contract",
         graph: "full",
-        attributes: { method: "GET", path: "/payments/{id}", tags: [] },
+        attributes: { method: "GET", path: "/payments/{id}", tags: [], style: "http" },
         source: {
           name: "specs",
           path: "./payments.openapi.json",
@@ -268,7 +262,7 @@ describe("loadContracts", () => {
         message:
           "contract https://example.invalid/gone.json of specs/api/gone could not be read: HTTP 404",
         remediation:
-          "fix the contract URL or path, give the build network access, or check that the file is an OpenAPI 3.x document; the note keeps its manual operations meanwhile",
+          "fix the contract URL or path, give the build network access, or check that the file is a contract an enabled plugin reads; the note keeps its manual operations meanwhile",
         source: "specs",
         path: "api/gone.md",
         entity: "specs/api/gone",
@@ -370,6 +364,21 @@ describe("loadContracts", () => {
       "specs/api/payments/get-payment-2",
       "specs/api/payments/get-payment-3",
     ]);
+  });
+
+  it("imports nothing and reports nothing for an XML contract, which belongs to the WSDL plugin", async () => {
+    const { fs, input } = harness({
+      "/repos/specs/api/payments.openapi.json": '<?xml version="1.0"?><definitions name="P"/>',
+    });
+    const output = await loadContracts(input([api()]));
+    expect(output).toEqual({
+      entities: [],
+      links: [],
+      candidates: [],
+      contracts: [],
+      findings: [],
+    });
+    expect(fs.listFiles("/pipeline/.concordance-cache")).toEqual([]);
   });
 
   it("returns empty blocks when no api note declares a contract", async () => {

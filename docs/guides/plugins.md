@@ -10,7 +10,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | [`@concordance-wiki/plugin-reader-office`](../../plugins/reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
 | `@concordance-wiki/plugin-convert-libreoffice` | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text extraction later | LibreOffice | available |
 | [`@concordance-wiki/plugin-contract-openapi`](../../plugins/contract-openapi/README.md) | source of `endpoint` entities from the OpenAPI 3.x contract an API note declares, candidate objects from its schemas, cached by fingerprint | none | available |
-| `@concordance-wiki/plugin-contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
+| [`@concordance-wiki/plugin-contract-wsdl`](../../plugins/contract-wsdl/README.md) | source of `endpoint` entities from the WSDL 1.1 or 2.0 contract an API note declares, candidate objects from its XSD types, cached by fingerprint | none | available |
 | `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none | planned |
 | `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
@@ -87,6 +87,8 @@ A source receives `{ payload, context }` where the payload is typed (`SourcePayl
 | `confidence` | the confidence of each provenance method, as the profile declares it |
 
 and the context (`PluginContext`) carries `fs`, `clock` and an optional `fetch`, absent when the build runs offline. It returns `{ entities, links, candidates, contracts, findings }`: the entities it produces with `type_origin: contract`, the links that attach them with their provenance, the candidate objects it offers without linking them, one record per contract it read (title, version, fingerprint, import date) and its findings. A contract that cannot be read is a [`W-CONTRACT-UNREACHABLE`](../checks/W-CONTRACT-UNREACHABLE.md) finding; the other contracts are still imported.
+
+The contract plugins share the loading: `@concordance-wiki/core` exports `loadContracts(input, reader)`, which finds the `api` entities that declare a `contract`, fetches or reads the text once, caches the extracted contract by the SHA-256 of the text, turns the reader's operations into `endpoint` entities, `exposes` links, candidate objects and a contract record, and reports what it could not read. A plugin only writes a `ContractReader`: `accepts(text)` decides on content whether the text is its format (an OpenAPI document is anything that is not XML; a WSDL is an XML document whose root is `definitions` or `description`), `read(text, location)` extracts what the plugin keeps, and `operations(contract)` maps it to the common operation shape (`name`, `title`, `aliases`, `summary`, `attributes`, `objects`). Every plugin sees every declared contract and leaves the ones it does not accept alone, so the rest of the chain does not know which format an endpoint came from: the attributes carry `operation_id`, `summary` and `style` (`http` or `soap`) whatever the format, then the format's own keys.
 
 #### Converters
 

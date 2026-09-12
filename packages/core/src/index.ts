@@ -79,6 +79,24 @@ export {
   type TranscriptLike,
 } from "./privacy/transcript.js";
 export type * from "./plugin/api.js";
+export {
+  cachedContractPath,
+  CONTRACT_METHOD,
+  CONTRACT_RELATION,
+  CONTRACT_UNREACHABLE,
+  declaredContracts,
+  DEFAULT_CONTRACT_CONFIDENCE,
+  fingerprintOf,
+  loadContracts,
+  readCachedContract,
+  writeCachedContract,
+  xmlRootOf,
+  type ContractError,
+  type ContractOperation,
+  type ContractReader,
+  type ContractSummary,
+  type DeclaredContract,
+} from "./plugin/contracts.js";
 export { definePlugin, PluginDefinitionError } from "./plugin/define.js";
 export { importPlugin } from "./plugin/node-loader.js";
 export {

@@ -1,0 +1,26 @@
+{
+  "name": "@concordance-wiki/plugin-contract-wsdl",
+  "version": "0.0.0",
+  "description": "Source of endpoint entities from WSDL 1.1 and 2.0 contracts declared by API notes, cached by fingerprint.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*",
+    "fast-xml-parser": "5.11.1"
+  },
+  "devDependencies": {
+    "@concordance-wiki/plugin-contract-openapi": "workspace:*"
+  }
+}

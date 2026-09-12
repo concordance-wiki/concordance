@@ -1,3 +1,4 @@
+import type { ContractError } from "@concordance-wiki/core";
 import { parse as parseYaml } from "yaml";
 
 /** The HTTP methods of an OpenAPI path item, in the order operations are listed. */
@@ -30,10 +31,6 @@ export interface OpenApiContract {
   title: string;
   version: string;
   operations: OpenApiOperation[];
-}
-
-export interface ContractError {
-  error: string;
 }
 
 type Json = Record<string, unknown>;

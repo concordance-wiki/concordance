@@ -217,7 +217,7 @@ export const catalogue: readonly CheckDefinition[] = [
     "warning",
     "contracts",
     "The contract an API note declares could not be fetched, read or parsed, so the note keeps its manual operations.",
-    "Fix the contract URL or path, give the build network access, or check that the file is an OpenAPI 3.x document.",
+    "Fix the contract URL or path, give the build network access, or check that the file is an OpenAPI 3.x or WSDL document.",
   ),
   model(
     "W-API-NOCONSUMER",
