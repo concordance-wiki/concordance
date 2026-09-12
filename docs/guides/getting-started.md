@@ -16,6 +16,14 @@ npm install --global concordance
 
 The `concordance` package is a preset: it installs the core and every official plugin. The command is `concordance`, with `conc` as a short alias.
 
+Without Node.js, use the container image, which also carries LibreOffice for document conversion:
+
+```bash
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
+```
+
+The image runs the same command line; mount the configuration repository on `/wiki`.
+
 ## Create a configuration repository
 
 A Concordance site is described by one repository that holds the configuration, the theme and the stopwords. It never holds content.

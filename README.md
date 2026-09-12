@@ -51,7 +51,7 @@ No rewriting. No wikilinks. No frontmatter required. No server to run.
 Turnkey with Docker:
 
 ```bash
-docker run --rm -v "$PWD:/wiki" ghcr.io/concordance-wiki/concordance build
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
 ```
 
 Or in a pipeline, with the CLI:
