@@ -54,6 +54,12 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
 
+  fixtures/plugins/example:
+    dependencies:
+      '@concordance-wiki/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
+
   packages/checks:
     dependencies:
       '@concordance-wiki/core':

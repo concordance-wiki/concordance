@@ -5,6 +5,7 @@ export type * from "./config/types.js";
 export { describeSchemaError, isWellFormedGlob, validateConfig } from "./config/validate.js";
 export { compileGlobs, type PathMatcher } from "./glob/index.js";
 export { fixedClock, systemClock, type Clock } from "./io/clock.js";
+export { commandExists } from "./io/command.js";
 export {
   memoryFileSystem,
   nodeFileSystem,
@@ -14,3 +15,15 @@ export {
 export type { FileHistory, GitClient } from "./io/git.js";
 export { nodeGit } from "./io/node-git.js";
 export { compareFindings, type Finding, type Severity } from "./model/finding.js";
+export { PLUGIN_API_VERSION } from "./plugin/api.js";
+export type * from "./plugin/api.js";
+export { definePlugin, PluginDefinitionError } from "./plugin/define.js";
+export { importPlugin } from "./plugin/node-loader.js";
+export {
+  loadPlugins,
+  PluginLoadError,
+  type LoadedPlugins,
+  type PluginLoaderDependencies,
+  type PluginRegistration,
+  type PluginRegistry,
+} from "./plugin/registry.js";

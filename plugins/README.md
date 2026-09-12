@@ -1,6 +1,6 @@
 # plugins
 
-Official plugins, published under `@concordance-wiki/plugin-*`. Empty until the plugin API exists; this page states what each one contributes.
+Official plugins, published under `@concordance-wiki/plugin-*`. Empty so far: the plugin API exists in the core and an example plugin lives under [`fixtures/plugins/example`](../fixtures/plugins/example/index.mjs); this page states what each official plugin will contribute.
 
 | Plugin | Contributes | System dependency |
 |---|---|---|
