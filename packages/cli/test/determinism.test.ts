@@ -8,6 +8,7 @@ import {
   fixedClock,
   memoryFileSystem,
   nodeFileSystem,
+  parseModel,
   type BuildLog,
 } from "@concordance-wiki/core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -85,11 +86,14 @@ describe("An integration test builds the golden corpus twice and compares the fi
     const second = temporaryOutput();
     expect(await buildInProcess(first)).toBe(2);
     expect(await buildInProcess(second)).toBe(2);
-    // No model.json nor site yet: every file the build writes is compared, today the log alone.
-    expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json"]);
+    // No site yet: every file the build writes is compared, today the log and the model.
+    expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
     expect(listTree(second)).toEqual(listTree(first));
     expect(fingerprint(second)).toBe(fingerprint(first));
     expect(readLog(first).at).toBe("2026-09-12T12:00:00.000Z");
+    expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
+      "2026-09-12T12:00:00.000Z",
+    );
   });
 
   describe("through the real executable", () => {
@@ -121,7 +125,11 @@ describe("An integration test builds the golden corpus twice and compares the fi
         expect(run.stderr).toContain("not implemented in this version");
       }
       expect(readLog(first).at).toBe("1970-01-01T00:00:00.000Z");
+      expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
+        "1970-01-01T00:00:00.000Z",
+      );
       expect(listTree(second)).toEqual(listTree(first));
+      expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
       expect(fingerprint(second)).toBe(fingerprint(first));
     });
   });

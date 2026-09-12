@@ -48,9 +48,26 @@ Strict TypeScript, ESM, Node LTS from `.nvmrc`, pnpm workspaces, packages publis
 
 The graph is built in memory and serialised to `model.json`, canonically sorted and schema-validated. `concordance render` reads it without touching the sources. A Cypher export is provided for those who want the graph elsewhere.
 
+## Canonical model
+
+`dist/model.json` is the single file that describes the whole model; every later step reads it and none re-reads the sources. It is described by [`model.schema.json`](../../packages/core/schemas/model.schema.json), published with `@concordance-wiki/core`, and holds five blocks plus one optional:
+
+| Block | Content |
+|---|---|
+| `build` | the only dated block: `tool` (version of the command line), `at` (timestamp from the injected clock), `profile_hash` (fingerprint of the merged profile) and `sources`, one entry per source with its `name` and, for a git repository, its `commit` and `url` |
+| `entities` | one object per note: `id`, `type`, `title`, `locale`, `application` and `domain` when known, `type_origin`, `attributes` (the frontmatter keys that are not common attributes) and `source` with the `name`, `path` and `line` of the note, plus `aliases`, `status`, `summary` and `graph` |
+| `links` | one object per source-target-relation triple: `from`, `to`, `relation`, `attributes`, the combined `confidence` and `provenance`, the complete list of what every method recorded |
+| `findings` | the same array as `build.log.json` |
+| `candidates` | `terms` (recurring expressions without a note) and `duplicates` (resources that look alike); empty until the corresponding steps exist |
+| `neighbours` | optional: the K best co-occurrence neighbours per entity |
+
+`assembleModel` in core puts every block in canonical order (sources by name, entities by identifier, links by triple, provenances by method, path and line, findings by check, source, path, line and message, candidates by score) and `serializeModel` writes it as canonical JSON: keys sorted at every depth, two-space indentation, a trailing newline. `parseModel` reads a model back and refuses anything the schema does not describe, with the same error wording as the configuration validator: parsing a serialised model gives back the assembled one.
+
+`concordance export --format cypher` turns the model into a Cypher script (`toCypher` in core): a header comment with the tool version and the timestamp, then one `MERGE (n:Entity {id})` per entity with `SET` of its scalar properties (`type`, `title`, `locale`, `application`, `domain`, `type_origin`, and every scalar or list-of-scalars attribute as `attr_<key>`), then one `MERGE (a)-[r:RELATION]->(b)` per link with `r.confidence` and `r.methods`, the distinct provenance methods. The relationship type is the relation slug in upper case. Strings are quoted with backslashes and single quotes escaped; nested attribute values have no property form and are left out. The script follows the order of the model, so two exports of one model are identical.
+
 ## Reproducible builds
 
-Two builds of the same sources write the same bytes. Every list is sorted canonically before it is written: findings by check, source, path, line and message; entities by identifier; links by the source, target and relation triple; provenances by method, path and line (`compareFindings`, `compareLinks`, `compareProvenances` and `sortCanonically` in `@concordance-wiki/core`). A step that runs in parallel sorts its results before writing them, so that scheduling never shows in the outputs. Nothing random is ever written, and the only timestamp is the `at` field of the build log, which will also be the `build` block of `model.json`. It comes from the injected `Clock`; when `SOURCE_DATE_EPOCH` is set, the command line pins that clock to the given instant, following the reproducible-builds convention, and two builds are byte-identical. A double-build test and a continuous-integration step compare every file of two builds of the golden corpus.
+Two builds of the same sources write the same bytes. Every list is sorted canonically before it is written: findings by check, source, path, line and message; entities by identifier; links by the source, target and relation triple; provenances by method, path and line (`compareFindings`, `compareLinks`, `compareProvenances` and `sortCanonically` in `@concordance-wiki/core`). A step that runs in parallel sorts its results before writing them, so that scheduling never shows in the outputs. Nothing random is ever written, and the only timestamp is the `at` field of the build log, which is also the `at` of the `build` block of `model.json`. It comes from the injected `Clock`; when `SOURCE_DATE_EPOCH` is set, the command line pins that clock to the given instant, following the reproducible-builds convention, and two builds are byte-identical. A double-build test and a continuous-integration step compare every file of two builds of the golden corpus.
 
 ## Deterministic identifiers
 

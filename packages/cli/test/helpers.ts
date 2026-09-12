@@ -14,8 +14,15 @@ export interface RecordedIo extends CommandIo {
   stderr: string[];
 }
 
-export const validConfig =
-  "version: 1\nproject: { name: Wiki }\nsources: [{ name: notes, path: ./notes }]\n";
+/** One local source filed under a declared application, every note claimed by one domain. */
+export const validConfig = [
+  "version: 1",
+  "project: { name: Wiki }",
+  "applications: [{ id: wiki }]",
+  "domains: [{ id: notes, match: ['**/*.md'] }]",
+  "sources: [{ name: notes, path: ./notes, application: wiki }]",
+  "",
+].join("\n");
 
 /** A git client that materialises a fixed file into the clone directory and fails on demand. */
 export class FakeGit implements GitClient {

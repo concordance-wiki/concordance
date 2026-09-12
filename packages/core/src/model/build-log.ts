@@ -5,9 +5,9 @@ import { compareFindings, type Finding, type Severity } from "./finding.js";
 export interface BuildSummary {
   sources: number;
   files: number;
-  /** Entities per type; empty until typing exists. */
+  /** Entities per type. */
   entities: Record<string, number>;
-  /** Links per inference method; empty until inference exists. */
+  /** Links per inference method; a link with two methods counts once for each. */
   links: Record<string, number>;
   findings: { bySeverity: Record<Severity, number>; byCheck: Record<string, number> };
   /** Keyword pages published and expressions under the threshold; absent while the build computes none. */
@@ -37,28 +37,41 @@ function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
 }
 
+/** Occurrences of each key, keys in code-unit order. */
+function countBy(keys: Iterable<string>): Record<string, number> {
+  const counts = new Map<string, number>();
+  for (const key of keys) {
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const sorted: Record<string, number> = {};
+  for (const [key, count] of [...counts].sort(([a], [b]) => byCodeUnit(a, b))) {
+    sorted[key] = count;
+  }
+  return sorted;
+}
+
 export function summarize(input: {
   sources: number;
   files: number;
   findings: readonly Finding[];
   keywords?: KeywordCounts;
+  entities?: readonly { type: string }[];
+  links?: readonly { provenance: readonly { method: string }[] }[];
 }): BuildSummary {
   const bySeverity: Record<Severity, number> = { error: 0, warning: 0, info: 0 };
-  const counts = new Map<string, number>();
   for (const finding of input.findings) {
     bySeverity[finding.severity] += 1;
-    counts.set(finding.check, (counts.get(finding.check) ?? 0) + 1);
-  }
-  const byCheck: Record<string, number> = {};
-  for (const [check, count] of [...counts].sort(([a], [b]) => byCodeUnit(a, b))) {
-    byCheck[check] = count;
   }
   return {
     sources: input.sources,
     files: input.files,
-    entities: {},
-    links: {},
-    findings: { bySeverity, byCheck },
+    entities: countBy((input.entities ?? []).map((entity) => entity.type)),
+    links: countBy(
+      (input.links ?? []).flatMap((link) => [
+        ...new Set(link.provenance.map((provenance) => provenance.method)),
+      ]),
+    ),
+    findings: { bySeverity, byCheck: countBy(input.findings.map((finding) => finding.check)) },
     ...(input.keywords === undefined
       ? {}
       : { keywords: { published: input.keywords.published, discarded: input.keywords.discarded } }),

@@ -53,6 +53,28 @@ export {
   type ProvenanceMethod,
   type ProvenanceOccurrence,
 } from "./model/link.js";
+export {
+  assembleModel,
+  canonicalJson,
+  ModelError,
+  parseModel,
+  quote,
+  relationshipType,
+  serializeModel,
+  sortKeysDeep,
+  toCypher,
+  validateModel,
+  type AssembleModelInput,
+  type Candidates,
+  type CanonicalModel,
+  type DuplicateCandidate,
+  type ModelBuild,
+  type ModelSource,
+  type Neighbour,
+  type Neighbours,
+  type TermCandidate,
+  type TermContext,
+} from "./model/serialize/index.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
 export {
   loadPseudonymDictionary,
