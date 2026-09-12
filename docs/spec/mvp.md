@@ -131,7 +131,7 @@ Four families, plus the contract checks. Each check is a pure function `(model) 
 |---|---|
 | Sources | `W-SOURCE-UNREACHABLE` |
 | Links | `E-LINK-BROKEN` |
-| Identifiers and types | `E-ID-DUP`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL` |
+| Identifiers and types | `E-ID-DUP`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED` |
 | Contracts | `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
@@ -802,7 +802,7 @@ As a developer, I want a single implementation of each check so that the linter 
 - Checks are registered in a registry, enabled, disabled and re-severitised through configuration (`checks:`).
 - The registry package (`@concordance-wiki/checks`) is consumed identically by the build and by the linter.
 - Each check carries its identifier, default severity, description and remediation.
-- MVP checks, four families: links (`E-LINK-BROKEN`); identifiers and types (`E-ID-DUP`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`); documents (`W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE`); vocabulary and filing (`W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED`); plus the contract checks (`W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH`).
+- MVP checks, four families: links (`E-LINK-BROKEN`); identifiers and types (`E-ID-DUP`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`); documents (`W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE`); vocabulary and filing (`W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED`); plus the contract checks (`W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH`).
 - Structural checks (orphans, dead ends, unreachable screens, test coverage, batch consistency) leave the MVP with the projections they depend on.
 
 Depends on: L0-09.

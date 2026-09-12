@@ -4,6 +4,11 @@ import * as entry from "../src/index.js";
 
 describe("@concordance-wiki/ingest", () => {
   it("exposes exactly its public API", () => {
-    expect(Object.keys(entry).sort()).toEqual(["ingestSources"]);
+    expect(Object.keys(entry).sort()).toEqual([
+      "ingestSources",
+      "parseMarkdown",
+      "readMarkdown",
+      "resolveLink",
+    ]);
   });
 });
