@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/plugin.schema.json",
+  "title": "Concordance plugin manifest",
+  "description": "Schema of the manifest returned by definePlugin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "version",
+    "apiVersion",
+    "contributes"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^(@[a-z0-9-]+/)?[a-z0-9-]+$"
+    },
+    "version": {
+      "type": "string"
+    },
+    "apiVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "systemDependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "check"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "check": {
+            "type": "string",
+            "description": "command run to detect the dependency"
+          },
+          "optional": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "contributes": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "readers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "extensions"
+            ],
+            "properties": {
+              "extensions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^\\."
+                }
+              }
+            }
+          }
+        },
+        "converters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "extensions",
+              "produces"
+            ],
+            "properties": {
+              "extensions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^\\."
+                }
+              },
+              "produces": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "pdf",
+                    "thumbnails",
+                    "text"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "inferenceMethods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "method"
+            ],
+            "properties": {
+              "method": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "severity",
+              "description",
+              "remediation",
+              "documentation"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$"
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "error",
+                  "warning",
+                  "info"
+                ]
+              },
+              "description": {
+                "type": "string"
+              },
+              "remediation": {
+                "type": "string"
+              },
+              "documentation": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "projections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          }
+        },
+        "uiComponents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "slot",
+              "bundle"
+            ],
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "bundle": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

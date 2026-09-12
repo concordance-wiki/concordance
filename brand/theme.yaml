@@ -1,0 +1,24 @@
+# Concordance brand tokens. A white-label installation overrides the accent
+# and the logo; it never touches the mark files.
+name: Concordance
+logo: brand/concordance-mark.svg
+favicon: brand/favicon.svg
+font:
+  display: Instrument Serif
+  ui: Instrument Sans
+  mono: IBM Plex Mono
+radius: 8
+light:
+  bg: "#F6F5F2"
+  surface: "#FFFFFF"
+  border: "#E4E1DA"
+  ink: "#16181B"
+  muted: "#4E5259"
+  accent: "#C24E24"
+dark:
+  bg: "#0E0F11"
+  surface: "#16181B"
+  border: "#26292E"
+  ink: "#E8E6E1"
+  muted: "#8B9199"
+  accent: "#E8703A"

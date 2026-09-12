@@ -1,0 +1,23 @@
+{
+  "name": "concordance-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Turns git repositories of markdown into a wiki that shows where every business word is used.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "build": "node scripts/workspace.mjs build",
+    "test": "node scripts/workspace.mjs test",
+    "lint": "node scripts/workspace.mjs lint && node scripts/validate.mjs",
+    "check": "pnpm lint && pnpm build && pnpm test && node scripts/determinism.mjs && node scripts/hygiene.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "yaml": "2.8.1"
+  }
+}

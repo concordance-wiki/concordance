@@ -1,0 +1,21 @@
+# Entities the engine must produce from this corpus, with their type and its origin.
+# Same structure as the English corpus; identifiers differ, types and origins do not.
+- { id: decisions/plafond-controle-cote-serveur, type: decision, type_origin: source, application: gestion-contrats, domain: unclassified }
+- { id: glossaire/adherent, type: term, type_origin: source, application: gestion-contrats, domain: adhesion }
+- { id: glossaire/contrat, type: term, type_origin: source, application: gestion-contrats, domain: unclassified }
+- { id: glossaire/versement, type: term, type_origin: source, application: gestion-contrats, domain: versements }
+- { id: glossaire/versement-libre, type: term, type_origin: source, application: gestion-contrats, domain: versements }
+- { id: glossaire/versement-programme, type: term, type_origin: source, application: gestion-contrats, domain: versements }
+- { id: reunions/2026-03-12-atelier-versements, type: meeting, type_origin: source, application: gestion-contrats, domain: versements }
+- { id: specs/api/versements, type: api, type_origin: "rule#2", application: gestion-contrats, domain: versements }
+- { id: specs/batchs/traitement-de-nuit, type: batch, type_origin: "rule#6", application: gestion-contrats, domain: versements }
+- { id: specs/ecrans/recapitulatif-versement, type: screen, type_origin: "rule#1", application: gestion-contrats, domain: versements }
+- { id: specs/ecrans/recherche-adherent, type: screen, type_origin: "rule#1", application: gestion-contrats, domain: adhesion }
+- { id: specs/ecrans/saisie-versement-libre, type: screen, type_origin: "rule#1", application: gestion-contrats, domain: versements }
+- { id: specs/objets/adherent, type: business_object, type_origin: "rule#3", application: gestion-contrats, domain: adhesion }
+- { id: specs/objets/contrat, type: business_object, type_origin: "rule#3", application: gestion-contrats, domain: unclassified }
+- { id: specs/objets/versement, type: business_object, type_origin: "rule#3", application: gestion-contrats, domain: versements }
+- { id: specs/processus/enregistrer-un-versement, type: process, type_origin: "rule#4", application: gestion-contrats, domain: versements }
+- { id: specs/regles/plafond-annuel, type: rule, type_origin: suffix, application: gestion-contrats, domain: versements }
+- { id: specs/roles/gestionnaire, type: role, type_origin: "rule#5", application: gestion-contrats, domain: unclassified }
+- { id: specs/tables/versement, type: data_object, type_origin: suffix, application: gestion-contrats, domain: versements }

@@ -1,0 +1,15 @@
+# Links the engine must produce, with the method of their strongest provenance. A minimum, not an exhaustive list.
+- { from: specs/ecrans/saisie-versement-libre, to: specs/regles/plafond-annuel, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/ecrans/saisie-versement-libre, to: specs/objets/contrat, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/saisie-versement-libre, to: specs/objets/versement, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/saisie-versement-libre, to: specs/ecrans/recapitulatif-versement, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/saisie-versement-libre, to: specs/ecrans/recherche-adherent, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/roles/gestionnaire, to: specs/ecrans/saisie-versement-libre, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/api/versements, to: specs/ecrans/saisie-versement-libre, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/regles/plafond-annuel, to: specs/api/versements, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/tables/versement, to: specs/objets/versement, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/batchs/traitement-de-nuit, to: specs/tables/versement, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/plafond-controle-cote-serveur, to: specs/api/versements, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: reunions/2026-03-12-atelier-versements, to: decisions/plafond-controle-cote-serveur, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: glossaire/versement-libre, to: glossaire/versement, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossaire/versement-libre, to: specs/ecrans/saisie-versement-libre, relation: related, method: glossary_occurrence, min_confidence: 0.6 }

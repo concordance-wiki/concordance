@@ -1,0 +1,466 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/model.schema.json",
+  "title": "Concordance model",
+  "description": "Schema of dist/model.json, the canonical serialised model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "build",
+    "entities",
+    "links",
+    "findings",
+    "candidates"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "at",
+        "profile_hash",
+        "sources"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "profile_hash": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "string"
+              },
+              "locale": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "fr"
+                ]
+              },
+              "files": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "counts": {
+          "type": "object"
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "title",
+          "source",
+          "type_origin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "fr"
+            ]
+          },
+          "application": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "type_origin": {
+            "type": "string",
+            "pattern": "^(source|rule#[0-9]+|suffix|frontmatter|contract|default)$"
+          },
+          "attributes": {
+            "type": "object"
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "path"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "commit": {
+                "type": "string"
+              },
+              "last_modified": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "representations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "format"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "format": {
+                  "type": "string"
+                },
+                "preview": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "keyword": {
+            "type": "boolean",
+            "description": "true for a keyword page without a note"
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to",
+          "relation",
+          "confidence",
+          "provenance"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+          },
+          "relation": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "attributes": {
+            "type": "object"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "provenance": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "method",
+                "confidence"
+              ],
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "explicit_link",
+                    "lock_promoted",
+                    "contract_import",
+                    "frontmatter_ref",
+                    "folder_zone",
+                    "section_mention",
+                    "glossary_occurrence",
+                    "cooccurrence",
+                    "embedding"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "path": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "section": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "operation": {
+                  "type": "string"
+                },
+                "occurrences": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "line",
+                      "context"
+                    ],
+                    "properties": {
+                      "line": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "position": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "context": {
+                        "type": "string"
+                      },
+                      "section": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "check": {
+            "type": "string",
+            "pattern": "^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "remediation": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "candidates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terms",
+        "duplicates"
+      ],
+      "properties": {
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "score",
+              "occurrences",
+              "documents"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "normalized": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "occurrences": {
+                "type": "integer"
+              },
+              "documents": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "boolean"
+              },
+              "contexts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "path",
+                    "line",
+                    "context"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "type": "integer"
+                    },
+                    "context": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "duplicates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "resources",
+              "score"
+            ],
+            "properties": {
+              "resources": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "signals": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "neighbours": {
+      "type": "object",
+      "description": "K best co-occurrence neighbours per entity identifier",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "count"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+# Concordance brand
+
+The mark reproduces a printed concordance: lines of context of unequal length, aligned on the column where the searched word repeats.
+
+## Files
+
+| File | Use |
+|---|---|
+| `concordance-mark.svg` | main mark, three lines, every size |
+| `concordance-mark-mono.svg` | ink only, imposed backgrounds and print |
+| `concordance-mark-light.svg` | dark backgrounds |
+| `concordance-mark-white.svg` | pure white, photo or accent backgrounds |
+| `favicon.svg` | favicon, switches between light and dark automatically |
+| `avatar-github.svg` | organisation avatar, 460 px, margin for the circular crop |
+| `concordance-header.svg` | five-line variant, README and documentation headers only |
+| `theme.yaml` | brand tokens, in the format of `schemas/theme.schema.json` |
+
+## Rules
+
+The mark is built on a 48 unit grid. Do not redraw it, do not add a shadow, gradient or outline. The accent column is always vertical and centred; the lines keep unequal lengths.
+
+Horizontal lock-up: mark then word, with a gap equal to half the mark height. Instrument Serif for the showcase, Instrument Sans 600 for the interface.
+
+The five-line variant clogs below 24 px: it is for large formats only.
+
+Minimum mark size: 16 px. Clear space: a quarter of the height.

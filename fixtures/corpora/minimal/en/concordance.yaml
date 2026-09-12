@@ -1,0 +1,51 @@
+version: 1
+project:
+  name: Minimal corpus
+  locale: en
+applications:
+  - id: policy-admin
+    title: Policy administration
+    status: active
+domains:
+  - id: membership
+    title: Membership
+    match: ["**/member*"]
+  - id: payments
+    title: Payments
+    match: ["**/payment*", "**/settlement*", "**/annual-cap*"]
+sources:
+  - name: glossary
+    path: ./glossary
+    type: term
+    glossary: true
+    application: policy-admin
+  - name: specs
+    path: ./specs
+    application: policy-admin
+    rules:
+      - match: { path: "screens/**" }
+        set: { type: screen }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { path: "objects/**" }
+        set: { type: business_object }
+      - match: { path: "processes/**" }
+        set: { type: process }
+      - match: { path: "roles/**" }
+        set: { type: role }
+      - match: { path: "batches/**" }
+        set: { type: batch }
+      - match: { suffix: ".rule.md" }
+        set: { type: rule }
+      - match: { suffix: ".table.md" }
+        set: { type: data_object }
+  - name: decisions
+    path: ./decisions
+    type: decision
+    application: policy-admin
+  - name: meetings
+    path: ./meetings
+    default_type: meeting
+    application: policy-admin
+inference:
+  keyword_pages: { min_occurrences: 3, min_files: 2 }

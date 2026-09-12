@@ -1,0 +1,29 @@
+version: 1
+project:
+  name: Faulty corpus
+  locale: en
+applications:
+  - id: policy-admin
+    title: Policy administration
+domains:
+  - id: everything
+    title: Everything
+    match: ["screens/**", "terms/**", "dup/**", "api/**", "*.md"]
+sources:
+  - name: notes
+    path: ./notes
+    application: policy-admin
+    rules:
+      - match: { path: "screens/**" }
+        set: { type: screen }
+      - match: { path: "terms/**" }
+        set: { type: term }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { suffix: ".rule.md" }
+        set: { type: rule }
+  - name: orphan
+    path: ./orphan
+    default_type: document
+inference:
+  glossary_sources: [notes]

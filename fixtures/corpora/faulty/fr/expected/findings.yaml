@@ -1,0 +1,15 @@
+# Findings the engine and the linter must produce on this corpus, sorted by check then path.
+# Exactly these findings, plus any I-REL-AMBIGUOUS produced by other prose mentions.
+- { check: E-FM-INVALID, source: notes, path: frontmatter-invalide.md, line: 3 }
+- { check: E-ID-DUP, source: notes, path: doublon/a.regle.md, entity: notes/doublon/a }
+- { check: E-LINK-BROKEN, source: notes, path: lien-casse.md, line: 3 }
+- { check: E-META-REL, source: notes, path: ecrans/relation-hors-matrice.md, entity: notes/ecrans/relation-hors-matrice }
+- { check: E-TYPE-CONFLICT, source: notes, path: conflit-de-type.regle.md }
+- { check: I-REL-AMBIGUOUS, source: notes, path: ecrans/mention-en-prose.md, line: 3 }
+- { check: W-API-CONSUMER-MISMATCH, source: notes, path: api/desaccord.md }
+- { check: W-API-NOCONSUMER, source: notes, path: api/desaccord.md }
+- { check: W-API-NOCONSUMER, source: notes, path: api/sans-consommateur.md }
+- { check: W-APP-MISSING, source: orphelin, path: sans-application.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: notes, path: divers/non-classe.md }
+- { check: W-TERM-UNDEFINED, text: expression récurrente, min_occurrences: 3, min_files: 2 }
+- { check: W-TERM-UNUSED, source: notes, path: termes/jamais-cite.md }

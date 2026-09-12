@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint, type check, schemas and fixtures
+        run: pnpm lint
+      - name: Build
+        run: pnpm build
+      - name: Test with coverage
+        run: pnpm test
+      - name: Determinism
+        run: node scripts/determinism.mjs
+      - name: Hygiene
+        env:
+          HYGIENE_COMMIT_RANGE: ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || 'HEAD~20..HEAD' }}
+        run: node scripts/hygiene.mjs

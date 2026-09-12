@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/theme.schema.json",
+  "title": "Concordance theme",
+  "description": "Schema of theme.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "light",
+    "dark"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "logo": {
+      "type": "string"
+    },
+    "favicon": {
+      "type": "string"
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display": {
+          "type": "string"
+        },
+        "ui": {
+          "type": "string"
+        },
+        "mono": {
+          "type": "string"
+        }
+      }
+    },
+    "radius": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "light": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bg",
+        "surface",
+        "border",
+        "ink",
+        "muted",
+        "accent"
+      ],
+      "properties": {
+        "bg": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "surface": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "border": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "ink": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "muted": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      }
+    },
+    "dark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bg",
+        "surface",
+        "border",
+        "ink",
+        "muted",
+        "accent"
+      ],
+      "properties": {
+        "bg": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "surface": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "border": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "ink": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "muted": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      }
+    },
+    "default_mode": {
+      "type": "string",
+      "enum": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "default": "system"
+    },
+    "footer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "url"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "mention_tool": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "stylesheet": {
+      "type": "string"
+    },
+    "labels": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "en",
+          "fr"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

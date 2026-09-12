@@ -1,0 +1,29 @@
+version: 1
+project:
+  name: Corpus fautif
+  locale: fr
+applications:
+  - id: gestion-contrats
+    title: Gestion des contrats
+domains:
+  - id: tout
+    title: Tout
+    match: ["ecrans/**", "termes/**", "doublon/**", "api/**", "*.md"]
+sources:
+  - name: notes
+    path: ./notes
+    application: gestion-contrats
+    rules:
+      - match: { path: "ecrans/**" }
+        set: { type: screen }
+      - match: { path: "termes/**" }
+        set: { type: term }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { suffix: ".regle.md" }
+        set: { type: rule }
+  - name: orphelin
+    path: ./orphelin
+    default_type: document
+inference:
+  glossary_sources: [notes]

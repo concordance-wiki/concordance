@@ -1,0 +1,31 @@
+name: Bug
+description: Something behaves differently from the documentation.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `concordance --version`, or the commit you built from.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: A minimal corpus and configuration that show the problem. No real name, no internal content.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Include the relevant lines of `dist/build.log.json` or the linter output.
+    validations:
+      required: true

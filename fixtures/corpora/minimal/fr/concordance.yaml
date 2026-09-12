@@ -1,0 +1,55 @@
+version: 1
+project:
+  name: Corpus minimal
+  locale: fr
+applications:
+  - id: gestion-contrats
+    title: Gestion des contrats
+    status: active
+domains:
+  - id: adhesion
+    title: Adhésion
+    match: ["**/adherent*"]
+  - id: versements
+    title: Versements
+    match: ["**/versement*", "**/traitement-de-nuit*", "**/plafond-annuel*"]
+sources:
+  - name: glossaire
+    path: ./glossaire
+    locale: fr
+    type: term
+    glossary: true
+    application: gestion-contrats
+  - name: specs
+    path: ./specs
+    locale: fr
+    application: gestion-contrats
+    rules:
+      - match: { path: "ecrans/**" }
+        set: { type: screen }
+      - match: { path: "api/**" }
+        set: { type: api }
+      - match: { path: "objets/**" }
+        set: { type: business_object }
+      - match: { path: "processus/**" }
+        set: { type: process }
+      - match: { path: "roles/**" }
+        set: { type: role }
+      - match: { path: "batchs/**" }
+        set: { type: batch }
+      - match: { suffix: ".regle.md" }
+        set: { type: rule }
+      - match: { suffix: ".table.md" }
+        set: { type: data_object }
+  - name: decisions
+    path: ./decisions
+    locale: fr
+    type: decision
+    application: gestion-contrats
+  - name: reunions
+    path: ./reunions
+    locale: fr
+    default_type: meeting
+    application: gestion-contrats
+inference:
+  keyword_pages: { min_occurrences: 3, min_files: 2 }

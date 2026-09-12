@@ -1,0 +1,7 @@
+# Findings the engine must produce, sorted by check then path. A minimum: further I-REL-AMBIGUOUS findings on other prose mentions are allowed.
+- { check: I-REL-AMBIGUOUS, path: specs/ecrans/saisie-versement-libre.md, note: "versement libre (term) mentioned in prose falls back to related" }
+- { check: W-DOMAIN-UNCLASSIFIED, path: decisions/plafond-controle-cote-serveur.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: glossaire/contrat.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: specs/objets/contrat.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: specs/roles/gestionnaire.md }
+- { check: W-TERM-UNDEFINED, text: versement exceptionnel, min_occurrences: 4, min_files: 3 }

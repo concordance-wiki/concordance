@@ -1,0 +1,4 @@
+pnpm-lock.yaml
+CHANGELOG.md
+LICENSE
+fixtures/corpora/**/expected/
