@@ -29,6 +29,7 @@ export {
   summarize,
   type BuildLog,
   type BuildSummary,
+  type KeywordCounts,
 } from "./model/build-log.js";
 export { compareContracts, type CandidateObject, type ContractRecord } from "./model/contract.js";
 export {

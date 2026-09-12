@@ -59,6 +59,28 @@ describe("summarize", () => {
     });
   });
 
+  it("counts the keyword pages generated and the expressions discarded by the threshold", () => {
+    const summary = summarize({
+      sources: 1,
+      files: 4,
+      findings: [],
+      keywords: { published: 12, discarded: 340 },
+    });
+    expect(summary.keywords).toEqual({ published: 12, discarded: 340 });
+    expect(Object.keys(summary)).toEqual([
+      "sources",
+      "files",
+      "entities",
+      "links",
+      "findings",
+      "keywords",
+    ]);
+  });
+
+  it("carries no keyword counts while the build computes none", () => {
+    expect("keywords" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
+  });
+
   it("counts findings per severity with the three severities always present", () => {
     expect(
       summarize({ sources: 0, files: 0, findings: [encoding, frontmatter, unreachable] }).findings
@@ -175,6 +197,19 @@ describe("serializeBuildLog", () => {
     expect(text).toContain(
       '  "findings": [\n    {\n      "check": "I-STALE",\n      "severity": "info",\n      "source": "notes",\n      "path": "c.md",\n      "entity": "notes/c",\n      "message": "c.md is old",\n      "remediation": "Review it."\n    }\n  ]\n',
     );
+  });
+
+  it("writes the keyword counts after the findings only when the summary holds them", () => {
+    const withKeywords: BuildLog = {
+      ...log,
+      summary: { ...log.summary, keywords: { discarded: 7, published: 2 } },
+    };
+    const text = serializeBuildLog(withKeywords);
+    expect(text).toContain(
+      '      "byCheck": {\n        "E-ENCODING": 1,\n        "E-FM-INVALID": 1\n      }\n    },\n    "keywords": {\n      "published": 2,\n      "discarded": 7\n    }\n  },\n',
+    );
+    expect(parse(text).summary.keywords).toEqual({ published: 2, discarded: 7 });
+    expect(serializeBuildLog(log)).not.toContain("keywords");
   });
 
   it("writes the summary and severity keys in a fixed order whatever the input order", () => {

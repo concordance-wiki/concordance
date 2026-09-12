@@ -340,4 +340,23 @@ describe("formatSummary", () => {
       "  W-Y: 2",
     ]);
   });
+
+  it("reports the keyword pages generated and the expressions discarded when the summary holds them", () => {
+    expect(
+      formatSummary({
+        sources: 1,
+        files: 3,
+        entities: {},
+        links: {},
+        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+        keywords: { published: 12, discarded: 340 },
+      }),
+    ).toEqual([
+      "sources: 1",
+      "files: 3",
+      "keyword pages: 12",
+      "expressions under the threshold: 340",
+      "findings: error 0, warning 0, info 0",
+    ]);
+  });
 });

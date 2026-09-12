@@ -13,8 +13,8 @@ export interface EntitySource {
   path: string;
   line: number;
   commit?: string;
-  /** ISO 8601 date of the last change. */
-  last_modified: string;
+  /** ISO 8601 date of the last change; absent for a keyword page, which has no file of its own. */
+  last_modified?: string;
 }
 
 /** One node of the model, as serialised under `entities` in `model.json`. */
@@ -33,6 +33,8 @@ export interface Entity {
   /** Frontmatter keys that are not common attributes, over the defaults set by the typing rules. */
   attributes: Record<string, unknown>;
   source: EntitySource;
+  /** `true` for a keyword page without a note, located on the first mention of its expression. */
+  keyword?: boolean;
 }
 
 /** Canonical order of entities: by identifier, code unit by code unit. */

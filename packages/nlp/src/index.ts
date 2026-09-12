@@ -69,3 +69,14 @@ export {
   type KeywordLock,
   type KeywordOptions,
 } from "./keywords/options.js";
+export {
+  KEYWORD_TYPE,
+  keywordEntities,
+  keywordPublicationDefaults,
+  keywordPublicationOptions,
+  publishKeywords,
+  type KeywordEntitiesOptions,
+  type KeywordPage,
+  type KeywordPublicationOptions,
+  type PublishedKeywords,
+} from "./keywords/publish.js";

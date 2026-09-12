@@ -86,14 +86,13 @@ describe("loadContracts", () => {
     expect(second !== undefined && "operation_id" in second.attributes).toBe(false);
   });
 
-  it("omits the application, the domain and the commit of an api note that has none", async () => {
+  it("omits the application, the domain, the commit and the modification date of an api note that has none", async () => {
     const { input } = harness(localFile);
     const bare = api({
       source: {
         name: "specs",
         path: "api/payments.md",
         line: 1,
-        last_modified: "2026-03-01T00:00:00.000Z",
       },
     });
     delete bare.application;
@@ -117,7 +116,6 @@ describe("loadContracts", () => {
       name: "specs",
       path: "./payments.openapi.json",
       line: 1,
-      last_modified: "2026-03-01T00:00:00.000Z",
     });
   });
 
