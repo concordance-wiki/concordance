@@ -17,6 +17,15 @@
     "typecheck": "tsc -b tsconfig.json"
   },
   "dependencies": {
-    "@concordance-wiki/core": "workspace:*"
+    "@concordance-wiki/core": "workspace:*",
+    "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.1.0",
+    "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "@types/mdast": "4.0.4"
   }
 }

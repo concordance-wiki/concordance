@@ -5,6 +5,8 @@ import { dirname, join, relative, sep } from "node:path";
 export interface FileSystem {
   exists(path: string): boolean;
   readText(path: string): string;
+  /** Raw content, for callers that decide how to decode it. */
+  readBytes(path: string): Uint8Array;
   writeText(path: string, content: string): void;
   /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` folders are skipped. */
   listFiles(directory: string): string[];
@@ -27,6 +29,7 @@ function walk(root: string, directory: string, out: string[]): void {
 export const nodeFileSystem: FileSystem = {
   exists: (path) => existsSync(path),
   readText: (path) => readFileSync(path, "utf8"),
+  readBytes: (path) => readFileSync(path),
   writeText: (path, content) => {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content, "utf8");
@@ -42,7 +45,12 @@ export const nodeFileSystem: FileSystem = {
 export interface MemoryFileSystem extends FileSystem {
   files: Map<string, string>;
   dates: Map<string, string>;
+  /** Stores raw bytes, so that a test can seed content that is not valid text. */
+  writeBytes(path: string, bytes: Uint8Array): void;
 }
+
+const encoder = new TextEncoder();
+const lenientDecoder = new TextDecoder();
 
 /** An in-memory file system keyed by absolute forward-slash paths. Dates default to the epoch. */
 export function memoryFileSystem(
@@ -50,25 +58,40 @@ export function memoryFileSystem(
   dates: Record<string, string> = {},
 ): MemoryFileSystem {
   const store = new Map(Object.entries(files));
+  const blobs = new Map<string, Uint8Array>();
   const stamps = new Map(Object.entries(dates));
+  const paths = () => [...store.keys(), ...blobs.keys()];
+  const missing = (path: string) => new Error(`ENOENT: no such file, open '${path}'`);
   return {
     files: store,
     dates: stamps,
     exists: (path) =>
-      store.has(path) || [...store.keys()].some((key) => key.startsWith(`${path}/`)),
+      store.has(path) || blobs.has(path) || paths().some((key) => key.startsWith(`${path}/`)),
     readText: (path) => {
       const content = store.get(path);
-      if (content === undefined) {
-        throw new Error(`ENOENT: no such file, open '${path}'`);
-      }
-      return content;
+      if (content !== undefined) return content;
+      const bytes = blobs.get(path);
+      if (bytes === undefined) throw missing(path);
+      return lenientDecoder.decode(bytes);
+    },
+    readBytes: (path) => {
+      const bytes = blobs.get(path);
+      if (bytes !== undefined) return bytes;
+      const content = store.get(path);
+      if (content === undefined) throw missing(path);
+      return encoder.encode(content);
     },
     writeText: (path, content) => {
+      blobs.delete(path);
       store.set(path, content);
+    },
+    writeBytes: (path, bytes) => {
+      store.delete(path);
+      blobs.set(path, bytes);
     },
     listFiles: (directory) => {
       const prefix = `${directory}/`;
-      return [...store.keys()]
+      return paths()
         .filter(
           (key) => key.startsWith(prefix) && !key.slice(prefix.length).split("/").includes(".git"),
         )

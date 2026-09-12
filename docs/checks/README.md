@@ -24,6 +24,7 @@ Severities can be overridden under `checks:` in `concordance.yaml` or, per repos
 | [`E-TYPE-CONFLICT`](E-TYPE-CONFLICT.md) | error | The frontmatter `type` contradicts the type given by the file suffix. |
 | [`E-FM-INVALID`](E-FM-INVALID.md) | error | The YAML frontmatter cannot be parsed. |
 | [`E-META-REL`](E-META-REL.md) | error | A declared relation is not allowed between these two types by the profile. |
+| [`E-ENCODING`](E-ENCODING.md) | error | A file is not valid UTF-8 and is skipped. |
 
 ## Documents
 

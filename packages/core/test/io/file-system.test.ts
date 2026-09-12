@@ -23,6 +23,12 @@ describe("nodeFileSystem", () => {
     expect(nodeFileSystem.readText(file)).toBe("content");
   });
 
+  it("reads the raw bytes of a file", () => {
+    const file = join(directory, "raw.bin");
+    writeFileSync(file, Uint8Array.from([0x61, 0xff, 0x62]));
+    expect([...nodeFileSystem.readBytes(file)]).toEqual([0x61, 0xff, 0x62]);
+  });
+
   it("lists files recursively as sorted forward-slash paths, skipping .git", () => {
     nodeFileSystem.writeText(join(directory, "b.md"), "");
     nodeFileSystem.writeText(join(directory, "a/z.md"), "");
@@ -54,6 +60,32 @@ describe("memoryFileSystem", () => {
 
   it("throws like the real file system on a missing file", () => {
     expect(() => memoryFileSystem().readText("/missing")).toThrow(/ENOENT/);
+    expect(() => memoryFileSystem().readBytes("/missing")).toThrow(/ENOENT/);
+  });
+
+  it("serves text files as UTF-8 bytes", () => {
+    const fs = memoryFileSystem({ "/a.txt": "é" });
+    expect([...fs.readBytes("/a.txt")]).toEqual([0xc3, 0xa9]);
+  });
+
+  it("serves seeded bytes as is, and as text with replacement characters", () => {
+    const fs = memoryFileSystem({ "/a.txt": "text" });
+    fs.writeBytes("/a.txt", Uint8Array.from([0x61, 0xff]));
+    expect([...fs.readBytes("/a.txt")]).toEqual([0x61, 0xff]);
+    expect(fs.readText("/a.txt")).toBe("a\ufffd");
+    expect(fs.exists("/a.txt")).toBe(true);
+    expect(fs.files.has("/a.txt")).toBe(false);
+  });
+
+  it("replaces seeded bytes when text is written over them", () => {
+    const fs = memoryFileSystem();
+    fs.writeBytes("/root/a.txt", Uint8Array.from([0xff]));
+    expect(fs.exists("/root")).toBe(true);
+    expect(fs.listFiles("/root")).toEqual(["a.txt"]);
+    fs.writeText("/root/a.txt", "b");
+    expect(fs.readText("/root/a.txt")).toBe("b");
+    expect([...fs.readBytes("/root/a.txt")]).toEqual([0x62]);
+    expect(fs.listFiles("/root")).toEqual(["a.txt"]);
   });
 
   it("reports a directory as existing when a file lives under it", () => {
