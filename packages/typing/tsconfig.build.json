@@ -13,6 +13,9 @@
     },
     {
       "path": "../profile/tsconfig.build.json"
+    },
+    {
+      "path": "../ingest/tsconfig.build.json"
     }
   ]
 }

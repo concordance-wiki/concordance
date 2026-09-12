@@ -1,0 +1,67 @@
+import type { SourceConfig } from "@concordance-wiki/core";
+import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
+import type { Profile } from "@concordance-wiki/profile";
+
+export const MODIFIED_AT = "2026-03-12T10:00:00.000Z";
+
+export function file(path: string, commit?: string): IngestedFile {
+  const ingested: IngestedFile = {
+    path,
+    absolutePath: `/sources/specs/${path}`,
+    modifiedAt: MODIFIED_AT,
+  };
+  return commit === undefined ? ingested : { ...ingested, commit };
+}
+
+export function source(name: string, files: IngestedFile[], locale = "en"): IngestedSource {
+  return { name, locale, root: `/sources/${name}`, files };
+}
+
+export function sourceConfig(overrides: Partial<SourceConfig> = {}): SourceConfig {
+  return { name: "specs", path: "./specs", ...overrides };
+}
+
+export function document(overrides: Partial<ParsedMarkdown> = {}): ParsedMarkdown {
+  return {
+    frontmatter: {},
+    title: undefined,
+    sections: [],
+    links: [],
+    images: [],
+    codeBlocks: [],
+    quotes: [],
+    tables: [],
+    paragraphs: [],
+    findings: [],
+    ...overrides,
+  };
+}
+
+/** A profile reduced to what the cascade looks at: the declared types and the common attributes. */
+export function profile(overrides: Partial<Profile> = {}, withCommon = true): Profile {
+  const common: Partial<Profile> = withCommon
+    ? {
+        common_attributes: {
+          title: { type: "string" },
+          status: { type: "enum", values: ["draft", "valid"], default: "draft" },
+        },
+      }
+    : {};
+  return {
+    version: 1,
+    ...common,
+    types: {
+      document: { label: { en: "Document" }, group: "source", graph: "documents-only" },
+      meeting: { label: { en: "Meeting" }, group: "source", graph: "documents-only" },
+      screen: {
+        label: { en: "Screen" },
+        group: "application",
+        attributes: { url_pattern: { type: "string" }, roles: { type: "ref[]" } },
+      },
+      rule: { label: { en: "Rule" }, group: "business" },
+    },
+    relations: {},
+    confidence: {},
+    ...overrides,
+  };
+}

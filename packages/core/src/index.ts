@@ -30,6 +30,13 @@ export {
   type BuildLog,
   type BuildSummary,
 } from "./model/build-log.js";
+export {
+  compareEntities,
+  type Entity,
+  type EntityGraph,
+  type EntitySource,
+  type TypeOrigin,
+} from "./model/entity.js";
 export { compareFindings, type Finding, type Severity } from "./model/finding.js";
 export {
   compareLinks,

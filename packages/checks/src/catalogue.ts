@@ -52,6 +52,20 @@ export const catalogue: readonly CheckDefinition[] = [
     "Set inference.cross_source_links to true in concordance.yaml, or link to a note of the same source.",
   ),
   step(
+    "W-TYPE-UNKNOWN",
+    "warning",
+    "identifiers-and-types",
+    "The resolved type is not declared in the profile; the note is treated as a document.",
+    "Declare the type in the project profile, or fix the rule or frontmatter that names it.",
+  ),
+  step(
+    "W-ATTRIBUTE-UNKNOWN",
+    "warning",
+    "identifiers-and-types",
+    "A frontmatter attribute is not part of the type's schema; it is kept as written.",
+    "Rename the attribute to one the type declares, or extend the type in the project profile.",
+  ),
+  step(
     "E-ID-DUP",
     "error",
     "identifiers-and-types",

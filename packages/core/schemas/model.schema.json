@@ -99,6 +99,11 @@
             "type": "string",
             "pattern": "^(source|rule#[0-9]+|suffix|frontmatter|contract|default)$"
           },
+          "graph": {
+            "type": "string",
+            "enum": ["full", "documents-only"],
+            "description": "documents-only for a raw source that only enters the graph through the documents relation"
+          },
           "attributes": {
             "type": "object"
           },
