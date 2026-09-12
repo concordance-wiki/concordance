@@ -49,7 +49,7 @@ describe("summarize", () => {
     expect(summary.files).toBe(17);
   });
 
-  it("carries empty entity and link counts while typing and inference do not exist", () => {
+  it("carries empty entity and link counts when no entity and no link is given", () => {
     expect(summarize({ sources: 1, files: 1, findings: [] })).toEqual({
       sources: 1,
       files: 1,
@@ -79,6 +79,28 @@ describe("summarize", () => {
 
   it("carries no keyword counts while the build computes none", () => {
     expect("keywords" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
+  });
+
+  it("counts entities per type and links per method, keys sorted, a method once per link", () => {
+    const summary = summarize({
+      sources: 1,
+      files: 1,
+      findings: [],
+      entities: [{ type: "term" }, { type: "api" }, { type: "term" }],
+      links: [
+        {
+          provenance: [
+            { method: "explicit_link" },
+            { method: "explicit_link" },
+            { method: "section_mention" },
+          ],
+        },
+        { provenance: [{ method: "explicit_link" }] },
+      ],
+    });
+    expect(summary.entities).toEqual({ api: 1, term: 2 });
+    expect(Object.keys(summary.entities)).toEqual(["api", "term"]);
+    expect(summary.links).toEqual({ explicit_link: 2, section_mention: 1 });
   });
 
   it("counts findings per severity with the three severities always present", () => {

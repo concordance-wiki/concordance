@@ -1,8 +1,8 @@
 // Builds the golden corpus twice through the built command line, with
 // SOURCE_DATE_EPOCH pinning the only timestamp, and compares the two output
 // trees byte for byte. Every file the build writes is compared, so the script
-// needs no update when model.json and the site appear. The build still stops
-// after parsing with exit code 2 once its log is written: that outcome is
+// needs no update when the site appears. The build still stops after inference
+// with exit code 2 once its log and its model are written: that outcome is
 // accepted; any other failure, or any differing file, fails the step.
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
