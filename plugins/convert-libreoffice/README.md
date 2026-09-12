@@ -16,4 +16,4 @@ One `converter` for the three extensions, producing `pdf`. The manifest declares
 
 ## Testing
 
-Unit tests replace LibreOffice with a fake command runner. The integration test runs the installed `soffice` when there is one and is skipped otherwise; every line is covered without it.
+Unit tests replace LibreOffice with a fake command runner. The integration test runs the installed `soffice` only when `CONCORDANCE_INTEGRATION=1` is set (the pipeline sets it) and there is one; it is skipped otherwise, and every line is covered without it.

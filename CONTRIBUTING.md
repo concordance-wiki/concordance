@@ -17,7 +17,7 @@ pnpm install
 pnpm check
 ```
 
-`pnpm check` runs everything the continuous integration runs. It must pass before every commit.
+`pnpm check` runs everything the continuous integration runs. It must pass before every commit. Tests that start an external program (LibreOffice) run only with `CONCORDANCE_INTEGRATION=1`, which the pipeline sets; set it locally when you touch the converter.
 
 | Command | Effect |
 |---|---|

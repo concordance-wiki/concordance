@@ -31,6 +31,8 @@ jobs:
       - name: Build
         run: pnpm build
       - name: Test with full coverage
+        env:
+          CONCORDANCE_INTEGRATION: "1"
         run: pnpm test
       - name: Publish coverage report
         if: always()
