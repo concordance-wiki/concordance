@@ -20,18 +20,26 @@ function plural(count: number, noun: string): string {
   return `${String(count)} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-export function formatFinding(finding: Finding): string {
-  const where = [finding.path, finding.line]
+/** `<path>:<line>`, `<path>` alone, or the empty string when the finding has no path. */
+export function locationOf(finding: Finding): string {
+  return [finding.path, finding.line]
     .filter((part) => part !== undefined)
     .map(String)
     .join(":");
+}
+
+export function documentationOf(check: string): string {
   // The registry only returns registered checks, whose identifiers follow the pattern.
-  const url = documentationUrl(finding.check as CheckId);
+  return documentationUrl(check as CheckId);
+}
+
+export function formatFinding(finding: Finding): string {
+  const where = locationOf(finding);
   return [
     finding.severity,
     ...(where === "" ? [] : [where]),
     finding.check,
-    `${finding.message} (${url})`,
+    `${finding.message} (${documentationOf(finding.check)})`,
   ].join(": ");
 }
 

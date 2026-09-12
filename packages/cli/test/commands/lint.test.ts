@@ -51,16 +51,41 @@ describe("concordance lint", () => {
     });
   });
 
-  describe("no network access in this mode, no write outside --fix", () => {
+  describe("no network access in this mode, no write outside --output and --fix", () => {
     it("never writes a file and never calls git", () => {
       const io = repository({ "/work/concordance.yaml": config });
       const write = vi.spyOn(io.fs, "writeText");
+      const writeBytes = vi.spyOn(io.fs, "writeBytes");
       const methods = ["clone", "update", "head", "history"] as const;
       const git = methods.map((method) => vi.spyOn(io.git, method));
       expect(lintCommand(["--config", "concordance.yaml", "--source", "notes"], io)).toBe(1);
       expect(write).not.toHaveBeenCalled();
+      expect(writeBytes).not.toHaveBeenCalled();
       for (const spy of git) expect(spy).not.toHaveBeenCalled();
       expect(io.git.calls).toEqual([]);
+    });
+
+    it("writes the report under --output and nothing else, and prints nothing", () => {
+      const io = repository();
+      const write = vi.spyOn(io.fs, "writeText");
+      expect(lintCommand(["--format", "sarif", "--output", "reports/lint.sarif"], io)).toBe(1);
+      expect(write).toHaveBeenCalledTimes(1);
+      expect(io.fs.listFiles("/work/reports")).toEqual(["lint.sarif"]);
+      expect(io.fs.readText("/work/reports/lint.sarif")).toMatch(
+        /^\{\n {2}"\$schema": .*\n\}\n$/su,
+      );
+      expect(io.stdout).toEqual([]);
+      expect(io.stderr).toEqual([]);
+      expect(io.git.calls).toEqual([]);
+    });
+
+    it("writes the text report under --output as the lines it would print", () => {
+      const io = repository();
+      expect(lintCommand(["--output", "/elsewhere/lint.txt"], io)).toBe(1);
+      expect(io.fs.readText("/elsewhere/lint.txt")).toBe(
+        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)\n1 finding: 1 error, 0 warnings, 0 info\n`,
+      );
+      expect(io.stdout).toEqual([]);
     });
 
     it("rejects --fix with a clear message and exit code 2", () => {
@@ -80,8 +105,8 @@ describe("concordance lint", () => {
 
     it("exits 2 on an unknown option", async () => {
       const io = repository();
-      expect(await main(["lint", "--format", "sarif"], io)).toBe(2);
-      expect(io.stderr[0]).toMatch(/--format/);
+      expect(await main(["lint", "--colour"], io)).toBe(2);
+      expect(io.stderr[0]).toMatch(/--colour/);
     });
   });
 
@@ -152,6 +177,105 @@ describe("concordance lint", () => {
       expect(io.stderr).toEqual([
         "--fail-on fatal is not a severity; expected error, warning or info",
       ]);
+    });
+  });
+
+  describe("--format selects the output format, text by default", () => {
+    const parse = (io: RecordedIo): unknown => JSON.parse(`${io.stdout.join("\n")}\n`);
+
+    it("Output formats: readable text, JSON, SARIF, JUnit", () => {
+      const text = repository();
+      const byDefault = repository();
+      expect(lintCommand(["--format", "text"], text)).toBe(1);
+      expect(lintCommand([], byDefault)).toBe(1);
+      expect(text.stdout).toEqual(byDefault.stdout);
+      expect(text.stdout).toHaveLength(2);
+      expect(text.stdout[1]).toBe("1 finding: 1 error, 0 warnings, 0 info");
+
+      const json = repository();
+      expect(lintCommand(["--format", "json"], json)).toBe(1);
+      expect(parse(json)).toMatchObject({
+        version: 1,
+        tool: { name: "concordance", version: expect.stringMatching(/^\d+\.\d+\.\d+/u) as string },
+        findings: [{ check: "E-LINK-BROKEN", path: "README.md", line: 3 }],
+        summary: { error: 1, warning: 0, info: 0 },
+      });
+
+      const sarif = repository();
+      expect(lintCommand(["--format", "sarif"], sarif)).toBe(1);
+      expect(parse(sarif)).toMatchObject({
+        $schema: "https://json.schemastore.org/sarif-2.1.0.json",
+        version: "2.1.0",
+        runs: [{ tool: { driver: { name: "concordance" } } }],
+      });
+
+      const junit = repository();
+      expect(lintCommand(["--format", "junit"], junit)).toBe(1);
+      expect(junit.stdout[0]).toBe('<?xml version="1.0" encoding="UTF-8"?>');
+      expect(junit.stdout[1]).toBe(
+        '<testsuite name="concordance lint" tests="1" failures="1" errors="0">',
+      );
+      expect(junit.stdout.at(-1)).toBe("</testsuite>");
+      for (const io of [json, sarif, junit]) {
+        expect(io.stdout.join("\n")).not.toContain("1 finding: 1 error");
+        expect(io.stderr).toEqual([]);
+      }
+    });
+
+    it("Each SARIF finding points to the file and line, for display in the diff margin", () => {
+      const io = repository();
+      lintCommand(["--format", "sarif"], io);
+      expect(parse(io)).toMatchObject({
+        runs: [
+          {
+            originalUriBaseIds: { "%SRCROOT%": { uri: "file:///work/" } },
+            results: [
+              {
+                ruleId: "E-LINK-BROKEN",
+                level: "error",
+                locations: [
+                  {
+                    physicalLocation: {
+                      artifactLocation: { uri: "README.md", uriBaseId: "%SRCROOT%" },
+                      region: { startLine: 3 },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it("Exit codes: 0 when no finding is above the threshold, 1 otherwise, 2 on execution error", () => {
+      for (const format of ["text", "json", "sarif", "junit"]) {
+        expect(lintCommand(["--format", format], recordedIo({ "/work/note.md": "# Note\n" }))).toBe(
+          0,
+        );
+        expect(lintCommand(["--format", format], repository())).toBe(1);
+        expect(lintCommand(["--format", format, "--config", "nope.yaml"], repository())).toBe(2);
+      }
+    });
+
+    it("--fail-on sets the blocking severity, error by default, whatever the format", () => {
+      const lenient = () =>
+        repository({
+          "/work/concordance-lint.yaml": "checks: { E-LINK-BROKEN: { severity: warning } }\n",
+        });
+      for (const format of ["text", "json", "sarif", "junit"]) {
+        expect(lintCommand(["--format", format], lenient())).toBe(0);
+        expect(lintCommand(["--format", format, "--fail-on", "warning"], lenient())).toBe(1);
+      }
+    });
+
+    it("rejects a format it does not know with the accepted values and exit code 2", () => {
+      const io = repository();
+      expect(lintCommand(["--format", "yaml"], io)).toBe(2);
+      expect(io.stderr).toEqual([
+        "--format yaml is not a format; expected text, json, sarif or junit",
+      ]);
+      expect(io.stdout).toEqual([]);
     });
   });
 
