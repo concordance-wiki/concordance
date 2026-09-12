@@ -52,6 +52,30 @@ export {
   type ProvenanceOccurrence,
 } from "./model/link.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
+export {
+  loadPseudonymDictionary,
+  type PseudonymDictionary,
+  type PseudonymEntry,
+} from "./privacy/dictionary.js";
+export {
+  createSpeakerNumbering,
+  detectPersonalMentions,
+  pseudonymizeSpeaker,
+  pseudonymizeText,
+  type DetectOptions,
+  type PersonalMention,
+  type PseudonymizedText,
+  type PseudonymizeOptions,
+  type SpeakerNumbering,
+  type SpeakerOptions,
+} from "./privacy/pseudonymize.js";
+export { transcriptsPublished } from "./privacy/publication.js";
+export {
+  pseudonymizeTranscript,
+  type PseudonymizedTranscript,
+  type TranscriptCueLike,
+  type TranscriptLike,
+} from "./privacy/transcript.js";
 export type * from "./plugin/api.js";
 export { definePlugin, PluginDefinitionError } from "./plugin/define.js";
 export { importPlugin } from "./plugin/node-loader.js";

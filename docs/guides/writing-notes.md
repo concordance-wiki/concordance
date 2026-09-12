@@ -77,6 +77,8 @@ Code blocks, inline code, URLs, frontmatter values and link targets are never sc
 
 A markdown file that no rule types is a document. It is indexed, its words are recorded, and it appears in the mentions of every note it cites, but it is not a node of the model. Meeting notes and transcripts behave the same way; the decisions they contain deserve their own `decision` note, linked to the meeting.
 
+A transcript names the people who spoke. Before it is rendered or indexed, speaker names and the real names of the pseudonymisation dictionary are replaced by pseudonyms, and a name pattern found outside the dictionary is reported as `I-PII-DETECTED` for you to add to the dictionary or to edit out of the source. Transcripts are published only when the configuration asks for it; see the [privacy section of the configuration guide](configuration.md#pseudonymisation).
+
 ## Glossary terms
 
 A term note is short: a definition, aliases, and, when useful, a broader term.

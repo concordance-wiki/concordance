@@ -14,9 +14,11 @@ Speakers are pseudonymised from the dictionary; a name pattern found in the text
 
 ## After
 
-```
-pseudonyms.yaml:
-  "Firstname Lastname": Participant-4
+```yaml
+# pseudonyms.yaml
+people:
+  "Firstname Lastname":
+    pseudonym: Participant-4
 ```
 
 ## How to fix
