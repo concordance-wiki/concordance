@@ -5,7 +5,7 @@ The JSON schemas of Concordance live with the package that validates them: [`pac
 | Schema | Validates |
 |---|---|
 | `config.schema.json` | `concordance.yaml` |
-| `profile.schema.json` | `profiles/default.yaml` and project profiles |
+| `profile.schema.json` | `packages/profile/default.yaml` and project profiles |
 | `model.schema.json` | `dist/model.json` |
 | `lock.schema.json` | `concordance.lock.yaml` |
 | `theme.schema.json` | `theme.yaml` |

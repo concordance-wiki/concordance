@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concordance-wiki.github.io/concordance/schemas/profile.schema.json",
   "title": "Concordance profile",
-  "description": "Schema of the meta-model profile (profiles/default.yaml and project overrides).",
+  "description": "Schema of the meta-model profile (packages/profile/default.yaml and project overrides).",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "types", "relations", "confidence"],
