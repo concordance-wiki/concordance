@@ -83,6 +83,9 @@ importers:
       '@concordance-wiki/ingest':
         specifier: workspace:*
         version: link:../ingest
+      '@concordance-wiki/lint':
+        specifier: workspace:*
+        version: link:../lint
       '@concordance-wiki/nlp':
         specifier: workspace:*
         version: link:../nlp
@@ -168,6 +171,12 @@ importers:
       '@concordance-wiki/typing':
         specifier: workspace:*
         version: link:../typing
+      ajv:
+        specifier: 8.17.1
+        version: 8.17.1
+      yaml:
+        specifier: 2.8.1
+        version: 2.8.1
 
   packages/nlp:
     dependencies:

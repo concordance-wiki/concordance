@@ -200,6 +200,18 @@ Each key is a check identifier from the [check catalogue](../checks/README.md). 
 
 The same block, in a `concordance-lint.yaml` at the root of a knowledge repository, overrides severities locally for the linter.
 
+## `concordance-lint.yaml`
+
+Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries the `checks` block alone, with the same shape and the same rules:
+
+```yaml
+checks:
+  E-LINK-BROKEN: { severity: warning }
+  W-STALE: { enabled: false }
+```
+
+An entry replaces the entry of the same check given under `checks` in the `concordance.yaml` passed with `--config`; the other entries of the configuration still apply. An empty file overrides nothing. Any other top-level key, a key that is not a check identifier, an unknown check or a value outside `severity` and `enabled` stops the linter with an execution error (exit code 2) naming the file and the key.
+
 ## `lock`
 
 Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages/core/schemas/lock.schema.json). Only `rejected_terms` is read in the first version.

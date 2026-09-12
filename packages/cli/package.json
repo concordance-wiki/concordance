@@ -25,6 +25,7 @@
     "@concordance-wiki/core": "workspace:*",
     "@concordance-wiki/inference": "workspace:*",
     "@concordance-wiki/ingest": "workspace:*",
+    "@concordance-wiki/lint": "workspace:*",
     "@concordance-wiki/nlp": "workspace:*",
     "@concordance-wiki/profile": "workspace:*",
     "@concordance-wiki/site": "workspace:*",
