@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="PaymentsService"
+    targetNamespace="urn:example:payments"
+    xmlns:tns="urn:example:payments"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>Payments API</wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema targetNamespace="urn:example:payments">
+      <xsd:complexType name="Payment">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:string"/>
+          <xsd:element name="amount" type="xsd:decimal"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="createPayment">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="payment" type="tns:Payment"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="createPaymentResponse" type="tns:Payment"/>
+      <xsd:element name="getPayment">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getPaymentResponse" type="tns:Payment"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="createPaymentRequest">
+    <wsdl:part name="parameters" element="tns:createPayment"/>
+  </wsdl:message>
+  <wsdl:message name="createPaymentResponse">
+    <wsdl:part name="parameters" element="tns:createPaymentResponse"/>
+  </wsdl:message>
+  <wsdl:message name="getPaymentRequest">
+    <wsdl:part name="parameters" element="tns:getPayment"/>
+  </wsdl:message>
+  <wsdl:message name="getPaymentResponse">
+    <wsdl:part name="parameters" element="tns:getPaymentResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="PaymentsPortType">
+    <wsdl:operation name="createPayment">
+      <wsdl:documentation>Create a payment</wsdl:documentation>
+      <wsdl:input message="tns:createPaymentRequest"/>
+      <wsdl:output message="tns:createPaymentResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPayment">
+      <wsdl:documentation>Read a payment</wsdl:documentation>
+      <wsdl:input message="tns:getPaymentRequest"/>
+      <wsdl:output message="tns:getPaymentResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PaymentsSoapBinding" type="tns:PaymentsPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="createPayment">
+      <soap:operation soapAction="urn:example:payments:createPayment"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPayment">
+      <soap:operation soapAction="urn:example:payments:getPayment"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PaymentsService">
+    <wsdl:port name="PaymentsPort" binding="tns:PaymentsSoapBinding">
+      <soap:address location="https://payments.example.invalid/soap"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

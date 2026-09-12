@@ -26,7 +26,7 @@ export const usage = [
   "                                        turn the model into a Cypher script (stdout by default)",
   "  gallery [--output dir] [--theme plugin] [--config file]",
   "                                        render every slot with fixture data through the theme",
-  "  init [directory]                      write a minimal configuration file",
+  "  init [directory] [--templates]        write a minimal configuration file, and the note templates",
   "  lint [--scope repo] [--source name] [--config file] [--fail-on error|warning|info]",
   "       [--format text|json|sarif|junit] [--output file]",
   "                                        check the current repository without any network access",

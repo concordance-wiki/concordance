@@ -53,7 +53,7 @@ git init
 concordance init
 ```
 
-`concordance init` writes a minimal, commented `concordance.yaml` and refuses to overwrite one that exists. Edit it to declare your sources:
+`concordance init` writes a minimal, commented `concordance.yaml` and refuses to overwrite one that exists. Add `--templates` to also receive the [note templates](../templates/README.md), one per type, under `templates/`: copy one into a knowledge repository whenever you start a note. Existing files under `templates/` are kept and reported. Edit `concordance.yaml` to declare your sources:
 
 ```yaml
 version: 1

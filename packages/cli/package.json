@@ -16,7 +16,8 @@
     "./bin": "./dist/bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "templates"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"
