@@ -5,7 +5,7 @@ Official plugins, published under `@concordance-wiki/plugin-*`. An example plugi
 | Plugin | Contributes | System dependency | Status |
 |---|---|---|---|
 | [`reader-vtt`](reader-vtt/README.md) | reader for `.vtt` and `.srt`: cues, speakers, duration, language, HTML rendering with addressable timecodes | none | available |
-| `reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none | planned |
+| [`reader-office`](reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
 | [`convert-libreoffice`](convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text later | LibreOffice | available |
 | `contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none | planned |
 | `contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |

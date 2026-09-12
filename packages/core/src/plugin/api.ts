@@ -10,13 +10,17 @@ export interface SystemDependency {
   optional?: boolean;
 }
 
-/** A file handed to a reader: its path in the source and its raw bytes. */
+/** A file handed to a reader: its path, used to pick the format and to name it in errors, and its raw bytes. */
 export interface ReaderInput {
   path: string;
   payload: { bytes: Uint8Array };
 }
 
-/** Metadata of a resource and its full text, the material of recognition and search. */
+/**
+ * What a reader knows about a resource: its native properties (title, author, dates, counts) as a
+ * flat record, and its text, empty when the format has no extractable text yet. Personal data in
+ * the metadata is returned raw; pseudonymisation applies downstream, on the model.
+ */
 export interface ReaderOutput {
   metadata: Record<string, unknown>;
   text: string;

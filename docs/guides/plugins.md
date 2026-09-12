@@ -7,7 +7,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | Package | Contributes | System dependency | Status |
 |---|---|---|---|
 | [`@concordance-wiki/plugin-reader-vtt`](../../plugins/reader-vtt/README.md) | reader for `.vtt` and `.srt` transcripts: cues, speakers, duration, language, HTML with addressable timecodes | none | available |
-| `@concordance-wiki/plugin-reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf` | none | planned |
+| [`@concordance-wiki/plugin-reader-office`](../../plugins/reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
 | `@concordance-wiki/plugin-convert-libreoffice` | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text extraction later | LibreOffice | available |
 | `@concordance-wiki/plugin-contract-openapi` | source of `endpoint` entities from OpenAPI 3.x | none | planned |
 | `@concordance-wiki/plugin-contract-wsdl` | source of `endpoint` entities from WSDL | none | planned |
@@ -87,6 +87,10 @@ A converter receives `{ path, payload }` where the payload is typed (`ConverterP
 | `options.timeoutMs`, `options.maxSizeBytes` | `conversion.timeout_s` and `conversion.max_size_mb`, converted |
 
 It returns `{ representations, findings }`: one `{ path }` per produced representation (`pdf`, `thumbnails`, `text`), each a file under the cache that the pipeline reads later, and the findings of the conversion. A conversion that fails produces no representation and a [`W-CONV-FAILED`](../checks/W-CONV-FAILED.md) finding: the document remains a downloadable entity. A PDF without extractable text from a large source carries a [`W-CONV-SUSPECT`](../checks/W-CONV-SUSPECT.md) finding. The pipeline runs converters through a pool of `conversion.parallelism` workers and keeps the results in input order.
+
+### Readers
+
+A reader receives a `ReaderInput`: the `path` of the file relative to its source, used to pick the format and to name the file in errors, and `payload.bytes`, its raw content as a `Uint8Array`. It returns a `ReaderOutput`: `metadata`, a flat record of the native properties of the resource (title, author, subject, keywords, `created` and `modified` dates as ISO 8601 strings, counts), and `text`, the readable content, empty when the format has no extractable text yet. A reader is synchronous and pure: it reads nothing but the bytes it is given, never git, the file system or the clock, so the dates it returns are the document's own and stay distinct from the commit date the ingested file carries. When the bytes cannot be read it throws a plain `Error` whose message names the file; the pipeline turns that failure into a finding. Personal data such as authors is returned raw: pseudonymisation applies downstream, on the model, when it is enabled.
 
 ### System dependencies
 

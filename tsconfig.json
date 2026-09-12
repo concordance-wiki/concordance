@@ -39,6 +39,9 @@
     },
     {
       "path": "plugins/reader-vtt/tsconfig.build.json"
+    },
+    {
+      "path": "plugins/reader-office/tsconfig.build.json"
     }
   ]
 }
