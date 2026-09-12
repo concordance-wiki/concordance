@@ -10,9 +10,11 @@ import { extractPdfText } from "../src/pdf-text.js";
 import { nodeCommandRunner, type CommandRunner } from "../src/runner.js";
 
 const encoder = new TextEncoder();
-const soffice = await commandExists("soffice");
+// Starting LibreOffice is slow, loads the machine and, on a desktop, opens the application:
+// the run is opted into with CONCORDANCE_INTEGRATION=1, as the pipeline does.
+const optedIn = process.env["CONCORDANCE_INTEGRATION"] === "1";
+const soffice = optedIn && (await commandExists("soffice"));
 
-// LibreOffice is slow to start and the machine may be loaded.
 describe.skipIf(!soffice)("convertToPdf through the installed LibreOffice", () => {
   let cacheDirectory = "";
   beforeEach(() => {
