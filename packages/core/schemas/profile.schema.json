@@ -467,8 +467,7 @@
     "type_prefixes": {
       "type": "object",
       "propertyNames": {
-        "type": "string",
-        "enum": ["en", "fr"]
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
       },
       "additionalProperties": {
         "type": "object",

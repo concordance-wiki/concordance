@@ -14,7 +14,7 @@ import { join } from "node:path";
 
 import { nodeFileSystem, nodeGit } from "@concordance-wiki/core";
 import { ingestSources } from "@concordance-wiki/ingest";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 /** Hash of every file under a tree, `.git` included, with its content and modification time. */
 function fingerprint(root: string): string {
@@ -54,6 +54,9 @@ function git(cwd: string, ...args: string[]): void {
     },
   );
 }
+
+// Real git processes; the default budget is meant for unit tests.
+vi.setConfig({ testTimeout: 60_000 });
 
 describe("ingestion never writes into a source", () => {
   const root = mkdtempSync(join(tmpdir(), "concordance-no-write-"));

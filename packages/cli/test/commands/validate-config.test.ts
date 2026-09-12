@@ -13,11 +13,11 @@ describe("concordance validate-config", () => {
 
   it("exits 1 and reports each error with its path, received value and expectation", () => {
     const io = recordedIo({
-      "/work/c.yaml": "version: 1\nproject: { name: W, locale: de }\nsources: []\n",
+      "/work/c.yaml": "version: 1\nproject: { name: W, locale: French }\nsources: []\n",
     });
     expect(validateConfigCommand(["--config", "c.yaml"], io)).toBe(1);
     expect(io.stderr).toEqual([
-      'error: /work/c.yaml: project.locale: value is not allowed; received "de"; expected one of "en", "fr"',
+      'error: /work/c.yaml: project.locale: value does not match the expected format; received "French"; expected a value matching ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$',
       "error: /work/c.yaml: sources: must NOT have fewer than 1 items; received []",
       "/work/c.yaml: 2 error(s)",
     ]);

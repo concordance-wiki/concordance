@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/language-pack.schema.json",
+  "title": "Concordance language pack",
+  "description": "Schema of the pack.yaml file that describes a language for the engine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["locale", "language", "collation", "plural"],
+  "properties": {
+    "locale": {
+      "type": "string",
+      "description": "BCP 47 language tag.",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "language": { "type": "string", "minLength": 1 },
+    "apostrophes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 1 }
+    },
+    "collation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sensitivity": { "type": "string", "enum": ["base", "accent", "case", "variant"] },
+        "numeric": { "type": "boolean" },
+        "ignorePunctuation": { "type": "boolean" }
+      }
+    },
+    "plural": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ending", "singular"],
+        "properties": {
+          "ending": { "type": "string", "minLength": 1 },
+          "singular": { "type": "string" },
+          "min_length": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

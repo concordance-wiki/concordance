@@ -1,0 +1,11 @@
+# Language pack: everything the engine needs to know about a language, as data.
+locale: fr
+language: Français
+apostrophes: ["’", "ʼ"]
+collation: { sensitivity: base, numeric: true }
+plural:
+  - { ending: aux, singular: al, min_length: 6 }
+  - { ending: eaux, singular: eau, min_length: 6 }
+  - { ending: eux, singular: eu, min_length: 5 }
+  - { ending: x, singular: "", min_length: 4 }
+  - { ending: s, singular: "", min_length: 4 }

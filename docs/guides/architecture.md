@@ -60,7 +60,11 @@ The core packages read markdown and produce JSON. They depend on no office forma
 
 ## Locale per source
 
-Each source declares `locale: en | fr`, defaulting to the project locale. The locale selects a language pack: normalisation, plural rules, default stopwords, type prefixes and collation. The `en` and `fr` packs are in the core, in `@concordance-wiki/nlp`; other languages are plugins that register their pack in the language pack registry (`registerLanguagePack`), and a locale no pack serves is a configuration error. Every ingested source carries its resolved locale, which the entities built from it inherit.
+Each source declares a BCP 47 locale, defaulting to the project locale. A language is described by data, never by code: a folder holding `pack.yaml` (name, apostrophes, collation options, plural suffix rules, validated by `language-pack.schema.json`) and `stopwords.txt`. The engine ships `en` and `fr`; a regional variant (`fr-CA`) uses the pack of its language until a plugin registers a more specific one; other languages are packs shipped by plugins and registered at load. Type prefixes stay in the profile, per locale, so that a project can extend them without touching the pack. Word segmentation and collation come from the platform's Unicode implementation (`Intl.Segmenter`, `Intl.Collator`).
+
+## Languages of the interface
+
+Every label of the generated site goes through a message catalogue per locale in ICU MessageFormat (plurals, selections, numbers and dates expressed in the message itself), stored as JSON in the format translation platforms exchange. Message identifiers are typed from the source catalogue, so a missing key or variable fails the build; a test checks that every locale carries every key. Messages are resolved at build: the published HTML contains final strings and no localisation library runs in the browser. Dates and numbers use the platform formatters. A project overrides any message through `theme.yaml`.
 
 ## Search
 

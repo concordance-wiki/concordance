@@ -13,7 +13,7 @@ Required. Schema version, currently `1`.
 | Key | Type | Default | Meaning |
 |---|---|---|---|
 | `name` | string | required | displayed in the site |
-| `locale` | `en`, `fr` | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
+| `locale` | BCP 47 tag | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
 | `theme` | path | `./theme.yaml` | theme file |
 | `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders |
 
@@ -78,7 +78,7 @@ One entry per repository or local folder. Names are unique.
 | `git` | repository URL; cloned at depth 1 |
 | `ref` | branch, tag or commit; `main` by default |
 | `path` | local folder, for development; exclusive with `git` |
-| `locale` | `en` or `fr`; defaults to `project.locale`. Selects the language pack of the source: text normalisation, default stopwords, the words that announce a type and the collation of its indexes. Other locales will come through plugins, which register their pack; the schema accepts `en` and `fr` today |
+| `locale` | BCP 47 tag (`en`, `fr`, `fr-CA`…); defaults to `project.locale`. Selects the language pack of the source: text normalisation, default stopwords, plural rules, word segmentation and the collation of its indexes, plus the profile's type prefixes for that locale. The engine ships `en` and `fr`; a regional variant uses the pack of its language; other languages come from plugins, which register their pack. A tag with no pack is a build error |
 | `type` | forces the type of every markdown file |
 | `default_type` | type when nothing else applies; `document` by default |
 | `application` | default application for the source |

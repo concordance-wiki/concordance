@@ -331,16 +331,12 @@ describe("validateProfile", () => {
     ]);
   });
 
-  it("reports a locale key that is not allowed at the root", () => {
-    const result = validateProfile({ ...minimal, type_prefixes: { de: { term: ["term"] } } });
-    expect(summarise(result.issues)).toEqual([
-      {
-        path: "type_prefixes.de",
-        message: "key is not allowed",
-        received: "de",
-        expected: 'one of "en", "fr"',
-      },
-    ]);
+  it("accepts type prefixes for any language tag and rejects a key that is not one", () => {
+    expect(validateProfile({ ...minimal, type_prefixes: { de: { term: ["term"] } } }).ok).toBe(
+      true,
+    );
+    const result = validateProfile({ ...minimal, type_prefixes: { German: { term: ["term"] } } });
+    expect(summarise(result.issues).map((issue) => issue.path)).toEqual(["type_prefixes.German"]);
   });
 
   it("reports an attribute target that is neither a slug nor a list once, without the branch details", () => {
