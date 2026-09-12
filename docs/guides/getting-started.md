@@ -148,7 +148,7 @@ The [configuration guide](configuration.md#continuous-integration) shows how to 
 - It does not read source code.
 - It does not run a server; anything that needs one (semantic search, questions in natural language, merge request creation) belongs to a separate, optional service that is not part of the first version.
 - It does not correct typos in search: matching is by prefix.
-- It does not publish transcripts unless the configuration asks for it explicitly.
+- It does not publish transcripts unless the configuration asks for it explicitly, and it does not decide whether they may be published: [Publishing transcripts](publishing-transcripts.md) sets out what to settle first.
 
 ## Orders of magnitude
 

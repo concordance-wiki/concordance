@@ -187,15 +187,55 @@ function ignoredFeatures(config: Config): ConfigIssue[] {
   return issues;
 }
 
+/** Enabling pseudonymisation without a dictionary would number every speaker and replace no name. */
+function missingDictionary(config: Config): ConfigIssue[] {
+  const pseudonymize = config.privacy?.pseudonymize;
+  if (pseudonymize?.enabled !== true || pseudonymize.dictionary !== undefined) {
+    return [];
+  }
+  return [
+    {
+      severity: "error",
+      path: "privacy.pseudonymize.dictionary",
+      message: "required key is missing when pseudonymize.enabled is true",
+      expected: "the path of the pseudonyms file",
+    },
+  ];
+}
+
+/** Publishing transcripts is a governance decision; the build only points out that no name is hidden. */
+function unpseudonymisedPublication(config: Config): ConfigIssue[] {
+  const privacy = config.privacy;
+  if (privacy?.publish_transcripts !== true || privacy.pseudonymize?.enabled === true) {
+    return [];
+  }
+  return [
+    {
+      severity: "warning",
+      path: "privacy.publish_transcripts",
+      message:
+        "transcripts are published without pseudonymisation: every speaker and every name is published as written",
+    },
+  ];
+}
+
 export function validateConfig(document: unknown): ConfigValidation {
   const schemaIssues = issuesFromSchema(document);
   if (schemaIssues.length > 0) {
     return { ok: false, issues: schemaIssues };
   }
   const config = document as Config;
-  const errors = [...duplicateSources(config), ...malformedGlobs(config.domains ?? [], "domains")];
+  const errors = [
+    ...duplicateSources(config),
+    ...malformedGlobs(config.domains ?? [], "domains"),
+    ...missingDictionary(config),
+  ];
   if (errors.length > 0) {
     return { ok: false, issues: errors };
   }
-  return { ok: true, config, issues: ignoredFeatures(config) };
+  return {
+    ok: true,
+    config,
+    issues: [...ignoredFeatures(config), ...unpseudonymisedPublication(config)],
+  };
 }

@@ -41,4 +41,27 @@ describe("concordance validate-config", () => {
     expect(validateConfigCommand([], io)).toBe(0);
     expect(io.stdout[0]).toMatch(/^warning: .*lock: accepted but ignored/);
   });
+
+  it("warns that transcripts are published without pseudonymisation and still exits 0", () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}privacy: { publish_transcripts: true }\n`,
+    });
+    expect(validateConfigCommand([], io)).toBe(0);
+    expect(io.stdout).toEqual([
+      "warning: /work/concordance.yaml: privacy.publish_transcripts: transcripts are published without pseudonymisation: every speaker and every name is published as written",
+      "/work/concordance.yaml: valid configuration",
+    ]);
+    expect(io.stderr).toEqual([]);
+  });
+
+  it("exits 1 when pseudonymisation is enabled without a dictionary", () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}privacy: { pseudonymize: { enabled: true } }\n`,
+    });
+    expect(validateConfigCommand([], io)).toBe(1);
+    expect(io.stderr).toEqual([
+      "error: /work/concordance.yaml: privacy.pseudonymize.dictionary: required key is missing when pseudonymize.enabled is true; expected the path of the pseudonyms file",
+      "/work/concordance.yaml: 1 error(s)",
+    ]);
+  });
 });

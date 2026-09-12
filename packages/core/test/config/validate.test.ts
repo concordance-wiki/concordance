@@ -198,6 +198,111 @@ describe("validateConfig beyond the schema", () => {
     expect(result.ok).toBe(true);
     expect(result.issues.map((issue) => issue.path)).toEqual(["sources[1]"]);
   });
+
+  it("does not publish transcripts by default and says nothing about it", () => {
+    const result = validateConfig({ ...minimal, privacy: { exclude: ["**/private/**"] } });
+    expect(result.ok).toBe(true);
+    expect(result.issues).toEqual([]);
+    if (result.ok) {
+      expect(result.config.privacy?.publish_transcripts).toBeUndefined();
+    }
+  });
+
+  it("warns when transcripts are published without pseudonymisation", () => {
+    const result = validateConfig({ ...minimal, privacy: { publish_transcripts: true } });
+    expect(result.ok).toBe(true);
+    expect(result.issues).toEqual([
+      {
+        severity: "warning",
+        path: "privacy.publish_transcripts",
+        message:
+          "transcripts are published without pseudonymisation: every speaker and every name is published as written",
+      },
+    ]);
+  });
+
+  it("warns when transcripts are published with pseudonymisation declared but not enabled", () => {
+    const result = validateConfig({
+      ...minimal,
+      privacy: { publish_transcripts: true, pseudonymize: { dictionary: "./pseudonyms.yaml" } },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.issues.map((issue) => issue.path)).toEqual(["privacy.publish_transcripts"]);
+  });
+
+  it("lists the unpseudonymised publication after the ignored keys", () => {
+    const result = validateConfig({
+      ...minimal,
+      lock: "./concordance.lock.yaml",
+      privacy: { publish_transcripts: true },
+    });
+    expect(result.issues.map((issue) => issue.path)).toEqual([
+      "lock",
+      "privacy.publish_transcripts",
+    ]);
+  });
+
+  it("says nothing when transcripts are published with pseudonymisation enabled", () => {
+    const result = validateConfig({
+      ...minimal,
+      privacy: {
+        publish_transcripts: true,
+        pseudonymize: { enabled: true, dictionary: "./pseudonyms.yaml" },
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("says nothing when transcripts are kept out, pseudonymised or not", () => {
+    expect(validateConfig({ ...minimal, privacy: { publish_transcripts: false } }).issues).toEqual(
+      [],
+    );
+    expect(
+      validateConfig({
+        ...minimal,
+        privacy: { pseudonymize: { enabled: true, dictionary: "./pseudonyms.yaml" } },
+      }).issues,
+    ).toEqual([]);
+  });
+
+  it("rejects pseudonymisation enabled without a dictionary", () => {
+    const result = validateConfig({
+      ...minimal,
+      privacy: { publish_transcripts: true, pseudonymize: { enabled: true } },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual([
+      {
+        severity: "error",
+        path: "privacy.pseudonymize.dictionary",
+        message: "required key is missing when pseudonymize.enabled is true",
+        expected: "the path of the pseudonyms file",
+      },
+    ]);
+  });
+
+  it("accepts pseudonymisation disabled without a dictionary", () => {
+    const result = validateConfig({
+      ...minimal,
+      privacy: { pseudonymize: { enabled: false, keep_roles: true } },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.issues).toEqual([]);
+  });
+
+  it("lists the missing dictionary after the other errors", () => {
+    const result = validateConfig({
+      ...minimal,
+      domains: [{ id: "a", match: ["**/{x"] }],
+      privacy: { pseudonymize: { enabled: true } },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues.map((issue) => issue.path)).toEqual([
+      "domains[0].match[0]",
+      "privacy.pseudonymize.dictionary",
+    ]);
+  });
 });
 
 describe("describeSchemaError", () => {

@@ -84,7 +84,7 @@ sources:
 
 - **A page per word**, written or not, with every passage that uses it and a link to the source line.
 - **Search that works without a server**, with facets by type, repository and domain.
-- **Document previews**: Word, PowerPoint, PDF, VTT transcripts, reconciled with their markdown twins.
+- **Document previews**: Word, PowerPoint, PDF, VTT transcripts, reconciled with their markdown twins; transcripts are pseudonymised at build and published only on [explicit request](docs/guides/publishing-transcripts.md).
 - **A to-do page**: words without a note, documents without markdown. The shortest path to a better corpus.
 - **A linter for your CI**: broken links, duplicate identifiers, invalid frontmatter, undefined terms, annotated in the merge request.
 - **Your brand**: name, logo, colours, light and dark. No mention of the tool unless you want one.
@@ -101,6 +101,7 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 - [Getting started](docs/guides/getting-started.md): from an empty folder to a published site.
 - [Writing notes](docs/guides/writing-notes.md): what a note is, what frontmatter adds, which sections mean something.
 - [Configuration](docs/guides/configuration.md): sources, typing rules, domains, thresholds, pipelines.
+- [Publishing transcripts](docs/guides/publishing-transcripts.md): what the build hides, what it cannot decide, what to settle first.
 - [Architecture](docs/guides/architecture.md): the decisions behind the tool, for contributors.
 - [MVP specification](docs/spec/mvp.md): every feature, with its acceptance criteria.
 
