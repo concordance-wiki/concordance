@@ -32,6 +32,7 @@ export function document(overrides: Partial<ParsedMarkdown> = {}): ParsedMarkdow
     quotes: [],
     tables: [],
     paragraphs: [],
+    scannable: [],
     findings: [],
     ...overrides,
   };

@@ -61,6 +61,17 @@ export interface MarkdownParagraph {
   section?: string;
 }
 
+/** A text unit a scan may read, excluded zones removed. */
+export interface ScannableUnit {
+  /** Line of the first character of the unit in the file. */
+  line: number;
+  /** The visible text; positions reported by a scan are relative to it. */
+  text: string;
+  /** Heading of the enclosing H2 section, when any. */
+  section?: string;
+  kind: "paragraph" | "heading" | "list-item" | "table-cell" | "quote";
+}
+
 /** What one markdown file gives to the next steps; every list is in document order. */
 export interface ParsedMarkdown {
   /** Empty when the file has no frontmatter or an invalid one. */
@@ -75,6 +86,8 @@ export interface ParsedMarkdown {
   tables: MarkdownTable[];
   /** Every paragraph, list items and quotes included. */
   paragraphs: MarkdownParagraph[];
+  /** The text units a scan may read: no code, no URL, no frontmatter, no link target. */
+  scannable: ScannableUnit[];
   findings: Finding[];
 }
 

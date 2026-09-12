@@ -205,6 +205,10 @@ importers:
       yaml:
         specifier: 2.8.1
         version: 2.8.1
+    devDependencies:
+      '@concordance-wiki/ingest':
+        specifier: workspace:*
+        version: link:../ingest
 
   packages/profile:
     dependencies:

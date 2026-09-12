@@ -7,6 +7,7 @@ import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import { parse as parseYaml, type YAMLParseError } from "yaml";
 
+import { scannableUnits } from "./scannable.js";
 import { plainText } from "./text.js";
 import type { MarkdownListItem, MarkdownSection, ParseContext, ParsedMarkdown } from "./types.js";
 
@@ -128,6 +129,7 @@ export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdo
     quotes: [],
     tables: [],
     paragraphs: [],
+    scannable: scannableUnits(root),
     findings: [],
   };
   let section: MarkdownSection | undefined;

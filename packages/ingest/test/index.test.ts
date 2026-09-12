@@ -9,6 +9,7 @@ describe("@concordance-wiki/ingest", () => {
       "parseMarkdown",
       "readMarkdown",
       "resolveLink",
+      "scannableText",
     ]);
   });
 });
