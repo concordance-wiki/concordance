@@ -36,7 +36,7 @@ The graph is built in memory and serialised to `model.json`, canonically sorted 
 
 ## Deterministic identifiers
 
-An entity's identifier is `<source>/<relative path without extension or type suffix>`, slugified. A frontmatter `id` takes precedence. Never a UUID, never anything that depends on processing order. Duplicates yield `E-ID-DUP`; the first in canonical order is kept. The identifier is the page URL.
+An entity's identifier is `<source>/<relative path without extension or type suffix>`, slugified segment by segment: lowercase, accents removed, every other run of characters replaced by one hyphen. The longest type suffix declared by the source's rules is stripped, otherwise the extension; an undeclared suffix stays in the slug as a hyphen. A frontmatter `id` takes precedence when it follows the identifier pattern of the model schema; otherwise it yields `E-ID-INVALID` and the path applies. Never a UUID, never anything that depends on processing order. Duplicates yield `E-ID-DUP`; the first in `(source, path)` order is kept. The identifier is the page URL: the page of an entity is written at `<id>/index.html`, so that `<id>/` resolves on a hosted site as well as from `file://`.
 
 ## Findings, not failures
 

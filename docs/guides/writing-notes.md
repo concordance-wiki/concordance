@@ -10,7 +10,7 @@ Concordance reads your markdown as it is. You do not have to change anything to 
 A payment made at the member's request, outside any schedule, on a running contract.
 ```
 
-The H1 is the title. The first paragraph is the summary. The file path gives the identifier: `glossary/free-payment.md` in the source `glossary` becomes `glossary/free-payment`, and its page URL follows.
+The H1 is the title. The first paragraph is the summary. The file path gives the identifier: `glossary/free-payment.md` in the source `glossary` becomes `glossary/free-payment`, and its page URL follows (`glossary/free-payment/`). Folder and file names are slugified: `Réglementation générale.md` becomes `reglementation-generale`. An `id:` in frontmatter overrides the path; it must be lowercase letters, digits and hyphens with at least one `/`, such as `specs/rules/annual-cap`.
 
 ## Type by filing, not by editing
 

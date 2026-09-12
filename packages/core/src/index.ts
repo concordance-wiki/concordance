@@ -4,6 +4,15 @@ export { readSchema, type SchemaName } from "./config/schema.js";
 export type * from "./config/types.js";
 export { describeSchemaError, isWellFormedGlob, validateConfig } from "./config/validate.js";
 export { compileGlobs, type PathMatcher } from "./glob/index.js";
+export { resolveDuplicates, type Identified } from "./identity/duplicates.js";
+export {
+  identifierFor,
+  pagePath,
+  pageUrl,
+  type IdentifierInput,
+  type IdentifierResult,
+} from "./identity/identifier.js";
+export { slugify } from "./identity/slug.js";
 export { fixedClock, systemClock, type Clock } from "./io/clock.js";
 export { commandExists } from "./io/command.js";
 export {
