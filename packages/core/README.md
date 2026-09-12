@@ -1,5 +1,7 @@
 # @concordance-wiki/core
 
-Model types, identifiers, canonical sorting, deterministic utilities and the plugin API.
+Model types, identifiers, canonical sorting, deterministic utilities and the plugin API. Ships the JSON schemas under `schemas/`.
 
-Part of [Concordance](../../README.md). No public API yet.
+Today: configuration parsing and validation (`parseConfig`, `validateConfig`, `formatValidation`), the schema reader (`readSchema`) and the injected file system (`FileSystem`, `nodeFileSystem`, `memoryFileSystem`).
+
+Part of [Concordance](../../README.md).

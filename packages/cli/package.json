@@ -4,6 +4,10 @@
   "description": "The concordance command: build, render, init, validate-config, lint.",
   "license": "GPL-3.0-or-later",
   "type": "module",
+  "bin": {
+    "concordance": "./dist/bin.js",
+    "conc": "./dist/bin.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

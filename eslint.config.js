@@ -25,6 +25,7 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/non-nullable-type-assertion-style": "off",
       "no-console": "error",
     },
   },

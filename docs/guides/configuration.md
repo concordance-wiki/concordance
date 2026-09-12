@@ -1,6 +1,6 @@
 # Configuration
 
-Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`schemas/config.schema.json`](../../schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected.
+Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`config.schema.json`](../../packages/core/schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected, then a verdict line. Exit codes: 0 valid, 1 invalid, 2 file not found. Beyond the schema, it rejects a source name used twice and a malformed domain glob, and it warns about keys that are accepted but ignored in this version (`lock`, tracker sources). `--config` (or `-c`) points at another file; the default is `concordance.yaml` in the current directory.
 
 The reference below follows the schema. Every key not marked required is optional.
 
@@ -167,11 +167,11 @@ The same block, in a `concordance-lint.yaml` at the root of a knowledge reposito
 
 ## `lock`
 
-Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../schemas/lock.schema.json). Only `rejected_terms` is read in the first version.
+Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages/core/schemas/lock.schema.json). Only `rejected_terms` is read in the first version.
 
 ## `theme.yaml`
 
-See [`schemas/theme.schema.json`](../../schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example. Name, logo, favicon, fonts, radius, light and dark palettes, default mode, optional footer and an optional additional stylesheet. The accent colour never carries information on its own.
+See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example. Name, logo, favicon, fonts, radius, light and dark palettes, default mode, optional footer and an optional additional stylesheet. The accent colour never carries information on its own.
 
 ## Continuous integration
 

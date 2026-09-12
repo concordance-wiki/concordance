@@ -29,7 +29,7 @@ Plugins load in the declared order and register in a deterministic registry. A p
 
 ## Writing a plugin
 
-A plugin is a package that exports a `definePlugin` call returning a manifest validated by [`schemas/plugin.schema.json`](../../schemas/plugin.schema.json).
+A plugin is a package that exports a `definePlugin` call returning a manifest validated by [`schemas/plugin.schema.json`](../../packages/core/schemas/plugin.schema.json).
 
 ```ts
 import { definePlugin } from "@concordance-wiki/core";
