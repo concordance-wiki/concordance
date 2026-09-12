@@ -305,6 +305,50 @@ pages:
 
 Add LibreOffice to the image when office conversion is wanted. Keep `.concordance-cache` in the pipeline cache so that unchanged documents are not reconverted.
 
+### With the container image
+
+The [container image](getting-started.md#with-the-container-image) removes the Node.js and LibreOffice setup from the pipeline: it carries both, and the pipeline only mounts the configuration repository on `/wiki`. On GitHub Actions the runner has Docker; mount the checkout and run the image directly:
+
+```yaml
+name: wiki
+on:
+  push: { branches: [main] }
+  schedule: [{ cron: "0 5 * * *" }]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with: { path: .concordance-cache, key: concordance-cache }
+      - run: docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+  deploy:
+    needs: build
+    permissions: { pages: write, id-token: write }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/deploy-pages@v4
+```
+
+On GitLab CI the job runs inside the image itself, whose entry point is the `concordance` command; the runner's checkout is the working directory, so no mount is needed:
+
+```yaml
+pages:
+  image:
+    name: concordancewiki/concordance
+    entrypoint: [""]
+  script:
+    - concordance build --output public
+  artifacts:
+    paths: [public]
+  cache:
+    paths: [.concordance-cache]
+```
+
+The image runs as uid 1000, so the working directory of the job must be writable by that user; when the runner prepares it as another user, the `user` setting of its executor runs the job as that user instead. Pin a version tag (`concordancewiki/concordance:1.2.0`) in a pipeline that must not change under your feet.
+
 ### Lint a knowledge repository in its merge requests
 
 Each knowledge repository checks itself on every merge request with `concordance lint`; `--format` gives the forge a report it annotates the diff with. On GitHub, upload the SARIF log to code scanning: each finding then appears in the margin of the diff, on its file and line, and the pipeline still fails according to `--fail-on`.

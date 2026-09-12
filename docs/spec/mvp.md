@@ -140,7 +140,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 
 ## 4. Batches and stories
 
-Sixty-eight stories in nine batches, ordered by dependency. L0 to L3 form the minimum demonstrable base; L4 to L7 are independent from each other and can run in parallel; L8 runs throughout.
+Sixty-nine stories in nine batches, ordered by dependency. L0 to L3 form the minimum demonstrable base; L4 to L7 are independent from each other and can run in parallel; L8 runs throughout.
 
 ### L0 — Foundation and ingestion
 
@@ -1023,6 +1023,20 @@ As the compliance owner, I want the publication of a site built from transcripts
 - The default configuration does not enable transcript publication: it must be requested explicitly.
 
 Depends on: L4-04.
+
+#### L8-06 Turnkey container image
+
+As an integrator without Node.js on my machine or my pipeline, I want a turnkey container image so that I build and check my wiki in one command.
+
+- The image `concordancewiki/concordance` is published on Docker Hub at every release, tagged by version and `latest`, built from a `Dockerfile` of the monorepo.
+- It ships Node.js LTS, the `concordance` preset with every official plugin, LibreOffice headless and the fonts the conversion needs.
+- The entry point is the `concordance` command: `docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build` builds the configuration repository mounted on `/wiki` and writes `dist/` into it; `lint`, `init` and `validate-config` work the same way.
+- The conversion cache can be mounted (`-v cache:/wiki/.concordance-cache`) and survives from one run to the next.
+- The image runs unprivileged, as a non-root user, and writes only under `/wiki/dist` and the cache.
+- A GitHub Actions pipeline builds the image, runs `build` on the golden corpus inside the container, compares the result with the build outside the container, then publishes; a GitLab and a GitHub pipeline example using the image is in `docs/guides/configuration.md`.
+- The image size is measured at every build and announced in the release summary.
+
+Depends on: L4-01, L8-03.
 
 ## 5. Working conditions
 

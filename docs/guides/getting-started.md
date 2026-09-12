@@ -16,13 +16,32 @@ npm install --global concordance
 
 The `concordance` package is a preset: it installs the core and every official plugin. The command is `concordance`, with `conc` as a short alias.
 
-Without Node.js, use the container image, which also carries LibreOffice for document conversion:
+Without Node.js, use the [container image](#with-the-container-image), which also carries LibreOffice for document conversion:
 
 ```bash
 docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
 ```
 
 The image runs the same command line; mount the configuration repository on `/wiki`.
+
+### With the container image
+
+`concordancewiki/concordance` is published on Docker Hub at every release, tagged by version and `latest`, and built from the `Dockerfile` of the repository. It carries Node.js LTS, the `concordance` preset with every official plugin, git, headless LibreOffice and the fonts the conversion needs (metric-compatible substitutes for the usual office fonts, and a fallback face). Its entry point is the `concordance` command, so every command of this guide runs the same way with the configuration repository mounted on `/wiki`:
+
+```bash
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance init
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance validate-config
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance lint
+```
+
+`build` writes `dist/` into the mounted folder, next to `concordance.yaml`, like the installed command. The conversion cache lives under `/wiki/.concordance-cache`; mount a named volume there so that unchanged documents are not reconverted from one run to the next, and so that the cache never lands in the configuration repository:
+
+```bash
+docker run --rm -v "$PWD:/wiki" -v concordance-cache:/wiki/.concordance-cache concordancewiki/concordance build
+```
+
+The image runs unprivileged, as the user `concordance` (uid 1000), and writes nothing but `dist/` and the cache. On Linux the files it writes belong to uid 1000; when your user has another uid, run the container as yourself so that `dist/` stays yours: `--user "$(id -u):$(id -g)"` (the mounted folder and the cache volume must then be writable by that user). Docker Desktop on macOS and Windows maps the ownership for you. `SOURCE_DATE_EPOCH` is not set in the image: pass it (`-e SOURCE_DATE_EPOCH=0`) when you want [reproducible builds](#reproducible-builds).
 
 ## Create a configuration repository
 

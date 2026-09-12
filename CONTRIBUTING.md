@@ -64,7 +64,7 @@ A pull request from a fork runs every blocking test without any secret or privat
 
 ## Releases
 
-Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`). Releases are cut by the maintainers.
+Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`). Releases are cut by the maintainers following the [releasing guide](docs/guides/releasing.md).
 
 ## Licence
 
