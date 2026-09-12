@@ -20,4 +20,4 @@ Out of scope: the content of knowledge repositories you feed to the tool, the ho
 
 ## What the tool does with your data
 
-The build reads repositories you declare, writes nothing into them, and produces a static site. The pseudonymisation dictionary, when used, is never written into the output. The published site contains everything the build indexed: review what you publish.
+The build reads repositories you declare, writes nothing into them, and produces a static site. The pseudonymisation dictionary, when used, is never written into the output, and transcripts are published only when the configuration asks for it explicitly; [Publishing transcripts](docs/guides/publishing-transcripts.md) sets out what to settle before doing so. The published site contains everything the build indexed: review what you publish.
