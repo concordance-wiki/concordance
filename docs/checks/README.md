@@ -29,6 +29,8 @@ Every check listed here is registered once, with its default severity, descripti
 | [`E-FM-INVALID`](E-FM-INVALID.md) | error | The YAML frontmatter cannot be parsed. |
 | [`E-META-REL`](E-META-REL.md) | error | A declared relation is not allowed between these two types by the profile. |
 | [`E-ENCODING`](E-ENCODING.md) | error | A file is not valid UTF-8 and is skipped. |
+| [`W-TYPE-UNKNOWN`](W-TYPE-UNKNOWN.md) | warning | The resolved type of a note is not declared by the profile; the note is treated as a document. |
+| [`W-ATTRIBUTE-UNKNOWN`](W-ATTRIBUTE-UNKNOWN.md) | warning | A frontmatter attribute is declared neither by the type nor among the common attributes; it is kept as-is. |
 
 ## Documents
 

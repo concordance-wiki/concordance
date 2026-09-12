@@ -207,6 +207,9 @@ importers:
       '@concordance-wiki/core':
         specifier: workspace:*
         version: link:../core
+      '@concordance-wiki/ingest':
+        specifier: workspace:*
+        version: link:../ingest
       '@concordance-wiki/profile':
         specifier: workspace:*
         version: link:../profile

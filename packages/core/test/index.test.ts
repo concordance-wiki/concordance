@@ -9,6 +9,7 @@ describe("@concordance-wiki/core", () => {
       "PluginDefinitionError",
       "PluginLoadError",
       "commandExists",
+      "compareEntities",
       "compareFindings",
       "compareLinks",
       "compareProvenances",

@@ -2,4 +2,6 @@
 
 Type cascade, identifiers, application and domain resolution.
 
-Part of [Concordance](../../README.md). No public API yet.
+Today: `resolveType` runs the type cascade of one markdown file, in increasing precedence the source's `default_type`, the source's `type`, the typing rules in order (`path` glob, `suffix`, `ext`, `frontmatter` criteria, every criterion of a rule required, the last match wins) and the frontmatter `type`; it records the origin (`source`, `rule#3`, `suffix`, `frontmatter`), the attribute defaults set by the matching rules, `E-TYPE-CONFLICT` when the frontmatter contradicts a suffix rule (the frontmatter is kept) and `W-TYPE-UNKNOWN` when the profile does not declare the type (the note becomes a `document`). `buildEntity` turns one ingested and parsed file into an `Entity`: deterministic identifier, title (frontmatter, H1, file name), aliases, status, summary (frontmatter, first paragraph), the frontmatter attributes over the rule defaults with `W-ATTRIBUTE-UNKNOWN` for the keys the type and the common attributes do not declare, the source location, the type origin and `graph` (`documents-only` for the types the profile marks so, `document` and `meeting` by default). `typeSources` does it for every parsed markdown file of the ingested sources, resolves duplicate identifiers (`E-ID-DUP`) and returns entities and findings in canonical order. Application and domain resolution come next.
+
+Part of [Concordance](../../README.md).

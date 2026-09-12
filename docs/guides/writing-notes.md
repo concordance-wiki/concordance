@@ -26,13 +26,13 @@ roles: [account-manager]
 # Free payment entry
 ```
 
-A `type` that contradicts the file suffix is reported (`E-TYPE-CONFLICT`) rather than guessed.
+A `type` that contradicts the file suffix is reported (`E-TYPE-CONFLICT`) rather than guessed; the frontmatter is kept. A `type` the profile does not declare is reported too (`W-TYPE-UNKNOWN`) and the note is treated as a document. The entity records where its type came from (`type_origin`: the source, `rule#3`, the suffix or the frontmatter).
 
 ## Frontmatter: what qualifies, nothing more
 
 Frontmatter carries what qualifies the note, at most a handful of keys. The site shows up to five of them next to the title; the rest goes to the side panel. The [templates](../templates/README.md) list the keys of each type.
 
-Common keys: `title` (overrides the H1), `aliases` (other names, used for recognition), `application`, `domain`, `status` (`draft`, `proposed`, `valid`, `obsolete`), `tags`, `summary`, `superseded_by`.
+Common keys: `title` (overrides the H1), `aliases` (other names, used for recognition), `application`, `domain`, `status` (`draft`, `proposed`, `valid`, `obsolete`), `tags`, `summary`, `superseded_by`. A key that neither the type nor the common attributes declare is kept as-is and reported (`W-ATTRIBUTE-UNKNOWN`).
 
 Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`) accept an identifier, a path or an exact title, and produce a typed relation at confidence 0.90.
 
