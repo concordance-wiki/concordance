@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { footer, header } from "../../helpers/fixtures.js";
+import { footer, header } from "../../../src/gallery/fixtures.js";
 import { expectBalanced } from "../../helpers/html.js";
 
 describe("Shell", () => {

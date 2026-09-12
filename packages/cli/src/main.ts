@@ -1,5 +1,6 @@
 import { buildCommand } from "./commands/build.js";
 import { exportCommand } from "./commands/export.js";
+import { galleryCommand } from "./commands/gallery.js";
 import { initCommand } from "./commands/init.js";
 import { lintCommand } from "./commands/lint.js";
 import { validateConfigCommand } from "./commands/validate-config.js";
@@ -10,6 +11,7 @@ type Command = (argv: string[], io: CommandIo) => ExitCode | Promise<ExitCode>;
 const commands: Record<string, Command> = {
   build: buildCommand,
   export: exportCommand,
+  gallery: galleryCommand,
   init: initCommand,
   lint: lintCommand,
   "validate-config": validateConfigCommand,
@@ -22,6 +24,8 @@ export const usage = [
   "  build [--config file] [--output dir]  validate the configuration and build the site",
   "  export [--format cypher] [--model dist/model.json] [--output file]",
   "                                        turn the model into a Cypher script (stdout by default)",
+  "  gallery [--output dir] [--theme plugin] [--config file]",
+  "                                        render every slot with fixture data through the theme",
   "  init [directory]                      write a minimal configuration file",
   "  lint [--scope repo] [--source name] [--config file] [--fail-on error|warning|info]",
   "       [--format text|json|sarif|junit] [--output file]",

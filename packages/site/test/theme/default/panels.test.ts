@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderSlot } from "../../../src/render.js";
 import { MENTIONS_ISLAND, MentionsMore } from "../../../src/theme/default/mentions-more.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { mentions, neighbourhood } from "../../helpers/fixtures.js";
+import { mentions, neighbourhood } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 describe("MentionsPanel", () => {
