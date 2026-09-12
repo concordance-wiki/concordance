@@ -17,6 +17,7 @@ const ids = catalogue.map((definition) => definition.id);
 const specified = [
   "W-SOURCE-UNREACHABLE",
   "E-LINK-BROKEN",
+  "W-LINK-CROSS-SOURCE",
   "E-ID-DUP",
   "E-ID-INVALID",
   "E-TYPE-CONFLICT",

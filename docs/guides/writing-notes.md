@@ -44,7 +44,15 @@ A markdown link to another note is the strongest relation the tool knows: confid
 The amount is checked against the [annual cap](../rules/annual-cap.rule.md).
 ```
 
-Links are relative to the file, then to the source root. A link to a missing file is an error (`E-LINK-BROKEN`); a link to a non-markdown file (a slide deck, a PDF) attaches that document to the note.
+Links are relative to the file, then to the source root. A link to a missing file is an error (`E-LINK-BROKEN`); a link to a non-markdown file (a slide deck, a PDF) attaches that document to the note. The provenance of the link records the file, the line, the link text and the anchor when one is written; several links from one note to the same target are one link with several provenances. A link from a note to itself, such as a table of contents, yields nothing.
+
+A link can reach another source with the `<source>:<path>` prefix, the path being relative to the root of that source:
+
+```markdown
+See [cap checked server-side](decisions:cap-checked-server-side.md).
+```
+
+A relative link that climbs above the source root into a sibling source (`../decisions/cap-checked-server-side.md` from a source that is a folder next to `decisions/`) counts as the same thing. Both resolve only when `inference.cross_source_links` is `true` in `concordance.yaml`; otherwise the link is flagged (`W-LINK-CROSS-SOURCE`) and not recorded.
 
 ## Sections that mean something
 

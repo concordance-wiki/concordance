@@ -50,7 +50,7 @@ The decisions that constrain the MVP are stated in the [architecture guide](../g
 | `@concordance-wiki/ingest` | git clone, file reading, markdown and frontmatter parsing | core |
 | `@concordance-wiki/typing` | type cascade, global domain resolution | core, profile |
 | `@concordance-wiki/nlp` | normalisation, Aho-Corasick, n-grams, C-value, stopwords, MinHash, language packs `en` and `fr` | core |
-| `@concordance-wiki/inference` | link production, confidence combination, bounded neighbourhood | core, nlp, profile |
+| `@concordance-wiki/inference` | link production, confidence combination, bounded neighbourhood | core, ingest, nlp, profile |
 | `@concordance-wiki/checks` | check registry, shared by build and linter | core, profile |
 | `@concordance-wiki/site` | site generation, templates, theme, search index | core, profile |
 | `@concordance-wiki/ui` | front-end components: mentions panel, mini-map, viewer slots | — |
@@ -130,7 +130,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Family | Checks |
 |---|---|
 | Sources | `W-SOURCE-UNREACHABLE` |
-| Links | `E-LINK-BROKEN` |
+| Links | `E-LINK-BROKEN`, `W-LINK-CROSS-SOURCE` |
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-APP-MISSING`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-PII-DETECTED` |

@@ -38,6 +38,12 @@ export {
   type LinkOrder,
   type ProvenanceOrder,
 } from "./model/order.js";
+export {
+  type Link,
+  type Provenance,
+  type ProvenanceMethod,
+  type ProvenanceOccurrence,
+} from "./model/link.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
 export type * from "./plugin/api.js";
 export { definePlugin, PluginDefinitionError } from "./plugin/define.js";

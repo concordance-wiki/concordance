@@ -45,6 +45,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "Fix the path; the linter rewrites the link under --fix when exactly one file matches the old name.",
   ),
   step(
+    "W-LINK-CROSS-SOURCE",
+    "warning",
+    "links",
+    "A markdown link points at a note of another source while cross-source links are disabled.",
+    "Set inference.cross_source_links to true in concordance.yaml, or link to a note of the same source.",
+  ),
+  step(
     "E-ID-DUP",
     "error",
     "identifiers-and-types",
