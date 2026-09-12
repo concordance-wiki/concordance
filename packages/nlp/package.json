@@ -21,5 +21,8 @@
     "@concordance-wiki/core": "workspace:*",
     "ajv": "8.17.1",
     "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "@concordance-wiki/ingest": "workspace:*"
   }
 }

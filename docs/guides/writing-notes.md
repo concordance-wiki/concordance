@@ -94,7 +94,7 @@ French headings (`## Objets`, `## Étapes`, `## Règles`) are recognised in sour
 
 ## What is not read
 
-Code blocks, inline code, URLs, frontmatter values and link targets are never scanned for words. A variable name in a code block never becomes a business mention.
+Fenced and indented code blocks, inline code, URLs (bare, autolinked or written as `www.`), raw HTML, frontmatter values, link targets and images are never scanned for words: a variable name in a code block never becomes a business mention. Everything else is read, one unit at a time: headings of every level (the H1 title included), paragraphs, list items (nested items separately), table cells and the paragraphs of block quotes. The visible text of a markdown link stays subject to recognition: in a link written as "annual cap" pointing to the rule note, "annual cap" is read and the target path is not. Every mention keeps the line where its unit starts and the H2 section that encloses it.
 
 ## Documents and meetings
 

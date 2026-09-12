@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
 
 import { nodeFileSystem, parseConfig, type Config } from "@concordance-wiki/core";
+import { parseMarkdown, scannableText } from "@concordance-wiki/ingest";
 import { describe, expect, it } from "vitest";
-import { parse } from "yaml";
 
 import {
   buildDictionary,
@@ -15,7 +15,6 @@ import {
   type DictionarySource,
   type Occurrence,
   type ScannedDocument,
-  type ScannedParagraph,
 } from "../../src/index.js";
 
 const corpus = fileURLToPath(new URL("../../../../fixtures/corpora/minimal/en/", import.meta.url));
@@ -27,47 +26,11 @@ interface Note {
   document: ScannedDocument;
 }
 
-const frontmatterBlock = /^---\n([\s\S]*?)\n---\n/;
-
-const linkTarget = /\[([^\]]*)\]\([^)]*\)/g;
-
-// The ingestion package owns markdown parsing and the excluded zones; this test keeps the H1,
-// the aliases and a paragraph split on blank lines and list items, headings, frontmatter and
-// link targets left out.
+// The ingestion package owns markdown parsing and the excluded zones: the scan reads the units it
+// gives, with the H1 and the aliases of the frontmatter as the entity.
 function readNote(source: string, path: string, text: string, locale: string): Note {
-  const frontmatter = frontmatterBlock.exec(text);
-  const document: unknown = frontmatter === null ? {} : parse(frontmatter[1] ?? "");
-  const aliases =
-    typeof document === "object" && document !== null && "aliases" in document
-      ? document.aliases
-      : [];
-  const title = /^# (.+)$/m.exec(text)?.[1] ?? "";
-  const body = frontmatter === null ? text : text.slice(frontmatter[0].length);
-  const firstLine = frontmatter === null ? 1 : frontmatter[0].split("\n").length;
-  const paragraphs: ScannedParagraph[] = [];
-  let section: string | undefined;
-  let block: string[] = [];
-  let blockLine = 0;
-  const flush = (): void => {
-    if (block.length > 0) {
-      const paragraph = { line: blockLine, text: block.join(" ").replace(linkTarget, "$1") };
-      paragraphs.push(section === undefined ? paragraph : { ...paragraph, section });
-    }
-    block = [];
-  };
-  body.split("\n").forEach((line, index) => {
-    if (line.startsWith("#")) {
-      flush();
-      if (line.startsWith("## ")) section = line.slice(3);
-    } else if (line.trim() === "") {
-      flush();
-    } else {
-      if (/^(- |\d+\. )/.test(line)) flush();
-      if (block.length === 0) blockLine = firstLine + index;
-      block.push(line);
-    }
-  });
-  flush();
+  const parsed = parseMarkdown(text, { path });
+  const aliases = parsed.frontmatter["aliases"];
   return {
     source,
     path,
@@ -75,11 +38,11 @@ function readNote(source: string, path: string, text: string, locale: string): N
       id: `${source}/${path.replace(/(\.[a-z]+)?\.md$/, "")}`,
       source,
       type: "document",
-      title,
+      title: parsed.title ?? "",
       aliases: Array.isArray(aliases) ? aliases.map(String) : [],
       locale,
     },
-    document: { path, paragraphs },
+    document: { path, paragraphs: scannableText(parsed) },
   };
 }
 
