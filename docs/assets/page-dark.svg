@@ -21,27 +21,27 @@
     <rect x="1148" y="24" width="8" height="8" rx="4" fill="#E8703A"/><text x="1162" y="34" font-size="13" fill="#8B9199">12</text>
 
     <!-- trail -->
-    <text x="40" y="92" font-size="12" fill="#6B7280">glossary / free-payment.md</text>
+    <text x="40" y="92" font-size="12" fill="#6B7280">glossary / keyword-page.md</text>
 
     <!-- badge -->
     <rect x="40" y="108" width="52" height="22" rx="6" fill="#E8E6E1"/>
     <text x="52" y="123" font-size="12" font-weight="600" fill="#0E0F11">term</text>
-    <text x="104" y="123" font-size="12" fill="#8B9199">aliases  FP, free contribution</text>
-    <text x="304" y="123" font-size="12" fill="#8B9199">broader  payment</text>
+    <text x="104" y="123" font-size="12" fill="#8B9199">aliases  word page</text>
+    <text x="304" y="123" font-size="12" fill="#8B9199">broader  page</text>
 
     <!-- title -->
-    <text x="40" y="176" font-size="40" font-family="Instrument Serif, Georgia, 'Times New Roman', serif" fill="#E8E6E1">Free payment</text>
+    <text x="40" y="176" font-size="40" font-family="Instrument Serif, Georgia, 'Times New Roman', serif" fill="#E8E6E1">Keyword page</text>
 
     <!-- body -->
     <text font-size="16" fill="#D6D4CF" xml:space="preserve">
-      <tspan x="40" y="220">A </tspan><tspan fill="#E8703A" text-decoration="underline">payment</tspan><tspan> made at the member's request, outside any schedule, on a</tspan>
-      <tspan x="40" y="246">running </tspan><tspan fill="#E8703A" text-decoration="underline">contract</tspan><tspan>. It differs from the </tspan><tspan fill="#E8E6E1" font-weight="600">scheduled payment</tspan><tspan> by the</tspan>
-      <tspan x="40" y="272">absence of periodicity.</tspan>
+      <tspan x="40" y="220">A </tspan><tspan fill="#E8703A" text-decoration="underline">page</tspan><tspan> built for every word above the </tspan><tspan fill="#E8703A" text-decoration="underline">publication threshold</tspan><tspan>,</tspan>
+      <tspan x="40" y="246">whether or not anyone wrote a </tspan><tspan fill="#E8E6E1" font-weight="600">note</tspan><tspan> for it. It differs from the </tspan><tspan fill="#E8E6E1" font-weight="600">entity page</tspan><tspan> by the</tspan>
+      <tspan x="40" y="272">absence of a note of its own.</tspan>
     </text>
     <text x="40" y="322" font-size="20" font-weight="600" fill="#E8E6E1">Not to be confused with</text>
     <text font-size="16" fill="#D6D4CF" xml:space="preserve">
-      <tspan x="40" y="352">An </tspan><tspan fill="#E8E6E1" font-weight="600">exceptional payment</tspan><tspan>, which sits outside the contractual frame and is</tspan>
-      <tspan x="40" y="378">validated by the branch manager.</tspan>
+      <tspan x="40" y="352">The </tspan><tspan fill="#E8E6E1" font-weight="600">alphabetical index</tspan><tspan>, which lists every page of the site but quotes</tspan>
+      <tspan x="40" y="378">no passage.</tspan>
     </text>
 
     <!-- legend -->
@@ -56,10 +56,10 @@
       <line x1="150" y1="595" x2="80" y2="565"/><line x1="150" y1="595" x2="90" y2="630"/><line x1="150" y1="595" x2="240" y2="560"/><line x1="150" y1="595" x2="250" y2="628" stroke-dasharray="4 3"/>
     </g>
     <circle cx="150" cy="595" r="9" fill="#E8703A"/>
-    <circle cx="80" cy="565" r="6" fill="#E8E6E1"/><text x="20" y="553" font-size="11" fill="#D6D4CF">payment</text>
-    <circle cx="90" cy="630" r="6" fill="#E8E6E1"/><text x="44" y="650" font-size="11" fill="#D6D4CF">annual cap</text>
-    <rect x="234" y="554" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="252" y="565" font-size="11" fill="#D6D4CF">Free payment entry</text>
-    <circle cx="250" cy="628" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5" stroke-dasharray="2 2"/><text x="262" y="632" font-size="11" fill="#8B9199">exceptional payment</text>
+    <circle cx="80" cy="565" r="6" fill="#E8E6E1"/><text x="20" y="553" font-size="11" fill="#D6D4CF">page</text>
+    <circle cx="90" cy="630" r="6" fill="#E8E6E1"/><text x="30" y="650" font-size="11" fill="#D6D4CF">publication threshold</text>
+    <rect x="234" y="554" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="252" y="565" font-size="11" fill="#D6D4CF">Mentions panel</text>
+    <circle cx="250" cy="628" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5" stroke-dasharray="2 2"/><text x="262" y="632" font-size="11" fill="#8B9199">build summary</text>
 
     <!-- mentions panel -->
     <rect x="610" y="80" width="550" height="560" rx="10" fill="#16181B" stroke="#26292E"/>
@@ -69,23 +69,23 @@
 
     <text x="634" y="154" font-size="11" font-weight="600" letter-spacing="1" fill="#E8703A">WRITTEN IN NOTES · 16</text>
     <g font-size="14" fill="#E8E6E1">
-      <rect x="634" y="170" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="181">Free payment entry</text><text x="820" y="181" font-size="12" fill="#6B7280">screen · Objects</text>
-      <rect x="634" y="200" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="211">Record a payment</text><text x="820" y="211" font-size="12" fill="#6B7280">process · step 2</text>
-      <circle cx="640" cy="236" r="6" fill="#E8E6E1"/><text x="656" y="241">Annual cap</text><text x="820" y="241" font-size="12" fill="#6B7280">rule · Applies to</text>
-      <path d="M634 260 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="271">Cap checked server-side</text><text x="850" y="271" font-size="12" fill="#6B7280">decision · Affects</text>
+      <rect x="634" y="170" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="181">Mentions panel</text><text x="820" y="181" font-size="12" fill="#6B7280">screen · Objects</text>
+      <rect x="634" y="200" width="12" height="12" rx="2" fill="#E8E6E1"/><text x="656" y="211">Build pipeline</text><text x="820" y="211" font-size="12" fill="#6B7280">process · step 7</text>
+      <circle cx="640" cy="236" r="6" fill="#E8E6E1"/><text x="656" y="241">Publication threshold</text><text x="820" y="241" font-size="12" fill="#6B7280">rule · Applies to</text>
+      <path d="M634 260 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="271">Static site with islands</text><text x="850" y="271" font-size="12" fill="#6B7280">decision · Affects</text>
       <text x="656" y="301" font-size="12" fill="#6B7280">12 more</text>
     </g>
 
     <line x1="634" y1="322" x2="1136" y2="322" stroke="#26292E"/>
     <text x="634" y="352" font-size="11" font-weight="600" letter-spacing="1" fill="#8B9199">SIMPLY CITED · 31</text>
     <g font-size="14" fill="#E8E6E1">
-      <circle cx="640" cy="374" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="379">Payments workshop</text><text x="820" y="379" font-size="12" fill="#6B7280">meeting · 7</text>
-      <text x="676" y="401" font-size="12" fill="#8B9199" xml:space="preserve">12:04  “…the scheduled payment, the <tspan fill="#E8E6E1" font-weight="600">free payment</tspan>, and the exceptional…”</text>
-      <text x="676" y="421" font-size="12" fill="#8B9199" xml:space="preserve">13:02  “On the <tspan fill="#E8E6E1" font-weight="600">free payment</tspan>, the cap stays server-side.”</text>
-      <rect x="634" y="442" width="12" height="12" rx="1" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="453">Payments framing v3</text><text x="820" y="453" font-size="12" fill="#6B7280">slides · 5</text>
-      <text x="676" y="475" font-size="12" fill="#8B9199" xml:space="preserve">slide 12  “Out of scope for V1: the exceptional payment…”</text>
-      <circle cx="640" cy="500" r="6" fill="#E8E6E1"/><text x="656" y="505">Annual cap</text><text x="820" y="505" font-size="12" fill="#6B7280">rule · 6</text>
-      <path d="M634 524 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="535">Payments API</text><text x="820" y="535" font-size="12" fill="#6B7280">api · 3</text>
+      <circle cx="640" cy="374" r="6" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="379">Threshold review</text><text x="820" y="379" font-size="12" fill="#6B7280">meeting · 7</text>
+      <text x="676" y="401" font-size="12" fill="#8B9199" xml:space="preserve">12:04  “…below three occurrences we do not publish a <tspan fill="#E8E6E1" font-weight="600">keyword page</tspan>…”</text>
+      <text x="676" y="421" font-size="12" fill="#8B9199" xml:space="preserve">13:02  “The threshold decides how many <tspan fill="#E8E6E1" font-weight="600">keyword pages</tspan> a build produces.”</text>
+      <rect x="634" y="442" width="12" height="12" rx="1" fill="none" stroke="#E8E6E1" stroke-width="1.5"/><text x="656" y="453">Roadmap outline v3</text><text x="820" y="453" font-size="12" fill="#6B7280">slides · 5</text>
+      <text x="676" y="475" font-size="12" fill="#8B9199" xml:space="preserve">slide 12  “Out of scope for V1: the pinned trail…”</text>
+      <circle cx="640" cy="500" r="6" fill="#E8E6E1"/><text x="656" y="505">Publication threshold</text><text x="820" y="505" font-size="12" fill="#6B7280">rule · 6</text>
+      <path d="M634 524 l6 -6 l6 6 l-6 6 z" fill="#E8E6E1"/><text x="656" y="535">Model query API</text><text x="820" y="535" font-size="12" fill="#6B7280">api · 3</text>
     </g>
     <rect x="634" y="560" width="502" height="40" rx="8" fill="#0E0F11" stroke="#26292E"/>
     <text x="885" y="585" font-size="13" font-weight="600" fill="#E8E6E1" text-anchor="middle">24 more files</text>

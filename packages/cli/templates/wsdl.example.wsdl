@@ -1,77 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions name="PaymentsService"
-    targetNamespace="urn:example:payments"
-    xmlns:tns="urn:example:payments"
+<wsdl:definitions name="ForgeBridgeService"
+    targetNamespace="urn:example:forge-bridge"
+    xmlns:tns="urn:example:forge-bridge"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <wsdl:documentation>Payments API</wsdl:documentation>
+  <wsdl:documentation>Forge bridge</wsdl:documentation>
   <wsdl:types>
-    <xsd:schema targetNamespace="urn:example:payments">
-      <xsd:complexType name="Payment">
+    <xsd:schema targetNamespace="urn:example:forge-bridge">
+      <xsd:complexType name="BuildReport">
         <xsd:sequence>
           <xsd:element name="id" type="xsd:string"/>
-          <xsd:element name="amount" type="xsd:decimal"/>
+          <xsd:element name="findings" type="xsd:integer"/>
         </xsd:sequence>
       </xsd:complexType>
-      <xsd:element name="createPayment">
+      <xsd:element name="notifyBuild">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="payment" type="tns:Payment"/>
+            <xsd:element name="report" type="tns:BuildReport"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="createPaymentResponse" type="tns:Payment"/>
-      <xsd:element name="getPayment">
+      <xsd:element name="notifyBuildResponse" type="tns:BuildReport"/>
+      <xsd:element name="fetchFindings">
         <xsd:complexType>
           <xsd:sequence>
             <xsd:element name="id" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="getPaymentResponse" type="tns:Payment"/>
+      <xsd:element name="fetchFindingsResponse" type="tns:BuildReport"/>
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="createPaymentRequest">
-    <wsdl:part name="parameters" element="tns:createPayment"/>
+  <wsdl:message name="notifyBuildRequest">
+    <wsdl:part name="parameters" element="tns:notifyBuild"/>
   </wsdl:message>
-  <wsdl:message name="createPaymentResponse">
-    <wsdl:part name="parameters" element="tns:createPaymentResponse"/>
+  <wsdl:message name="notifyBuildResponse">
+    <wsdl:part name="parameters" element="tns:notifyBuildResponse"/>
   </wsdl:message>
-  <wsdl:message name="getPaymentRequest">
-    <wsdl:part name="parameters" element="tns:getPayment"/>
+  <wsdl:message name="fetchFindingsRequest">
+    <wsdl:part name="parameters" element="tns:fetchFindings"/>
   </wsdl:message>
-  <wsdl:message name="getPaymentResponse">
-    <wsdl:part name="parameters" element="tns:getPaymentResponse"/>
+  <wsdl:message name="fetchFindingsResponse">
+    <wsdl:part name="parameters" element="tns:fetchFindingsResponse"/>
   </wsdl:message>
-  <wsdl:portType name="PaymentsPortType">
-    <wsdl:operation name="createPayment">
-      <wsdl:documentation>Create a payment</wsdl:documentation>
-      <wsdl:input message="tns:createPaymentRequest"/>
-      <wsdl:output message="tns:createPaymentResponse"/>
+  <wsdl:portType name="ForgeBridgePortType">
+    <wsdl:operation name="notifyBuild">
+      <wsdl:documentation>Notify a build</wsdl:documentation>
+      <wsdl:input message="tns:notifyBuildRequest"/>
+      <wsdl:output message="tns:notifyBuildResponse"/>
     </wsdl:operation>
-    <wsdl:operation name="getPayment">
-      <wsdl:documentation>Read a payment</wsdl:documentation>
-      <wsdl:input message="tns:getPaymentRequest"/>
-      <wsdl:output message="tns:getPaymentResponse"/>
+    <wsdl:operation name="fetchFindings">
+      <wsdl:documentation>Fetch the findings of a build</wsdl:documentation>
+      <wsdl:input message="tns:fetchFindingsRequest"/>
+      <wsdl:output message="tns:fetchFindingsResponse"/>
     </wsdl:operation>
   </wsdl:portType>
-  <wsdl:binding name="PaymentsSoapBinding" type="tns:PaymentsPortType">
+  <wsdl:binding name="ForgeBridgeSoapBinding" type="tns:ForgeBridgePortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="createPayment">
-      <soap:operation soapAction="urn:example:payments:createPayment"/>
+    <wsdl:operation name="notifyBuild">
+      <soap:operation soapAction="urn:example:forge-bridge:notifyBuild"/>
       <wsdl:input><soap:body use="literal"/></wsdl:input>
       <wsdl:output><soap:body use="literal"/></wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="getPayment">
-      <soap:operation soapAction="urn:example:payments:getPayment"/>
+    <wsdl:operation name="fetchFindings">
+      <soap:operation soapAction="urn:example:forge-bridge:fetchFindings"/>
       <wsdl:input><soap:body use="literal"/></wsdl:input>
       <wsdl:output><soap:body use="literal"/></wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
-  <wsdl:service name="PaymentsService">
-    <wsdl:port name="PaymentsPort" binding="tns:PaymentsSoapBinding">
-      <soap:address location="https://payments.example.invalid/soap"/>
+  <wsdl:service name="ForgeBridgeService">
+    <wsdl:port name="ForgeBridgePort" binding="tns:ForgeBridgeSoapBinding">
+      <soap:address location="https://forge-bridge.example.invalid/soap"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

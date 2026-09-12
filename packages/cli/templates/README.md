@@ -1,6 +1,6 @@
 # Note templates
 
-One template per type implemented in the first version. Copy the file, keep the frontmatter keys you need, write the rest as prose. Every template passes the linter; the links between them resolve, so the folder is a tiny, consistent corpus about a fictional personal insurer.
+One template per type implemented in the first version. Copy the file, keep the frontmatter keys you need, write the rest as prose. Every template passes the linter; the links between them resolve, so the folder is a tiny, consistent corpus about Concordance itself: its keyword pages, the publication threshold and the service that will answer model queries.
 
 Frontmatter carries what qualifies the note, nothing more. Sections whose heading is mapped in the profile (`## Objects`, `## Actions`, `## Rules`, `## Steps`, `## Consumers`, `## Reads`, `## Writes`, `## Applies to`, `## Affects`) produce typed relations for the notes they mention.
 
@@ -22,6 +22,6 @@ Frontmatter carries what qualifies the note, nothing more. Sections whose headin
 | document | [document.md](document.md) | — |
 | meeting | [meeting.md](meeting.md) | — |
 
-The `api` template declares [openapi.example.json](openapi.example.json) as its contract; [wsdl.example.wsdl](wsdl.example.wsdl) is its WSDL twin, the same two operations as a SOAP service, so that both contract plugins can be tried on the same API.
+The `api` template declares [openapi.example.json](openapi.example.json), the model query contract, as its contract; [wsdl.example.wsdl](wsdl.example.wsdl) describes the forge bridge, a SOAP service with two operations, so that both contract plugins have an example to import: point a second `api` note's `contract` at it.
 
 `concordance init --templates` copies these templates, this index and the example contract into `templates/` of the configuration repository, next to `concordance.yaml`; it never overwrites a file that exists there. The command line ships its own copy of this folder, kept identical by `scripts/sync-templates.mjs` and checked by `pnpm lint`.

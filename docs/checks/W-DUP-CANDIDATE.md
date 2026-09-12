@@ -9,21 +9,21 @@ The reconciliation score is between 0.5 and 0.9. The message names the score and
 ## Before
 
 ```
-framing/payments-workshop.md
-meetings/payments-workshop.pptx
+framing/threshold-review.md
+meetings/threshold-review.pptx
 ```
 
 ```
-docs/framing/payments-workshop.md and docs/meetings/payments-workshop.pptx look like two representations of one document (score 0.50: same base name in another folder 0.50); they stay separate
+docs/framing/threshold-review.md and docs/meetings/threshold-review.pptx look like two representations of one document (score 0.50: same base name in another folder 0.50); they stay separate
 ```
 
 ## After
 
 ```
 ---
-source: ../meetings/payments-workshop.pptx
+source: ../meetings/threshold-review.pptx
 ---
-# Payments workshop
+# Keyword page threshold review
 ```
 
 ## How to fix

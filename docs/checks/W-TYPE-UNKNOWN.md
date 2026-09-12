@@ -12,7 +12,7 @@ The type cascade (source `default_type` and `type`, typing rules, frontmatter `t
 ---
 type: regulation
 ---
-# Annual cap
+# Publication threshold
 (profile.yaml declares no regulation type)
 ```
 

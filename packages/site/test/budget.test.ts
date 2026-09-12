@@ -9,7 +9,7 @@ describe("measureBudget", () => {
   ];
   const pages = [
     { path: "todo/index.html", bytes: 20_000 },
-    { path: "glossary/payment/index.html", bytes: 151_000 },
+    { path: "glossary/keyword-page/index.html", bytes: 151_000 },
     { path: "index.html", bytes: 150_000 },
   ];
 
@@ -17,11 +17,13 @@ describe("measureBudget", () => {
     const report = measureBudget(pages, islands, { maxPageBytes: 150_000 });
     expect(report.maxPageBytes).toBe(150_000);
     expect(report.pages.map((page) => page.path)).toEqual([
-      "glossary/payment/index.html",
+      "glossary/keyword-page/index.html",
       "index.html",
       "todo/index.html",
     ]);
-    expect(report.overBudget).toEqual([{ path: "glossary/payment/index.html", bytes: 151_000 }]);
+    expect(report.overBudget).toEqual([
+      { path: "glossary/keyword-page/index.html", bytes: 151_000 },
+    ]);
     expect(report.islands.map((island) => island.name)).toEqual(["mentions-panel", "zeta"]);
   });
 
@@ -31,7 +33,7 @@ describe("measureBudget", () => {
       "island mentions-panel: 12.0 kB",
       "island zeta: 2.5 kB",
       "pages: 3, largest 151.0 kB, budget 150.0 kB",
-      "page glossary/payment/index.html: 151.0 kB over budget",
+      "page glossary/keyword-page/index.html: 151.0 kB over budget",
     ]);
   });
 

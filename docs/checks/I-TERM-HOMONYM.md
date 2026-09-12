@@ -9,17 +9,17 @@ The recognition dictionary keeps both. Every occurrence of the form links to eac
 ## Before
 
 ```
-glossary/contract.md        # Contract  (a term)
-specs/objects/contract.md   # Contract  (a business object)
+glossary/source.md        # Source  (a term)
+specs/objects/source.md   # Source  (a business object)
 ```
 
-Every mention of "contract" in the notes links to both entities at half confidence.
+Every mention of "source" in the notes links to both entities at half confidence.
 
 ## After
 
 ```
-glossary/contract.md        # Contract
-specs/objects/contract.md   # Contract record
+glossary/source.md        # Source
+specs/objects/source.md   # Source record
 ```
 
 Or keep both titles and add to each note a `## Not to be confused with` section that points to the other.

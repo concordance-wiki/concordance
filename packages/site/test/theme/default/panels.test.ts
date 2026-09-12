@@ -88,13 +88,13 @@ describe("Neighbourhood", () => {
   it("lists every neighbour with its type, relation and weight, as the textual equivalent of the map", () => {
     const html = renderSlot("Neighbourhood", neighbourhood, defaultTheme);
     expect(html).toContain(
-      '<h2 id="neighbourhood-title">Neighbourhood <span class="neighbourhood-centre">Free payment</span></h2>',
+      '<h2 id="neighbourhood-title">Neighbourhood <span class="neighbourhood-centre">Keyword page</span></h2>',
     );
     expect(html).toContain(
-      '<li class="neighbour"><a href="../payment/">payment</a><span class="badge">term</span><span class="weight">12</span></li>',
+      '<li class="neighbour"><a href="../page/">page</a><span class="badge">term</span><span class="weight">12</span></li>',
     );
     expect(html).toContain(
-      '<a href="../free-payment-entry/">Free payment entry</a><span class="relation">displays</span><span class="weight">4</span>',
+      '<a href="../mentions-panel/">Mentions panel</a><span class="relation">displays</span><span class="weight">4</span>',
     );
     expectBalanced(html);
   });

@@ -2,7 +2,7 @@ import { fingerprintOf } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
 import { loadContracts, wsdlReader } from "../src/source.js";
-import { api, harness, members, orders, payments, paymentsOpenApi } from "./fixtures.js";
+import { api, forgeBridge, harness, members, modelQueryOpenApi, orders } from "./fixtures.js";
 
 const localFile = { "/repos/specs/api/orders.wsdl": orders };
 
@@ -11,7 +11,7 @@ describe("wsdlReader", () => {
     expect(wsdlReader.accepts(orders)).toBe(true);
     expect(wsdlReader.accepts(members)).toBe(true);
     expect(wsdlReader.accepts("<!-- soap -->\n<wsdl:definitions xmlns:wsdl='x'/>")).toBe(true);
-    expect(wsdlReader.accepts(paymentsOpenApi)).toBe(false);
+    expect(wsdlReader.accepts(modelQueryOpenApi)).toBe(false);
     expect(wsdlReader.accepts("openapi: 3.1.0\n")).toBe(false);
     expect(wsdlReader.accepts('<?xml version="1.0"?><xs:schema xmlns:xs="x"/>')).toBe(false);
     expect(wsdlReader.accepts("")).toBe(false);
@@ -288,17 +288,20 @@ describe("loadContracts", () => {
 
   it("dispatches by content: an OpenAPI contract is left to the OpenAPI plugin, a WSDL named .json is still read", async () => {
     const { input } = harness({
-      "/repos/specs/api/payments.json": paymentsOpenApi,
-      "/repos/specs/api/legacy.json": payments,
+      "/repos/specs/api/model-query.json": modelQueryOpenApi,
+      "/repos/specs/api/legacy.json": forgeBridge,
     });
-    const rest = api({ id: "specs/api/payments", attributes: { contract: "./payments.json" } });
+    const rest = api({
+      id: "specs/api/model-query",
+      attributes: { contract: "./model-query.json" },
+    });
     const legacy = api({ id: "specs/api/legacy", attributes: { contract: "./legacy.json" } });
     const output = await loadContracts(input([rest, legacy]));
     expect(output.findings).toEqual([]);
     expect(output.contracts.map((record) => record.api)).toEqual(["specs/api/legacy"]);
     expect(output.entities.map((entity) => entity.id)).toEqual([
-      "specs/api/legacy/createpayment",
-      "specs/api/legacy/getpayment",
+      "specs/api/legacy/fetchfindings",
+      "specs/api/legacy/notifybuild",
     ]);
   });
 });

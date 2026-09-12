@@ -1,0 +1,20 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Forge bridge", "version": "1.0.0" },
+  "paths": {
+    "/builds/{id}/findings": {
+      "get": {
+        "operationId": "fetchFindings",
+        "summary": "Fetch the findings of a build",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/notifications": {
+      "post": {
+        "operationId": "notifyBuild",
+        "summary": "Notify a build",
+        "responses": { "202": { "description": "Accepted" } }
+      }
+    }
+  }
+}

@@ -55,7 +55,7 @@ export function keywordForms(forms: Iterable<string>, pack: LanguagePack): Set<s
  * Every n-gram of `minWords` to `maxWords` words in the units, in unit then text order,
  * except those starting or ending with a stopword, those made only of digits and those
  * whose key is shorter than `minLength`. Words are the tokens of the text: normalised by
- * the pack and singularised, so that "Exceptional payments" and "exceptional payment"
+ * the pack and singularised, so that "Build summaries" and "build summary"
  * share a key while each keeps its surface form.
  */
 export function extractNgrams(

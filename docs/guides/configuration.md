@@ -38,25 +38,25 @@ Containers of first level. Every entity is resolved to one, in increasing preced
 
 ```yaml
 applications:
-  - id: policy-admin
-    title: Policy administration
+  - id: concordance-cli
+    title: Concordance command line
     status: active   # active | legacy | target
 ```
 
 ## `domains`
 
-Global business domains, orthogonal to sources. The globs of every domain are evaluated on the path of every file relative to its source root, whatever the source; a glob such as `**/*payment*` therefore files `glossary/payment.md` and `specs/screens/free-payment-entry.md` together. A subdomain's globs are evaluated on their own, after its parent's: the deepest matching domain wins, and between domains of the same depth the last declared. The entity records the full identifier path of its domain, `membership/payments` below.
+Global business domains, orthogonal to sources. The globs of every domain are evaluated on the path of every file relative to its source root, whatever the source; a glob such as `**/*keyword*` therefore files `glossary/keyword-page.md` and `specs/screens/keyword-page.md` together. A subdomain's globs are evaluated on their own, after its parent's: the deepest matching domain wins, and between domains of the same depth the last declared. The entity records the full identifier path of its domain, `inference/recognition` below.
 
-A frontmatter `domain` overrides the globs; it names a domain by its identifier (`payments`, the first declared with it) or by its identifier path (`membership/payments`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
+A frontmatter `domain` overrides the globs; it names a domain by its identifier (`recognition`, the first declared with it) or by its identifier path (`inference/recognition`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
 
 ```yaml
 domains:
-  - id: membership
-    title: Membership
-    match: ["**/membership/**", "**/member/**"]
+  - id: inference
+    title: Inference
+    match: ["**/inference/**", "**/links/**"]
     subdomains:
-      - id: payments
-        match: ["**/payment*/**"]
+      - id: recognition
+        match: ["**/recogni*/**", "**/dictionary/**"]
 ```
 
 ## `privacy`
@@ -75,7 +75,7 @@ domains:
 When `pseudonymize.enabled` is `true`, every transcript is pseudonymised before anything else reads it: the rendered page, the search index and the model only ever see the pseudonymised form. Three things happen to a transcript.
 
 - Every speaker named in the dictionary takes its pseudonym, or its role when `keep_roles` is `true` and the entry has one. A speaker the dictionary does not know becomes `Speaker-1`, `Speaker-2`… numbered by first appearance within that transcript, so that the numbering is stable as long as the transcript does not change; add the person to the dictionary for a pseudonym that survives an edit.
-- Every occurrence of a real name of the dictionary inside the spoken text is replaced the same way, including the names of the numbered speakers. Names are matched on word boundaries, without regard to case or accents, longest name first: with both `Mary Ann` and `Mary Ann Smith` declared, "mary ann smith" becomes the pseudonym of the latter and "contract" is never found inside "contractual".
+- Every occurrence of a real name of the dictionary inside the spoken text is replaced the same way, including the names of the numbered speakers. Names are matched on word boundaries, without regard to case or accents, longest name first: with both `Mary Ann` and `Mary Ann Smith` declared, "mary ann smith" becomes the pseudonym of the latter and "source" is never found inside "resource".
 - A run of two or more capitalised words that no dictionary name covers, "Firstname Lastname" style, is reported as [`I-PII-DETECTED`](../checks/I-PII-DETECTED.md) for review and left as written. All-uppercase words are read as acronyms and never start a mention, and the heuristic knows nothing about sentences: a capitalised first word followed by a name is reported with the name.
 
 `pseudonyms.yaml` is validated by [`pseudonyms.schema.json`](../../packages/core/schemas/pseudonyms.schema.json):
@@ -119,7 +119,7 @@ A rule matches on `path` (glob), `suffix` (`.rule.md`), `ext` (`[".vtt"]`) or `f
 sources:
   - name: specs
     git: https://example.invalid/knowledge/specs.git
-    application: policy-admin
+    application: concordance-cli
     rules:
       - match: { path: "screens/**" }
         set: { type: screen }

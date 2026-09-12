@@ -1,8 +1,8 @@
 ---
 type: business_object
-attributes: [amount, value date, reason]
-lifecycle: [entered, validated, settled, cancelled]
+attributes: [expression, occurrences, files]
+lifecycle: [proposed, accepted, published, rejected]
 ---
-# Payment
+# Keyword page
 
-An amount paid into a contract at a given value date. A payment is entered on a screen, validated against the [annual cap](rule.md), and settled by the [nightly settlement](batch.md). It is stored in the [PAYMENT table](data_object.md).
+A page generated for a recurring expression that no note defines. A keyword page is proposed on a screen, validated against the [publication threshold](rule.md), and published by the [nightly build](batch.md). It is stored in the [ENTITIES table](data_object.md).

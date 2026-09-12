@@ -1,6 +1,6 @@
 # Default profile of Concordance.
 #
-# The engine knows nothing about screens, rules or payments: it reads this file.
+# The engine knows nothing about screens, rules or glossaries: it reads this file.
 # A project profile is merged on top of it key by key. Types marked
 # `status: planned` are part of the meta-model but not yet rendered by the
 # first version; a project may enable them without any code change.

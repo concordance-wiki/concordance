@@ -17,8 +17,8 @@ interface Piece {
 
 const notLetterOrDigit = /[^\p{L}\p{M}\p{N}]/gu;
 
-// The segmenter cuts a hyphenated compound into its parts ("versement-libre" gives the tokens
-// "versement" and "libre", so that both "versement" and "versement libre" match there) but keeps
+// The segmenter cuts a hyphenated compound into its parts ("mot-clé" gives the tokens
+// "mot" and "clé", so that both "mot" and "mot clé" match there) but keeps
 // an apostrophe inside its word ("l'écran"): the parts an apostrophe binds are cut here the same
 // way, with the apostrophe characters the pack unifies.
 function pieces(segment: Word, pack: LanguagePack): Piece[] {

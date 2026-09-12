@@ -5,12 +5,12 @@ Concordance reads your markdown as it is. You do not have to change anything to 
 ## A note is a markdown file with a title
 
 ```markdown
-# Free payment
+# Keyword page
 
-A payment made at the member's request, outside any schedule, on a running contract.
+A page generated for every expression that crosses the publication threshold, whether or not a note defines it.
 ```
 
-The H1 is the title. The first paragraph is the summary. The file path gives the identifier: `glossary/free-payment.md` in the source `glossary` becomes `glossary/free-payment`, and its page URL follows (`glossary/free-payment/`). Folder and file names are slugified: `Réglementation générale.md` becomes `reglementation-generale`. An `id:` in frontmatter overrides the path; it must be lowercase letters, digits and hyphens with at least one `/`, such as `specs/rules/annual-cap`.
+The H1 is the title. The first paragraph is the summary. The file path gives the identifier: `glossary/keyword-page.md` in the source `glossary` becomes `glossary/keyword-page`, and its page URL follows (`glossary/keyword-page/`). Folder and file names are slugified: `Réglementation générale.md` becomes `reglementation-generale`. An `id:` in frontmatter overrides the path; it must be lowercase letters, digits and hyphens with at least one `/`, such as `specs/rules/publication-threshold`.
 
 ## Type by filing, not by editing
 
@@ -21,9 +21,9 @@ When you need to be explicit, frontmatter wins over the filing rules:
 ```markdown
 ---
 type: screen
-roles: [account-manager]
+roles: [reader]
 ---
-# Free payment entry
+# Entity page
 ```
 
 A `type` that contradicts the file suffix is reported (`E-TYPE-CONFLICT`) rather than guessed; the frontmatter is kept. A `type` the profile does not declare is reported too (`W-TYPE-UNKNOWN`) and the note is treated as a document. The entity records where its type came from (`type_origin`: the source, `rule#3`, the suffix or the frontmatter).
@@ -34,13 +34,13 @@ Frontmatter carries what qualifies the note, at most a handful of keys. The site
 
 Common keys: `title` (overrides the H1), `aliases` (other names, used for recognition), `application`, `domain`, `status` (`draft`, `proposed`, `valid`, `obsolete`), `tags`, `summary`, `superseded_by`. A key that neither the type nor the common attributes declare is kept as-is and reported (`W-ATTRIBUTE-UNKNOWN`).
 
-`application` and `domain` file the note where the configuration would not. The application otherwise comes from the source or from a typing rule; the domain otherwise comes from the globs the integrator declares globally, across every source. A frontmatter value wins over both, and names a domain by its identifier (`payments`) or by its identifier path (`membership/payments`). A note that nothing files goes to the `unclassified` domain (`W-DOMAIN-UNCLASSIFIED`) or has no application (`W-APP-MISSING`); a value the configuration does not declare is kept as written and reported (`W-DOMAIN-UNKNOWN`, `W-APP-UNKNOWN`).
+`application` and `domain` file the note where the configuration would not. The application otherwise comes from the source or from a typing rule; the domain otherwise comes from the globs the integrator declares globally, across every source. A frontmatter value wins over both, and names a domain by its identifier (`recognition`) or by its identifier path (`inference/recognition`). A note that nothing files goes to the `unclassified` domain (`W-DOMAIN-UNCLASSIFIED`) or has no application (`W-APP-MISSING`); a value the configuration does not declare is kept as written and reported (`W-DOMAIN-UNKNOWN`, `W-APP-UNKNOWN`).
 
-Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `broader`, `business_object`) accept one value or a list of values and produce the relation the profile attaches to the key at confidence 0.90, method `frontmatter_ref`, with the key name as provenance: `reads: [objects/payment]` on a screen gives `accesses` in `read` mode, `roles: [roles/account-manager]` gives `assigned_to` from the role to the screen. Each value is resolved in this order, the first match winning:
+Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `broader`, `business_object`) accept one value or a list of values and produce the relation the profile attaches to the key at confidence 0.90, method `frontmatter_ref`, with the key name as provenance: `reads: [objects/entity]` on a screen gives `accesses` in `read` mode, `roles: [roles/reader]` gives `assigned_to` from the role to the screen. Each value is resolved in this order, the first match winning:
 
-1. by identifier: the full identifier (`specs/roles/account-manager`), or the identifier relative to the source of the note (`roles/account-manager`);
-2. by path relative to the source root, extension included (`roles/account-manager.md`, `rules/annual-cap.rule.md`); a path written differently from the file name resolves through the identifier it derives (`Roles/Account Manager.md`);
-3. by exact title, after trimming, case-sensitively (`Annual cap`).
+1. by identifier: the full identifier (`specs/roles/reader`), or the identifier relative to the source of the note (`roles/reader`);
+2. by path relative to the source root, extension included (`roles/reader.md`, `rules/publication-threshold.rule.md`); a path written differently from the file name resolves through the identifier it derives (`Roles/Reader.md`);
+3. by exact title, after trimming, case-sensitively (`Publication threshold`).
 
 A value that matches nothing, a title shared by several notes, or a note of a type the key does not accept (a rule under `reads`) is reported (`W-REF-UNRESOLVED`) and gives no link. Several values naming the same note give one link with one provenance per value.
 
@@ -49,7 +49,7 @@ A value that matches nothing, a title shared by several notes, or a note of a ty
 A markdown link to another note is the strongest relation the tool knows: confidence 1.00, above anything inferred.
 
 ```markdown
-The amount is checked against the [annual cap](../rules/annual-cap.rule.md).
+The count is checked against the [publication threshold](../rules/publication-threshold.rule.md).
 ```
 
 Links are relative to the file, then to the source root. A link to a missing file is an error (`E-LINK-BROKEN`); a link to a non-markdown file (a slide deck, a PDF) attaches that document to the note. The provenance of the link records the file, the line, the link text and the anchor when one is written; several links from one note to the same target are one link with several provenances. A link from a note to itself, such as a table of contents, yields nothing.
@@ -57,10 +57,10 @@ Links are relative to the file, then to the source root. A link to a missing fil
 A link can reach another source with the `<source>:<path>` prefix, the path being relative to the root of that source:
 
 ```markdown
-See [cap checked server-side](decisions:cap-checked-server-side.md).
+See [static site with islands](decisions:static-site-with-islands.md).
 ```
 
-A relative link that climbs above the source root into a sibling source (`../decisions/cap-checked-server-side.md` from a source that is a folder next to `decisions/`) counts as the same thing. Both resolve only when `inference.cross_source_links` is `true` in `concordance.yaml`; otherwise the link is flagged (`W-LINK-CROSS-SOURCE`) and not recorded.
+A relative link that climbs above the source root into a sibling source (`../decisions/static-site-with-islands.md` from a source that is a folder next to `decisions/`) counts as the same thing. Both resolve only when `inference.cross_source_links` is `true` in `concordance.yaml`; otherwise the link is flagged (`W-LINK-CROSS-SOURCE`) and not recorded.
 
 ## An API note declares its contract
 
@@ -70,9 +70,9 @@ An `api` note names its contract in the `contract` attribute, as a URL or as a p
 ---
 type: api
 protocol: rest
-contract: ./payments.openapi.json
+contract: ./model-query.openapi.json
 ---
-# Payments API
+# Model query API
 ```
 
 With the `contract-openapi` plugin declared in the configuration, the build reads the OpenAPI 3.x document and produces one operation per path and method, linked to the API at confidence 0.95 with the contract location and the operation name as provenance: the operations are never copied into the note. The schemas the contract references are offered as candidate objects, not linked. The version the contract declares is recorded with its import date. A contract that cannot be fetched, read or parsed is reported (`W-CONTRACT-UNREACHABLE`) and the note keeps the operations written by hand; the build goes on.
@@ -83,9 +83,9 @@ The same attribute accepts a WSDL, so that a SOAP service is inventoried like th
 ---
 type: api
 protocol: soap
-contract: https://legacy.example.invalid/orders?wsdl
+contract: https://legacy.example.invalid/forge-bridge?wsdl
 ---
-# Orders service
+# Forge bridge
 ```
 
 With the `contract-wsdl` plugin declared, the build reads the WSDL 1.1 or 2.0 document and produces one operation per port type operation, titled `operation (port)`, with its port, binding and SOAP action; the XSD elements and types its messages reference are offered as candidate objects. The plugins tell the two formats apart by content, not by extension: an XML document whose root is `definitions` or `description` goes to the WSDL plugin, anything else to the OpenAPI plugin. An operation imported from either carries `operation_id`, `summary` and `style` (`http` or `soap`) and is handled the same way afterwards.
@@ -109,7 +109,7 @@ Under a mapped section, every recognised mention of another note gives the decla
 
 ## What is not read
 
-Fenced and indented code blocks, inline code, URLs (bare, autolinked or written as `www.`), raw HTML, frontmatter values, link targets and images are never scanned for words: a variable name in a code block never becomes a business mention. Everything else is read, one unit at a time: headings of every level (the H1 title included), paragraphs, list items (nested items separately), table cells and the paragraphs of block quotes. The visible text of a markdown link stays subject to recognition: in a link written as "annual cap" pointing to the rule note, "annual cap" is read and the target path is not. Every mention keeps the line where its unit starts and the H2 section that encloses it.
+Fenced and indented code blocks, inline code, URLs (bare, autolinked or written as `www.`), raw HTML, frontmatter values, link targets and images are never scanned for words: a variable name in a code block never becomes a business mention. Everything else is read, one unit at a time: headings of every level (the H1 title included), paragraphs, list items (nested items separately), table cells and the paragraphs of block quotes. The visible text of a markdown link stays subject to recognition: in a link written as "publication threshold" pointing to the rule note, "publication threshold" is read and the target path is not. Every mention keeps the line where its unit starts and the H2 section that encloses it.
 
 ## Documents and meetings
 
@@ -123,17 +123,17 @@ A term note is short: a definition, aliases, and, when useful, a broader term.
 
 ```markdown
 ---
-aliases: [FP, free contribution]
-broader: payment
+aliases: [word page]
+broader: page
 ---
-# Free payment
+# Keyword page
 
-A payment made at the member's request, outside any schedule.
+A page generated for every expression that crosses the publication threshold.
 ```
 
-Spellings are compared without regard to case, accents or the plural: "Free Payment", "free payments" and "free payment" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "contract" is not found inside "contractual". A mention is recognised on whole words, the longest expression wins ("free payment" counts once, not as "free payment" plus "payment"), and a type prefix written right before it ("screen Free payment entry", "l'écran Saisie de versement libre"; the words are listed per locale under `type_prefixes` in the profile) raises its confidence by 0.10 and tells the tool which type of note to expect.
+Spellings are compared without regard to case, accents or the plural: "Keyword Page", "keyword pages" and "keyword page" are one term, in every language pack the engine ships. Hyphens and apostrophes stay part of the word, and a term is only recognised on word boundaries: "source" is not found inside "resource". A mention is recognised on whole words, the longest expression wins ("keyword page" counts once, not as "keyword page" plus "page"), and a type prefix written right before it ("screen Entity page", "l'écran Page entité"; the words are listed per locale under `type_prefixes` in the profile) raises its confidence by 0.10 and tells the tool which type of note to expect.
 
-Two entities with the same title or alias, once spellings are compared, are homonyms: a glossary term and a business object both called "Contract", or two terms whose aliases meet. The tool keeps both, reports `I-TERM-HOMONYM` with the form and the entities, and links every occurrence to each entity at half confidence, glossary entities first; a `## Not to be confused with` section helps readers. Aliases shorter than three characters (`FP`) are ignored unless `inference.short_terms` lists them, and a title or alias that is a stopword of the language is never recognised.
+Two entities with the same title or alias, once spellings are compared, are homonyms: a glossary term and a business object both called "Source", or two terms whose aliases meet. The tool keeps both, reports `I-TERM-HOMONYM` with the form and the entities, and links every occurrence to each entity at half confidence, glossary entities first; a `## Not to be confused with` section helps readers. Aliases shorter than three characters (`id`) are ignored unless `inference.short_terms` lists them, and a title or alias that is a stopword of the language is never recognised.
 
 ## Profile
 

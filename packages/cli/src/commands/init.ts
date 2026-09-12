@@ -27,8 +27,8 @@ sources:
 
 # Global business domains, resolved by globs across every source.
 # domains:
-#   - id: payments
-#     match: ["**/payment*"]
+#   - id: publication
+#     match: ["**/publication/**"]
 
 build:
   output: ./dist

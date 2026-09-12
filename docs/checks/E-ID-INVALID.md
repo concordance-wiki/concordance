@@ -10,18 +10,18 @@ An identifier declared in frontmatter must match `^[a-z0-9][a-z0-9-]*(/[a-z0-9][
 
 ```
 ---
-id: Annual Cap
+id: Publication Threshold
 ---
-# Annual cap
+# Publication threshold
 ```
 
 ## After
 
 ```
 ---
-id: specs/rules/annual-cap
+id: specs/rules/publication-threshold
 ---
-# Annual cap
+# Publication threshold
 ```
 
 ## How to fix

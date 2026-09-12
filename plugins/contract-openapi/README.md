@@ -19,7 +19,7 @@ Paths are sorted and methods follow the fixed order above, so that two builds on
 - The plugin decides on content whether a contract is its business: any text that is not an XML document is read as OpenAPI; an XML document is left to the WSDL plugin, without a finding.
 - The cache key is the SHA-256 of the contract text: the contract is read on every build, and one whose bytes are unchanged is not parsed again; the extracted operations are kept under `<cache>/contracts/<sha256>.json`. Nothing is written next to the note.
 - A contract that cannot be fetched (HTTP error, network failure, no network access), read (missing file) or parsed (neither JSON nor YAML, not an object, no `openapi` key, or a version other than 3.x) yields a [`W-CONTRACT-UNREACHABLE`](../../docs/checks/W-CONTRACT-UNREACHABLE.md) finding naming the reason; nothing is imported for that API, the other contracts are still imported and the build goes on. An unparsable contract is not cached, so that the next build reads it again.
-- Two operations whose names slugify alike get numbered identifiers (`get-payment`, `get-payment-2`), in contract order.
+- Two operations whose names slugify alike get numbered identifiers (`get-entity`, `get-entity-2`), in contract order.
 
 ## What is read, and what is not
 

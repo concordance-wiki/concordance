@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isWsdlRoot, readWsdl } from "../src/contract.js";
-import { members, orders, payments } from "./fixtures.js";
+import { forgeBridge, members, orders } from "./fixtures.js";
 
 function contract(text: string, location = "service.wsdl") {
   const read = readWsdl(text, location);
@@ -87,7 +87,7 @@ describe("readWsdl", () => {
   });
 
   it("falls back to the name of the definitions for the title, then to an empty title", () => {
-    expect(contract(payments).title).toBe("Payments API");
+    expect(contract(forgeBridge).title).toBe("Forge bridge");
     expect(contract('<definitions name="Svc"/>').title).toBe("Svc");
     expect(contract("<definitions/>")).toEqual({
       wsdl: "1.1",

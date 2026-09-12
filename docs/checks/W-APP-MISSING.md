@@ -20,7 +20,7 @@ sources:
 sources:
   - name: specs
     git: https://example.invalid/knowledge/specs.git
-    application: policy-admin
+    application: concordance-cli
 ```
 
 ## How to fix

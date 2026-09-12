@@ -12,9 +12,9 @@ The application cascade (the source's `application`, a typing rule's `set.applic
 sources:
   - name: specs
     git: https://example.invalid/knowledge/specs.git
-    application: policy-admn
+    application: concordance-cl
 applications:
-  - id: policy-admin
+  - id: concordance-cli
 ```
 
 ## After
@@ -23,9 +23,9 @@ applications:
 sources:
   - name: specs
     git: https://example.invalid/knowledge/specs.git
-    application: policy-admin
+    application: concordance-cli
 applications:
-  - id: policy-admin
+  - id: concordance-cli
 ```
 
 ## How to fix

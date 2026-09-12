@@ -12,16 +12,16 @@ Neither its title nor its aliases appear in any other file. The term may be obso
 ---
 aliases: []
 ---
-# Scheduled contribution
+# Comparison form
 ```
 
 ## After
 
 ```
 ---
-aliases: [scheduled payment, standing payment]
+aliases: [normalised form, compared form]
 ---
-# Scheduled contribution
+# Comparison form
 ```
 
 ## How to fix

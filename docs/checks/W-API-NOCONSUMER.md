@@ -12,7 +12,7 @@ Nothing links a screen, a process or a batch to this API: neither a `consumers` 
 ---
 protocol: rest
 ---
-# Payments API
+# Model query API
 ```
 
 ## After
@@ -20,9 +20,9 @@ protocol: rest
 ```
 ---
 protocol: rest
-consumers: [screens/free-payment-entry]
+consumers: [screens/search-results]
 ---
-# Payments API
+# Model query API
 ```
 
 ## How to fix

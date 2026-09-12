@@ -12,8 +12,8 @@ A suffix such as `.rule.md` is a typing convention of the source. A frontmatter 
 ---
 type: screen
 ---
-# Annual cap
-(file: rules/annual-cap.rule.md)
+# Publication threshold
+(file: rules/publication-threshold.rule.md)
 ```
 
 ## After
@@ -22,8 +22,8 @@ type: screen
 ---
 type: rule
 ---
-# Annual cap
-(file: rules/annual-cap.rule.md)
+# Publication threshold
+(file: rules/publication-threshold.rule.md)
 ```
 
 ## How to fix

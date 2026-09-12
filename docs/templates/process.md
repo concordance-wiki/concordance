@@ -1,17 +1,17 @@
 ---
 type: process
 execution: mixed
-triggers: [payment request]
+triggers: [candidate proposed]
 ---
-# Record a payment
+# Review a candidate expression
 
-A member asks to pay an extra amount on a running contract.
+The recogniser proposes an expression that no note defines.
 
 ## Steps
 
-1. The [account manager](role.md) finds the member.
-2. The account manager enters the amount on [free payment entry](screen.md).
-   - If the [annual cap](rule.md) is exceeded, go to step 5.
-3. The system calls the [Payments API](api.md).
-4. A [payment](business_object.md) is created on the contract.
+1. The [glossary owner](role.md) opens the candidate.
+2. The glossary owner accepts it on the [to-do page](screen.md).
+   - If the [publication threshold](rule.md) is not met, go to step 5.
+3. The system calls the [Model query API](api.md).
+4. A [keyword page](business_object.md) is created in the model.
 5. End.

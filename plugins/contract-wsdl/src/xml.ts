@@ -61,7 +61,7 @@ export function parseXml(text: string): { root: XmlElement } | { error: string }
   return { root: root as XmlElement };
 }
 
-/** The local part of a qualified name: `tns:Payment` is `Payment`. */
+/** The local part of a qualified name: `tns:BuildReport` is `BuildReport`. */
 export function localName(qualified: string): string {
   return qualified.slice(qualified.lastIndexOf(":") + 1);
 }

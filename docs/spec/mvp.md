@@ -300,11 +300,11 @@ The heart of the product. This batch is what makes an unprepared corpus browsabl
 
 #### L1-01 Text normalisation
 
-As the engine, I want to compare "Free Payment", "free payments" and "free payment" as a single form so that I record the real occurrences of a term.
+As the engine, I want to compare "Keyword Page", "keyword pages" and "keyword page" as a single form so that I record the real occurrences of a term.
 
 - Lower-casing, accent stripping for comparison, original form kept for display.
 - Simple plural rules per locale (`en`: -s, -es, -ies; `fr`: -s, -x, -aux, -eux).
-- Matches happen on word boundaries: "contract" does not match inside "contractual".
+- Matches happen on word boundaries: "source" does not match inside "resource".
 - Normalisation is a pure function, tested on a named case set covering accents, case, plurals, hyphens and apostrophes, in both locales.
 
 Depends on: L0-12.
@@ -325,7 +325,7 @@ Depends on: L1-01.
 As a reader, I want to see where a word is used and in which sentence so that I understand its real meaning in my organisation.
 
 - An Aho-Corasick automaton built once on the dictionary, then a single pass per document.
-- On overlap, the longest pattern wins: "free payment" beats "payment".
+- On overlap, the longest pattern wins: "keyword page" beats "page".
 - Each occurrence carries the file, line, position, enclosing section and an 80-character centred context.
 - Recognised type prefixes ("screen X", "API Y", "table Z", configurable per locale) add 0.1 confidence and fix the expected target type.
 - Performance: the scan on a 2,000-file corpus runs in under ten seconds on a development machine.
@@ -971,7 +971,7 @@ Runs alongside L2 to L7. Gates publication, not the demonstration.
 
 As a developer, I want a stable reference corpus so that I write tests that do not depend on real data.
 
-- A fictional corpus (`fixtures/corpora/realistic`, generic personal insurance, `en` and `fr`) covering every implemented type, every inference method and every check.
+- A reference corpus (`fixtures/corpora/realistic`, Concordance describing itself, `en` and `fr`) covering every implemented type, every inference method and every check.
 - A second, deliberately faulty corpus (`fixtures/corpora/faulty`), one file per expected finding.
 - The expected result (model and findings) is versioned under `expected/` and compared on every run.
 - No real nor personal data in the corpora.

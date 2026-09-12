@@ -1,9 +1,9 @@
 ---
 type: application
-code: PAD
-status: active
-owner: membership-team
+code: SVC
+status: target
+owner: maintainers
 ---
-# Policy administration
+# Concordance service
 
-The application account managers use to manage contracts, members and payments. It exposes the [Payments API](api.md) and hosts the [free payment entry](screen.md) screen.
+The long-running service that answers questions about the canonical model, proposes keyword pages and talks to the forge. It exposes the [Model query API](api.md) and hosts the [to-do page](screen.md) screen.

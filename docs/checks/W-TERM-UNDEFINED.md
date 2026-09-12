@@ -11,15 +11,15 @@ The C-value of an expression is its number of occurrences, minus the mean occurr
 ## Before
 
 ```
-"exceptional payment": 17 occurrences in 6 files, no note
+"build summary": 17 occurrences in 6 files, no note
 ```
 
 ## After
 
 ```
-glossary/exceptional-payment.md
-# Exceptional payment
-A payment outside the contractual frame, validated by the branch manager.
+glossary/build-summary.md
+# Build summary
+The counts a build prints last: entities, links, findings by severity.
 ```
 
 ## How to fix

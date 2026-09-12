@@ -9,14 +9,14 @@ Identifiers derive from the source name and the file path without extension or t
 ## Before
 
 ```
-specs/rules/annual-cap.rule.md
-specs/rules/annual-cap.md
+specs/rules/publication-threshold.rule.md
+specs/rules/publication-threshold.md
 ```
 
 ## After
 
 ```
-specs/rules/annual-cap.rule.md
+specs/rules/publication-threshold.rule.md
 ```
 
 ## How to fix

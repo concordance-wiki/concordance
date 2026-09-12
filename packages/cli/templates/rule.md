@@ -1,14 +1,14 @@
 ---
 type: rule
 severity: blocking
-condition: total payments over the calendar year exceed the contract cap
+condition: an expression occurs fewer than three times or in fewer than two files
 ---
-# Annual cap
+# Publication threshold
 
-The total of payments on a contract over a calendar year may not exceed the cap set at subscription. The check happens in the [Payments API](api.md) only; screens display the message it returns and never recompute the cap, as recorded in the [cap checked server-side](decision.md) decision.
+An expression gets a keyword page only when it occurs at least three times across at least two files. The check happens in the [Model query API](api.md) only; screens display the count it returns and never recompute the threshold, as recorded in the [threshold checked server-side](decision.md) decision.
 
 ## Applies to
 
-- [Free payment entry](screen.md)
-- [Payments API](api.md)
-- [Payment](business_object.md)
+- [To-do page](screen.md)
+- [Model query API](api.md)
+- [Keyword page](business_object.md)

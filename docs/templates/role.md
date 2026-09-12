@@ -1,7 +1,7 @@
 ---
 type: role
-actors: [branch-staff]
+actors: [maintainers]
 ---
-# Account manager
+# Glossary owner
 
-Handles member requests in a branch. Enters payments on the [free payment entry](screen.md) screen and follows the [record a payment](process.md) process.
+Keeps the glossary of a corpus. Reviews candidate expressions on the [to-do page](screen.md) screen and follows the [review a candidate expression](process.md) process.

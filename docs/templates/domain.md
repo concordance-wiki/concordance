@@ -1,6 +1,6 @@
 ---
 type: domain
 ---
-# Payments
+# Publication
 
-Everything that concerns money coming into a contract: [free payments](term.md), scheduled payments, the [annual cap](rule.md) and the [nightly settlement](batch.md).
+Everything that turns the canonical model into a site: [candidate expressions](term.md), keyword pages, the [publication threshold](rule.md) and the [nightly build](batch.md).

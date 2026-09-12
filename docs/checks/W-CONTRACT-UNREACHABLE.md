@@ -11,13 +11,13 @@ An `api` note names its contract in the `contract` attribute, as a URL or as a p
 ```
 ---
 type: api
-contract: https://example.invalid/payments/openapi.json   (the server answers 404)
+contract: https://example.invalid/model-query/openapi.json   (the server answers 404)
 ---
-# Payments API
+# Model query API
 ```
 
 ```
-warning: W-CONTRACT-UNREACHABLE (specs:api/payments.md): contract https://example.invalid/payments/openapi.json of specs/api/payments could not be read: HTTP 404
+warning: W-CONTRACT-UNREACHABLE (specs:api/model-query.md): contract https://example.invalid/model-query/openapi.json of specs/api/model-query could not be read: HTTP 404
 ```
 
 ## After
@@ -25,9 +25,9 @@ warning: W-CONTRACT-UNREACHABLE (specs:api/payments.md): contract https://exampl
 ```
 ---
 type: api
-contract: ./payments.openapi.json
+contract: ./model-query.openapi.json
 ---
-# Payments API
+# Model query API
 ```
 
 ## How to fix

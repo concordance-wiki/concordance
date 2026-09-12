@@ -7,7 +7,7 @@ export const UNCLASSIFIED_DOMAIN = "unclassified";
 
 export interface CompiledDomain {
   id: string;
-  /** The identifiers from the root domain down to this one, `membership/payments` style. */
+  /** The identifiers from the root domain down to this one, `inference/recognition` style. */
   path: string;
   /** Zero for a root domain. */
   depth: number;

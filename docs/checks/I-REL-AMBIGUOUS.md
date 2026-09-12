@@ -9,19 +9,19 @@ No mapped section, no typed frontmatter attribute, and the profile allows more t
 ## Before
 
 ```
-# Free payment entry
+# Entity page
 
-The screen reads the contract and updates its balance.
+The screen reads the entity and updates its neighbourhood.
 ```
 
 ## After
 
 ```
-# Free payment entry
+# Entity page
 
 ## Objects
-- Reads: [contract](../objects/contract.md)
-- Writes: [contract](../objects/contract.md)
+- Reads: [entity](../objects/entity.md)
+- Writes: [neighbourhood](../objects/neighbourhood.md)
 ```
 
 ## How to fix

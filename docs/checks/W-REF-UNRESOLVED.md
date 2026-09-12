@@ -4,28 +4,28 @@
 
 A frontmatter reference matches no note by identifier, path or title, several notes by title, or a note of a type the attribute does not accept.
 
-No link is recorded for that value; the other values of the attribute are unaffected. A reference-typed attribute (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `broader`, `business_object`, ...) is resolved by identifier (`specs/roles/account-manager`, or `roles/account-manager` within the source of the note), then by path relative to the source root (`roles/account-manager.md`), then by exact title after trimming, case-sensitively. A title shared by several notes resolves nothing: the finding names the candidates. A note found under a type the attribute does not accept, such as a rule under `reads`, is reported with the expected types.
+No link is recorded for that value; the other values of the attribute are unaffected. A reference-typed attribute (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `broader`, `business_object`, ...) is resolved by identifier (`specs/roles/reader`, or `roles/reader` within the source of the note), then by path relative to the source root (`roles/reader.md`), then by exact title after trimming, case-sensitively. A title shared by several notes resolves nothing: the finding names the candidates. A note found under a type the attribute does not accept, such as a rule under `reads`, is reported with the expected types.
 
 ## Before
 
 ```
 ---
-roles: [roles/acount-manager]
-reads: [Payment]
+roles: [roles/raeder]
+reads: [Source]
 ---
-# Free payment entry
+# Entity page
 ```
 
-where `roles/acount-manager` is misspelt and both `specs/objects/payment` and `glossary/payment` are titled "Payment".
+where `roles/raeder` is misspelt and both `specs/objects/source` and `glossary/source` are titled "Source".
 
 ## After
 
 ```
 ---
-roles: [roles/account-manager]
-reads: [objects/payment]
+roles: [roles/reader]
+reads: [objects/source]
 ---
-# Free payment entry
+# Entity page
 ```
 
 ## How to fix

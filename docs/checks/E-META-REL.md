@@ -10,9 +10,9 @@ The profile lists, for each relation, the pairs of types it may join. A frontmat
 
 ```
 ---
-reads: [glossary/free-payment]
+reads: [glossary/keyword-page]
 ---
-# Free payment entry
+# Entity page
 (a screen cannot `accesses` a term)
 ```
 
@@ -20,9 +20,9 @@ reads: [glossary/free-payment]
 
 ```
 ---
-reads: [objects/payment]
+reads: [objects/entity]
 ---
-# Free payment entry
+# Entity page
 ```
 
 ## How to fix
