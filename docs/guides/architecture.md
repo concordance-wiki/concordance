@@ -68,6 +68,10 @@ Two entities named in the same paragraph (same source, file and line) are neighb
 
 Each pair gives one undirected `related` link at the `cooccurrence` confidence, emitted once from the lower identifier, with the number of shared paragraphs as the `count` of its single provenance; the relation typing step may refine `related` from the type pair. The `neighbours` block of `model.json` lists, per identifier and in identifier order, the retained neighbours best first, for the mini-map and the accompanying-words panel.
 
+## Displayed neighbourhood
+
+The mini-map of a page shows the one-hop neighbours of its entity, precomputed at build from the links of the model and served with the page: the browser computes nothing. Both ends of every link are neighbours of each other, whatever the direction of the link; a typed entity and a noteless keyword page are equally eligible, and each neighbour carries its `kind` (`entity` or `keyword`) so that the rendering can distinguish them. A neighbour reached through several links keeps the largest confidence and the relation of the most confident link, the first in code-unit order on a tie, and its `direction` is `out`, `in` or `both`, seen from the page. Neighbours are sorted by decreasing confidence then by identifier and truncated to `site.neighbourhood.size` (6 by default); the computation never shows more than 12 whatever the value, and the configuration schema rejects a larger one. The merge is commutative, so the result depends on the set of links alone. The `displayed_neighbourhood` block of `model.json` lists, per identifier and in identifier order, every entity with its neighbours best first, an empty list for one that has none. The type-driven neighbour order of the profile (`display.neighbours_order`) reorders this list at rendering time and is not applied here.
+
 ## Keyword page threshold
 
 A keyword page exists from three occurrences in at least two files (`inference.keyword_pages`). Below the threshold the word is searchable but has no page. The build summary reports pages generated and expressions discarded.

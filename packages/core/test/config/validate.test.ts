@@ -125,6 +125,36 @@ describe("validateConfig against the published schema", () => {
     ]);
   });
 
+  it("accepts a displayed neighbourhood size between 1 and 12 and returns it typed", () => {
+    const result = validateConfig({ ...minimal, site: { neighbourhood: { size: 12 } } });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.config.site?.neighbourhood?.size).toBe(12);
+      expect(result.issues).toEqual([]);
+    }
+    expect(validateConfig({ ...minimal, site: { neighbourhood: { size: 1 } } }).ok).toBe(true);
+  });
+
+  it("rejects a displayed neighbourhood size above the cap of 12", () => {
+    expect(issuesOf({ ...minimal, site: { neighbourhood: { size: 13 } } })).toEqual([
+      { path: "site.neighbourhood.size", message: "must be <= 12", severity: "error" },
+    ]);
+  });
+
+  it("rejects a displayed neighbourhood size below 1 or not an integer", () => {
+    expect(issuesOf({ ...minimal, site: { neighbourhood: { size: 0 } } })).toEqual([
+      { path: "site.neighbourhood.size", message: "must be >= 1", severity: "error" },
+    ]);
+    expect(issuesOf({ ...minimal, site: { neighbourhood: { size: 6.5 } } })).toEqual([
+      {
+        path: "site.neighbourhood.size",
+        message: "wrong type",
+        severity: "error",
+        expected: "integer",
+      },
+    ]);
+  });
+
   it("names the array index in the path of a nested error", () => {
     expect(
       issuesOf({ ...minimal, domains: [{ id: "d", subdomains: [{ title: "no id" }] }] }),

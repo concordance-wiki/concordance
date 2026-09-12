@@ -97,6 +97,11 @@ export interface BuildConfig {
   extracted_text_max_chars?: number;
 }
 
+export interface SiteConfig {
+  /** Nodes of the neighbourhood mini-map of a page: 6 by default, 12 at most. */
+  neighbourhood?: { size?: number };
+}
+
 export type CheckOverrides = Record<
   string,
   { severity?: "error" | "warning" | "info"; enabled?: boolean }
@@ -115,6 +120,7 @@ export interface Config {
   inference?: InferenceConfig;
   conversion?: ConversionConfig;
   build?: BuildConfig;
+  site?: SiteConfig;
   checks?: CheckOverrides;
   lock?: string;
 }
