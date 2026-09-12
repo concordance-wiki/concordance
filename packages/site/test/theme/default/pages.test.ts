@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { home, index, keywordPage, searchResults, todo } from "../../helpers/fixtures.js";
+import { home, index, keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 describe("Home", () => {

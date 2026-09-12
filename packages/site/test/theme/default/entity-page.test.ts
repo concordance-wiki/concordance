@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { renderSlot } from "../../../src/render.js";
 import { EntityPage } from "../../../src/theme/default/entity-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { entityPage } from "../../helpers/fixtures.js";
+import { entityPage } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 describe("EntityPage", () => {

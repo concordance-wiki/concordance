@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { IslandBundle } from "../src/islands/bundle.js";
 import { directionOf, renderPage, renderSlot, type RenderOptions } from "../src/render.js";
 import { defaultTheme } from "../src/theme/resolve.js";
-import { entityPage, footer, header, home, mentions, todo } from "./helpers/fixtures.js";
+import { entityPage, footer, header, home, mentions, todo } from "../src/gallery/fixtures.js";
 import { count, expectBalanced } from "./helpers/html.js";
 
 const bundle: IslandBundle = { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 };

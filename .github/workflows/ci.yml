@@ -30,6 +30,15 @@ jobs:
         run: pnpm lint
       - name: Build
         run: pnpm build
+      - name: Component gallery
+        # Every slot rendered with fixture data; fails on a page over budget or an accessibility finding.
+        run: node packages/cli/dist/bin.js gallery --output reports/gallery
+      - name: Publish component gallery
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery
+          path: reports/gallery
+          if-no-files-found: error
       - name: Test with full coverage
         env:
           CONCORDANCE_INTEGRATION: "1"

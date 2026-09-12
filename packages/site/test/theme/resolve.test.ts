@@ -13,7 +13,7 @@ import { renderPage, renderSlot } from "../../src/render.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
 import { importThemeModule } from "../../src/theme/node-loader.js";
 import { ThemeResolutionError, defaultTheme, resolveTheme } from "../../src/theme/resolve.js";
-import { footer, header, todo } from "../helpers/fixtures.js";
+import { footer, header, todo } from "../../src/gallery/fixtures.js";
 
 const fixturePlugin = pathToFileURL(
   resolve(

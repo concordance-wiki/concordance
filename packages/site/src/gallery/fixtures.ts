@@ -1,4 +1,27 @@
-import type { Mention, SlotProps } from "../../src/slots.js";
+import type { ThemeConfig } from "../css/theme-config.js";
+import type { Mention, SlotProps } from "../slots.js";
+
+/** A neutral palette for the gallery stylesheet; a project sees its own `theme.yaml` in its build. */
+export const galleryTheme: ThemeConfig = {
+  name: "Gallery",
+  radius: 8,
+  light: {
+    bg: "#F6F5F2",
+    surface: "#FFFFFF",
+    border: "#E4E1DA",
+    ink: "#16181B",
+    muted: "#4E5259",
+    accent: "#C24E24",
+  },
+  dark: {
+    bg: "#0E0F11",
+    surface: "#16181B",
+    border: "#26292E",
+    ink: "#E8E6E1",
+    muted: "#8B9199",
+    accent: "#E8703A",
+  },
+};
 
 export function mention(index: number, kind: Mention["kind"] = "recognised"): Mention {
   return {
@@ -26,11 +49,31 @@ export const header: SlotProps["Header"] = {
   search: { action: "../search/", placeholder: "Search a word of your business" },
 };
 
+/** The header with a logo and without a search field, the other shape a project may configure. */
+export const headerWithLogo: SlotProps["Header"] = {
+  siteTitle: "My wiki",
+  homeHref: "../",
+  logo: {
+    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23C24E24'/%3E%3C/svg%3E",
+    alt: "",
+  },
+  navigation: [{ label: "Index", href: "../index/" }],
+};
+
 export const footer: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
   links: [{ label: "Forge", href: "https://forge.example/wiki" }],
   mentionTool: true,
+};
+
+/** The footer with a project text and no links, the tool left unmentioned. */
+export const footerWithText: SlotProps["Footer"] = {
+  version: "0.1.0",
+  generatedAt: "2024-05-01T10:00:00.000Z",
+  text: "Internal documentation of the claims department.",
+  links: [],
+  mentionTool: false,
 };
 
 export const neighbourhood: SlotProps["Neighbourhood"] = {

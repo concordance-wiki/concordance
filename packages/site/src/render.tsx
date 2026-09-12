@@ -41,14 +41,8 @@ export function renderSlot<S extends SlotName>(
   );
 }
 
-function document<S extends PageSlot>(
-  slot: S,
-  props: SlotProps[S],
-  options: RenderOptions,
-  head: HeadAssets,
-): string {
+function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): string {
   const { Shell, Header, Footer } = options.theme.components;
-  const Page = options.theme.components[slot];
   const page: JSX.Element = (
     <Shell
       locale={options.locale}
@@ -57,7 +51,7 @@ function document<S extends PageSlot>(
       head={head}
     >
       <Header {...options.header} />
-      <main id="main">{h(Page, props)}</main>
+      <main id="main">{body}</main>
       <Footer {...options.footer} />
     </Shell>
   );
@@ -77,23 +71,28 @@ function scriptsFor(names: string[], options: RenderOptions): string[] {
   });
 }
 
+/** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
+export function renderDocument(body: JSX.Element, options: RenderOptions): string {
+  const head: HeadAssets = { stylesheets: options.stylesheets, modulePreloads: [], scripts: [] };
+  const first = document(body, options, head);
+  const islands = islandsUsed(first);
+  // Components are pure: rendering again with the scripts known gives the same body.
+  const html =
+    islands.length === 0
+      ? first
+      : document(body, options, {
+          ...head,
+          modulePreloads: scriptsFor(islands, options),
+          scripts: scriptsFor(islands, options),
+        });
+  return `<!doctype html>\n${html}\n`;
+}
+
 /** The complete HTML document of a page; a page without an island carries no script. */
 export function renderPage<S extends PageSlot>(
   slot: S,
   props: SlotProps[S],
   options: RenderOptions,
 ): string {
-  const head: HeadAssets = { stylesheets: options.stylesheets, modulePreloads: [], scripts: [] };
-  const first = document(slot, props, options, head);
-  const islands = islandsUsed(first);
-  // Components are pure: rendering again with the scripts known gives the same body.
-  const html =
-    islands.length === 0
-      ? first
-      : document(slot, props, options, {
-          ...head,
-          modulePreloads: scriptsFor(islands, options),
-          scripts: scriptsFor(islands, options),
-        });
-  return `<!doctype html>\n${html}\n`;
+  return renderDocument(h(options.theme.components[slot], props), options);
 }
