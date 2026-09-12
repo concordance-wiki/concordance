@@ -87,7 +87,7 @@ Two notes with the same title are homonyms. The tool keeps both and links occurr
 
 ## Profile
 
-A project profile (`profile.yaml`) adds types, attributes, relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../profiles/default.yaml) is the reference; [`schemas/profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
+A project profile (`profile.yaml`) adds types, attributes, relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../packages/profile/default.yaml) is the reference; [`profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
 
 ```yaml
 types:
@@ -97,12 +97,17 @@ types:
     attributes:
       reference: { type: string }
     sections:
-      applies_to: { heading: { en: "Applies to", fr: "S'applique à" }, produces: constrains }
+      applies_to:
+        heading: { en: "Applies to", fr: "S'applique à" }
+        parse: bullet-list
+        produces: constrains
 relations:
   constrains:
     allowed:
       - [regulation, process]
 ```
+
+Merge semantics: objects are merged key by key at every depth, so a project can add a type, add or complete an attribute of an existing type, or translate a label without repeating the rest. A scalar or an array in the project profile replaces the default value (`display.highlight`, `values`, `neighbours_order`); the only exception is `allowed` under a relation, where the project pairs are added to the default pairs, so that `constrains` above still applies to rules. The merged profile is validated against the schema, then every slug it names must be declared: the group of a type, the relation an attribute or a mapped section produces, the types of an allowed pair (`any`, `same` and `type` are the wildcards). A fingerprint of the merged profile is recorded in the model, so that two builds can be compared.
 
 ## Check before pushing
 
