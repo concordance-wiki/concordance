@@ -93,7 +93,8 @@ jobs:
           work=$(mktemp -d)
           cp -R "$CORPUS" "$work/wiki"
           chmod -R a+rwX "$work/wiki"
-          accept env SOURCE_DATE_EPOCH=0 node packages/cli/dist/bin.js build --config "$PWD/$CORPUS/concordance.yaml" --output "$work/outside"
+          # Both builds read the same copy: a local source records the modification time of its files.
+          accept env SOURCE_DATE_EPOCH=0 node packages/cli/dist/bin.js build --config "$work/wiki/concordance.yaml" --output "$work/outside"
           accept docker run --rm -v "$work/wiki:/wiki" -e SOURCE_DATE_EPOCH=0 "$IMAGE:ci" build
           test -f "$work/wiki/dist/build.log.json"
           node scripts/compare-builds.mjs "$work/outside" "$work/wiki/dist"
