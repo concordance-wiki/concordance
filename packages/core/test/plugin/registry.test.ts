@@ -508,6 +508,7 @@ describe("loadPlugins", () => {
     expect(typeSlugOf({ path: "./types/runbook" })).toBe("runbook");
     expect(typeSlugOf({ path: "runbook/" })).toBe("runbook");
     expect(typeSlugOf({ path: "runbook" })).toBe("runbook");
+    expect(typeSlugOf({ path: "types/runbook//" })).toBe("runbook");
   });
 
   it("loads the example plugin, which exercises every contribution point", async () => {
