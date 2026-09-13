@@ -126,7 +126,12 @@ export { DEFAULT_MENTIONS_INLINE, mentionsOf, mentionsPanelOf } from "./build/me
 export type { MentionsFragment } from "./build/mentions.js";
 export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions-island.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
-export type { EntityFragment, FragmentImage, FragmentPassage } from "./build/fragments.js";
+export type {
+  EntityFragment,
+  FragmentImage,
+  FragmentLead,
+  FragmentPassage,
+} from "./build/fragments.js";
 export { defaultThemeConfig } from "./build/default-theme.js";
 export { assemblePages, assemblySummary } from "./build/assemble.js";
 export type { Assembled, AssembleOptions, PageReport, WrittenDocument } from "./build/assemble.js";

@@ -47,13 +47,28 @@ describe("fragments", () => {
     expect(parseFragment(text, "f.json")).toEqual(fragment);
   });
 
-  it("keeps the passages of a keyword page", () => {
+  it("keeps the passages of a keyword page, with the expression as written when the build recorded it, and its leads", () => {
     const keyword: EntityFragment = {
       id: "keywords/build-summary",
       sections: [],
-      passages: [{ source: "specs", path: "a.md", line: 3, context: "the build summary" }],
+      passages: [
+        { source: "specs", path: "a.md", line: 3, context: "the build summary" },
+        {
+          source: "specs",
+          path: "b.md",
+          line: 1,
+          text: "Build summaries",
+          context: "Build summaries",
+        },
+      ],
+      leads: [{ id: "glossary/build-log", title: "Build log" }],
     };
     expect(parseFragment(serializeFragment(keyword), "f.json")).toEqual(keyword);
+  });
+
+  it("keeps the keyword addresses a note took over", () => {
+    const note: EntityFragment = { ...fragment, keywords: ["keywords/keyword-page"] };
+    expect(parseFragment(serializeFragment(note), "f.json")).toEqual(note);
   });
 
   it("keeps the images of a note that the build copied next to the page", () => {
@@ -92,6 +107,24 @@ describe("fragments", () => {
     expect(() =>
       parseFragment('{"id": "a/b", "sections": [], "passages": [{"source": "s"}]}', "f.json"),
     ).toThrow("passages must be a list");
+    expect(() =>
+      parseFragment(
+        '{"id": "a/b", "sections": [], "passages": [{"source": "s", "path": "p", "line": 1, "text": 2, "context": "c"}]}',
+        "f.json",
+      ),
+    ).toThrow("passages must be a list");
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "leads": {}}', "f.json")).toThrow(
+      "f.json: leads must be a list of { id, title }",
+    );
+    expect(() =>
+      parseFragment('{"id": "a/b", "sections": [], "leads": [{"id": "x"}]}', "f.json"),
+    ).toThrow("leads must be a list");
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "keywords": "x"}', "f.json")).toThrow(
+      "f.json: keywords must be a list of identifiers",
+    );
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "keywords": [1]}', "f.json")).toThrow(
+      "keywords must be a list",
+    );
     expect(() => parseFragment('{"id": "a/b", "sections": [], "images": {}}', "f.json")).toThrow(
       "f.json: images must be a list of { source, path, target }",
     );

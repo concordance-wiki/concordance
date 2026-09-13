@@ -1,6 +1,6 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, posix, resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 
 import {
@@ -49,13 +49,15 @@ const modelLines = (stdout: string[]): string[] =>
 
 /**
  * The site summary the rendering appends to stdout; the island sizes vary with the code, so their
- * lines are matched. `pages` counts the pages of the model and the fixed ones, the search page apart.
+ * lines are matched. `pages` counts the pages of the model, the redirects and the fixed ones, the
+ * search page apart.
  */
-function expectSiteSummary(stdout: string[], pages: number, output: string): void {
+function expectSiteSummary(stdout: string[], pages: number, output: string, redirects = 0): void {
   const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
   const total = pages + 1;
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
+    `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
@@ -861,6 +863,11 @@ describe("concordance build", () => {
       }
     }
 
+    /** The pages that forward a former keyword address to a note, by path. */
+    function redirectsOf(result: Built): [string, string][] {
+      return [...result.pages].filter(([, html]) => html.includes('http-equiv="refresh"'));
+    }
+
     /** Whether a finding of the model is the one an expected entry describes. */
     function matches(finding: Finding, entry: ExpectedFinding): boolean {
       if (finding.check !== entry.check) return false;
@@ -885,7 +892,12 @@ describe("concordance build", () => {
 
       it("exits 0 after writing the model and rendering the site", () => {
         expect(built.exit).toBe(0);
-        expectSiteSummary(built.stdout, built.model.entities.length + 3, built.output);
+        expectSiteSummary(
+          built.stdout,
+          built.model.entities.length + 3 + redirectsOf(built).length,
+          built.output,
+          redirectsOf(built).length,
+        );
         expect(built.stderr.some((line) => line.includes("build stopped"))).toBe(false);
         expect(built.stderr.some((line) => line.startsWith("warning: accessibility"))).toBe(false);
       });
@@ -1003,7 +1015,20 @@ describe("concordance build", () => {
         expect(
           built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
-        expect(built.pages.size).toBe(built.model.entities.length + 4);
+        expect(built.pages.size).toBe(built.model.entities.length + 4 + redirectsOf(built).length);
+      });
+
+      it("keeps a keyword address for every recurring expression a note defines, forwarding to the note", () => {
+        const redirects = redirectsOf(built);
+        expect(redirects.length).toBeGreaterThan(0);
+        const ids = new Set(built.model.entities.map((entity) => entity.id));
+        for (const [path, html] of redirects) {
+          expect(path.startsWith("keywords/")).toBe(true);
+          expect(ids.has(path.replace(/\/index\.html$/, ""))).toBe(false);
+          const target = /content="0; url=([^"]+)"/.exec(html)?.[1] ?? "";
+          expect(built.files).toContain(posix.normalize(posix.join(posix.dirname(path), target)));
+          expect(html).toContain(`<a href="${target}">`);
+        }
       });
 
       it("generates the search index at build, fragmented into shards under search/ that the page loads in pieces as the user types", () => {

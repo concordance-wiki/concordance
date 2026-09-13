@@ -18,7 +18,7 @@ import { discover, readCorpus } from "./minimal-corpus.js";
 const config: Config = { version: 1, project: { name: "Minimal" }, sources: [] };
 
 function mention(source: string, path: string, line: number): KeywordMention {
-  return { source, path, line, position: 0, context: `…${path}…` };
+  return { source, path, line, position: 0, surface: path, context: `…${path}…` };
 }
 
 /** A candidate with `occurrences` mentions spread over `documents` files, cycling through them. */
@@ -196,7 +196,15 @@ describe("keywordEntities", () => {
       occurrences: 3,
       documents: 2,
       score: 5,
-      mentions: [{ path: "batches/nightly.md", line: 4, position: 2, context: "Nightly" }],
+      mentions: [
+        {
+          path: "batches/nightly.md",
+          line: 4,
+          position: 2,
+          surface: "Nightly",
+          context: "Nightly",
+        },
+      ],
     };
     expect(keywordEntities([local], { locale: "en" })[0]?.source).toEqual({
       name: "",

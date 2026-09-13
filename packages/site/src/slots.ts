@@ -40,6 +40,8 @@ export interface HeadAssets {
   classicScripts?: string[];
   /** Href of the favicon; `type` is inferred from the extension. */
   favicon?: string;
+  /** Href the page forwards to at once, as a `<meta http-equiv="refresh">`; the body repeats it as a link. */
+  redirect?: string;
 }
 
 export interface ShellProps {
@@ -206,6 +208,8 @@ export interface EntityPageProps {
 
 export interface Passage {
   context: string;
+  /** The expression as written in the passage; the template marks it in the context when it finds it there. */
+  text?: string;
   line: number;
   href: string;
 }
@@ -218,18 +222,39 @@ export interface PassageGroup {
 export interface Companion {
   label: string;
   href?: string;
-  /** Relative co-occurrence frequency, from 1 (rare) to 5 (frequent). */
+  /** Number of paragraphs the word shares with the expression. */
+  count: number;
+  /** Relative co-occurrence frequency, from 1 (rare) to 5 (frequent), by rank of the count among the companions. */
   weight: number;
 }
 
+/** The lead to write the missing note: its label, and the new-file page of the glossary on its forge when known. */
+export interface CreateNoteLead {
+  label: string;
+  href?: string;
+}
+
+export interface KeywordBanner {
+  /** The notice that no note exists, with the number of passages recorded, already localised. */
+  text: string;
+  createNote: CreateNoteLead;
+}
+
 export interface KeywordPageProps {
-  entity: { id: string; title: string; locale: string };
+  /** `typeLabel` names the kind of page, "keyword" in the locale of the site. */
+  entity: { id: string; title: string; locale: string; typeLabel: string };
+  banner: KeywordBanner;
   counts: { occurrences: number; files: number; sources: number };
   /** Grouped by file, in corpus order. */
   passages: PassageGroup[];
+  /** The most frequent first, twelve at most. */
   companions: Companion[];
   /** Expressions with a similar form, offered as a lead. */
   similar: Link[];
+  /** The wording of that lead, already localised, which asserts no relation. */
+  similarLead: string;
+  neighbours: NeighbourhoodProps;
+  mentions: MentionsPanelProps;
 }
 
 export interface Mention {

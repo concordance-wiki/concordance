@@ -71,6 +71,17 @@ export {
   type KeywordOptions,
 } from "./keywords/options.js";
 export {
+  SIMILAR_EXPRESSIONS_LIMIT,
+  similarExpressions,
+  similarForm,
+  type KeyedExpression,
+} from "./keywords/similar.js";
+export {
+  definedExpressions,
+  type DefinedExpression,
+  type DefinedExpressionsOptions,
+} from "./keywords/defined.js";
+export {
   KEYWORD_TYPE,
   keywordEntities,
   keywordPublicationDefaults,

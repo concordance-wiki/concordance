@@ -8,7 +8,15 @@ export interface FragmentPassage {
   /** Forward-slash path relative to the source root. */
   path: string;
   line: number;
+  /** The expression as written in the passage, which the page marks in the context; absent in older fragments. */
+  text?: string;
   context: string;
+}
+
+/** A page offered as a lead from a keyword page: an expression of a similar form. */
+export interface FragmentLead {
+  id: string;
+  title: string;
 }
 
 /** An image of a note that is a file of the sources, copied next to the page. */
@@ -30,6 +38,13 @@ export interface EntityFragment {
   sections: Section[];
   /** In corpus order; absent for an entity that is not a keyword page. */
   passages?: FragmentPassage[];
+  /** Closest first; absent for an entity that is not a keyword page, or a page without any. */
+  leads?: FragmentLead[];
+  /**
+   * The identifiers of the keyword pages this note took over, `keywords/<slug>`, whose address
+   * the site keeps as a redirect to this page; absent when the note defines no recurring expression.
+   */
+  keywords?: string[];
   /** By target; absent for a note without an image of the sources. */
   images?: FragmentImage[];
   /** The plain text of the note, what the search index reads as the body; absent for an entity without a note. */
@@ -70,8 +85,17 @@ function isPassage(value: unknown): value is FragmentPassage {
     typeof value["source"] === "string" &&
     typeof value["path"] === "string" &&
     typeof value["line"] === "number" &&
+    (value["text"] === undefined || typeof value["text"] === "string") &&
     typeof value["context"] === "string"
   );
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isLead(value: unknown): value is FragmentLead {
+  return isRecord(value) && typeof value["id"] === "string" && typeof value["title"] === "string";
 }
 
 function isImage(value: unknown): value is FragmentImage {
@@ -104,6 +128,19 @@ export function parseFragment(text: string, file: string): EntityFragment {
       throw new FragmentError(file, "passages must be a list of { source, path, line, context }");
     }
     fragment.passages = document["passages"];
+  }
+  if (document["leads"] !== undefined) {
+    if (!Array.isArray(document["leads"]) || !document["leads"].every(isLead)) {
+      throw new FragmentError(file, "leads must be a list of { id, title }");
+    }
+    fragment.leads = document["leads"];
+  }
+  if (document["keywords"] !== undefined) {
+    const keywords: unknown = document["keywords"];
+    if (!Array.isArray(keywords) || !keywords.every(isString)) {
+      throw new FragmentError(file, "keywords must be a list of identifiers");
+    }
+    fragment.keywords = keywords;
   }
   if (document["images"] !== undefined) {
     if (!Array.isArray(document["images"]) || !document["images"].every(isImage)) {

@@ -200,22 +200,59 @@ export const entityPage: SlotProps["EntityPage"] = {
 };
 
 export const keywordPage: SlotProps["KeywordPage"] = {
-  entity: { id: "keywords/build-summary", title: "build summary", locale: "en" },
+  entity: {
+    id: "keywords/build-summary",
+    title: "build summary",
+    locale: "en",
+    typeLabel: "Keyword",
+  },
+  banner: {
+    text: "Expression without a note. 7 passages recorded.",
+    createNote: {
+      label: "Create a note",
+      href: "https://forge.example/glossary/new/main?filename=build-summary.md",
+    },
+  },
   counts: { occurrences: 7, files: 3, sources: 2 },
   passages: [
     {
       file: { label: "processes/build-pipeline.md", href: "../build-pipeline/" },
       passages: [
-        { context: "the build summary is printed", line: 12, href: "../build-pipeline/#L12" },
-        { context: "after the build summary", line: 40, href: "../build-pipeline/#L40" },
+        {
+          context: "the build summary is printed",
+          text: "build summary",
+          line: 12,
+          href: "../build-pipeline/#L12",
+        },
+        {
+          context: "after the Build summaries",
+          text: "Build summaries",
+          line: 40,
+          href: "../build-pipeline/#L40",
+        },
+      ],
+    },
+    {
+      file: { label: "screens/todo-page.md", href: "../todo-page/" },
+      passages: [
+        {
+          context: "the to-do page counts what the build summary reports",
+          text: "build summary",
+          line: 8,
+          href: "../todo-page/#L8",
+        },
       ],
     },
   ],
   companions: [
-    { label: "build log", href: "../build-log/", weight: 5 },
-    { label: "counts", weight: 2 },
+    { label: "build log", href: "../build-log/", count: 12, weight: 5 },
+    { label: "finding", href: "../finding/", count: 5, weight: 3 },
+    { label: "counts", count: 2, weight: 1 },
   ],
-  similar: [{ label: "build summaries", href: "../build-summaries/" }],
+  similar: [{ label: "Build", href: "../build/" }],
+  similarLead: "You may also mean:",
+  neighbours: { centre: "build summary", neighbours: [] },
+  mentions: { mentions: [], initial: 20 },
 };
 
 export const home: SlotProps["Home"] = {

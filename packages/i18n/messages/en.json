@@ -95,9 +95,21 @@
     "defaultMessage": "{count, plural, one {# document} other {# documents}}",
     "description": "Number of documents a keyword appears in."
   },
+  "keyword.noteWritten": {
+    "defaultMessage": "A note now defines this expression:",
+    "description": "Text of the page that forwards a former keyword address to the note written since."
+  },
   "keyword.occurrences": {
     "defaultMessage": "{count, plural, one {# occurrence} other {# occurrences}}",
     "description": "Number of occurrences of a keyword across the corpus."
+  },
+  "keyword.passages": {
+    "defaultMessage": "{count, plural, one {# passage recorded} other {# passages recorded}}",
+    "description": "Number of passages a keyword page lists, stated in its banner."
+  },
+  "keyword.similarLead": {
+    "defaultMessage": "You may also mean:",
+    "description": "Lead to expressions with a similar form, worded so as to assert no relation."
   },
   "keyword.title": {
     "defaultMessage": "Keyword",

@@ -83,7 +83,7 @@ describe("message catalogues", () => {
 
   it("list every identifier of the source catalogue in sorted order", () => {
     expect(messageIds).toEqual(Object.keys(readCatalogue("en.json")));
-    expect(messageIds).toHaveLength(61);
+    expect(messageIds).toHaveLength(64);
   });
 
   it("use only the argument kinds a build can supply, never a tag", () => {

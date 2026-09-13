@@ -14,17 +14,18 @@ import type {
   Neighbours,
   PluginRegistry,
 } from "@concordance-wiki/core";
-import { neighbourhoodToModel } from "@concordance-wiki/inference";
+import { neighbourhoodOptions, neighbourhoodToModel } from "@concordance-wiki/inference";
 import type { IngestedSource } from "@concordance-wiki/ingest";
 import type { KeywordMention } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 
 import { enrichStepFindings, runModelChecks } from "./checks.js";
 import { combineProducedLinks } from "./combine.js";
+import { keywordNeighbours } from "./companions.js";
 import { buildDictionaries } from "./dictionary.js";
 import { displayedNeighbourhoodBlock } from "./display.js";
 import { reconcileTwins } from "./duplicates.js";
-import { discoverKeywords } from "./keywords.js";
+import { discoverKeywords, type KeywordLead } from "./keywords.js";
 import { produceLinks } from "./links.js";
 import { attachOperationNotes } from "./operations.js";
 import { indexDocuments, parseSources } from "./parse.js";
@@ -65,6 +66,10 @@ export interface PipelineResult {
   keywords: KeywordCounts;
   /** The mentions of every keyword page by identifier, which its fragment records as passages. */
   keywordMentions: Map<string, KeywordMention[]>;
+  /** The expressions of a similar form to every keyword page, which its fragment offers as leads. */
+  keywordLeads: Map<string, KeywordLead[]>;
+  /** The keyword page identifiers every note takes over, whose address the site keeps as a redirect. */
+  takenOver: Map<string, string[]>;
   /** The recognised words of every note by `<source>/<path>`, which its fragment links in the text. */
   recognised: Map<string, RecognisedWord[]>;
   duplicates: DuplicateCounts;
@@ -167,7 +172,15 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...(contributed.objects.length === 0 ? {} : { objects: contributed.objects }),
       duplicates: twins.candidates,
     },
-    neighbours: neighbourhoodToModel(produced.neighbourhood),
+    // The rows of the entities, then those of the keyword pages, whose identifiers are their own.
+    neighbours: {
+      ...neighbourhoodToModel(produced.neighbourhood),
+      ...keywordNeighbours({
+        occurrences,
+        keywordMentions: keywords.mentions,
+        options: neighbourhoodOptions(config.inference),
+      }),
+    },
     displayedNeighbourhood: displayedNeighbourhoodBlock({
       entities: twins.entities,
       links: twins.links,
@@ -177,6 +190,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     contracts: contributed.contracts,
     keywords: keywords.counts,
     keywordMentions: keywords.mentions,
+    keywordLeads: keywords.leads,
+    takenOver: keywords.takenOver,
     recognised: recognisedWords({ occurrences, documents: parsed.documents, sources }),
     duplicates: twins.counts,
   };
