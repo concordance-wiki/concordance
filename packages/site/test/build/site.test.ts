@@ -921,7 +921,7 @@ describe("siteDocuments", () => {
         editUrl: "https://forge.example/{source}/{path}",
         staleness: { warn_after_days: { default: 1 } },
         sourceDescriptions: { glossary: "The vocabulary of the tool." },
-        names: { domains: { publication: "Publication" } },
+        names: { domains: { publication: "Publication" }, sources: { specs: "Specifications" } },
         collate: (a, b) => b.localeCompare(a),
         model: model({
           entities: model().entities.map((entity) => (entity.id === term.id ? dated : entity)),
@@ -958,6 +958,11 @@ describe("siteDocuments", () => {
     );
     const space = documents.find((document) => document.path === spacePagePath("glossary"));
     expect(space?.content).toContain("<title>glossary – Concordance notes</title>");
+    // A titled source names its page, its row and its space by the title.
+    const specs = documents.find((document) => document.path === spacePagePath("specs"));
+    expect(specs?.content).toContain("<title>Specifications – Concordance notes</title>");
+    expect(specs?.content).toContain("<h1>Specifications</h1>");
+    expect(spaces?.content).toContain('<a href="../specs/index.html">Specifications</a>');
     expect(space?.content).toContain(
       '<h1>glossary</h1><p class="space-description">The vocabulary of the tool.</p><p class="space-meta"><span>2 pages</span><span>repository <code>glossary</code></span><time datetime="2026-09-01">updated 2 weeks ago</time></p>',
     );

@@ -832,7 +832,9 @@ describe("concordance build", () => {
       expect(model.entities.find((entity) => entity.id === "notes/rebuild")?.type).toBe("runbook");
       expect(model.build.profile_hash).not.toBe(fingerprintProfile(loadDefaultProfile()));
       const page = io.fs.readText(`/work/dist/${pagePath("notes/rebuild")}`);
-      expect(page).toContain('<span class="badge">Runbook</span>');
+      expect(page).toContain(
+        '<a class="badge" href="../../search/index.html?type=runbook">Runbook</a>',
+      );
       expect(page).toContain("a red build");
     });
 

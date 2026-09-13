@@ -133,7 +133,7 @@ describe("The gallery shows every registered type", () => {
     const index = io.fs.readText("/work/gallery/index.html");
     expect(index).toContain('<a href="type-screen.html">screen</a>: Screen, generic entity page');
     expect(io.fs.readText("/work/gallery/type-decision.html")).toContain(
-      '<span class="badge">Decision</span>',
+      '<a class="badge" href="../../search/index.html?type=decision">Decision</a>',
     );
   });
 
@@ -188,7 +188,7 @@ describe("The gallery shows every registered type", () => {
     });
     expect(await galleryCommand([], io)).toBe(0);
     const page = io.fs.readText("/work/gallery/type-audit.html");
-    expect(page).toContain('<span class="badge">Audit</span>');
+    expect(page).toContain('<a class="badge" href="../../search/index.html?type=audit">Audit</a>');
     expect(page).toContain('<dt>Scope</dt><dd><span class="value">the nightly build</span></dd>');
     expect(io.fs.readText("/work/gallery/index.html")).toContain(
       '<a href="type-audit.html">audit</a>: Audit, generic entity page',

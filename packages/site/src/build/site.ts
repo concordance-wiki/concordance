@@ -40,6 +40,7 @@ import { categoryDocumentsOf, categorySearchField, listedCategoriesOf } from "./
 import {
   message,
   siteContext,
+  spaceTitle,
   typeLabel,
   type SiteContext,
   type SiteFolders,
@@ -431,7 +432,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       path: page,
       content: renderDocument(
         h(input.theme.components.Space, spacePageOf(context, source)),
-        optionsFor(page, source, input.locale, { searchSource: source }),
+        optionsFor(page, spaceTitle(context, source), input.locale, { searchSource: source }),
       ),
     };
   };
