@@ -95,29 +95,27 @@ export function scan<K>(
   return matches;
 }
 
-function overlaps(a: RawMatch<unknown>, b: RawMatch<unknown>): boolean {
-  return a.start < b.end && b.start < a.end;
-}
-
-function sameSpan(a: RawMatch<unknown>, b: RawMatch<unknown>): boolean {
-  return a.start === b.start && a.end === b.end;
-}
-
 /**
- * Resolves overlaps: the longest match wins, and between equal lengths the earlier start;
- * a match that overlaps a winner is dropped. Two keys on exactly the same span both stay:
- * they are two spellings of the same words. The result is in text order; equal spans keep
- * their input order.
+ * Resolves overlaps: a match contained in another one is dropped, so that among the matches
+ * sharing a start the longest wins and "keyword page" is not counted again as "page"; matches
+ * that only partly overlap, from different starts, are all kept since each may name another
+ * entity. Two keys on exactly the same span both stay: they are two spellings of the same
+ * words. The result is in text order; equal spans keep their input order.
  */
 export function longestMatches<K>(matches: readonly RawMatch<K>[]): RawMatch<K>[] {
-  const byLength = [...matches].sort(
-    (a, b) => b.end - b.start - (a.end - a.start) || a.start - b.start,
-  );
+  const byStart = [...matches].sort((a, b) => a.start - b.start || b.end - a.end);
   const kept: RawMatch<K>[] = [];
-  for (const match of byLength) {
-    if (!kept.some((winner) => overlaps(winner, match) && !sameSpan(winner, match))) {
-      kept.push(match);
+  // Farthest end of the matches starting before the current group, and of the group itself.
+  let outerEnd = -1;
+  let groupStart = -1;
+  let groupEnd = -1;
+  for (const match of byStart) {
+    if (match.start !== groupStart) {
+      outerEnd = Math.max(outerEnd, groupEnd);
+      groupStart = match.start;
+      groupEnd = match.end;
     }
+    if (match.end === groupEnd && match.end > outerEnd) kept.push(match);
   }
-  return kept.sort((a, b) => a.start - b.start);
+  return kept;
 }

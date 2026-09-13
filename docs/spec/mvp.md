@@ -325,7 +325,7 @@ Depends on: L1-01.
 As a reader, I want to see where a word is used and in which sentence so that I understand its real meaning in my organisation.
 
 - An Aho-Corasick automaton built once on the dictionary, then a single pass per document.
-- On overlap, the longest pattern wins: "keyword page" beats "page".
+- An expression contained in a longer recognised expression is not counted twice: "keyword page" beats "page". Two expressions that only partly overlap ("build log" and "log summary" in "the build log summary") are both counted, since each may name a different entity.
 - Each occurrence carries the file, line, position, enclosing section and an 80-character centred context.
 - Recognised type prefixes ("screen X", "API Y", "table Z", configurable per locale) add 0.1 confidence and fix the expected target type.
 - Performance: the scan on a 2,000-file corpus runs in under ten seconds on a development machine.

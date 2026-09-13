@@ -169,6 +169,23 @@ describe("scanDocument", () => {
     ]);
   });
 
+  it("keeps a match that starts inside a longer match, ends after it and targets a different entity", () => {
+    const dictionary = dictionaryOf("en", [
+      { id: "glossary/build-log", title: "Build log" },
+      { id: "specs/screens/log-summary", title: "Log summary" },
+      { id: "glossary/log", title: "Log" },
+    ]);
+    const occurrences = scanEn([{ line: 1, text: "Read the build log summary first." }], {
+      dictionary,
+    });
+    expect(
+      occurrences.map((occurrence) => [occurrence.key, occurrence.target.id, occurrence.position]),
+    ).toEqual([
+      ["build log", "glossary/build-log", 9],
+      ["log summary", "specs/screens/log-summary", 15],
+    ]);
+  });
+
   it("recognises a mention on whole words, whatever the case and the plural", () => {
     const occurrences = scanEn([{ line: 1, text: "List Mentions, not resourceful mentions." }]);
     expect(occurrences.map((occurrence) => [occurrence.key, occurrence.target.id])).toEqual([
