@@ -1136,6 +1136,18 @@ As a reader, I want the page of a word nobody defined to look like every other p
 - Gallery state `keyword-page-corporate` on an expression of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
 
 Depends on: L9-01, L2-04, L3-04.
+
+#### L9-07 Neighbourhood map in the panel
+
+As a reader who opened the line of the panel, I want the map to take the panel and nothing else so that I explore the neighbourhood of the page without losing its text.
+
+- Opening "See the neighbourhood map" replaces the blocks of the panel by the map: the `<details>` of the fold drives it, its summary becoming the head of the map once open, a ◂ back control before the title "Neighbourhood map" and the name of the page, the other blocks hidden from the desktop width; the text stays readable and the map occupies the panel, never the page; without JavaScript the fold simply opens under the blocks.
+- Controls: "Distance · 1 hop", the hops the model records (the displayed neighbourhood is computed at one hop; a second hop is never computed in the browser), and "Types ▾", a filter of checkboxes served all ticked that hides the nodes, the edges and the rows of an unticked type, from the stylesheet alone; the legend "existing page / word without a note", the noteless word drawn dotted.
+- Six neighbours at most, always named, no label overlapping another, the layout test kept; the section "The six neighbours · textual equivalent" lists each neighbour with its type and its passage count; the note "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over." closes the fold.
+- On the phone the map keeps its fold in the flow of the page, on the tablet it sits at the foot of the page: only what is inside the fold changes.
+- Gallery state `entity-page-map`, the corporate entity page with the fold open; the accessibility checker and the contrast checker pass on it, the SVG keeping its caption and the textual equivalent.
+
+Depends on: L9-01, L7-01, L7-02, L7-03.
 ### 5.1 Ready
 
 A story enters development only when its upstream batch is delivered, its acceptance criteria are testable without interpretation, the golden corpus contains a case that exercises it, and its effect on build time or published weight is estimated when it has one.
