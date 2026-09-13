@@ -19,15 +19,18 @@ export interface FileSystem {
   writeBytes(path: string, bytes: Uint8Array): void;
   /** Deletes a file, or a folder with everything under it; a missing path is not an error. */
   remove(path: string): void;
-  /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` folders are skipped. */
+  /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` and `node_modules` folders are skipped. */
   listFiles(directory: string): string[];
   /** ISO 8601 modification date of a file. */
   modifiedAt(path: string): string;
 }
 
+/** Folders never read: a repository's own history and installed packages, whose READMEs are not notes. */
+const SKIPPED_FOLDERS = new Set([".git", "node_modules"]);
+
 function walk(root: string, directory: string, out: string[]): void {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.name === ".git") continue;
+    if (SKIPPED_FOLDERS.has(entry.name)) continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       walk(root, path, out);
@@ -117,7 +120,12 @@ export function memoryFileSystem(
       const prefix = `${directory}/`;
       return paths()
         .filter(
-          (key) => key.startsWith(prefix) && !key.slice(prefix.length).split("/").includes(".git"),
+          (key) =>
+            key.startsWith(prefix) &&
+            !key
+              .slice(prefix.length)
+              .split("/")
+              .some((segment) => SKIPPED_FOLDERS.has(segment)),
         )
         .map((key) => key.slice(prefix.length))
         .sort();
