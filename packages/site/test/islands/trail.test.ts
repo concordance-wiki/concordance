@@ -13,6 +13,7 @@ import {
   TRAIL_KEPT_MAX,
   TRAIL_SHOWN_MAX,
   TRAIL_STORAGE_KEY,
+  TRAIL_GLYPH,
   trailHash,
   wireTrail,
   writeTrail,
@@ -30,7 +31,6 @@ const labels = {
   title: "Trail",
   pin: "Pin",
   unpin: "Unpin",
-  empty: "No page pinned yet",
   earlier: "earlier pages",
 };
 
@@ -187,7 +187,18 @@ describe("The trail shows the entities visited in order, each clickable", () => 
       ["../../glossary/entity/index.html", "Entity"],
     ]);
     expect(host.querySelector('a[aria-current="page"]')?.textContent).toBe("Entity");
-    expect(host.querySelector("details")).toBeNull();
+    expect(host.querySelector("details.trail-earlier")).toBeNull();
+  });
+
+  it("folds the trail behind a square button of the bar drawing a bookmark, named for assistive technology, the list unfolded under it", () => {
+    const { host } = wire({ session: [source], current: entity });
+    const fold = host.querySelector("details.trail-fold");
+    expect(fold?.hasAttribute("open")).toBe(false);
+    const button = fold?.querySelector(":scope > summary.trail-button");
+    expect(button?.getAttribute("title")).toBe("Trail");
+    expect(button?.innerHTML).toBe(`${TRAIL_GLYPH}<span class="visually-hidden">Trail</span>`);
+    expect(fold?.querySelector(":scope > nav.trail > ol.trail-list")).not.toBeNull();
+    expect(fold?.querySelector(":scope > nav.trail > button.trail-pin")).not.toBeNull();
   });
 
   it("deduplicates a page already at the end, as on a reload, and refreshes its title", () => {
@@ -214,25 +225,24 @@ describe("The trail shows the entities visited in order, each clickable", () => 
     expect(host.querySelector("[aria-current]")).toBeNull();
   });
 
-  it("says that no page is pinned yet, without a pin button, when the trail is empty", () => {
+  it("leaves the island empty, so that the bar shows no button, when the trail is empty", () => {
     const { host, env, replaced } = wire();
-    expect(host.querySelector("nav.trail > p.trail-empty")?.textContent).toBe("No page pinned yet");
-    expect(host.querySelector("button")).toBeNull();
-    expect(host.querySelector("ol")).toBeNull();
+    expect(host.childNodes).toHaveLength(0);
     expect(replaced).toEqual([]);
     expect(env.session.items.size).toBe(0);
   });
 
-  it("serves the island empty, its labels and the current page serialised, so that without JavaScript the region takes no space", () => {
+  it("serves the island empty in the bar, before the mode switch, its labels and the current page serialised, so that without JavaScript the bar shows no button", () => {
     const html = renderSlot(
       "Header",
       { ...header, trail: { base: "../", labels, current: entity } },
       defaultTheme,
     );
     expect(html).toContain(
-      '</nav><concordance-island data-island="trail" data-props="{&quot;base&quot;:&quot;../&quot;,&quot;labels&quot;:{&quot;title&quot;:&quot;Trail&quot;,&quot;pin&quot;:&quot;Pin&quot;,&quot;unpin&quot;:&quot;Unpin&quot;,&quot;empty&quot;:&quot;No page pinned yet&quot;,&quot;earlier&quot;:&quot;earlier pages&quot;},&quot;current&quot;:{&quot;id&quot;:&quot;glossary/entity&quot;,&quot;title&quot;:&quot;Entity&quot;}}"></concordance-island></header>',
+      '</details><concordance-island data-island="trail" data-props="{&quot;base&quot;:&quot;../&quot;,&quot;labels&quot;:{&quot;title&quot;:&quot;Trail&quot;,&quot;pin&quot;:&quot;Pin&quot;,&quot;unpin&quot;:&quot;Unpin&quot;,&quot;earlier&quot;:&quot;earlier pages&quot;},&quot;current&quot;:{&quot;id&quot;:&quot;glossary/entity&quot;,&quot;title&quot;:&quot;Entity&quot;}}"></concordance-island><concordance-island data-island="mode-switch"',
     );
     expect(html).not.toContain("trail-list");
+    expect(html).toContain("</concordance-island></nav></header>");
   });
 
   it("renders the island with the theme's own labels and no current page when the header receives no trail", () => {
@@ -470,10 +480,9 @@ describe("The trail is bounded in length, the oldest entries being condensed", (
     const details = items[0]?.querySelector("details.trail-earlier");
     expect(details?.querySelector("summary")?.textContent).toBe("… 2 earlier pages");
     expect(details?.hasAttribute("open")).toBe(false);
-    expect(links(host, "details .trail-list > li > a").map(([, title]) => title)).toEqual([
-      "Term 1",
-      "Term 2",
-    ]);
+    expect(
+      links(host, "details.trail-earlier .trail-list > li > a").map(([, title]) => title),
+    ).toEqual(["Term 1", "Term 2"]);
     expect(links(host, ".trail > .trail-list > li > a").map(([, title]) => title)).toEqual(
       visited
         .slice(2)
@@ -488,8 +497,10 @@ describe("The trail is bounded in length, the oldest entries being condensed", (
     const current = { id: "glossary/term-30", title: "Term 30" };
     const { host } = wire({ session: visited, current });
     expect(host.querySelectorAll(".trail > .trail-list > li")).toHaveLength(12);
-    expect(host.querySelector("summary")?.textContent).toBe("… 19 earlier pages");
-    expect(links(host, "details .trail-list > li > a")).toEqual(
+    expect(host.querySelector("details.trail-earlier > summary")?.textContent).toBe(
+      "… 19 earlier pages",
+    );
+    expect(links(host, "details.trail-earlier .trail-list > li > a")).toEqual(
       visited.slice(0, 19).map((page) => [`../../${page.id}/index.html`, page.title]),
     );
     expect(condense(visited, 12)).toEqual({

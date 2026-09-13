@@ -223,7 +223,6 @@ function chromeFor(
       title: message(context, "trail.title"),
       pin: message(context, "trail.pin"),
       unpin: message(context, "trail.unpin"),
-      empty: message(context, "trail.empty"),
       earlier: message(context, "trail.earlier"),
     },
     ...(current === undefined ? {} : { current }),

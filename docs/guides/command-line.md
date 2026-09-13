@@ -76,7 +76,7 @@ The URL of a page follows the identifier of its entity and nothing else, so it s
 
 #### Keep a trail
 
-Under the header, the trail lists the pages you visited, in order, each a link. It travels in the URL as `#trail=glossary%2Fsource,glossary%2Fnote,…`, so copying the address of the page shares the path you followed and reloading restores it; following a link of the site carries it along. Press "Pin" to keep the trail in the browser between visits: the next visit starts from it, every page you then open joins it, and "Unpin" forgets it. Beyond twelve pages the oldest fold into one "… N earlier pages" entry that opens on demand. Nothing is fetched and nothing leaves the browser: the trail works over `file://` as it does behind a server, and without JavaScript it simply is not there. The [theming guide](theming.md#trail) describes the island, the URL format and the storage key.
+Behind the bookmark button of the bar, the trail lists the pages you visited, in order, each a link; the button appears once a page is in the trail. It travels in the URL as `#trail=glossary%2Fsource,glossary%2Fnote,…`, so copying the address of the page shares the path you followed and reloading restores it; following a link of the site carries it along. Press "Pin" to keep the trail in the browser between visits: the next visit starts from it, every page you then open joins it, and "Unpin" forgets it. Beyond twelve pages the oldest fold into one "… N earlier pages" entry that opens on demand. Nothing is fetched and nothing leaves the browser: the trail works over `file://` as it does behind a server, and without JavaScript it simply is not there. The [theming guide](theming.md#trail) describes the island, the URL format and the storage key.
 
 ### Search
 

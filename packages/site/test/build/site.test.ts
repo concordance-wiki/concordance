@@ -1015,7 +1015,6 @@ describe("siteDocuments", () => {
       title: "Parcours",
       pin: "Épingler",
       unpin: "Désépingler",
-      empty: "Aucune page épinglée",
       earlier: "pages précédentes",
     };
     expect(trailOf(HOME_PAGE)).toEqual({ base: "", labels });

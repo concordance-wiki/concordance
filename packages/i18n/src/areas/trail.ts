@@ -8,7 +8,6 @@ export const trailMessages = {
   fr,
   arguments: {
     "trail.earlier": {},
-    "trail.empty": {},
     "trail.pin": {},
     "trail.title": {},
     "trail.unpin": {},
