@@ -1,4 +1,6 @@
 {
   "attributes.parent": "Parent",
+  "counted": "{count, plural, one {# domaine décrit} other {# domaines décrits}}",
+  "description": "Un domaine est une zone du métier qui regroupe les objets, les règles et les processus d'un même sujet.",
   "label": "Domaine"
 }

@@ -50,6 +50,10 @@ export interface DisplayDefinition {
 
 export interface TypeDefinition {
   label: Label;
+  /** One sentence saying what an entity of the type is, shown under the count of a category of the type. */
+  description?: Label;
+  /** The count of a category of the type as an ICU message with a `count` argument: "{count, plural, one {# screen described} other {# screens described}}". */
+  counted?: Label;
   group: string;
   status?: ProfileStatus;
   glyph?: string;

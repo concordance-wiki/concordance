@@ -15,6 +15,14 @@
     "defaultMessage": "Reference",
     "description": "Label of the ref attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# test described} other {# tests described}}",
+    "description": "Number of tests a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A test is a check of one behaviour of the solution, with what it exercises and what it expects.",
+    "description": "One sentence saying what a test is, shown under the count of a category of tests."
+  },
   "label": {
     "defaultMessage": "Test",
     "description": "Label of the test type."

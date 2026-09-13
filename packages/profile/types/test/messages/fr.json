@@ -3,5 +3,7 @@
   "attributes.covers": "Couvre",
   "attributes.level": "Niveau",
   "attributes.ref": "Référence",
+  "counted": "{count, plural, one {# test décrit} other {# tests décrits}}",
+  "description": "Un test est une vérification d'un comportement de la solution, avec ce qu'il exerce et ce qu'il attend.",
   "label": "Test"
 }

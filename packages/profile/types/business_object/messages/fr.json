@@ -1,5 +1,7 @@
 {
   "attributes.attributes": "Attributs",
   "attributes.lifecycle": "Cycle de vie",
+  "counted": "{count, plural, one {# objet métier décrit} other {# objets métier décrits}}",
+  "description": "Un objet métier est une chose que le métier nomme et manipule, avec ses attributs et son cycle de vie.",
   "label": "Objet métier"
 }

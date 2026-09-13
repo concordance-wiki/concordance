@@ -2,5 +2,7 @@
   "attributes.guarantee": "Garantie",
   "attributes.owner": "Responsable",
   "attributes.technology": "Technologie",
+  "counted": "{count, plural, one {# canal décrit} other {# canaux décrits}}",
+  "description": "Un canal est un moyen par lequel les utilisateurs atteignent l'application : un site, un guichet, un courrier.",
   "label": "Canal"
 }

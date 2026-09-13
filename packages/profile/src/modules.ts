@@ -42,7 +42,10 @@ export interface TypeModuleDeclaration {
   display?: DisplayDefinition;
 }
 
-/** The messages of a module in one locale: `label`, `attributes.<name>` and `sections.<key>`, as final strings. */
+/** The messages a module carries about the type itself, next to `attributes.<name>` and `sections.<key>`. */
+export const TYPE_MESSAGE_KEYS = ["label", "description", "counted"] as const;
+
+/** The messages of a module in one locale: `label`, `description`, `counted`, `attributes.<name>` and `sections.<key>`, as final strings. */
 export type TypeMessages = Readonly<Record<string, string>>;
 
 /** The component names a module may override: the page of the type, the value of an attribute, a mapped section. */
@@ -184,7 +187,7 @@ function messagesOf(
     }
     const [kind, name] = key.split(".", 2);
     const known =
-      key === "label" ||
+      (TYPE_MESSAGE_KEYS as readonly string[]).includes(key) ||
       (kind === "attributes" && name !== undefined && attributes.includes(name)) ||
       (kind === "sections" && name !== undefined && sections.includes(name));
     if (!known) {
@@ -192,7 +195,8 @@ function messagesOf(
         prefixed(
           file,
           error(key, "message names nothing the module declares", {
-            expected: "label, attributes.<declared attribute> or sections.<declared section>",
+            expected:
+              "label, description, counted, attributes.<declared attribute> or sections.<declared section>",
           }),
         ),
       );
@@ -416,9 +420,13 @@ export function typeDefinitionOf(module: TypeModule): TypeDefinition {
     const heading = labelOf(module, `sections.${key}`) as Label;
     sections[key] = { heading, ...section };
   }
+  const description = labelOf(module, "description");
+  const counted = labelOf(module, "counted");
   return {
     // Same reason: the label message is checked when the module is read.
     label: labelOf(module, "label") as Label,
+    ...(description === undefined ? {} : { description }),
+    ...(counted === undefined ? {} : { counted }),
     group: declaration.group,
     ...(declaration.status === undefined ? {} : { status: declaration.status }),
     ...(declaration.glyph === undefined ? {} : { glyph: declaration.glyph }),

@@ -38,11 +38,21 @@ const runbookFiles: Record<string, string> = {
   }),
   [`${root}/messages/en.json`]: JSON.stringify({
     "attributes.trigger": { defaultMessage: "Trigger", description: "What starts the runbook." },
+    counted: {
+      defaultMessage: "{count, plural, one {# runbook} other {# runbooks}}",
+      description: "Number of runbooks of a category.",
+    },
+    description: {
+      defaultMessage: "A runbook is a procedure to operate the tool.",
+      description: "What a runbook is.",
+    },
     label: { defaultMessage: "Runbook", description: "Label of the type." },
     "sections.steps": { defaultMessage: "Steps", description: "Heading of the steps." },
   }),
   [`${root}/messages/fr.json`]: JSON.stringify({
     "attributes.trigger": "Déclencheur",
+    counted: "{count, plural, one {# procédure} other {# procédures}}",
+    description: "Une procédure sert à exploiter l'outil.",
     label: "Procédure",
     "sections.steps": "Étapes",
   }),
@@ -85,8 +95,20 @@ describe("readTypeModule", () => {
       steps: { parse: "ordered-list", produces: "related" },
     });
     expect(module.messages).toEqual({
-      en: { "attributes.trigger": "Trigger", label: "Runbook", "sections.steps": "Steps" },
-      fr: { "attributes.trigger": "Déclencheur", label: "Procédure", "sections.steps": "Étapes" },
+      en: {
+        "attributes.trigger": "Trigger",
+        counted: "{count, plural, one {# runbook} other {# runbooks}}",
+        description: "A runbook is a procedure to operate the tool.",
+        label: "Runbook",
+        "sections.steps": "Steps",
+      },
+      fr: {
+        "attributes.trigger": "Déclencheur",
+        counted: "{count, plural, one {# procédure} other {# procédures}}",
+        description: "Une procédure sert à exploiter l'outil.",
+        label: "Procédure",
+        "sections.steps": "Étapes",
+      },
     });
     expect(module.template).toMatch(/^---\ntype: runbook/);
     expect(module.schema).toEqual({
@@ -254,6 +276,14 @@ describe("typeDefinitionOf", () => {
     const module = expectModule(readRunbook());
     expect(typeDefinitionOf(module)).toEqual({
       label: { en: "Runbook", fr: "Procédure" },
+      description: {
+        en: "A runbook is a procedure to operate the tool.",
+        fr: "Une procédure sert à exploiter l'outil.",
+      },
+      counted: {
+        en: "{count, plural, one {# runbook} other {# runbooks}}",
+        fr: "{count, plural, one {# procédure} other {# procédures}}",
+      },
       group: "quality",
       glyph: "runbook",
       attributes: {
@@ -353,10 +383,12 @@ describe("the type modules of the default profile", () => {
     }
   });
 
-  it("carry an English and a French label for the type, every attribute and every section", () => {
+  it("carry an English and a French label, description and count for the type, and a label for every attribute and every section", () => {
     for (const module of modules.modules) {
       const keys = [
         "label",
+        "description",
+        "counted",
         ...Object.keys(module.declaration.attributes ?? {}).map((name) => `attributes.${name}`),
         ...Object.keys(module.declaration.sections ?? {}).map((key) => `sections.${key}`),
       ].sort();

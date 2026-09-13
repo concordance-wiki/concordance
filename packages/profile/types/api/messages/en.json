@@ -23,6 +23,14 @@
     "defaultMessage": "Version",
     "description": "Label of the version attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# API described} other {# APIs described}}",
+    "description": "Number of APIs a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An API is a service the application exposes, with the operations its contract declares.",
+    "description": "One sentence saying what a API is, shown under the count of a category of APIs."
+  },
   "label": {
     "defaultMessage": "API",
     "description": "Label of the api type."

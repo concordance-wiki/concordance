@@ -2,7 +2,7 @@
 
 Every key of `type.yaml`, generated from [`type-module.schema.json`](../../packages/core/schemas/type-module.schema.json) by `scripts/config-reference.mjs`: edit the schema, then run `pnpm reference:update`. The [guide](../guides/adding-a-type.md) explains how the keys work together.
 
-Schema of type.yaml, the declaration of a type module. A module is a folder types/<slug>/ holding type.yaml, template.md (the note template), messages/<locale>.json (the labels of the type, its attributes and its sections, in the format of the interface catalogues), optionally schema.json (a JSON Schema of the items of its list attributes, by attribute name) and components/ (rendering overrides: EntityPage, Attribute@<name>, Section@<key>). The slug is the folder name; the labels live in the messages, never here.
+Schema of type.yaml, the declaration of a type module. A module is a folder types/<slug>/ holding type.yaml, template.md (the note template), messages/<locale>.json (the labels of the type, its attributes and its sections, its one-sentence description and the counted message of a category of it, in the format of the interface catalogues), optionally schema.json (a JSON Schema of the items of its list attributes, by attribute name) and components/ (rendering overrides: EntityPage, Attribute@<name>, Section@<key>). The slug is the folder name; the labels live in the messages, never here.
 
 A key marked (required) must be present; every other key is optional and takes the default shown, or none. Paths use `[]` for the items of a list and `*` for the keys of a map.
 

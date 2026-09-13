@@ -17,7 +17,6 @@ import {
 } from "../search/shared.js";
 import {
   clearFilters,
-  emptyState,
   parseSearchState,
   searchQueryString,
   withQuery,
@@ -213,15 +212,21 @@ export function suggestionOf(entry: SearchEntry, meta: SearchMeta, root: string)
   };
 }
 
-/** The state a field submits: its query alone, with the source facet set on the field of a space page. */
+/**
+ * The state a field submits: its query, with the facet values the field carries as hidden fields
+ * and, on the field of a space page, the source facet set to that space.
+ */
 export function fieldState(search: SearchField, query: string): SearchState {
-  const state = withQuery(emptyState(), query);
+  const state = withQuery(
+    parseSearchState(new URLSearchParams(search.filters ?? {}).toString()),
+    query,
+  );
   return search.source === undefined
     ? state
     : { ...state, filters: { ...state.filters, source: [search.source] } };
 }
 
-/** The results page with the query typed: the action of the form, then the query string of that query, the space kept. */
+/** The results page with the query typed: the action of the form, then the query string of that query and of the filters the field submits with it. */
 export function seeResultsHref(search: SearchField, query: string): string {
   return `${search.action}${searchQueryString(fieldState(search, query))}`;
 }

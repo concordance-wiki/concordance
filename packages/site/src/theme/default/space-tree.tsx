@@ -15,28 +15,47 @@ function Page({ node }: { node: SpaceNode }): JSX.Element {
   );
 }
 
-/** A folder shows its name and its page count; the folders on the way to the current page list their contents under them. */
+/**
+ * A folder shows its name and its page count; the folders on the way to the current page list
+ * their contents under them. A folder at the top of the space links to its list; the folder
+ * whose list is the current page is marked as the current page is.
+ */
 function Folder({ node }: { node: SpaceNode }): JSX.Element {
+  const classes = [
+    "space-folder",
+    ...(node.children === undefined ? [] : ["space-open"]),
+    ...(node.current === true ? ["space-current"] : []),
+  ];
+  const name = (
+    <>
+      {node.label}
+      <span class="count">{node.count}</span>
+    </>
+  );
   return (
-    <li class={node.children === undefined ? "space-folder" : "space-folder space-open"}>
-      <span class="space-folder-name">
-        {node.label}
-        {node.count !== undefined && <span class="count">{node.count}</span>}
-      </span>
+    <li class={classes.join(" ")}>
+      {node.current === true ? (
+        <span class="space-folder-name" aria-current="page">
+          {name}
+        </span>
+      ) : node.href === undefined ? (
+        <span class="space-folder-name">{name}</span>
+      ) : (
+        <a class="space-folder-name" href={node.href}>
+          {name}
+        </a>
+      )}
       {node.children !== undefined && <Nodes nodes={node.children} />}
     </li>
   );
 }
 
+/** A node with a count is a folder; the others are pages, the current one included. */
 function Node({ node }: { node: SpaceNode }): JSX.Element {
   if (node.omitted === true) {
     return <li class="space-omitted">{node.label}</li>;
   }
-  return node.href === undefined && node.current !== true ? (
-    <Folder node={node} />
-  ) : (
-    <Page node={node} />
-  );
+  return node.count === undefined ? <Page node={node} /> : <Folder node={node} />;
 }
 
 /** The nodes of a tree at one level; the home page draws the whole tree of every space with it. */

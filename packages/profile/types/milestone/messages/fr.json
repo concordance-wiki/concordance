@@ -1,4 +1,6 @@
 {
   "attributes.date": "Date",
+  "counted": "{count, plural, one {# jalon décrit} other {# jalons décrits}}",
+  "description": "Un jalon est une date à laquelle le projet s'engage, avec ce qui est livré à cette échéance.",
   "label": "Jalon"
 }

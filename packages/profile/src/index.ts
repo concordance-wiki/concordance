@@ -20,6 +20,7 @@ export {
   MODULE_TEMPLATE_FILE,
   readTypeModule,
   readTypeModules,
+  TYPE_MESSAGE_KEYS,
   typeDefinitionOf,
   typesOf,
   type TypeMessages,

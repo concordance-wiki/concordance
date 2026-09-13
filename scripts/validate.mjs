@@ -117,6 +117,8 @@ for (const slug of modules) {
     const [kind, name] = key.split(".");
     const known =
       key === "label" ||
+      key === "description" ||
+      key === "counted" ||
       (kind === "attributes" && declaration.attributes?.[name] !== undefined) ||
       (kind === "sections" && declaration.sections?.[name] !== undefined);
     if (!known)

@@ -2,6 +2,7 @@ export { argumentsOf, parseMessage, type ArgumentKind, type ParsedMessage } from
 export {
   CatalogueError,
   formatMessage,
+  formatText,
   loadCatalogue,
   resolveLanguage,
   type Catalogue,

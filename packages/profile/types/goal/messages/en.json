@@ -1,4 +1,12 @@
 {
+  "counted": {
+    "defaultMessage": "{count, plural, one {# goal described} other {# goals described}}",
+    "description": "Number of goals a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A goal is an outcome the project or the business aims at, which principles and requirements serve.",
+    "description": "One sentence saying what a goal is, shown under the count of a category of goals."
+  },
   "label": {
     "defaultMessage": "Goal",
     "description": "Label of the goal type."

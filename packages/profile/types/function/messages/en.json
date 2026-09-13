@@ -7,6 +7,14 @@
     "defaultMessage": "Triggers",
     "description": "Label of the triggers attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# application function described} other {# application functions described}}",
+    "description": "Number of application functions a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An application function is a capability the application provides, whatever the screen or API that exposes it.",
+    "description": "One sentence saying what a application function is, shown under the count of a category of application functions."
+  },
   "label": {
     "defaultMessage": "Application function",
     "description": "Label of the function type."

@@ -1,3 +1,5 @@
 {
+  "counted": "{count, plural, one {# service métier décrit} other {# services métier décrits}}",
+  "description": "Un service métier est ce que le métier offre à ses utilisateurs, rendu par des processus et des applications.",
   "label": "Service métier"
 }

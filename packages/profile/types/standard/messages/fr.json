@@ -2,5 +2,7 @@
   "attributes.applies_to_types": "S'applique aux types",
   "attributes.mandatory": "Obligatoire",
   "attributes.version": "Version",
+  "counted": "{count, plural, one {# norme décrite} other {# normes décrites}}",
+  "description": "Une norme est une référence externe à laquelle la solution se conforme.",
   "label": "Norme"
 }

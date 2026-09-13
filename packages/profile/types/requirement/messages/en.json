@@ -7,6 +7,14 @@
     "defaultMessage": "Priority",
     "description": "Label of the priority attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# requirement described} other {# requirements described}}",
+    "description": "Number of requirements a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A requirement is something the solution must do or be, stated so that it can be checked.",
+    "description": "One sentence saying what a requirement is, shown under the count of a category of requirements."
+  },
   "label": {
     "defaultMessage": "Requirement",
     "description": "Label of the requirement type."

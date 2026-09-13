@@ -3,5 +3,7 @@
   "attributes.owner": "Responsable",
   "attributes.plateau": "Plateau",
   "attributes.status": "Statut",
+  "counted": "{count, plural, one {# application décrite} other {# applications décrites}}",
+  "description": "Une application est un système que la documentation décrit, qui range sous elle ses écrans, ses API et ses batchs.",
   "label": "Application"
 }

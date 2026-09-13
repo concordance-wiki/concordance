@@ -5,6 +5,8 @@
   "attributes.objects": "Objets",
   "attributes.protocol": "Protocole",
   "attributes.version": "Version",
+  "counted": "{count, plural, one {# API décrite} other {# API décrites}}",
+  "description": "Une API est un service que l'application expose, avec les opérations que son contrat déclare.",
   "label": "API",
   "sections.consumers": "Consommateurs",
   "sections.objects": "Objets"

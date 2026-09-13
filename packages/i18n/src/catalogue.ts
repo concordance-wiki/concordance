@@ -127,3 +127,18 @@ export function formatMessage<Id extends MessageId>(
     .map((part) => part.value)
     .join("");
 }
+
+/**
+ * Resolves an ICU message that lives outside the catalogues, the counted message of a type
+ * module for instance, with the locale and the time zone of a catalogue.
+ */
+export function formatText(
+  catalogue: Catalogue,
+  message: string,
+  values: Record<string, PrimitiveType> = {},
+): string {
+  return new IntlMessageFormat(message, catalogue.locale, zonedFormats(catalogue.timeZone))
+    .formatToParts(values)
+    .map((part) => part.value)
+    .join("");
+}

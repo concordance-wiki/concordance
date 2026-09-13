@@ -1,5 +1,7 @@
 {
   "attributes.origin": "Origine",
   "attributes.priority": "Priorité",
+  "counted": "{count, plural, one {# exigence décrite} other {# exigences décrites}}",
+  "description": "Une exigence est quelque chose que la solution doit faire ou être, formulé pour pouvoir être vérifié.",
   "label": "Exigence"
 }

@@ -258,6 +258,26 @@ export {
   spacesLabels,
   spacesPageOf,
 } from "./build/spaces.js";
+export {
+  CATEGORY_VARIANTS_MAX,
+  categoryDocumentsOf,
+  categoryLead,
+  categorySearchField,
+  categoryTreeOf,
+  listedCategoriesOf,
+  rowsOf,
+  variantFile,
+} from "./build/category.js";
+export type { Category, CategoryDocument, CategoryState } from "./build/category.js";
+export {
+  CATEGORY_ISLAND,
+  CATEGORY_PAGE_SIZE,
+  CategoryIsland,
+  filterRows,
+  orderRows,
+  pageCount,
+} from "./theme/default/category-island.js";
+export { CategoryList } from "./theme/default/category-list.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
   EntityFragment,

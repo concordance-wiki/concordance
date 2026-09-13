@@ -15,6 +15,14 @@
     "defaultMessage": "Status",
     "description": "Label of the status attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# application described} other {# applications described}}",
+    "description": "Number of applications a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An application is a system the documentation describes, which files its screens, APIs and batches under it.",
+    "description": "One sentence saying what a application is, shown under the count of a category of applications."
+  },
   "label": {
     "defaultMessage": "Application",
     "description": "Label of the application type."

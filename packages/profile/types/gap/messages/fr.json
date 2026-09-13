@@ -1,5 +1,7 @@
 {
   "attributes.from": "De",
   "attributes.to": "Vers",
+  "counted": "{count, plural, one {# écart décrit} other {# écarts décrits}}",
+  "description": "Un écart est une différence entre ce qui existe et ce qui est voulu, à combler par un lot.",
   "label": "Écart"
 }

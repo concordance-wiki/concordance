@@ -3,6 +3,14 @@
     "defaultMessage": "Origin",
     "description": "Label of the origin attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# constraint described} other {# constraints described}}",
+    "description": "Number of constraints a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A constraint is a limit the solution must respect, imposed from outside it.",
+    "description": "One sentence saying what a constraint is, shown under the count of a category of constraints."
+  },
   "label": {
     "defaultMessage": "Constraint",
     "description": "Label of the constraint type."

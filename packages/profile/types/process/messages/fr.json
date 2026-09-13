@@ -2,6 +2,8 @@
   "attributes.execution": "Exécution",
   "attributes.steps": "Étapes",
   "attributes.triggers": "Déclencheurs",
+  "counted": "{count, plural, one {# processus décrit} other {# processus décrits}}",
+  "description": "Un processus est une suite d'étapes que le métier ou l'outil suit, avec les rôles, les écrans et les règles que chaque étape engage.",
   "label": "Processus",
   "sections.steps": "Étapes"
 }

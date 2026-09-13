@@ -11,6 +11,14 @@
     "defaultMessage": "Schema",
     "description": "Label of the schema attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# message described} other {# messages described}}",
+    "description": "Number of messages a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A message is a piece of information exchanged between two parts of the system, with its format.",
+    "description": "One sentence saying what a message is, shown under the count of a category of messages."
+  },
   "label": {
     "defaultMessage": "Message",
     "description": "Label of the message type."

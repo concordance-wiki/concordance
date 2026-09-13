@@ -24,7 +24,7 @@ import {
   rankedSourceNames,
 } from "./home.js";
 import { entityHref, relativeHref, SPACES_PAGE, spacePagePath } from "./paths.js";
-import { categoryOf, initialsOf, topFoldersOf } from "./space.js";
+import { categoryOf, categoryPagePathOf, initialsOf, topFoldersOf } from "./space.js";
 
 /** The latest changes a space page lists. */
 export const SPACE_RECENT = 4;
@@ -107,15 +107,19 @@ export function spacesPageOf(context: SiteContext): SpacesProps {
 }
 
 /**
- * The categories of a space: its top-level folders, each linking to the page the tree lists
- * first under it, where the tree opens on the folder, until a category has a list of its own.
+ * The categories of a space: its top-level folders, each linking to its list, or, for a folder
+ * whose address a note takes, to the page the tree lists first under it, where the tree opens on
+ * the folder.
  */
 export function categoriesOf(context: SiteContext, page: string, source: string): SpaceCategory[] {
-  return topFoldersOf(context, source).map(({ name, count, first }) => ({
-    label: name,
-    href: entityHref(page, first.id),
-    count,
-  }));
+  return topFoldersOf(context, source).map(({ name, count, first }) => {
+    const list = categoryPagePathOf(context, source, name);
+    return {
+      label: name,
+      href: list === undefined ? entityHref(page, first.id) : relativeHref(page, list),
+      count,
+    };
+  });
 }
 
 /** The notes of a space changed last, newest first then by identifier, each with its category. */

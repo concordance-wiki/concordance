@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concordance-wiki.github.io/concordance/schemas/type-module.schema.json",
   "title": "Concordance type module",
-  "description": "Schema of type.yaml, the declaration of a type module. A module is a folder types/<slug>/ holding type.yaml, template.md (the note template), messages/<locale>.json (the labels of the type, its attributes and its sections, in the format of the interface catalogues), optionally schema.json (a JSON Schema of the items of its list attributes, by attribute name) and components/ (rendering overrides: EntityPage, Attribute@<name>, Section@<key>). The slug is the folder name; the labels live in the messages, never here.",
+  "description": "Schema of type.yaml, the declaration of a type module. A module is a folder types/<slug>/ holding type.yaml, template.md (the note template), messages/<locale>.json (the labels of the type, its attributes and its sections, its one-sentence description and the counted message of a category of it, in the format of the interface catalogues), optionally schema.json (a JSON Schema of the items of its list attributes, by attribute name) and components/ (rendering overrides: EntityPage, Attribute@<name>, Section@<key>). The slug is the folder name; the labels live in the messages, never here.",
   "type": "object",
   "additionalProperties": false,
   "required": ["group"],

@@ -11,6 +11,14 @@
     "defaultMessage": "Schema",
     "description": "Label of the schema attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# data object described} other {# data objects described}}",
+    "description": "Number of data objects a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A data object is a table or a record as it is stored, with its columns and their meaning.",
+    "description": "One sentence saying what a data object is, shown under the count of a category of data objects."
+  },
   "label": {
     "defaultMessage": "Data object",
     "description": "Label of the data_object type."

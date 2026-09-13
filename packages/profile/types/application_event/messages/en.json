@@ -3,6 +3,14 @@
     "defaultMessage": "Channel",
     "description": "Label of the channel attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# application event described} other {# application events described}}",
+    "description": "Number of application events a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An application event is something that happens inside the application and that other parts react to.",
+    "description": "One sentence saying what a application event is, shown under the count of a category of application events."
+  },
   "label": {
     "defaultMessage": "Application event",
     "description": "Label of the application_event type."

@@ -1,4 +1,6 @@
 {
   "attributes.nature": "Nature",
+  "counted": "{count, plural, one {# événement métier décrit} other {# événements métier décrits}}",
+  "description": "Un événement métier est quelque chose qui se produit dans le métier et auquel un processus répond.",
   "label": "Événement métier"
 }

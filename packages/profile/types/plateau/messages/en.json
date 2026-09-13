@@ -7,6 +7,14 @@
     "defaultMessage": "Date",
     "description": "Label of the date attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# plateau described} other {# plateaus described}}",
+    "description": "Number of plateaus a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A plateau is a stable state of the architecture between two transitions.",
+    "description": "One sentence saying what a plateau is, shown under the count of a category of plateaus."
+  },
   "label": {
     "defaultMessage": "Plateau",
     "description": "Label of the plateau type."

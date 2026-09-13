@@ -1,4 +1,6 @@
 {
   "attributes.external": "Externe",
+  "counted": "{count, plural, one {# acteur décrit} other {# acteurs décrits}}",
+  "description": "Un acteur est une personne, une équipe ou un système qui prend part à un processus depuis l'extérieur de l'application.",
   "label": "Acteur"
 }

@@ -5,6 +5,8 @@
   "attributes.rules": "Règles",
   "attributes.url_pattern": "Motif d'URL",
   "attributes.writes": "Écrit",
+  "counted": "{count, plural, one {# écran décrit} other {# écrans décrits}}",
+  "description": "Un écran est une page de l'application, avec ce qu'elle affiche et ce qu'elle permet.",
   "label": "Écran",
   "sections.actions": "Actions",
   "sections.objects": "Objets",

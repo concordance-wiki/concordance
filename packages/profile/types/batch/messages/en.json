@@ -19,6 +19,14 @@
     "defaultMessage": "Writes",
     "description": "Label of the writes attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# batch described} other {# batches described}}",
+    "description": "Number of batches a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A batch is a treatment that runs on a schedule, with what it reads, what it writes and what it depends on.",
+    "description": "One sentence saying what a batch is, shown under the count of a category of batches."
+  },
   "label": {
     "defaultMessage": "Batch",
     "description": "Label of the batch type."

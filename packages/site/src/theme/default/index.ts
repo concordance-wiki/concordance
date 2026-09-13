@@ -2,6 +2,7 @@ import { h, type JSX } from "preact";
 
 import type { EntityPageProps } from "../../slots.js";
 import type { SlotComponents } from "../types.js";
+import { CategoryList } from "./category-list.js";
 import { EntityPage as GenericEntityPage } from "./entity-page.js";
 import { Footer } from "./footer.js";
 import { Header } from "./header.js";
@@ -39,4 +40,5 @@ export const defaultComponents: SlotComponents = {
   Todo,
   Spaces,
   Space,
+  CategoryList,
 };

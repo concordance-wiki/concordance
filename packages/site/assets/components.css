@@ -3906,3 +3906,335 @@ tbody .spaces-name {
 .legend + .entity-source {
   margin-inline-start: auto;
 }
+
+/* Category list: the list of a folder at the top of a space. The tree of the space on the left, as on the entity page; the breadcrumb, the title and its lead, the two selectors on the same line, the table in a card, the counts and the note under it. Nothing under 13 px and no target under 40 px, where the reference frame goes lower. */
+
+.category {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "space"
+    "main";
+}
+
+.category > .space {
+  display: none;
+}
+
+.category-main {
+  display: grid;
+  grid-area: main;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "crumbs crumbs"
+    "header toolbar"
+    "card card"
+    "foot foot"
+    "pages pages";
+  align-items: end;
+  column-gap: var(--space-3);
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--space-3) var(--space-3) var(--space-5);
+}
+
+/* The island stands between the header and the card without breaking the grid. */
+.category-main > concordance-island {
+  display: contents;
+}
+
+.category-main > .breadcrumbs {
+  grid-area: crumbs;
+  margin-block-end: var(--space-2);
+}
+
+.category-header {
+  grid-area: header;
+  margin-block-end: var(--space-3);
+}
+
+.category-header h1 {
+  margin-block: 0 0.4375rem;
+  font-size: 1.875rem;
+  letter-spacing: -0.024em;
+}
+
+.category-lead {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* The selectors: two chips, each a disclosure reading what is selected, its choices in a menu under it. */
+
+.category-toolbar {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  grid-area: toolbar;
+  margin-block-end: var(--space-3);
+}
+
+.category-select {
+  position: relative;
+}
+
+.category-select > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2) 0 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+
+.category-select > summary::-webkit-details-marker {
+  display: none;
+}
+
+.category-select-mark {
+  color: var(--color-label);
+}
+
+.category-choices {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 2;
+  min-inline-size: 12rem;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  list-style: none;
+}
+
+.category-choices a,
+.category-choices button,
+.category-choices span {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: calc(var(--radius) * 0.75);
+  background: none;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.category-choices a:hover,
+.category-choices button:hover {
+  background: var(--color-soft);
+  color: var(--color-ink);
+}
+
+/* The choice selected: bold and ticked, so that the mark does not rest on colour. */
+.category-choices [aria-current],
+.category-choices [aria-pressed="true"] {
+  color: var(--color-ink);
+  font-weight: 600;
+  cursor: default;
+}
+
+.category-choices [aria-current]::after,
+.category-choices [aria-pressed="true"]::after {
+  content: "✓";
+  margin-inline-start: auto;
+}
+
+/* The table in its card: uppercase mono-spaced labels on the soft surface, one row per page, its columns fixed. */
+
+.category-card {
+  grid-area: card;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  overflow-x: auto;
+}
+
+.category-table {
+  inline-size: 100%;
+  min-inline-size: 40rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.category-table th,
+.category-table td {
+  padding: 0.875rem 0 0.875rem var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  vertical-align: baseline;
+  text-align: start;
+}
+
+.category-table th:last-child,
+.category-table td:last-child {
+  padding-inline-end: var(--space-3);
+}
+
+.category-table thead th {
+  padding-block: 0.6875rem;
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.category-table tbody tr:last-child th,
+.category-table tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+.category-table .category-title {
+  inline-size: 14.375rem;
+}
+
+.category-table .category-value {
+  inline-size: 7.375rem;
+}
+
+.category-table .category-links {
+  inline-size: 2.75rem;
+  text-align: end;
+}
+
+.category-table tbody .category-title {
+  font-size: 0.90625rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.category-table tbody .category-title a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.category-table tbody .category-title a:hover {
+  text-decoration: underline;
+}
+
+.category-table tbody .category-value {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.category-table tbody .category-value a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.category-table tbody .category-value a:hover {
+  text-decoration: underline;
+}
+
+.category-table tbody .category-summary {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.84375rem;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-table tbody .category-links {
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Under the card: how many rows the page shows of the whole and the note on the links column, one paragraph; the page links after it. */
+
+.category-foot {
+  grid-area: foot;
+  margin: 0;
+  padding: 0.875rem 0 1.125rem;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.category-pages {
+  grid-area: pages;
+}
+
+.category-pages ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.category-pages a,
+.category-pages button,
+.category-pages span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.category-pages [aria-current="page"] {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  font-weight: 600;
+  cursor: default;
+}
+
+.category-pages a:hover,
+.category-pages button:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* The desktop: the tree returns to its column and the list reads in a measured column beside it. */
+
+@media (min-width: 73.75rem) {
+  .category {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    grid-template-areas: "space main";
+  }
+
+  .category > .space {
+    display: block;
+  }
+
+  .category-main {
+    max-inline-size: 58.75rem;
+    justify-self: center;
+    padding: 1.875rem 2.25rem var(--space-5);
+  }
+}

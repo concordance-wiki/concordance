@@ -2,6 +2,8 @@
   "attributes.applies_to": "S'applique à",
   "attributes.condition": "Condition",
   "attributes.severity": "Sévérité",
+  "counted": "{count, plural, one {# règle de gestion décrite} other {# règles de gestion décrites}}",
+  "description": "Une règle de gestion est une condition que le métier impose, avec ce qu'elle contraint et ce qui se passe quand elle est enfreinte.",
   "label": "Règle de gestion",
   "sections.applies_to": "S'applique à"
 }

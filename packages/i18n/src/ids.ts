@@ -7,6 +7,10 @@ export type MessageId = keyof typeof source;
 
 /** The arguments of the messages that take some; a message absent from this interface takes none. */
 export interface MessageArguments {
+  "category.linksNote": { name: string };
+  "category.pages": { count: number };
+  "category.searchIn": { name: string };
+  "category.shown": { shown: string; name: string; total: string };
   "document.pages": { count: number };
   "entity.changed": { when: string };
   "entity.confidence": { value: number };
@@ -56,6 +60,18 @@ export interface MessageArguments {
 
 /** The ICU kind of every argument of every message, as declared by the source catalogue. */
 export const messageArguments = {
+  "category.all": {},
+  "category.firstLine": {},
+  "category.links": {},
+  "category.linksNote": { name: "argument" },
+  "category.page": {},
+  "category.pages": { count: "plural" },
+  "category.pagination": {},
+  "category.searchIn": { name: "argument" },
+  "category.shown": { shown: "argument", name: "argument", total: "argument" },
+  "category.sort": {},
+  "category.sortLinks": {},
+  "category.sortTitle": {},
   "document.download": {},
   "document.pages": { count: "plural" },
   "document.preview": {},

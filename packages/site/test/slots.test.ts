@@ -4,7 +4,7 @@ import { PART_NAMES, SLOT_NAMES, isSlotName, parseComponentName } from "../src/s
 import { defaultComponents } from "../src/theme/default/index.js";
 
 describe("slots", () => {
-  it("names the thirteen slots of the site, chrome first, then pages, then panels, the spaces pages last", () => {
+  it("names the fourteen slots of the site, chrome first, then pages, then panels, the spaces pages and the category list last", () => {
     expect(SLOT_NAMES).toEqual([
       "Shell",
       "Header",
@@ -19,6 +19,7 @@ describe("slots", () => {
       "Todo",
       "Spaces",
       "Space",
+      "CategoryList",
     ]);
   });
 

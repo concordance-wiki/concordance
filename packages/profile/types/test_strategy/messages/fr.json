@@ -1,5 +1,7 @@
 {
   "attributes.applies_to": "S'applique à",
   "attributes.levels": "Niveaux",
+  "counted": "{count, plural, one {# stratégie de test décrite} other {# stratégies de test décrites}}",
+  "description": "Une stratégie de test dit quels tests couvrent quelles parties de la solution et pourquoi.",
   "label": "Stratégie de test"
 }

@@ -156,7 +156,7 @@ describe("spacesPageOf", () => {
 });
 
 describe("categoriesOf", () => {
-  it("lists the top-level folders of the space by name with their page counts, folders included, each linking to the page the tree lists first under it", () => {
+  it("lists the top-level folders of the space by name with their page counts, folders included, each linking to its list, or to the page the tree lists first under it when a note takes the address of the list", () => {
     expect(categoryOf("screens/service/home.md")).toBe("screens");
     expect(categoryOf("readme.md")).toBeUndefined();
     const deep = dated("specs/a/b/c/deep", "specs", "a/b/c/deep.md", "2026-09-01T00:00:00.000Z");
@@ -171,13 +171,19 @@ describe("categoriesOf", () => {
       ["screens", 1, "specs/screens/mentions-panel"],
     ]);
     expect(categoriesOf(ctx, SPACE_PAGE, "specs")).toEqual([
-      { label: "a", href: "a/b/c/deep/index.html", count: 3 },
-      { label: "screens", href: "screens/mentions-panel/index.html", count: 1 },
+      { label: "a", href: "a/index.html", count: 3 },
+      { label: "screens", href: "screens/index.html", count: 1 },
     ]);
-    // Two folders under one: the name orders them, the first one leads.
+    // A note at the address of the list: the category leads to the first page of the folder instead,
+    // two folders under one ordered by name, the first one leading.
+    const taken = dated("specs/a", "specs", "a.md", "2026-09-01T00:00:00.000Z");
     const early = dated("specs/a/aa/x", "specs", "a/aa/x.md", "2026-09-01T00:00:00.000Z");
     expect(
-      categoriesOf(context({ model: model({ entities: [deep, early] }) }), SPACE_PAGE, "specs"),
+      categoriesOf(
+        context({ model: model({ entities: [deep, early, taken] }) }),
+        SPACE_PAGE,
+        "specs",
+      ),
     ).toEqual([{ label: "a", href: "a/aa/x/index.html", count: 2 }]);
     // Two files of one folder: the file name orders them, then the identifier.
     const twin = dated("specs/a/aab", "specs", "a/zed.md", "2026-09-01T00:00:00.000Z");
@@ -334,8 +340,8 @@ describe("spacePageOf", () => {
       count: 2,
       date: "2026-09-09",
       categories: [
-        { label: "rules", href: "rules/publication-threshold/index.html", count: 1 },
-        { label: "screens", href: "screens/mentions-panel/index.html", count: 1 },
+        { label: "rules", href: "rules/index.html", count: 1 },
+        { label: "screens", href: "screens/index.html", count: 1 },
       ],
       recent: [
         {

@@ -7,5 +7,7 @@
   "attributes.preview_available": "Aperçu disponible",
   "attributes.representations": "Représentations",
   "attributes.source": "Source",
+  "counted": "{count, plural, one {# document décrit} other {# documents décrits}}",
+  "description": "Un document est un fichier qui cadre le projet sans en décrire une partie : une vision, une feuille de route, une note.",
   "label": "Document"
 }

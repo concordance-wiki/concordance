@@ -2,5 +2,7 @@
   "attributes.deliverables": "Livrables",
   "attributes.end": "Fin",
   "attributes.start": "Début",
+  "counted": "{count, plural, one {# lot décrit} other {# lots décrits}}",
+  "description": "Un lot est un ensemble borné de travaux qui comble des écarts et mène le projet à son plateau suivant.",
   "label": "Lot"
 }

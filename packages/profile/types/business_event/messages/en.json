@@ -3,6 +3,14 @@
     "defaultMessage": "Nature",
     "description": "Label of the nature attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# business event described} other {# business events described}}",
+    "description": "Number of business events a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A business event is something that happens in the business and that a process answers.",
+    "description": "One sentence saying what a business event is, shown under the count of a category of business events."
+  },
   "label": {
     "defaultMessage": "Business event",
     "description": "Label of the business_event type."

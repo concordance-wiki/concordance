@@ -7,6 +7,8 @@
   "attributes.port": "Port",
   "attributes.soap_action": "Action SOAP",
   "attributes.style": "Style",
+  "counted": "{count, plural, one {# opération décrite} other {# opérations décrites}}",
+  "description": "Une opération est un appel d'une API, avec ses paramètres et ses réponses tels que le contrat les déclare.",
   "label": "Opération",
   "sections.consumers": "Consommateurs",
   "sections.rules": "Règles"

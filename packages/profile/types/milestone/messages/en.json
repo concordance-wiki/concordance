@@ -3,6 +3,14 @@
     "defaultMessage": "Date",
     "description": "Label of the date attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# milestone described} other {# milestones described}}",
+    "description": "Number of milestones a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A milestone is a date the project commits to, with what is delivered by then.",
+    "description": "One sentence saying what a milestone is, shown under the count of a category of milestones."
+  },
   "label": {
     "defaultMessage": "Milestone",
     "description": "Label of the milestone type."

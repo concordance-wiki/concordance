@@ -11,6 +11,14 @@
     "defaultMessage": "Severity",
     "description": "Label of the severity attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# business rule described} other {# business rules described}}",
+    "description": "Number of business rules a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A business rule is a condition the business imposes, with what it constrains and what happens when it is broken.",
+    "description": "One sentence saying what a business rule is, shown under the count of a category of business rules."
+  },
   "label": {
     "defaultMessage": "Business rule",
     "description": "Label of the rule type."
