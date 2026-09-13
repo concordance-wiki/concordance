@@ -127,12 +127,13 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain("<h1>Screen A</h1>");
     expect(page).toContain('<a href="../b/index.html" class="written">B</a>');
     expect(page).toContain('<a href="../b/index.html" class="recognised">Term B</a>');
-    expect(page).toContain('<img src="figures/a.svg" alt="the screen">');
+    expect(page).toContain(
+      '<figure class="figure"><img src="figures/a.svg" alt="the screen"><figcaption><span class="figure-caption">the screen</span><span class="figure-note">Image of the repository, shown in the flow of the text</span><code class="figure-path">figures/a.svg</code></figcaption></figure>',
+    );
     expect(io.fs.readText("/work/dist/notes/a/figures/a.svg")).toBe("<svg/>");
     expect(page).toContain(
-      '<footer class="legend"><span class="legend-written">link written in the note</span><span class="legend-recognised">word recognised at indexing</span></footer>',
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></p><p class="entity-source"><code>notes/a.md</code></p></footer>',
     );
-    expect(page).toContain('<p class="entity-source"><code>notes/a.md</code></p>');
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");
     const keyword = io.fs.readText("/work/dist/keywords/build-summary/index.html");
