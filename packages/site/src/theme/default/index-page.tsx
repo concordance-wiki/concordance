@@ -30,7 +30,7 @@ export function Index({ letters, current, entries }: IndexProps): JSX.Element {
       </nav>
       <ul class="index-entries">
         {entries.map((entry) => (
-          <li key={entry.href} class="index-entry">
+          <li key={entry.href} class="index-entry" id={entry.anchor}>
             {entry.glyph === undefined ? (
               <span class="noteless">{labels.noteless}</span>
             ) : (

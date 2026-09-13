@@ -29,6 +29,8 @@ export interface SiteContextInput {
   locale?: Locale;
   /** `staleness` of the configuration, which the home page reads to flag dormant sources. */
   staleness?: StalenessConfig;
+  /** The collation of the project locale, the `compare` of its language pack; a collator of the locale when absent. */
+  collate?: (a: string, b: string) => number;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */
@@ -42,6 +44,14 @@ export interface SiteContext extends SiteContextInput {
   touching: ReadonlyMap<string, Link[]>;
   /** The language whose type and relation labels are shown. */
   language: string;
+  /** What the alphabetical index sorts titles with. */
+  collate: (a: string, b: string) => number;
+}
+
+/** The collation the shipped language packs declare: accent-insensitive, digits compared by value. */
+export function defaultCollation(locale: Locale): (a: string, b: string) => number {
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  return (a, b) => collator.compare(a, b);
 }
 
 export function fileKey(source: string, path: string): string {
@@ -75,7 +85,16 @@ export function siteContext(input: SiteContextInput): SiteContext {
     add(touching, link.from, link);
     add(touching, link.to, link);
   }
-  return { ...input, entities, byFile, incoming, touching, language: input.catalogue.language };
+  const language = input.catalogue.language;
+  return {
+    ...input,
+    entities,
+    byFile,
+    incoming,
+    touching,
+    language,
+    collate: input.collate ?? defaultCollation(input.locale ?? language),
+  };
 }
 
 /** A message of the catalogue that takes no argument. */

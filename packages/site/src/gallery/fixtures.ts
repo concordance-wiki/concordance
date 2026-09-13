@@ -241,7 +241,7 @@ export const index: SlotProps["Index"] = {
   ],
   current: "B",
   entries: [
-    { label: "build log", href: "../glossary/build-log/", glyph: "T", count: 3 },
+    { label: "build log", href: "../glossary/build-log/", glyph: "T", anchor: "b", count: 3 },
     { label: "build summary", href: "../keywords/build-summary/", count: 7 },
   ],
 };
