@@ -134,7 +134,7 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
       ".passage-at",
       ".similar-count",
       ".neighbour > .weight",
-      ".spaces-count",
+      ".spaces-table .spaces-count",
       ".space-category-count",
       ".chip-count",
     ]);
