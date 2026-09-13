@@ -196,6 +196,51 @@ concordance-island {
   font-style: italic;
 }
 
+.home-items,
+.home-tree,
+.home-tree ul,
+.home-sources {
+  padding: 0;
+  list-style: none;
+}
+
+.home-tree ul {
+  padding-inline-start: var(--space-3);
+}
+
+.home-tree summary {
+  cursor: pointer;
+}
+
+.home-entry-index .home-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.home-entry-index .home-item a {
+  display: inline-block;
+  min-inline-size: 2em;
+  text-align: center;
+}
+
+.home-item time,
+.home-source time {
+  margin-inline-start: var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.home-sources {
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.home-source.stale {
+  color: var(--color-muted);
+}
+
 /* Entity and keyword pages */
 
 .entity,

@@ -168,6 +168,8 @@ staleness:
   warn_after_days: { default: 60, glossary: 120 }
 ```
 
+The home page reads the same thresholds: its freshness entry flags a source dormant when its newest change, by the git date of its notes, is older than its threshold at the instant of the build; without the key, 180 days.
+
 ## `inference`
 
 | Key | Default | Meaning |

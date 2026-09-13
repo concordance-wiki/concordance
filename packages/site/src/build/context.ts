@@ -1,4 +1,4 @@
-import type { CanonicalModel, Entity, Link } from "@concordance-wiki/core";
+import type { CanonicalModel, Entity, Link, Locale, StalenessConfig } from "@concordance-wiki/core";
 import {
   formatMessage,
   type Catalogue,
@@ -25,6 +25,10 @@ export interface SiteContextInput {
   editUrl?: string;
   /** The `ref` every source declares, by name; `main` is assumed for the others. */
   sourceRefs?: Record<string, string>;
+  /** The project locale, for the dates the pages spell out; the catalogue language when absent. */
+  locale?: Locale;
+  /** `staleness` of the configuration, which the home page reads to flag dormant sources. */
+  staleness?: StalenessConfig;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */

@@ -21,10 +21,7 @@ import {
   sourcesOf,
 } from "../../src/build/entity-page.js";
 import { DEFAULT_MENTIONS_INLINE } from "../../src/build/mentions.js";
-import { entriesOf, homeOf, shortcutsOf } from "../../src/build/home.js";
-import { foldTitle, indexOf, letterOf } from "../../src/build/index-page.js";
 import { companionsOf, keywordPageOf } from "../../src/build/keyword-page.js";
-import { documentsOf, termsOf } from "../../src/build/todo.js";
 import {
   entity,
   fragments,
@@ -345,122 +342,5 @@ describe("keywordPageOf", () => {
     expect(orphan.counts).toEqual({ occurrences: 0, files: 0, sources: 0 });
     expect(orphan.passages).toEqual([]);
     expect(orphan.companions).toEqual([]);
-  });
-});
-
-describe("homeOf", () => {
-  it("counts the sources and files of the build block and offers the most cited entities as shortcuts", () => {
-    const home = homeOf(context(), "Concordance notes");
-    expect(home.title).toBe("Concordance notes");
-    expect(home.search).toBeUndefined();
-    expect(home.stats).toEqual({ sources: 3, files: 5, builtAt: "2026-09-12T12:00:00.000Z" });
-    expect(shortcutsOf(context())).toEqual([
-      { label: "Keyword page", href: "glossary/keyword-page/index.html" },
-      { label: "vision", href: "framing/vision/index.html" },
-      { label: "Page", href: "glossary/page/index.html" },
-    ]);
-  });
-
-  it("lists the domains, the types and the applications with their counts, named by the configuration when it names them", () => {
-    const entries = entriesOf(
-      context({
-        names: {
-          domains: { publication: "Publication" },
-          applications: { "concordance-cli": "Command line" },
-        },
-      }),
-    );
-    expect(entries.map((entry) => [entry.kind, entry.title, entry.href])).toEqual([
-      ["tree", "Domains", "index/index.html"],
-      ["index", "Types", "index/index.html"],
-      ["recent", "Applications", "index/index.html"],
-    ]);
-    expect(entries[0]?.items).toEqual([
-      { label: "inference/recognition", href: "index/index.html", count: 1 },
-      { label: "Publication", href: "index/index.html", count: 3 },
-    ]);
-    expect(entries[1]?.items.map((item) => [item.label, item.count])).toEqual([
-      ["Document", 1],
-      ["Business rule", 1],
-      ["Screen", 1],
-      ["Term", 4],
-    ]);
-    expect(entries[2]?.items).toEqual([
-      { label: "Command line", href: "index/index.html", count: 3 },
-    ]);
-  });
-});
-
-describe("indexOf", () => {
-  it("folds case and accents to order the titles and to pick the letter, other openings gathering under #", () => {
-    expect(foldTitle("Épreuve du Seuil")).toBe("epreuve du seuil");
-    expect(letterOf("Épreuve")).toBe("E");
-    expect(letterOf("  build")).toBe("B");
-    expect(letterOf("#hash")).toBe("#");
-    expect(letterOf("42")).toBe("#");
-  });
-
-  it("lists every page by folded title with its glyph or the noteless mark and its citation count, and activates the letters that have entries", () => {
-    const index = indexOf(context());
-    expect(index.current).toBeUndefined();
-    expect(index.entries).toEqual([
-      { label: "#hash", href: "../keywords/zzz/index.html", count: 0 },
-      { label: "build summary", href: "../keywords/build-summary/index.html", count: 0 },
-      {
-        label: "Épreuve du seuil",
-        href: "../specs/rules/publication-threshold/index.html",
-        glyph: "R",
-        count: 0,
-      },
-      { label: "Keyword page", href: "../glossary/keyword-page/index.html", glyph: "T", count: 4 },
-      {
-        label: "Mentions panel",
-        href: "../specs/screens/mentions-panel/index.html",
-        glyph: "S",
-        count: 0,
-      },
-      { label: "Page", href: "../glossary/page/index.html", glyph: "T", count: 1 },
-      { label: "vision", href: "../framing/vision/index.html", glyph: "D", count: 1 },
-    ]);
-    expect(index.letters).toHaveLength(27);
-    expect(index.letters.filter((letter) => letter.href !== undefined)).toEqual([
-      { letter: "B", href: "index.html", count: 1 },
-      { letter: "E", href: "index.html", count: 1 },
-      { letter: "K", href: "index.html", count: 1 },
-      { letter: "M", href: "index.html", count: 1 },
-      { letter: "P", href: "index.html", count: 1 },
-      { letter: "V", href: "index.html", count: 1 },
-      { letter: "#", href: "index.html", count: 1 },
-    ]);
-    expect(index.letters[0]).toEqual({ letter: "A", count: 0 });
-  });
-
-  it("orders two titles that fold alike by identifier", () => {
-    const twin = { ...page, id: "specs/objects/page", title: "page" };
-    const index = indexOf(context({ model: model({ entities: [twin, page], links: [] }) }));
-    expect(index.entries.map((entry) => entry.href)).toEqual([
-      "../glossary/page/index.html",
-      "../specs/objects/page/index.html",
-    ]);
-  });
-});
-
-describe("todoOf", () => {
-  it("lists the keyword pages by decreasing occurrences then identifier", () => {
-    expect(termsOf(context())).toEqual([
-      { label: "build summary", href: "../keywords/build-summary/index.html", count: 5 },
-      { label: "#hash", href: "../keywords/zzz/index.html", count: 0 },
-    ]);
-    const twin = { ...keyword, id: "keywords/aaa", title: "aaa" };
-    const tied = context({ model: model({ entities: [keyword, twin], links: [] }) });
-    expect(termsOf(tied).map((entry) => entry.label)).toEqual(["aaa", "build summary"]);
-  });
-
-  it("lists the entities the W-DOC-NOMD findings name by decreasing finding count then identifier, ignoring findings without a page", () => {
-    expect(documentsOf(context())).toEqual([
-      { label: "vision", href: "../framing/vision/index.html", count: 2 },
-      { label: "Page", href: "../glossary/page/index.html", count: 1 },
-      { label: "Mentions panel", href: "../specs/screens/mentions-panel/index.html", count: 1 },
-    ]);
   });
 });

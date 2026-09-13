@@ -4,6 +4,7 @@ import {
   type CanonicalModel,
   type Entity,
   type FileSystem,
+  type StalenessConfig,
 } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
 import type { Profile } from "@concordance-wiki/profile";
@@ -60,6 +61,8 @@ export interface SiteInput {
   sourceRefs?: Record<string, string>;
   /** `build.mentions_inline` of the configuration. */
   mentionsInline?: number;
+  /** `staleness` of the configuration: the thresholds behind the dormant flag of the home page. */
+  staleness?: StalenessConfig;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -165,12 +168,22 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
     profile: input.profile,
     catalogue,
     fragments: input.fragments,
+    locale: input.locale,
     ...(input.names === undefined ? {} : { names: input.names }),
     ...(input.editUrl === undefined ? {} : { editUrl: input.editUrl }),
     ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
+    ...(input.staleness === undefined ? {} : { staleness: input.staleness }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
+  const index = indexOf(context);
+  const letters = index.letters
+    .filter((letter) => letter.href !== undefined)
+    .map((letter) => ({
+      label: letter.letter,
+      href: relativeHref(HOME_PAGE, INDEX_PAGE),
+      count: letter.count,
+    }));
   const render = <S extends PageSlot>(
     page: string,
     slot: S,
@@ -220,8 +233,14 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
   };
   const siteTitle = themeChrome(input, "").siteTitle;
   return [
-    render(HOME_PAGE, "Home", homeOf(context, siteTitle), siteTitle, input.locale),
-    render(INDEX_PAGE, "Index", indexOf(context), message(context, "site.index"), input.locale),
+    render(
+      HOME_PAGE,
+      "Home",
+      homeOf(context, siteTitle, { todoCount, letters }),
+      siteTitle,
+      input.locale,
+    ),
+    render(INDEX_PAGE, "Index", index, message(context, "site.index"), input.locale),
     render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
     ...input.model.entities.map(entityPage),
     { path: SEARCH_INDEX, content: searchIndexOf(input.model) },
