@@ -19,6 +19,7 @@ export {
 } from "./ids.js";
 export {
   formatDate,
+  formatMonth,
   formatNumber,
   formatRelative,
   textDirection,

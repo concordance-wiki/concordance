@@ -131,29 +131,89 @@
     "defaultMessage": "Browse by initial letter",
     "description": "Label of the letter navigation of the index."
   },
+  "keyword.companions": {
+    "defaultMessage": "Accompanying words",
+    "description": "Heading of the panel block listing the words that accompany a keyword."
+  },
   "keyword.createNote": {
-    "defaultMessage": "Create a note",
-    "description": "Call to action that opens the note template for a keyword."
+    "defaultMessage": "Propose a definition",
+    "description": "Call to action that opens the note template of the glossary for a keyword."
   },
   "keyword.documents": {
     "defaultMessage": "{count, plural, one {# document} other {# documents}}",
     "description": "Number of documents a keyword appears in."
   },
+  "keyword.factFiles": {
+    "defaultMessage": "Files",
+    "description": "Label of the number of files a keyword appears in, in the panel of its page."
+  },
+  "keyword.factOccurrences": {
+    "defaultMessage": "Occurrences",
+    "description": "Label of the number of occurrences of a keyword, in the panel of its page."
+  },
+  "keyword.factSpaces": {
+    "defaultMessage": "Spaces",
+    "description": "Label of the spaces a keyword appears in, in the panel of its page."
+  },
+  "keyword.filesSummary": {
+    "defaultMessage": "{count, plural, one {# file.} other {# files.}}",
+    "description": "Sentence under the passages heading of a keyword page, counting the files they come from."
+  },
+  "keyword.maybeSame": {
+    "defaultMessage": "Maybe the same thing",
+    "description": "Heading of the panel block listing the expressions of a similar form."
+  },
+  "keyword.noCompanion": {
+    "defaultMessage": "No accompanying word recorded.",
+    "description": "Notice shown when a keyword shares no paragraph with another page."
+  },
+  "keyword.noDefinition": {
+    "defaultMessage": "No definition",
+    "description": "Mark on the line under the title of a keyword page, saying that no note defines the word."
+  },
+  "keyword.noProperty": {
+    "defaultMessage": "No declared property: there is no file for this word.",
+    "description": "Note under the counts of a keyword page, saying why it has no properties block."
+  },
   "keyword.noteWritten": {
     "defaultMessage": "A note now defines this expression:",
     "description": "Text of the page that forwards a former keyword address to the note written since."
+  },
+  "keyword.noticeDetail": {
+    "defaultMessage": "This page is built from those passages alone. If someone creates the note in the glossary, its text will take its place here and the rest of the page will not change.",
+    "description": "Second part of the notice of a keyword page, saying what the page is built from and what happens when a note is written."
+  },
+  "keyword.noticeLead": {
+    "defaultMessage": "{count, plural, one {Nobody has written a definition, but # passage uses this word.} other {Nobody has written a definition, but # passages use this word.}}",
+    "description": "First sentence of the notice of a keyword page, with the number of passages that use the word."
   },
   "keyword.occurrences": {
     "defaultMessage": "{count, plural, one {# occurrence} other {# occurrences}}",
     "description": "Number of occurrences of a keyword across the corpus."
   },
-  "keyword.passages": {
-    "defaultMessage": "{count, plural, one {# passage recorded} other {# passages recorded}}",
-    "description": "Number of passages a keyword page lists, stated in its banner."
+  "keyword.pageAt": {
+    "defaultMessage": "p. {number, number}",
+    "description": "Position of a passage read from a converted document, given by its page number."
+  },
+  "keyword.passagesTitle": {
+    "defaultMessage": "The passages, in corpus order",
+    "description": "Heading of the passages of a keyword page."
+  },
+  "keyword.relatedNote": {
+    "defaultMessage": "Ordered by number of passages. None is “cited”: this word has no note to carry links.",
+    "description": "Note under the related pages of a keyword page, saying how they are ordered and why none is cited."
   },
   "keyword.similarLead": {
-    "defaultMessage": "You may also mean:",
-    "description": "Lead to expressions with a similar form, worded so as to assert no relation."
+    "defaultMessage": "Expressions close in form and context. A lead, not a claim.",
+    "description": "Note under the expressions of a similar form, worded so as to assert no relation."
+  },
+  "keyword.slideAt": {
+    "defaultMessage": "slide {number, number}",
+    "description": "Position of a passage read from a slide deck, given by its slide number."
+  },
+  "keyword.terms": {
+    "defaultMessage": "Terms",
+    "description": "Middle step of the breadcrumb of a keyword page, between the space and the word."
   },
   "keyword.title": {
     "defaultMessage": "Keyword",
@@ -162,6 +222,14 @@
   "keyword.undefinedExpression": {
     "defaultMessage": "Expression without a note",
     "description": "Notice that a keyword has no note of its own yet."
+  },
+  "keyword.usedSince": {
+    "defaultMessage": "Used since {month}",
+    "description": "Line under the title of a keyword page, giving the month of the oldest file that uses the word."
+  },
+  "keyword.whatWeKnow": {
+    "defaultMessage": "What we know",
+    "description": "Heading of the panel block giving the counts of a keyword."
   },
   "mentions.atLine": {
     "defaultMessage": "line {line, number}",

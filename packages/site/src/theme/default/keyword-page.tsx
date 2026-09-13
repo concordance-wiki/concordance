@@ -1,9 +1,30 @@
 import type { ComponentChildren, JSX } from "preact";
 
-import type { KeywordPageProps, Passage } from "../../slots.js";
+import type { KeywordPageLabels, KeywordPageProps, Passage, PassageGroup } from "../../slots.js";
 import { useSlot } from "../context.js";
-import { NeighbourhoodFold } from "./entity-page.js";
+import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { labels } from "./labels.js";
+import { SpaceTree } from "./space-tree.js";
+
+/** The labels of the default theme, used for every label the page does not receive; the neighbour count is worded from the page. */
+export function defaultKeywordPageLabels(neighbours: number): KeywordPageLabels {
+  return {
+    spaceTree: labels.spaceTree,
+    breadcrumb: labels.breadcrumb,
+    noDefinition: labels.noDefinition,
+    passages: labels.passages,
+    whatWeKnow: labels.whatWeKnow,
+    occurrences: labels.occurrences,
+    files: labels.filesCount,
+    spaces: labels.spaces,
+    noProperty: labels.noProperty,
+    maybeSame: labels.maybeSame,
+    companions: labels.companions,
+    noCompanion: labels.noCompanion,
+    seeNeighbourhood: labels.seeNeighbourhood,
+    neighbourPages: `${String(neighbours)} ${labels.neighbourPages}`,
+  };
+}
 
 /** The context of a passage, the expression marked where it is found as written; the text alone otherwise. */
 export function markedContext(passage: Passage): ComponentChildren {
@@ -20,18 +41,51 @@ export function markedContext(passage: Passage): ComponentChildren {
   );
 }
 
+/** One file: its type, its title linking to its page, its number of passages, then each passage where it stands and its text. */
+function PassageFile({ group }: { group: PassageGroup }): JSX.Element {
+  return (
+    <section class="passage-group">
+      <h3 class="passage-file">
+        {group.typeLabel !== undefined && <span class="badge">{group.typeLabel}</span>}
+        <a class="passage-title" href={group.file.href}>
+          {group.title ?? group.file.label}
+        </a>
+        <span class="passage-count">{group.passages.length}</span>
+      </h3>
+      <ul class="passage-list">
+        {group.passages.map((passage) => (
+          <li key={passage.href} class="passage">
+            <a class="passage-at" href={passage.href}>
+              {passage.location ?? `${labels.line} ${String(passage.line)}`}
+            </a>
+            <q class="passage-text">{markedContext(passage)}</q>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /**
- * The page of a word nobody defined, on the shell of the entity page: the title, the badge and
- * the "no note" mark, then in place of the note a banner saying so with the number of passages,
- * the three counts and the passages grouped by file; in the right panel the accompanying words
- * and the similar expressions where the entity page keeps its properties, the related pages,
- * and the neighbourhood folded behind its line, through the slots of the theme. No article, no
- * properties, no source footer: a keyword page has no file of its own.
+ * The page of a word nobody defined, on the shell of the entity page: the tree of the space the
+ * word is filed in on the left; in the centre the breadcrumb, the title marked as having no note,
+ * the line saying so and since when the word is used, then in place of the note the notice with
+ * the lead to propose a definition, and the passages grouped by file, each file with its type,
+ * its title and its count, each passage with where it stands and its text; on the right the
+ * counts under "what we know" with the note that the word has no property, the expressions of a
+ * similar form as a lead, the accompanying words, the related pages, and the neighbourhood folded
+ * behind its line, through the slots of the theme. No article, no properties, no source footer:
+ * a keyword page has no file of its own.
  */
 export function KeywordPage({
   entity,
+  space,
+  breadcrumb = [],
+  usedSince,
   banner,
   counts,
+  spaces,
+  summary,
   passages,
   companions,
   similar,
@@ -41,66 +95,81 @@ export function KeywordPage({
   labels: given = {},
 }: KeywordPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
+  const text: KeywordPageLabels = {
+    ...defaultKeywordPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...given,
+  };
   return (
-    <div class="entity keyword">
+    <div class={space === undefined ? "entity keyword" : "entity entity-with-space keyword"}>
+      {space !== undefined && <SpaceTree space={space} label={text.spaceTree} />}
       <div class="entity-main">
+        {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
-          <h1>{entity.title}</h1>
+          <h1 class="keyword-title">{entity.title}</h1>
           <p class="entity-badge">
-            <span class="badge">{entity.typeLabel}</span>
-            <span class="noteless">{labels.noteless}</span>
-          </p>
-        </header>
-        <section class="keyword-body" aria-labelledby="passages-title">
-          <p class="banner" role="note">
-            {banner.text}{" "}
-            {banner.createNote.href === undefined ? (
-              <span class="create-note">{banner.createNote.label}</span>
-            ) : (
-              <a class="create-note" href={banner.createNote.href}>
-                {banner.createNote.label}
-              </a>
+            <span class="badge badge-noteless">{text.noDefinition}</span>
+            {usedSince !== undefined && (
+              <time class="keyword-since" dateTime={usedSince.date}>
+                {usedSince.label}
+              </time>
             )}
           </p>
-          <dl class="counts">
-            <div>
-              <dt>{labels.occurrences}</dt>
-              <dd>{counts.occurrences}</dd>
-            </div>
-            <div>
-              <dt>{labels.filesCount}</dt>
-              <dd>{counts.files}</dd>
-            </div>
-            <div>
-              <dt>{labels.sourcesCount}</dt>
-              <dd>{counts.sources}</dd>
-            </div>
-          </dl>
-          <h2 id="passages-title">{labels.passages}</h2>
+        </header>
+        <aside class="keyword-notice" role="note">
+          <p class="keyword-notice-lead">{banner.text}</p>
+          {banner.detail !== undefined && <p class="keyword-notice-detail">{banner.detail}</p>}
+          {banner.createNote.href === undefined ? (
+            <span class="create-note">{banner.createNote.label}</span>
+          ) : (
+            <a class="create-note" href={banner.createNote.href}>
+              {banner.createNote.label}
+            </a>
+          )}
+        </aside>
+        <section class="keyword-body" aria-labelledby="passages-title">
+          <h2 id="passages-title">{text.passages}</h2>
+          <p class="keyword-summary">{summary}</p>
           {passages.map((group) => (
-            <section key={group.file.href} class="passage-group">
-              <h3>
-                <a href={group.file.href}>{group.file.label}</a>
-              </h3>
-              <ul>
-                {group.passages.map((passage) => (
-                  <li key={passage.href}>
-                    <a href={passage.href}>
-                      {labels.line} {passage.line}
-                    </a>{" "}
-                    <q>{markedContext(passage)}</q>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <PassageFile key={group.file.href} group={group} />
           ))}
         </section>
       </div>
       <div class="entity-side">
-        <aside class="keyword-panel panel-block" aria-labelledby="companions-title">
-          <h2 id="companions-title">{labels.companions}</h2>
+        <PanelBlock id="keyword-facts" className="keyword-facts" heading={text.whatWeKnow}>
+          <dl class="attributes">
+            <div class="attribute">
+              <dt>{text.occurrences}</dt>
+              <dd>{counts.occurrences}</dd>
+            </div>
+            <div class="attribute">
+              <dt>{text.files}</dt>
+              <dd>{counts.files}</dd>
+            </div>
+            <div class="attribute">
+              <dt>{text.spaces}</dt>
+              <dd>{spaces.length === 0 ? counts.sources : spaces.join(", ")}</dd>
+            </div>
+          </dl>
+          <p class="panel-note">{text.noProperty}</p>
+        </PanelBlock>
+        {similar.length > 0 && (
+          <PanelBlock id="keyword-similar" className="keyword-similar" heading={text.maybeSame}>
+            <ul class="similar-list">
+              {similar.map((lead) => (
+                <li key={lead.href}>
+                  <a class="similar-lead" href={lead.href}>
+                    <span class="similar-label">{lead.label}</span>
+                    {lead.count !== undefined && <span class="similar-count">{lead.count}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p class="panel-note">{similarLead}</p>
+          </PanelBlock>
+        )}
+        <PanelBlock id="keyword-companions" className="keyword-panel" heading={text.companions}>
           {companions.length === 0 ? (
-            <p class="empty">{labels.noCompanion}</p>
+            <p class="empty panel-note">{text.noCompanion}</p>
           ) : (
             <ul class="companions">
               {companions.map((companion) => (
@@ -115,20 +184,7 @@ export function KeywordPage({
               ))}
             </ul>
           )}
-          {similar.length > 0 && (
-            <section class="similar" aria-labelledby="similar-title">
-              <h2 id="similar-title">{labels.similar}</h2>
-              <p>{similarLead}</p>
-              <ul>
-                {similar.map((link) => (
-                  <li key={link.href}>
-                    <a href={link.href}>{link.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </aside>
+        </PanelBlock>
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} />
       </div>

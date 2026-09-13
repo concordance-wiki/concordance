@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+Keyword page on the shell of the default theme: the tree of the space the word is filed in, the glossary when the configuration names one, else the space of its first passage, with the word at its place as the current page, and the breadcrumb "space › Terms › word"; the title dotted, the "No definition" mark and "Used since <month year>" from the oldest git date among the citing files; the notice saying that nobody wrote a definition with the number of passages, what the page is built from, and the button "Propose a definition"; the passages grouped by file with the type and the title of each file and where each passage stands, the timecode of a transcript cue, the page or the slide of a converted document read from the fragment of the citing page, else the line; on the right "What we know" (occurrences, files, spaces and the note that the word has no property), "Maybe the same thing" (the similar expressions with their counts under a wording that asserts nothing), the accompanying words, the related pages with the note that none is cited, the neighbourhood folded; the `keyword-page-corporate` gallery state on an expression of the fixtures corpus; the `keyword.*` messages of the page in both catalogues and `formatMonth`, `keyword.passages` retired.

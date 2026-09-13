@@ -1098,6 +1098,17 @@ As a reader of a corporate documentation, I want the site to look like a wiki I 
 
 Depends on: L2-02, L2-08, L2-10, L2-12, L2-15, L7-02.
 
+#### L9-04 Keyword page
+
+As a reader, I want the page of a word nobody defined to look like every other page so that I understand at once what is known of the word and what is missing.
+
+- The breadcrumb "Space › Terms › word", the space being the glossary when there is one, else the space of the first passage, and the tree of that space on the left with the word at its place as the current page; the title dotted, the "no note" mark; the line "No definition · Used since <month year>", the month of the earliest git date among the citing files as the model carries it, "Used since" omitted when no date is known; the box "Nobody has written a definition, but N passages use this word. This page is built from those passages alone. If someone creates the note in the glossary, its text will take its place here and the rest of the page will not change." and the button "Propose a definition", the existing lead to the forge of the glossary.
+- "The passages, in corpus order" with the summary sentence "N files.", grouped by file with the type chip, the title and the count; each passage with its timestamp (`12:04`, transcripts), its page (`p. 12`, converted documents) or its line, read from the fragment of the citing page, and the text with the word marked.
+- Panel: "What we know" (Occurrences, Files, Spaces, then "No declared property: there is no file for this word."), "Maybe the same thing" (the similar expressions with their counts and the note "Expressions close in form and context. A lead, not a claim."), the accompanying words, "Related pages" with the note "Ordered by number of passages. None is “cited”: this word has no note to carry links.", then the neighbourhood map folded.
+- Gallery state `keyword-page-corporate` on an expression of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L2-04, L3-04.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

@@ -31,12 +31,21 @@ import {
   sectionsOf,
   sourcesOf,
 } from "../../src/build/entity-page.js";
-import type { EntityFragment } from "../../src/build/fragments.js";
+import type {
+  EntityFragment,
+  FragmentDocument,
+  FragmentPassage,
+} from "../../src/build/fragments.js";
 import {
   COMPANIONS_MAX,
   companionsOf,
+  keywordPageLabels,
   keywordPageOf,
+  keywordSpaceOf,
   passageGroupsOf,
+  passageLocationOf,
+  similarOf,
+  usedSinceOf,
   weightsOf,
 } from "../../src/build/keyword-page.js";
 import { DEFAULT_MENTIONS_INLINE, mentionsPanelOf } from "../../src/build/mentions.js";
@@ -901,30 +910,79 @@ describe("keywordPageOf", () => {
     });
     expect(props.counts).toEqual({ occurrences: 5, files: 2, sources: 2 });
     expect(Object.keys(props.counts)).toEqual(["occurrences", "files", "sources"]);
+    expect(props.spaces).toEqual(["glossary", "specs"]);
+    expect(props.summary).toBe("2 files.");
     const orphan = keywordPageOf(context(), orphanKeyword);
     expect(orphan.counts).toEqual({ occurrences: 0, files: 0, sources: 0 });
+    expect(orphan.spaces).toEqual([]);
+    expect(orphan.summary).toBe("0 files.");
     expect(orphan.passages).toEqual([]);
     expect(orphan.companions).toEqual([]);
     expect(orphan.similar).toEqual([]);
+    const one = { ...keyword, attributes: { ...keyword.attributes, documents: 1 } };
+    expect(keywordPageOf(context(), one).summary).toBe("1 file.");
   });
 
-  it("writes the banner from the catalogue with the number of passages, in the language of the site", () => {
-    expect(keywordPageOf(context(), keyword).banner.text).toBe(
-      "Expression without a note. 5 passages recorded.",
+  it("writes the notice from the catalogue with the number of passages that use the word, in the language of the site", () => {
+    const { banner } = keywordPageOf(context(), keyword);
+    expect(banner.text).toBe("Nobody has written a definition, but 5 passages use this word.");
+    expect(banner.detail).toBe(
+      "This page is built from those passages alone. If someone creates the note in the glossary, its text will take its place here and the rest of the page will not change.",
     );
     const one = { ...keyword, attributes: { ...keyword.attributes, occurrences: 1 } };
     expect(keywordPageOf(context(), one).banner.text).toBe(
-      "Expression without a note. 1 passage recorded.",
+      "Nobody has written a definition, but 1 passage uses this word.",
     );
     const fr = keywordPageOf(context({ catalogue: loadCatalogue("fr") }), keyword);
-    expect(fr.banner.text).toBe("Expression sans note. 5 passages relevés.");
+    expect(fr.banner.text).toBe(
+      "Personne n’a écrit de définition, mais 5 passages emploient ce mot.",
+    );
     expect(fr.entity.typeLabel).toBe("Mot-clé");
-    expect(fr.similarLead).toBe("Vous pensiez peut-être à\u00a0:");
+    expect(fr.summary).toBe("2 fichiers.");
+    expect(fr.similarLead).toBe(
+      "Expressions voisines en forme et en contexte. Une piste, pas une affirmation.",
+    );
+    expect(fr.labels).toEqual({
+      spaceTree: "Arborescence de l’espace",
+      breadcrumb: "Vous êtes ici",
+      noDefinition: "Sans définition",
+      passages: "Les passages, dans l’ordre du corpus",
+      whatWeKnow: "Ce qu’on sait",
+      occurrences: "Occurrences",
+      files: "Fichiers",
+      spaces: "Espaces",
+      noProperty: "Aucune propriété déclarée\u00a0: il n’existe pas de fichier pour ce mot.",
+      maybeSame: "Peut-être la même chose",
+      companions: "Mots qui l’accompagnent",
+      noCompanion: "Aucun mot d’accompagnement relevé.",
+      seeNeighbourhood: "Voir la carte du voisinage",
+      neighbourPages: "0 page",
+    });
   });
 
-  it("offers to create the note on the forge of the first glossary source it knows, as plain text otherwise", () => {
+  it("labels the page in the site language, the neighbour count worded", () => {
+    expect(keywordPageOf(context(), keyword).labels).toEqual({
+      spaceTree: "Tree of the space",
+      breadcrumb: "You are here",
+      noDefinition: "No definition",
+      passages: "The passages, in corpus order",
+      whatWeKnow: "What we know",
+      occurrences: "Occurrences",
+      files: "Files",
+      spaces: "Spaces",
+      noProperty: "No declared property: there is no file for this word.",
+      maybeSame: "Maybe the same thing",
+      companions: "Accompanying words",
+      noCompanion: "No accompanying word recorded.",
+      seeNeighbourhood: "See the neighbourhood map",
+      neighbourPages: "0 pages",
+    });
+    expect(keywordPageLabels(context(), 1).neighbourPages).toBe("1 page");
+  });
+
+  it("offers to propose a definition on the forge of the first glossary source it knows, as plain text otherwise", () => {
     expect(keywordPageOf(context(), keyword).banner.createNote).toEqual({
-      label: "Create a note",
+      label: "Propose a definition",
     });
     const sources = [
       { name: "framing", url: "https://example.org/wiki/framing.git" },
@@ -937,7 +995,7 @@ describe("keywordPageOf", () => {
       sourceRefs: { glossary: "v2" },
     });
     expect(keywordPageOf(withForge, keyword).banner.createNote).toEqual({
-      label: "Create a note",
+      label: "Propose a definition",
       href: "https://github.com/concordance-wiki/demo-glossary/new/v2?filename=build-summary.md",
     });
     expect(createNoteHref(withForge, "build-summary")).toBe(
@@ -954,16 +1012,99 @@ describe("keywordPageOf", () => {
     );
   });
 
-  it("lists the passages grouped by file in corpus order, sources as declared then paths, with their text, and leaves out a file that is no page", () => {
+  it("files the word in the first glossary source the model knows, its tree with the word at its place, with the breadcrumb space › terms › word", () => {
+    const glossary = context({ glossarySources: ["nowhere", "glossary"] });
+    const props = keywordPageOf(glossary, keyword);
+    expect(props.breadcrumb).toEqual([
+      { label: "glossary", href: "../../index.html#home-tree" },
+      { label: "Terms" },
+      { label: "build summary" },
+    ]);
+    expect(props.space).toEqual({
+      name: "glossary",
+      initials: "GL",
+      nodes: [
+        { label: "build summary", current: true },
+        { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
+        { label: "Page", href: "../../glossary/page/index.html" },
+      ],
+    });
+    const fr = keywordPageOf(
+      context({ glossarySources: ["glossary"], catalogue: loadCatalogue("fr") }),
+      keyword,
+    );
+    expect(fr.breadcrumb?.[1]).toEqual({ label: "Termes" });
+  });
+
+  it("files the word in the space of its first passage when no glossary source is known, and nowhere without a passage", () => {
+    const props = keywordPageOf(context(), keyword);
+    expect(props.breadcrumb?.[0]).toEqual({
+      label: "glossary",
+      href: "../../index.html#home-tree",
+    });
+    expect(props.space?.name).toBe("glossary");
+    const build = model().build;
+    const reversed = context({
+      model: model({ build: { ...build, sources: [...build.sources].reverse() } }),
+      glossarySources: ["nowhere"],
+    });
+    const specs = keywordPageOf(reversed, keyword);
+    expect(specs.space?.name).toBe("specs");
+    expect(specs.space?.nodes).toEqual([
+      { label: "rules", count: 1 },
+      { label: "screens", count: 1 },
+      { label: "build summary", current: true },
+    ]);
+    const orphan = keywordPageOf(context(), orphanKeyword);
+    expect(orphan.space).toBeUndefined();
+    expect(orphan.breadcrumb).toBeUndefined();
+    expect(keywordSpaceOf(context(), [])).toBeUndefined();
+  });
+
+  it("says since when the word is used from the oldest git date among the files of its passages, by month in the project locale, and nothing without a date", () => {
+    expect(keywordPageOf(context(), keyword).usedSince).toBeUndefined();
+    const dated = context({
+      model: model({
+        entities: model().entities.map((candidate) =>
+          candidate.id === "glossary/page"
+            ? {
+                ...candidate,
+                source: { ...candidate.source, last_modified: "2026-06-30T23:30:00Z" },
+              }
+            : candidate.id === "specs/screens/mentions-panel"
+              ? {
+                  ...candidate,
+                  source: { ...candidate.source, last_modified: "2026-03-12T09:00:00Z" },
+                }
+              : candidate,
+        ),
+      }),
+    });
+    expect(keywordPageOf(dated, keyword).usedSince).toEqual({
+      date: "2026-03-12",
+      label: "Used since March 2026",
+    });
+    expect(keywordPageOf({ ...dated, locale: "fr" }, keyword).usedSince?.label).toBe(
+      "Used since mars 2026",
+    );
+    const passages = fragments.get("keywords/build-summary")?.passages ?? [];
+    expect(usedSinceOf(dated, [...passages].reverse())?.date).toBe("2026-03-12");
+    expect(usedSinceOf(dated, passages.slice(2, 3))?.date).toBe("2026-06-30");
+  });
+
+  it("lists the passages grouped by file in corpus order, sources as declared then paths, with the title and the type of the page, their text and their line, and leaves out a file that is no page", () => {
     const props = keywordPageOf(context(), keyword);
     expect(props.passages).toEqual([
       {
         file: { label: "page.md", href: "../../glossary/page/index.html" },
+        title: "Page",
+        typeLabel: "Term",
         passages: [
           {
             context: "the build summary is printed",
             line: 3,
             href: "../../glossary/page/index.html#L3",
+            location: "line 3",
           },
         ],
       },
@@ -972,22 +1113,30 @@ describe("keywordPageOf", () => {
           label: "screens/mentions-panel.md",
           href: "../../specs/screens/mentions-panel/index.html",
         },
+        title: "Mentions panel",
+        typeLabel: "Screen",
         passages: [
           {
             context: "after the Build summaries",
             text: "Build summaries",
             line: 12,
             href: "../../specs/screens/mentions-panel/index.html#L12",
+            location: "line 12",
           },
           {
             context: "the build summary again",
             text: "build summary",
             line: 40,
             href: "../../specs/screens/mentions-panel/index.html#L40",
+            location: "line 40",
           },
         ],
       },
     ]);
+    expect(
+      keywordPageOf(context({ catalogue: loadCatalogue("fr") }), keyword).passages[0]?.passages[0]
+        ?.location,
+    ).toBe("ligne 3");
     // Declaration order, not name order: specs before glossary once the build block says so.
     const build = model().build;
     const reversed = context({
@@ -1016,6 +1165,54 @@ describe("keywordPageOf", () => {
     expect(
       passageGroupsOf(extra, "keywords/x/index.html", passages).map((group) => group.file.href),
     ).toEqual(["../../alpha/z/index.html", "../../zeta/a/index.html", "../../zeta/b/index.html"]);
+  });
+
+  it("words where a passage of a document stands from the fragment of its page: the timecode of a cue, the page, the slide; the line when the position is unknown", () => {
+    const withDocument = (unit: FragmentDocument["unit"]): SiteContext => {
+      const document: FragmentDocument = {
+        source: "specs",
+        path: "screens/mentions-panel.pptx",
+        format: "pptx",
+        target: "specs/screens/mentions-panel/screens/mentions-panel.pptx",
+        unit,
+        pages: [
+          { number: 2, label: "slide 2", text: "the build summary on a slide" },
+          { number: 3, label: "00:12:04", text: "spoken" },
+          { number: 4, label: "01:02:03", text: "spoken later" },
+        ],
+      };
+      const fragment: EntityFragment = {
+        id: "specs/screens/mentions-panel",
+        sections: [],
+        documents: [document],
+      };
+      return context({
+        fragments: new Map<string, EntityFragment>([...fragments, [fragment.id, fragment]]),
+      });
+    };
+    const at = (line: number): FragmentPassage => ({
+      source: "specs",
+      path: "screens/mentions-panel.pptx",
+      line,
+      context: "c",
+    });
+    expect(passageLocationOf(withDocument("slide"), screen, at(2))).toBe("slide 2");
+    expect(passageLocationOf(withDocument("page"), screen, at(2))).toBe("p. 2");
+    expect(passageLocationOf(withDocument("cue"), screen, at(3))).toBe("12:04");
+    expect(passageLocationOf(withDocument("cue"), screen, at(4))).toBe("01:02:03");
+    expect(passageLocationOf(withDocument("slide"), screen, at(9))).toBe("line 9");
+    expect(passageLocationOf(context(), screen, at(2))).toBe("line 2");
+    const fr = { ...withDocument("slide"), catalogue: loadCatalogue("fr") };
+    expect(passageLocationOf(fr, screen, at(2))).toBe("diapo 2");
+    expect(
+      passageLocationOf({ ...withDocument("page"), catalogue: fr.catalogue }, screen, at(2)),
+    ).toBe("p. 2");
+    const grouped = passageGroupsOf(withDocument("slide"), "keywords/x/index.html", [at(2)]);
+    expect(grouped[0]?.passages[0]?.location).toBe("slide 2");
+    expect(grouped[0]?.file).toEqual({
+      label: "screens/mentions-panel.pptx",
+      href: "../../specs/screens/mentions-panel/index.html",
+    });
   });
 
   it("sizes the companions by the rank of their co-occurrence count, twelve at most, a neighbour the model lost keeping its identifier without a link", () => {
@@ -1055,21 +1252,55 @@ describe("keywordPageOf", () => {
     expect(weightsOf([])).toEqual([]);
   });
 
-  it("turns the leads of the fragment into links, a lead to a page the model lost being left out", () => {
+  it("turns the leads of the fragment into links, a keyword page among them with its occurrences, a lead to a page the model lost being left out", () => {
     expect(keywordPageOf(context(), keyword).similar).toEqual([
       { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
     ]);
-    expect(keywordPageOf(context(), keyword).similarLead).toBe("You may also mean:");
+    expect(keywordPageOf(context(), keyword).similarLead).toBe(
+      "Expressions close in form and context. A lead, not a claim.",
+    );
+    const leads = new Map<string, EntityFragment>([
+      ...fragments,
+      [
+        "keywords/zzz",
+        {
+          id: "keywords/zzz",
+          sections: [],
+          leads: [
+            { id: "keywords/build-summary", title: "build summary" },
+            { id: "glossary/page", title: "Page" },
+          ],
+        },
+      ],
+    ]);
+    expect(
+      similarOf(context({ fragments: leads }), "keywords/zzz/index.html", orphanKeyword),
+    ).toEqual([
+      { label: "build summary", href: "../build-summary/index.html", count: 5 },
+      { label: "Page", href: "../../glossary/page/index.html" },
+    ]);
   });
 
-  it("gives the keyword page the neighbourhood and the mentions of the entity page, with the inline count", () => {
+  it("gives the keyword page the neighbourhood and the mentions of the entity page, with the inline count and the note that none is cited", () => {
     const props = keywordPageOf(context(), keyword, { mentionsInline: 4 });
     expect(props.neighbours).toEqual(
       neighbourhoodOf(context(), "keywords/build-summary/index.html", keyword),
     );
-    expect(props.mentions).toEqual(
-      mentionsPanelOf(context(), "keywords/build-summary/index.html", keyword, 4),
-    );
+    const mentions = mentionsPanelOf(context(), "keywords/build-summary/index.html", keyword, 4);
+    expect(props.mentions).toEqual({
+      ...mentions,
+      labels: {
+        ...mentions.labels,
+        orderNote:
+          "Ordered by number of passages. None is “cited”: this word has no note to carry links.",
+      },
+    });
     expect(keywordPageOf(context(), keyword).mentions.initial).toBe(DEFAULT_MENTIONS_INLINE);
+    expect(
+      keywordPageOf(context({ catalogue: loadCatalogue("fr") }), keyword).mentions.labels
+        ?.orderNote,
+    ).toBe(
+      "Ordonnées par nombre de passages. Aucune n’est « citée »\u00a0: ce mot n’a pas de fiche pour porter des liens.",
+    );
   });
 });

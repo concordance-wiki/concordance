@@ -11,6 +11,7 @@ describe("@concordance-wiki/i18n", () => {
       "argumentsOf",
       "formatDate",
       "formatMessage",
+      "formatMonth",
       "formatNumber",
       "formatRelative",
       "loadCatalogue",

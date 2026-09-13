@@ -348,11 +348,11 @@ export interface SpaceTree {
   nodes: SpaceNode[];
 }
 
-/** When the note last changed, for the line under the title. */
+/** A date on the line under the title: when the note last changed, or since when a word is used. */
 export interface ChangeDate {
   /** ISO 8601 date. */
   date: string;
-  /** Worded in the language of the site: "changed 9 days ago". */
+  /** Worded in the language of the site: "changed 9 days ago", "used since March 2026". */
   label: string;
 }
 
@@ -483,10 +483,19 @@ export interface Passage {
   text?: string;
   line: number;
   href: string;
+  /**
+   * Where the passage stands, worded: the timecode of a transcript cue, the page or the slide of
+   * a converted document, else the line; the theme shows the line when absent.
+   */
+  location?: string;
 }
 
 export interface PassageGroup {
   file: Link;
+  /** The title of the page the file belongs to; the file label stands in when absent. */
+  title?: string;
+  /** The label of the type of that page in the language of the site. */
+  typeLabel?: string;
   passages: Passage[];
 }
 
@@ -506,28 +515,74 @@ export interface CreateNoteLead {
 }
 
 export interface KeywordBanner {
-  /** The notice that no note exists, with the number of passages recorded, already localised. */
+  /** The notice that no note exists, with the number of passages that use the word, already localised. */
   text: string;
+  /** What the page is built from and what happens when a note is written, already localised; absent, the notice is its text alone. */
+  detail?: string;
   createNote: CreateNoteLead;
+}
+
+/** An expression of a similar form, offered as a lead from a keyword page. */
+export interface SimilarExpression extends Link {
+  /** How many occurrences the model counts for the expression; absent for a note. */
+  count?: number;
+}
+
+/** The headings and notes the keyword page adds itself, in the language of the site; the theme's own English when absent. */
+export interface KeywordPageLabels {
+  /** Accessible name of the tree of the space. */
+  spaceTree: string;
+  /** Accessible name of the breadcrumb. */
+  breadcrumb: string;
+  /** The mark on the line under the title: that no note defines the word. */
+  noDefinition: string;
+  /** Heading of the passages. */
+  passages: string;
+  /** Heading of the block of counts. */
+  whatWeKnow: string;
+  occurrences: string;
+  files: string;
+  spaces: string;
+  /** Note under the counts: that the word has no file, hence no property. */
+  noProperty: string;
+  /** Heading of the block of expressions with a similar form. */
+  maybeSame: string;
+  /** Heading of the block of accompanying words. */
+  companions: string;
+  /** When the word shares no paragraph with another page. */
+  noCompanion: string;
+  /** The line that unfolds the neighbourhood. */
+  seeNeighbourhood: string;
+  /** How many pages the neighbourhood holds, already worded: "5 pages". */
+  neighbourPages: string;
 }
 
 export interface KeywordPageProps {
   /** `typeLabel` names the kind of page, "keyword" in the locale of the site. */
   entity: { id: string; title: string; locale: string; typeLabel: string };
+  /** The space the word is filed in, the glossary when there is one, its tree with the word as the current page; absent, the page has no left column. */
+  space?: SpaceTree;
+  /** Space › terms › word; absent, the page has no breadcrumb. */
+  breadcrumb?: BreadcrumbItem[];
+  /** Since when the word is used: the oldest change among the files that use it; absent when none carries a date. */
+  usedSince?: ChangeDate;
   banner: KeywordBanner;
   counts: { occurrences: number; files: number; sources: number };
+  /** The names of the spaces the passages come from, in corpus order. */
+  spaces: string[];
+  /** The sentence under the passages heading, "6 files.", already localised. */
+  summary: string;
   /** Grouped by file, in corpus order. */
   passages: PassageGroup[];
   /** The most frequent first, twelve at most. */
   companions: Companion[];
   /** Expressions with a similar form, offered as a lead. */
-  similar: Link[];
-  /** The wording of that lead, already localised, which asserts no relation. */
+  similar: SimilarExpression[];
+  /** The note under that lead, already localised, which asserts no relation. */
   similarLead: string;
   neighbours: NeighbourhoodProps;
   mentions: MentionsPanelProps;
-  /** The line that unfolds the neighbourhood and its count; the theme's own English when absent. */
-  labels?: Partial<Pick<EntityPageLabels, "seeNeighbourhood" | "neighbourPages">>;
+  labels?: Partial<KeywordPageLabels>;
 }
 
 export interface Mention {

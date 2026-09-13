@@ -254,12 +254,10 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(entity).toContain('<span class="badge">Term</span>');
     expect(entity).toContain("<p>An entity page.</p>");
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
-    expect(keyword).toContain('<div class="entity keyword">');
-    expect(keyword).toContain("<h1>build summary</h1>");
-    expect(keyword).toContain(
-      '<span class="badge">Keyword</span><span class="noteless">no note</span>',
-    );
-    expect(keyword).toContain("Expression without a note. 5 passages recorded.");
+    expect(keyword).toContain('<div class="entity entity-with-space keyword">');
+    expect(keyword).toContain('<h1 class="keyword-title">build summary</h1>');
+    expect(keyword).toContain('<span class="badge badge-noteless">No definition</span>');
+    expect(keyword).toContain("Nobody has written a definition, but 5 passages use this word.");
     const rule = fileSystem.readText("/dist/specs/rules/publication-threshold/index.html");
     expect(rule.startsWith('<!doctype html>\n<html lang="fr" dir="ltr">')).toBe(true);
     for (const page of report.pages) {
@@ -407,9 +405,11 @@ describe("URLs follow the entity identifier and stay stable from one build to th
     expect(redirect).toContain(
       '<main id="main"><div class="redirect"><h1>Build summary</h1><p>A note now defines this expression: <a href="../../glossary/build-summary/index.html">Build summary</a></p></div></main>',
     );
-    expect(redirect).not.toContain("Expression without a note");
+    expect(redirect).not.toContain("Nobody has written a definition");
     // The address a keyword page of this build holds stays that page; a free one is claimed once.
-    expect(fileSystem.readText("/dist/keywords/zzz/index.html")).toContain("<h1>#hash</h1>");
+    expect(fileSystem.readText("/dist/keywords/zzz/index.html")).toContain(
+      '<h1 class="keyword-title">#hash</h1>',
+    );
     const summary = fileSystem.readText("/dist/keywords/summary/index.html");
     expect(summary).toContain('url=../../glossary/build-summary/index.html"');
     expect(report.pages.map((page) => page.path)).toContain("keywords/build-summary/index.html");
@@ -432,10 +432,10 @@ describe("URLs follow the entity identifier and stay stable from one build to th
     });
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
     expect(keyword).toContain(
-      '<a class="create-note" href="https://github.com/concordance-wiki/demo-glossary/new/main?filename=build-summary.md">Create a note</a>',
+      '<a class="create-note" href="https://github.com/concordance-wiki/demo-glossary/new/main?filename=build-summary.md">Propose a definition</a>',
     );
     const plain = (await build()).fileSystem.readText("/dist/keywords/build-summary/index.html");
-    expect(plain).toContain('<span class="create-note">Create a note</span>');
+    expect(plain).toContain('<span class="create-note">Propose a definition</span>');
   });
 
   it("keeps the same URL when the model gains an entity or a link", async () => {
@@ -469,8 +469,8 @@ describe("The main content of every page is present in the served HTML, without 
     const keyword = withoutJavaScript(
       fileSystem.readText("/dist/keywords/build-summary/index.html"),
     );
-    expect(keyword).toContain("<q>the build summary is printed</q>");
-    expect(keyword).toContain("<q>after the <mark>Build summaries</mark></q>");
+    expect(keyword).toContain('<q class="passage-text">the build summary is printed</q>');
+    expect(keyword).toContain('<q class="passage-text">after the <mark>Build summaries</mark></q>');
     const index = withoutJavaScript(fileSystem.readText(`/dist/${INDEX_PAGE}`));
     expect(count(index, '<li class="index-entry"')).toBe(7);
     const todo = withoutJavaScript(fileSystem.readText(`/dist/${TODO_PAGE}`));

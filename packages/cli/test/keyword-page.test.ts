@@ -234,8 +234,8 @@ describe("The keyword page in the pipeline", () => {
     const io = recordedIo({ "/work/concordance.yaml": config, ...corpus });
     expect(await buildCommand([], io)).toBe(0);
     const page = io.fs.readText("/work/dist/keywords/build-summary/index.html");
-    expect(page).toContain("<h1>build summary</h1>");
-    expect(page).toContain("Expression without a note. 5 passages recorded.");
+    expect(page).toContain('<h1 class="keyword-title">build summary</h1>');
+    expect(page).toContain("Nobody has written a definition, but 5 passages use this word.");
     expect(page).toContain("<mark>build summary</mark>");
     expect(page).not.toContain('http-equiv="refresh"');
     expect(io.stdout).toContain("redirects: 2 former keyword addresses forwarding to a note");

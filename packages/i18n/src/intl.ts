@@ -19,6 +19,15 @@ export function formatDate(
   }).format(date);
 }
 
+/** The month of a date with its year, "March 2026", in the words of the locale. */
+export function formatMonth(locale: Locale, date: Date, options: DateOptions = {}): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: options.timeZone ?? "UTC",
+  }).format(date);
+}
+
 export function formatNumber(
   locale: Locale,
   value: number,

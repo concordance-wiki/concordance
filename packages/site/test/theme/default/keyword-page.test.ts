@@ -6,11 +6,15 @@ import { renderSlot } from "../../../src/render.js";
 import type { EntityPageProps, KeywordPageProps } from "../../../src/slots.js";
 import { KeywordPage, markedContext } from "../../../src/theme/default/keyword-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { entityPage, keywordPage } from "../../../src/gallery/fixtures.js";
+import { corporateKeywordPage, entityPage, keywordPage } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 function render(overrides: Partial<KeywordPageProps> = {}): string {
   return renderSlot("KeywordPage", { ...keywordPage, ...overrides }, defaultTheme);
+}
+
+function renderCorporate(overrides: Partial<KeywordPageProps> = {}): string {
+  return renderSlot("KeywordPage", { ...corporateKeywordPage, ...overrides }, defaultTheme);
 }
 
 /** Asserts that the markers appear in the markup in the order given, each of them present. */
@@ -24,8 +28,20 @@ function expectInOrder(html: string, markers: string[]): void {
 }
 
 describe("KeywordPage", () => {
-  it("uses the same template as the entity page, without the markdown and the declared properties", () => {
-    const shared = { neighbours: entityPage.neighbours, mentions: entityPage.mentions };
+  it("uses the same shell as the entity page, without the markdown and the declared properties", () => {
+    const shared = {
+      space: {
+        name: "glossary",
+        initials: "GL",
+        nodes: [
+          { label: "Alias", href: "../alias/" },
+          { label: "build summary", current: true },
+        ],
+      },
+      breadcrumb: [{ label: "glossary", href: "../../#home-tree" }, { label: "build summary" }],
+      neighbours: entityPage.neighbours,
+      mentions: entityPage.mentions,
+    };
     const entity: EntityPageProps = {
       ...entityPage,
       ...shared,
@@ -40,26 +56,34 @@ describe("KeywordPage", () => {
     const entityShell = entityHtml
       .replace('<article class="entity-body"></article>', "")
       .replace('<footer class="entity-footer"></footer>', "");
-    // What the keyword page adds in their place: its own body and panel.
+    // What the keyword page adds in their place: its notice, its body and its own blocks of the panel.
     const keywordShell = keywordHtml
+      .replace(/<aside class="keyword-notice"[\s\S]*?<\/aside>/, "")
       .replace(/<section class="keyword-body"[\s\S]*?<\/section>/, "")
-      .replace(/<aside class="keyword-panel panel-block"[\s\S]*?<\/aside>/, "");
+      .replace(/<section class="panel-block keyword-facts"[\s\S]*?<\/section>/, "")
+      .replace(/<section class="panel-block keyword-panel"[\s\S]*?<\/section>/, "");
     const skeleton = (html: string): string =>
       html
         .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge/>")
-        .replace(/<h1>[\s\S]*?<\/h1>/, "<title/>")
-        .replace('<div class="entity keyword">', '<div class="entity">');
+        .replace(/<h1[^>]*>[\s\S]*?<\/h1>/, "<title/>")
+        .replace(
+          '<div class="entity entity-with-space keyword">',
+          '<div class="entity entity-with-space">',
+        );
     expect(skeleton(keywordShell)).toBe(skeleton(entityShell));
     expect(keywordHtml).not.toContain("entity-body");
-    expect(keywordHtml).not.toContain("entity-panel");
+    expect(keywordHtml).not.toContain("entity-properties");
     expect(keywordHtml).not.toContain("entity-footer");
     expect(keywordHtml).not.toContain("<article");
     expectInOrder(keywordHtml, [
-      '<div class="entity keyword"><div class="entity-main"><header class="entity-header">',
-      "<h1>build summary</h1>",
-      '<p class="entity-badge"><span class="badge">Keyword</span><span class="noteless">no note</span></p></header>',
+      '<div class="entity entity-with-space keyword"><nav class="space" aria-label="Tree of the space">',
+      '<div class="entity-main"><nav class="breadcrumbs" aria-label="You are here">',
+      '<header class="entity-header"><h1 class="keyword-title">build summary</h1>',
+      '<p class="entity-badge"><span class="badge badge-noteless">No definition</span></p></header>',
+      '<aside class="keyword-notice" role="note">',
       '<section class="keyword-body"',
-      '<div class="entity-side"><aside class="keyword-panel panel-block"',
+      '<div class="entity-side"><section class="panel-block keyword-facts"',
+      '<section class="panel-block keyword-panel"',
       '<aside class="mentions panel-block"',
       '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span></summary><section class="neighbourhood"',
     ]);
@@ -69,43 +93,87 @@ describe("KeywordPage", () => {
       }),
     ).toContain('<span class="neighbourhood-lead">Voir la carte du voisinage</span>');
     expectBalanced(keywordHtml);
+    expectBalanced(renderCorporate());
   });
 
-  it("explains in a banner that no note exists and states the number of passages recorded", () => {
+  it("stands without a left column or a breadcrumb when the word is filed in no space", () => {
     const html = render();
+    expect(html).toContain('<div class="entity keyword"><div class="entity-main"><header');
+    expect(html).not.toContain('class="space"');
+    expect(html).not.toContain('class="breadcrumbs"');
+  });
+
+  it("walks the breadcrumb space › terms › word and marks the word as the current page of the tree of its space", () => {
+    const html = renderCorporate();
     expect(html).toContain(
-      '<p class="banner" role="note">Expression without a note. 7 passages recorded. <a class="create-note" href="https://forge.example/glossary/new/main?filename=build-summary.md">Create a note</a></p>',
+      '<ol class="breadcrumbs-list"><li><a href="../../#home-tree">glossary</a></li><li><span>Terms</span></li><li><span aria-current="page">build summary</span></li></ol>',
     );
-    expectInOrder(html, ["</header>", '<p class="banner"', '<dl class="counts">']);
-    const plain = render({ banner: { text: "No note.", createNote: { label: "Create a note" } } });
+    expect(html).toContain('<span class="space-name">glossary</span>');
+    expectInOrder(html, [
+      '<li class="space-page"><a href="../../glossary/build-log/">Build log</a></li>',
+      '<li class="space-page space-current"><span aria-current="page">build summary</span></li>',
+      '<li class="space-page"><a href="../../glossary/candidate-expression/">Candidate expression</a></li>',
+    ]);
+  });
+
+  it("dots the title, marks the line under it as having no definition and says since when the word is used", () => {
+    const html = renderCorporate();
+    expect(html).toContain(
+      '<h1 class="keyword-title">build summary</h1><p class="entity-badge"><span class="badge badge-noteless">No definition</span><time class="keyword-since" datetime="2026-03-12">Used since March 2026</time></p>',
+    );
+    expect(render()).toContain(
+      '<p class="entity-badge"><span class="badge badge-noteless">No definition</span></p>',
+    );
+    expect(renderCorporate({ labels: { noDefinition: "Sans définition" } })).toContain(
+      '<span class="badge badge-noteless">Sans définition</span>',
+    );
+  });
+
+  it("explains in a notice that nobody wrote a definition, what the page is built from, and offers to propose one", () => {
+    const html = renderCorporate();
+    expect(html).toContain(
+      '<aside class="keyword-notice" role="note"><p class="keyword-notice-lead">Nobody has written a definition, but 17 passages use this word.</p><p class="keyword-notice-detail">This page is built from those passages alone. If someone creates the note in the glossary, its text will take its place here and the rest of the page will not change.</p><a class="create-note" href="https://forge.example/glossary/new/main?filename=build-summary.md">Propose a definition</a></aside>',
+    );
+    expectInOrder(html, [
+      "</header>",
+      '<aside class="keyword-notice"',
+      '<section class="keyword-body"',
+    ]);
+    const plain = render({
+      banner: { text: "No note.", createNote: { label: "Propose a definition" } },
+    });
     expect(plain).toContain(
-      '<p class="banner" role="note">No note. <span class="create-note">Create a note</span></p>',
+      '<aside class="keyword-notice" role="note"><p class="keyword-notice-lead">No note.</p><span class="create-note">Propose a definition</span></aside>',
     );
     expect(plain).not.toContain('<a class="create-note"');
   });
 
-  it("shows three numbers only: occurrences, files, sources", () => {
-    const html = render();
-    const counts = html.slice(html.indexOf('<dl class="counts">'), html.indexOf("</dl>"));
-    expect(counts).toBe(
-      '<dl class="counts"><div><dt>Occurrences</dt><dd>7</dd></div><div><dt>Files</dt><dd>3</dd></div><div><dt>Sources</dt><dd>2</dd></div>',
-    );
-    expect(count(counts, "<dd>")).toBe(3);
-    expect(count(html, "<dl")).toBe(1);
-  });
-
-  it("lists the passages grouped by file, in the order received, with their context and the expression marked", () => {
-    const html = render();
+  it("lists the passages in corpus order under their summary, grouped by file with its type, its title and its count, each passage where it stands with the expression marked", () => {
+    const html = renderCorporate();
     expectInOrder(html, [
-      '<h2 id="passages-title">Passages</h2>',
-      '<section class="passage-group"><h3><a href="../build-pipeline/">processes/build-pipeline.md</a></h3>',
-      '<a href="../build-pipeline/#L12">line 12</a> <q>the <mark>build summary</mark> is printed</q>',
-      '<a href="../build-pipeline/#L40">line 40</a> <q>after the <mark>Build summaries</mark></q>',
-      '<section class="passage-group"><h3><a href="../todo-page/">screens/todo-page.md</a></h3>',
-      "<q>the to-do page counts what the <mark>build summary</mark> reports</q>",
+      '<section class="keyword-body" aria-labelledby="passages-title"><h2 id="passages-title">The passages, in corpus order</h2><p class="keyword-summary">6 files.</p>',
+      '<section class="passage-group"><h3 class="passage-file"><span class="badge">Term</span><a class="passage-title" href="../../glossary/build-log/">Build log</a><span class="passage-count">2</span></h3><ul class="passage-list">',
+      '<li class="passage"><a class="passage-at" href="../../glossary/build-log/#L6">line 6</a><q class="passage-text">The build log is the file; the <mark>build summary</mark> is what the command prints from it at the end.</q></li>',
+      '<span class="badge">Meeting</span><a class="passage-title" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/">Keyword page threshold review</a><span class="passage-count">5</span>',
+      '<a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L31">12:04</a>',
+      '<a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L90">34:51</a><q class="passage-text">Participant-2: the <mark>Build summaries</mark> of the nightly build',
+      '<span class="badge">Document</span><a class="passage-title" href="../../framing/roadmap-outline/">Roadmap outline</a>',
+      '<a class="passage-at" href="../../framing/roadmap-outline/#L12">p. 12</a>',
     ]);
-    expect(count(html, '<section class="passage-group">')).toBe(2);
-    expect(render({ passages: [] })).toContain('<h2 id="passages-title">Passages</h2></section>');
+    expect(count(html, '<section class="passage-group">')).toBe(6);
+    expect(count(html, '<li class="passage">')).toBe(17);
+    // A group without a title or a type, a passage without a worded location: the file label and the line stand in.
+    const bare = render();
+    expect(bare).toContain(
+      '<h3 class="passage-file"><a class="passage-title" href="../build-pipeline/">processes/build-pipeline.md</a><span class="passage-count">2</span></h3>',
+    );
+    expect(bare).toContain(
+      '<a class="passage-at" href="../build-pipeline/#L12">line 12</a><q class="passage-text">the <mark>build summary</mark> is printed</q>',
+    );
+    expect(bare).not.toContain('<span class="badge">Term</span>');
+    expect(render({ passages: [], summary: "0 files." })).toContain(
+      '<p class="keyword-summary">0 files.</p></section>',
+    );
   });
 
   it("marks the expression only where the context holds it as written", () => {
@@ -124,10 +192,31 @@ describe("KeywordPage", () => {
     ).toBe("<q>a b c</q>");
   });
 
+  it("states what we know in the first block of the panel: occurrences, files, spaces, and that the word has no property", () => {
+    const html = renderCorporate();
+    expect(html).toContain(
+      '<section class="panel-block keyword-facts" aria-labelledby="keyword-facts"><details class="panel-fold"><summary><h2 id="keyword-facts">What we know</h2></summary><dl class="attributes"><div class="attribute"><dt>Occurrences</dt><dd>17</dd></div><div class="attribute"><dt>Files</dt><dd>6</dd></div><div class="attribute"><dt>Spaces</dt><dd>glossary, specs, framing</dd></div></dl><p class="panel-note">No declared property: there is no file for this word.</p></details></section>',
+    );
+    expect(count(html, "<dd>")).toBe(3);
+    // Without a passage on a page of the site, the number of sources stands in for their names.
+    expect(render({ spaces: [], counts: { occurrences: 3, files: 2, sources: 2 } })).toContain(
+      "<dt>Spaces</dt><dd>2</dd>",
+    );
+  });
+
+  it("offers the expressions that may be the same thing with their counts, under a note that asserts nothing, and no block without any", () => {
+    const html = renderCorporate();
+    expect(html).toContain(
+      '<section class="panel-block keyword-similar" aria-labelledby="keyword-similar"><details class="panel-fold"><summary><h2 id="keyword-similar">Maybe the same thing</h2></summary><ul class="similar-list"><li><a class="similar-lead" href="../build-report/"><span class="similar-label">build report</span><span class="similar-count">4</span></a></li><li><a class="similar-lead" href="../../glossary/build-log/"><span class="similar-label">Build log</span></a></li></ul><p class="panel-note">Expressions close in form and context. A lead, not a claim.</p></details></section>',
+    );
+    expect(render({ similar: [] })).not.toContain("keyword-similar");
+    expectInOrder(html, ['id="keyword-facts"', 'id="keyword-similar"', 'id="keyword-companions"']);
+  });
+
   it("shows the accompanying words sized by co-occurrence frequency, each a link with its count in text", () => {
     const html = render();
     expect(html).toContain(
-      '<ul class="companions"><li class="companion" data-weight="5"><a href="../build-log/">build log</a> <span class="count">12</span></li>',
+      '<h2 id="keyword-companions">Accompanying words</h2></summary><ul class="companions"><li class="companion" data-weight="5"><a href="../build-log/">build log</a> <span class="count">12</span></li>',
     );
     expect(html).toContain(
       '<li class="companion" data-weight="3"><a href="../finding/">finding</a> <span class="count">5</span></li>',
@@ -136,16 +225,15 @@ describe("KeywordPage", () => {
       '<li class="companion" data-weight="1"><span>counts</span> <span class="count">2</span></li>',
     );
     expect(render({ companions: [] })).toContain(
-      '<h2 id="companions-title">Accompanying words</h2><p class="empty">No accompanying word recorded.</p>',
+      '<h2 id="keyword-companions">Accompanying words</h2></summary><p class="empty panel-note">No accompanying word recorded.</p>',
     );
   });
 
-  it("offers the expressions with a similar form as a lead, worded so as to assert nothing", () => {
-    const html = render();
-    expect(html).toContain(
-      '<section class="similar" aria-labelledby="similar-title"><h2 id="similar-title">Expressions with a similar form</h2><p>You may also mean:</p><ul><li><a href="../build/">Build</a></li></ul></section>',
+  it("gives the related pages the note that none is cited, through the mentions slot", () => {
+    expect(renderCorporate()).toContain(
+      '<p class="related-note">Ordered by number of passages. None is “cited”: this word has no note to carry links.</p>',
     );
-    expect(render({ similar: [] })).not.toContain('class="similar"');
+    expect(renderCorporate()).not.toContain('<span class="related-mark">');
   });
 
   it("renders the neighbourhood and the mentions through the slots of the theme", () => {
