@@ -1,5 +1,7 @@
-import type { Transcript } from "./parse.js";
-import { groupCues } from "./render.js";
+import type { ReaderUnit } from "@concordance-wiki/core";
+
+import type { Cue, Transcript } from "./parse.js";
+import { anchorOf, formatTimecode, groupCues } from "./render.js";
 
 export interface CueOffset {
   cueIndex: number;
@@ -32,4 +34,20 @@ export function transcriptText(transcript: Transcript): TranscriptText {
     position += 1;
   }
   return { text: lines.join("\n"), offsets };
+}
+
+/**
+ * The spoken text as addressable units, one per speaker turn: labelled by the timecode of its
+ * first cue and anchored like the rendered transcript, so that a citation lands on the passage.
+ */
+export function transcriptUnits(transcript: Transcript): ReaderUnit[] {
+  return groupCues(transcript.cues).map((group) => {
+    // groupCues only ever opens a group around a cue: the first one is always there.
+    const first = group.cues[0] as Cue;
+    return {
+      label: formatTimecode(first.start),
+      text: group.cues.map((cue) => cue.text).join(" "),
+      anchor: anchorOf(first),
+    };
+  });
 }

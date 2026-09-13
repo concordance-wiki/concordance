@@ -100,6 +100,23 @@ describe("Mentions are grouped by file, each group collapsible, with its count",
     expect(plain).toContain('<q class="mention-context">passage 5 cites the entity</q>');
     expect(plain).not.toContain("<mark>");
   });
+
+  it("names the page, slide or timecode of a mention read from a document instead of a line", () => {
+    const html = render({
+      mentions: [
+        { ...mention(3), location: "slide 3" },
+        {
+          ...mention(1),
+          file: { label: "review.vtt", href: "../notes/review.vtt/" },
+          location: "00:12:05",
+        },
+      ],
+      initial: 20,
+    });
+    expect(html).toContain('href="../notes/note-1/#L3">slide 3</a>');
+    expect(html).toContain('href="../notes/note-1/#L1">00:12:05</a>');
+    expect(html).not.toContain(">line 3<");
+  });
 });
 
 describe("The first twenty mentions are in the served HTML; the rest is loaded on demand from a JSON fragment specific to the entity", () => {

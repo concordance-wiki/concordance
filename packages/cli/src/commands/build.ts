@@ -1,3 +1,4 @@
+import { availableParallelism } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
@@ -46,11 +47,14 @@ export interface BuildDependencies extends PluginLoaderDependencies {
   loadTheme?: ThemeDependencies["loadTheme"];
   rootOf?: ThemeDependencies["rootOf"];
   pluginFiles?: ThemeDependencies["pluginFiles"];
+  /** The cores available for conversions when `conversion.parallelism` is unset; one when absent. */
+  parallelism?: number;
 }
 
 const nodeDependencies: BuildDependencies = {
   ...nodeThemeDependencies,
   fetch: globalThis.fetch,
+  parallelism: availableParallelism(),
 };
 
 /** The theme loading of the build: what the caller injected, the real importer for the rest. */
@@ -183,6 +187,7 @@ export async function buildCommand(
     fs: io.fs,
     clock: io.clock,
     ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
+    parallelism: config.conversion?.parallelism ?? deps.parallelism ?? 1,
   });
 
   const at = io.clock.now().toISOString();
@@ -226,6 +231,7 @@ export async function buildCommand(
       keywordLeads: result.keywordLeads,
       takenOver: result.takenOver,
       recognised: result.recognised,
+      documents: result.documents,
       config,
       fs: io.fs,
     },
@@ -251,8 +257,7 @@ export async function buildCommand(
   if (rendered !== exitCodes.ok) {
     return rendered;
   }
-  // Conversion does not exist yet, so no document is left unconverted.
-  const verdict = shouldFail(result.findings, config.build?.fail_on, 0);
+  const verdict = shouldFail(result.findings, config.build?.fail_on, result.unconverted);
   if (verdict.fail) {
     io.err(`build failed: ${verdict.reasons.join("; ")}`);
     return exitCodes.invalid;

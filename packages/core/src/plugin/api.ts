@@ -29,6 +29,21 @@ export interface ReaderInput {
 export interface ReaderOutput {
   metadata: Record<string, unknown>;
   text: string;
+  /**
+   * The text split into the addressable units of the format, in reading order, when it has
+   * some: one per speaker turn of a transcript, labelled by its timecode. Absent when `text`
+   * has no positions of its own.
+   */
+  units?: ReaderUnit[];
+}
+
+/** One addressable unit of a resource's text: what a citation points at. */
+export interface ReaderUnit {
+  /** How a reader names the position: a timecode such as `00:12:05` for a transcript. */
+  label: string;
+  text: string;
+  /** Fragment identifier of the unit in the reader's own HTML rendering, when it has one. */
+  anchor?: string;
 }
 
 export interface Reader {
@@ -36,6 +51,10 @@ export interface Reader {
   read: (input: ReaderInput) => ReaderOutput;
 }
 
+/**
+ * What a converter may produce: the PDF of the document, a folder of PNG thumbnails, and its
+ * text as a JSON file `{ "pages": string[] }`, one entry per page of the PDF in page order.
+ */
 export type Representation = "pdf" | "thumbnails" | "text";
 
 export interface ConversionLimits {

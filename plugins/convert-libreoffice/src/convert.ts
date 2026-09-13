@@ -2,7 +2,12 @@ import { createHash } from "node:crypto";
 import { basename, extname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import type { ConverterOutput, FileSystem, Finding } from "@concordance-wiki/core";
+import {
+  canonicalJson,
+  type ConverterOutput,
+  type FileSystem,
+  type Finding,
+} from "@concordance-wiki/core";
 
 import type { CommandRunner } from "./runner.js";
 
@@ -23,9 +28,9 @@ export interface ConvertOptions {
 export interface ConvertDependencies {
   runner: CommandRunner;
   fs: FileSystem;
-  /** Text of a produced PDF; empty when nothing can be extracted. */
-  extractText: (pdf: Uint8Array) => Promise<string>;
-  /** Folder of the pipeline cache; the converted PDFs and the temporary folders live under `convert/`. */
+  /** The text of every page of a PDF; no page when nothing can be extracted. */
+  extractPages: (pdf: Uint8Array) => Promise<string[]>;
+  /** Folder of the pipeline cache; the converted PDFs, their text and the temporary folders live under `convert/`. */
   cacheDirectory: string;
 }
 
@@ -33,6 +38,18 @@ export interface ConvertDependencies {
 export const SUSPECT_SOURCE_BYTES = 100 * 1024;
 
 export const SOFFICE = "soffice";
+
+/** A PDF source is its own PDF representation: it is kept in the cache and read, never converted. */
+export const PDF_EXTENSION = ".pdf";
+
+/** What the `text` representation holds, as `<sha256>.text.json` next to the PDF: the text of every page. */
+export interface ExtractedText {
+  pages: string[];
+}
+
+export function extractedTextPath(cacheDirectory: string, sha256: string): string {
+  return join(cacheDirectory, "convert", `${sha256}.text.json`);
+}
 
 export function sha256Of(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex");
@@ -123,23 +140,24 @@ async function produce(
   return { pdf: deps.fs.readBytes(output) };
 }
 
-async function suspectFindings(
+function suspectFindings(
   source: ConvertSource,
-  pdf: Uint8Array,
-  deps: ConvertDependencies,
-): Promise<Finding[]> {
-  if (source.bytes.byteLength <= SUSPECT_SOURCE_BYTES) {
+  extension: string,
+  pages: readonly string[],
+): Finding[] {
+  if (source.bytes.byteLength <= SUSPECT_SOURCE_BYTES || pages.join("").trim() !== "") {
     return [];
   }
-  const text = await deps.extractText(pdf);
-  if (text.trim() !== "") {
-    return [];
-  }
+  const size = `${megabytes(source.bytes.byteLength)} MB`;
+  const subject =
+    extension === PDF_EXTENSION
+      ? `the PDF ${source.path} (${size})`
+      : `the PDF converted from ${source.path} (${size})`;
   return [
     {
       check: "W-CONV-SUSPECT",
       severity: "warning",
-      message: `the PDF converted from ${source.path} (${megabytes(source.bytes.byteLength)} MB) contains no extractable text`,
+      message: `${subject} contains no extractable text`,
       remediation:
         "re-export the document with selectable text, or add a markdown twin that carries its content",
       path: source.path,
@@ -147,9 +165,30 @@ async function suspectFindings(
   ];
 }
 
+/** Reads a text representation back; a file the cache holds was written by this module. */
+function readExtractedText(fs: FileSystem, path: string): string[] {
+  return (JSON.parse(fs.readText(path)) as ExtractedText).pages;
+}
+
+/** The pages of the PDF, extracted once per fingerprint and kept next to it. */
+async function pagesOf(
+  pdf: Uint8Array,
+  path: string,
+  deps: ConvertDependencies,
+): Promise<string[]> {
+  if (deps.fs.exists(path)) {
+    return readExtractedText(deps.fs, path);
+  }
+  const pages = await deps.extractPages(pdf);
+  deps.fs.writeText(path, canonicalJson({ pages }));
+  return pages;
+}
+
 /**
- * Converts one office document to PDF through headless LibreOffice, keyed in the cache by the
- * SHA-256 of the source: an unchanged source is never reconverted. Every failure is a finding.
+ * Converts one office document to PDF through headless LibreOffice and extracts the text of
+ * every page of the PDF, both keyed in the cache by the SHA-256 of the source: an unchanged
+ * source is never reconverted nor re-read. A PDF source skips the conversion and is only read.
+ * Every failure is a finding.
  */
 export async function convertToPdf(
   source: ConvertSource,
@@ -176,6 +215,9 @@ export async function convertToPdf(
   let pdf: Uint8Array;
   if (deps.fs.exists(cached)) {
     pdf = deps.fs.readBytes(cached);
+  } else if (extension === PDF_EXTENSION) {
+    pdf = source.bytes;
+    deps.fs.writeBytes(cached, pdf);
   } else {
     const work = join(deps.cacheDirectory, "convert", "work", sha256);
     const produced = await produce(source, work, options, deps);
@@ -186,8 +228,10 @@ export async function convertToPdf(
     pdf = produced.pdf;
     deps.fs.writeBytes(cached, pdf);
   }
+  const text = extractedTextPath(deps.cacheDirectory, sha256);
+  const pages = await pagesOf(pdf, text, deps);
   return {
-    representations: { pdf: { path: cached } },
-    findings: await suspectFindings(source, pdf, deps),
+    representations: { pdf: { path: cached }, text: { path: text } },
+    findings: suspectFindings(source, extension, pages),
   };
 }

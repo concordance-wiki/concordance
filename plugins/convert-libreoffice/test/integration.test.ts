@@ -6,7 +6,7 @@ import { commandExists, nodeFileSystem } from "@concordance-wiki/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { convertToPdf } from "../src/convert.js";
-import { extractPdfText } from "../src/pdf-text.js";
+import { extractPdfPages, extractPdfText } from "../src/pdf-text.js";
 import { nodeCommandRunner, type CommandRunner } from "../src/runner.js";
 
 const encoder = new TextEncoder();
@@ -35,7 +35,7 @@ describe.skipIf(!soffice)("convertToPdf through the installed LibreOffice", () =
           return nodeCommandRunner.run(command, args, options);
         },
       };
-      const deps = { runner, fs: nodeFileSystem, cacheDirectory, extractText: extractPdfText };
+      const deps = { runner, fs: nodeFileSystem, cacheDirectory, extractPages: extractPdfPages };
       const options = { extensions: [".txt"], timeoutMs: 120_000, maxSizeBytes: 1024 * 1024 };
       const source = {
         path: join(cacheDirectory, "source", "sample.txt"),
@@ -49,9 +49,14 @@ describe.skipIf(!soffice)("convertToPdf through the installed LibreOffice", () =
       expect(await extractPdfText(nodeFileSystem.readBytes(pdf))).toContain(
         "Hello conversion world",
       );
+      const name = (pdf.split("/").at(-1) ?? "").replace(/\.pdf$/, "");
       expect(nodeFileSystem.listFiles(cacheDirectory)).toEqual([
-        `convert/${pdf.split("/").at(-1) ?? ""}`,
+        `convert/${name}.pdf`,
+        `convert/${name}.text.json`,
       ]);
+      expect(nodeFileSystem.readText(output.representations.text?.path ?? "")).toContain(
+        "Hello conversion world",
+      );
       expect(calls).toBe(1);
       expect(await convertToPdf(source, options, deps)).toEqual(output);
       expect(calls).toBe(1);

@@ -2,7 +2,7 @@ import { memoryFileSystem, type ConverterInput } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
 import * as entry from "../src/index.js";
-import plugin, { createConverter, OFFICE_EXTENSIONS } from "../src/index.js";
+import plugin, { createConverter, createPdfConverter, OFFICE_EXTENSIONS } from "../src/index.js";
 import { fakeRunner, PDF_BYTES } from "./fake-runner.js";
 
 const encoder = new TextEncoder();
@@ -24,13 +24,17 @@ describe("@concordance-wiki/plugin-convert-libreoffice", () => {
   it("exposes exactly its public API", () => {
     expect(Object.keys(entry).sort()).toEqual([
       "OFFICE_EXTENSIONS",
+      "PDF_EXTENSION",
       "SOFFICE",
       "SUSPECT_SOURCE_BYTES",
       "convertMany",
       "convertToPdf",
       "createConverter",
+      "createPdfConverter",
       "default",
+      "extractPdfPages",
       "extractPdfText",
+      "extractedTextPath",
       "nodeCommandRunner",
       "sha256Of",
     ]);
@@ -42,10 +46,40 @@ describe("@concordance-wiki/plugin-convert-libreoffice", () => {
     expect(plugin.systemDependencies).toEqual([{ name: "LibreOffice", check: "soffice" }]);
   });
 
-  it("contributes one converter for docx, pptx and xlsx that produces pdf", () => {
+  it("contributes a converter for docx, pptx and xlsx and one for pdf, both producing pdf and text", () => {
     expect(OFFICE_EXTENSIONS).toEqual([".docx", ".pptx", ".xlsx"]);
     expect(plugin.contributes.converters?.map((c) => [c.extensions, c.produces])).toEqual([
-      [[".docx", ".pptx", ".xlsx"], ["pdf"]],
+      [
+        [".docx", ".pptx", ".xlsx"],
+        ["pdf", "text"],
+      ],
+      [[".pdf"], ["pdf", "text"]],
+    ]);
+  });
+
+  it("reads a PDF source through the PDF converter without LibreOffice: the text comes from the same extraction", async () => {
+    const fs = memoryFileSystem();
+    const runner = fakeRunner(fs);
+    const converter = createPdfConverter({
+      runner,
+      fs,
+      extractPages: () => Promise.resolve(["Vision", "Non-goals"]),
+    });
+    const output = await converter.convert({
+      ...input(),
+      path: "/repo/framing/vision.pdf",
+    });
+    expect(runner.calls).toEqual([]);
+    expect(output.representations).toEqual({
+      pdf: { path: "/pipeline/.concordance-cache/convert/abc123.pdf" },
+      text: { path: "/pipeline/.concordance-cache/convert/abc123.text.json" },
+    });
+    expect(
+      JSON.parse(fs.readText("/pipeline/.concordance-cache/convert/abc123.text.json")),
+    ).toEqual({ pages: ["Vision", "Non-goals"] });
+    const refused = await converter.convert(input());
+    expect(refused.findings.map((finding) => finding.message)).toEqual([
+      "conversion of /repo/decks/kickoff.pptx failed: extension .pptx is not converted by this plugin",
     ]);
   });
 
@@ -56,9 +90,9 @@ describe("@concordance-wiki/plugin-convert-libreoffice", () => {
     const converter = createConverter({
       runner,
       fs,
-      extractText: (pdf) => {
+      extractPages: (pdf) => {
         extracted.push(pdf);
-        return Promise.resolve("");
+        return Promise.resolve([]);
       },
     });
     const large = input({ bytes: new Uint8Array(200 * 1024), sha256: "large" });
@@ -68,6 +102,7 @@ describe("@concordance-wiki/plugin-convert-libreoffice", () => {
     ]);
     expect(output.representations).toEqual({
       pdf: { path: "/pipeline/.concordance-cache/convert/large.pdf" },
+      text: { path: "/pipeline/.concordance-cache/convert/large.text.json" },
     });
     expect(extracted.map((pdf) => [...pdf])).toEqual([[...PDF_BYTES]]);
     expect(output.findings.map((finding) => finding.check)).toEqual(["W-CONV-SUSPECT"]);

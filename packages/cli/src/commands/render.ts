@@ -112,6 +112,35 @@ export function placeImages(
 }
 
 /**
+ * Places the documents of the entities next to their pages, the original file and its PDF
+ * preview, from the copies the build kept under `fragments/`; a file the build did not keep is
+ * skipped. Returns how many files were placed.
+ */
+export function placeDocuments(
+  fs: FileSystem,
+  fragments: ReadonlyMap<string, EntityFragment>,
+  modelDirectory: string,
+  output: string,
+): number {
+  let placed = 0;
+  for (const fragment of fragments.values()) {
+    for (const document of fragment.documents ?? []) {
+      const targets =
+        document.preview === undefined || document.preview === document.target
+          ? [document.target]
+          : [document.target, document.preview];
+      for (const target of targets) {
+        const from = join(modelDirectory, fragmentImagePath(target));
+        if (!fs.exists(from)) continue;
+        fs.writeBytes(join(output, target), fs.readBytes(from));
+        placed += 1;
+      }
+    }
+  }
+  return placed;
+}
+
+/**
  * Renders the site from a model and its fragments through the theme of the configuration, prints
  * the summary on stdout and every warning on stderr; a page over budget or with an accessibility
  * finding is reported, never a failure.
@@ -162,6 +191,7 @@ export async function renderSite(
       : { bodyMaxChars: config.build.extracted_text_max_chars }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
+  placeDocuments(io.fs, fragments, input.modelDirectory, input.output);
   for (const line of report.summary) {
     io.out(line);
   }

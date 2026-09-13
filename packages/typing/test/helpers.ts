@@ -2,6 +2,8 @@ import type { ApplicationConfig, DomainConfig, SourceConfig } from "@concordance
 import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
+import { compileDomains, type DomainMatcher } from "../src/domains.js";
+
 export const MODIFIED_AT = "2026-03-12T10:00:00.000Z";
 
 export function file(path: string, commit?: string): IngestedFile {
@@ -85,3 +87,8 @@ export const DOMAINS: DomainConfig[] = [
   },
   { id: "quality", match: ["quality/**"] },
 ];
+
+/** The declared domains, compiled once for the builders that take a matcher. */
+export function compiled(): DomainMatcher {
+  return compileDomains(DOMAINS);
+}

@@ -62,6 +62,16 @@ export function surfaceOf(entity: Entity, provenance: Provenance): string | unde
   return undefined;
 }
 
+/**
+ * In a document that is not a note, the scan names the position in the section of the occurrence
+ * (`page 3`, `slide 3`, a timecode) and counts it as the line: the panel cites the name.
+ */
+export function locationOf(provenance: Provenance): string | undefined {
+  return provenance.path !== undefined && !provenance.path.endsWith(".md")
+    ? (provenance.occurrences?.[0]?.section ?? provenance.section)
+    : undefined;
+}
+
 interface LocatedMention {
   mention: Mention;
   /** Source name, then path, then line: the corpus order. */
@@ -99,6 +109,7 @@ function mentionOf(
   const href = entityHref(page, note.id);
   const line = provenance.line ?? note.source.line;
   const surface = surfaceOf(entity, provenance);
+  const location = locationOf(provenance);
   return {
     mention: {
       kind: WRITTEN.has(provenance.method) ? "written" : "recognised",
@@ -107,6 +118,7 @@ function mentionOf(
       line,
       href: `${href}#L${String(line)}`,
       ...(surface === undefined ? {} : { surface }),
+      ...(location === undefined ? {} : { location }),
     },
     source: note.source.name,
     path: provenance.path,

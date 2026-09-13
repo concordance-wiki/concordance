@@ -79,3 +79,29 @@ export function recordedIo(files: Record<string, string> = {}, cwd = "/work"): R
     err: (line) => stderr.push(line),
   };
 }
+
+const pdfEncoder = new TextEncoder();
+
+/** A minimal PDF, one page per content stream, small enough to be read by pdf.js in a test. */
+export function tinyPdf(pages: readonly string[]): Uint8Array {
+  const kids = pages.map((_, index) => `${String(4 + index * 2)} 0 R`).join(" ");
+  const objects = pages.flatMap((text, index) => {
+    const page = 4 + index * 2;
+    const content = `BT /F1 12 Tf 20 100 Td (${text}) Tj ET`;
+    return [
+      `${String(page)} 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 2000 200] /Contents ${String(page + 1)} 0 R /Resources << /Font << /F1 3 0 R >> >> >> endobj`,
+      `${String(page + 1)} 0 obj << /Length ${String(content.length)} >> stream\n${content}\nendstream endobj`,
+    ];
+  });
+  return pdfEncoder.encode(
+    [
+      "%PDF-1.4",
+      "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj",
+      `2 0 obj << /Type /Pages /Kids [${kids}] /Count ${String(pages.length)} >> endobj`,
+      "3 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj",
+      ...objects,
+      "trailer << /Root 1 0 R >>",
+      "%%EOF",
+    ].join("\n"),
+  );
+}

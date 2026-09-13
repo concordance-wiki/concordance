@@ -10,10 +10,13 @@ import {
 import type { Profile } from "@concordance-wiki/profile";
 
 import type { LocaleDictionary } from "./dictionary.js";
+import { pageParagraphs, type ReadDocument } from "./documents.js";
 import type { ParsedDocument } from "./parse.js";
 
 export interface ScanNotesInput {
   documents: readonly ParsedDocument[];
+  /** The documents that are not notes, read page by page; none when the corpus has only notes. */
+  resources?: readonly ReadDocument[];
   sources: readonly IngestedSource[];
   dictionaries: ReadonlyMap<string, LocaleDictionary>;
   profile: Profile;
@@ -67,9 +70,10 @@ export function typePrefixes(
 }
 
 /**
- * Every occurrence of a dictionary entry in the scannable units of every note, each note read
- * with the dictionary and the language pack of its source; in source, path, line and position
- * order whatever the order of the sources.
+ * Every occurrence of a dictionary entry in the scannable units of every note and in the pages
+ * of every document, each read with the dictionary and the language pack of its source; in
+ * source, path, line and position order whatever the order of the sources. In a document the
+ * line is the page number and the section its label, so that the source can be cited.
  */
 export function scanNotes(input: ScanNotesInput): Occurrence[] {
   const scale = occurrenceScale(input.profile);
@@ -78,10 +82,18 @@ export function scanNotes(input: ScanNotesInput): Occurrence[] {
     const pack = languagePack(locale);
     const prefixes = typePrefixes(input.profile, input.config, locale);
     for (const source of input.sources.filter((candidate) => candidate.locale === locale)) {
-      for (const note of input.documents.filter((candidate) => candidate.source === source.name)) {
+      const scanned = [
+        ...input.documents
+          .filter((candidate) => candidate.source === source.name)
+          .map((note) => ({ path: note.path, paragraphs: scannableText(note.document) })),
+        ...(input.resources ?? [])
+          .filter((candidate) => candidate.source === source.name)
+          .map((document) => ({ path: document.path, paragraphs: pageParagraphs(document) })),
+      ];
+      for (const document of scanned) {
         occurrences.push(
           ...scanDocument({
-            document: { path: note.path, paragraphs: scannableText(note.document) },
+            document,
             source: source.name,
             dictionary,
             pack,

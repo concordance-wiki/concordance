@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractPdfText } from "../src/pdf-text.js";
+import { extractPdfPages, extractPdfText } from "../src/pdf-text.js";
 
 const encoder = new TextEncoder();
 
@@ -26,6 +26,30 @@ function pdf(contents: string[]): Uint8Array {
     ].join("\n"),
   );
 }
+
+describe("extractPdfPages", () => {
+  it("gives the text of every page, in page order", async () => {
+    const pages = await extractPdfPages(
+      pdf([
+        "BT /F1 12 Tf 20 100 Td (Build) Tj ( summary) Tj ET",
+        "BT /F1 12 Tf 20 100 Td (Second slide) Tj ET",
+      ]),
+    );
+    expect(pages).toEqual(["Build summary", "Second slide"]);
+  });
+
+  it("keeps a page without text as an empty entry, so that page numbers stay right", async () => {
+    expect(
+      await extractPdfPages(
+        pdf(["0 0 1 rg 10 10 50 50 re f", "BT /F1 12 Tf 20 100 Td (Two) Tj ET"]),
+      ),
+    ).toEqual(["", "Two"]);
+  });
+
+  it("has no page for bytes that are not a PDF", async () => {
+    expect(await extractPdfPages(encoder.encode("not a pdf at all"))).toEqual([]);
+  });
+});
 
 describe("extractPdfText", () => {
   it("joins the text items of every page, one line per page", async () => {

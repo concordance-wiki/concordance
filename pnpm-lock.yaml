@@ -114,6 +114,15 @@ importers:
         specifier: workspace:*
         version: link:../typing
     devDependencies:
+      '@concordance-wiki/plugin-convert-libreoffice':
+        specifier: workspace:*
+        version: link:../../plugins/convert-libreoffice
+      '@concordance-wiki/plugin-reader-office':
+        specifier: workspace:*
+        version: link:../../plugins/reader-office
+      '@concordance-wiki/plugin-reader-vtt':
+        specifier: workspace:*
+        version: link:../../plugins/reader-vtt
       preact:
         specifier: 10.29.8
         version: 10.29.8(preact-render-to-string@6.7.0)
