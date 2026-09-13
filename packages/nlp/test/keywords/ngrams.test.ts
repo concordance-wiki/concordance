@@ -20,7 +20,7 @@ function keysOf(units: KeywordUnit[], options = defaults, pack = en): string[] {
 describe("extractNgrams", () => {
   it("generates n-grams of one to four words over notes and documents", () => {
     const units = [
-      { path: "notes/cap.md", line: 3, text: "Nightly build summary printed twice" },
+      { path: "notes/cap.md", line: 3, text: "Nightly build summary printed verbatim" },
       { path: "documents/minutes.md", line: 8, text: "Glossary owner" },
     ];
     expect(keysOf(units)).toEqual([
@@ -31,13 +31,13 @@ describe("extractNgrams", () => {
       "build",
       "build summary",
       "build summary printed",
-      "build summary printed twice",
+      "build summary printed verbatim",
       "summary",
       "summary printed",
-      "summary printed twice",
+      "summary printed verbatim",
       "printed",
-      "printed twice",
-      "twice",
+      "printed verbatim",
+      "verbatim",
       "glossary",
       "glossary owner",
       "owner",
@@ -45,15 +45,15 @@ describe("extractNgrams", () => {
   });
 
   it("starts at the configured shortest n-gram and stops at the longest", () => {
-    const units = [{ path: "a.md", line: 1, text: "nightly build summary printed twice" }];
+    const units = [{ path: "a.md", line: 1, text: "nightly build summary printed verbatim" }];
     expect(keysOf(units, { minWords: 2, maxWords: 3, minLength: 3 })).toEqual([
       "nightly build",
       "nightly build summary",
       "build summary",
       "build summary printed",
       "summary printed",
-      "summary printed twice",
-      "printed twice",
+      "summary printed verbatim",
+      "printed verbatim",
     ]);
   });
 
