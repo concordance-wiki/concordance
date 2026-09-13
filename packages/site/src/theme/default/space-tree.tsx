@@ -39,7 +39,8 @@ function Node({ node }: { node: SpaceNode }): JSX.Element {
   );
 }
 
-function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
+/** The nodes of a tree at one level; the home page draws the whole tree of every space with it. */
+export function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
   return (
     <ul class="space-nodes">
       {nodes.map((node, index) => (

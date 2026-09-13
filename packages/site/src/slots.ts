@@ -108,6 +108,25 @@ export interface SearchField {
    * index; absent when the site has no index, and the field then only submits.
    */
   root?: string;
+  /** The strings of the live results under the field, worded at build; the island's own English when absent. */
+  suggestions?: SuggestionLabels;
+}
+
+/** A message by plural category of the locale, `#` standing for the number, as the island words a count. */
+export type CountForms = Record<string, string>;
+
+/** The strings of the live results a search field shows as the reader types. */
+export interface SuggestionLabels {
+  /** "N matches", next to the field of the home page. */
+  matches: CountForms;
+  /** Under the title of a keyword page: "Used in N documents, never defined". */
+  usedIn: CountForms;
+  /** The keyboard help: the arrow keys "browse", the Enter key "open". */
+  browse: string;
+  enter: string;
+  open: string;
+  /** The link to the results page: "See the N results". */
+  seeResults: CountForms;
 }
 
 export interface NavigationItem extends Link {
@@ -166,65 +185,78 @@ export interface FooterProps {
   credit: boolean;
 }
 
-export interface HomeStats {
-  sources: number;
-  files: number;
-  /** ISO 8601 instant of the build. */
-  builtAt: string;
-  /** The day of the build in the words of the project locale; the theme shows the instant when absent. */
-  builtAtLabel?: string;
-}
-
-export interface HomeItem extends Link {
-  count?: number;
-  /** ISO 8601 date of the last change, for the freshness entry. */
-  date?: string;
-  /** The date in the words of the project locale; the theme shows `date` when absent. */
-  dateLabel?: string;
-  /** Whether the source of the item is dormant according to the staleness thresholds. */
-  stale?: boolean;
-}
-
-/** A node of the file tree: a source, a folder or a note; only a note has a page. */
-export interface HomeTreeNode {
-  label: string;
-  href?: string;
-  /** How many notes a source or a folder holds. */
-  count?: number;
-  children?: HomeTreeNode[];
-}
-
-/** A source of the freshness entry: its newest change, and whether the staleness threshold makes it dormant. */
-export interface HomeSource {
+/** A space of the home page: a source, how much it holds and when it last moved, its tree folded behind its row. */
+export interface HomeSpace {
   name: string;
+  /** Two letters standing for the space in its badge. */
+  initials: string;
+  /** How many pages the space holds. */
+  count: number;
+  /** What the count counts: `documents` when the notes of the space mostly stand for converted documents, `pages` otherwise. */
+  unit: "pages" | "documents";
+  /** The count worded in the language of the site, "312 pages"; the theme words it itself when absent. */
+  countLabel?: string;
   /** ISO 8601 date of the newest change among its notes; absent when none carries a git date. */
   date?: string;
+  /** The change worded relative to the build, "2 days ago"; the theme shows `date` when absent. */
   dateLabel?: string;
+  /** Whether the staleness threshold makes the space dormant. */
   stale: boolean;
+  /** The whole tree of the space, every folder open, drawn as the tree of the entity page. */
+  nodes: SpaceNode[];
 }
 
-/** One of the three entry points of the home page: the file tree, the alphabetical index, the latest changes. */
-export interface HomeEntry {
-  kind: "tree" | "index" | "recent";
+/** A page of the list of recent changes: where it leads, its space and when it changed. */
+export interface HomeChange extends Link {
+  space: string;
+  /** ISO 8601 date of the change. */
+  date: string;
+  /** The change worded relative to the build, "4 days ago"; the theme shows `date` when absent. */
+  dateLabel?: string;
+}
+
+/** The alert on a dormant space, worded by the build: its title, the space it names, the note on the threshold. */
+export interface HomeAlert {
+  /** "A space has not moved for 193 days". */
   title: string;
-  /** Where the whole of the entry lives, when it has a page of its own. */
-  href?: string;
-  items: HomeItem[];
-  /** The sources, their folders and their notes, for the `tree` entry. */
-  tree?: HomeTreeNode[];
-  /** Every source with its newest change, for the `recent` entry. */
-  sources?: HomeSource[];
+  space: string;
+  /** "framing. The alert threshold is set to 180 days in the configuration." */
+  text: string;
+}
+
+/** The strings of the home page in the language of the site; the theme's own English when absent. */
+export interface HomeLabels {
+  /** The question that heads the page. */
+  question: string;
+  /** Under the question: that every word used anywhere has a page. */
+  explanation: string;
+  /** Lead of the shortcuts. */
+  frequent: string;
+  /** Heading of the spaces. */
+  spaces: string;
+  /** After that heading: that the spaces come from the repositories. */
+  spacesLead: string;
+  /** The line folding the spaces beyond the first ones, already counted: "3 more spaces, less consulted". */
+  moreSpaces: string;
+  /** Under the spaces: where their dates come from. */
+  datesNote: string;
+  /** Heading of the recent changes. */
+  recent: string;
 }
 
 export interface HomeProps {
-  title: string;
   search?: SearchField;
-  /** The most cited words, offered as shortcuts under the search field. */
+  /** The most cited pages, offered as shortcuts under the search field. */
   shortcuts: Link[];
-  stats: HomeStats;
-  entries: HomeEntry[];
-  /** The link to the to-do page with the number of its entries. */
-  todo?: NavigationItem;
+  /** The spaces in view, most cited first. */
+  spaces: HomeSpace[];
+  /** The spaces beyond the first ones, folded behind a line counting them; absent or empty when every space is in view. */
+  moreSpaces?: HomeSpace[];
+  /** The pages changed last, newest first. */
+  recent: HomeChange[];
+  /** One alert per dormant space, in the order of the spaces. */
+  alerts: HomeAlert[];
+  labels?: Partial<HomeLabels>;
 }
 
 export interface EntityRef {

@@ -40,8 +40,8 @@ import { message, siteContext, typeLabel, type SiteContext, type SiteNames } fro
 import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf, type ViewerBundles } from "./entity-page.js";
 import type { EntityFragment } from "./fragments.js";
-import { homeOf } from "./home.js";
-import { letterHref, planIndex } from "./index-page.js";
+import { homeOf, suggestionLabels } from "./home.js";
+import { planIndex } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
 import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
 import {
@@ -207,13 +207,14 @@ function chromeFor(
   };
 }
 
-/** The search field of a page, in the header and in the search region of the home page: it submits to the results page. */
+/** The search field of a page, in the header and at the head of the home page: it submits to the results page, and its island words the live results. */
 function searchFieldOf(context: SiteContext, page: string): SearchField {
   return {
     action: relativeHref(page, SEARCH_PAGE),
     placeholder: message(context, "site.searchPlaceholder"),
     label: message(context, "site.search"),
     root: siteRootOf(page),
+    suggestions: suggestionLabels(context.catalogue),
   };
 }
 
@@ -360,13 +361,6 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   const index = planIndex(context, (props) =>
     Buffer.byteLength(render(INDEX_PAGE, "Index", props, indexTitle, input.locale).content),
   );
-  const letters = index.counts
-    .filter(({ count }) => count > 0)
-    .map(({ letter, count }) => ({
-      label: letter,
-      href: letterHref(HOME_PAGE, letter, index.segmented),
-      count,
-    }));
   const searchTitle = message(context, "site.search");
   // The results page is served empty: the island fills it from the query of the address.
   const searchPage = document(
@@ -395,10 +389,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       render(
         HOME_PAGE,
         "Home",
-        {
-          ...homeOf(context, siteTitle, { todoCount, letters }),
-          search: searchFieldOf(context, HOME_PAGE),
-        },
+        { ...homeOf(context), search: searchFieldOf(context, HOME_PAGE) },
         siteTitle,
         input.locale,
       ),

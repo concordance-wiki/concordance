@@ -158,3 +158,23 @@ export function breadcrumbOf(page: string, entity: Entity): BreadcrumbItem[] {
     { label: entity.title },
   ];
 }
+
+/** The nodes of a folder with every folder open and every page a link: the folders first, then the pages by file name and identifier. */
+function openNodesOf(page: string, folder: Folder): SpaceNode[] {
+  const folders = [...folder.folders.entries()]
+    .sort(([a], [b]) => byCodeUnit(a, b))
+    .map(([name, child]): SpaceNode => ({
+      label: name,
+      count: pagesIn(child),
+      children: openNodesOf(page, child),
+    }));
+  const pages = [...folder.pages]
+    .sort((a, b) => byCodeUnit(a.file, b.file) || byCodeUnit(a.entity.id, b.entity.id))
+    .map(({ entity }): SpaceNode => ({ label: entity.title, href: entityHref(page, entity.id) }));
+  return [...folders, ...pages];
+}
+
+/** The whole tree of a source from `page`, every folder open and every page listed: what the home page folds behind the row of a space. */
+export function wholeTreeOf(context: SiteContext, page: string, source: string): SpaceNode[] {
+  return openNodesOf(page, treeOf(context, source));
+}

@@ -4,17 +4,20 @@ import { describe, expect, it } from "vitest";
 
 import { siteContext, type SiteContext, type SiteContextInput } from "../../src/build/context.js";
 import {
+  alertsOf,
   DEFAULT_WARN_AFTER_DAYS,
-  entriesOf,
   HOME_RECENT,
   HOME_SHORTCUTS,
+  HOME_SPACES_SHOWN,
+  homeLabels,
   homeOf,
   isDormant,
   mentionCount,
   recentOf,
   shortcutsOf,
-  sourcesOf,
-  treeOf,
+  spacesOf,
+  suggestionLabels,
+  warnAfterDays,
 } from "../../src/build/home.js";
 import { entity, fragments, keyword, model, page, profile, term } from "./fixture.js";
 
@@ -29,16 +32,21 @@ function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
 }
 
 /** A note of `source` changed at `changed`, filed under `path`. */
-function dated(id: string, source: string, path: string, changed: string): Entity {
+function dated(
+  id: string,
+  source: string,
+  path: string,
+  changed: string,
+  overrides: Partial<Entity> = {},
+): Entity {
   return entity({
     id,
     type: "term",
     title: id.split("/").pop() ?? id,
     source: { name: source, path, line: 1, last_modified: changed },
+    ...overrides,
   });
 }
-
-const letters = [{ label: "B", href: "index/index.html", count: 1 }];
 
 describe("shortcutsOf", () => {
   it("offers the most cited pages, a note by the links pointing at it and a keyword page by its occurrences, the identifier breaking ties", () => {
@@ -78,62 +86,51 @@ describe("shortcutsOf", () => {
   });
 });
 
-describe("treeOf", () => {
-  it("files every note under its source and folders, folders before notes, each level counting its notes, keyword pages left out", () => {
-    expect(treeOf(context())).toEqual([
+describe("spacesOf", () => {
+  it("ranks the spaces by the citations of their notes, the name breaking ties, each with its initials, its page count worded and its whole tree, keyword pages left out", () => {
+    const spaces = spacesOf(context());
+    expect(spaces.map((space) => [space.name, space.initials, space.countLabel])).toEqual([
+      ["glossary", "GL", "2 pages"],
+      ["framing", "FR", "1 page"],
+      ["specs", "SP", "2 pages"],
+    ]);
+    expect(spaces.map((space) => space.stale)).toEqual([false, false, false]);
+    expect(spaces.every((space) => space.date === undefined)).toBe(true);
+    expect(spaces[2]?.nodes).toEqual([
       {
-        label: "framing",
+        label: "rules",
         count: 1,
-        children: [{ label: "vision", href: "framing/vision/index.html" }],
-      },
-      {
-        label: "glossary",
-        count: 2,
         children: [
-          { label: "Keyword page", href: "glossary/keyword-page/index.html" },
-          { label: "Page", href: "glossary/page/index.html" },
+          { label: "Épreuve du seuil", href: "specs/rules/publication-threshold/index.html" },
         ],
       },
       {
-        label: "specs",
-        count: 2,
-        children: [
-          {
-            label: "rules",
-            count: 1,
-            children: [
-              {
-                label: "Épreuve du seuil",
-                href: "specs/rules/publication-threshold/index.html",
-              },
-            ],
-          },
-          {
-            label: "screens",
-            count: 1,
-            children: [
-              { label: "Mentions panel", href: "specs/screens/mentions-panel/index.html" },
-            ],
-          },
-        ],
+        label: "screens",
+        count: 1,
+        children: [{ label: "Mentions panel", href: "specs/screens/mentions-panel/index.html" }],
       },
+    ]);
+    expect(spaces[0]?.nodes).toEqual([
+      { label: "Keyword page", href: "glossary/keyword-page/index.html" },
+      { label: "Page", href: "glossary/page/index.html" },
     ]);
   });
 
-  it("nests folders as deep as the paths go, keeps a declared source without a note, adds a source met only on a note and orders two notes of one file by identifier", () => {
-    const deep = dated("specs/a/b/c/deep", "specs", "a/b/c/deep.md", "2026-09-01T00:00:00.000Z");
-    const shallow = dated("specs/a/shallow", "specs", "a/shallow.md", "2026-09-01T00:00:00.000Z");
-    const stray = dated("notes/stray", "notes", "stray.md", "2026-09-01T00:00:00.000Z");
-    const twin = dated("notes/aaa", "notes", "stray.md", "2026-09-01T00:00:00.000Z");
-    const tree = treeOf(context({ model: model({ entities: [deep, shallow, stray, twin] }) }));
-    expect(tree.map((node) => [node.label, node.count])).toEqual([
-      ["framing", 0],
-      ["glossary", 0],
-      ["notes", 2],
-      ["specs", 2],
+  it("opens every folder of the tree as deep as the paths go, keeps a declared source without a note, adds a source met only on a note and orders two notes of one file by identifier", () => {
+    const same = "2026-09-01T00:00:00.000Z";
+    const deep = dated("specs/a/b/c/deep", "specs", "a/b/c/deep.md", same);
+    const shallow = dated("specs/a/shallow", "specs", "a/shallow.md", same);
+    const stray = dated("notes/stray", "notes", "stray.md", same);
+    const twin = dated("notes/aaa", "notes", "stray.md", same);
+    const spaces = spacesOf(context({ model: model({ entities: [deep, shallow, stray, twin] }) }));
+    expect(spaces.map((space) => [space.name, space.count, space.date])).toEqual([
+      ["framing", 0, undefined],
+      ["glossary", 0, undefined],
+      ["notes", 2, "2026-09-01"],
+      ["specs", 2, "2026-09-01"],
     ]);
-    expect(tree[2]?.children?.map((node) => node.label)).toEqual(["aaa", "stray"]);
-    expect(tree[3]?.children).toEqual([
+    expect(spaces[2]?.nodes.map((node) => node.label)).toEqual(["aaa", "stray"]);
+    expect(spaces[3]?.nodes).toEqual([
       {
         label: "a",
         count: 2,
@@ -152,6 +149,38 @@ describe("treeOf", () => {
           { label: "shallow", href: "specs/a/shallow/index.html" },
         ],
       },
+    ]);
+  });
+
+  it("counts a space in documents when its notes mostly stand for converted documents, an operation of a contract counting for nothing", () => {
+    const deck = (id: string): Entity =>
+      dated(`meetings/${id}`, "meetings", `${id}.md`, "2026-09-01T00:00:00.000Z", {
+        representations: [
+          { path: `${id}.md`, format: "markdown" },
+          { path: `${id}.pptx`, format: "pptx" },
+        ],
+      });
+    const plain = dated("meetings/plain", "meetings", "plain.md", "2026-09-01T00:00:00.000Z");
+    const operation = dated("meetings/op", "meetings", "op.md", "2026-09-01T00:00:00.000Z", {
+      representations: [{ path: "op", format: "json", kind: "contract", operation: "op" }],
+    });
+    const of = (entities: Entity[]): [string, number] | undefined => {
+      const space = spacesOf(context({ model: model({ entities }) })).find(
+        (candidate) => candidate.name === "meetings",
+      );
+      return space === undefined ? undefined : [space.unit, space.count];
+    };
+    expect(of([deck("a"), deck("b"), plain])).toEqual(["documents", 3]);
+    expect(of([deck("a"), plain])).toEqual(["pages", 2]);
+    expect(of([deck("a"), operation, plain])).toEqual(["pages", 3]);
+    const fr = spacesOf(
+      context({ model: model({ entities: [deck("a")] }), catalogue: loadCatalogue("fr") }),
+    );
+    expect(fr.map((space) => space.countLabel)).toEqual([
+      "0 page",
+      "0 page",
+      "1 document",
+      "0 page",
     ]);
   });
 });
@@ -181,103 +210,157 @@ describe("freshness", () => {
     const perSource = fresh({ staleness: { warn_after_days: { default: 60, glossary: 120 } } });
     expect(isDormant(perSource, "glossary", change)).toBe(false);
     expect(isDormant(perSource, "specs", change)).toBe(true);
+    expect(warnAfterDays(perSource, "glossary")).toBe(120);
+    expect(warnAfterDays(perSource, "specs")).toBe(60);
+    expect(warnAfterDays(fresh({ staleness: {} }), "specs")).toBe(180);
     expect(isDormant(fresh({ staleness: {} }), "specs", change)).toBe(false);
     expect(fresh().model.build.at).toBe(build);
   });
 
-  it("gives every source the date of its newest change spelled in the locale, a source without a dated note never dormant", () => {
-    expect(sourcesOf(fresh())).toEqual([
-      { name: "framing", date: "2025-12-01", dateLabel: "Dec 1, 2025", stale: true },
-      { name: "glossary", date: "2026-09-10", dateLabel: "Sep 10, 2026", stale: false },
-      { name: "specs", stale: false },
+  it("gives every space the date of its newest change worded relative to the build, a space without a dated note never dormant", () => {
+    expect(
+      spacesOf(fresh()).map((space) => [space.name, space.date, space.dateLabel, space.stale]),
+    ).toEqual([
+      ["framing", "2025-12-01", "9 months ago", true],
+      ["glossary", "2026-09-10", "2 days ago", false],
+      ["specs", undefined, undefined, false],
     ]);
-    const fr = sourcesOf(fresh({ catalogue: loadCatalogue("fr") }));
-    expect(fr[0]?.dateLabel).toBe("1 déc. 2025");
-    const canadian = sourcesOf(fresh({ catalogue: loadCatalogue("fr"), locale: "fr-CA" }));
-    expect(canadian[0]?.dateLabel).toBe("1 déc. 2025");
-    expect(canadian[1]?.dateLabel).toBe("10 sept. 2026");
+    const fr = spacesOf(fresh({ catalogue: loadCatalogue("fr") }));
+    expect(fr[0]?.dateLabel).toBe("il y a 9 mois");
+    const canadian = spacesOf(fresh({ catalogue: loadCatalogue("fr"), locale: "fr-CA" }));
+    expect(canadian[1]?.dateLabel).toBe("avant-hier");
   });
 
-  it("lists the latest changes newest first then by identifier, dated and spelled, the notes of a dormant source flagged", () => {
+  it("lists the latest changes newest first then by identifier, each with its space and its change worded relative to the build", () => {
     expect(recentOf(fresh())).toEqual([
       {
         label: "fresh",
         href: "glossary/fresh/index.html",
+        space: "glossary",
         date: "2026-09-10",
-        dateLabel: "Sep 10, 2026",
+        dateLabel: "2 days ago",
       },
       {
         label: "older",
         href: "glossary/older/index.html",
+        space: "glossary",
         date: "2026-06-01",
-        dateLabel: "Jun 1, 2026",
+        dateLabel: "3 months ago",
       },
       {
         label: "asleep",
         href: "framing/asleep/index.html",
+        space: "framing",
         date: "2025-12-01",
-        dateLabel: "Dec 1, 2025",
-        stale: true,
+        dateLabel: "9 months ago",
       },
     ]);
   });
 
-  it("stops at twenty changes and breaks a tie on the instant by identifier", () => {
+  it("stops at eight changes and breaks a tie on the instant by identifier", () => {
     const same = "2026-09-01T00:00:00.000Z";
-    const notes = Array.from({ length: 25 }, (_, index) =>
-      dated(`glossary/n-${String(24 - index).padStart(2, "0")}`, "glossary", "n.md", same),
+    const notes = Array.from({ length: 12 }, (_, index) =>
+      dated(`glossary/n-${String(11 - index).padStart(2, "0")}`, "glossary", "n.md", same),
     );
     const recent = recentOf(context({ model: model({ entities: notes }) }));
-    expect(HOME_RECENT).toBe(20);
-    expect(recent).toHaveLength(20);
+    expect(HOME_RECENT).toBe(8);
+    expect(recent).toHaveLength(8);
     expect(recent[0]?.label).toBe("n-00");
-    expect(recent[19]?.label).toBe("n-19");
+    expect(recent[7]?.label).toBe("n-07");
+  });
+
+  it("raises one alert per dormant space, in the order of the spaces, counting the days since its newest change and naming its threshold", () => {
+    const ctx = fresh();
+    expect(alertsOf(ctx, spacesOf(ctx))).toEqual([
+      {
+        title: "A space has not moved for 285 days",
+        space: "framing",
+        text: "framing. The alert threshold is set to 180 days in the configuration.",
+      },
+    ]);
+    const strict = fresh({ staleness: { warn_after_days: { default: 1, glossary: 2 } } });
+    expect(alertsOf(strict, spacesOf(strict)).map((alert) => [alert.space, alert.text])).toEqual([
+      ["framing", "framing. The alert threshold is set to 1 day in the configuration."],
+      ["glossary", "glossary. The alert threshold is set to 2 days in the configuration."],
+    ]);
+    expect(
+      alertsOf(fresh({ staleness: { warn_after_days: { default: 400 } } }), spacesOf(ctx)),
+    ).toEqual([]);
+    const fr = fresh({ catalogue: loadCatalogue("fr") });
+    expect(alertsOf(fr, spacesOf(fr))[0]).toEqual({
+      title: "Un espace n'a pas bougé depuis 285 jours",
+      space: "framing",
+      text: "framing. Le seuil d'alerte est fixé à 180 jours dans la configuration.",
+    });
   });
 });
 
 describe("homeOf", () => {
-  it("states the counts of the build block with its date in the words of the locale, links the to-do page with its count and keeps the letters of the index", () => {
-    const home = homeOf(context(), "Concordance notes", { todoCount: 5, letters });
-    expect(home.title).toBe("Concordance notes");
+  it("gathers the shortcuts, the spaces in view with the others folded, the recent changes, the alerts and the labels, and leaves the search field to the site", () => {
+    const home = homeOf(context());
     expect(home.search).toBeUndefined();
-    expect(home.stats).toEqual({
-      sources: 3,
-      files: 5,
-      builtAt: "2026-09-12T12:00:00.000Z",
-      builtAtLabel: "September 12, 2026",
-    });
-    expect(home.todo).toEqual({ label: "To do", href: "todo/index.html", count: 5 });
     expect(home.shortcuts).toHaveLength(4);
-    expect(home.entries[1]?.items).toBe(letters);
-    const fr = homeOf(context({ catalogue: loadCatalogue("fr") }), "Notes", {
-      todoCount: 0,
-      letters,
+    expect(home.spaces.map((space) => space.name)).toEqual(["glossary", "framing", "specs"]);
+    expect(home.moreSpaces).toBeUndefined();
+    expect(home.recent).toEqual([]);
+    expect(home.alerts).toEqual([]);
+    expect(home.labels).toEqual({
+      question: "What are you looking for?",
+      explanation:
+        "Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.",
+      frequent: "Frequently consulted",
+      spaces: "Spaces",
+      spacesLead: "fed by your repositories",
+      moreSpaces: "0 more spaces, less consulted",
+      datesNote: "The dates come from the history of the repositories, so they are always right.",
+      recent: "Recently changed",
     });
-    expect(fr.stats.builtAtLabel).toBe("12 septembre 2026");
-    expect(fr.todo?.label).toBe("À faire");
   });
 
-  it("offers three entry points of equal standing: the file tree, the letters of the index and the latest changes with the sources", () => {
-    const entries = entriesOf(context(), letters);
-    expect(entries.map((entry) => [entry.kind, entry.title, entry.href])).toEqual([
-      ["tree", "By file tree", undefined],
-      ["index", "By word", "index/index.html"],
-      ["recent", "Latest changes", undefined],
-    ]);
-    expect(entries[0]?.tree).toHaveLength(3);
-    expect(entries[0]?.items).toEqual([]);
-    expect(entries[1]?.items).toEqual(letters);
-    expect(entries[2]?.items).toEqual([]);
-    expect(entries[2]?.sources?.map((source) => source.name)).toEqual([
+  it("keeps five spaces in view and folds the others, the line counting them in the site language", () => {
+    const notes = Array.from({ length: 7 }, (_, index) =>
+      dated(`s${String(index)}/note`, `s${String(index)}`, "note.md", "2026-09-01T00:00:00.000Z"),
+    );
+    const home = homeOf(context({ model: model({ entities: notes }) }));
+    expect(HOME_SPACES_SHOWN).toBe(5);
+    expect(home.spaces.map((space) => space.name)).toEqual([
       "framing",
       "glossary",
-      "specs",
+      "s0",
+      "s1",
+      "s2",
     ]);
-    const fr = entriesOf(context({ catalogue: loadCatalogue("fr") }), letters);
-    expect(fr.map((entry) => entry.title)).toEqual([
-      "Par arborescence",
-      "Par mot",
-      "Derniers changements",
-    ]);
+    expect(home.moreSpaces?.map((space) => space.name)).toEqual(["s3", "s4", "s5", "s6", "specs"]);
+    expect(home.labels?.moreSpaces).toBe("5 more spaces, less consulted");
+    const fr = homeOf(
+      context({ model: model({ entities: notes }), catalogue: loadCatalogue("fr") }),
+    );
+    expect(fr.labels?.moreSpaces).toBe("5 espaces de plus, moins consultés");
+    expect(homeLabels(context({ catalogue: loadCatalogue("fr") }), 1)).toMatchObject({
+      question: "Que cherchez-vous ?",
+      moreSpaces: "1 espace de plus, moins consulté",
+      recent: "Modifié récemment",
+    });
+  });
+
+  it("words the strings of the live results with their plural forms frozen by category", () => {
+    expect(suggestionLabels(loadCatalogue("en"))).toEqual({
+      matches: { one: "# match", other: "# matches" },
+      usedIn: {
+        one: "Used in # document, never defined",
+        other: "Used in # documents, never defined",
+      },
+      browse: "browse",
+      enter: "Enter",
+      open: "open",
+      seeResults: { one: "See the # result", other: "See the # results" },
+    });
+    const fr = suggestionLabels(loadCatalogue("fr"));
+    expect(fr.seeResults).toEqual({
+      many: "Voir les # résultats",
+      one: "Voir le résultat",
+      other: "Voir les # résultats",
+    });
+    expect(fr.enter).toBe("Entrée");
   });
 });

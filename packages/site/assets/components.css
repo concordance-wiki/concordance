@@ -150,21 +150,6 @@ concordance-island[data-island="search"] {
   box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
 }
 
-.search-suggestions .result {
-  padding-block: var(--space-1);
-}
-
-.search-suggestions .result:last-child {
-  border-block-end: none;
-}
-
-.home-search input {
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-surface);
-}
-
 .site-links {
   display: flex;
   flex-wrap: wrap;
@@ -296,113 +281,6 @@ concordance-island[data-island="search"] {
 
 .site-footer-credit {
   font-size: 0.8125rem;
-}
-
-/* Home */
-
-.home-stats {
-  color: var(--color-muted);
-}
-
-.home-search {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.home-search input {
-  flex: 1;
-  font-size: 1.125rem;
-}
-
-.home-shortcuts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: 0;
-  list-style: none;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 2.5rem;
-  padding: 0 0.875rem;
-  border: 1px solid var(--color-border);
-  border-radius: 1.25rem;
-  background: var(--color-surface);
-  color: var(--color-ink);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.home-entries {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-4);
-}
-
-.home-entry {
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-}
-
-.home-entry h2 {
-  margin-block-start: 0;
-}
-
-.home-item.stale {
-  color: var(--color-muted);
-}
-
-.stale-mark {
-  margin-inline-start: var(--space-1);
-  font-size: 0.8125rem;
-  font-style: italic;
-}
-
-.home-items,
-.home-tree,
-.home-tree ul,
-.home-sources {
-  padding: 0;
-  list-style: none;
-}
-
-.home-tree ul {
-  padding-inline-start: var(--space-3);
-}
-
-.home-entry-index .home-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.home-entry-index .home-item a {
-  display: inline-block;
-  min-inline-size: 2em;
-  text-align: center;
-}
-
-.home-item time,
-.home-source time {
-  margin-inline-start: var(--space-1);
-  color: var(--color-label);
-  font-size: 0.8125rem;
-}
-
-.home-sources {
-  margin-block-start: var(--space-3);
-  padding-block-start: var(--space-2);
-  border-block-start: 1px solid var(--color-border);
-}
-
-.home-source.stale {
-  color: var(--color-muted);
 }
 
 /* Every page but the entity page reads in one measured column. */
@@ -1594,6 +1472,369 @@ concordance-island[data-island="search"] {
 .document-text summary {
   color: var(--color-muted);
   cursor: pointer;
+}
+
+/* Home: the question, the field with its live results in the flow, the shortcuts; then the spaces and the recent changes in two columns. */
+
+.home {
+  max-inline-size: 65rem;
+  padding-block-start: var(--space-5);
+}
+
+.home h1 {
+  margin-block: 0 var(--space-2);
+  font-size: 2.375rem;
+  letter-spacing: -0.024em;
+}
+
+.home-explanation {
+  max-inline-size: 41rem;
+  margin-block-end: var(--space-4);
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* The field of the home page: drawn large across the column, ruled in the ink, its live results joined under it. */
+
+.home-ask concordance-island[data-island="search"] {
+  position: static;
+  max-inline-size: none;
+}
+
+.home-search {
+  margin: 0;
+}
+
+.home-search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 3.5rem;
+  padding-inline: var(--space-3);
+  border: 1.5px solid var(--color-ink);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.home-search-field input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 1.125rem;
+}
+
+.home-search-field input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.search-count {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.home-search:has(+ .home-suggestions:not([hidden])) .home-search-field {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.home-suggestions {
+  position: static;
+  min-inline-size: 0;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--color-ink);
+  border-block-start: 0;
+  border-radius: 0 0 calc(var(--radius) * 1.25) calc(var(--radius) * 1.25);
+  box-shadow: none;
+}
+
+/* The rows of the live results, under the field of the header and the field of the home page alike. */
+
+.suggestions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion > a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-block-size: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.suggestion > a:hover,
+.suggestion > a:focus-visible {
+  background: var(--color-soft);
+}
+
+.suggestion-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.suggestion-detail {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-space {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.suggestion-keyword .suggestion-title {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.suggestions-help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.suggestions-help kbd {
+  padding: 0.25em 0.4em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.suggestions-all {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  margin-inline-start: auto;
+}
+
+/* The panel of the header keeps its width and its shadow; its rows read the same. */
+
+.search-suggestions {
+  padding: 0;
+}
+
+.suggestion:last-child > a {
+  border-block-end: none;
+}
+
+/* The most cited pages as chips, led by a word. */
+
+.home-frequent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block: var(--space-3) var(--space-5);
+}
+
+.home-frequent-lead {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.home-shortcuts {
+  display: contents;
+}
+
+.home-shortcuts li {
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.chip:hover {
+  border-color: var(--color-ink);
+}
+
+/* The spaces on the left, the recent changes on the right, from 48 rem. */
+
+.home-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .home-columns {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+}
+
+.home-spaces h2,
+.home-recent h2 {
+  margin-block: 0 var(--space-2);
+  font-size: 1.0625rem;
+}
+
+.home-lead {
+  margin-inline-start: var(--space-1);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.home-space-list,
+.home-change-list {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  list-style: none;
+  overflow: hidden;
+}
+
+.home-space + .home-space,
+.home-change + .home-change {
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* A row of a space: the badge, the name and the count; its tree folds behind it, the marker at the end of the row. */
+
+.home-space-row {
+  gap: var(--space-3);
+  min-block-size: 3.75rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.home-space-row::before {
+  order: 1;
+  margin-inline-start: auto;
+}
+
+.home-space-row .space-initials {
+  flex: none;
+  inline-size: 2.125rem;
+  block-size: 2.125rem;
+}
+
+.home-space-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-inline-size: 0;
+}
+
+.home-space-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.home-space-meta,
+.home-change-meta {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.home-space.stale .home-space-meta {
+  color: var(--color-muted);
+}
+
+.home-space-fold > .space-nodes {
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.home-more-spaces {
+  margin-block-start: var(--space-2);
+}
+
+.home-more-spaces > summary {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.home-more-spaces > .home-space-list {
+  margin-block-start: var(--space-2);
+}
+
+.home-note {
+  margin-block: var(--space-2) 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+/* A recent change: the title, then its space and its date. */
+
+.home-change > a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.home-change > a:hover .home-change-title {
+  text-decoration: underline;
+}
+
+.home-change-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* The alert on a dormant space: a card in the ink, never in the accent. */
+
+.home-alert {
+  margin-block-start: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+}
+
+.home-alert h3 {
+  margin-block: 0 var(--space-1);
+  font-size: 0.875rem;
+}
+
+.home-alert p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
 
 /* Keyword page: the word nobody defined, its passages in the centre, what is known of it in the panel. */

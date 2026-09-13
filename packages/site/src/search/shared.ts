@@ -28,6 +28,8 @@ export interface SearchIslandProps {
   /** Href of the root of the site from the page; absent when there is no index to load. */
   root?: string;
   search?: SearchField;
+  /** `true` for the field at the head of the home page, drawn large with its live results in the flow of the page. */
+  home?: boolean;
   results?: SearchResultsProps;
 }
 

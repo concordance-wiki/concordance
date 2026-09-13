@@ -13,6 +13,14 @@ export interface MessageArguments {
   "entity.mentionsCount": { count: number };
   "entity.neighbourPages": { count: number };
   "entity.otherPages": { count: number };
+  "home.documents": { count: number };
+  "home.matches": { count: number };
+  "home.moreSpaces": { count: number };
+  "home.pages": { count: number };
+  "home.seeResults": { count: number };
+  "home.stale": { count: number };
+  "home.staleThreshold": { space: string; count: number };
+  "home.usedIn": { count: number };
   "keyword.documents": { count: number };
   "keyword.filesSummary": { count: number };
   "keyword.noticeLead": { count: number };
@@ -58,9 +66,23 @@ export const messageArguments = {
   "entity.status": {},
   "entity.type": {},
   "footer.builtWith": {},
-  "home.index": {},
+  "home.browse": {},
+  "home.datesNote": {},
+  "home.documents": { count: "plural" },
+  "home.enterKey": {},
+  "home.explanation": {},
+  "home.frequent": {},
+  "home.matches": { count: "plural" },
+  "home.moreSpaces": { count: "plural" },
+  "home.open": {},
+  "home.pages": { count: "plural" },
+  "home.question": {},
   "home.recent": {},
-  "home.tree": {},
+  "home.seeResults": { count: "plural" },
+  "home.spacesLead": {},
+  "home.stale": { count: "plural" },
+  "home.staleThreshold": { space: "argument", count: "plural" },
+  "home.usedIn": { count: "plural" },
   "index.empty": {},
   "index.letters": {},
   "keyword.companions": {},

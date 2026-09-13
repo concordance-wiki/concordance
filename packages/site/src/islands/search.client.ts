@@ -9,6 +9,8 @@ function adapt(element: HTMLElement): SearchIslandElement<HTMLElement> {
     getAttribute: (name) => element.getAttribute(name),
     input: () => element.querySelector("input"),
     panel: () => element.querySelector<HTMLElement>(`.${SUGGESTIONS_CLASS}`),
+    links: () => [...element.querySelectorAll<HTMLAnchorElement>(".suggestion > a")],
+    counter: () => element.querySelector<HTMLElement>(".search-count"),
     container: () => element,
   };
 }

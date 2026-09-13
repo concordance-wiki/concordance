@@ -6,6 +6,7 @@ import {
   corporateFooter,
   corporateHeader,
   corporateKeywordPage,
+  corporateHome,
   documentEntityPage,
   entityPage,
   footer,
@@ -82,7 +83,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "Home",
     state: "default",
     description:
-      "the search field, the shortcuts, the statistics and the three entry points, one item dormant",
+      "the question and the search field, the shortcuts, four spaces with their trees folded, one dormant, the latest changes and the alert",
     ...chrome,
     props: home,
   },
@@ -299,5 +300,17 @@ export const galleryPages: readonly GalleryPage[] = [
     header: corporateHeader,
     footer: corporateFooter,
     props: corporateKeywordPage,
+  },
+  {
+    file: "home-corporate.html",
+    slot: "Home",
+    rendered: "Home",
+    state: "corporate",
+    description:
+      "the home page in the corporate chrome: the question and the field with its live results to come, the most cited pages as shortcuts, five spaces of the fixtures corpus with their counts and freshness and two more folded, the pages changed last, the alert on a space that has not moved past the threshold",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: corporateHome,
   },
 ];

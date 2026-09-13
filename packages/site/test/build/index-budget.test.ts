@@ -123,9 +123,10 @@ describe("The alphabetical index of a realistic corpus is segmented to stay unde
       expect(page.content).toContain('<span class="letter inactive" aria-disabled="true">J</span>');
       expect(page.content).toContain('aria-current="page"');
     }
+    // The letters live on the index page alone; the home page leads to it through the top bar.
     const home = documents.find((document) => document.path === "index.html");
-    expect(home?.content).toContain('<a href="index/e/index.html">E</a>');
-    expect(home?.content).toContain('<a href="index/other/index.html">#</a>');
+    expect(home?.content).toContain('<a href="index/index.html">A–Z index</a>');
+    expect(home?.content).not.toContain('href="index/e/index.html"');
   });
 
   it("titles a letter page after the index and its letter", () => {

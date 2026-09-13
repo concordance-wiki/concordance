@@ -13,10 +13,15 @@ import {
   SCROLL_KEY,
   scrollMemory,
   searchRunner,
+  seeResultsHref,
   shardLoader,
   storageOf,
+  suggestionOf,
   SUGGESTIONS,
+  wireArrows,
   wireShortcuts,
+  type CounterSlot,
+  type Focusable,
   type KeyEvent,
   type ScriptInjector,
   type SearchInput,
@@ -379,16 +384,55 @@ describe("Keyboard shortcut / reaches the field, Escape leaves it", () => {
 
 interface Panel extends SearchPanel {
   html: string;
+  /** Fires a key event on the panel, as a keystroke on one of its links would. */
+  press(event: KeyEvent): void;
+}
+
+function fakePanel(hidden: boolean): Panel {
+  const listeners: ((event: KeyEvent) => void)[] = [];
+  return {
+    hidden,
+    html: "",
+    addEventListener: (_type, listener) => {
+      listeners.push(listener);
+    },
+    press: (event) => {
+      for (const listener of listeners) listener(event);
+    },
+  };
+}
+
+/** A link of the live results the arrow keys can reach. */
+interface FakeLink extends Focusable {
+  focused: boolean;
+}
+
+function fakeLink(): FakeLink {
+  const link: FakeLink = {
+    focused: false,
+    focus: () => {
+      link.focused = true;
+    },
+  };
+  return link;
 }
 
 function island(
   props: Record<string, unknown>,
-  parts: { input?: FakeInput; panel?: Panel; container: Panel },
+  parts: {
+    input?: FakeInput;
+    panel?: Panel;
+    container: Panel;
+    links?: () => FakeLink[];
+    counter?: CounterSlot;
+  },
 ): SearchIslandElement<Panel> {
   return {
     getAttribute: (name) => (name === "data-props" ? JSON.stringify(props) : null),
     input: () => parts.input ?? null,
     panel: () => parts.panel ?? null,
+    links: () => parts.links?.() ?? [],
+    counter: () => parts.counter ?? null,
     container: () => parts.container,
   };
 }
@@ -521,10 +565,10 @@ function fakeDefer(): FakeDefer {
 }
 
 describe("mountSearch", () => {
-  it("shows the best results under the header field as the reader types, at most eight, and hides them when nothing matches", async () => {
+  it("shows the best results under the header field as the reader types, the query marked in their titles, at most eight, and hides them when nothing matches", async () => {
     const { host, inject, answer } = page();
     const input = fakeInput();
-    const panel: Panel = { hidden: true, html: "" };
+    const panel = fakePanel(true);
     const { render } = rendered();
     const mounted = mountSearch({
       islands: [
@@ -552,16 +596,140 @@ describe("mountSearch", () => {
     await settled();
     expect(panel.hidden).toBe(false);
     expect(panel.html).toBe(
-      '<ol class="results"><li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span></li><li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span><span class="result-detail">17 occurrences · 6 documents</span></li></ol>',
+      '<ol class="suggestions"><li class="suggestion"><a href="../glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail"><span class="badge">Term</span></span><span class="suggestion-space">glossary</span></a></li><li class="suggestion suggestion-keyword"><a href="../keywords/build-summary/index.html"><span class="suggestion-title">build summary</span><span class="suggestion-detail">Used in 6 documents, never defined</span><span class="suggestion-space">specs</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="../search/index.html?q=key">See the 2 results</a></p>',
     );
     input.value = "zebra";
     input.fire("input");
     await settled();
     expect(panel.hidden).toBe(true);
-    expect(panel.html).toBe('<ol class="results"></ol>');
+    expect(panel.html).toContain('<ol class="suggestions"></ol>');
+    expect(panel.html).toContain(
+      '<a class="suggestions-all" href="../search/index.html?q=zebra">See the 0 results</a>',
+    );
     input.fire("keydown", keyEvent("Escape"));
     expect(panel.hidden).toBe(true);
     expect(SUGGESTIONS).toBe(8);
+  });
+
+  it("counts the matches next to the field of the home page, words the rows with the labels the field carries, and reaches that field with the / shortcut before the field of the header", async () => {
+    const { host, inject, answer } = page();
+    const headerInput = fakeInput();
+    const headerPanel = fakePanel(true);
+    const input = fakeInput();
+    const panel = fakePanel(true);
+    const counter: CounterSlot = { textContent: "" };
+    const document = fakeDocument();
+    const { render } = rendered();
+    const field = {
+      action: "search/index.html",
+      placeholder: "",
+      suggestions: {
+        matches: { one: "# correspondance", other: "# correspondances" },
+        usedIn: { one: "Employé dans # document", other: "Employé dans # documents" },
+        browse: "parcourir",
+        enter: "Entrée",
+        open: "ouvrir",
+        seeResults: { one: "Voir le résultat", other: "Voir les # résultats" },
+      },
+    };
+    expect(
+      mountSearch({
+        islands: [
+          island(
+            { root: "", search: { action: "search/index.html", placeholder: "" } },
+            { input: headerInput, panel: headerPanel, container: headerPanel },
+          ),
+          island(
+            { root: "", search: field, home: true },
+            { input, panel, container: panel, counter },
+          ),
+        ],
+        document,
+        location: fakeLocation(),
+        scroll: fakeScroll(),
+        clipboard: undefined,
+        defer: fakeDefer().defer,
+        inject,
+        host,
+        render,
+      }),
+    ).toBe(2);
+    document.press(keyEvent("/"));
+    expect(input.focused).toBe(true);
+    expect(headerInput.focused).toBe(false);
+    input.value = "key";
+    input.fire("input");
+    await settled();
+    answer("meta", meta);
+    await settled();
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(panel.hidden).toBe(false);
+    expect(counter.textContent).toBe("2 correspondances");
+    expect(panel.html).toContain('<span class="suggestion-detail">Employé dans 6 documents</span>');
+    expect(panel.html).toContain(
+      '<p class="suggestions-help"><kbd>↑ ↓</kbd> parcourir <kbd>Entrée</kbd> ouvrir<a class="suggestions-all" href="search/index.html?q=key">Voir les 2 résultats</a></p>',
+    );
+    // The field of the header has live results of its own, and its Escape hides them alone.
+    headerInput.value = "page";
+    headerInput.fire("input");
+    await settled();
+    answer("pa", shards["pa"]);
+    await settled();
+    expect(headerPanel.hidden).toBe(false);
+    expect(headerPanel.html).toContain("Keyword <mark>page</mark>");
+    expect(headerPanel.html).toContain("See the 1 result");
+    headerInput.focus();
+    headerInput.fire("keydown", keyEvent("Escape"));
+    expect(headerPanel.hidden).toBe(true);
+    expect(headerInput.focused).toBe(false);
+    expect(panel.hidden).toBe(false);
+    // A query too short for a shard matches nothing: the counter clears.
+    input.value = "k";
+    input.fire("input");
+    await settled();
+    expect(panel.hidden).toBe(true);
+    expect(counter.textContent).toBe("");
+  });
+
+  it("keeps the live results of the latest query when an earlier one answers later", async () => {
+    const { host, inject, answer } = page();
+    const input = fakeInput();
+    const panel = fakePanel(true);
+    const view = rendered();
+    mountSearch({
+      islands: [
+        island(
+          { root: "", search: { action: "search/", placeholder: "" } },
+          { input, panel, container: panel },
+        ),
+      ],
+      document: fakeDocument(),
+      location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
+      inject,
+      host,
+      render: view.render,
+    });
+    input.value = "key";
+    input.fire("input");
+    await settled();
+    answer("meta", meta);
+    await settled();
+    input.value = "page";
+    input.fire("input");
+    await settled();
+    answer("pa", shards["pa"]);
+    await settled();
+    expect(panel.html).toContain("Keyword <mark>page</mark>");
+    expect(panel.html).toContain("See the 1 result");
+    const drawn = view.calls;
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(view.calls).toBe(drawn);
+    expect(panel.html).toContain("See the 1 result");
   });
 
   it("caps the suggestions at eight while the results page shows them all", async () => {
@@ -580,7 +748,7 @@ describe("mountSearch", () => {
     const shard: ShardData = { term: many.entities.map((_, at) => [at, 5]) };
     const { host, inject, answer } = page();
     const input = fakeInput();
-    const panel: Panel = { hidden: true, html: "" };
+    const panel = fakePanel(true);
     const { render } = rendered();
     mountSearch({
       islands: [
@@ -605,14 +773,15 @@ describe("mountSearch", () => {
     await settled();
     answer("te", shard);
     await settled();
-    expect(panel.html.match(/<li class="result">/g)).toHaveLength(8);
+    expect(panel.html.match(/<li class="suggestion">/g)).toHaveLength(8);
+    expect(panel.html).toContain("See the 12 results");
   });
 
   it("fills the results page from the query of the address and follows the field, the suggestions staying hidden", async () => {
     const { host, inject, answer } = page();
     const input = fakeInput();
-    const panel: Panel = { hidden: true, html: "" };
-    const results: Panel = { hidden: false, html: "" };
+    const panel = fakePanel(true);
+    const results = fakePanel(false);
     const { render } = rendered();
     const mounted = mountSearch({
       islands: [
@@ -665,7 +834,7 @@ describe("mountSearch", () => {
   it("keeps the latest query when an earlier one answers later", async () => {
     const { host, inject, answer } = page();
     const input = fakeInput();
-    const results: Panel = { hidden: false, html: "" };
+    const results = fakePanel(false);
     const { render } = rendered();
     mountSearch({
       islands: [
@@ -712,7 +881,7 @@ describe("mountSearch", () => {
       islands: [
         island(
           { search: { action: "search/", placeholder: "" } },
-          { input, container: { hidden: false, html: "" } },
+          { input, container: fakePanel(false) },
         ),
       ],
       document,
@@ -731,7 +900,7 @@ describe("mountSearch", () => {
     input.fire("input");
     expect(injected).toEqual([]);
     expect(calls).toBe(0);
-    const results: Panel = { hidden: false, html: "" };
+    const results = fakePanel(false);
     expect(
       mountSearch({
         islands: [
@@ -769,7 +938,7 @@ describe("mountSearch", () => {
   it("hides the suggestions when the table fails to load", async () => {
     const { host, inject, answer } = page();
     const input = fakeInput();
-    const panel: Panel = { hidden: true, html: "" };
+    const panel = fakePanel(true);
     mountSearch({
       islands: [
         island(
@@ -792,7 +961,7 @@ describe("mountSearch", () => {
     answer("meta");
     await settled();
     expect(panel.hidden).toBe(true);
-    expect(panel.html).toBe('<ol class="results"></ol>');
+    expect(panel.html).toContain('<ol class="suggestions"></ol>');
   });
 
   it("draws nothing for a field without a panel, and still leaves it on Escape", async () => {
@@ -804,7 +973,7 @@ describe("mountSearch", () => {
       islands: [
         island(
           { root: "", search: { action: "", placeholder: "" } },
-          { input, container: { hidden: false, html: "" } },
+          { input, container: fakePanel(false) },
         ),
       ],
       document: fakeDocument(),
@@ -839,7 +1008,9 @@ describe("mountSearch", () => {
       getAttribute: () => null,
       input: () => null,
       panel: () => null,
-      container: () => ({ hidden: false, html: "" }),
+      links: () => [],
+      counter: () => null,
+      container: () => fakePanel(false),
     };
     expect(
       mountSearch({
@@ -854,6 +1025,107 @@ describe("mountSearch", () => {
         render: rendered().render,
       }),
     ).toBe(1);
+  });
+});
+
+describe("The arrow keys walk the live results", () => {
+  function wired(hidden = false): {
+    input: FakeInput;
+    panel: Panel;
+    links: FakeLink[];
+  } {
+    const input = fakeInput();
+    const panel = fakePanel(hidden);
+    const links = [fakeLink(), fakeLink(), fakeLink()];
+    wireArrows(input, panel, () => links);
+    return { input, panel, links };
+  }
+
+  it("reaches the first row from the field on ArrowDown, and leaves the field alone while the results are hidden or empty", () => {
+    const { input, links } = wired();
+    const down = keyEvent("ArrowDown");
+    input.fire("keydown", down);
+    expect(links.map((link) => link.focused)).toEqual([true, false, false]);
+    expect(down.prevented).toBe(true);
+    const other = keyEvent("ArrowUp");
+    input.fire("keydown", other);
+    expect(other.prevented).toBe(false);
+    const asleep = wired(true);
+    const ignored = keyEvent("ArrowDown");
+    asleep.input.fire("keydown", ignored);
+    expect(ignored.prevented).toBe(false);
+    expect(asleep.links[0]?.focused).toBe(false);
+    const empty = fakeInput();
+    wireArrows(empty, fakePanel(false), () => []);
+    const nothing = keyEvent("ArrowDown");
+    empty.fire("keydown", nothing);
+    expect(nothing.prevented).toBe(false);
+  });
+
+  it("moves down and up the rows, stays on the last one, returns to the field from the first, and hides the results on Escape", () => {
+    const { input, panel, links } = wired();
+    const [first, second, third] = links;
+    const down = keyEvent("ArrowDown", { target: first });
+    panel.press(down);
+    expect(second?.focused).toBe(true);
+    expect(down.prevented).toBe(true);
+    panel.press(keyEvent("ArrowDown", { target: second }));
+    expect(third?.focused).toBe(true);
+    for (const link of links) link.focused = false;
+    panel.press(keyEvent("ArrowDown", { target: third }));
+    expect(third?.focused).toBe(true);
+    panel.press(keyEvent("ArrowUp", { target: third }));
+    expect(second?.focused).toBe(true);
+    const up = keyEvent("ArrowUp", { target: first });
+    panel.press(up);
+    expect(input.focused).toBe(true);
+    expect(up.prevented).toBe(true);
+    input.focused = false;
+    panel.press(keyEvent("Escape", { target: second }));
+    expect(panel.hidden).toBe(true);
+    expect(input.focused).toBe(true);
+    // A key on something else in the panel, the link to the whole list for instance, and any other key on a row are left alone.
+    const elsewhere = keyEvent("ArrowDown", { target: {} });
+    panel.press(elsewhere);
+    expect(elsewhere.prevented).toBe(false);
+    const tab = keyEvent("Tab", { target: first });
+    panel.press(tab);
+    expect(tab.prevented).toBe(false);
+  });
+});
+
+describe("suggestionOf and seeResultsHref", () => {
+  it("turns an entry into a row with its type, its space by its declared name, and the documents of a keyword page", () => {
+    const [note, screen, summary] = meta.entities;
+    expect(suggestionOf(note as SearchEntry, meta, "../")).toEqual({
+      title: "Keyword page",
+      href: "../glossary/keyword-page/index.html",
+      typeLabel: "Term",
+      space: "glossary",
+    });
+    expect(suggestionOf({ ...(screen as SearchEntry), source: "notes" }, meta, "")).toEqual({
+      title: "Search results",
+      href: "specs/screens/search-results/index.html",
+      space: "notes",
+    });
+    expect(suggestionOf(summary as SearchEntry, meta, "")).toEqual({
+      title: "build summary",
+      href: "keywords/build-summary/index.html",
+      typeLabel: "Keyword",
+      keyword: true,
+      documents: 6,
+      space: "specs",
+    });
+    const { documents, ...uncounted } = summary as SearchEntry;
+    expect(documents).toBe(6);
+    expect(suggestionOf(uncounted, meta, "").documents).toBe(0);
+  });
+
+  it("leads to the results page with the query alone, readable in the address", () => {
+    expect(seeResultsHref({ action: "../search/index.html", placeholder: "" }, "key word")).toBe(
+      "../search/index.html?q=key+word",
+    );
+    expect(seeResultsHref({ action: "search/", placeholder: "" }, "")).toBe("search/");
   });
 });
 
@@ -876,7 +1148,7 @@ async function resultsPage(
 ): Promise<ResultsPage> {
   const { host, inject, injected, answer } = page();
   const input = fakeInput();
-  const results: Panel = { hidden: false, html: "" };
+  const results = fakePanel(false);
   const location = fakeLocation(search);
   const scroll = options.scroll ?? fakeScroll();
   const timers = fakeDefer();

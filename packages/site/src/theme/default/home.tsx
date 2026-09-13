@@ -1,136 +1,162 @@
 import type { JSX } from "preact";
 
-import type { HomeEntry, HomeItem, HomeProps, HomeSource, HomeTreeNode } from "../../slots.js";
+import type { HomeAlert, HomeChange, HomeLabels, HomeProps, HomeSpace } from "../../slots.js";
 import { labels } from "./labels.js";
+import { SearchIsland } from "./search-island.js";
+import { Nodes } from "./space-tree.js";
 
-function Item({ item }: { item: HomeItem }): JSX.Element {
-  return (
-    <li class={item.stale === true ? "home-item stale" : "home-item"}>
-      <a href={item.href}>{item.label}</a>
-      {item.count !== undefined && <span class="count">{item.count}</span>}
-      {item.date !== undefined && <time dateTime={item.date}>{item.dateLabel ?? item.date}</time>}
-      {item.stale === true && <span class="stale-mark">{labels.dormant}</span>}
-    </li>
-  );
+/** The labels of the default theme for every label the page does not receive; the folded spaces are counted from the page. */
+export function defaultHomeLabels(folded: number): HomeLabels {
+  return {
+    question: labels.homeQuestion,
+    explanation: labels.homeExplanation,
+    frequent: labels.frequent,
+    spaces: labels.spaces,
+    spacesLead: labels.spacesLead,
+    moreSpaces: `${String(folded)} ${labels.moreSpaces}`,
+    datesNote: labels.datesNote,
+    recent: labels.recentlyChanged,
+  };
 }
 
-/** A source or a folder folds; only the sources start open. A note is a link. */
-function TreeNode({ node, open }: { node: HomeTreeNode; open: boolean }): JSX.Element {
-  if (node.children === undefined) {
-    return (
-      <li class="tree-note">
-        <a href={node.href}>{node.label}</a>
-      </li>
-    );
-  }
+/** A change worded relative to the build when the page words it, the date otherwise. */
+function When({ date, label }: { date: string; label: string | undefined }): JSX.Element {
+  return <time dateTime={date}>{label ?? date}</time>;
+}
+
+/**
+ * The row of a space: its initials badge, its name, its count and its freshness; the whole
+ * tree of the space folds behind it, drawn as the tree of the entity page.
+ */
+function Space({ space }: { space: HomeSpace }): JSX.Element {
   return (
-    <li class="tree-folder">
-      <details open={open}>
-        <summary>
-          {node.label}
-          {node.count !== undefined && <span class="count">{node.count}</span>}
+    <li class={space.stale ? "home-space stale" : "home-space"}>
+      <details class="home-space-fold">
+        <summary class="home-space-row">
+          <span class="space-initials" aria-hidden="true">
+            {space.initials}
+          </span>
+          <span class="home-space-text">
+            <span class="home-space-name">{space.name}</span>
+            <span class="home-space-meta">
+              {space.countLabel ?? `${String(space.count)} ${space.unit}`}
+              {space.date !== undefined && (
+                <>
+                  {" · "}
+                  <When date={space.date} label={space.dateLabel} />
+                </>
+              )}
+            </span>
+          </span>
         </summary>
-        <ul>
-          {node.children.map((child) => (
-            <TreeNode key={child.label} node={child} open={false} />
-          ))}
-        </ul>
+        <Nodes nodes={space.nodes} />
       </details>
     </li>
   );
 }
 
-function Source({ source }: { source: HomeSource }): JSX.Element {
+function Change({ change }: { change: HomeChange }): JSX.Element {
   return (
-    <li class={source.stale ? "home-source stale" : "home-source"}>
-      <span class="home-source-name">{source.name}</span>
-      {source.date !== undefined && (
-        <time dateTime={source.date}>{source.dateLabel ?? source.date}</time>
-      )}
-      {source.stale && <span class="stale-mark">{labels.dormant}</span>}
+    <li class="home-change">
+      <a href={change.href}>
+        <span class="home-change-title">{change.label}</span>
+        <span class="home-change-meta">
+          {change.space}
+          {" · "}
+          <When date={change.date} label={change.dateLabel} />
+        </span>
+      </a>
     </li>
   );
 }
 
-function Entry({ entry }: { entry: HomeEntry }): JSX.Element {
-  const id = `home-${entry.kind}`;
+function Alert({ alert }: { alert: HomeAlert }): JSX.Element {
   return (
-    <section class={`home-entry home-entry-${entry.kind}`} aria-labelledby={id}>
-      <h2 id={id}>
-        {entry.href === undefined ? entry.title : <a href={entry.href}>{entry.title}</a>}
-      </h2>
-      {entry.tree !== undefined && (
-        <ul class="home-tree">
-          {entry.tree.map((node) => (
-            <TreeNode key={node.label} node={node} open={true} />
-          ))}
-        </ul>
-      )}
-      {entry.items.length > 0 && (
-        <ul class="home-items">
-          {entry.items.map((item) => (
-            <Item key={item.href} item={item} />
-          ))}
-        </ul>
-      )}
-      {entry.sources !== undefined && (
-        <ul class="home-sources" aria-label={labels.sourceFreshness}>
-          {entry.sources.map((source) => (
-            <Source key={source.name} source={source} />
-          ))}
-        </ul>
-      )}
-    </section>
+    <div class="home-alert">
+      <h3>{alert.title}</h3>
+      <p>{alert.text}</p>
+    </div>
   );
 }
 
-export function Home({ title, search, shortcuts, stats, entries, todo }: HomeProps): JSX.Element {
+/**
+ * The home page: the question, the field with its live results in the flow of the page and
+ * the most cited pages as shortcuts; then the spaces, each row folding the tree of its
+ * source, the less cited ones folded behind a line counting them, and the pages changed last
+ * with the alert on every dormant space. The letters of the index live on the index page and
+ * the to-do link in the footer.
+ */
+export function Home({
+  search,
+  shortcuts,
+  spaces,
+  moreSpaces = [],
+  recent,
+  alerts,
+  labels: given = {},
+}: HomeProps): JSX.Element {
+  const text: HomeLabels = { ...defaultHomeLabels(moreSpaces.length), ...given };
   return (
     <div class="home">
-      <h1>{title}</h1>
-      <p class="home-stats">
-        {stats.sources} {labels.sources}, {stats.files} {labels.files}, {labels.builtOn}{" "}
-        <time dateTime={stats.builtAt}>{stats.builtAtLabel ?? stats.builtAt}</time>
-      </p>
-      <div class="home-search-slot" data-slot="search">
+      <section class="home-ask" aria-labelledby="home-question">
+        <h1 id="home-question">{text.question}</h1>
+        <p class="home-explanation">{text.explanation}</p>
         {search && (
-          <form
-            class="home-search"
-            role="search"
-            aria-label={labels.search}
-            action={search.action}
-            method="get"
-          >
-            <label for="home-search">{labels.search}</label>
-            <input id="home-search" type="search" name="q" placeholder={search.placeholder} />
-            <button type="submit">{labels.searchSubmit}</button>
-          </form>
+          <SearchIsland
+            {...(search.root === undefined ? {} : { root: search.root })}
+            search={search}
+            home
+          />
         )}
-      </div>
-      {shortcuts.length > 0 && (
-        <ul class="home-shortcuts" aria-label={labels.shortcuts}>
-          {shortcuts.map((link) => (
-            <li key={link.href}>
-              <a class="chip" href={link.href}>
-                {link.label}
-              </a>
-            </li>
+        {shortcuts.length > 0 && (
+          <nav class="home-frequent" aria-label={text.frequent}>
+            <span class="home-frequent-lead">{text.frequent}</span>
+            <ul class="home-shortcuts">
+              {shortcuts.map((link) => (
+                <li key={link.href}>
+                  <a class="chip" href={link.href}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </section>
+      <div class="home-columns">
+        <section class="home-spaces" aria-labelledby="home-tree">
+          <h2 id="home-tree">
+            {text.spaces} <span class="home-lead">{text.spacesLead}</span>
+          </h2>
+          <ul class="home-space-list">
+            {spaces.map((space) => (
+              <Space key={space.name} space={space} />
+            ))}
+          </ul>
+          {moreSpaces.length > 0 && (
+            <details class="home-more-spaces">
+              <summary>{text.moreSpaces}</summary>
+              <ul class="home-space-list">
+                {moreSpaces.map((space) => (
+                  <Space key={space.name} space={space} />
+                ))}
+              </ul>
+            </details>
+          )}
+          <p class="home-note">{text.datesNote}</p>
+        </section>
+        <section class="home-recent" aria-labelledby="home-recent">
+          <h2 id="home-recent">{text.recent}</h2>
+          <ul class="home-change-list">
+            {recent.map((change) => (
+              <Change key={change.href} change={change} />
+            ))}
+          </ul>
+          {alerts.map((alert) => (
+            <Alert key={alert.space} alert={alert} />
           ))}
-        </ul>
-      )}
-      <nav class="home-entries" aria-label={labels.entryPoints}>
-        {entries.map((entry) => (
-          <Entry key={entry.kind} entry={entry} />
-        ))}
-      </nav>
-      {todo && (
-        <p class="home-todo">
-          <a href={todo.href}>
-            {todo.label}
-            {todo.count !== undefined && <span class="count">{todo.count}</span>}
-          </a>
-        </p>
-      )}
+        </section>
+      </div>
     </div>
   );
 }

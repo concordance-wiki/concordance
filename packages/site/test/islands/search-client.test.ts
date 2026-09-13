@@ -190,3 +190,83 @@ describe("the search entry on the results page", () => {
     scrollTo.mockRestore();
   });
 });
+
+describe("the search entry on the home page", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+    document.head.innerHTML = "";
+    document.body.innerHTML = "";
+  });
+
+  it("draws the live results under the field of the home page, counts the matches next to it, walks the rows with the arrow keys and hides them on Escape", async () => {
+    document.body.innerHTML = [
+      renderSlot(
+        "Header",
+        {
+          siteTitle: "Notes",
+          homeHref: "index.html",
+          navigation: [],
+          search: { action: "search/index.html", placeholder: "Search", root: "" },
+        },
+        defaultTheme,
+      ),
+      "<main>",
+      renderSlot(
+        "Home",
+        {
+          search: { action: "search/index.html", placeholder: "Search", root: "" },
+          shortcuts: [],
+          spaces: [],
+          recent: [],
+          alerts: [],
+        },
+        defaultTheme,
+      ),
+      "</main>",
+    ].join("");
+    vi.stubGlobal("location", { search: "", pathname: "/dist/index.html" });
+    await import("../../src/islands/search.client.js");
+    const input = document.querySelector<HTMLInputElement>("#home-search");
+    expect(input).not.toBeNull();
+    if (input === null) return;
+    // The slash reaches the field of the home page, not the one of the header.
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "/", bubbles: true }));
+    expect(document.activeElement).toBe(input);
+    input.value = "Key";
+    input.dispatchEvent(new Event("input"));
+    await settled();
+    expect(scripts()).toEqual(["search/meta.js"]);
+    window.__concordanceSearch?.shard("meta", meta);
+    await settled();
+    window.__concordanceSearch?.shard("ke", shard);
+    await settled();
+    const panel = document.querySelector<HTMLElement>(".home-suggestions");
+    expect(panel?.hidden).toBe(false);
+    expect(panel?.innerHTML).toContain(
+      '<li class="suggestion"><a href="glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail"><span class="badge">Term</span></span><span class="suggestion-space">glossary</span></a></li>',
+    );
+    expect(panel?.innerHTML).toContain(
+      '<a class="suggestions-all" href="search/index.html?q=Key">See the 1 result</a>',
+    );
+    expect(document.querySelector(".search-count")?.textContent).toBe("1 match");
+    expect(document.querySelector<HTMLElement>(".site-search + .search-suggestions")?.hidden).toBe(
+      true,
+    );
+    const down = new KeyboardEvent("keydown", {
+      key: "ArrowDown",
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(true);
+    const row = panel?.querySelector("a");
+    expect(document.activeElement).toBe(row);
+    row?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(document.activeElement).toBe(input);
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    row?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(panel?.hidden).toBe(true);
+    expect(document.activeElement).toBe(input);
+  });
+});

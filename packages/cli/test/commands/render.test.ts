@@ -376,15 +376,19 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ).toEqual({ a: "v2" });
   });
 
-  it("passes the staleness thresholds to the home page, which flags a source dormant by them", async () => {
+  it("passes the staleness thresholds to the home page, which raises an alert on a source dormant by them", async () => {
     const dormant = corpus();
     expect(await buildCommand([], dormant)).toBe(0);
-    expect(dormant.fs.readText("/work/dist/index.html")).toContain(
-      '<li class="home-source stale"><span class="home-source-name">notes</span><time datetime="1970-01-01">Jan 1, 1970</time><span class="stale-mark">dormant</span></li>',
+    const home = dormant.fs.readText("/work/dist/index.html");
+    expect(home).toContain(
+      '<li class="home-space stale"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">NO</span><span class="home-space-text"><span class="home-space-name">notes</span><span class="home-space-meta">',
+    );
+    expect(home).toContain(
+      '<div class="home-alert"><h3>A space has not moved for 20,708 days</h3><p>notes. The alert threshold is set to 180 days in the configuration.</p></div>',
     );
     const patient = corpus(`${validConfig}staleness: { warn_after_days: { notes: 100000 } }\n`);
     expect(await buildCommand([], patient)).toBe(0);
-    expect(patient.fs.readText("/work/dist/index.html")).not.toContain("dormant");
+    expect(patient.fs.readText("/work/dist/index.html")).not.toContain("home-alert");
   });
 
   it("cuts the body indexed for the search at build.extracted_text_max_chars", async () => {

@@ -129,7 +129,7 @@ describe("the search entry", () => {
         (input.listeners[type] ??= []).push(listener);
       },
     };
-    const panel = { hidden: true };
+    const panel = { hidden: true, addEventListener: () => undefined };
     const element = {
       getAttribute: () =>
         JSON.stringify({
@@ -137,6 +137,7 @@ describe("the search entry", () => {
           search: { action: "../../search/index.html", placeholder: "Search" },
         }),
       querySelector: (selector: string) => (selector === "input" ? input : panel),
+      querySelectorAll: () => [],
     };
     vi.stubGlobal("document", {
       querySelectorAll: (selector: string) => {
