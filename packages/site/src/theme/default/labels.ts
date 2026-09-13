@@ -58,6 +58,8 @@ export const labels = {
   neighbourhoodMap: "Map of the neighbourhood",
   neighbourhoodMapCaption: "The list below carries the same information as the map.",
   noNeighbour: "No neighbour recorded.",
+  neighboursInTotal: "neighbours in total, more than the map shows",
+  seeMentions: "see the mentions panel",
   resultsFor: "results for",
   facets: "Facets",
   index: "Index",

@@ -10,6 +10,8 @@ import {
   index,
   keywordPage,
   mentions,
+  neighbourhoodFull,
+  neighbourhoodOverflow,
   searchResults,
   todo,
 } from "./fixtures.js";
@@ -164,6 +166,26 @@ export const galleryPages: readonly GalleryPage[] = [
     description: "two neighbours, one with a type and one with a relation",
     ...chrome,
     props: entityPage.neighbours,
+  },
+  {
+    file: "neighbourhood-full.html",
+    slot: "Neighbourhood",
+    rendered: "Neighbourhood",
+    state: "full",
+    description:
+      "six neighbours: shapes by glyph, an initial for a glyph without a shape, a dashed noteless word, a title cut with an ellipsis",
+    ...chrome,
+    props: neighbourhoodFull,
+  },
+  {
+    file: "neighbourhood-overflow.html",
+    slot: "Neighbourhood",
+    rendered: "Neighbourhood",
+    state: "overflow",
+    description:
+      "more neighbours in the model than the map may show: a pointer to the mentions panel replaces it, the list stays",
+    ...chrome,
+    props: neighbourhoodOverflow,
   },
   {
     file: "neighbourhood-empty.html",

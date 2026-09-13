@@ -9,7 +9,14 @@ import type {
   NeighbourhoodProps,
   SourceRef,
 } from "../slots.js";
-import { editHref, message, relationLabel, typeLabel, type SiteContext } from "./context.js";
+import {
+  editHref,
+  glyphNameOf,
+  message,
+  relationLabel,
+  typeLabel,
+  type SiteContext,
+} from "./context.js";
 import { mentionsPanelOf } from "./mentions.js";
 import { entityHref } from "./paths.js";
 
@@ -105,7 +112,24 @@ export function panelOf(context: SiteContext, page: string, entity: Entity): Att
   ]);
 }
 
-/** The neighbourhood of a page as the model ordered it; `weight` is the co-occurrence count when the model has one. */
+/**
+ * How many one-hop neighbours an entity has: the other ends of the links touching it that are
+ * entities of the model, a link looping on its node counting for none, the way the displayed
+ * neighbourhood was computed before its truncation.
+ */
+function neighbourCount(context: SiteContext, entity: Entity): number {
+  const others = new Set<string>();
+  for (const link of context.touching.get(entity.id) ?? []) {
+    const other = link.from === entity.id ? link.to : link.from;
+    if (other !== entity.id && context.entities.has(other)) others.add(other);
+  }
+  return others.size;
+}
+
+/**
+ * The neighbourhood of a page as the model ordered it; `weight` is the co-occurrence count when
+ * the model has one. `total` counts every neighbour of the model, shown or not.
+ */
 export function neighbourhoodOf(
   context: SiteContext,
   page: string,
@@ -118,20 +142,29 @@ export function neighbourhoodOf(
     ]),
   );
   const neighbours: Neighbour[] = (context.model.displayed_neighbourhood?.[entity.id] ?? []).map(
-    (neighbour) => ({
-      id: neighbour.id,
-      label: neighbour.title,
-      href: entityHref(page, neighbour.id),
-      typeLabel:
-        neighbour.kind === "keyword"
-          ? message(context, "keyword.title")
-          : typeLabel(context, neighbour.type),
-      relation: relationLabel(context, neighbour.relation),
-      weight: counts.get(neighbour.id) ?? 1,
-      rank: neighbour.rank,
-    }),
+    (neighbour) => {
+      const glyph = neighbour.kind === "keyword" ? undefined : glyphNameOf(context, neighbour.type);
+      return {
+        id: neighbour.id,
+        label: neighbour.title,
+        href: entityHref(page, neighbour.id),
+        typeLabel:
+          neighbour.kind === "keyword"
+            ? message(context, "keyword.title")
+            : typeLabel(context, neighbour.type),
+        relation: relationLabel(context, neighbour.relation),
+        weight: counts.get(neighbour.id) ?? 1,
+        rank: neighbour.rank,
+        kind: neighbour.kind,
+        ...(glyph === undefined ? {} : { typeGlyph: glyph }),
+      };
+    },
   );
-  return { centre: entity.title, neighbours };
+  return {
+    centre: entity.title,
+    neighbours,
+    total: Math.max(neighbourCount(context, entity), neighbours.length),
+  };
 }
 
 /** The files of an entity in its source, the note first with its edit link when the forge is known. */

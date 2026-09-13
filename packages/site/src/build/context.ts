@@ -122,9 +122,14 @@ export function relationLabel(context: SiteContext, relation: string): string {
   return definition === undefined ? relation : labelIn(definition.label, context.language);
 }
 
+/** The glyph name the profile gives a type, as declared (`screen`, `api`…); none for a type without one. */
+export function glyphNameOf(context: SiteContext, type: string): string | undefined {
+  return context.profile.types[type]?.glyph;
+}
+
 /** The one-letter mark of a type, from the first character of its glyph name; none for a type without a glyph. */
 export function glyphOf(context: SiteContext, type: string): string | undefined {
-  const glyph = context.profile.types[type]?.glyph;
+  const glyph = glyphNameOf(context, type);
   return glyph === undefined ? undefined : glyph.slice(0, 1).toUpperCase();
 }
 

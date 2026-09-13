@@ -35,6 +35,28 @@ export type { PageSlot, RenderOptions } from "./render.js";
 export { SLOT_NAMES, isSlotName } from "./slots.js";
 export type * from "./slots.js";
 export { ThemeContext, useSlot } from "./theme/context.js";
+export {
+  CENTRE_RADIUS,
+  FONT_SIZE,
+  LABEL_MAX,
+  NODE_RADIUS,
+  contains,
+  intersects,
+  layoutNeighbourhood,
+  truncate,
+} from "./neighbourhood/layout.js";
+export type {
+  Box,
+  Cut,
+  LabelSide,
+  Layout,
+  PlacedItem,
+  PlacedLabel,
+  PlacedNode,
+  TextAnchor,
+} from "./neighbourhood/layout.js";
+export { GLYPH_SHAPES, initialOfGlyph, shapeOfGlyph } from "./theme/default/glyphs.js";
+export type { GlyphShape } from "./theme/default/glyphs.js";
 export { defaultComponents } from "./theme/default/index.js";
 export { REPOSITORY_URL } from "./theme/default/footer.js";
 export { MODE_SWITCH_ISLAND, ModeSwitch } from "./theme/default/mode-switch.js";

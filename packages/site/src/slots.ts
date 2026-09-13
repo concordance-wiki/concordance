@@ -273,6 +273,10 @@ export interface Neighbour {
    * draws a separator where it changes and never decides the order itself.
    */
   rank?: number;
+  /** A typed entity, drawn as a circle, or a noteless word, drawn as a dashed square with a dashed edge; an entity when absent. */
+  kind?: "entity" | "keyword";
+  /** The glyph name the profile gives the type (`screen`, `api`…); the theme turns it into a shape inside the node. */
+  typeGlyph?: string;
 }
 
 export interface NeighbourhoodProps {
@@ -280,6 +284,11 @@ export interface NeighbourhoodProps {
   centre: string;
   /** In the order the model gives, which the panel keeps. */
   neighbours: Neighbour[];
+  /**
+   * How many one-hop neighbours the entity has in the model. When more than `neighbours` lists,
+   * the map gives way to a pointer to the mentions panel; the list stays.
+   */
+  total?: number;
 }
 
 export interface SearchResult {
