@@ -1,7 +1,9 @@
 import { resolve } from "node:path";
 
-import { definePlugin, type PluginManifest } from "@concordance-wiki/core";
+import { definePlugin, nodeFileSystem, type PluginManifest } from "@concordance-wiki/core";
+import { defaultTypesDirectory, readTypeModules } from "@concordance-wiki/profile";
 import { defaultComponents, galleryPages } from "@concordance-wiki/site";
+import { h, type JSX } from "preact";
 import { describe, expect, it } from "vitest";
 
 import { galleryCommand, type GalleryDependencies } from "../../src/commands/gallery.js";
@@ -16,7 +18,11 @@ const palette =
   "{ bg: '#F4F7FB', surface: '#FFFFFF', border: '#D5DCE6', ink: '#101820', muted: '#4A5566', accent: '#1F5FA8' }";
 const projectTheme = `name: Pipeline notes\nlight: ${palette}\ndark: ${palette}\n`;
 
-const pageCount = galleryPages.length + 1;
+/** The core types with a template, rendered one page each after the fixture pages. */
+const coreTypePages = readTypeModules(nodeFileSystem, defaultTypesDirectory()).modules.filter(
+  (module) => module.template !== undefined,
+).length;
+const pageCount = galleryPages.length + coreTypePages + 1;
 
 function themePlugin(
   name: string,
@@ -99,17 +105,114 @@ describe("A concordance gallery command renders every slot with fixture view mod
 
   it("exits 1 and names every problem when a page fails the accessibility checks", async () => {
     const io = recordedIo();
-    // A footer rendering nothing: every page but the four entity pages, which carry their own footer, loses the landmark.
+    // A footer rendering nothing: every page but the entity pages, the four fixture ones and one per core type, which carry their own footer, loses the landmark.
     const deps = fakeDependencies(
       { "@example/theme": themePlugin("@example/theme", { Footer: "./footer.js" }) },
       () => null,
     );
     expect(await galleryCommand(["--theme", "@example/theme"], io, deps)).toBe(1);
-    const failing = pageCount - 4;
+    const failing = pageCount - 4 - coreTypePages;
     expect(io.stderr).toHaveLength(failing + 1);
     expect(io.stderr[0]).toBe("footer-text.html: landmarks: no footer landmark");
     expect(io.stderr.at(-1)).toBe(`gallery failed: ${String(failing)} problem(s)`);
     expect(io.stdout[1]).toBe("override Footer: plugin @example/theme, theme custom");
+  });
+});
+
+describe("The gallery shows every registered type", () => {
+  it("renders one page per core type from its template through the generic page, listed in the index", async () => {
+    const io = recordedIo();
+    expect(await galleryCommand([], io)).toBe(0);
+    const files = io.fs.listFiles("/work/gallery");
+    expect(files.filter((file) => file.startsWith("type-"))).toHaveLength(coreTypePages);
+    expect(files).toContain("type-screen.html");
+    const index = io.fs.readText("/work/gallery/index.html");
+    expect(index).toContain('<a href="type-screen.html">screen</a>: Screen, generic entity page');
+    expect(io.fs.readText("/work/gallery/type-decision.html")).toContain(
+      '<span class="badge">Decision</span>',
+    );
+  });
+
+  it("renders the type a plugin contributes through the component its module ships, and names it in the index", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}plugins: [types-plugin]\n`,
+      "/plugins/types-plugin/types/runbook/type.yaml": "group: quality\n",
+      "/plugins/types-plugin/types/runbook/messages/en.json": JSON.stringify({ label: "Runbook" }),
+      "/plugins/types-plugin/types/runbook/template.md": "---\ntype: runbook\n---\n# Rebuild\n",
+      "/plugins/types-plugin/types/runbook/components/EntityPage.js": "",
+    });
+    const plugin = definePlugin({
+      name: "types-plugin",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { types: [{ path: "./types/runbook" }] },
+    });
+    const RunbookPage = (): JSX.Element =>
+      h("div", { class: "entity runbook" }, h("h1", null, "Runbook"));
+    const deps: GalleryDependencies = {
+      load: () => Promise.resolve(plugin),
+      commandAvailable: () => Promise.resolve(true),
+      loadTheme: () => Promise.resolve(undefined),
+      loadFile: () => Promise.resolve(RunbookPage),
+      rootOf: () => "/plugins/types-plugin",
+      pluginFiles: io.fs,
+    };
+    expect(await galleryCommand([], io, deps)).toBe(0);
+    expect(io.fs.readText("/work/gallery/type-runbook.html")).toContain(
+      '<div class="entity runbook"><h1>Runbook</h1></div>',
+    );
+    expect(io.fs.readText("/work/gallery/index.html")).toContain(
+      '<a href="type-runbook.html">runbook</a>: Runbook, <code>EntityPage@runbook</code> of <code>types-plugin</code>, <code>type module</code>',
+    );
+    expect(io.stdout).toContain(
+      "override EntityPage@runbook: plugin types-plugin, theme type module",
+    );
+    expect(io.stderr).toEqual([]);
+  });
+
+  it("renders the types of the project profile, its types_dir modules among them, through the generic page", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}profile: profile.yaml\n`,
+      "/work/profile.yaml": "types_dir: ./types\n",
+      "/work/types/audit/type.yaml": "group: quality\nattributes:\n  scope: { type: string }\n",
+      "/work/types/audit/messages/en.json": JSON.stringify({
+        label: "Audit",
+        "attributes.scope": "Scope",
+      }),
+      "/work/types/audit/template.md":
+        "---\ntype: audit\nscope: the nightly build\n---\n# An audit\n",
+    });
+    expect(await galleryCommand([], io)).toBe(0);
+    const page = io.fs.readText("/work/gallery/type-audit.html");
+    expect(page).toContain('<span class="badge">Audit</span>');
+    expect(page).toContain('<dt>Scope</dt><dd><span class="value">the nightly build</span></dd>');
+    expect(io.fs.readText("/work/gallery/index.html")).toContain(
+      '<a href="type-audit.html">audit</a>: Audit, generic entity page',
+    );
+  });
+
+  it("stops with exit code 1 when a type module of the plugins is invalid", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}plugins: [types-plugin]\n`,
+      "/plugins/types-plugin/types/runbook/type.yaml": "group: 3\n",
+    });
+    const plugin = definePlugin({
+      name: "types-plugin",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { types: [{ path: "./types/runbook" }] },
+    });
+    const deps: GalleryDependencies = {
+      load: () => Promise.resolve(plugin),
+      commandAvailable: () => Promise.resolve(true),
+      loadTheme: () => Promise.resolve(undefined),
+      rootOf: () => "/plugins/types-plugin",
+    };
+    expect(await galleryCommand([], io, deps)).toBe(1);
+    expect(io.stderr).toEqual([
+      "error: plugin types-plugin, /plugins/types-plugin/types/runbook: type.yaml: group: wrong type; received 3; expected string",
+      "gallery stopped: fix the profile first",
+    ]);
   });
 });
 
@@ -173,6 +276,8 @@ describe("Every theme override is visible there", () => {
       const html = io.fs.readText(`/out/${file}`);
       expect(html, file).toContain("</svg></span>Pipeline notes</a>");
       expect(html, file).toContain('<link rel="stylesheet" href="assets/project.css"/>');
+      // The type pages render the note templates, a corpus whose subject is the tool itself.
+      if (file.startsWith("type-")) continue;
       expect(
         html.replace(/<script>.*?<\/script>/gs, "").replace(/<[^>]+>/g, " "),
         file,

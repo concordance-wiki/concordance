@@ -1,5 +1,6 @@
 import type { Link } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
+import type { Profile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -19,12 +20,16 @@ import {
 } from "../../src/build/context.js";
 import {
   contractOf,
+  declarationOf,
   entityPageOf,
   highlightsOf,
   neighbourhoodOf,
+  othersOf,
   panelOf,
+  sectionsOf,
   sourcesOf,
 } from "../../src/build/entity-page.js";
+import type { EntityFragment } from "../../src/build/fragments.js";
 import {
   COMPANIONS_MAX,
   companionsOf,
@@ -173,14 +178,18 @@ describe("siteContext", () => {
 });
 
 describe("entityPageOf", () => {
-  it("shows the highlights the profile names for the type, in its order, an identifier value becoming a link", () => {
+  it("shows the highlights the profile names for the type, in its order, labelled by the profile, an identifier value becoming a link", () => {
     expect(highlightsOf(context(), pagePath, term)).toEqual([
       { name: "aliases", label: "aliases", values: [{ text: "word page" }] },
-      { name: "broader", label: "broader", values: [{ text: "Page", href: "../page/index.html" }] },
+      {
+        name: "broader",
+        label: "Broader term",
+        values: [{ text: "Page", href: "../page/index.html" }],
+      },
     ]);
     expect(highlightsOf(context(), "specs/screens/mentions-panel/index.html", screen)).toEqual([
-      { name: "roles", label: "roles", values: [{ text: "roles/reader" }] },
-      { name: "url_pattern", label: "url pattern", values: [{ text: "/{id}/" }] },
+      { name: "roles", label: "Roles", values: [{ text: "roles/reader" }] },
+      { name: "url_pattern", label: "URL pattern", values: [{ text: "/{id}/" }] },
       { name: "status", label: "Status", values: [{ text: "active" }] },
     ]);
     expect(highlightsOf(context(), pagePath, entity({ ...term, type: "unknown_type" }))).toEqual(
@@ -188,15 +197,47 @@ describe("entityPageOf", () => {
     );
   });
 
-  it("fills the side panel with the common properties then every attribute in key order, scalars and lists only", () => {
-    expect(panelOf(context(), pagePath, term)).toEqual([
+  it("labels an attribute in the site language, falling back to English then to the key itself", () => {
+    const french = context({ catalogue: loadCatalogue("fr") });
+    expect(highlightsOf(french, pagePath, term)[1]?.label).toBe("Terme générique");
+    const englishOnly = context({
+      profile: {
+        ...profile,
+        types: {
+          ...profile.types,
+          term: {
+            label: { en: "Term" },
+            group: "business",
+            attributes: { broader: { type: "ref", label: { en: "Broader" } } },
+            display: { highlight: ["broader"] },
+          },
+        },
+      },
+      catalogue: loadCatalogue("fr"),
+    });
+    expect(highlightsOf(englishOnly, pagePath, term)[0]?.label).toBe("Broader");
+  });
+
+  it("fills the side panel with the common properties, the declared attributes of the type in declaration order, then the declared common ones", () => {
+    const declaredCommon = entity({
+      ...term,
+      attributes: { ...term.attributes, superseded_by: "glossary/page", locale: "en" },
+    });
+    expect(panelOf(context(), pagePath, declaredCommon)).toEqual([
       { name: "application", label: "Application", values: [{ text: "concordance-cli" }] },
       { name: "domain", label: "Domain", values: [{ text: "publication" }] },
       { name: "status", label: "Status", values: [{ text: "active" }] },
-      { name: "broader", label: "broader", values: [{ text: "Page", href: "../page/index.html" }] },
-      { name: "note", label: "note", values: [{ text: "true" }] },
-      { name: "supersedes", label: "supersedes", values: [{ text: "unknown/thing" }] },
-      { name: "weight", label: "weight", values: [{ text: "3" }] },
+      {
+        name: "broader",
+        label: "Broader term",
+        values: [{ text: "Page", href: "../page/index.html" }],
+      },
+      { name: "locale", label: "locale", values: [{ text: "en" }] },
+      {
+        name: "superseded_by",
+        label: "superseded by",
+        values: [{ text: "Page", href: "../page/index.html" }],
+      },
     ]);
     const panel = panelOf(context(), "specs/screens/mentions-panel/index.html", screen);
     expect(panel.map((attribute) => attribute.name)).toEqual([
@@ -206,6 +247,165 @@ describe("entityPageOf", () => {
       "roles",
       "url_pattern",
     ]);
+  });
+
+  it("keeps the attributes the profile does not declare apart, as written, in key order", () => {
+    expect(othersOf(context(), term)).toEqual([
+      { name: "note", label: "note", values: [{ text: "true" }] },
+      { name: "supersedes", label: "supersedes", values: [{ text: "unknown/thing" }] },
+      { name: "weight", label: "weight", values: [{ text: "3" }] },
+    ]);
+    const nested = entity({
+      ...term,
+      attributes: {
+        steps: [{ action: "rebuild" }, "check", 2],
+        owner: { team: "quality" },
+        empty: null,
+        none: [],
+      },
+    });
+    expect(othersOf(context(), nested)).toEqual([
+      { name: "owner", label: "owner", values: [{ text: '{"team":"quality"}' }] },
+      {
+        name: "steps",
+        label: "steps",
+        values: [{ text: '{"action":"rebuild"}' }, { text: "check" }, { text: "2" }],
+      },
+    ]);
+    expect(othersOf(context(), screen)).toEqual([]);
+    expect(othersOf(context(), entity({ ...term, type: "unknown_type" }))).toEqual([
+      { name: "broader", label: "broader", values: [{ text: "glossary/page" }] },
+      { name: "note", label: "note", values: [{ text: "true" }] },
+      { name: "supersedes", label: "supersedes", values: [{ text: "unknown/thing" }] },
+      { name: "weight", label: "weight", values: [{ text: "3" }] },
+    ]);
+  });
+
+  it("shows a declared number or boolean as text, and reads every key as declared by the type when the profile has no common attributes", () => {
+    const report = entity({
+      id: "framing/lint-report",
+      type: "document",
+      title: "Lint report",
+      attributes: { pages: 3, preview_available: true, author: "Participant-1" },
+    });
+    expect(
+      panelOf(context(), pagePath, report).map((attribute) => [
+        attribute.label,
+        attribute.values[0]?.text,
+      ]),
+    ).toEqual([
+      ["Status", "active"],
+      ["Author", "Participant-1"],
+      ["Pages", "3"],
+      ["Preview available", "true"],
+    ]);
+    const withoutCommon: Profile = { ...profile };
+    delete withoutCommon.common_attributes;
+    const ctx = context({ profile: withoutCommon });
+    expect(othersOf(ctx, term).map((attribute) => attribute.name)).toEqual([
+      "note",
+      "supersedes",
+      "weight",
+    ]);
+    expect(panelOf(ctx, pagePath, term).map((attribute) => attribute.name)).toEqual([
+      "application",
+      "domain",
+      "status",
+      "broader",
+    ]);
+  });
+
+  it("builds the page of an entity of an undeclared type without a declaration, every attribute among the others", () => {
+    const stranger = entityPageOf(context(), entity({ ...term, type: "unknown_type" }));
+    expect(stranger.declaration).toBeUndefined();
+    expect(stranger.entity.typeLabel).toBe("unknown_type");
+    expect(stranger.highlights).toEqual([]);
+    expect(stranger.otherAttributes?.map((attribute) => attribute.name)).toEqual([
+      "broader",
+      "note",
+      "supersedes",
+      "weight",
+    ]);
+    expect(stranger.labels).toEqual({
+      properties: "Attributes",
+      otherAttributes: "Other attributes",
+    });
+    const declared = entityPageOf(context(), screen);
+    expect(declared.declaration?.type).toBe("screen");
+    expect(declared.otherAttributes).toBeUndefined();
+  });
+
+  it("exposes the declaration of the type, labelled in the site language, and none for an undeclared type", () => {
+    const declaration = declarationOf(context(), "screen");
+    expect(declaration?.type).toBe("screen");
+    expect(declaration?.label).toBe("Screen");
+    expect(declaration?.group).toBe("application");
+    expect(declaration?.glyph).toBe("screen");
+    expect(declaration?.attributes.map((attribute) => attribute.name)).toEqual([
+      "roles",
+      "reads",
+      "writes",
+      "actions",
+      "rules",
+      "url_pattern",
+    ]);
+    expect(declaration?.attributes[0]).toEqual({
+      name: "roles",
+      label: "Roles",
+      type: "ref[]",
+      target: ["role"],
+      relation: "assigned_to",
+    });
+    expect(declaration?.attributes[1]?.target).toEqual(["business_object", "data_object"]);
+    expect(declaration?.attributes[3]).toEqual({ name: "actions", label: "Actions", type: "list" });
+    expect(declaration?.sections).toEqual([
+      { key: "objects", heading: "Objects", parse: "bullet-list", produces: "accesses" },
+      { key: "actions", heading: "Actions", parse: "ordered-list", produces: "triggers" },
+      { key: "rules", heading: "Rules", parse: "bullet-list", produces: "constrains" },
+    ]);
+    expect(declaration?.display).toEqual({
+      highlight: ["roles", "url_pattern", "status"],
+      neighboursOrder: ["business_object", "data_object", "screen", "api", "rule", "process"],
+    });
+    expect(
+      declarationOf(context({ catalogue: loadCatalogue("fr") }), "screen")?.sections[0],
+    ).toEqual({ key: "objects", heading: "Objets", parse: "bullet-list", produces: "accesses" });
+    const api = declarationOf(context(), "api");
+    expect(api?.attributes[0]?.values).toEqual(["rest", "soap", "graphql", "grpc"]);
+    expect(declarationOf(context(), "goal")).toEqual({
+      type: "goal",
+      label: "Goal",
+      group: "motivation",
+      glyph: "goal",
+      attributes: [],
+      sections: [],
+      display: { highlight: [], neighboursOrder: [] },
+    });
+    expect(declarationOf(context(), "unknown_type")).toBeUndefined();
+  });
+
+  it("marks the sections of the note whose heading the type maps, in any language or by the key, and leaves the others", () => {
+    const fragments = new Map<string, EntityFragment>([
+      [
+        screen.id,
+        {
+          id: screen.id,
+          sections: [
+            { id: "section-lead", html: "<p>lead</p>" },
+            { id: "section-objects", heading: "  OBJETS ", html: "<ul></ul>" },
+            { id: "section-rules", heading: "rules", html: "<ul></ul>" },
+            { id: "section-notes", heading: "Notes", html: "<p></p>" },
+          ],
+        },
+      ],
+    ]);
+    expect(sectionsOf(context({ fragments }), screen)).toEqual([
+      { id: "section-lead", html: "<p>lead</p>" },
+      { id: "section-objects", heading: "  OBJETS ", html: "<ul></ul>", key: "objects" },
+      { id: "section-rules", heading: "rules", html: "<ul></ul>", key: "rules" },
+      { id: "section-notes", heading: "Notes", html: "<p></p>" },
+    ]);
+    expect(sectionsOf(context(), screen)).toEqual([]);
   });
 
   it("lists a key once when the profile highlights a common property the frontmatter also carries", () => {

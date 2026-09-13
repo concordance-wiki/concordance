@@ -14,6 +14,7 @@ import {
 } from "@concordance-wiki/core";
 import {
   defaultThemeManifest,
+  importFile,
   importThemeModule,
   loadTheme,
   packageDirectoryOf,
@@ -22,6 +23,8 @@ import {
   type ResolvedThemeConfig,
   type ThemeLoader,
 } from "@concordance-wiki/site";
+
+import type { TypeModule } from "@concordance-wiki/profile";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { formatFinding } from "./findings.js";
@@ -36,12 +39,15 @@ export const defaultThemeFile = "theme.yaml";
  */
 export interface ThemeDependencies extends PluginLoaderDependencies, TypeModuleDependencies {
   loadTheme: ThemeLoader["load"];
+  /** Loads a component file of a type module by its absolute path; absent, the components of the modules are left aside. */
+  loadFile?: ThemeLoader["loadFile"];
 }
 
 export const nodeThemeDependencies: ThemeDependencies = {
   load: importPlugin,
   commandAvailable: commandExists,
   loadTheme: importThemeModule,
+  loadFile: importFile,
   rootOf: (plugin) => packageDirectoryOf(plugin),
   pluginFiles: nodeFileSystem,
 };
@@ -80,12 +86,12 @@ export function projectTheme(
   return { exit: missing ? exitCodes.failure : exitCodes.invalid };
 }
 
-/** The theme of the plugins declared, the last contribution winning a slot; loading findings go to stderr. */
-export async function themeOf(
+/** The plugins declared, loaded with the default theme registered first; loading findings go to stderr. */
+export async function pluginsOf(
   declarations: PluginConfig[],
   io: CommandIo,
-  deps: ThemeDependencies,
-): Promise<ResolvedTheme> {
+  deps: PluginLoaderDependencies,
+): Promise<PluginRegistry> {
   const { registry, findings } = await loadPlugins(declarations, {
     load: (name) => deps.load(specifier(name, io.cwd)),
     commandAvailable: deps.commandAvailable,
@@ -94,12 +100,14 @@ export async function themeOf(
   for (const finding of findings) {
     io.err(formatFinding(finding));
   }
-  return resolveTheme(registry, loaderOf(deps));
+  return registry;
 }
 
-function loaderOf(deps: ThemeDependencies): ThemeLoader {
+/** The loader of the site's theme resolution, from the injected dependencies. */
+export function loaderOf(deps: ThemeDependencies): ThemeLoader {
   return {
     load: deps.loadTheme,
+    ...(deps.loadFile === undefined ? {} : { loadFile: deps.loadFile }),
     ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
     ...(deps.pluginFiles === undefined ? {} : { fileSystem: deps.pluginFiles }),
   };
@@ -113,6 +121,8 @@ export interface SiteThemeInput {
   command: string;
   /** The plugins of the configuration, already loaded by the command. */
   registry: PluginRegistry;
+  /** The type modules merged into the profile, whose components the theme resolves. */
+  modules: readonly TypeModule[];
 }
 
 /**
@@ -131,7 +141,7 @@ export async function siteTheme(
   }
   let theme: ResolvedTheme;
   try {
-    theme = await resolveTheme(input.registry, loaderOf(deps));
+    theme = await resolveTheme(input.registry, loaderOf(deps), input.modules);
   } catch (error) {
     io.err(
       `${command}: cannot resolve the theme: ${error instanceof Error ? error.message : String(error)}`,

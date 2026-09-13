@@ -12,7 +12,7 @@ import {
   type PluginRegistry,
 } from "@concordance-wiki/core";
 import { glossarySources, languagePack, searchTokens } from "@concordance-wiki/nlp";
-import type { Profile } from "@concordance-wiki/profile";
+import type { Profile, TypeModule } from "@concordance-wiki/profile";
 import {
   buildSite,
   contractFileTarget,
@@ -45,6 +45,8 @@ export interface SiteRenderInput {
   command: string;
   /** The plugins of the configuration, loaded by the command. */
   registry: PluginRegistry;
+  /** The type modules merged into the profile: the site renders their components. */
+  modules: readonly TypeModule[];
 }
 
 /** The titles the configuration gives to applications and domains, subdomains keyed by their id path. */
@@ -190,6 +192,7 @@ export async function renderSite(
     file: input.configFile,
     command,
     registry: input.registry,
+    modules: input.modules,
   });
   if ("exit" in theme) {
     return theme.exit;
@@ -269,7 +272,7 @@ export async function renderCommand(
   for (const finding of plugins.findings) {
     io.err(formatFinding(finding));
   }
-  const resolved = loadProfile(io, config, configDirectory, {
+  const resolved = loadProfile(io, config.profile, configDirectory, {
     registry: plugins.registry,
     ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
     ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
@@ -307,5 +310,6 @@ export async function renderCommand(
     output,
     command: "render",
     registry: plugins.registry,
+    modules: resolved.modules,
   });
 }

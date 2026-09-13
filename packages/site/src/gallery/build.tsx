@@ -9,10 +9,12 @@ import type { IslandBundle } from "../islands/bundle.js";
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
 import type { SlotProps } from "../slots.js";
 import { chromeOf, type ThemeChrome } from "../theme/chrome.js";
+import { pageComponentFor } from "../theme/context.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import { footer, galleryTheme, header } from "./fixtures.js";
 import { GalleryIndex } from "./index-page.js";
 import { galleryPages, type GalleryPage } from "./pages.js";
+import { typePages, type GalleryTypes, type TypePage } from "./types.js";
 
 export const GALLERY_PAGE_BUDGET = 150_000;
 
@@ -25,6 +27,8 @@ export interface GalleryOptions {
   theme: ResolvedTheme;
   fileSystem: FileSystem;
   maxPageBytes?: number;
+  /** The registered types, each rendered from its template through the generic page or its dedicated component; none without. */
+  types?: GalleryTypes;
 }
 
 export interface GalleryDocument {
@@ -91,8 +95,17 @@ function chromeFor(fixtures: FixtureChrome, chrome: ThemeChrome | undefined): Fi
   return { header, footer: { ...fixtures.footer, ...chrome.footer } };
 }
 
+/** The page of a type: its template through `EntityPage@<type>` when the theme resolved one, else through `EntityPage`. */
+function typeBody(page: TypePage, options: RenderOptions): string {
+  return renderDocument(h(pageComponentFor(options.theme, page.type), page.props), options);
+}
+
 /** Every page of the gallery and its index, rendered through the theme against the given bundles. */
-export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]): GalleryDocument[] {
+export function galleryDocuments(
+  theme: ResolvedTheme,
+  islands: IslandBundle[],
+  types?: GalleryTypes,
+): GalleryDocument[] {
   const chrome = theme.config === undefined ? undefined : chromeOf(theme.config, ASSETS_BASE);
   const suffix = chrome === undefined ? "" : ` – ${chrome.siteTitle}`;
   const options = (title: string, locale: string, page: FixtureChrome): RenderOptions => ({
@@ -109,10 +122,17 @@ export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]):
     path: page.file,
     html: body(page, options(`${page.slot}, ${page.state}`, page.locale, page)),
   }));
+  const shownTypes = types === undefined ? [] : typePages(types, theme);
+  for (const page of shownTypes) {
+    documents.push({
+      path: page.file,
+      html: typeBody(page, options(`Type ${page.type}`, "en", { header, footer })),
+    });
+  }
   documents.push({
     path: "index.html",
     html: renderDocument(
-      <GalleryIndex pages={galleryPages} overrides={theme.overrides} />,
+      <GalleryIndex pages={galleryPages} types={shownTypes} overrides={theme.overrides} />,
       options("Component gallery", "en", { header, footer }),
     ),
   });
@@ -130,7 +150,10 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
     fallback: galleryTheme,
     maxPageBytes: options.maxPageBytes ?? GALLERY_PAGE_BUDGET,
     documents: (islands) =>
-      galleryDocuments(theme, islands).map(({ path, html }) => ({ path, content: html })),
+      galleryDocuments(theme, islands, options.types).map(({ path, html }) => ({
+        path,
+        content: html,
+      })),
   });
   return {
     pages: assembled.pages,

@@ -6,15 +6,20 @@ import type {
   AttributeValue,
   ContractOperationItem,
   ContractSectionProps,
+  DeclaredAttribute,
+  DeclaredSection,
   DocumentView,
   EntityPageProps,
   Neighbour,
   NeighbourhoodProps,
+  Section,
   SourceRef,
+  TypeDeclaration,
 } from "../slots.js";
 import {
   editHref,
   glyphNameOf,
+  labelIn,
   message,
   relationLabel,
   typeLabel,
@@ -48,8 +53,12 @@ function commonLabel(context: SiteContext, key: Common): string {
   }
 }
 
-function attributeLabel(key: string): string {
-  return key.replaceAll("_", " ");
+/** The label of an attribute in the site language: what the type or the common attributes declare, else the name itself. */
+function attributeLabel(context: SiteContext, type: string, key: string): string {
+  const { profile } = context;
+  const label =
+    profile.types[type]?.attributes?.[key]?.label ?? profile.common_attributes?.[key]?.label;
+  return label === undefined ? key.replaceAll("_", " ") : labelIn(label, context.language);
 }
 
 /** A value of the frontmatter as the page shows it: scalars and lists of scalars, an identifier becoming a link. */
@@ -78,7 +87,8 @@ function attributeOf(
   key: string,
 ): Attribute | undefined {
   const common = COMMON.find((candidate) => candidate === key);
-  const label = common === undefined ? attributeLabel(key) : commonLabel(context, common);
+  const label =
+    common === undefined ? attributeLabel(context, entity.type, key) : commonLabel(context, common);
   const raw: unknown =
     common !== undefined
       ? commonValue(entity, common)
@@ -113,12 +123,115 @@ export function highlightsOf(context: SiteContext, page: string, entity: Entity)
   ]);
 }
 
-/** The side panel: the common properties, then every frontmatter attribute in key order. */
+/** The keys of the frontmatter the profile declares, for the type or for every type. */
+function declaredKeys(context: SiteContext, type: string): { typed: string[]; common: string[] } {
+  const { profile } = context;
+  return {
+    typed: Object.keys(profile.types[type]?.attributes ?? {}),
+    common: Object.keys(profile.common_attributes ?? {}),
+  };
+}
+
+/**
+ * The side panel: the common properties, then the attributes the type declares in declaration
+ * order, then the other declared common attributes the note sets, in key order.
+ */
 export function panelOf(context: SiteContext, page: string, entity: Entity): Attribute[] {
+  const declared = declaredKeys(context, entity.type);
+  const set = Object.keys(entity.attributes).sort(byCodeUnit);
   return attributes(context, page, entity, [
     ...COMMON,
-    ...Object.keys(entity.attributes).sort(byCodeUnit),
+    ...declared.typed.filter((key) => Object.hasOwn(entity.attributes, key)),
+    ...set.filter((key) => declared.common.includes(key)),
   ]);
+}
+
+/** A value the profile knows nothing about, as written: scalars and their lists as text, anything nested as JSON. */
+function rawValuesOf(value: unknown): AttributeValue[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((item: unknown) =>
+      typeof item === "object" && item !== null
+        ? [{ text: JSON.stringify(item) }]
+        : rawValuesOf(item),
+    );
+  }
+  if (typeof value === "string") {
+    return [{ text: value }];
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return [{ text: String(value) }];
+  }
+  return value === null || value === undefined ? [] : [{ text: JSON.stringify(value) }];
+}
+
+/** The frontmatter keys the profile declares neither for the type nor for every type, kept as written, in key order. */
+export function othersOf(context: SiteContext, entity: Entity): Attribute[] {
+  const declared = declaredKeys(context, entity.type);
+  const others: Attribute[] = [];
+  for (const key of Object.keys(entity.attributes).sort(byCodeUnit)) {
+    if (declared.typed.includes(key) || declared.common.includes(key)) continue;
+    const values = rawValuesOf(entity.attributes[key]);
+    if (values.length > 0) others.push({ name: key, label: key, values });
+  }
+  return others;
+}
+
+/** The declaration of the type of an entity as the profile has it, labelled in the site language; none for an undeclared type. */
+export function declarationOf(context: SiteContext, type: string): TypeDeclaration | undefined {
+  const definition = context.profile.types[type];
+  if (definition === undefined) return undefined;
+  const attributes = Object.entries(definition.attributes ?? {}).map(
+    ([name, attribute]): DeclaredAttribute => ({
+      name,
+      label: attributeLabel(context, type, name),
+      type: attribute.type,
+      ...(attribute.target === undefined
+        ? {}
+        : { target: Array.isArray(attribute.target) ? attribute.target : [attribute.target] }),
+      ...(attribute.relation === undefined ? {} : { relation: attribute.relation }),
+      ...(attribute.values === undefined ? {} : { values: attribute.values }),
+    }),
+  );
+  const sections = Object.entries(definition.sections ?? {}).map(
+    ([key, section]): DeclaredSection => ({
+      key,
+      heading: labelIn(section.heading, context.language),
+      parse: section.parse,
+      produces: section.produces,
+    }),
+  );
+  return {
+    type,
+    label: labelIn(definition.label, context.language),
+    group: definition.group,
+    ...(definition.glyph === undefined ? {} : { glyph: definition.glyph }),
+    attributes,
+    sections,
+    display: {
+      highlight: [...(definition.display?.highlight ?? [])],
+      neighboursOrder: [...(definition.display?.neighbours_order ?? [])],
+    },
+  };
+}
+
+/** A heading compared without regard to case, accents or surrounding and repeated whitespace, as the pipeline maps sections. */
+function foldHeading(heading: string): string {
+  return heading.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+/** The sections of the note, each mapped section of the type marked with its key when its heading matches, in any language or by the key itself. */
+export function sectionsOf(context: SiteContext, entity: Entity): Section[] {
+  const mapped = Object.entries(context.profile.types[entity.type]?.sections ?? {});
+  return (context.fragments.get(entity.id)?.sections ?? []).map((section) => {
+    if (section.heading === undefined) return section;
+    const heading = foldHeading(section.heading);
+    const match = mapped.find(([key, definition]) =>
+      [key, ...Object.values<string>({ ...definition.heading })].some(
+        (label) => foldHeading(label) === heading,
+      ),
+    );
+    return match === undefined ? section : { ...section, key: match[0] };
+  });
 }
 
 /**
@@ -293,6 +406,8 @@ export function entityPageOf(
   const page = pagePath(entity.id);
   const documents = documentsOf(context, page, entity, options.viewer);
   const contract = contractOf(context, page, entity);
+  const declaration = declarationOf(context, entity.type);
+  const otherAttributes = othersOf(context, entity);
   return {
     entity: {
       id: entity.id,
@@ -301,9 +416,15 @@ export function entityPageOf(
       title: entity.title,
       locale: entity.locale,
     },
+    ...(declaration === undefined ? {} : { declaration }),
     highlights: highlightsOf(context, page, entity),
-    sections: context.fragments.get(entity.id)?.sections ?? [],
+    sections: sectionsOf(context, entity),
     attributes: panelOf(context, page, entity),
+    ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
+    labels: {
+      properties: message(context, "entity.attributes"),
+      otherAttributes: message(context, "entity.otherAttributes"),
+    },
     neighbours: neighbourhoodOf(context, page, entity),
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),

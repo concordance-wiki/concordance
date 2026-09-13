@@ -33,6 +33,7 @@ export const messageArguments = {
   "entity.mentions": {},
   "entity.mentionsCount": { count: "plural" },
   "entity.neighbours": {},
+  "entity.otherAttributes": {},
   "entity.relatedTo": {},
   "entity.showLess": {},
   "entity.showMore": {},

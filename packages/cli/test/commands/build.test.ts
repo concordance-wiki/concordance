@@ -17,7 +17,8 @@ import {
 } from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
-import { fragmentPath, searchFilePath } from "@concordance-wiki/site";
+import { fragmentPath, searchFilePath, type EntityPageProps } from "@concordance-wiki/site";
+import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
@@ -824,6 +825,32 @@ describe("concordance build", () => {
       const page = io.fs.readText(`/work/dist/${pagePath("notes/rebuild")}`);
       expect(page).toContain('<span class="badge">Runbook</span>');
       expect(page).toContain("a red build");
+    });
+
+    it("renders the notes of a plugin type through the page component its module ships, and lists the override", async () => {
+      const io = runbookCorpus(`${validConfig}plugins: [types-plugin]\n`);
+      runbookModule(io, "/plugins/types-plugin/types");
+      io.fs.writeText("/plugins/types-plugin/types/runbook/components/EntityPage.js", "");
+      const RunbookPage = (props: EntityPageProps): JSX.Element =>
+        h("div", { class: "entity runbook" }, h("h1", null, `Runbook: ${props.entity.title}`));
+      const asked: string[] = [];
+      const deps = {
+        ...withTypesPlugin(io),
+        loadFile: (path: string) => {
+          asked.push(path);
+          return Promise.resolve(RunbookPage);
+        },
+      };
+      expect(await buildCommand([], io, deps)).toBe(0);
+      expect(asked).toEqual(["/plugins/types-plugin/types/runbook/components/EntityPage.js"]);
+      const page = io.fs.readText(`/work/dist/${pagePath("notes/rebuild")}`);
+      expect(page).toContain('<div class="entity runbook"><h1>Runbook: Rebuild the site</h1>');
+      expect(io.fs.readText(`/work/dist/${pagePath("notes/a")}`)).toContain(
+        '<div class="entity"><header class="entity-header">',
+      );
+      expect(io.stdout).toContain(
+        "override EntityPage@runbook: plugin types-plugin, theme type module",
+      );
     });
 
     it("stops with exit code 1 on an invalid plugin module, naming the plugin, the folder and the file", async () => {

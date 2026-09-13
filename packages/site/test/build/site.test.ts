@@ -1,6 +1,7 @@
 import { runInNewContext } from "node:vm";
 
 import { memoryFileSystem, pagePath } from "@concordance-wiki/core";
+import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import {
@@ -22,6 +23,7 @@ import {
 import { defaultIslands, type IslandBundle } from "../../src/islands/bundle.js";
 import { searchFilePath } from "../../src/search/build.js";
 import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/shared.js";
+import type { EntityPageProps } from "../../src/slots.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
 import { count, expectBalanced } from "../helpers/html.js";
@@ -251,6 +253,41 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     for (const page of report.pages) {
       expectBalanced(fileSystem.readText(`/dist/${page.path}`));
     }
+  });
+
+  it("renders the entities of a type through the page component resolved for that type, the others through the generic page", async () => {
+    const TermPage = (props: EntityPageProps): JSX.Element =>
+      h(
+        "div",
+        { class: "entity term-page" },
+        h("h1", null, props.entity.title),
+        h("p", null, `${String(props.declaration?.attributes.length)} declared attributes`),
+        h("p", null, (props.otherAttributes ?? []).map((attribute) => attribute.name).join(", ")),
+      );
+    const theme: ResolvedTheme = {
+      ...defaultTheme,
+      typed: { pages: { term: TermPage }, parts: { attributes: {}, sections: {} }, typeParts: {} },
+      overrides: [{ slot: "EntityPage@term", plugin: "@example/theme", theme: "custom" }],
+    };
+    const { fileSystem: files, report: typed } = await build({ theme });
+    const page = files.readText("/dist/glossary/keyword-page/index.html");
+    expect(page).toContain('<div class="entity term-page"><h1>Keyword page</h1>');
+    expect(page).toContain("<p>4 declared attributes</p>");
+    expect(page).toContain("<p>note, supersedes, weight</p>");
+    expect(files.readText("/dist/specs/screens/mentions-panel/index.html")).toContain(
+      '<div class="entity"><header class="entity-header">',
+    );
+    expect(typed.summary).toContain(
+      "override EntityPage@term: plugin @example/theme, theme custom",
+    );
+  });
+
+  it("names the attributes and the other attributes of a page, the declared ones by the profile in the site language, the others as written", () => {
+    const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    expect(page).toContain('<h2 id="entity-properties">Attributes</h2>');
+    expect(page).toContain("<dt>Broader term</dt>");
+    expect(page).toContain('<h2 id="entity-other-attributes">Other attributes</h2>');
+    expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');
   });
 
   it("writes the project name as the site title, the index and to-do links with the count in the header, and no credit without a theme", () => {

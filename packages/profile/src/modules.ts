@@ -54,6 +54,8 @@ export interface TypeModule {
   slug: string;
   /** Absolute folder of the module. */
   directory: string;
+  /** The plugin the module comes from, set by the command line; absent for a module of a project folder. */
+  origin?: string;
   declaration: TypeModuleDeclaration;
   /** By language; the source language is always present. */
   messages: Readonly<Record<string, TypeMessages>>;

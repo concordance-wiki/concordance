@@ -27,6 +27,7 @@ import {
 } from "../search/build.js";
 import type { SearchField, SlotProps, TrailPage } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
+import { pageComponentFor } from "../theme/context.js";
 import { SearchIsland } from "../theme/default/search-island.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import {
@@ -306,13 +307,15 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
           entity.locale,
           current,
         )
-      : render(
+      : document(
           page,
-          "EntityPage",
-          entityPageOf(context, entity, {
-            ...mentionsOptions,
-            ...(viewer === undefined ? {} : { viewer }),
-          }),
+          h(
+            pageComponentFor(input.theme, entity.type),
+            entityPageOf(context, entity, {
+              ...mentionsOptions,
+              ...(viewer === undefined ? {} : { viewer }),
+            }),
+          ),
           entity.title,
           entity.locale,
           current,
