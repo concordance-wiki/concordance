@@ -849,7 +849,7 @@ describe("entityPageOf", () => {
     expect(glyphNameOf(context(), "term")).toBe("term");
   });
 
-  it("names the source file and its other representations, the edit link on the note, and takes the sections from the fragment", () => {
+  it("names the source file and its other representations, the note linked to its forge page with the edit link on it, else the contribution address behind the edit link alone, and takes the sections from the fragment", () => {
     const props = entityPageOf(
       context({ editUrl: "https://forge.example/{source}/{path}" }),
       screen,
@@ -858,12 +858,23 @@ describe("entityPageOf", () => {
       {
         source: "specs",
         path: "screens/mentions-panel.md",
+        href: "https://forge.example/specs/screens/mentions-panel.md",
         editHref: "https://forge.example/specs/screens/mentions-panel.md",
       },
       { source: "specs", path: "screens/mentions-panel.pptx" },
     ]);
     expect(sourcesOf(context(), screen)).toEqual([
       { source: "specs", path: "screens/mentions-panel.md" },
+      { source: "specs", path: "screens/mentions-panel.pptx" },
+    ]);
+    expect(
+      sourcesOf(context({ contributeUrl: "https://forge.example/wiki/contribute" }), screen),
+    ).toEqual([
+      {
+        source: "specs",
+        path: "screens/mentions-panel.md",
+        editHref: "https://forge.example/wiki/contribute",
+      },
       { source: "specs", path: "screens/mentions-panel.pptx" },
     ]);
     expect(props.sections).toEqual([]);
@@ -1440,10 +1451,14 @@ describe("keywordPageOf", () => {
     expect(keywordPageLabels(context(), 1).neighbourPages).toBe("1 page");
   });
 
-  it("offers to propose a definition on the forge of the first glossary source it knows, as plain text otherwise", () => {
+  it("offers to propose a definition on the forge of the first glossary source it knows, else at the contribution address, else without an address", () => {
     expect(keywordPageOf(context(), keyword).banner.createNote).toEqual({
       label: "Propose a definition",
     });
+    expect(
+      keywordPageOf(context({ contributeUrl: "https://forge.example/wiki/contribute" }), keyword)
+        .banner.createNote,
+    ).toEqual({ label: "Propose a definition", href: "https://forge.example/wiki/contribute" });
     const sources = [
       { name: "framing", url: "https://example.org/wiki/framing.git" },
       { name: "glossary", url: "https://github.com/concordance-wiki/demo-glossary.git", files: 2 },

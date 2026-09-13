@@ -244,7 +244,8 @@ export function keywordPageOf(
   const occurrences = numberOf(entity.attributes["occurrences"]);
   const files = numberOf(entity.attributes["documents"]);
   const slug = entity.id.replace(/^.*\//, "");
-  const createHref = createNoteHref(context, slug);
+  // The new-file page of the glossary on its forge, else the contribution address of the project; none without either, and the page shows no lead.
+  const createHref = createNoteHref(context, slug) ?? context.contributeUrl;
   const space = keywordSpaceOf(context, groups);
   const usedSince = usedSinceOf(context, passages);
   const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);

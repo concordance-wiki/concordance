@@ -390,6 +390,23 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ).toEqual({ a: "v2" });
   });
 
+  it("leads the edit link to project.contribute_url when no forge link can be built for a local source", async () => {
+    const io = corpus(
+      [
+        "version: 1",
+        "project: { name: Wiki, contribute_url: 'https://forge.example/notes/issues/new' }",
+        "sources: [{ name: notes, path: ./notes }]",
+        "",
+      ].join("\n"),
+    );
+    expect(await buildCommand([], io)).toBe(0);
+    const page = io.fs.readText("/work/dist/notes/b/index.html");
+    expect(page).toContain(
+      '<a class="entity-edit" href="https://forge.example/notes/issues/new">Edit this page</a>',
+    );
+    expect(page).not.toContain('class="entity-source-file"');
+  });
+
   it("passes the staleness thresholds to the home page, which raises an alert on a source dormant by them", async () => {
     const dormant = corpus();
     expect(await buildCommand([], dormant)).toBe(0);

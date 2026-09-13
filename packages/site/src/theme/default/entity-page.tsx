@@ -206,7 +206,7 @@ function TableOfContents({
   );
 }
 
-/** The path of the file in the monospace family, then the edit link when the forge is known. */
+/** The path of the file in the monospace family, linked to the file on its forge when known, then the call to action when it has somewhere to lead. */
 export function Source({
   source,
   text,
@@ -214,11 +214,20 @@ export function Source({
   source: SourceRef;
   text: EntityPageLabels;
 }): JSX.Element {
+  const path = (
+    <code>
+      {source.source}/{source.path}
+    </code>
+  );
   return (
     <p class="entity-source">
-      <code>
-        {source.source}/{source.path}
-      </code>
+      {source.href === undefined ? (
+        path
+      ) : (
+        <a class="entity-source-file" href={source.href}>
+          {path}
+        </a>
+      )}
       {source.editHref !== undefined && (
         <span class="entity-edit-lead">
           {text.correction}{" "}

@@ -115,9 +115,7 @@ export function KeywordPage({
         <aside class="keyword-notice" role="note">
           <p class="keyword-notice-lead">{banner.text}</p>
           {banner.detail !== undefined && <p class="keyword-notice-detail">{banner.detail}</p>}
-          {banner.createNote.href === undefined ? (
-            <span class="create-note">{banner.createNote.label}</span>
-          ) : (
+          {banner.createNote.href !== undefined && (
             <a class="create-note" href={banner.createNote.href}>
               {banner.createNote.label}
             </a>

@@ -342,7 +342,11 @@ export function neighbourhoodLabels(
   };
 }
 
-/** The files of an entity in its source, the note first with its edit link when the forge is known. */
+/**
+ * The files of an entity in its source, the note first: its path linked to its edit page on
+ * the forge when one is known, its call to action leading there, else to the contribution
+ * address of the project; none without either.
+ */
 export function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
   const paths = [
     entity.source.path,
@@ -350,10 +354,12 @@ export function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
       .filter((representation) => representation.kind === undefined)
       .map((representation) => representation.path),
   ];
-  const edit = editHref(context, entity);
+  const forge = editHref(context, entity);
+  const edit = forge ?? context.contributeUrl;
   return [...new Set(paths)].map((path) => ({
     source: entity.source.name,
     path,
+    ...(path === entity.source.path && forge !== undefined ? { href: forge } : {}),
     ...(path === entity.source.path && edit !== undefined ? { editHref: edit } : {}),
   }));
 }

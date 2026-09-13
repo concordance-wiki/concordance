@@ -544,7 +544,8 @@ describe("URLs follow the entity identifier and stay stable from one build to th
       '<a class="create-note" href="https://github.com/concordance-wiki/demo-glossary/new/main?filename=build-summary.md">Propose a definition</a>',
     );
     const plain = (await build()).fileSystem.readText("/dist/keywords/build-summary/index.html");
-    expect(plain).toContain('<span class="create-note">Propose a definition</span>');
+    expect(plain).not.toContain("create-note");
+    expect(plain).toMatch(/<p class="keyword-notice-detail">[^<]+<\/p><\/aside>/);
   });
 
   it("keeps the same URL when the model gains an entity or a link", async () => {
@@ -1039,7 +1040,7 @@ describe("siteDocuments", () => {
     const entity = documents.find((document) => document.path === pagePath(term.id));
     const screen = documents.find((document) => document.path === pagePath(screenEntity.id));
     expect(entity?.content).toContain(
-      '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit this page</a></span></p>',
+      '<p class="entity-source"><a class="entity-source-file" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md"><code>glossary/keyword-page.md</code></a><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit this page</a></span></p>',
     );
     expect(screen?.content).toContain(
       '<a class="entity-edit" href="https://gitlab.com/concordance-wiki/demo-specs/-/edit/develop/screens/mentions-panel.md">',
