@@ -1,0 +1,19 @@
+{
+  "index.bySpace": "Par espace",
+  "index.byType": "Par type",
+  "index.columnDescription": "Première ligne de la page, ou passage le plus cité",
+  "index.columnPages": "Pages",
+  "index.columnType": "Type",
+  "index.columnWord": "Mot",
+  "index.empty": "Aucune entrée sous cette lettre",
+  "index.filters": "Filtres",
+  "index.lead": "{words, plural, one {# mot employé} other {# mots employés}} dans la documentation. {notes, plural, one {# a une page rédigée} other {# ont une page rédigée}}, les autres existent par leurs seuls emplois.",
+  "index.letters": "Parcourir par initiale",
+  "index.lettersWithout": "{count, plural, one {# lettre sans entrée} other {# lettres sans entrée}}",
+  "index.noDefinition": "sans définition",
+  "index.note": "Les mots sans définition figurent dans l’index comme les autres, en trait pointillé, avec à la place d’une définition le passage qui les emploie le plus. C’est la liste de travail d’un responsable de glossaire.",
+  "index.passage": "« {passage} » — {title}",
+  "index.title": "Index A–Z",
+  "index.withoutDefinition": "sans définition",
+  "index.words": "{count, plural, one {# mot} other {# mots}}"
+}

@@ -174,10 +174,11 @@ describe("formatText", () => {
 describe("browser independence", () => {
   it("never touches the DOM or the browser globals in its sources", () => {
     const directory = new URL("../src/", import.meta.url);
-    for (const name of readdirSync(directory)) {
+    for (const name of readdirSync(directory, { recursive: true, encoding: "utf8" })) {
+      if (!name.endsWith(".ts")) continue;
       const text = readFileSync(new URL(name, directory), "utf8");
       expect(text, name).not.toMatch(
-        /(?<![\w"'.])(window|document|navigator|localStorage)\s*[.[(]/,
+        /(?<![\w"'./])(window|document|navigator|localStorage)\s*[.[(]/,
       );
     }
   });

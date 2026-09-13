@@ -1,15 +1,12 @@
-import source from "../messages/en.json" with { type: "json" };
-import fr from "../messages/fr.json" with { type: "json" };
-
 import type { MessageId } from "./ids.js";
-import { byCodeUnit, byMessageId } from "./ids.js";
+import { byCodeUnit, byMessageId, french, source } from "./ids.js";
 
 export const SOURCE_LANGUAGE = "en";
 
-/** The shipped catalogues, flat, by language; adding a locale means adding its file here. */
+/** The shipped catalogues, flat, by language, in identifier order; adding a locale means adding it here. */
 export const shipped: Readonly<Record<string, Readonly<Record<MessageId, string>>>> = {
   en: byMessageId((id) => source[id].defaultMessage),
-  fr,
+  fr: byMessageId((id) => french[id]),
 };
 
 /** The languages that ship with a catalogue, in sorted order. */

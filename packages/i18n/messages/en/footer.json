@@ -1,0 +1,6 @@
+{
+  "footer.builtWith": {
+    "defaultMessage": "Built with Concordance",
+    "description": "Optional discreet mention of the tool in the footer."
+  }
+}

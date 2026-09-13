@@ -1,0 +1,6 @@
+{
+  "drawer.menu": {
+    "defaultMessage": "Menu",
+    "description": "Accessible name of the button that opens the drawer of the narrow layouts, and of the drawer itself."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "results.alsoCalled": "Aussi appelé : '{aliases}'",
+  "results.broader": "Terme plus large : '{term}'",
+  "results.cited": "{count, plural, one {cité dans # page} other {cité dans # pages}}",
+  "results.clearQuery": "Effacer la recherche",
+  "results.closestForm": "Forme la plus proche :",
+  "results.countersNote": "Les compteurs sont établis à la publication du site. Le filtrage se fait dans le navigateur, sans aller-retour.",
+  "results.noResultFor": "Aucun résultat pour « '{query}' »",
+  "results.notelessNote": "Les mots employés mais non définis apparaissent avec les autres, en trait pointillé. C'est ainsi qu'on repère ce qui manque au glossaire.",
+  "results.usedIn": "{count, plural, one {Employé dans # document, jamais défini dans le glossaire} other {Employé dans # documents, jamais défini dans le glossaire}}"
+}

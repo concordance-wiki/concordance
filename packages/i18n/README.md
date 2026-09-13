@@ -2,9 +2,13 @@
 
 Message catalogues of the generated site and their resolution at build time.
 
-Every label of the site comes from a catalogue per language in ICU MessageFormat, stored as the JSON translation platforms exchange: `messages/en.json` is the source, `{ "<id>": { "defaultMessage": "...", "description": "..." } }`, and every other `messages/<language>.json` is a flat translation, `{ "<id>": "..." }`. `en` and `fr` ship complete; a test checks that every locale carries every key of the source with the same variables and kinds, and that the keys are sorted.
+Every label of the site comes from a catalogue per language in ICU MessageFormat, stored as the JSON translation platforms exchange, one file per area of the site under `messages/<language>/`: an area is an identifier prefix (`home`, `entity`, `search`, `results`, `spaces`...), `messages/en/<area>.json` is its source, `{ "<id>": { "defaultMessage": "...", "description": "..." } }`, and `messages/<language>/<area>.json` its flat translation, `{ "<id>": "..." }`. Every key of a file is under the prefix the file is named after, and the keys are sorted. `en` and `fr` ship complete; a test checks that every locale carries every key of the source with the same variables and kinds.
 
-Identifiers are typed from the source catalogue (`MessageId` is `keyof` the imported `en.json`), and the arguments of every message are declared in `MessageArguments`: an unknown identifier, a missing variable or an extra one does not compile. A type-level test keeps the interface aligned with the runtime declaration `messageArguments`, and a unit test keeps that declaration aligned with what the ICU parser reads in the catalogue.
+Each area has a module under `src/areas/<area>.ts` that imports its two files and declares the ICU kind of every argument of every message of the area (`{ count: "plural" }`, `{}` for a message without any), checked by `satisfies` against the keys of the source file. `src/areas.ts` lists the areas in the order of their prefixes; the catalogue merges them in that order, so the identifiers read in sorted order. Identifiers are typed from that merge (`MessageId` is the union of the keys of every area), and `MessageArguments` derives the argument types from the declared kinds: an unknown identifier, a missing variable or an extra one does not compile. A unit test keeps the declared kinds aligned with what the ICU parser reads in the catalogue, and computes the number of messages from the files rather than pinning it.
+
+## Adding an area
+
+A new page or part of the site gets its own prefix and its own files: `messages/en/<area>.json`, `messages/fr/<area>.json`, `src/areas/<area>.ts` declaring the arguments, and one line in the `AREAS` list of `src/areas.ts` at the place of its prefix. The tests reject a file whose keys leave the prefix or are unsorted, a module whose declared kinds differ from the parsed messages, and an area listed out of order.
 
 ## Usage
 
@@ -38,8 +42,8 @@ An override uses the syntax of the message it replaces and must use exactly the 
 
 ## Adding a locale
 
-1. Add `messages/<language>.json` with every key of `messages/en.json`, sorted, each value a translation that keeps the variables and kinds of the source message. Plural forms follow the CLDR categories of the language (`one`, `other`, ...).
-2. Register the file in `src/shipped.ts` and add the language to the `labels` key of [`theme.schema.json`](../core/schemas/theme.schema.json).
+1. Add `messages/<language>/<area>.json` for every area, with every key of `messages/en/<area>.json`, sorted, each value a translation that keeps the variables and kinds of the source message. Plural forms follow the CLDR categories of the language (`one`, `other`, ...).
+2. Import each file in the module of its area under `src/areas/`, add the language to the `Area` type in `src/area.ts` and to `src/shipped.ts`, and to the `labels` key of [`theme.schema.json`](../core/schemas/theme.schema.json).
 3. Run the tests: the parity test lists any missing key or differing variable.
 
 ## Dependencies

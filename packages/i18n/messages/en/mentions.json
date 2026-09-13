@@ -1,0 +1,10 @@
+{
+  "mentions.atLine": {
+    "defaultMessage": "line {line, number}",
+    "description": "Location of a mention inside a document, given by its line number."
+  },
+  "mentions.inSection": {
+    "defaultMessage": "in section {section}",
+    "description": "Location of a mention inside a document, given by its section heading."
+  }
+}

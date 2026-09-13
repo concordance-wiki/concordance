@@ -1,0 +1,110 @@
+{
+  "entity.application": {
+    "defaultMessage": "Application",
+    "description": "Label of the application an entity belongs to."
+  },
+  "entity.attributes": {
+    "defaultMessage": "Properties",
+    "description": "Heading of the block of declared properties of an entity page."
+  },
+  "entity.breadcrumb": {
+    "defaultMessage": "You are here",
+    "description": "Accessible name of the breadcrumb of an entity page, space then folders then page."
+  },
+  "entity.changed": {
+    "defaultMessage": "Changed {when}",
+    "description": "Frame around the relative date of the last change of a note, such as nine days ago."
+  },
+  "entity.confidence": {
+    "defaultMessage": "Confidence: {value, number, percent}",
+    "description": "Confidence of an inferred link, as a percentage between 0 and 1."
+  },
+  "entity.correction": {
+    "defaultMessage": "Something to correct?",
+    "description": "Question before the edit link in the footer of an entity page."
+  },
+  "entity.declaredAtTop": {
+    "defaultMessage": "{count, plural, one {# declared key} other {# declared keys}}. The rest of the file is free text.",
+    "description": "Note under the declared properties of an entity page, counting the keys of the frontmatter and saying that the rest of the file is prose."
+  },
+  "entity.domain": {
+    "defaultMessage": "Domain",
+    "description": "Label of the domain an entity belongs to."
+  },
+  "entity.edit": {
+    "defaultMessage": "Edit this page",
+    "description": "Link to the edit page of the note on its forge."
+  },
+  "entity.imageNote": {
+    "defaultMessage": "Image of the repository, shown in the flow of the text",
+    "description": "Note under an image of the sources embedded in a note, before the path of the file."
+  },
+  "entity.legendRecognised": {
+    "defaultMessage": "recognised word",
+    "description": "Legend of the dotted underline of a word the scan recognised in the text."
+  },
+  "entity.legendWritten": {
+    "defaultMessage": "written link",
+    "description": "Legend of the underline of a link the author wrote in the text."
+  },
+  "entity.mentions": {
+    "defaultMessage": "Mentions",
+    "description": "Heading of the mentions panel of an entity page."
+  },
+  "entity.mentionsCount": {
+    "defaultMessage": "{count, plural, one {# mention} other {# mentions}}",
+    "description": "Number of mentions of an entity, with the plural handled by the message."
+  },
+  "entity.neighbourPages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "Number of pages of the neighbourhood, after the line that unfolds it."
+  },
+  "entity.neighbours": {
+    "defaultMessage": "Neighbourhood",
+    "description": "Heading of the one-hop neighbourhood of an entity."
+  },
+  "entity.onThisPage": {
+    "defaultMessage": "On this page",
+    "description": "Heading of the table of contents of an entity page, one entry per section of the note."
+  },
+  "entity.otherAttributes": {
+    "defaultMessage": "Other attributes",
+    "description": "Heading of the section listing the frontmatter keys the profile does not declare for the type."
+  },
+  "entity.otherPages": {
+    "defaultMessage": "{count, plural, one {# other page} other {# other pages}}",
+    "description": "Node of the tree of the space standing for the pages of a long folder it leaves out."
+  },
+  "entity.relatedTo": {
+    "defaultMessage": "Related to",
+    "description": "Heading of the list of entities linked to the current one."
+  },
+  "entity.seeNeighbourhood": {
+    "defaultMessage": "See the neighbourhood map",
+    "description": "Line of the right panel that unfolds the neighbourhood of the page."
+  },
+  "entity.showLess": {
+    "defaultMessage": "Show less",
+    "description": "Button that collapses an expanded list."
+  },
+  "entity.showMore": {
+    "defaultMessage": "Show more",
+    "description": "Button that expands a truncated list."
+  },
+  "entity.sources": {
+    "defaultMessage": "Sources",
+    "description": "Heading of the list of sources an entity comes from."
+  },
+  "entity.spaceTree": {
+    "defaultMessage": "Tree of the space",
+    "description": "Accessible name of the tree of the space in the left column of an entity page."
+  },
+  "entity.status": {
+    "defaultMessage": "Status",
+    "description": "Label of the lifecycle status of an entity."
+  },
+  "entity.type": {
+    "defaultMessage": "Type",
+    "description": "Label of the type of an entity."
+  }
+}

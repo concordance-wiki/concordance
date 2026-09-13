@@ -1,0 +1,18 @@
+{
+  "nav.applications": {
+    "defaultMessage": "Applications",
+    "description": "Navigation entry for the list of applications."
+  },
+  "nav.domains": {
+    "defaultMessage": "Domains",
+    "description": "Navigation entry for the domain hierarchy."
+  },
+  "nav.index": {
+    "defaultMessage": "A–Z index",
+    "description": "Link of the top bar to the alphabetical index."
+  },
+  "nav.types": {
+    "defaultMessage": "Types",
+    "description": "Navigation entry for the list of entity types."
+  }
+}

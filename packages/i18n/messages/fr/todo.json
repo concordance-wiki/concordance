@@ -1,0 +1,7 @@
+{
+  "todo.findings": "{count, plural, one {# constat} other {# constats}}",
+  "todo.severity.error": "Erreur",
+  "todo.severity.info": "Information",
+  "todo.severity.warning": "Avertissement",
+  "todo.title": "À faire"
+}

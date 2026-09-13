@@ -1,0 +1,102 @@
+{
+  "meeting.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date of a meeting in the properties block."
+  },
+  "meeting.decision": {
+    "defaultMessage": "Decision taken here",
+    "description": "Lead of the callout linking the decisions a meeting produced."
+  },
+  "meeting.document": {
+    "defaultMessage": "Document",
+    "description": "Tab of a converted document on the page of a meeting."
+  },
+  "meeting.durationHours": {
+    "defaultMessage": "{hours} h {minutes}",
+    "description": "Duration of a meeting of an hour or more, the minutes on two digits."
+  },
+  "meeting.durationMinutes": {
+    "defaultMessage": "{minutes} min",
+    "description": "Duration of a meeting under an hour."
+  },
+  "meeting.files": {
+    "defaultMessage": "Files",
+    "description": "Label of the number of files grouped into the page of a meeting."
+  },
+  "meeting.filesGrouped": {
+    "defaultMessage": "{count, plural, one {# grouped} other {# grouped}}",
+    "description": "Value of the files property of a meeting: how many files the build grouped into its page."
+  },
+  "meeting.grouped": {
+    "defaultMessage": "Grouped automatically",
+    "description": "Mention next to the tabs of a meeting: the build grouped its files."
+  },
+  "meeting.groupingNote": {
+    "defaultMessage": "{count, plural, one {# file} other {# files}}: {reasons}.",
+    "description": "Note under the properties of a meeting naming why the build grouped its files."
+  },
+  "meeting.notes": {
+    "defaultMessage": "Notes",
+    "description": "Tab of the written notes on the page of a meeting."
+  },
+  "meeting.participants": {
+    "defaultMessage": "{count, plural, one {# participant} other {# participants}}",
+    "description": "Number of participants of a meeting, when their names are not pseudonymised."
+  },
+  "meeting.pseudonymNote": {
+    "defaultMessage": "The names of the participants are replaced at publication by stable pseudonyms. The mapping is never published.",
+    "description": "Note under the transcript of a meeting whose speakers were pseudonymised."
+  },
+  "meeting.pseudonymised": {
+    "defaultMessage": "Pseudonymised participants",
+    "description": "Mention under the title of a meeting whose transcript was pseudonymised."
+  },
+  "meeting.relatedNote": {
+    "defaultMessage": "A meeting does not enter the model: it brings passages, and sometimes a decision someone took the trouble to write elsewhere.",
+    "description": "Note under the related pages of a meeting."
+  },
+  "meeting.representations": {
+    "defaultMessage": "Representations",
+    "description": "Accessible name of the tabs of a meeting, one per file grouped into its page."
+  },
+  "meeting.signal.commit": {
+    "defaultMessage": "same commit",
+    "description": "Grouping reason of the files of a meeting: added in the same commit."
+  },
+  "meeting.signal.content": {
+    "defaultMessage": "high textual overlap",
+    "description": "Grouping reason of the files of a meeting: their texts are similar."
+  },
+  "meeting.signal.declared": {
+    "defaultMessage": "declared in the frontmatter",
+    "description": "Grouping reason of the files of a meeting: the note names its twin."
+  },
+  "meeting.signal.folder": {
+    "defaultMessage": "same folder",
+    "description": "Grouping reason of the files of a meeting: they lie in the same folder."
+  },
+  "meeting.signal.name": {
+    "defaultMessage": "same base name",
+    "description": "Grouping reason of the files of a meeting: they share their base name."
+  },
+  "meeting.signal.similarName": {
+    "defaultMessage": "similar base names",
+    "description": "Grouping reason of the files of a meeting: their base names are close."
+  },
+  "meeting.signal.title": {
+    "defaultMessage": "title equal to the heading",
+    "description": "Grouping reason of the files of a meeting: the title of a document is the heading of the note."
+  },
+  "meeting.slides": {
+    "defaultMessage": "Slides",
+    "description": "Tab of the slide deck on the page of a meeting."
+  },
+  "meeting.space": {
+    "defaultMessage": "Space",
+    "description": "Label of the space of a meeting in the properties block."
+  },
+  "meeting.transcript": {
+    "defaultMessage": "Transcript",
+    "description": "Tab of the transcript on the page of a meeting."
+  }
+}

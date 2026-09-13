@@ -1,0 +1,8 @@
+{
+  "spaces.content": "Contenu",
+  "spaces.datesNote": "Les dates viennent de l'historique git, elles sont donc toujours exactes. Un espace au-delà du seuil de fraîcheur — {count, plural, one {# jour} other {# jours}} par défaut — est signalé en accent, seul cas où la couleur porte une alerte, doublée par la valeur en jours.",
+  "spaces.lastUpdate": "Dernière mise à jour",
+  "spaces.lead": "{count, plural, one {# espace, alimenté par les dépôts déclarés dans la configuration.} other {# espaces, alimentés par les dépôts déclarés dans la configuration.}} Un dépôt peut porter plusieurs espaces, et un espace se répartir sur plusieurs dépôts.",
+  "spaces.pages": "Pages",
+  "spaces.space": "Espace"
+}

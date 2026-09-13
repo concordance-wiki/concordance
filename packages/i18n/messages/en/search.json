@@ -1,0 +1,70 @@
+{
+  "search.activeFilters": {
+    "defaultMessage": "Active filters",
+    "description": "Heading of the list recalling the facets selected on the search page."
+  },
+  "search.address": {
+    "defaultMessage": "Address of this search",
+    "description": "Label of the line showing the address that replays the current search."
+  },
+  "search.clear": {
+    "defaultMessage": "Clear filters",
+    "description": "Button that resets every facet of the search."
+  },
+  "search.copied": {
+    "defaultMessage": "Address copied",
+    "description": "Status shown once the address of the search is in the clipboard."
+  },
+  "search.copyAddress": {
+    "defaultMessage": "Copy",
+    "description": "Button that copies the address of the current search."
+  },
+  "search.facet.application": {
+    "defaultMessage": "Application",
+    "description": "Facet that filters search results by application."
+  },
+  "search.facet.domain": {
+    "defaultMessage": "Domain",
+    "description": "Facet that filters search results by domain."
+  },
+  "search.facet.noNote": {
+    "defaultMessage": "Without a note",
+    "description": "Facet that keeps, isolates or excludes the recurring expressions nobody defined."
+  },
+  "search.facet.source": {
+    "defaultMessage": "Space",
+    "description": "Facet that filters search results by the space, the source repository of the note."
+  },
+  "search.facet.type": {
+    "defaultMessage": "Page type",
+    "description": "Facet that filters search results by entity type."
+  },
+  "search.facets": {
+    "defaultMessage": "Filters",
+    "description": "Heading of the facet filters of the search page."
+  },
+  "search.noNote.any": {
+    "defaultMessage": "Included",
+    "description": "Value of the no-note facet that keeps the noteless words among the results."
+  },
+  "search.noNote.exclude": {
+    "defaultMessage": "Excluded",
+    "description": "Value of the no-note facet that leaves the noteless words out."
+  },
+  "search.noNote.only": {
+    "defaultMessage": "Only",
+    "description": "Value of the no-note facet that keeps the noteless words alone."
+  },
+  "search.noResult": {
+    "defaultMessage": "No result",
+    "description": "Notice shown when a search matches nothing."
+  },
+  "search.removeFilter": {
+    "defaultMessage": "Remove this filter",
+    "description": "Accessible name of the control that lifts one selected facet of the search."
+  },
+  "search.results": {
+    "defaultMessage": "{count, plural, one {# result, most cited first} other {# results, most cited first}}",
+    "description": "Number of results of a search, saying that the most cited come first."
+  }
+}

@@ -261,7 +261,7 @@ Every key is in the [theme reference](../reference/theme.md); the theme shipped 
 
 ### `labels`
 
-Every label of the generated site comes from a message catalogue per language, shipped by [`@concordance-wiki/i18n`](../../packages/i18n/README.md) in ICU MessageFormat: `en` is the source, `fr` a complete translation, and a project whose locale has no catalogue gets the source labels. The `labels` block overrides any message, by language of a shipped catalogue then by message identifier; the identifiers are the keys of [`messages/en.json`](../../packages/i18n/messages/en.json), whose `description` says where each label appears.
+Every label of the generated site comes from a message catalogue per language, shipped by [`@concordance-wiki/i18n`](../../packages/i18n/README.md) in ICU MessageFormat: `en` is the source, `fr` a complete translation, and a project whose locale has no catalogue gets the source labels. The `labels` block overrides any message, by language of a shipped catalogue then by message identifier; the identifiers are the keys of the source files under [`messages/en/`](../../packages/i18n/messages/en/), one per area of the site (`home.json`, `entity.json`, `search.json`...), whose `description` says where each label appears.
 
 ```yaml
 labels:

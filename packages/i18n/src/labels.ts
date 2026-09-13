@@ -1,10 +1,9 @@
 import type { ConfigIssue } from "@concordance-wiki/core";
 import { parse } from "@formatjs/icu-messageformat-parser";
 
-import source from "../messages/en.json" with { type: "json" };
-
 import { argumentsOf, parseMessage } from "./arguments.js";
 import type { MessageId } from "./ids.js";
+import { source } from "./ids.js";
 import { shipped, shippedLanguages } from "./shipped.js";
 
 function isMessageId(id: string): id is MessageId {
@@ -35,7 +34,7 @@ export function validateOverride(
       path,
       message: "unknown message identifier",
       received: id,
-      expected: "an identifier of the source catalogue, messages/en.json",
+      expected: "an identifier of the source catalogue, messages/en/",
     };
   }
   const parsed = parseMessage(message);

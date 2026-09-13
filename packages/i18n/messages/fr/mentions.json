@@ -1,0 +1,4 @@
+{
+  "mentions.atLine": "ligne {line, number}",
+  "mentions.inSection": "dans la section {section}"
+}
