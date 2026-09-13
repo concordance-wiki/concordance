@@ -117,7 +117,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(await galleryCommand(["--theme", "@example/theme"], io, deps)).toBe(1);
     const failing = pageCount - 11 - coreTypePages;
     expect(io.stderr).toHaveLength(failing + 1);
-    expect(io.stderr[0]).toBe("footer-text.html: landmarks: no footer landmark");
+    expect(io.stderr[0]).toBe("category-corporate.html: landmarks: no footer landmark");
     expect(io.stderr.at(-1)).toBe(`gallery failed: ${String(failing)} problem(s)`);
     expect(io.stdout[1]).toBe("override Footer: plugin @example/theme, theme custom");
   });
@@ -309,8 +309,8 @@ describe("Every theme override is visible there", () => {
     expect(await galleryCommand([], io, deps)).toBe(0);
     expect(deps.asked).toEqual([]);
     expect(io.stdout[0]).toBe("/work/concordance.yaml: valid configuration");
-    expect(io.stdout[2]).toMatch(/^island contract-viewer: /);
-    expect(io.stdout[3]).toMatch(/^island document-viewer: /);
+    expect(io.stdout[2]).toMatch(/^island category-list: /);
+    expect(io.stdout[3]).toMatch(/^island contract-viewer: /);
   });
 
   it("reads the theme.yaml next to the configuration, or the one project.theme names, and lets it win over plugin tokens", async () => {
