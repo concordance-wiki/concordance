@@ -50,6 +50,14 @@ export interface FragmentDocument {
   target: string;
   /** Where its PDF representation is copied, when the conversion produced one and previews are on. */
   preview?: string;
+  /** The size of the original file in bytes; absent in older fragments. */
+  size?: number;
+  /** The author the file states, as its reader read it; absent when the file states none. */
+  author?: string;
+  /** ISO 8601 date the file states, its last modification else its creation; distinct from the commit date. */
+  date?: string;
+  /** The page or slide count the file states; the positions are what the conversion found. */
+  pageCount?: number;
   /** How the positions are named: the pages of a PDF, the slides of a deck, the cues of a transcript. */
   unit: "page" | "slide" | "cue";
   /** Every position in order; the text beyond `build.extracted_text_max_chars` in all is cut. */
@@ -156,6 +164,10 @@ function isDocument(value: unknown): value is FragmentDocument {
     typeof value["format"] === "string" &&
     typeof value["target"] === "string" &&
     (value["preview"] === undefined || typeof value["preview"] === "string") &&
+    (value["size"] === undefined || typeof value["size"] === "number") &&
+    (value["author"] === undefined || typeof value["author"] === "string") &&
+    (value["date"] === undefined || typeof value["date"] === "string") &&
+    (value["pageCount"] === undefined || typeof value["pageCount"] === "number") &&
     (value["unit"] === "page" || value["unit"] === "slide" || value["unit"] === "cue") &&
     Array.isArray(value["pages"]) &&
     value["pages"].every(isPage)
@@ -213,7 +225,7 @@ export function parseFragment(text: string, file: string): EntityFragment {
     if (!Array.isArray(document["documents"]) || !document["documents"].every(isDocument)) {
       throw new FragmentError(
         file,
-        "documents must be a list of { source, path, format, target, preview?, unit, pages }",
+        "documents must be a list of { source, path, format, target, preview?, size?, author?, date?, pageCount?, unit, pages }",
       );
     }
     fragment.documents = document["documents"];

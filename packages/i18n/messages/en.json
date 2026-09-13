@@ -119,9 +119,65 @@
     "defaultMessage": "A–Z",
     "description": "Entry of the sort selector ordering a category list by title."
   },
+  "document.author": {
+    "defaultMessage": "Author",
+    "description": "Row of the properties block of a document page: the author the file states."
+  },
+  "document.convertedNote": {
+    "defaultMessage": "Converted at publication, cached by fingerprint",
+    "description": "Note under the rendered page of a document: how the preview was produced."
+  },
+  "document.date": {
+    "defaultMessage": "Date",
+    "description": "Row of the properties block of a document page: the date the file states."
+  },
+  "document.dateNote": {
+    "defaultMessage": "Read from the file, distinct from the repository date.",
+    "description": "Note under the properties of a document page, when they were read from the file."
+  },
   "document.download": {
     "defaultMessage": "Download the original",
     "description": "Link to the original file of a converted document."
+  },
+  "document.extractedText": {
+    "defaultMessage": "Extracted text",
+    "description": "Tab of a document page showing the text extracted from the file."
+  },
+  "document.groupedNote": {
+    "defaultMessage": "Grouped by folder, date and textual overlap — a single entry in the index.",
+    "description": "Note under the files of a document page: why they form one page."
+  },
+  "document.kind.pdf": {
+    "defaultMessage": "PDF",
+    "description": "Kind of a document whose file is a PDF."
+  },
+  "document.kind.presentation": {
+    "defaultMessage": "Presentation",
+    "description": "Kind of a document whose file is a slide deck."
+  },
+  "document.kind.spreadsheet": {
+    "defaultMessage": "Spreadsheet",
+    "description": "Kind of a document whose file is a spreadsheet."
+  },
+  "document.kind.text": {
+    "defaultMessage": "Text document",
+    "description": "Kind of a document whose file is a word-processing document."
+  },
+  "document.noNote": {
+    "defaultMessage": "No note describes this document yet.",
+    "description": "Notes tab of a document page when no note is merged with the document."
+  },
+  "document.openPdf": {
+    "defaultMessage": "Open the PDF",
+    "description": "Link to the PDF of a document, offered where the page cannot show it."
+  },
+  "document.originalNote": {
+    "defaultMessage": "The original stays downloadable",
+    "description": "Note under the rendered page of a document: the original file is still offered."
+  },
+  "document.pageCount": {
+    "defaultMessage": "Pages",
+    "description": "Heading of the strip of pages and row of the properties block of a document page."
   },
   "document.pages": {
     "defaultMessage": "{count, plural, one {# page} other {# pages}}",
@@ -130,6 +186,38 @@
   "document.preview": {
     "defaultMessage": "Preview",
     "description": "Link to the rendered preview of a converted document."
+  },
+  "document.relatedNotes": {
+    "defaultMessage": "Related notes",
+    "description": "Tab of a document page showing the note merged with the document."
+  },
+  "document.roleNotes": {
+    "defaultMessage": "session notes",
+    "description": "Role of the note among the files of a document page."
+  },
+  "document.roleOriginal": {
+    "defaultMessage": "original",
+    "description": "Role of the original file among the files of a document page."
+  },
+  "document.rolePreview": {
+    "defaultMessage": "preview",
+    "description": "Role of the PDF among the files of a document page."
+  },
+  "document.sameDocument": {
+    "defaultMessage": "Same document, {count, plural, one {one file} other {# files}}",
+    "description": "Heading of the block listing the files that make one document page."
+  },
+  "document.type": {
+    "defaultMessage": "Type",
+    "description": "Row of the properties block of a document page: the kind of the file."
+  },
+  "document.view": {
+    "defaultMessage": "Document",
+    "description": "Tab of a document page showing the rendered document."
+  },
+  "document.views": {
+    "defaultMessage": "Views of the document",
+    "description": "Accessible name of the tab bar of a document page."
   },
   "drawer.menu": {
     "defaultMessage": "Menu",

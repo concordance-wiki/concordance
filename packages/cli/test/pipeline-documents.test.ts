@@ -386,6 +386,8 @@ describe("L4-07 extracted text indexed", () => {
         path: "meetings/threshold-review.pptx",
         format: "pptx",
         target: `${REVIEW}/meetings/threshold-review.pptx`,
+        size: 12,
+        pageCount: 2,
         unit: "slide",
         pages: [],
       },
@@ -439,6 +441,8 @@ describe("L4-07 extracted text indexed", () => {
         format: "pptx",
         target: `${REVIEW}/meetings/threshold-review.pptx`,
         preview: `${REVIEW}/meetings/threshold-review.pdf`,
+        size: 12,
+        pageCount: 2,
         unit: "slide",
         pages: [
           { number: 1, label: "slide 1", text: "The publication threshold on slide one" },
