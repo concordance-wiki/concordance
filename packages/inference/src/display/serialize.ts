@@ -1,7 +1,10 @@
 import { byCodeUnit } from "../neighbourhood/order.js";
 import type { DisplayedNeighbour, DisplayedNeighbourhood } from "./types.js";
 
-/** The `displayed_neighbourhood` block of `model.json`: keys in identifier order, each list best first. */
+/**
+ * The `displayed_neighbourhood` block of `model.json`: keys in identifier order, each list in
+ * priority order with the `rank` of every neighbour, so that a panel can separate the groups.
+ */
 export function displayedNeighbourhoodToModel(
   neighbourhood: DisplayedNeighbourhood,
 ): Record<string, DisplayedNeighbour[]> {

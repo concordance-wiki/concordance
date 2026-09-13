@@ -1,3 +1,4 @@
+import { loadDefaultProfile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -8,12 +9,14 @@ import type { DisplayedNeighbour } from "../../src/display/types.js";
 import { generator } from "../neighbourhood/fixtures.js";
 import { entity, link, shuffled } from "./fixtures.js";
 
+const profile = loadDefaultProfile();
+
 function ids(neighbours: readonly DisplayedNeighbour[] | undefined): string[] {
   return (neighbours ?? []).map((neighbour) => neighbour.id);
 }
 
 describe("the displayed neighbourhood", () => {
-  it("is computed at one hop, sorted by decreasing confidence then by identifier", () => {
+  it("is computed at one hop, sorted by decreasing confidence then by identifier within a group", () => {
     const entities = [
       entity("specs/cap"),
       entity("specs/entry"),
@@ -27,7 +30,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/entry", 0.4),
       link("specs/rate", "specs/far", 0.9),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(ids(neighbourhood.get("specs/cap"))).toEqual([
       "specs/rate",
       "specs/entry",
@@ -42,6 +45,7 @@ describe("the displayed neighbourhood", () => {
         relation: "related",
         direction: "out",
         confidence: 0.9,
+        rank: 2,
       },
       {
         id: "specs/entry",
@@ -51,6 +55,7 @@ describe("the displayed neighbourhood", () => {
         relation: "related",
         direction: "out",
         confidence: 0.4,
+        rank: 2,
       },
       {
         id: "specs/zone",
@@ -60,6 +65,7 @@ describe("the displayed neighbourhood", () => {
         relation: "related",
         direction: "out",
         confidence: 0.4,
+        rank: 2,
       },
     ]);
   });
@@ -68,11 +74,11 @@ describe("the displayed neighbourhood", () => {
     const others = Array.from({ length: 14 }, (_, i) => `specs/n${String(i).padStart(2, "0")}`);
     const entities = [entity("specs/hub"), ...others.map((id) => entity(id))];
     const links = others.map((id, i) => link("specs/hub", id, 1 - i / 100));
-    const withDefault = displayedNeighbourhood({ entities, links, size: 6 });
+    const withDefault = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(ids(withDefault.get("specs/hub"))).toEqual(others.slice(0, 6));
-    const withNine = displayedNeighbourhood({ entities, links, size: 9 });
+    const withNine = displayedNeighbourhood({ entities, links, profile, size: 9 });
     expect(ids(withNine.get("specs/hub"))).toEqual(others.slice(0, 9));
-    const beyondTheCap = displayedNeighbourhood({ entities, links, size: 14 });
+    const beyondTheCap = displayedNeighbourhood({ entities, links, profile, size: 14 });
     expect(MAX_DISPLAYED_NEIGHBOURS).toBe(12);
     expect(ids(beyondTheCap.get("specs/hub"))).toEqual(others.slice(0, 12));
   });
@@ -87,7 +93,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "glossary/rate", 0.6, "mentions"),
       link("specs/cap", "words/quota", 0.6, "mentions"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")).toEqual([
       {
         id: "glossary/rate",
@@ -97,6 +103,7 @@ describe("the displayed neighbourhood", () => {
         relation: "mentions",
         direction: "out",
         confidence: 0.6,
+        rank: 6,
       },
       {
         id: "words/quota",
@@ -106,6 +113,7 @@ describe("the displayed neighbourhood", () => {
         relation: "mentions",
         direction: "out",
         confidence: 0.6,
+        rank: 6,
       },
     ]);
   });
@@ -113,8 +121,8 @@ describe("the displayed neighbourhood", () => {
   it("is precomputed at build as a pure function of the model, one list per entity", () => {
     const entities = [entity("specs/b"), entity("specs/a"), entity("specs/c")];
     const links = [link("specs/a", "specs/b", 0.5)];
-    const first = displayedNeighbourhood({ entities, links, size: 6 });
-    const second = displayedNeighbourhood({ entities, links, size: 6 });
+    const first = displayedNeighbourhood({ entities, links, profile, size: 6 });
+    const second = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect([...first.keys()]).toEqual(["specs/a", "specs/b", "specs/c"]);
     expect(first).toEqual(second);
     expect(first.get("specs/c")).toEqual([]);
@@ -127,7 +135,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/rate", 0.9, "reads"),
       link("specs/cap", "specs/rate", 0.6, "consumes"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.[0]).toMatchObject({
       relation: "reads",
       confidence: 0.9,
@@ -147,7 +155,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/rate", 0.9, "consumes"),
       link("specs/cap", "specs/rate", 0.9, "related"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.[0]?.relation).toBe("consumes");
   });
 
@@ -157,7 +165,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/rate", 0.9, "reads"),
       link("specs/cap", "specs/rate", 0.5, "consumes"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.[0]).toMatchObject({
       relation: "reads",
       confidence: 0.9,
@@ -171,7 +179,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/rate", "specs/cap", 0.5, "feeds"),
       link("specs/cap", "specs/entry", 0.7, "reads"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.map((n) => [n.id, n.direction])).toEqual([
       ["specs/rate", "both"],
       ["specs/entry", "out"],
@@ -190,7 +198,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/rate", 0.9, "reads"),
       link("specs/cap", "specs/rate", 0.5, "consumes"),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.[0]?.direction).toBe("out");
     expect(neighbourhood.get("specs/rate")?.[0]?.direction).toBe("in");
   });
@@ -198,7 +206,7 @@ describe("the displayed neighbourhood", () => {
   it("flags a noteless word as a keyword neighbour and a typed entity as an entity", () => {
     const entities = [entity("specs/cap"), entity("words/quota", "keyword", true)];
     const links = [link("words/quota", "specs/cap", 0.3, "mentions")];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.get("specs/cap")?.[0]).toMatchObject({
       id: "words/quota",
       kind: "keyword",
@@ -218,7 +226,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/hub", "specs/b", 0.8),
       link("specs/hub", "specs/c", 0.5),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 2 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 2 });
     expect(ids(neighbourhood.get("specs/hub"))).toEqual(["specs/b", "specs/c"]);
     expect(ids(neighbourhood.get("specs/a"))).toEqual(["specs/hub"]);
   });
@@ -226,7 +234,7 @@ describe("the displayed neighbourhood", () => {
   it("lists an entity without any neighbour with an empty list", () => {
     const entities = [entity("specs/alone"), entity("specs/cap"), entity("specs/rate")];
     const links = [link("specs/cap", "specs/rate", 0.5)];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect(neighbourhood.has("specs/alone")).toBe(true);
     expect(neighbourhood.get("specs/alone")).toEqual([]);
   });
@@ -239,7 +247,7 @@ describe("the displayed neighbourhood", () => {
       link("specs/cap", "specs/cap", 0.9),
       link("specs/cap", "specs/rate", 0.5),
     ];
-    const neighbourhood = displayedNeighbourhood({ entities, links, size: 6 });
+    const neighbourhood = displayedNeighbourhood({ entities, links, profile, size: 6 });
     expect([...neighbourhood.keys()]).toEqual(["specs/cap", "specs/rate"]);
     expect(ids(neighbourhood.get("specs/cap"))).toEqual(["specs/rate"]);
   });
@@ -256,12 +264,13 @@ describe("the displayed neighbourhood", () => {
       const confidence = Math.round(next() * 10) / 10;
       return link(from, to, confidence, relations[Math.floor(next() * relations.length)]);
     });
-    const reference = displayedNeighbourhood({ entities, links, size: 6 });
+    const reference = displayedNeighbourhood({ entities, links, profile, size: 6 });
     const shuffle = generator(99);
     for (let round = 0; round < 5; round += 1) {
       const permuted = displayedNeighbourhood({
         entities: shuffled(entities, shuffle),
         links: shuffled(links, shuffle),
+        profile,
         size: 6,
       });
       expect(permuted).toEqual(reference);

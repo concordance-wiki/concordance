@@ -234,7 +234,7 @@ build:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `neighbourhood.size` | 6 | nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes (see the [architecture guide](architecture.md#displayed-neighbourhood)) |
+| `neighbourhood.size` | 6 | nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes; which nodes are kept follows the `display.neighbours_order` of the page's type in the profile (see the [architecture guide](architecture.md#displayed-neighbourhood)) |
 
 ```yaml
 site:

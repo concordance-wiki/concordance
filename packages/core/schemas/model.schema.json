@@ -486,14 +486,23 @@
     },
     "displayed_neighbourhood": {
       "type": "object",
-      "description": "One-hop neighbours shown on the page of each entity identifier, best first, at most site.neighbourhood.size of them",
+      "description": "One-hop neighbours shown on the page of each entity identifier, grouped by the priority of their type for the page's type then best first, at most site.neighbourhood.size of them",
       "additionalProperties": {
         "type": "array",
         "maxItems": 12,
         "items": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["id", "title", "type", "kind", "relation", "direction", "confidence"],
+          "required": [
+            "id",
+            "title",
+            "type",
+            "kind",
+            "relation",
+            "direction",
+            "confidence",
+            "rank"
+          ],
           "properties": {
             "id": {
               "type": "string"
@@ -523,6 +532,11 @@
               "minimum": 0,
               "maximum": 1,
               "description": "largest confidence over the links between the two nodes"
+            },
+            "rank": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "position of the neighbour's type in the display.neighbours_order of the page's type; unlisted types share the rank after the last listed one"
             }
           }
         }

@@ -115,6 +115,59 @@ describe("Neighbourhood", () => {
     expectBalanced(html);
   });
 
+  it("renders the neighbours in the order it receives and separates the priority groups by rank", () => {
+    const neighbours = [
+      {
+        id: "specs/api/model-query/get-entity",
+        label: "getEntity",
+        href: "../get-entity/",
+        weight: 2,
+        rank: 0,
+      },
+      {
+        id: "specs/api/model-query/list-entities",
+        label: "listEntities",
+        href: "../list-entities/",
+        weight: 5,
+        rank: 0,
+      },
+      {
+        id: "specs/screens/search",
+        label: "Search results",
+        href: "../search/",
+        weight: 9,
+        rank: 1,
+      },
+      { id: "glossary/endpoint", label: "endpoint", href: "../endpoint/", weight: 12, rank: 5 },
+      {
+        id: "words/build-summary",
+        label: "build summary",
+        href: "../build-summary/",
+        weight: 7,
+        rank: 5,
+      },
+    ];
+    const html = renderSlot("Neighbourhood", { centre: "Model query", neighbours }, defaultTheme);
+    const items = html.match(/<li class="neighbour[^"]*"><a href="[^"]+">[^<]+<\/a>/g) ?? [];
+    expect(items).toEqual([
+      '<li class="neighbour"><a href="../get-entity/">getEntity</a>',
+      '<li class="neighbour"><a href="../list-entities/">listEntities</a>',
+      '<li class="neighbour group-start"><a href="../search/">Search results</a>',
+      '<li class="neighbour group-start"><a href="../endpoint/">endpoint</a>',
+      '<li class="neighbour"><a href="../build-summary/">build summary</a>',
+    ]);
+  });
+
+  it("draws no separator when the neighbours carry no rank", () => {
+    const neighbours = [
+      { id: "glossary/page", label: "page", href: "../page/", weight: 12 },
+      { id: "glossary/note", label: "note", href: "../note/", weight: 4 },
+    ];
+    const html = renderSlot("Neighbourhood", { centre: "Keyword page", neighbours }, defaultTheme);
+    expect(html).not.toContain("group-start");
+    expect(html.match(/<li class="neighbour">/g)).toHaveLength(2);
+  });
+
   it("draws a star map hidden from assistive technologies, described by the list, one row per neighbour side", () => {
     expect(NEIGHBOURHOOD_LIST).toBe("neighbourhood-list");
     const html = renderSlot("Neighbourhood", neighbourhood, defaultTheme);
