@@ -159,7 +159,11 @@ describe("buildSearchIndex", () => {
   it("writes the entity table in model order with the labels of the types and the names of the applications and domains", () => {
     const { meta } = buildSearchIndex(
       input({
-        names: { applications: { probe: "Probe application" }, domains: {} },
+        names: {
+          applications: { probe: "Probe application" },
+          domains: {},
+          sources: { specs: "Specifications" },
+        },
       }),
     );
     expect(meta.entities.map((entry) => entry.id)).toEqual(Object.values(probes).map((e) => e.id));
@@ -181,7 +185,7 @@ describe("buildSearchIndex", () => {
     });
     expect(meta.applications).toEqual({ probe: "Probe application" });
     expect(meta.domains).toEqual({ probe: "probe" });
-    expect(meta.sources).toEqual({ probe: "probe", specs: "specs" });
+    expect(meta.sources).toEqual({ probe: "probe", specs: "Specifications" });
     expect(meta.labels).toBe(labels);
     expect(meta.locale).toBe("en");
     expect(meta.shards).toEqual([...meta.shards].sort());

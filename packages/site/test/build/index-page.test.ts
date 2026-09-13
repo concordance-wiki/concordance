@@ -210,6 +210,12 @@ describe("filtersOf", () => {
       href: "../../search/index.html?nonote=only",
       count: 2,
     });
+    const titled = context({ names: { sources: { specs: "Specifications" } } });
+    expect(
+      filtersOf(titled, "index/a/index.html", filedEntities(titled)).spaces.find(
+        (space) => space.href === "../../search/index.html?source=specs",
+      ),
+    ).toEqual({ label: "Specifications", href: "../../search/index.html?source=specs", count: 4 });
   });
 
   it("orders two types sharing a label by their address, and encodes a value the address could not carry as written", () => {

@@ -1387,6 +1387,20 @@ describe("keywordPageOf", () => {
     expect(Object.keys(props.counts)).toEqual(["occurrences", "files", "sources"]);
     expect(props.spaces).toEqual(["glossary", "specs"]);
     expect(props.summary).toBe("2 files.");
+    const titled = keywordPageOf(
+      context({
+        glossarySources: ["glossary"],
+        names: { sources: { glossary: "Business glossary", specs: "Specifications" } },
+      }),
+      keyword,
+    );
+    expect(titled.spaces).toEqual(["Business glossary", "Specifications"]);
+    expect(titled.breadcrumb?.[0]).toEqual({
+      label: "Business glossary",
+      href: "../../glossary/index.html",
+    });
+    expect(titled.space?.name).toBe("Business glossary");
+    expect(titled.space?.initials).toBe("BG");
     const orphan = keywordPageOf(context(), orphanKeyword);
     expect(orphan.counts).toEqual({ occurrences: 0, files: 0, sources: 0 });
     expect(orphan.spaces).toEqual([]);
