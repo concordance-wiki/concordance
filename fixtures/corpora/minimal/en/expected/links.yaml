@@ -1,16 +1,16 @@
 # Links the engine must produce, with the method of their strongest provenance.
 # Not exhaustive for occurrence-based methods; every listed link must exist with at least this confidence.
-- { from: specs/screens/free-payment-entry, to: specs/rules/annual-cap, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/screens/free-payment-entry, to: specs/objects/contract, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/objects/payment, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/screens/payment-summary, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/screens/member-search, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/roles/account-manager, to: specs/screens/free-payment-entry, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/api/payments, to: specs/screens/free-payment-entry, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/rules/annual-cap, to: specs/api/payments, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/tables/payment, to: specs/objects/payment, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/batches/nightly-settlement, to: specs/tables/payment, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/cap-checked-server-side, to: specs/api/payments, relation: affects, method: section_mention, min_confidence: 0.7 }
-- { from: meetings/2026-03-12-payments-workshop, to: decisions/cap-checked-server-side, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: glossary/free-payment, to: glossary/payment, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: glossary/free-payment, to: specs/screens/free-payment-entry, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: specs/screens/mentions-panel, to: specs/rules/related-link-cap, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/screens/mentions-panel, to: specs/objects/build, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/mentions-panel, to: specs/objects/link, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/mentions-panel, to: specs/screens/neighbourhood-map, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/mentions-panel, to: specs/screens/entity-page, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/roles/maintainer, to: specs/screens/mentions-panel, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/api/model-query, to: specs/screens/mentions-panel, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/rules/related-link-cap, to: specs/api/model-query, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/tables/links, to: specs/objects/link, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/batches/nightly-build, to: specs/tables/links, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/cap-checked-upstream, to: specs/api/model-query, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: meetings/2026-03-12-links-workshop, to: decisions/cap-checked-upstream, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: glossary/explicit-link, to: glossary/link, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossary/explicit-link, to: specs/screens/mentions-panel, relation: related, method: glossary_occurrence, min_confidence: 0.6 }

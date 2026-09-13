@@ -222,7 +222,7 @@ describe("loadPlugins", () => {
     expect(findings).toEqual([]);
   });
 
-  it("does not claim the contributions of a disabled plugin", async () => {
+  it("does not take the contributions of a disabled plugin", async () => {
     const modules = {
       disabled: plugin("disabled", { systemDependencies: [{ name: "tool", check: "tool" }] }),
       enabled: plugin("enabled", {

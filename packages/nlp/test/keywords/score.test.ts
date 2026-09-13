@@ -39,25 +39,25 @@ function summary(list: KeywordCandidate[]): [string, number, number, number][] {
 
 describe("scoreCandidates", () => {
   it("ranks by C-value multiplied by IDF", () => {
-    // "branch manager" twice in two files: C-value log2(3) × 2 = 3.1699, IDF ln(1 + 2/2) = 0.6931.
-    const units = [unit("a.md", "branch manager validates"), unit("b.md", "branch manager")];
+    // "glossary owner" twice in two files: C-value log2(3) × 2 = 3.1699, IDF ln(1 + 2/2) = 0.6931.
+    const units = [unit("a.md", "glossary owner validates"), unit("b.md", "glossary owner")];
     const thresholds = { minOccurrences: 2, minDocuments: 2 };
     expect(summary(candidates(units, thresholds, 2))).toEqual([
-      ["branch manager", 2, 2, 2.1972],
-      ["branch", 2, 2, 0],
-      ["manager", 2, 2, 0],
+      ["glossary owner", 2, 2, 2.1972],
+      ["glossary", 2, 2, 0],
+      ["owner", 2, 2, 0],
     ]);
   });
 
   it("weighs the frequency by the logarithm of the length and the rarity across files", () => {
-    // "cap" three times in three files, explained twice by "annual cap": 1 × (3 − 2) × ln(1 + 3/3).
-    // "annual cap" twice in two files: log2(3) × 2 × ln(1 + 3/2) = 2.9046.
-    const units = [unit("a.md", "annual cap"), unit("b.md", "annual cap"), unit("c.md", "cap")];
+    // "cap" three times in three files, explained twice by "related cap": 1 × (3 − 2) × ln(1 + 3/3).
+    // "related cap" twice in two files: log2(3) × 2 × ln(1 + 3/2) = 2.9046.
+    const units = [unit("a.md", "related cap"), unit("b.md", "related cap"), unit("c.md", "cap")];
     const thresholds = { minOccurrences: 1, minDocuments: 1 };
     expect(summary(candidates(units, thresholds, 2))).toEqual([
-      ["annual cap", 2, 2, 2.9046],
+      ["related cap", 2, 2, 2.9046],
       ["cap", 3, 3, 0.6931],
-      ["annual", 2, 2, 0],
+      ["related", 2, 2, 0],
     ]);
   });
 
@@ -101,42 +101,42 @@ describe("scoreCandidates", () => {
 
   it("lets an n-gram with inner stopwords explain its edge words", () => {
     const units = [
-      unit("a.md", "cap of the contract"),
-      unit("b.md", "cap of the contract"),
-      unit("c.md", "cap of the contract"),
+      unit("a.md", "cap of the build"),
+      unit("b.md", "cap of the build"),
+      unit("c.md", "cap of the build"),
     ];
     // log2(5) × 3 × ln 2 for the whole expression; the inner stopwords are no candidates.
     expect(summary(candidates(units))).toEqual([
-      ["cap of the contract", 3, 3, 4.8283],
+      ["cap of the build", 3, 3, 4.8283],
+      ["build", 3, 3, 0],
       ["cap", 3, 3, 0],
-      ["contract", 3, 3, 0],
     ]);
   });
 
   it("lets a rare longer n-gram explain nothing", () => {
     const units = [
-      unit("a.md", "annual cap checked server"),
+      unit("a.md", "related cap checked server"),
       unit("b.md", "cap checked server"),
       unit("c.md", "cap checked server"),
     ];
     const scored = candidates(units);
-    expect(scored.map((c) => c.key)).not.toContain("annual cap checked server");
+    expect(scored.map((c) => c.key)).not.toContain("related cap checked server");
     expect(summary(scored)[0]).toEqual(["cap checked server", 3, 3, 4.1589]);
   });
 
   it("keeps three occurrences in two distinct documents by default", () => {
     const units = [
-      unit("a.md", "settlement runs nightly"),
-      unit("a.md", "settlement failed", 2),
-      unit("a.md", "settlement", 3),
+      unit("a.md", "pipeline runs nightly"),
+      unit("a.md", "pipeline failed", 2),
+      unit("a.md", "pipeline", 3),
       unit("b.md", "nightly batch"),
       unit("b.md", "nightly", 2),
       unit("c.md", "nightly"),
     ];
-    // "settlement" has three occurrences in one file; "nightly" four in three; "batch" one.
+    // "pipeline" has three occurrences in one file; "nightly" four in three; "batch" one.
     expect(summary(candidates(units))).toEqual([["nightly", 4, 3, 2.7726]]);
     expect(summary(candidates(units, { minDocuments: 1 })).map(([key]) => key)).toEqual([
-      "settlement",
+      "pipeline",
       "nightly",
     ]);
     expect(summary(candidates(units, { minOccurrences: 5 }))).toEqual([]);
@@ -166,68 +166,68 @@ describe("scoreCandidates", () => {
 
   it("excludes n-grams already in the dictionary and those listed in the lock's rejected terms", () => {
     const units = [
-      unit("a.md", "Exceptional payments on the server-side"),
-      unit("b.md", "exceptional payment on the server side"),
-      unit("c.md", "exceptional payment server side"),
+      unit("a.md", "Build summaries after the cold-start"),
+      unit("b.md", "build summary after the cold start"),
+      unit("c.md", "build summary cold start"),
     ];
     const scored = candidates(units, {
-      dictionaryKeys: new Set(["server-side"]),
-      rejected: new Set(["Exceptional Payments"]),
+      dictionaryKeys: new Set(["cold-start"]),
+      rejected: new Set(["Build Summaries"]),
     });
     expect(summary(scored)).toEqual([
-      ["exceptional", 3, 3, 0],
-      ["payment", 3, 3, 0],
-      ["server", 3, 3, 0],
-      ["side", 3, 3, 0],
+      ["build", 3, 3, 0],
+      ["cold", 3, 3, 0],
+      ["start", 3, 3, 0],
+      ["summary", 3, 3, 0],
     ]);
   });
 
   it("carries the score, the occurrences and their contexts for each candidate", () => {
     const units = [
-      unit("b.md", "the annual cap", 1, "specs"),
-      unit("a.md", "Annual cap set at subscription", 3, "specs"),
-      unit("a.md", "Annual cap", 1, "glossary"),
+      unit("b.md", "the related cap", 1, "specs"),
+      unit("a.md", "Related cap set in the profile", 3, "specs"),
+      unit("a.md", "Related cap", 1, "glossary"),
     ];
     const [candidate] = candidates(units, { minOccurrences: 1, minDocuments: 1 }, 2);
     expect(candidate).toEqual({
-      key: "annual cap",
-      display: "Annual cap",
+      key: "related cap",
+      display: "Related cap",
       words: 2,
       occurrences: 3,
       documents: 3,
       score: 3.2958,
       mentions: [
-        { source: "glossary", path: "a.md", line: 1, position: 0, context: "Annual cap" },
+        { source: "glossary", path: "a.md", line: 1, position: 0, context: "Related cap" },
         {
           source: "specs",
           path: "a.md",
           line: 3,
           position: 0,
-          context: "Annual cap set at subscription",
+          context: "Related cap set in the profile",
         },
-        { source: "specs", path: "b.md", line: 1, position: 4, context: "the annual cap" },
+        { source: "specs", path: "b.md", line: 1, position: 4, context: "the related cap" },
       ],
     });
   });
 
   it("displays the most frequent surface form, the first mention deciding a tie", () => {
     const units = [
-      unit("b.md", "annual cap"),
-      unit("a.md", "Annual Cap", 2),
-      unit("a.md", "ANNUAL CAP", 1),
-      unit("c.md", "ANNUAL CAP"),
+      unit("b.md", "related cap"),
+      unit("a.md", "Related Cap", 2),
+      unit("a.md", "RELATED CAP", 1),
+      unit("c.md", "RELATED CAP"),
     ];
     const [tied] = candidates(units.slice(0, 3), { minOccurrences: 1, minDocuments: 1 }, 2);
-    expect(tied?.display).toBe("ANNUAL CAP");
+    expect(tied?.display).toBe("RELATED CAP");
     const [frequent] = candidates(
-      [...units, unit("d.md", "Annual Cap"), unit("e.md", "Annual Cap")],
+      [...units, unit("d.md", "Related Cap"), unit("e.md", "Related Cap")],
       {
         minOccurrences: 1,
         minDocuments: 1,
       },
       2,
     );
-    expect(frequent?.display).toBe("Annual Cap");
+    expect(frequent?.display).toBe("Related Cap");
   });
 
   it("sorts candidates by score, then by key", () => {

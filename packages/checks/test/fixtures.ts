@@ -19,7 +19,11 @@ export function filed(
   type: string,
   attributes: Record<string, unknown> = {},
 ): CheckEntity {
-  return entity(id, type, { application: "apps/policy-admin", domain: "payments", ...attributes });
+  return entity(id, type, {
+    application: "apps/concordance-cli",
+    domain: "inference",
+    ...attributes,
+  });
 }
 
 export function link(from: string, to: string, relation: string): CheckLink {

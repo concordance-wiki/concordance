@@ -5,13 +5,13 @@ import { profile } from "./helpers.js";
 
 function filing(overrides: Partial<FilingInput> = {}): FilingInput {
   return {
-    id: "specs/screens/free-payment-entry",
+    id: "specs/screens/keyword-page",
     type: "screen",
     source: "specs",
-    path: "screens/free-payment-entry.md",
+    path: "screens/keyword-page.md",
     profile: profile(),
-    application: { application: "policy-admin", origin: "source", declared: true },
-    domain: { domain: "membership/payments", origin: "glob", declared: true },
+    application: { application: "concordance-cli", origin: "source", declared: true },
+    domain: { domain: "inference/recognition", origin: "glob", declared: true },
     ...overrides,
   };
 }
@@ -30,9 +30,9 @@ describe("filingFindings", () => {
         check: "W-DOMAIN-UNCLASSIFIED",
         severity: "info",
         source: "specs",
-        path: "screens/free-payment-entry.md",
-        entity: "specs/screens/free-payment-entry",
-        message: "specs/screens/free-payment-entry matches no declared domain",
+        path: "screens/keyword-page.md",
+        entity: "specs/screens/keyword-page",
+        message: "specs/screens/keyword-page matches no declared domain",
         remediation:
           "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
       },
@@ -51,9 +51,9 @@ describe("filingFindings", () => {
         check: "W-APP-MISSING",
         severity: "warning",
         source: "specs",
-        path: "screens/free-payment-entry.md",
-        entity: "specs/screens/free-payment-entry",
-        message: "specs/screens/free-payment-entry resolves to no application",
+        path: "screens/keyword-page.md",
+        entity: "specs/screens/keyword-page",
+        message: "specs/screens/keyword-page resolves to no application",
         remediation:
           "Set application on the source, in a typing rule, or in the note's frontmatter.",
       },
@@ -62,17 +62,17 @@ describe("filingFindings", () => {
 
   it("yields W-APP-UNKNOWN for an application the configuration does not declare", () => {
     const unknown = filing({
-      application: { application: "claims", origin: "frontmatter", declared: false },
+      application: { application: "forge-bridge", origin: "frontmatter", declared: false },
     });
     expect(filingFindings(unknown)).toEqual([
       {
         check: "W-APP-UNKNOWN",
         severity: "warning",
         source: "specs",
-        path: "screens/free-payment-entry.md",
-        entity: "specs/screens/free-payment-entry",
+        path: "screens/keyword-page.md",
+        entity: "specs/screens/keyword-page",
         message:
-          'application "claims" of specs/screens/free-payment-entry (from frontmatter) is not declared in the configuration; it is kept as written',
+          'application "forge-bridge" of specs/screens/keyword-page (from frontmatter) is not declared in the configuration; it is kept as written',
         remediation:
           "Declare the application under applications in concordance.yaml, or fix the source, the rule or the frontmatter that sets it.",
       },
@@ -81,17 +81,17 @@ describe("filingFindings", () => {
 
   it("yields W-DOMAIN-UNKNOWN for a frontmatter domain the configuration does not declare", () => {
     const unknown = filing({
-      domain: { domain: "claims", origin: "frontmatter", declared: false },
+      domain: { domain: "theming", origin: "frontmatter", declared: false },
     });
     expect(filingFindings(unknown)).toEqual([
       {
         check: "W-DOMAIN-UNKNOWN",
         severity: "warning",
         source: "specs",
-        path: "screens/free-payment-entry.md",
-        entity: "specs/screens/free-payment-entry",
+        path: "screens/keyword-page.md",
+        entity: "specs/screens/keyword-page",
         message:
-          'frontmatter domain "claims" of specs/screens/free-payment-entry is not declared in the configuration; it is kept as written',
+          'frontmatter domain "theming" of specs/screens/keyword-page is not declared in the configuration; it is kept as written',
         remediation:
           "Declare the domain under domains in concordance.yaml, or name a declared domain by its id or its id path.",
       },
@@ -100,9 +100,9 @@ describe("filingFindings", () => {
 
   it("exempts containers from W-APP-MISSING and W-DOMAIN-UNCLASSIFIED but not from the unknown ones", () => {
     const container = filing({
-      id: "config/apps/policy-admin",
+      id: "config/apps/concordance-cli",
       type: "application",
-      path: "apps/policy-admin.md",
+      path: "apps/concordance-cli.md",
       application: { origin: "none", declared: false },
       domain: { domain: "unclassified", origin: "unclassified", declared: true },
     });
@@ -110,8 +110,8 @@ describe("filingFindings", () => {
     expect(filingFindings({ ...container, type: "domain" })).toEqual([]);
     const misfiled = filingFindings({
       ...container,
-      application: { application: "claims", origin: "source", declared: false },
-      domain: { domain: "claims", origin: "frontmatter", declared: false },
+      application: { application: "forge-bridge", origin: "source", declared: false },
+      domain: { domain: "theming", origin: "frontmatter", declared: false },
     });
     expect(misfiled.map((finding) => finding.check)).toEqual(["W-APP-UNKNOWN", "W-DOMAIN-UNKNOWN"]);
   });

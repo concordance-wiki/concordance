@@ -1,5 +1,5 @@
 # Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
 published:
-  - { text: exceptional payment, min_occurrences: 4, min_files: 3 }
+  - { text: build summary, min_occurrences: 5, min_files: 3 }
 unpublished:
-  - { text: contractual frame, reason: "2 occurrences" }
+  - { text: cold start, reason: "2 occurrences in a single file" }

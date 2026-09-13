@@ -520,7 +520,7 @@ describe("concordance build", () => {
       rmSync(output, { recursive: true, force: true });
     });
 
-    it("types and links every note, files the four notes no domain claims as unclassified and stops after inference with exit code 2", async () => {
+    it("types and links every note, files the four notes no domain covers as unclassified and stops after inference with exit code 2", async () => {
       const stdout: string[] = [];
       const stderr: string[] = [];
       const io = {
@@ -535,10 +535,10 @@ describe("concordance build", () => {
       expect(io.git.calls).toEqual([]);
       const log = JSON.parse(readFileSync(join(output, "build.log.json"), "utf8")) as BuildLog;
       expect(log.findings).toEqual([
-        unclassified("cap-checked-server-side.md", "decisions/cap-checked-server-side"),
-        unclassified("contract.md", "glossary/contract"),
-        unclassified("objects/contract.md", "specs/objects/contract"),
-        unclassified("roles/account-manager.md", "specs/roles/account-manager"),
+        unclassified("cap-checked-upstream.md", "decisions/cap-checked-upstream"),
+        unclassified("build.md", "glossary/build"),
+        unclassified("objects/build.md", "specs/objects/build"),
+        unclassified("roles/maintainer.md", "specs/roles/maintainer"),
       ]);
       expect(log.summary).toEqual({
         sources: 4,
@@ -563,10 +563,10 @@ describe("concordance build", () => {
         },
       });
       expect(stderr).toEqual([
-        "info: W-DOMAIN-UNCLASSIFIED (decisions:cap-checked-server-side.md): decisions/cap-checked-server-side matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (glossary:contract.md): glossary/contract matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (specs:objects/contract.md): specs/objects/contract matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (specs:roles/account-manager.md): specs/roles/account-manager matches no declared domain",
+        "info: W-DOMAIN-UNCLASSIFIED (decisions:cap-checked-upstream.md): decisions/cap-checked-upstream matches no declared domain",
+        "info: W-DOMAIN-UNCLASSIFIED (glossary:build.md): glossary/build matches no declared domain",
+        "info: W-DOMAIN-UNCLASSIFIED (specs:objects/build.md): specs/objects/build matches no declared domain",
+        "info: W-DOMAIN-UNCLASSIFIED (specs:roles/maintainer.md): specs/roles/maintainer matches no declared domain",
         "build stopped: model.json is written; the steps after inference are not implemented in this version",
       ]);
     });

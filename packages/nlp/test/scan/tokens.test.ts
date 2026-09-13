@@ -7,19 +7,19 @@ const fr = languagePack("fr");
 
 describe("tokenize", () => {
   it("gives each word its comparison form and its span in the original text", () => {
-    expect(tokenize("The Free Payments, entered.", en)).toEqual([
+    expect(tokenize("The List Mentions, entered.", en)).toEqual([
       { word: "the", start: 0, end: 3 },
-      { word: "free", start: 4, end: 8 },
-      { word: "payment", start: 9, end: 17 },
+      { word: "list", start: 4, end: 8 },
+      { word: "mention", start: 9, end: 17 },
       { word: "entered", start: 19, end: 26 },
     ]);
   });
 
   it("cuts a hyphenated compound into its parts", () => {
-    expect(tokenize("un versement-libre", fr)).toEqual([
+    expect(tokenize("un lien-explicite", fr)).toEqual([
       { word: "un", start: 0, end: 2 },
-      { word: "versement", start: 3, end: 12 },
-      { word: "libre", start: 13, end: 18 },
+      { word: "lien", start: 3, end: 7 },
+      { word: "explicite", start: 8, end: 17 },
     ]);
   });
 

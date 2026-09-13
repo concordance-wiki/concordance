@@ -1,6 +1,6 @@
 ---
 protocol: rest
 ---
-# API without consumer
+# Forge bridge API without consumer
 
-Nothing declares or mentions this API.
+No screen declares or mentions this API.

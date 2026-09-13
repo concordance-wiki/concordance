@@ -89,10 +89,10 @@ describe("the minimal corpus", () => {
     expect(
       links.map((link) => [link.from, link.to, link.provenance.map((p) => p.attribute)]),
     ).toEqual([
-      ["glossary/free-payment", "glossary/payment", ["broader"]],
-      ["glossary/scheduled-payment", "glossary/payment", ["broader"]],
-      ["specs/roles/account-manager", "specs/screens/free-payment-entry", ["roles"]],
-      ["specs/tables/payment", "specs/objects/payment", ["business_object"]],
+      ["glossary/explicit-link", "glossary/link", ["broader"]],
+      ["glossary/section-mention", "glossary/link", ["broader"]],
+      ["specs/roles/maintainer", "specs/screens/mentions-panel", ["roles"]],
+      ["specs/tables/links", "specs/objects/link", ["business_object"]],
     ]);
   });
 });

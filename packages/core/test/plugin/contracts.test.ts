@@ -55,20 +55,20 @@ const linesReader: ContractReader<LinesContract> = {
 
 function api(overrides: Partial<Entity> = {}): Entity {
   return {
-    id: "specs/api/payments",
+    id: "specs/api/model-query",
     type: "api",
-    title: "Payments API",
+    title: "Model query API",
     aliases: [],
     locale: "en",
-    application: "payments",
-    domain: "payments",
+    application: "concordance-service",
+    domain: "inference",
     status: "valid",
     type_origin: "rule#1",
     graph: "full",
-    attributes: { contract: "./payments.lines" },
+    attributes: { contract: "./model-query.lines" },
     source: {
       name: "specs",
-      path: "api/payments.md",
+      path: "api/model-query.md",
       line: 1,
       commit: "abc123",
       last_modified: "2026-03-01T00:00:00.000Z",
@@ -117,10 +117,10 @@ function harness(files: Record<string, string> = {}, fetchStub?: typeof fetch): 
   };
 }
 
-const text = "createPayment|Create a payment|Payment,Member\ngetPayment||Payment\n";
+const text = "createLink|Create a link|Link,Entity\ngetLink||Link\n";
 const fingerprint = createHash("sha256").update(text).digest("hex");
 const cachePath = `/pipeline/.concordance-cache/contracts/${fingerprint}.json`;
-const localFile = { "/repos/specs/api/payments.lines": text };
+const localFile = { "/repos/specs/api/model-query.lines": text };
 
 describe("the contract constants", () => {
   it("name the check, the relation, the method and the confidence of the specification", () => {
@@ -133,14 +133,14 @@ describe("the contract constants", () => {
 
 describe("declaredContracts", () => {
   it("declares the contract through the contract attribute of an api note, as a URL or a file path, in identifier order", () => {
-    const url = api({ id: "specs/api/members", attributes: { contract: "https://x.invalid/o" } });
+    const url = api({ id: "specs/api/entities", attributes: { contract: "https://x.invalid/o" } });
     const screen = api({ id: "specs/screens/entry", type: "screen" });
     const none = api({ id: "specs/api/none", attributes: {} });
     const empty = api({ id: "specs/api/empty", attributes: { contract: "" } });
     const number = api({ id: "specs/api/number", attributes: { contract: 3 } });
     expect(declaredContracts([api(), screen, none, url, empty, number])).toEqual([
       { api: url, location: "https://x.invalid/o" },
-      { api: api(), location: "./payments.lines" },
+      { api: api(), location: "./model-query.lines" },
     ]);
     expect(declaredContracts([])).toEqual([]);
   });
@@ -194,41 +194,41 @@ describe("loadContracts", () => {
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.entities).toEqual([
       {
-        id: "specs/api/payments/createpayment",
+        id: "specs/api/model-query/createlink",
         type: "endpoint",
-        title: "createPayment (lines)",
-        aliases: ["createPayment"],
+        title: "createLink (lines)",
+        aliases: ["createLink"],
         locale: "en",
-        application: "payments",
-        domain: "payments",
+        application: "concordance-service",
+        domain: "inference",
         status: "valid",
-        summary: "Create a payment",
+        summary: "Create a link",
         type_origin: "contract",
         graph: "full",
-        attributes: { operation_id: "createPayment", style: "lines" },
+        attributes: { operation_id: "createLink", style: "lines" },
         source: {
           name: "specs",
-          path: "./payments.lines",
+          path: "./model-query.lines",
           line: 1,
           commit: "abc123",
           last_modified: "2026-03-01T00:00:00.000Z",
         },
       },
       {
-        id: "specs/api/payments/getpayment",
+        id: "specs/api/model-query/getlink",
         type: "endpoint",
-        title: "getPayment (lines)",
-        aliases: ["getPayment"],
+        title: "getLink (lines)",
+        aliases: ["getLink"],
         locale: "en",
-        application: "payments",
-        domain: "payments",
+        application: "concordance-service",
+        domain: "inference",
         status: "valid",
         type_origin: "contract",
         graph: "full",
-        attributes: { operation_id: "getPayment", style: "lines" },
+        attributes: { operation_id: "getLink", style: "lines" },
         source: {
           name: "specs",
-          path: "./payments.lines",
+          path: "./model-query.lines",
           line: 1,
           commit: "abc123",
           last_modified: "2026-03-01T00:00:00.000Z",
@@ -244,7 +244,7 @@ describe("loadContracts", () => {
     const bare = api({
       source: {
         name: "specs",
-        path: "api/payments.md",
+        path: "api/model-query.md",
         line: 1,
         last_modified: "2026-03-01T00:00:00.000Z",
       },
@@ -274,7 +274,7 @@ describe("loadContracts", () => {
     ]);
     expect(first?.source).toEqual({
       name: "specs",
-      path: "./payments.lines",
+      path: "./model-query.lines",
       line: 1,
       last_modified: "2026-03-01T00:00:00.000Z",
     });
@@ -285,30 +285,30 @@ describe("loadContracts", () => {
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.links).toEqual([
       {
-        from: "specs/api/payments",
-        to: "specs/api/payments/createpayment",
+        from: "specs/api/model-query",
+        to: "specs/api/model-query/createlink",
         relation: "exposes",
         confidence: 0.95,
         provenance: [
           {
             method: "contract_import",
             confidence: 0.95,
-            path: "./payments.lines",
-            operation: "createPayment",
+            path: "./model-query.lines",
+            operation: "createLink",
           },
         ],
       },
       {
-        from: "specs/api/payments",
-        to: "specs/api/payments/getpayment",
+        from: "specs/api/model-query",
+        to: "specs/api/model-query/getlink",
         relation: "exposes",
         confidence: 0.95,
         provenance: [
           {
             method: "contract_import",
             confidence: 0.95,
-            path: "./payments.lines",
-            operation: "getPayment",
+            path: "./model-query.lines",
+            operation: "getLink",
           },
         ],
       },
@@ -330,18 +330,31 @@ describe("loadContracts", () => {
 
   it("offers the objects the operations reference as candidate objects, once each, sorted by api then by name, without linking them", async () => {
     const { input } = harness({
-      "/repos/specs/api/payments.lines": text,
-      "/repos/specs/api/members.lines": "listMembers||Zone,Member\n",
+      "/repos/specs/api/model-query.lines": text,
+      "/repos/specs/api/entities.lines": "listEntities||Zone,Entity\n",
     });
-    const members = api({ id: "specs/api/members", attributes: { contract: "./members.lines" } });
-    const output = await loadContracts(input([api(), members]), linesReader);
+    const entities = api({
+      id: "specs/api/entities",
+      attributes: { contract: "./entities.lines" },
+    });
+    const output = await loadContracts(input([api(), entities]), linesReader);
     expect(output.candidates).toEqual([
-      { kind: "object", name: "Member", from: "specs/api/members", contract: "./members.lines" },
-      { kind: "object", name: "Zone", from: "specs/api/members", contract: "./members.lines" },
-      { kind: "object", name: "Member", from: "specs/api/payments", contract: "./payments.lines" },
-      { kind: "object", name: "Payment", from: "specs/api/payments", contract: "./payments.lines" },
+      { kind: "object", name: "Entity", from: "specs/api/entities", contract: "./entities.lines" },
+      { kind: "object", name: "Zone", from: "specs/api/entities", contract: "./entities.lines" },
+      {
+        kind: "object",
+        name: "Entity",
+        from: "specs/api/model-query",
+        contract: "./model-query.lines",
+      },
+      {
+        kind: "object",
+        name: "Link",
+        from: "specs/api/model-query",
+        contract: "./model-query.lines",
+      },
     ]);
-    expect(output.links.map((link) => link.to)).not.toContain("Payment");
+    expect(output.links.map((link) => link.to)).not.toContain("Link");
     expect(output.entities.map((entity) => entity.type)).toEqual([
       "endpoint",
       "endpoint",
@@ -350,7 +363,7 @@ describe("loadContracts", () => {
   });
 
   it("fetches a contract declared as a URL through the injected fetch", async () => {
-    const url = "https://example.invalid/payments.lines";
+    const url = "https://example.invalid/model-query.lines";
     const { calls, fetch: fetchStub } = answering({ [url]: text });
     const { input } = harness({}, fetchStub);
     const output = await loadContracts(
@@ -364,17 +377,17 @@ describe("loadContracts", () => {
   });
 
   it("reads a relative contract path from the folder of the api note", async () => {
-    const { input } = harness({ "/repos/specs/contracts/payments.lines": text });
+    const { input } = harness({ "/repos/specs/contracts/model-query.lines": text });
     const output = await loadContracts(
-      input([api({ attributes: { contract: "../contracts/payments.lines" } })]),
+      input([api({ attributes: { contract: "../contracts/model-query.lines" } })]),
       linesReader,
     );
     expect(output.entities.map((entity) => entity.id)).toEqual([
-      "specs/api/payments/createpayment",
-      "specs/api/payments/getpayment",
+      "specs/api/model-query/createlink",
+      "specs/api/model-query/getlink",
     ]);
     expect(output.contracts.map((record) => record.location)).toEqual([
-      "../contracts/payments.lines",
+      "../contracts/model-query.lines",
     ]);
   });
 
@@ -382,7 +395,7 @@ describe("loadContracts", () => {
     const { fs, input } = harness(localFile);
     await loadContracts(input([api()]), linesReader);
     expect(fs.files.get(cachePath)).toBe(
-      `${JSON.stringify({ title: "Lines", version: "1", lines: ["createPayment|Create a payment|Payment,Member", "getPayment||Payment"] }, null, 2)}\n`,
+      `${JSON.stringify({ title: "Lines", version: "1", lines: ["createLink|Create a link|Link,Entity", "getLink||Link"] }, null, 2)}\n`,
     );
   });
 
@@ -398,7 +411,7 @@ describe("loadContracts", () => {
   });
 
   it("leaves a contract the reader does not accept alone: nothing imported, nothing cached, nothing reported", async () => {
-    const { fs, input } = harness({ "/repos/specs/api/payments.lines": "# another format" });
+    const { fs, input } = harness({ "/repos/specs/api/model-query.lines": "# another format" });
     const output = await loadContracts(input([api()]), linesReader);
     expect(output).toEqual({
       entities: [],
@@ -413,7 +426,7 @@ describe("loadContracts", () => {
   it("reports an unreachable URL as W-CONTRACT-UNREACHABLE and goes on with the other contracts", async () => {
     const { input } = harness(
       localFile,
-      answering({ "https://example.invalid/members.lines": text }).fetch,
+      answering({ "https://example.invalid/entities.lines": text }).fetch,
     );
     const gone = api({
       id: "specs/api/gone",
@@ -425,11 +438,11 @@ describe("loadContracts", () => {
         last_modified: "2026-03-01T00:00:00.000Z",
       },
     });
-    const members = api({
-      id: "specs/api/members",
-      attributes: { contract: "https://example.invalid/members.lines" },
+    const entities = api({
+      id: "specs/api/entities",
+      attributes: { contract: "https://example.invalid/entities.lines" },
     });
-    const output = await loadContracts(input([gone, api(), members]), linesReader);
+    const output = await loadContracts(input([gone, api(), entities]), linesReader);
     expect(output.findings).toEqual([
       {
         check: "W-CONTRACT-UNREACHABLE",
@@ -444,26 +457,26 @@ describe("loadContracts", () => {
       },
     ]);
     expect(output.contracts.map((record) => record.api)).toEqual([
-      "specs/api/members",
-      "specs/api/payments",
+      "specs/api/entities",
+      "specs/api/model-query",
     ]);
     expect(output.entities.map((entity) => entity.id)).toEqual([
-      "specs/api/members/createpayment",
-      "specs/api/members/getpayment",
-      "specs/api/payments/createpayment",
-      "specs/api/payments/getpayment",
+      "specs/api/entities/createlink",
+      "specs/api/entities/getlink",
+      "specs/api/model-query/createlink",
+      "specs/api/model-query/getlink",
     ]);
   });
 
   it("reports a fetch that throws with its message instead of throwing", async () => {
-    const url = "https://example.invalid/payments.lines";
+    const url = "https://example.invalid/model-query.lines";
     const failing = harness({}, () => Promise.reject(new Error("getaddrinfo ENOTFOUND")));
     const output = await loadContracts(
       failing.input([api({ attributes: { contract: url } })]),
       linesReader,
     );
     expect(output.findings.map((finding) => finding.message)).toEqual([
-      `contract ${url} of specs/api/payments could not be read: getaddrinfo ENOTFOUND`,
+      `contract ${url} of specs/api/model-query could not be read: getaddrinfo ENOTFOUND`,
     ]);
     // A rejection that is not an Error, as a fetch polyfill may produce.
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
@@ -473,19 +486,19 @@ describe("loadContracts", () => {
       linesReader,
     );
     expect(odd.findings.map((finding) => finding.message)).toEqual([
-      `contract ${url} of specs/api/payments could not be read: offline`,
+      `contract ${url} of specs/api/model-query could not be read: offline`,
     ]);
   });
 
   it("reports a URL contract when the build runs without network access", async () => {
     const { input } = harness();
-    const url = "http://intranet.invalid/payments.lines";
+    const url = "http://intranet.invalid/model-query.lines";
     const output = await loadContracts(
       input([api({ attributes: { contract: url } })]),
       linesReader,
     );
     expect(output.findings.map((finding) => finding.message)).toEqual([
-      `contract ${url} of specs/api/payments could not be read: the build runs without network access`,
+      `contract ${url} of specs/api/model-query could not be read: the build runs without network access`,
     ]);
     expect(output.entities).toEqual([]);
   });
@@ -494,7 +507,7 @@ describe("loadContracts", () => {
     const { input } = harness();
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.findings.map((finding) => finding.message)).toEqual([
-      "contract ./payments.lines of specs/api/payments could not be read: file /repos/specs/api/payments.lines does not exist",
+      "contract ./model-query.lines of specs/api/model-query could not be read: file /repos/specs/api/model-query.lines does not exist",
     ]);
     // Only a location starting with the scheme is a URL; anything else is a path, odd as it may look.
     const odd = await loadContracts(
@@ -514,17 +527,17 @@ describe("loadContracts", () => {
     orphan.payload.roots = {};
     const orphaned = await loadContracts(orphan, linesReader);
     expect(orphaned.findings.map((finding) => finding.message)).toEqual([
-      "contract ./payments.lines of specs/api/payments could not be read: source specs has no root folder",
+      "contract ./model-query.lines of specs/api/model-query could not be read: source specs has no root folder",
     ]);
   });
 
   it("reports an unparsable contract with the reader's reason and does not cache it", async () => {
-    const { fs, input } = harness({ "/repos/specs/api/payments.lines": "broken" });
+    const { fs, input } = harness({ "/repos/specs/api/model-query.lines": "broken" });
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.findings.map((finding) => [finding.check, finding.message])).toEqual([
       [
         "W-CONTRACT-UNREACHABLE",
-        "contract ./payments.lines of specs/api/payments could not be read: ./payments.lines is broken",
+        "contract ./model-query.lines of specs/api/model-query could not be read: ./model-query.lines is broken",
       ],
     ]);
     expect(fs.listFiles("/pipeline/.concordance-cache")).toEqual([]);
@@ -537,8 +550,8 @@ describe("loadContracts", () => {
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.contracts).toEqual([
       {
-        api: "specs/api/payments",
-        location: "./payments.lines",
+        api: "specs/api/model-query",
+        location: "./model-query.lines",
         title: "Lines",
         version: "1",
         fingerprint,
@@ -550,13 +563,13 @@ describe("loadContracts", () => {
 
   it("numbers the identifiers of two operations whose names slugify alike, in contract order", async () => {
     const { input } = harness({
-      "/repos/specs/api/payments.lines": "get-payment\nget_payment\nGet Payment\n",
+      "/repos/specs/api/model-query.lines": "get-link\nget_link\nGet Link\n",
     });
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.entities.map((entity) => [entity.id, entity.title])).toEqual([
-      ["specs/api/payments/get-payment", "get-payment (lines)"],
-      ["specs/api/payments/get-payment-2", "get_payment (lines)"],
-      ["specs/api/payments/get-payment-3", "Get Payment (lines)"],
+      ["specs/api/model-query/get-link", "get-link (lines)"],
+      ["specs/api/model-query/get-link-2", "get_link (lines)"],
+      ["specs/api/model-query/get-link-3", "Get Link (lines)"],
     ]);
   });
 
@@ -588,15 +601,15 @@ describe("loadContracts", () => {
   });
 
   it("sorts the entities, links and candidates canonically whatever the order of the contract", async () => {
-    const { input } = harness({ "/repos/specs/api/payments.lines": "b||Z\na||A\n" });
+    const { input } = harness({ "/repos/specs/api/model-query.lines": "b||Z\na||A\n" });
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.entities.map((entity) => entity.id)).toEqual([
-      "specs/api/payments/a",
-      "specs/api/payments/b",
+      "specs/api/model-query/a",
+      "specs/api/model-query/b",
     ]);
     expect(output.links.map((link) => link.to)).toEqual([
-      "specs/api/payments/a",
-      "specs/api/payments/b",
+      "specs/api/model-query/a",
+      "specs/api/model-query/b",
     ]);
     expect(output.candidates.map((candidate) => candidate.name)).toEqual(["A", "Z"]);
   });

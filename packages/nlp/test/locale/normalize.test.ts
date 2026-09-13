@@ -5,13 +5,13 @@ import { languagePack } from "../../src/index.js";
 const cases: readonly [name: string, input: string, expected: string][] = [
   ["strips accents", "Réglementation", "reglementation"],
   ["strips every combining mark of a word", "Été à l'écran", "ete a l'ecran"],
-  ["lower-cases", "Free Payment", "free payment"],
-  ["unifies the curly apostrophe", "l’adhérent", "l'adherent"],
-  ["keeps the straight apostrophe", "l'adhérent", "l'adherent"],
-  ["collapses multiple spaces and tabs", "free \t  payment\tentry", "free payment entry"],
-  ["collapses line breaks", "free\npayment", "free payment"],
-  ["trims", "  free payment \n", "free payment"],
-  ["leaves an already normalised text unchanged", "free payment", "free payment"],
+  ["lower-cases", "Explicit Link", "explicit link"],
+  ["unifies the curly apostrophe", "l’entité", "l'entite"],
+  ["keeps the straight apostrophe", "l'entité", "l'entite"],
+  ["collapses multiple spaces and tabs", "explicit \t  link\tentry", "explicit link entry"],
+  ["collapses line breaks", "explicit\nlink", "explicit link"],
+  ["trims", "  explicit link \n", "explicit link"],
+  ["leaves an already normalised text unchanged", "explicit link", "explicit link"],
   ["keeps hyphens and digits", "Item-2", "item-2"],
 ];
 

@@ -13,20 +13,20 @@ function automatonOf(...patterns: string[]): ReturnType<typeof buildAutomaton> {
 describe("buildAutomaton and scan", () => {
   it("finds every pattern in one pass, patterns sharing a prefix and a suffix of another included", () => {
     const automaton = automatonOf(
-      "free payment",
-      "payment",
-      "free",
-      "scheduled payment",
-      "payment summary",
+      "list mention",
+      "mention",
+      "list",
+      "section mention",
+      "mention summary",
     );
-    const matches = scan(automaton, words("the free payment summary lists each scheduled payment"));
+    const matches = scan(automaton, words("the list mention summary lists each section mention"));
     expect(matches).toEqual([
-      { key: "free", start: 1, end: 2 },
-      { key: "free payment", start: 1, end: 3 },
-      { key: "payment", start: 2, end: 3 },
-      { key: "payment summary", start: 2, end: 4 },
-      { key: "scheduled payment", start: 6, end: 8 },
-      { key: "payment", start: 7, end: 8 },
+      { key: "list", start: 1, end: 2 },
+      { key: "list mention", start: 1, end: 3 },
+      { key: "mention", start: 2, end: 3 },
+      { key: "mention summary", start: 2, end: 4 },
+      { key: "section mention", start: 6, end: 8 },
+      { key: "mention", start: 7, end: 8 },
     ]);
   });
 
@@ -44,32 +44,32 @@ describe("buildAutomaton and scan", () => {
   });
 
   it("matches whole tokens only, never a word inside another", () => {
-    const automaton = automatonOf("contract", "free payment");
-    expect(scan(automaton, words("contractual free payments contracts"))).toEqual([]);
+    const automaton = automatonOf("resource", "list mention");
+    expect(scan(automaton, words("resourceful list mentions resources"))).toEqual([]);
   });
 
   it("finds nothing in an empty token list and with no pattern", () => {
-    expect(scan(automatonOf("payment"), [])).toEqual([]);
-    expect(scan(buildAutomaton([]), words("payment"))).toEqual([]);
+    expect(scan(automatonOf("mention"), [])).toEqual([]);
+    expect(scan(buildAutomaton([]), words("mention"))).toEqual([]);
   });
 
   it("ignores a pattern without words and keeps a key given twice once", () => {
     const automaton = buildAutomaton([
       { key: "empty", words: [] },
-      { key: "payment", words: ["payment"] },
-      { key: "payment", words: ["payment"] },
+      { key: "mention", words: ["mention"] },
+      { key: "mention", words: ["mention"] },
     ]);
-    expect(scan(automaton, words("a payment"))).toEqual([{ key: "payment", start: 1, end: 2 }]);
+    expect(scan(automaton, words("a mention"))).toEqual([{ key: "mention", start: 1, end: 2 }]);
   });
 
   it("reports two keys on the same words separately", () => {
     const automaton = buildAutomaton([
-      { key: "versement libre", words: ["versement", "libre"] },
-      { key: "versement-libre", words: ["versement", "libre"] },
+      { key: "lien explicite", words: ["lien", "explicite"] },
+      { key: "lien-explicite", words: ["lien", "explicite"] },
     ]);
-    expect(scan(automaton, words("un versement libre"))).toEqual([
-      { key: "versement libre", start: 1, end: 3 },
-      { key: "versement-libre", start: 1, end: 3 },
+    expect(scan(automaton, words("un lien explicite"))).toEqual([
+      { key: "lien explicite", start: 1, end: 3 },
+      { key: "lien-explicite", start: 1, end: 3 },
     ]);
   });
 
@@ -93,10 +93,10 @@ describe("buildAutomaton and scan", () => {
 describe("longestMatches", () => {
   const match = (key: string, start: number, end: number): RawMatch => ({ key, start, end });
 
-  it("keeps the longest match on overlap: free payment beats payment", () => {
-    const automaton = automatonOf("free payment", "payment", "free");
-    const matches = scan(automaton, words("a free payment"));
-    expect(longestMatches(matches)).toEqual([match("free payment", 1, 3)]);
+  it("keeps the longest match on overlap: list mention beats mention", () => {
+    const automaton = automatonOf("list mention", "mention", "list");
+    const matches = scan(automaton, words("a list mention"));
+    expect(longestMatches(matches)).toEqual([match("list mention", 1, 3)]);
   });
 
   it("drops a match that overlaps a longer one without being contained in it", () => {

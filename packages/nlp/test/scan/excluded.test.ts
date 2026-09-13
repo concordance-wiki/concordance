@@ -16,18 +16,18 @@ const dictionary: Dictionary = buildDictionary({
   shortTerms: new Set(),
   entities: [
     {
-      id: "glossary/contract",
+      id: "glossary/resource",
       source: "glossary",
       type: "term",
-      title: "Contract",
-      aliases: ["running agreement"],
+      title: "Resource",
+      aliases: ["twin document"],
       locale: "en",
     },
     {
-      id: "glossary/annual-cap",
+      id: "glossary/related-cap",
       source: "glossary",
       type: "term",
-      title: "Annual cap",
+      title: "Related cap",
       aliases: [],
       locale: "en",
     },
@@ -56,19 +56,19 @@ describe("the scan over the scannable text of a note", () => {
   it("yields no occurrence for a term present only in a code block", () => {
     const text = [
       "---",
-      "title: contract",
+      "title: resource",
       "---",
       "# Entry",
       "",
       "```ts",
-      "const contract = load();",
+      "const resource = load();",
       "```",
       "",
-      "    contract.save()",
+      "    resource.save()",
       "",
-      "Call `contract.save()` or see https://example.test/contract for details.",
+      "Call `resource.save()` or see https://example.test/resource for details.",
       "",
-      "[Documentation](../objects/contract.md#running-agreement)",
+      "[Documentation](../objects/resource.md#twin-document)",
       "",
     ].join("\n");
     expect(occurrencesOf(text)).toEqual([]);
@@ -76,17 +76,17 @@ describe("the scan over the scannable text of a note", () => {
 
   it("recognises a term in the visible text of a link, in a heading, a list item, a cell and a quote", () => {
     const text = [
-      "# Annual cap",
+      "# Related cap",
       "",
       "## Objects",
       "",
-      "- Reads: [running agreement](../objects/contract.md)",
+      "- Reads: [twin document](../objects/resource.md)",
       "",
       "| Field | Note |",
       "|---|---|",
-      "| contract | key |",
+      "| resource | key |",
       "",
-      "> Every contract.",
+      "> Every resource.",
       "",
     ].join("\n");
     expect(
@@ -96,10 +96,10 @@ describe("the scan over the scannable text of a note", () => {
         occurrence.position,
       ]),
     ).toEqual([
-      ["annual cap", 1, 0],
-      ["running agreement", 5, 7],
-      ["contract", 9, 0],
-      ["contract", 11, 6],
+      ["related cap", 1, 0],
+      ["twin document", 5, 7],
+      ["resource", 9, 0],
+      ["resource", 11, 6],
     ]);
   });
 });

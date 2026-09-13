@@ -108,9 +108,9 @@ describe("catalogue", () => {
 
   it("returns no finding from a step check, whatever the model", () => {
     const model = input({
-      entities: [filed("specs/api/payments", "api"), filed("specs/screens/entry", "screen")],
-      links: [link("specs/api/payments", "specs/screens/entry", "related")],
-      sources: [{ name: "specs", files: ["api/payments.md"] }],
+      entities: [filed("specs/api/model-query", "api"), filed("specs/screens/entry", "screen")],
+      links: [link("specs/api/model-query", "specs/screens/entry", "related")],
+      sources: [{ name: "specs", files: ["api/model-query.md"] }],
     });
     for (const definition of catalogue.filter((d) => d.kind === "step")) {
       expect(definition.run(model)).toEqual([]);
@@ -120,7 +120,7 @@ describe("catalogue", () => {
   it("gives each model finding the identifier, the default severity and the remediation of its check", () => {
     const model = input({
       entities: [
-        filed("specs/api/payments", "api", { consumers: ["specs/screens/search"] }),
+        filed("specs/api/model-query", "api", { consumers: ["specs/screens/search"] }),
         filed("specs/api/members", "api"),
         {
           id: "specs/rules/cap",
@@ -130,8 +130,8 @@ describe("catalogue", () => {
         },
       ],
       links: [
-        link("specs/api/payments", "specs/screens/entry", "serves"),
-        link("specs/rules/cap", "specs/api/payments", "related"),
+        link("specs/api/model-query", "specs/screens/entry", "serves"),
+        link("specs/rules/cap", "specs/api/model-query", "related"),
       ],
     });
     for (const definition of catalogue.filter((d) => d.kind === "model")) {

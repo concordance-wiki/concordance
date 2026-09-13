@@ -3,8 +3,8 @@ project:
   name: Corpus fautif
   locale: fr
 applications:
-  - id: gestion-contrats
-    title: Gestion des contrats
+  - id: concordance-cli
+    title: Ligne de commande Concordance
 domains:
   - id: tout
     title: Tout
@@ -12,7 +12,7 @@ domains:
 sources:
   - name: notes
     path: ./notes
-    application: gestion-contrats
+    application: concordance-cli
     rules:
       - match: { path: "ecrans/**" }
         set: { type: screen }

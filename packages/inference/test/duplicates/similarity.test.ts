@@ -4,7 +4,7 @@ import { comparisonKey, directoryProximity, jaroWinkler } from "../../src/duplic
 
 describe("the comparison key", () => {
   it("lowercases, strips accents and folds punctuation to single spaces", () => {
-    expect(comparisonKey("Payments_Workshop--2024 (Été)")).toBe("payments workshop 2024 ete");
+    expect(comparisonKey("Keywords_Workshop--2024 (Été)")).toBe("keywords workshop 2024 ete");
   });
 
   it("is empty for a name made of punctuation only", () => {

@@ -89,63 +89,61 @@ describe("the occurrence scan on the minimal en corpus", () => {
   );
   const entry = occurrences.filter(
     (occurrence) =>
-      occurrence.source === "specs" && occurrence.path === "screens/free-payment-entry.md",
+      occurrence.source === "specs" && occurrence.path === "screens/mentions-panel.md",
   );
 
-  it("finds free payment in the free payment entry screen, with its line and context", () => {
-    const found = entry.filter((occurrence) => occurrence.key === "free payment");
+  it("finds explicit link in the mentions panel screen, with its line and context", () => {
+    const found = entry.filter((occurrence) => occurrence.key === "explicit link");
     expect(found).toEqual([
       {
-        key: "free payment",
-        target: { id: "glossary/free-payment", kind: "title" },
+        key: "explicit link",
+        target: { id: "glossary/explicit-link", kind: "title" },
         source: "specs",
-        path: "screens/free-payment-entry.md",
+        path: "screens/mentions-panel.md",
         line: 7,
-        position: 33,
+        position: 29,
         context:
-          "Lets an account manager record a free payment on a running contract at the membe…",
+          "Lets a maintainer confirm an explicit link on a finished build for a typed entit…",
         confidence: 0.6,
       },
     ]);
   });
 
-  it("does not count payment inside free payment as its own occurrence", () => {
-    const payments = entry.filter(
-      (occurrence) => occurrence.key === "payment" && occurrence.line === 7,
-    );
-    expect(payments).toEqual([]);
+  it("does not count link inside explicit link as its own occurrence", () => {
+    const links = entry.filter((occurrence) => occurrence.key === "link" && occurrence.line === 7);
+    expect(links).toEqual([]);
     expect(entry.filter((occurrence) => occurrence.line === 7).map((o) => o.key)).toEqual([
-      "account manager",
-      "free payment",
-      "contract",
-      "contract",
-      "member",
-      "member",
-      "annual cap",
-      "payment api",
+      "maintainer",
+      "explicit link",
+      "build",
+      "build",
+      "entity",
+      "entity",
+      "related link cap",
+      "model query api",
     ]);
   });
 
-  it("produces nothing for exceptional payment, which has no note", () => {
-    expect(occurrences.some((occurrence) => occurrence.key.includes("exceptional"))).toBe(false);
-    expect(dictionary.entries.has("exceptional payment")).toBe(false);
-    const exceptional = entry.find((occurrence) => occurrence.line === 9);
-    expect(exceptional).toMatchObject({
-      key: "payment",
-      position: 12,
-      context: "Exceptional payments are not entered here: they are handled manually in the bran…",
+  it("produces nothing for build summary, which has no note", () => {
+    expect(occurrences.some((occurrence) => occurrence.key.includes("summary"))).toBe(false);
+    expect(dictionary.entries.has("build summary")).toBe(false);
+    const summary = entry.find((occurrence) => occurrence.line === 9);
+    expect(summary).toMatchObject({
+      key: "build",
+      position: 4,
+      context: "The build summary is not shown here: it is printed at the end of the nightly bui…",
     });
   });
 
   it("carries the enclosing section of a list mention and announces no type where no prefix is written", () => {
     const objects = entry.filter((occurrence) => occurrence.section === "Objects");
     expect(objects.map((occurrence) => [occurrence.key, occurrence.line])).toEqual([
-      ["contract", 13],
-      ["contract", 13],
-      ["member", 13],
-      ["member", 13],
-      ["payment", 14],
-      ["payment", 14],
+      ["build", 13],
+      ["build", 13],
+      ["entity", 13],
+      ["entity", 13],
+      ["link", 14],
+      ["link", 14],
     ]);
     const announced = occurrences.filter((occurrence) => occurrence.expectedType !== undefined);
     expect(announced).toEqual([]);

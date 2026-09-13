@@ -12,10 +12,10 @@ const config: Config = {
   applications: APPLICATIONS,
   domains: DOMAINS,
   sources: [
-    sourceConfig({ name: "glossary", type: "screen", application: "policy-admin" }),
+    sourceConfig({ name: "glossary", type: "screen", application: "concordance-cli" }),
     sourceConfig({
       name: "specs",
-      application: "policy-admin",
+      application: "concordance-cli",
       rules: [{ match: { suffix: ".rule.md" }, set: { type: "rule" } }],
     }),
   ],
@@ -45,11 +45,11 @@ describe("@concordance-wiki/typing", () => {
 
 describe("typeSources", () => {
   it("builds one entity per parsed markdown file and skips the other files", () => {
-    const files = [file("member-cap.rule.md"), file("diagram.png"), file("unreadable.md")];
+    const files = [file("link-cap.rule.md"), file("diagram.png"), file("unreadable.md")];
     const result = typeSources({
       sources: [source("specs", files)],
       documents: documents({
-        "specs/member-cap.rule.md": document({ title: "Annual cap" }),
+        "specs/link-cap.rule.md": document({ title: "Related link cap" }),
         "specs/diagram.png": document(),
       }),
       config,
@@ -58,20 +58,20 @@ describe("typeSources", () => {
     expect(result.findings).toEqual([]);
     expect(result.entities).toEqual([
       {
-        id: "specs/member-cap",
+        id: "specs/link-cap",
         type: "rule",
-        title: "Annual cap",
+        title: "Related link cap",
         aliases: [],
         locale: "en",
-        application: "policy-admin",
-        domain: "membership",
+        application: "concordance-cli",
+        domain: "inference",
         status: "draft",
         type_origin: "suffix",
         graph: "full",
         attributes: {},
         source: {
           name: "specs",
-          path: "member-cap.rule.md",
+          path: "link-cap.rule.md",
           line: 1,
           last_modified: "2026-03-12T10:00:00.000Z",
         },
@@ -82,26 +82,26 @@ describe("typeSources", () => {
   it("resolves the domains declared globally on every source and files the rest as unclassified", () => {
     const result = typeSources({
       sources: [
-        source("glossary", [file("member.md"), file("contract.md")]),
-        source("specs", [file("screens/payment-summary.md"), file("contracts/annual.md")]),
+        source("glossary", [file("link.md"), file("build.md")]),
+        source("specs", [file("screens/keyword-page.md"), file("quality/staleness.md")]),
       ],
       documents: documents({
-        "glossary/member.md": document(),
-        "glossary/contract.md": document(),
-        "specs/screens/payment-summary.md": document(),
-        "specs/contracts/annual.md": document(),
+        "glossary/link.md": document(),
+        "glossary/build.md": document(),
+        "specs/screens/keyword-page.md": document(),
+        "specs/quality/staleness.md": document(),
       }),
       config,
       profile: profile(),
     });
     expect(result.entities.map((entity) => [entity.id, entity.domain])).toEqual([
-      ["glossary/contract", "unclassified"],
-      ["glossary/member", "membership"],
-      ["specs/contracts/annual", "contracts"],
-      ["specs/screens/payment-summary", "membership/payments"],
+      ["glossary/build", "unclassified"],
+      ["glossary/link", "inference"],
+      ["specs/quality/staleness", "quality"],
+      ["specs/screens/keyword-page", "inference/recognition"],
     ]);
     expect(result.findings.map((finding) => [finding.check, finding.entity])).toEqual([
-      ["W-DOMAIN-UNCLASSIFIED", "glossary/contract"],
+      ["W-DOMAIN-UNCLASSIFIED", "glossary/build"],
     ]);
   });
 
@@ -112,8 +112,8 @@ describe("typeSources", () => {
       sources: [sourceConfig({ name: "notes" })],
     };
     const result = typeSources({
-      sources: [source("notes", [file("member.md")])],
-      documents: documents({ "notes/member.md": document() }),
+      sources: [source("notes", [file("entity.md")])],
+      documents: documents({ "notes/entity.md": document() }),
       config: orphan,
       profile: profile(),
     });
@@ -128,19 +128,19 @@ describe("typeSources", () => {
 
   it("resolves duplicate identifiers and keeps the first in (source, path) order", () => {
     const result = typeSources({
-      sources: [source("specs", [file("member-cap.rule.md"), file("member-cap.md")])],
+      sources: [source("specs", [file("link-cap.rule.md"), file("link-cap.md")])],
       documents: documents({
-        "specs/member-cap.rule.md": document({ title: "Rule" }),
-        "specs/member-cap.md": document({ title: "Note" }),
+        "specs/link-cap.rule.md": document({ title: "Rule" }),
+        "specs/link-cap.md": document({ title: "Note" }),
       }),
       config,
       profile: profile(),
     });
     expect(result.entities.map((entity) => [entity.id, entity.title])).toEqual([
-      ["specs/member-cap", "Note"],
+      ["specs/link-cap", "Note"],
     ]);
     expect(result.findings.map((finding) => [finding.check, finding.path])).toEqual([
-      ["E-ID-DUP", "member-cap.rule.md"],
+      ["E-ID-DUP", "link-cap.rule.md"],
     ]);
   });
 
@@ -150,10 +150,10 @@ describe("typeSources", () => {
     const result = typeSources({
       sources: [specs, glossary],
       documents: documents({
-        "glossary/z.md": document({ frontmatter: { colour: "blue", domain: "contracts" } }),
-        "glossary/a.md": document({ frontmatter: { type: "regulation", domain: "contracts" } }),
-        "specs/b.rule.md": document({ frontmatter: { type: "screen", domain: "contracts" } }),
-        "specs/a.md": document({ frontmatter: { id: "Bad", domain: "contracts" } }),
+        "glossary/z.md": document({ frontmatter: { colour: "blue", domain: "quality" } }),
+        "glossary/a.md": document({ frontmatter: { type: "regulation", domain: "quality" } }),
+        "specs/b.rule.md": document({ frontmatter: { type: "screen", domain: "quality" } }),
+        "specs/a.md": document({ frontmatter: { id: "Bad", domain: "quality" } }),
       }),
       config,
       profile: profile(),

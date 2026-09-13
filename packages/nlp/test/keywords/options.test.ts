@@ -49,9 +49,9 @@ describe("keywordOptions", () => {
   });
 
   it("takes the rejected terms of the lock as written", () => {
-    const lock = { rejected_terms: ["Exceptional payments", "server-side"] };
+    const lock = { rejected_terms: ["Build summaries", "cold-start"] };
     expect(keywordOptions(config, lock).rejected).toEqual(
-      new Set(["Exceptional payments", "server-side"]),
+      new Set(["Build summaries", "cold-start"]),
     );
     expect(keywordOptions(config, {}).rejected).toEqual(new Set());
   });

@@ -2,6 +2,6 @@
 protocol: rest
 consumers: [ecrans/mention-en-prose]
 ---
-# API au consommateur en désaccord
+# API Requête de modèle au consommateur en désaccord
 
-Déclare un consommateur qui ne la cite jamais.
+Déclare l'écran de mention en prose comme consommateur, alors qu'il ne la cite jamais.

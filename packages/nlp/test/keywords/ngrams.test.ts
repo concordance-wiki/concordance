@@ -20,51 +20,51 @@ function keysOf(units: KeywordUnit[], options = defaults, pack = en): string[] {
 describe("extractNgrams", () => {
   it("generates n-grams of one to four words over notes and documents", () => {
     const units = [
-      { path: "notes/cap.md", line: 3, text: "Annual cap checked server side" },
-      { path: "documents/minutes.md", line: 8, text: "Branch manager" },
+      { path: "notes/cap.md", line: 3, text: "Nightly build summary printed twice" },
+      { path: "documents/minutes.md", line: 8, text: "Glossary owner" },
     ];
     expect(keysOf(units)).toEqual([
-      "annual",
-      "annual cap",
-      "annual cap checked",
-      "annual cap checked server",
-      "cap",
-      "cap checked",
-      "cap checked server",
-      "cap checked server side",
-      "checked",
-      "checked server",
-      "checked server side",
-      "server",
-      "server side",
-      "side",
-      "branch",
-      "branch manager",
-      "manager",
+      "nightly",
+      "nightly build",
+      "nightly build summary",
+      "nightly build summary printed",
+      "build",
+      "build summary",
+      "build summary printed",
+      "build summary printed twice",
+      "summary",
+      "summary printed",
+      "summary printed twice",
+      "printed",
+      "printed twice",
+      "twice",
+      "glossary",
+      "glossary owner",
+      "owner",
     ]);
   });
 
   it("starts at the configured shortest n-gram and stops at the longest", () => {
-    const units = [{ path: "a.md", line: 1, text: "annual cap checked server side" }];
+    const units = [{ path: "a.md", line: 1, text: "nightly build summary printed twice" }];
     expect(keysOf(units, { minWords: 2, maxWords: 3, minLength: 3 })).toEqual([
-      "annual cap",
-      "annual cap checked",
-      "cap checked",
-      "cap checked server",
-      "checked server",
-      "checked server side",
-      "server side",
+      "nightly build",
+      "nightly build summary",
+      "build summary",
+      "build summary printed",
+      "summary printed",
+      "summary printed twice",
+      "printed twice",
     ]);
   });
 
   it("excludes n-grams starting or ending with a stopword", () => {
-    const units = [{ path: "a.md", line: 1, text: "the cap of the contract" }];
-    expect(keysOf(units)).toEqual(["cap", "cap of the contract", "contract"]);
+    const units = [{ path: "a.md", line: 1, text: "the cap of the build" }];
+    expect(keysOf(units)).toEqual(["cap", "cap of the build", "build"]);
   });
 
   it("excludes n-grams starting or ending with a stopword of the French pack", () => {
-    const units = [{ path: "a.md", line: 1, text: "Le plafond des versements" }];
-    expect(keysOf(units, defaults, fr)).toEqual(["plafond", "plafond des versement", "versement"]);
+    const units = [{ path: "a.md", line: 1, text: "Le plafond des liens" }];
+    expect(keysOf(units, defaults, fr)).toEqual(["plafond", "plafond des lien", "lien"]);
   });
 
   it("compares the given stopwords in comparison form", () => {
@@ -84,55 +84,55 @@ describe("extractNgrams", () => {
   });
 
   it("excludes n-grams under a minimum length", () => {
-    const units = [{ path: "a.md", line: 1, text: "FP VL api" }];
-    expect(keysOf(units)).toEqual(["fp vl", "fp vl api", "vl api", "api"]);
+    const units = [{ path: "a.md", line: 1, text: "EL MS api" }];
+    expect(keysOf(units)).toEqual(["el ms", "el ms api", "ms api", "api"]);
     expect(extractNgrams(units, en, defaults)[3]).toStrictEqual({
       key: "api",
       surface: "api",
       path: "a.md",
       line: 1,
       position: 6,
-      context: "FP VL api",
+      context: "EL MS api",
     });
   });
 
   it("keys each n-gram on its normalised, singularised words", () => {
     const units = [
-      { path: "a.md", line: 1, text: "Exceptional payments" },
-      { path: "b.md", line: 1, text: "exceptional payment" },
+      { path: "a.md", line: 1, text: "Build summaries" },
+      { path: "b.md", line: 1, text: "build summary" },
     ];
     const occurrences = extractNgrams(units, en, defaults);
     expect(occurrences.map((occurrence) => [occurrence.key, occurrence.surface])).toEqual([
-      ["exceptional", "Exceptional"],
-      ["exceptional payment", "Exceptional payments"],
-      ["payment", "payments"],
-      ["exceptional", "exceptional"],
-      ["exceptional payment", "exceptional payment"],
-      ["payment", "payment"],
+      ["build", "Build"],
+      ["build summary", "Build summaries"],
+      ["summary", "summaries"],
+      ["build", "build"],
+      ["build summary", "build summary"],
+      ["summary", "summary"],
     ]);
   });
 
   it("carries the surface form, the position and the source of every occurrence", () => {
-    const units = [{ source: "specs", path: "a.md", line: 4, text: "In the Payments API." }];
+    const units = [{ source: "specs", path: "a.md", line: 4, text: "In the Mentions API." }];
     const occurrences = extractNgrams(units, en, { maxWords: 2, minLength: 3 });
     const expected: NgramOccurrence[] = [
       {
-        key: "payment",
-        surface: "Payments",
+        key: "mention",
+        surface: "Mentions",
         source: "specs",
         path: "a.md",
         line: 4,
         position: 7,
-        context: "In the Payments API.",
+        context: "In the Mentions API.",
       },
       {
-        key: "payment api",
-        surface: "Payments API",
+        key: "mention api",
+        surface: "Mentions API",
         source: "specs",
         path: "a.md",
         line: 4,
         position: 7,
-        context: "In the Payments API.",
+        context: "In the Mentions API.",
       },
       {
         key: "api",
@@ -141,7 +141,7 @@ describe("extractNgrams", () => {
         path: "a.md",
         line: 4,
         position: 16,
-        context: "In the Payments API.",
+        context: "In the Mentions API.",
       },
     ];
     expect(occurrences).toEqual(expected);
@@ -166,7 +166,7 @@ describe("extractNgrams", () => {
 
 describe("keywordForm", () => {
   it("tokenises a term like the texts, cutting hyphens and singularising", () => {
-    expect(keywordForm("Server-side Payments", en)).toBe("server side payment");
+    expect(keywordForm("Cold-start Mentions", en)).toBe("cold start mention");
     expect(keywordForm("", en)).toBe("");
   });
 });

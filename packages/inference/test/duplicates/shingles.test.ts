@@ -10,11 +10,11 @@ import { normalize } from "./fixtures.js";
 
 describe("the text normalisation", () => {
   it("keeps one comparison line per non-empty source line and counts words and characters", () => {
-    const text = normaliseText("The Cap\r\n\r\nof the Annual, cap!\n   \nthe end", normalize);
+    const text = normaliseText("The Cap\r\n\r\nof the Related, cap!\n   \nthe end", normalize);
     expect(text).toEqual({
-      lines: ["cap", "annual cap", "end"],
-      words: ["cap", "annual", "cap", "end"],
-      characters: "cap annual cap end".length,
+      lines: ["cap", "related cap", "end"],
+      words: ["cap", "related", "cap", "end"],
+      characters: "cap related cap end".length,
     });
   });
 

@@ -13,11 +13,11 @@ function entity(id: string, type: string, source = "specs"): LinkableEntity {
 
 const screen = entity("specs/screens/entry", "screen");
 const summary = entity("specs/screens/summary", "screen");
-const payment = entity("specs/objects/payment", "business_object");
+const object = entity("specs/objects/link", "business_object");
 const rule = entity("specs/rules/cap", "rule");
-const term = entity("glossary/payment", "term", "glossary");
+const term = entity("glossary/link", "term", "glossary");
 const batch = entity("specs/batches/nightly", "batch");
-const entities = [screen, summary, payment, rule, term, batch];
+const entities = [screen, summary, object, rule, term, batch];
 
 /** A mention of `to` read in the note of `from`. */
 function mention(
@@ -42,23 +42,23 @@ function run(occurrences: MentionOccurrence[], custom: Profile = profile) {
 describe("mentionLinks", () => {
   it("sections mapped in the profile yield the declared relation for every mention they contain", () => {
     const { links } = run([
-      mention(screen, payment, 8, "Objects"),
+      mention(screen, object, 8, "Objects"),
       mention(screen, summary, 12, "Actions"),
-      mention(batch, payment, 6, "Reads"),
+      mention(batch, object, 6, "Reads"),
     ]);
     expect(links.map((link) => [link.from, link.to, link.relation])).toEqual([
-      ["specs/batches/nightly", "specs/objects/payment", "accesses"],
-      ["specs/screens/entry", "specs/objects/payment", "accesses"],
+      ["specs/batches/nightly", "specs/objects/link", "accesses"],
+      ["specs/screens/entry", "specs/objects/link", "accesses"],
       ["specs/screens/entry", "specs/screens/summary", "triggers"],
     ]);
   });
 
   it("confidence 0.70, method section_mention, provenance on the section name and line", () => {
-    const { links } = run([mention(screen, payment, 8, "Objects")]);
+    const { links } = run([mention(screen, object, 8, "Objects")]);
     expect(links).toEqual([
       {
         from: "specs/screens/entry",
-        to: "specs/objects/payment",
+        to: "specs/objects/link",
         relation: "accesses",
         attributes: {},
         confidence: 0.7,
@@ -78,7 +78,7 @@ describe("mentionLinks", () => {
   it.each(["Objects", "Objets", "OBJECTS", "objets"])(
     "section heading matching is case- and accent-insensitive, and accepts the labels of every profile locale: %s",
     (heading) => {
-      const { links } = run([mention(screen, payment, 8, heading)]);
+      const { links } = run([mention(screen, object, 8, heading)]);
       expect(links.map((link) => [link.relation, link.provenance[0]?.method])).toEqual([
         ["accesses", "section_mention"],
       ]);
@@ -89,7 +89,7 @@ describe("mentionLinks", () => {
     const { links } = run([mention(screen, summary, 3), mention(screen, term, 20, "See also")]);
     expect(links).toEqual([
       {
-        from: "glossary/payment",
+        from: "glossary/link",
         to: "specs/screens/entry",
         relation: "related",
         attributes: {},
@@ -112,7 +112,7 @@ describe("mentionLinks", () => {
   });
 
   it("a section of another type's vocabulary does not map: Applies to under a screen is a plain mention", () => {
-    const { links } = run([mention(screen, payment, 8, "Applies to")]);
+    const { links } = run([mention(screen, object, 8, "Applies to")]);
     expect(links.map((link) => [link.relation, link.provenance[0]?.method])).toEqual([
       ["related", "glossary_occurrence"],
     ]);
@@ -122,7 +122,7 @@ describe("mentionLinks", () => {
     // A screen accesses objects, not terms: the term mentioned under Objects stays related.
     const { links } = run([mention(screen, term, 8, "Objects")]);
     expect(links.map((link) => [link.from, link.relation, link.provenance[0]?.method])).toEqual([
-      ["glossary/payment", "related", "glossary_occurrence"],
+      ["glossary/link", "related", "glossary_occurrence"],
     ]);
   });
 
@@ -150,8 +150,8 @@ describe("mentionLinks", () => {
 
   it("carries the attributes of the section and keeps two attribute sets of one relation as two links in attribute order", () => {
     const { links } = run([
-      mention(batch, payment, 10, "Writes"),
-      mention(batch, payment, 6, "Reads"),
+      mention(batch, object, 10, "Writes"),
+      mention(batch, object, 6, "Reads"),
     ]);
     expect(
       links.map((link) => [link.relation, link.attributes, link.provenance[0]?.section]),
@@ -164,14 +164,14 @@ describe("mentionLinks", () => {
   it("orients an undirected relation from the smaller identifier, so that reciprocal mentions merge into one link", () => {
     const { links } = run([mention(screen, term, 3), mention(term, screen, 5)]);
     expect(links.map((link) => [link.from, link.to, link.provenance.map((p) => p.path)])).toEqual([
-      ["glossary/payment", "specs/screens/entry", ["payment.md", "screens/entry.md"]],
+      ["glossary/link", "specs/screens/entry", ["link.md", "screens/entry.md"]],
     ]);
   });
 
   it("keeps a directed relation from the note to the mentioned entity whatever their identifiers", () => {
-    const { links } = run([mention(summary, payment, 8, "Objects")]);
+    const { links } = run([mention(summary, object, 8, "Objects")]);
     expect(links.map((link) => [link.from, link.to])).toEqual([
-      ["specs/screens/summary", "specs/objects/payment"],
+      ["specs/screens/summary", "specs/objects/link"],
     ]);
   });
 
@@ -182,7 +182,7 @@ describe("mentionLinks", () => {
 
   it("ignores a mention read in a file that is no entity and a mention of an unknown target", () => {
     const { links } = run([
-      { target: { id: payment.id }, source: "specs", path: "readme.md", line: 1 },
+      { target: { id: object.id }, source: "specs", path: "readme.md", line: 1 },
       {
         target: { id: "specs/objects/unknown" },
         source: "specs",
@@ -195,15 +195,15 @@ describe("mentionLinks", () => {
 
   it("tells files apart by source: the same path in another source is no entity", () => {
     const { links } = run([
-      { target: { id: payment.id }, source: "other", path: "screens/entry.md", line: 1 },
+      { target: { id: object.id }, source: "other", path: "screens/entry.md", line: 1 },
     ]);
     expect(links).toEqual([]);
   });
 
   it("merges several mentions of the same target in the same relation into one link with one provenance per mention, in line order", () => {
     const { links } = run([
-      mention(screen, payment, 9, "Objects"),
-      mention(screen, payment, 8, "objets"),
+      mention(screen, object, 9, "Objects"),
+      mention(screen, object, 8, "objets"),
       mention(screen, summary, 3),
       mention(screen, summary, 12, "Actions"),
       mention(screen, summary, 1),
@@ -218,14 +218,14 @@ describe("mentionLinks", () => {
   it("orders links by from, to and relation whatever the order of the mentions", () => {
     const { links } = run([
       mention(screen, summary, 12, "Actions"),
-      mention(batch, payment, 6, "Reads"),
-      mention(screen, payment, 3),
-      mention(screen, payment, 8, "Objects"),
+      mention(batch, object, 6, "Reads"),
+      mention(screen, object, 3),
+      mention(screen, object, 8, "Objects"),
     ]);
     expect(links.map((link) => `${link.from} ${link.to} ${link.relation}`)).toEqual([
-      "specs/batches/nightly specs/objects/payment accesses",
-      "specs/objects/payment specs/screens/entry related",
-      "specs/screens/entry specs/objects/payment accesses",
+      "specs/batches/nightly specs/objects/link accesses",
+      "specs/objects/link specs/screens/entry related",
+      "specs/screens/entry specs/objects/link accesses",
       "specs/screens/entry specs/screens/summary triggers",
     ]);
   });
@@ -239,11 +239,11 @@ describe("mentionLinks", () => {
       },
     };
     const { links } = run(
-      [mention(screen, payment, 8, "Objects"), mention(screen, summary, 3)],
+      [mention(screen, object, 8, "Objects"), mention(screen, summary, 3)],
       custom,
     );
     expect(links.map((link) => link.confidence)).toEqual([0.75, 0.5]);
-    const bare = run([mention(screen, payment, 8, "Objects"), mention(screen, summary, 3)], {
+    const bare = run([mention(screen, object, 8, "Objects"), mention(screen, summary, 3)], {
       ...profile,
       confidence: {},
     });
@@ -256,14 +256,14 @@ describe("mentionLinks", () => {
     );
     const { links } = run([mention(screen, term, 3)], { ...profile, relations });
     expect(links.map((link) => [link.from, link.to])).toEqual([
-      ["specs/screens/entry", "glossary/payment"],
+      ["specs/screens/entry", "glossary/link"],
     ]);
   });
 
   it("treats a section under a type the profile does not declare as unmapped", () => {
     const { links } = mentionLinks({
-      occurrences: [mention(screen, payment, 8, "Objects")],
-      entities: [{ ...screen, type: "widget" }, payment],
+      occurrences: [mention(screen, object, 8, "Objects")],
+      entities: [{ ...screen, type: "widget" }, object],
       profile,
     });
     expect(links.map((link) => [link.relation, link.provenance[0]?.method])).toEqual([

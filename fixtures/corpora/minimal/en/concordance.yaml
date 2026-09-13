@@ -3,25 +3,25 @@ project:
   name: Minimal corpus
   locale: en
 applications:
-  - id: policy-admin
-    title: Policy administration
+  - id: concordance-cli
+    title: Concordance command line
     status: active
 domains:
-  - id: membership
-    title: Membership
-    match: ["**/*member*"]
-  - id: payments
-    title: Payments
-    match: ["**/*payment*", "**/*settlement*", "**/annual-cap*"]
+  - id: publication
+    title: Publication
+    match: ["**/*entit*"]
+  - id: inference
+    title: Inference
+    match: ["**/*link*", "**/*mention*", "**/nightly-build*", "**/model-query*", "**/neighbourhood-map*"]
 sources:
   - name: glossary
     path: ./glossary
     type: term
     glossary: true
-    application: policy-admin
+    application: concordance-cli
   - name: specs
     path: ./specs
-    application: policy-admin
+    application: concordance-cli
     rules:
       - match: { path: "screens/**" }
         set: { type: screen }
@@ -42,11 +42,11 @@ sources:
   - name: decisions
     path: ./decisions
     type: decision
-    application: policy-admin
+    application: concordance-cli
   - name: meetings
     path: ./meetings
     default_type: meeting
-    application: policy-admin
+    application: concordance-cli
 inference:
   cross_source_links: true
   keyword_pages: { min_occurrences: 3, min_files: 2 }

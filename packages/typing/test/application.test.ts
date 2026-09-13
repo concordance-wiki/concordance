@@ -7,7 +7,7 @@ function resolve(
   overrides: Partial<ResolveApplicationInput> = {},
 ): ReturnType<typeof resolveApplication> {
   return resolveApplication({
-    source: sourceConfig({ application: "policy-admin" }),
+    source: sourceConfig({ application: "concordance-cli" }),
     ruleDefaults: {},
     frontmatterApplication: undefined,
     applications: APPLICATIONS,
@@ -17,15 +17,20 @@ function resolve(
 
 describe("resolveApplication", () => {
   it("resolves the application by the same cascade: frontmatter over rule over source", () => {
-    expect(resolve()).toEqual({ application: "policy-admin", origin: "source", declared: true });
-    expect(resolve({ ruleDefaults: { application: "billing", audience: "internal" } })).toEqual({
-      application: "billing",
+    expect(resolve()).toEqual({ application: "concordance-cli", origin: "source", declared: true });
+    expect(
+      resolve({ ruleDefaults: { application: "concordance-service", audience: "internal" } }),
+    ).toEqual({
+      application: "concordance-service",
       origin: "rule",
       declared: true,
     });
     expect(
-      resolve({ ruleDefaults: { application: "billing" }, frontmatterApplication: "policy-admin" }),
-    ).toEqual({ application: "policy-admin", origin: "frontmatter", declared: true });
+      resolve({
+        ruleDefaults: { application: "concordance-service" },
+        frontmatterApplication: "concordance-cli",
+      }),
+    ).toEqual({ application: "concordance-cli", origin: "frontmatter", declared: true });
   });
 
   it("resolves to no application when neither the frontmatter, a rule nor the source sets one", () => {
@@ -37,8 +42,8 @@ describe("resolveApplication", () => {
   });
 
   it("keeps an application the configuration does not declare and marks it undeclared", () => {
-    expect(resolve({ frontmatterApplication: "claims" })).toEqual({
-      application: "claims",
+    expect(resolve({ frontmatterApplication: "forge-bridge" })).toEqual({
+      application: "forge-bridge",
       origin: "frontmatter",
       declared: false,
     });
@@ -51,8 +56,8 @@ describe("resolveApplication", () => {
   });
 
   it("serialises a frontmatter application that is not a string so that the finding shows it", () => {
-    expect(resolve({ frontmatterApplication: ["policy-admin"] })).toEqual({
-      application: '["policy-admin"]',
+    expect(resolve({ frontmatterApplication: ["concordance-cli"] })).toEqual({
+      application: '["concordance-cli"]',
       origin: "frontmatter",
       declared: false,
     });

@@ -22,13 +22,13 @@ function note(
   };
 }
 
-const role = note("roles/account-manager.md", "role", "Account manager");
-const payment = note("objects/payment.md", "business_object", "Payment");
-const contract = note("objects/contract.md", "business_object", "Contract");
-const table = note("tables/payment.table.md", "data_object", "PAYMENT table", {
-  business_object: "objects/payment",
+const role = note("roles/maintainer.md", "role", "Maintainer");
+const object = note("objects/link.md", "business_object", "Link");
+const build = note("objects/build.md", "business_object", "Build");
+const table = note("tables/links.table.md", "data_object", "LINKS table", {
+  business_object: "objects/link",
 });
-const cap = note("rules/annual-cap.rule.md", "rule", "Annual cap");
+const cap = note("rules/related-cap.rule.md", "rule", "Related cap");
 
 const REMEDIATION =
   "Write the identifier, the path relative to the source root or the exact title of an existing note of a type the attribute accepts, or remove the reference.";
@@ -49,45 +49,45 @@ function unresolved(entity: LinkableEntity, attribute: string, message: string) 
 describe("frontmatterLinks", () => {
   it("reference-typed attributes of the profile are resolved by identifier, by path, then by exact title", () => {
     const screen = note("screens/entry.md", "screen", "Entry", {
-      reads: ["specs/objects/payment", "objects/contract.md", "Annual cap"],
-      rules: ["Annual cap"],
+      reads: ["specs/objects/link", "objects/build.md", "Related cap"],
+      rules: ["Related cap"],
     });
     const { links, findings } = frontmatterLinks({
-      entities: [screen, payment, contract, cap],
+      entities: [screen, object, build, cap],
       profile,
     });
     expect(findings).toEqual([
       unresolved(
         screen,
         "reads",
-        'reference "Annual cap" names specs/rules/annual-cap of type rule where business_object or data_object is expected',
+        'reference "Related cap" names specs/rules/related-cap of type rule where business_object or data_object is expected',
       ),
     ]);
     expect(links.map((link) => [link.from, link.to, link.relation])).toEqual([
-      ["specs/rules/annual-cap", "specs/screens/entry", "constrains"],
-      ["specs/screens/entry", "specs/objects/contract", "accesses"],
-      ["specs/screens/entry", "specs/objects/payment", "accesses"],
+      ["specs/rules/related-cap", "specs/screens/entry", "constrains"],
+      ["specs/screens/entry", "specs/objects/build", "accesses"],
+      ["specs/screens/entry", "specs/objects/link", "accesses"],
     ]);
   });
 
   it("the produced relation is the one the profile associates with the attribute, with its attributes; thus reads yields accesses in read mode", () => {
     const screen = note("screens/entry.md", "screen", "Entry", {
-      reads: ["objects/contract"],
-      writes: ["objects/payment"],
+      reads: ["objects/build"],
+      writes: ["objects/link"],
     });
-    const { links } = frontmatterLinks({ entities: [screen, payment, contract], profile });
+    const { links } = frontmatterLinks({ entities: [screen, object, build], profile });
     expect(links.map((link) => [link.to, link.relation, link.attributes])).toEqual([
-      ["specs/objects/contract", "accesses", { mode: "read" }],
-      ["specs/objects/payment", "accesses", { mode: "write" }],
+      ["specs/objects/build", "accesses", { mode: "read" }],
+      ["specs/objects/link", "accesses", { mode: "write" }],
     ]);
   });
 
   it("confidence 0.90, method frontmatter_ref, provenance on the attribute name", () => {
-    const { links } = frontmatterLinks({ entities: [table, payment], profile });
+    const { links } = frontmatterLinks({ entities: [table, object], profile });
     expect(links).toStrictEqual([
       {
-        from: "specs/tables/payment",
-        to: "specs/objects/payment",
+        from: "specs/tables/links",
+        to: "specs/objects/link",
         relation: "represents",
         attributes: {},
         confidence: 0.9,
@@ -95,7 +95,7 @@ describe("frontmatterLinks", () => {
           {
             method: "frontmatter_ref",
             confidence: 0.9,
-            path: "tables/payment.table.md",
+            path: "tables/links.table.md",
             line: 1,
             attribute: "business_object",
           },
@@ -124,28 +124,28 @@ describe("frontmatterLinks", () => {
   });
 
   it("reports a title shared by several notes, naming the candidates, and gives no link", () => {
-    const term = note("payment.md", "term", "Payment", {}, "glossary");
-    const screen = note("screens/entry.md", "screen", "Entry", { writes: "Payment" });
-    const { links, findings } = frontmatterLinks({ entities: [screen, payment, term], profile });
+    const term = note("link.md", "term", "Link", {}, "glossary");
+    const screen = note("screens/entry.md", "screen", "Entry", { writes: "Link" });
+    const { links, findings } = frontmatterLinks({ entities: [screen, object, term], profile });
     expect(links).toEqual([]);
     expect(findings).toEqual([
       unresolved(
         screen,
         "writes",
-        'reference "Payment" is the title of several notes (specs/objects/payment, glossary/payment)',
+        'reference "Link" is the title of several notes (specs/objects/link, glossary/link)',
       ),
     ]);
   });
 
   it("reports a reference to a note of a type the attribute does not accept, naming the expected types", () => {
-    const screen = note("screens/entry.md", "screen", "Entry", { roles: ["objects/payment"] });
-    const { links, findings } = frontmatterLinks({ entities: [screen, payment], profile });
+    const screen = note("screens/entry.md", "screen", "Entry", { roles: ["objects/link"] });
+    const { links, findings } = frontmatterLinks({ entities: [screen, object], profile });
     expect(links).toEqual([]);
     expect(findings).toEqual([
       unresolved(
         screen,
         "roles",
-        'reference "objects/payment" names specs/objects/payment of type business_object where role is expected',
+        'reference "objects/link" names specs/objects/link of type business_object where role is expected',
       ),
     ]);
   });
@@ -174,37 +174,37 @@ describe("frontmatterLinks", () => {
       "decision",
       "Newer",
       {
-        affects: ["specs/objects/payment"],
-        supersedes: ["older", "specs/objects/payment"],
-        open: "specs/rules/annual-cap",
-        near: ["specs/rules/annual-cap", "decisions/older", "specs/objects/payment"],
+        affects: ["specs/objects/link"],
+        supersedes: ["older", "specs/objects/link"],
+        open: "specs/rules/related-cap",
+        near: ["specs/rules/related-cap", "decisions/older", "specs/objects/link"],
       },
       "decisions",
     );
     const { links, findings } = frontmatterLinks({
-      entities: [decision, older, payment, cap],
+      entities: [decision, older, object, cap],
       profile: custom,
     });
     expect(findings.map((finding) => finding.message)).toEqual([
-      'reference "specs/objects/payment" names specs/objects/payment of type business_object where decision is expected in attribute supersedes of newer.md',
-      'reference "specs/objects/payment" names specs/objects/payment of type business_object where decision or rule is expected in attribute near of newer.md',
+      'reference "specs/objects/link" names specs/objects/link of type business_object where decision is expected in attribute supersedes of newer.md',
+      'reference "specs/objects/link" names specs/objects/link of type business_object where decision or rule is expected in attribute near of newer.md',
     ]);
     expect(links.map((link) => [link.to, link.relation, link.provenance.length])).toEqual([
       ["decisions/older", "affects", 1],
       ["decisions/older", "supersedes", 1],
-      ["specs/objects/payment", "affects", 1],
-      ["specs/rules/annual-cap", "affects", 2],
+      ["specs/objects/link", "affects", 1],
+      ["specs/rules/related-cap", "affects", 2],
     ]);
   });
 
   it("reverses the link when the attribute is declared inverse", () => {
     const screen = note("screens/entry.md", "screen", "Entry", {
-      roles: ["roles/account-manager"],
+      roles: ["roles/maintainer"],
     });
     const { links } = frontmatterLinks({ entities: [screen, role], profile });
     expect(links).toStrictEqual([
       {
-        from: "specs/roles/account-manager",
+        from: "specs/roles/maintainer",
         to: "specs/screens/entry",
         relation: "assigned_to",
         attributes: {},
@@ -223,8 +223,8 @@ describe("frontmatterLinks", () => {
   });
 
   it("carries the attributes of the attribute definition on the link without sharing the profile's object", () => {
-    const screen = note("screens/entry.md", "screen", "Entry", { reads: ["objects/payment"] });
-    const { links } = frontmatterLinks({ entities: [screen, payment], profile });
+    const screen = note("screens/entry.md", "screen", "Entry", { reads: ["objects/link"] });
+    const { links } = frontmatterLinks({ entities: [screen, object], profile });
     const [link] = links;
     expect(link?.attributes).toEqual({ mode: "read" });
     expect(link?.attributes).not.toBe(profile.types["screen"]?.attributes?.["reads"]?.attributes);
@@ -232,10 +232,10 @@ describe("frontmatterLinks", () => {
 
   it("merges several references to the same target and relation into one link with every provenance", () => {
     const batch = note("batches/nightly.md", "batch", "Nightly", {
-      reads: ["objects/payment", "Payment", "objects/payment.md"],
-      writes: ["objects/payment"],
+      reads: ["objects/link", "Link", "objects/link.md"],
+      writes: ["objects/link"],
     });
-    const { links } = frontmatterLinks({ entities: [batch, payment], profile });
+    const { links } = frontmatterLinks({ entities: [batch, object], profile });
     expect(links.map((link) => [link.attributes, link.provenance.length])).toEqual([
       [{ mode: "read" }, 3],
       [{ mode: "write" }, 1],
@@ -268,10 +268,10 @@ describe("frontmatterLinks", () => {
       },
     };
     const batch = note("batches/nightly.md", "batch", "Nightly", {
-      reads: ["objects/payment"],
-      also: ["objects/payment"],
+      reads: ["objects/link"],
+      also: ["objects/link"],
     });
-    const { links } = frontmatterLinks({ entities: [batch, payment], profile: custom });
+    const { links } = frontmatterLinks({ entities: [batch, object], profile: custom });
     expect(links.map((link) => link.provenance.map((p) => p.attribute))).toEqual([
       ["reads", "also"],
     ]);
@@ -303,25 +303,25 @@ describe("frontmatterLinks", () => {
       },
     };
     const batch = note("batches/nightly.md", "batch", "Nightly", {
-      writes: ["objects/payment"],
-      reads: ["objects/payment"],
+      writes: ["objects/link"],
+      reads: ["objects/link"],
     });
-    const { links } = frontmatterLinks({ entities: [batch, payment], profile: custom });
+    const { links } = frontmatterLinks({ entities: [batch, object], profile: custom });
     expect(links.map((link) => link.attributes)).toEqual([{ mode: "read" }, { mode: "write" }]);
   });
 
   it("reports a value that is neither a string nor a list of strings with the value received", () => {
     const screen = note("screens/entry.md", "screen", "Entry", {
-      roles: [{ id: "roles/account-manager" }, "roles/account-manager"],
+      roles: [{ id: "roles/maintainer" }, "roles/maintainer"],
       rules: 42,
     });
     const { links, findings } = frontmatterLinks({ entities: [screen, role], profile });
-    expect(links.map((link) => link.from)).toEqual(["specs/roles/account-manager"]);
+    expect(links.map((link) => link.from)).toEqual(["specs/roles/maintainer"]);
     expect(findings).toEqual([
       unresolved(
         screen,
         "roles",
-        'value {"id":"roles/account-manager"} is neither a string nor a list of strings',
+        'value {"id":"roles/maintainer"} is neither a string nor a list of strings',
       ),
       unresolved(screen, "rules", "value 42 is neither a string nor a list of strings"),
     ]);
@@ -340,21 +340,21 @@ describe("frontmatterLinks", () => {
       },
     };
     const term = note(
-      "free-payment.md",
+      "explicit-link.md",
       "term",
-      "Free payment",
-      { narrower: ["payment"] },
+      "Explicit link",
+      { narrower: ["link"] },
       "glossary",
     );
     const screen = note("screens/entry.md", "screen", "Entry", {
-      url_pattern: "/pay",
-      actions: [{ label: "Pay", to: "screens/summary" }],
+      url_pattern: "/mentions",
+      actions: [{ label: "Confirm", to: "screens/summary" }],
     });
-    const gizmo = note("misc/thing.md", "gizmo", "Thing", { about: "specs/objects/payment" });
-    const unknown = note("misc/other.md", "widget", "Other", { reads: ["objects/payment"] });
-    const paymentTerm = note("payment.md", "term", "Payment", {}, "glossary");
+    const gizmo = note("misc/thing.md", "gizmo", "Thing", { about: "specs/objects/link" });
+    const unknown = note("misc/other.md", "widget", "Other", { reads: ["objects/link"] });
+    const linkTerm = note("link.md", "term", "Link", {}, "glossary");
     const { links, findings } = frontmatterLinks({
-      entities: [term, screen, gizmo, unknown, paymentTerm, payment],
+      entities: [term, screen, gizmo, unknown, linkTerm, object],
       profile: custom,
     });
     expect(links).toEqual([]);
@@ -362,14 +362,14 @@ describe("frontmatterLinks", () => {
   });
 
   it("ignores a reference of a note to itself", () => {
-    const term = note("payment.md", "term", "Payment", { broader: "payment" }, "glossary");
+    const term = note("link.md", "term", "Link", { broader: "link" }, "glossary");
     const { links, findings } = frontmatterLinks({ entities: [term], profile });
     expect(links).toEqual([]);
     expect(findings).toEqual([]);
   });
 
   it("takes the confidence from the input, then from the profile, then 0.9", () => {
-    const entities = [table, payment];
+    const entities = [table, object];
     expect(frontmatterLinks({ entities, profile, confidence: 0.5 }).links[0]).toMatchObject({
       confidence: 0.5,
       provenance: [{ confidence: 0.5 }],

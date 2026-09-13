@@ -28,44 +28,44 @@ function candidate(
   };
 }
 
-const exceptional = candidate("exceptional payment", 13.8621, [
+const summary = candidate("build summary", 13.8621, [
   {
     source: "glossary",
-    path: "free-payment.md",
+    path: "explicit-link.md",
     line: 11,
     position: 3,
-    context: "An exceptional…",
+    context: "The build…",
   },
-  { source: "meetings", path: "workshop.md", line: 7, position: 60, context: "…exceptional…" },
-  { source: "specs", path: "rules/annual-cap.rule.md", line: 6, position: 140, context: "…" },
+  { source: "meetings", path: "workshop.md", line: 7, position: 60, context: "…build…" },
+  { source: "specs", path: "rules/related-link-cap.rule.md", line: 6, position: 140, context: "…" },
 ]);
 
 describe("undefinedTermFindings", () => {
   it("produces a W-TERM-UNDEFINED finding above a score threshold", () => {
-    const below = candidate("server side", 3.1579, [
-      { source: "specs", path: "api/payments.md", line: 4, position: 0, context: "Server side" },
-      { source: "specs", path: "api/payments.md", line: 9, position: 0, context: "Server side" },
+    const below = candidate("cold start", 3.1579, [
+      { source: "specs", path: "api/model-query.md", line: 4, position: 0, context: "Cold start" },
+      { source: "specs", path: "api/model-query.md", line: 9, position: 0, context: "Cold start" },
     ]);
     const expected: Finding[] = [
       {
         check: UNDEFINED_TERM_CHECK,
         severity: "warning",
         message:
-          '"exceptional payment" is used 3 times in 3 files (score 13.8621) without a note defining it',
+          '"build summary" is used 3 times in 3 files (score 13.8621) without a note defining it',
         remediation,
         source: "glossary",
-        path: "free-payment.md",
+        path: "explicit-link.md",
         line: 11,
       },
     ];
-    expect(undefinedTermFindings([exceptional, below], { minScore: 4 })).toEqual(expected);
+    expect(undefinedTermFindings([summary, below], { minScore: 4 })).toEqual(expected);
     expect(UNDEFINED_TERM_CHECK).toBe("W-TERM-UNDEFINED");
   });
 
   it("reports a candidate scoring exactly the threshold", () => {
-    const findings = undefinedTermFindings([exceptional], { minScore: 13.8621 });
-    expect(findings.map((finding) => finding.path)).toEqual(["free-payment.md"]);
-    expect(undefinedTermFindings([exceptional], { minScore: 13.8622 })).toEqual([]);
+    const findings = undefinedTermFindings([summary], { minScore: 13.8621 });
+    expect(findings.map((finding) => finding.path)).toEqual(["explicit-link.md"]);
+    expect(undefinedTermFindings([summary], { minScore: 13.8622 })).toEqual([]);
   });
 
   it("names the display form and writes singular counts for one occurrence in one file", () => {
@@ -113,9 +113,9 @@ describe("undefinedTermFindings", () => {
         context: "Nightly batch",
       },
     ]);
-    const findings = undefinedTermFindings([later, exceptional], { minScore: 4 });
+    const findings = undefinedTermFindings([later, summary], { minScore: 4 });
     expect(findings.map((finding) => [finding.source, finding.path, finding.line])).toEqual([
-      ["glossary", "free-payment.md", 11],
+      ["glossary", "explicit-link.md", 11],
       ["specs", "batches/nightly.md", 2],
     ]);
   });

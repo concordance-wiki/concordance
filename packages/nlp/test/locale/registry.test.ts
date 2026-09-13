@@ -82,13 +82,14 @@ describe("the locale selects a language pack built from data files", () => {
   });
 
   it("segments a text into words with the locale's rules", () => {
-    const words = languagePack("fr").segment("L'adhérent verse 10 €.");
+    const words = languagePack("fr").segment("L'auteur écrit 10 fiches.");
     expect(words.filter((word) => word.isWordLike).map((word) => word.text)).toEqual([
-      "L'adhérent",
-      "verse",
+      "L'auteur",
+      "écrit",
       "10",
+      "fiches",
     ]);
-    expect(words[0]).toEqual({ text: "L'adhérent", index: 0, isWordLike: true });
+    expect(words[0]).toEqual({ text: "L'auteur", index: 0, isWordLike: true });
   });
 });
 

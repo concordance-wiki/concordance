@@ -9,9 +9,9 @@ describe("slugify", () => {
   });
 
   it("replaces spaces and underscores by one hyphen", () => {
-    expect(slugify("record a  payment")).toBe("record-a-payment");
-    expect(slugify("record_a_payment")).toBe("record-a-payment");
-    expect(slugify("record _ payment")).toBe("record-payment");
+    expect(slugify("confirm a  link")).toBe("confirm-a-link");
+    expect(slugify("confirm_a_link")).toBe("confirm-a-link");
+    expect(slugify("confirm _ link")).toBe("confirm-link");
   });
 
   it("replaces dots like any other character", () => {
@@ -19,11 +19,11 @@ describe("slugify", () => {
   });
 
   it("keeps digits and hyphens", () => {
-    expect(slugify("2026-03-12-payments-workshop")).toBe("2026-03-12-payments-workshop");
+    expect(slugify("2026-03-12-links-workshop")).toBe("2026-03-12-links-workshop");
   });
 
   it("trims leading and trailing hyphens", () => {
-    expect(slugify("--Payment (draft)--")).toBe("payment-draft");
+    expect(slugify("--Link (draft)--")).toBe("link-draft");
     expect(slugify(" .hidden ")).toBe("hidden");
   });
 

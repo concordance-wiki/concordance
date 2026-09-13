@@ -1,6 +1,6 @@
 # Synthetic corpus generator
 
-A script that produces a large, deterministic, fictional corpus (thousands of notes and documents about a generic personal insurer) for load and performance tests: occurrence scan time, bounded neighbourhood memory, index and site weight.
+A script that produces a large, deterministic, fictional corpus (thousands of notes and documents in which Concordance describes itself, built from the vocabulary of the realistic corpus) for load and performance tests: occurrence scan time, bounded neighbourhood memory, index and site weight.
 
 Not written yet. Requirements when it is:
 

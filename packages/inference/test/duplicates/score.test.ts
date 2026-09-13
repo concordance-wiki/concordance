@@ -105,8 +105,8 @@ describe("the base name signal", () => {
 
   it("compares base names in comparison form", () => {
     const pair = score(
-      resource({ path: "Payments_Workshop.md" }),
-      resource({ path: "payments-workshop.PDF" }),
+      resource({ path: "Keywords_Workshop.md" }),
+      resource({ path: "keywords-workshop.PDF" }),
     );
     expect(pair.signals[0]?.name).toBe("same_name");
   });
@@ -139,7 +139,7 @@ describe("the base name signal", () => {
     expect(similarity("abcdefgh", "abcdexyz")).toBeUndefined();
     expect(similarity("martha", "marhta")).toBeCloseTo(0.9611, 4);
     expect(similarity("abcdefgh", "abcdefxy")).toBeCloseTo(0.9, 4);
-    expect(similarity("payments workshop", "payment workshops")).toBeCloseTo(0.9412, 4);
+    expect(similarity("keywords workshop", "keyword workshops")).toBeCloseTo(0.9412, 4);
     expect(similarity("x", "x")).toBe(1);
   });
 
@@ -158,8 +158,8 @@ describe("the base name signal", () => {
 
 describe("the title signal", () => {
   it("scores 0.6 when the property title of one equals the heading of the other", () => {
-    const deck = resource({ path: "a/x.pptx", title: "Payments Workshop" });
-    const note = resource({ path: "b/y.md", heading: "payments workshop" });
+    const deck = resource({ path: "a/x.pptx", title: "Keywords Workshop" });
+    const note = resource({ path: "b/y.md", heading: "keywords workshop" });
     expect(score(deck, note)).toMatchObject({
       score: 0.6,
       signals: [{ name: "same_title", weight: 0.6, detail: "title equal to the heading" }],

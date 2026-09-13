@@ -144,8 +144,8 @@ describe("the minimal corpus", () => {
         .filter((link) => link.from.startsWith("decisions/"))
         .map((link) => [link.to, link.relation]),
     ).toEqual([
-      ["specs/api/payments", "affects"],
-      ["specs/screens/free-payment-entry", "affects"],
+      ["specs/api/model-query", "affects"],
+      ["specs/screens/mentions-panel", "affects"],
     ]);
   });
 });

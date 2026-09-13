@@ -10,8 +10,8 @@ const rules: readonly PluralRule[] = [
 
 describe("simple plural rules per locale", () => {
   it("applies the first rule whose ending the word carries", () => {
-    expect(singularize("policies", rules)).toBe("policy");
-    expect(singularize("payments", rules)).toBe("payment");
+    expect(singularize("entities", rules)).toBe("entity");
+    expect(singularize("mentions", rules)).toBe("mention");
   });
 
   it("replaces the ending by the singular of the rule", () => {

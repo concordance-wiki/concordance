@@ -54,12 +54,12 @@ function dictionaryOf(locale: "en" | "fr", entities: Entity[]): Dictionary {
 }
 
 const en = dictionaryOf("en", [
-  { id: "glossary/free-payment", title: "Free payment" },
-  { id: "glossary/payment", title: "Payment" },
-  { id: "glossary/contract", title: "Contract" },
-  { id: "specs/objects/contract", title: "Contract" },
-  { id: "specs/screens/free-payment-entry", title: "Free payment entry" },
-  { id: "specs/api/payments", title: "Payments API", aliases: ["API payments"] },
+  { id: "glossary/list-mention", title: "List mention" },
+  { id: "glossary/mention", title: "Mention" },
+  { id: "glossary/resource", title: "Resource" },
+  { id: "specs/objects/resource", title: "Resource" },
+  { id: "specs/screens/list-mention-panel", title: "List mention panel" },
+  { id: "specs/api/mentions", title: "Mentions API", aliases: ["API mentions"] },
 ]);
 
 function scanEn(
@@ -67,7 +67,7 @@ function scanEn(
   overrides: Partial<ScanDocumentInput> = {},
 ): Occurrence[] {
   return scanDocument({
-    document: { path: "specs/screens/free-payment-entry.md", paragraphs },
+    document: { path: "specs/screens/list-mention-panel.md", paragraphs },
     source: "specs",
     dictionary: en,
     pack: languagePack("en"),
@@ -79,73 +79,73 @@ function scanEn(
 
 describe("scanDocument", () => {
   it("carries the file, line, position, enclosing section and the whole short paragraph as context", () => {
-    const text = "Lets an account manager record a free payment on a running contract.";
+    const text = "Lets a site maintainer confirm a list mention on a running resource.";
     expect(
       scanEn([
         { line: 5, text },
-        { line: 9, text: "Reads: contract", section: "Objects" },
+        { line: 9, text: "Reads: resource", section: "Objects" },
       ]),
     ).toStrictEqual([
       {
-        key: "free payment",
-        target: { id: "glossary/free-payment", kind: "title" },
+        key: "list mention",
+        target: { id: "glossary/list-mention", kind: "title" },
         source: "specs",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/list-mention-panel.md",
         line: 5,
         position: 33,
         context: text,
         confidence: 0.6,
       },
       {
-        key: "contract",
-        target: { id: "glossary/contract", kind: "title" },
+        key: "resource",
+        target: { id: "glossary/resource", kind: "title" },
         source: "specs",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/list-mention-panel.md",
         line: 5,
         position: 59,
         context: text,
         confidence: 0.3,
       },
       {
-        key: "contract",
-        target: { id: "specs/objects/contract", kind: "title" },
+        key: "resource",
+        target: { id: "specs/objects/resource", kind: "title" },
         source: "specs",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/list-mention-panel.md",
         line: 5,
         position: 59,
         context: text,
         confidence: 0.3,
       },
       {
-        key: "contract",
-        target: { id: "glossary/contract", kind: "title" },
+        key: "resource",
+        target: { id: "glossary/resource", kind: "title" },
         source: "specs",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/list-mention-panel.md",
         line: 9,
         position: 7,
         section: "Objects",
-        context: "Reads: contract",
+        context: "Reads: resource",
         confidence: 0.3,
       },
       {
-        key: "contract",
-        target: { id: "specs/objects/contract", kind: "title" },
+        key: "resource",
+        target: { id: "specs/objects/resource", kind: "title" },
         source: "specs",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/list-mention-panel.md",
         line: 9,
         position: 7,
         section: "Objects",
-        context: "Reads: contract",
+        context: "Reads: resource",
         confidence: 0.3,
       },
     ]);
   });
 
   it("centres an 80-character context on the match, an ellipsis on each cut side", () => {
-    const middle = `${"a".repeat(50)} free payment ${"b".repeat(60)}`;
-    const atStart = `free payment ${"b".repeat(100)}`;
-    const atEnd = `${"a".repeat(100)} free payment`;
-    const exact = `${"a".repeat(33)} free payment ${"b".repeat(33)}`;
+    const middle = `${"a".repeat(50)} list mention ${"b".repeat(60)}`;
+    const atStart = `list mention ${"b".repeat(100)}`;
+    const atEnd = `${"a".repeat(100)} list mention`;
+    const exact = `${"a".repeat(33)} list mention ${"b".repeat(33)}`;
     const contexts = scanEn([
       { line: 1, text: middle },
       { line: 2, text: atStart },
@@ -153,54 +153,52 @@ describe("scanDocument", () => {
       { line: 4, text: exact },
     ]).map((occurrence) => [occurrence.position, occurrence.context]);
     expect(contexts).toEqual([
-      [51, `…${"a".repeat(33)} free payment ${"b".repeat(33)}…`],
-      [0, `free payment ${"b".repeat(67)}…`],
-      [101, `…${"a".repeat(67)} free payment`],
+      [51, `…${"a".repeat(33)} list mention ${"b".repeat(33)}…`],
+      [0, `list mention ${"b".repeat(67)}…`],
+      [101, `…${"a".repeat(67)} list mention`],
       [34, exact],
     ]);
     expect(exact).toHaveLength(80);
   });
 
-  it("keeps the longest expression on overlap: free payment entry beats free payment and payment", () => {
-    const occurrences = scanEn([{ line: 1, text: "Open Free payment entry, then the payments." }]);
+  it("keeps the longest expression on overlap: list mention panel beats list mention and mention", () => {
+    const occurrences = scanEn([{ line: 1, text: "Open List mention panel, then the mentions." }]);
     expect(occurrences.map((occurrence) => [occurrence.key, occurrence.position])).toEqual([
-      ["free payment entry", 5],
-      ["payment", 34],
+      ["list mention panel", 5],
+      ["mention", 34],
     ]);
   });
 
   it("recognises a mention on whole words, whatever the case and the plural", () => {
-    const occurrences = scanEn([{ line: 1, text: "Free Payments, not contractual payments." }]);
+    const occurrences = scanEn([{ line: 1, text: "List Mentions, not resourceful mentions." }]);
     expect(occurrences.map((occurrence) => [occurrence.key, occurrence.target.id])).toEqual([
-      ["free payment", "glossary/free-payment"],
-      ["payment", "glossary/payment"],
+      ["list mention", "glossary/list-mention"],
+      ["mention", "glossary/mention"],
     ]);
   });
 
-  it("adds the type prefix bonus and fixes the expected type: screen Free payment entry", () => {
-    const [occurrence] = scanEn([{ line: 1, text: "Open the screen Free payment entry." }]);
+  it("adds the type prefix bonus and fixes the expected type: screen List mention panel", () => {
+    const [occurrence] = scanEn([{ line: 1, text: "Open the screen List mention panel." }]);
     expect(occurrence).toMatchObject({
-      key: "free payment entry",
+      key: "list mention panel",
       position: 16,
       expectedType: "screen",
       confidence: 0.7,
     });
-    const [table] = scanEn([{ line: 1, text: "See table Contract." }]);
+    const [table] = scanEn([{ line: 1, text: "See table Resource." }]);
     expect(table).toMatchObject({ expectedType: "data_object", confidence: 0.35 });
   });
 
-  it("recognises a French type prefix bound by an apostrophe: l'écran Saisie de versement libre", () => {
+  it("recognises a French type prefix bound by an apostrophe: l'écran Page entité", () => {
     const fr = dictionaryOf("fr", [
-      { id: "glossaire/versement-libre", title: "Versement libre" },
-      { id: "glossaire/versement", title: "Versement" },
-      { id: "specs/ecrans/saisie-versement-libre", title: "Saisie de versement libre" },
+      { id: "glossaire/lien-explicite", title: "Lien explicite" },
+      { id: "glossaire/lien", title: "Lien" },
+      { id: "specs/ecrans/page-entite", title: "Page entité" },
     ]);
     const occurrences = scanDocument({
       document: {
-        path: "specs/processus/enregistrer-un-versement.md",
-        paragraphs: [
-          { line: 3, text: "Depuis l’écran Saisie de versement libre, le gestionnaire valide." },
-        ],
+        path: "specs/processus/confirmer-un-lien.md",
+        paragraphs: [{ line: 3, text: "Depuis l’écran Page entité, le mainteneur valide." }],
       },
       source: "specs",
       dictionary: fr,
@@ -210,13 +208,13 @@ describe("scanDocument", () => {
     });
     expect(occurrences).toEqual([
       {
-        key: "saisie de versement libre",
-        target: { id: "specs/ecrans/saisie-versement-libre", kind: "title" },
+        key: "page entite",
+        target: { id: "specs/ecrans/page-entite", kind: "title" },
         source: "specs",
-        path: "specs/processus/enregistrer-un-versement.md",
+        path: "specs/processus/confirmer-un-lien.md",
         line: 3,
         position: 15,
-        context: "Depuis l’écran Saisie de versement libre, le gestionnaire valide.",
+        context: "Depuis l’écran Page entité, le mainteneur valide.",
         expectedType: "screen",
         confidence: 0.7,
       },
@@ -224,44 +222,44 @@ describe("scanDocument", () => {
   });
 
   it("never takes a prefix word that is part of the match as a type prefix", () => {
-    const occurrences = scanEn([{ line: 1, text: "Call API payments to record it." }]);
+    const occurrences = scanEn([{ line: 1, text: "Call API mentions to record it." }]);
     expect(occurrences).toEqual([
-      expect.objectContaining({ key: "api payment", position: 5, confidence: 0.6 }),
+      expect.objectContaining({ key: "api mention", position: 5, confidence: 0.6 }),
     ]);
     expect(occurrences[0]).not.toHaveProperty("expectedType");
   });
 
   it("announces no type for a prefix word listed under several types", () => {
     const typePrefixes = { api: ["service"], process: ["service"], screen: ["screen"] };
-    const occurrences = scanEn([{ line: 1, text: "The service Free payment entry." }], {
+    const occurrences = scanEn([{ line: 1, text: "The service List mention panel." }], {
       typePrefixes,
     });
     expect(occurrences).toEqual([
-      expect.objectContaining({ key: "free payment entry", confidence: 0.6 }),
+      expect.objectContaining({ key: "list mention panel", confidence: 0.6 }),
     ]);
     expect(occurrences[0]).not.toHaveProperty("expectedType");
   });
 
   it("halves the confidence of a homonym and links each of its entities, glossary first", () => {
-    const occurrences = scanEn([{ line: 1, text: "A contract." }]);
+    const occurrences = scanEn([{ line: 1, text: "A resource." }]);
     expect(occurrences.map((occurrence) => [occurrence.target.id, occurrence.confidence])).toEqual([
-      ["glossary/contract", 0.3],
-      ["specs/objects/contract", 0.3],
+      ["glossary/resource", 0.3],
+      ["specs/objects/resource", 0.3],
     ]);
   });
 
   it("sorts occurrences by line, position, target then key; a hyphenated alias matches its spaced form too", () => {
     const fr = dictionaryOf("fr", [
-      { id: "glossaire/versement-libre", title: "Versement libre", aliases: ["versement-libre"] },
-      { id: "glossaire/contrat", title: "Contrat" },
-      { id: "annexes/contrat", title: "Contrat" },
+      { id: "glossaire/lien-explicite", title: "Lien explicite", aliases: ["lien-explicite"] },
+      { id: "glossaire/entite", title: "Entité" },
+      { id: "annexes/entite", title: "Entité" },
     ]);
     const occurrences = scanDocument({
       document: {
         path: "notes.md",
         paragraphs: [
-          { line: 9, text: "Le contrat porte un versement-libre." },
-          { line: 3, text: "Un versement libre sur le contrat." },
+          { line: 9, text: "Une entité porte un lien-explicite." },
+          { line: 3, text: "Un lien explicite sur une entité." },
         ],
       },
       source: "glossaire",
@@ -279,21 +277,21 @@ describe("scanDocument", () => {
         occurrence.target.kind,
       ]),
     ).toEqual([
-      [3, 3, "glossaire/versement-libre", "versement libre", "title"],
-      [3, 3, "glossaire/versement-libre", "versement-libre", "alias"],
-      [3, 26, "annexes/contrat", "contrat", "title"],
-      [3, 26, "glossaire/contrat", "contrat", "title"],
-      [9, 3, "annexes/contrat", "contrat", "title"],
-      [9, 3, "glossaire/contrat", "contrat", "title"],
-      [9, 20, "glossaire/versement-libre", "versement libre", "title"],
-      [9, 20, "glossaire/versement-libre", "versement-libre", "alias"],
+      [3, 3, "glossaire/lien-explicite", "lien explicite", "title"],
+      [3, 3, "glossaire/lien-explicite", "lien-explicite", "alias"],
+      [3, 26, "annexes/entite", "entite", "title"],
+      [3, 26, "glossaire/entite", "entite", "title"],
+      [9, 4, "annexes/entite", "entite", "title"],
+      [9, 4, "glossaire/entite", "entite", "title"],
+      [9, 20, "glossaire/lien-explicite", "lien explicite", "title"],
+      [9, 20, "glossaire/lien-explicite", "lien-explicite", "alias"],
     ]);
   });
 
   it("orders occurrences of several documents by path, line, position, target then key", () => {
     const base: Occurrence = {
-      key: "contract",
-      target: { id: "glossary/contract", kind: "title" },
+      key: "resource",
+      target: { id: "glossary/resource", kind: "title" },
       source: "specs",
       path: "b.md",
       line: 5,
@@ -306,8 +304,8 @@ describe("scanDocument", () => {
       later({ path: "c.md", line: 1, position: 0, key: "a" }),
       later({ line: 6, position: 0, key: "a" }),
       later({ position: 11, key: "a" }),
-      later({ target: { id: "specs/objects/contract", kind: "alias" }, key: "a" }),
-      later({ key: "contracts" }),
+      later({ target: { id: "specs/objects/resource", kind: "alias" }, key: "a" }),
+      later({ key: "resources" }),
     ]) {
       expect(compareOccurrences(base, after)).toBeLessThan(0);
       expect(compareOccurrences(after, base)).toBeGreaterThan(0);
@@ -321,10 +319,10 @@ describe("scanDocument", () => {
   });
 
   it("builds the automaton once for a dictionary, then scans every document in a single pass", () => {
-    const dictionary = dictionaryOf("en", [{ id: "glossary/member", title: "Member" }]);
+    const dictionary = dictionaryOf("en", [{ id: "glossary/entity", title: "Entity" }]);
     const calls = buildAutomaton.mock.calls.length;
     const input: ScanDocumentInput = {
-      document: { path: "a.md", paragraphs: [{ line: 1, text: "A member." }] },
+      document: { path: "a.md", paragraphs: [{ line: 1, text: "An entity." }] },
       source: "specs",
       dictionary,
       pack: languagePack("en"),
@@ -336,7 +334,7 @@ describe("scanDocument", () => {
     expect(scanDocument(input)).toHaveLength(1);
     expect(buildAutomaton.mock.calls.length - calls).toBe(1);
     expect(buildAutomaton.mock.calls.at(-1)?.[0]).toEqual([
-      { key: dictionary.entries.get("member"), words: ["member"] },
+      { key: dictionary.entries.get("entity"), words: ["entity"] },
     ]);
     expect(scanDocument({ ...input, pack: languagePack("fr") })).toHaveLength(1);
     expect(buildAutomaton.mock.calls.length - calls).toBe(2);

@@ -27,11 +27,11 @@ describe("normalizeFrontmatter", () => {
     it("pins the key order: id, type, title, aliases, status, then the rest alphabetically", () => {
       expect(CANONICAL_KEY_ORDER).toEqual(["id", "type", "title", "aliases", "status"]);
       const result = normalizeFrontmatter(
-        `---\ntags: [cap]\nstatus: valid\ndomain: payments\ntitle: Cap\naliases: [ceiling]\ntype: rule\napplication: policy\nid: notes/cap\n---\n${body}`,
+        `---\ntags: [cap]\nstatus: valid\ndomain: inference\ntitle: Cap\naliases: [ceiling]\ntype: rule\napplication: concordance-cli\nid: notes/cap\n---\n${body}`,
         { path },
       );
       expect(result.text).toBe(
-        `---\nid: notes/cap\ntype: rule\ntitle: Cap\naliases: [ ceiling ]\nstatus: valid\napplication: policy\ndomain: payments\ntags: [ cap ]\n---\n${body}`,
+        `---\nid: notes/cap\ntype: rule\ntitle: Cap\naliases: [ ceiling ]\nstatus: valid\napplication: concordance-cli\ndomain: inference\ntags: [ cap ]\n---\n${body}`,
       );
       expect(result.changes).toEqual([
         {
