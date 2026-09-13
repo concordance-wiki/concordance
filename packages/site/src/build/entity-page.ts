@@ -24,6 +24,7 @@ import type {
   SourceRef,
   TypeDeclaration,
 } from "../slots.js";
+import { OPERATION_TYPE } from "../slots.js";
 import {
   editHref,
   glyphNameOf,
@@ -736,7 +737,14 @@ export function entityPageOf(
     entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
   const dated =
     (meeting !== undefined || document !== undefined) && isDatedSpace(context, entity.source.name);
-  const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);
+  // On an interface the operations lead: the served slice of the mentions starts with them.
+  const mentions = mentionsPanelOf(
+    context,
+    page,
+    entity,
+    options.mentionsInline,
+    contract === undefined ? undefined : OPERATION_TYPE,
+  );
   return {
     entity: {
       id: entity.id,
@@ -757,13 +765,7 @@ export function entityPageOf(
     ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
     labels: entityPageLabels(context, neighbourPages(neighbours), attributes.length),
     neighbours,
-    mentions:
-      meeting === undefined
-        ? mentions
-        : {
-            ...mentions,
-            labels: { ...mentions.labels, orderNote: message(context, "meeting.relatedNote") },
-          },
+    mentions,
     sources: sourcesOf(context, entity),
     ...(documents.length === 0 ? {} : { documents }),
     ...(contract === undefined ? {} : { contract }),

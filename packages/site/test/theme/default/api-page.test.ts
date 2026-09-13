@@ -106,7 +106,7 @@ describe("ApiPage", () => {
     expect(bare).toContain('<aside class="mentions panel-block"');
   });
 
-  it("lifts the operations to the top of the related pages, the note under the list saying why", () => {
+  it("lifts the operations to the top of the related pages, the one note under the list saying why", () => {
     const html = render(corporateApiPage);
     const titles = [...html.matchAll(/<a class="related-title" href="[^"]*">([^<]+)<\/a>/g)].map(
       (match) => match[1],
@@ -115,8 +115,9 @@ describe("ApiPage", () => {
     expect(titles).toContain("Document viewer");
     expect(html).toContain("&quot;leadType&quot;:&quot;endpoint&quot;");
     expect(html).toContain(
-      '<p class="related-note related-lead-note">On an interface the operations rise to the top: that is the grain we work at.</p>',
+      '<p class="related-note">On an interface the operations rise to the top: that is the grain we work at.</p>',
     );
+    expect(html.match(/related-note/g)).toHaveLength(1);
     expect(html).toContain('<span class="related-mark">Cited · </span>');
   });
 

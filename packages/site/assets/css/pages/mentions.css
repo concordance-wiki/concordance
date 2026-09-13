@@ -223,3 +223,45 @@
   min-block-size: 2.5rem;
   font-size: 0.8125rem;
 }
+
+/* The served pages beyond the six in view: a disclosure worded and drawn as the button that shows them, its line gone once opened; the island renders its button in its place. */
+
+.related-beyond > summary {
+  justify-content: center;
+  margin-block-start: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.related-beyond > summary::before {
+  content: none;
+}
+
+.related-beyond[open] > summary {
+  display: none;
+}
+
+/* Phone: two entries in view before the button; the others return once the reader asks for them, through the island or the disclosure. */
+
+@media (width < 48rem) {
+  .mentions-body:not(.related-expanded):not(:has(.related-beyond[open]))
+    > .related-list
+    > .related-page:nth-child(n + 3),
+  .mentions-body:not(.related-expanded):not(:has(.related-beyond[open])) > .related-others {
+    display: none;
+  }
+}
+
+/* Tablet: while the entries beyond three stay folded behind their count, the way to the others stays with them. */
+
+@media (48rem <= width < 73.75rem) {
+  .related-others:not([open]) ~ .related-beyond,
+  .related-others:not([open]) ~ .mentions-more {
+    display: none;
+  }
+}

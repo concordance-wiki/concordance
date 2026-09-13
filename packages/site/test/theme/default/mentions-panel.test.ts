@@ -7,6 +7,7 @@ import {
   fill,
   groupByPage,
   matchesFilter,
+  RELATED_INLINE,
   typeCounts,
 } from "../../../src/theme/default/mention-list.js";
 import {
@@ -41,7 +42,7 @@ function withoutScripts(html: string): string {
 const fragmentHref = "../../fragments/glossary/entity.mentions.json";
 
 describe("Related pages: one entry per page that evokes the entity, title, type, passage count and excerpt", () => {
-  it("renders the block as a disclosure headed from the catalogue with the number of pages, one entry per page, the cited pages first", () => {
+  it("renders the block as a disclosure headed from the catalogue with the number of pages, one entry per page, most passages first", () => {
     const html = render({
       mentions: mentions(7),
       initial: 20,
@@ -66,25 +67,24 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
       '<span class="related-count">1<span class="visually-hidden"> passage</span></span>',
     );
     expect(html).toContain(
-      '<p class="related-note">From the surest to the weakest: written links first, then recognised mentions.</p>',
+      '<p class="related-note">Ordered by number of passages, written and recognised together. “Cited” marks a link present in the text.</p>',
     );
     expectBalanced(html);
   });
 
-  it("hands the lead type to the island and lists its pages first in the served markup, the lead note before the order note", () => {
+  it("hands the lead type to the island and lists its pages first in the served markup, the note under the list given by the page", () => {
     const html = render({
       mentions: [mention(4), mention(5), mention(1)],
       initial: 20,
       leadType: "term",
-      labels: { leadNote: "The terms come first." },
+      labels: { orderNote: "The terms come first." },
     });
     expect(html.indexOf('href="../notes/note-1/"')).toBeLessThan(
       html.indexOf('href="../notes/note-2/"'),
     );
     expect(html).toContain("&quot;leadType&quot;:&quot;term&quot;");
-    expect(html).toContain(
-      '<p class="related-note related-lead-note">The terms come first.</p><p class="related-note">From the surest to the weakest',
-    );
+    expect(html).toContain('<p class="related-note">The terms come first.</p></div>');
+    expect(count(html, "related-note")).toBe(1);
     expect(render({ mentions: [mention(4), mention(1)], initial: 20 })).not.toContain("leadType");
   });
 
@@ -139,18 +139,18 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
     );
   });
 
-  it("groups the mentions by page and orders the pages cited first, then by passage count, the first appearance breaking ties", () => {
+  it("groups the mentions by page and orders the pages by passage count, written and recognised alike, the first appearance breaking ties, a written link marking its page without lifting it", () => {
     const pages = groupByPage([mention(4), mention(1), mention(2, "written"), mention(5)]);
     expect(pages.map((page) => [page.key, page.mentions.length, page.cited])).toEqual([
-      ["../notes/note-1/", 2, true],
       ["../notes/note-2/", 2, false],
+      ["../notes/note-1/", 2, true],
     ]);
-    expect(pages[0]?.excerpt.line).toBe(2);
+    expect(pages[1]?.excerpt.line).toBe(2);
     expect(
       groupByPage([mention(4), mention(5), mention(1), mention(7, "written")]).map(
         (page) => page.key,
       ),
-    ).toEqual(["../notes/note-3/", "../notes/note-2/", "../notes/note-1/"]);
+    ).toEqual(["../notes/note-2/", "../notes/note-1/", "../notes/note-3/"]);
     expect(groupByPage([])).toEqual([]);
     expect(
       groupByPage([mention(4), mention(1), mention(2, "written"), mention(5)], "term").map(
@@ -170,9 +170,9 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
       "screen",
       "term",
     ]);
-    expect(matchesFilter(pages[1] as (typeof pages)[number], "NOTE 2")).toBe(true);
-    expect(matchesFilter(pages[1] as (typeof pages)[number], "passage 5")).toBe(true);
-    expect(matchesFilter(pages[1] as (typeof pages)[number], "note 1")).toBe(false);
+    expect(matchesFilter(pages[0] as (typeof pages)[number], "NOTE 2")).toBe(true);
+    expect(matchesFilter(pages[0] as (typeof pages)[number], "passage 5")).toBe(true);
+    expect(matchesFilter(pages[0] as (typeof pages)[number], "note 1")).toBe(false);
     expect(fill("{shown} of {total} pages", { shown: 2, total: 5 })).toBe("2 of 5 pages");
   });
 });
@@ -224,6 +224,39 @@ describe("The first twenty mentions are in the served HTML; the rest is loaded o
     expect(JSON.parse(text)).toEqual([hostile]);
     const html = render({ mentions: [...mentions(20), hostile], initial: 20 });
     expect(count(html, "</script>")).toBe(1);
+  });
+});
+
+describe("Six entries then the way to the others", () => {
+  it("serves six entries in view, three of them behind the count of every page beyond the three, and the served pages beyond six behind a disclosure worded as the button", () => {
+    expect(RELATED_INLINE).toBe(6);
+    const html = withoutScripts(render({ mentions: mentions(25), initial: 20, fragmentHref }));
+    expect(count(html, '<li class="related-page')).toBe(7);
+    expect(html).toContain(
+      '</ol><details class="related-others"><summary>6 others</summary><ol class="related-list">',
+    );
+    expect(html).toContain(
+      '</ol></details><details class="related-beyond"><summary>Show the 3 others</summary><ol class="related-list"><li class="related-page"><span class="related-head"><a class="related-title" href="../notes/note-7/">',
+    );
+    expect(html).toContain(
+      `</ol></details><p class="mentions-more"><a href="${fragmentHref}">Open the full list (JSON) (25)</a></p>`,
+    );
+    expectBalanced(html);
+  });
+
+  it("serves no second disclosure when the served pages fit in six, whatever the pages beyond them", () => {
+    const six = render({ mentions: mentions(25), initial: 18, fragmentHref });
+    expect(count(six, '<li class="related-page')).toBe(6);
+    expect(six).not.toContain("related-beyond");
+    expect(six).toContain('<details class="related-others"><summary>6 others</summary>');
+    const french = render({
+      mentions: mentions(21),
+      initial: 21,
+      labels: { showOthers: "Afficher les {count} autres" },
+    });
+    expect(french).toContain(
+      '<details class="related-beyond"><summary>Afficher les 1 autres</summary>',
+    );
   });
 });
 

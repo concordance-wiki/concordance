@@ -52,7 +52,8 @@ export const labels = {
   loadingOthers: "Loading the other pages",
   othersUnavailable: "The other pages could not be loaded.",
   fullList: "Open the full list (JSON)",
-  orderNote: "From the surest to the weakest: written links first, then recognised mentions.",
+  orderNote:
+    "Ordered by number of passages, written and recognised together. “Cited” marks a link present in the text.",
   noRelated: "No other page evokes this one yet.",
   noMatchingPage: "No page matches the filter.",
   neighbourhoodMap: "Neighbourhood map",

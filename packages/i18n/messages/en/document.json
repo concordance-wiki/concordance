@@ -67,6 +67,10 @@
     "defaultMessage": "Preview",
     "description": "Link to the rendered preview of a converted document."
   },
+  "document.relatedNote": {
+    "defaultMessage": "A document does not enter the model: its pages bring passages, and the note that describes it stands among its files.",
+    "description": "Note under the related pages of a document page, saying that the document itself is not a note of the model."
+  },
   "document.relatedNotes": {
     "defaultMessage": "Related notes",
     "description": "Tab of a document page showing the note merged with the document."
