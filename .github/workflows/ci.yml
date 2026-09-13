@@ -64,3 +64,11 @@ jobs:
         run: node scripts/hygiene.mjs
       - name: Licences
         run: pnpm licenses:check
+      - name: Wiki parity
+        # The project wiki keeps pace with the tool: every check, page slot, active type,
+        # configuration key and check family has its note in the demonstration repositories.
+        run: |
+          for name in demo-glossary demo-specs demo-wiki; do
+            git clone --quiet --depth 1 --branch main "https://github.com/concordance-wiki/$name.git" "$RUNNER_TEMP/demo/$name"
+          done
+          DEMO_ROOT="$RUNNER_TEMP/demo" node scripts/parity.mjs

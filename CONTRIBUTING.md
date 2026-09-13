@@ -78,6 +78,10 @@ A pull request from a fork runs every blocking test without any secret or privat
 - Discussions about the design happen in the issue, before the code; the review is about whether the code delivers what the issue agreed on.
 - A pull request is merged as it is, with its history: that is why its commits are squashed into a progression before the review starts.
 
+## The project wiki
+
+The tool documents itself: the demonstration repositories of the organisation (`demo-glossary`, `demo-specs`, built by `demo-wiki`) are its wiki, and continuous integration runs `scripts/parity.mjs` against fresh clones of them. When a pull request adds or renames a check, a page slot, an active type, a top-level configuration key or a public design decision, it comes with the matching note in those repositories, written from the public documentation only, or the parity step fails. Locally, `DEMO_ROOT=<folder holding the three checkouts> pnpm parity` runs the same check; the default is the parent folder of this repository.
+
 ## Releases
 
 Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`) that names the packages, the bump and one sentence for the changelog. Releases are cut by the maintainers following the [release guide](docs/guides/releasing.md).

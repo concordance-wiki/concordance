@@ -1051,6 +1051,20 @@ As an integrator without Node.js on my machine or my pipeline, I want a turnkey 
 
 Depends on: L4-01, L8-03.
 
+#### L8-07 Living project wiki fed by its own specifications
+
+As a maintainer, I want the project wiki to be built from the tool's own glossary and specifications on every change so that the documentation of the tool is a corpus the tool checks, never a copy that drifts.
+
+- `demo-glossary` carries a `term` note per public concept of the tool: every term of its vocabulary, every top-level key of `concordance.yaml`, every check family, with `aliases` and `broader` filled; the homonyms `source`, `link` and `index` are deliberate, two notes each with a `## Not to be confused with` section.
+- `demo-specs` carries the real specifications: a `screen` note per page of the generated site with a `## Today` section, a `rule` note per check of `docs/checks/README.md` with `## Applies to`, a `process` note per chain (build pipeline, lint in a merge request, release, adding a language pack, onboarding a repository, publishing the wiki), a `decision` note per public design choice of the architecture guide, `api` notes for `model.json`, the plugin API and the model query contract, the `business_object` notes of the canonical model and the `role` notes.
+- Parity is verified in continuous integration: `scripts/parity.mjs` reads the three demonstration checkouts from `DEMO_ROOT` (`..` by default; the pipeline clones them at `main`, depth 1) and fails when a check page has no rule note naming the check, when a slot that renders a page has no screen note, when an active type of the default profile has no note across the repositories (types inferred from the typing rules of `demo-wiki`), or when a top-level configuration key or a check family has no glossary term; the report lists the gaps. The demonstration repositories lint themselves on every push with `concordance lint --fail-on error`.
+- `demo-wiki` builds the site of the three repositories on every push, every morning, on manual dispatch and on the `content-updated` dispatch the content repositories send after a green lint on `main`, and publishes it on GitHub Pages; the sources are read at `main`. Until the first release, the workflows build the command line from a checkout of this repository; the human steps (the Pages source, the dispatch token) are documented in the README of `demo-wiki`.
+- The notes are written from the public documentation only; nothing internal to the project crosses into the public repositories.
+- `fixtures/README.md` says how the frozen `realistic` corpus and the living demonstration repositories relate.
+- A first loop is documented: the wiki built locally, real findings read from `build.log.json`, at least three of them fixed by writing or correcting notes, the counts before and after recorded in the changelog of `demo-wiki`.
+
+Depends on: L6-01, L8-01, L8-03.
+
 ## 5. Working conditions
 
 ### 5.1 Ready
