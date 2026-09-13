@@ -162,14 +162,45 @@ export interface TrailProps {
   labels: TrailLabels;
 }
 
+/** A space listed in the drawer of the narrow layouts: a source, its initials and how many notes it holds. */
+export interface SpaceLink extends Link {
+  /** Two letters standing for the space in its badge. */
+  initials: string;
+  count: number;
+}
+
+/** The spaces entry of the header: its link to the file tree of the home page, and one item per source. */
+export interface HeaderSpaces extends Link {
+  items: SpaceLink[];
+}
+
+/** The labels the default theme writes itself in the header; its own English when absent. */
+export interface HeaderLabels {
+  /** Accessible name of the button opening the drawer, and of the drawer. */
+  menu: string;
+  /** The search button of the tablet bar, which unfolds the field. */
+  search: string;
+}
+
 export interface HeaderProps {
   siteTitle: string;
   homeHref: string;
   logo?: HeaderLogo;
+  /** The links of the bar, the index and the recent changes for instance; the spaces have their own entry. */
   navigation: NavigationItem[];
+  /**
+   * The spaces of the site: a link in the bar where it has room, the list of sources with their
+   * initials and counts in the drawer of the narrow layouts; absent, the drawer lists none.
+   */
+  spaces?: HeaderSpaces;
+  /** The tree of the space of the page, unfolded in the drawer of the narrow layouts; absent on a page without a space. */
+  space?: SpaceTree;
   search?: SearchField;
   /** Absent, the default theme renders the trail with its own English labels and records no page. */
   trail?: TrailProps;
+  /** Whether the drawer of the narrow layouts is served open, to preview it; a page of the site never is. */
+  drawerOpen?: boolean;
+  labels?: Partial<HeaderLabels>;
 }
 
 export interface FooterProps {
@@ -386,6 +417,8 @@ export interface ChangeDate {
   date: string;
   /** Worded in the language of the site: "changed 9 days ago", "used since March 2026". */
   label: string;
+  /** The same in the fewest words, for the line of a narrow page: "9 days ago"; the label stands in when absent. */
+  short?: string;
 }
 
 /** The value of one attribute of an entity page, what an `Attribute@<name>` component receives. */
@@ -661,6 +694,9 @@ export interface RelatedLabels {
   othersUnavailable: string;
   /** The link to the JSON fragment, before the island runs. */
   fullList: string;
+  /** "{count} other" and "{count} others": the line unfolding the entries beyond the first three where the panel is condensed, the placeholder replaced by the island. */
+  other: string;
+  others: string;
   /** Under the list: how it is ordered and what "cited" marks. */
   orderNote: string;
   /** When no page evokes the entity. */

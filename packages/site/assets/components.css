@@ -44,7 +44,7 @@ concordance-island {
   text-transform: uppercase;
 }
 
-/* Top bar: mark and site name, the search field, three links, the mode switch; no statistic. */
+/* Top bar: the drawer button, mark and site name, the search field, three links, the mode switch; no statistic. Served for the phone: the wider layouts are added at the end of the sheet. */
 
 .site-header {
   background: var(--color-surface);
@@ -150,12 +150,11 @@ concordance-island[data-island="search"] {
   box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
 }
 
+/* The links of the bar stand in the drawer, one under the other; the wide bar lays them in a row. */
 .site-links {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  margin: 0 0 0 auto;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -2035,4 +2034,401 @@ concordance-island[data-island="search"] {
 
 .keyword-panel .companions {
   margin: 0 0 var(--space-3);
+}
+
+/* Phone and tablet: the same page at three widths. The base layer is the phone's: the bar reduced to the drawer button and the name, the panel as folded blocks under the text; the tablet and the desktop add their columns. */
+
+/* The drawer button: the summary of the drawer, a 48 px target drawn as ☰, as ✕ once open; its name is written for assistive technology. */
+
+.site-menu {
+  flex: none;
+  justify-content: center;
+  inline-size: 3rem;
+  min-block-size: 3rem;
+  margin-inline-start: calc(-1 * var(--space-2));
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.site-menu::before {
+  content: "☰" / "";
+  color: var(--color-ink);
+  font-size: 1.25rem;
+}
+
+.site-drawer[open] > .site-menu::before {
+  content: "✕" / "";
+}
+
+/* Closed, the drawer keeps the search field, the links and the mode switch: the bar shows the button and the name alone. */
+
+.site-search-fold,
+.site-nav > concordance-island[data-island="mode-switch"] {
+  display: none;
+}
+
+.site-search-button {
+  list-style: none;
+}
+
+/* The drawer: the spaces with their initials and counts, the tree of the current space unfolded, the links, every entry a 48 px target. */
+
+.drawer-spaces-title,
+.drawer-space-list a,
+.drawer .site-links a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 3rem;
+  padding-inline: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.drawer-spaces-title {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.drawer-space-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drawer-space-name {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.drawer-space-list .count {
+  margin-inline-start: auto;
+}
+
+.drawer-space {
+  margin-block-start: var(--space-2);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.drawer-space .space-tree {
+  border: 0;
+  background: transparent;
+}
+
+.drawer-space .space-head,
+.drawer-space .space-folder-name,
+.drawer-space .space-page > a,
+.drawer-space .space-page > span {
+  min-block-size: 3rem;
+}
+
+.drawer .site-links {
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* Open, the drawer takes the whole screen: the bar stays at the top with ✕ and the name, the search field comes first, then the spaces, the tree and the links, the mode switch at the foot. The trail waits behind it. The drawer exists under the width where the bar has room for everything. */
+
+@media (width < 73.75rem) {
+  .site-header:has(.site-drawer[open]) {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    overflow-y: auto;
+  }
+
+  body:has(.site-drawer[open]) {
+    overflow: hidden;
+  }
+
+  .site-header:has(.site-drawer[open]) > concordance-island[data-island="trail"] {
+    display: none;
+  }
+
+  /* The summary and the content of the open drawer lay out as two items of the bar: the button in the first row, the content after the search field. */
+  .site-drawer[open],
+  .site-drawer[open]::details-content {
+    display: contents;
+  }
+
+  .drawer {
+    flex-basis: 100%;
+    order: 2;
+    padding-block-end: var(--space-4);
+  }
+
+  .site-drawer[open] ~ .site-search-fold {
+    display: block;
+    flex-basis: 100%;
+    order: 1;
+    margin-inline-start: 0;
+  }
+
+  .site-drawer[open] ~ .site-search-fold > .site-search-button {
+    display: none;
+  }
+
+  .site-drawer[open] ~ .site-search-fold::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .site-drawer[open] ~ concordance-island[data-island="mode-switch"] {
+    display: block;
+    flex-basis: 100%;
+    order: 3;
+  }
+}
+
+/* The page on the phone: the tree lives in the drawer, the breadcrumb keeps the last folder and the page, the line under the title reads the type and the short date, the blocks of the panel show their counts. */
+
+.entity > .space {
+  display: none;
+}
+
+.breadcrumbs-list > li:not(:nth-last-child(-n + 2)) {
+  display: none;
+}
+
+.breadcrumbs-list > li:nth-last-child(2)::before {
+  content: none;
+}
+
+.entity-badge > .entity-space,
+.entity-changed-long {
+  display: none;
+}
+
+/* The related pages beyond the first three: a disclosure of their own, kept in view wherever the panel is not condensed. */
+
+.related-others::details-content {
+  display: block;
+  content-visibility: visible;
+}
+
+.related-others > summary {
+  display: none;
+}
+
+/* Tablet: the bar gains the search button and the mode switch, the panel stands beside the text, condensed; the tree stays in the drawer. */
+
+@media (min-width: 48rem) {
+  .site-search-fold {
+    display: block;
+    position: relative;
+    margin-inline-start: auto;
+  }
+
+  .site-search-button {
+    display: inline-flex;
+    gap: var(--space-2);
+    min-block-size: 2.5rem;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-soft);
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .site-search-button::before {
+    content: none;
+  }
+
+  .site-nav > concordance-island[data-island="mode-switch"] {
+    display: block;
+  }
+
+  .breadcrumbs-list > li:not(:nth-last-child(-n + 2)) {
+    display: block;
+  }
+
+  .breadcrumbs-list > li:nth-last-child(2)::before {
+    content: "›" / "";
+  }
+
+  .entity-badge > .entity-space {
+    display: inline;
+  }
+
+  .entity-changed-long {
+    display: inline;
+  }
+
+  .entity-changed-short,
+  .panel-count {
+    display: none;
+  }
+}
+
+@media (48rem <= width < 73.75rem) {
+  /* The search button unfolds the field under itself, at the end of the bar, while the drawer is closed. */
+  .site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + var(--space-1));
+    z-index: 3;
+    inline-size: min(22rem, calc(100vw - 2 * var(--space-4)));
+    max-inline-size: none;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  }
+
+  /* The blocks of the panel are placed one under the other in the right column, and the neighbourhood spans the foot of the page under the text and the blocks. */
+  .entity {
+    grid-template-areas: none;
+  }
+
+  .entity-main {
+    grid-area: 1 / 1 / 7 / 2;
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  .entity-side {
+    display: contents;
+  }
+
+  .entity-side > .panel-block {
+    grid-column: 2;
+    background: var(--color-surface);
+  }
+
+  .entity-side > .neighbourhood-fold {
+    grid-area: 7 / 1 / 8 / 3;
+    border-block-start: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .entity-side > .neighbourhood-fold > summary {
+    padding-inline: var(--space-4);
+  }
+
+  .entity-side > .neighbourhood-fold .neighbourhood {
+    padding-inline: var(--space-4);
+  }
+
+  /* Properties: the values alone, their terms kept for assistive technology, the note left out. */
+  .entity-panel .panel-note {
+    display: none;
+  }
+
+  .entity-panel .attributes dt {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Related pages: three titles, the others folded behind their count. */
+  .mentions-controls,
+  .related-type,
+  .related-count,
+  .related-excerpt,
+  .related-note {
+    display: none;
+  }
+
+  .related-others:not([open])::details-content {
+    display: none;
+  }
+
+  .related-others > summary {
+    display: flex;
+    min-block-size: 2.5rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    list-style: none;
+  }
+}
+
+/* Desktop: the bar has room for everything. The drawer button goes, its content stays in view in the bar: the link to the spaces and the two others; the search field is unfolded; the tree of the space returns to its column. */
+
+@media (min-width: 73.75rem) {
+  .site-menu {
+    display: none;
+  }
+
+  .site-drawer {
+    order: 1;
+    margin-inline-start: auto;
+  }
+
+  .site-drawer::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .drawer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .drawer-space-list,
+  .drawer-space {
+    display: none;
+  }
+
+  .drawer-spaces-title,
+  .drawer .site-links a {
+    min-block-size: 2.5rem;
+    padding-inline: 0;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .drawer-spaces-title:hover,
+  .drawer .site-links a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  .drawer .site-links {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+
+  .site-search-fold {
+    flex: 1 1 16rem;
+    max-inline-size: 26rem;
+    margin-inline-start: 0;
+  }
+
+  .site-search-button {
+    display: none;
+  }
+
+  .site-search-fold::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .site-nav > concordance-island[data-island="mode-switch"] {
+    order: 2;
+  }
+
+  .entity > .space {
+    display: block;
+  }
 }

@@ -401,16 +401,22 @@ export function documentsOf(
   }));
 }
 
-/** When the note last changed, relative to the build instant so that two builds of the same corpus agree; none without a git date. */
+/**
+ * When the note last changed, relative to the build instant so that two builds of the same
+ * corpus agree, worded in full and in short for the line of a narrow page; none without a git date.
+ */
 export function changedOf(context: SiteContext, entity: Entity): ChangeDate | undefined {
   const changed = entity.source.last_modified;
   if (changed === undefined) return undefined;
   const locale = context.locale ?? context.language;
+  const from = new Date(changed);
+  const to = new Date(context.model.build.at);
   return {
     date: changed.slice(0, 10),
     label: formatMessage(context.catalogue, "entity.changed", {
-      when: formatRelative(locale, new Date(changed), new Date(context.model.build.at)),
+      when: formatRelative(locale, from, to),
     }),
+    short: formatRelative(locale, from, to, "short"),
   };
 }
 

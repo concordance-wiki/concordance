@@ -161,6 +161,8 @@ export function relatedLabels(context: SiteContext): RelatedLabels {
     passage: message(context, "related.passage"),
     passages: message(context, "related.passages"),
     showOthers: message(context, "related.showOthers"),
+    other: message(context, "related.other"),
+    others: message(context, "related.others"),
     loadingOthers: message(context, "related.loadingOthers"),
     othersUnavailable: message(context, "related.othersUnavailable"),
     fullList: message(context, "related.fullList"),

@@ -255,6 +255,8 @@ describe("mentionsPanelOf", () => {
       passage: "passage",
       passages: "passages",
       showOthers: "Show the {count} others",
+      other: "{count} other",
+      others: "{count} others",
       loadingOthers: "Loading the other pages…",
       othersUnavailable: "The other pages could not be loaded.",
       fullList: "Open the full list (JSON)",
@@ -272,6 +274,8 @@ describe("mentionsPanelOf", () => {
     expect(french?.related).toBe("Pages en relation");
     expect(french?.pagesOf).toBe("{shown} pages sur {total}");
     expect(french?.showOthers).toBe("Afficher les {count} autres");
+    expect(french?.other).toBe("{count} autre");
+    expect(french?.others).toBe("{count} autres");
     expect(french?.orderNote).toBe(
       "Ordonnées par nombre de passages, écrits et relevés confondus. « Cité » signale un lien présent dans le texte.",
     );

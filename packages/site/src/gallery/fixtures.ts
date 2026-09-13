@@ -1,5 +1,5 @@
 import type { ThemeConfig } from "../css/theme-config.js";
-import type { HomeSpace, Mention, Passage, PassageGroup, SlotProps } from "../slots.js";
+import type { HomeSpace, Mention, Passage, PassageGroup, SlotProps, SpaceTree } from "../slots.js";
 import { defaultThemeConfig } from "../build/default-theme.js";
 
 /** The neutral palette of a project without `theme.yaml`, named after the gallery. */
@@ -219,18 +219,61 @@ export const entityPage: SlotProps["EntityPage"] = {
 const MARK_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22"><rect x="7" y="11" width="27" height="6" rx="3" fill="currentColor"/><rect x="5" y="21" width="31" height="6" rx="3" fill="currentColor"/><rect x="11" y="31" width="26" height="6" rx="3" fill="currentColor"/><rect x="20" y="5" width="8" height="38" rx="4" fill="var(--color-accent)"/></svg>';
 
-/** The top bar of the corporate state: the mark and the name, the search field, the three links; no statistic. */
+/** The tree of the specifications space as the rule sees it: the folders with their counts, the current folder open, the current page marked. */
+const corporateSpaceTree: SpaceTree = {
+  name: "specs",
+  initials: "SP",
+  nodes: [
+    { label: "api", count: 3 },
+    { label: "batches", count: 3 },
+    { label: "endpoints", count: 6 },
+    { label: "objects", count: 12 },
+    { label: "processes", count: 5 },
+    { label: "roles", count: 3 },
+    {
+      label: "rules",
+      count: 10,
+      children: [
+        { label: "Cross-source links off", href: "../cross-source-links-off/" },
+        { label: "Fail-on policy", href: "../fail-on-policy/" },
+        { label: "Identifier pattern", href: "../identifier-pattern/" },
+        { label: "Keyword page identifier", href: "../keyword-page-identifier/" },
+        { label: "Publication threshold", current: true },
+        { label: "Rejected terms never proposed", href: "../rejected-terms-never-proposed/" },
+        { label: "Related relation cap", href: "../related-relation-cap/" },
+        { label: "Section heading match", href: "../section-heading-match/" },
+        { label: "Stale after 180 days", href: "../stale-after-180-days/" },
+        { label: "Twin size ratio", href: "../twin-size-ratio/" },
+      ],
+    },
+    { label: "screens", count: 11 },
+    { label: "tables", count: 4 },
+  ],
+};
+
+/** The top bar of the corporate state: the mark and the name, the search field, the spaces, the index and the recent changes; no statistic. */
 export const corporateHeader: SlotProps["Header"] = {
   siteTitle: "Concordance documentation",
   homeHref: "../",
   logo: { svg: MARK_SVG },
+  spaces: {
+    label: "Spaces",
+    href: "../#home-tree",
+    items: [
+      { label: "glossary", href: "../#home-tree", initials: "GL", count: 48 },
+      { label: "specs", href: "../#home-tree", initials: "SP", count: 57 },
+    ],
+  },
   navigation: [
-    { label: "Spaces", href: "../#home-tree" },
     { label: "A–Z index", href: "../index/" },
     { label: "Recent", href: "../#home-recent" },
   ],
+  space: corporateSpaceTree,
   search: { action: "../search/", placeholder: "Search the documentation" },
 };
+
+/** The same bar with its drawer served open, as a phone shows it once the menu button is pressed. */
+export const corporateDrawerHeader: SlotProps["Header"] = { ...corporateHeader, drawerOpen: true };
 
 /** The footer of the corporate state: the same as the others, the to-do page with its count kept out of the top bar. */
 export const corporateFooter: SlotProps["Footer"] = footer;
@@ -362,36 +405,7 @@ export const corporateEntityPage: SlotProps["EntityPage"] = {
     title: "Publication threshold",
     locale: "en",
   },
-  space: {
-    name: "specs",
-    initials: "SP",
-    nodes: [
-      { label: "api", count: 3 },
-      { label: "batches", count: 3 },
-      { label: "endpoints", count: 6 },
-      { label: "objects", count: 12 },
-      { label: "processes", count: 5 },
-      { label: "roles", count: 3 },
-      {
-        label: "rules",
-        count: 10,
-        children: [
-          { label: "Cross-source links off", href: "../cross-source-links-off/" },
-          { label: "Fail-on policy", href: "../fail-on-policy/" },
-          { label: "Identifier pattern", href: "../identifier-pattern/" },
-          { label: "Keyword page identifier", href: "../keyword-page-identifier/" },
-          { label: "Publication threshold", current: true },
-          { label: "Rejected terms never proposed", href: "../rejected-terms-never-proposed/" },
-          { label: "Related relation cap", href: "../related-relation-cap/" },
-          { label: "Section heading match", href: "../section-heading-match/" },
-          { label: "Stale after 180 days", href: "../stale-after-180-days/" },
-          { label: "Twin size ratio", href: "../twin-size-ratio/" },
-        ],
-      },
-      { label: "screens", count: 11 },
-      { label: "tables", count: 4 },
-    ],
-  },
+  space: corporateSpaceTree,
   breadcrumb: [
     { label: "specs", href: "../../../#home-tree" },
     { label: "rules" },

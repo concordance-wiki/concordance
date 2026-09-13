@@ -73,13 +73,17 @@ describe("EntityPage", () => {
     expect(html).not.toContain("entity-highlights");
   });
 
-  it("names the last change and the space on the line under the title when the page has them", () => {
+  it("names the last change and the space on the line under the title when the page has them, the change in full and in short for the narrow line", () => {
     const html = render({
-      changed: { date: "2026-09-04", label: "Changed 9 days ago" },
+      changed: { date: "2026-09-04", label: "Changed 9 days ago", short: "9 days ago" },
       space: { name: "glossary", initials: "GL", nodes: [] },
     });
     expect(html).toContain(
-      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04">Changed 9 days ago</time><span class="entity-space">glossary</span><span class="highlight">',
+      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">glossary</span><span class="highlight">',
+    );
+    // Without a short form, the narrow line reads the label.
+    expect(render({ changed: { date: "2026-09-04", label: "Changed 9 days ago" } })).toContain(
+      '<span class="entity-changed-short">Changed 9 days ago</span>',
     );
     expect(render()).not.toContain("entity-changed");
     expect(render()).not.toContain("entity-space");
@@ -91,7 +95,7 @@ describe("EntityPage", () => {
       "<h1>Keyword page</h1>",
       '<article class="entity-body">',
       "</article>",
-      '<div class="entity-side"><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties</h2></summary>',
+      '<div class="entity-side"><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties<span class="count panel-count">2</span></h2></summary>',
       '<dt>Owner</dt><dd><a class="value" href="../publication/">Publication</a></dd>',
       '<p class="panel-note">Declared at the top of the file.</p></details></section>',
     ]);
@@ -302,8 +306,8 @@ describe("EntityPage", () => {
       labels: { otherAttributes: "Autres attributs" },
     });
     expectInOrder(html, [
-      '<h2 id="entity-properties">Properties</h2>',
-      '<section class="panel-block entity-panel entity-others" aria-labelledby="entity-other-attributes"><details class="panel-fold"><summary><h2 id="entity-other-attributes">Autres attributs</h2></summary>',
+      '<h2 id="entity-properties">Properties<span class="count panel-count">2</span></h2>',
+      '<section class="panel-block entity-panel entity-others" aria-labelledby="entity-other-attributes"><details class="panel-fold"><summary><h2 id="entity-other-attributes">Autres attributs<span class="count panel-count">2</span></h2></summary>',
       '<dt>ticket</dt><dd><span class="value">WIKI-12</span></dd>',
       '<dt>steps</dt><dd><span class="value">{&quot;action&quot;:&quot;rebuild&quot;}</span>, <span class="value">check</span></dd>',
       '<section class="panel-block entity-toc"',
@@ -312,11 +316,13 @@ describe("EntityPage", () => {
     expect(render()).not.toContain("entity-others");
     expect(render({ otherAttributes: [] })).not.toContain("entity-others");
     expect(render({ otherAttributes: others })).toContain(
-      '<h2 id="entity-other-attributes">Other attributes</h2>',
+      '<h2 id="entity-other-attributes">Other attributes<span class="count panel-count">2</span></h2>',
     );
     expect(render({ labels: { properties: "Propriétés" } })).toContain(
-      '<h2 id="entity-properties">Propriétés</h2>',
+      '<h2 id="entity-properties">Propriétés<span class="count panel-count">2</span></h2>',
     );
+    // The table of contents counts nothing: its heading stands alone.
+    expect(render()).toContain('<h2 id="entity-toc">On this page</h2>');
   });
 
   it("renders an attribute value and a mapped section through the parts the theme resolved, the theme's before the type module's", () => {

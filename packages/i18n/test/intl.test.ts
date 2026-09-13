@@ -70,6 +70,13 @@ describe("formatRelative", () => {
     expect(formatRelative("en", before(4 * 365.25 * 86_400_000), now)).toBe("4 years ago");
   });
 
+  it("abbreviates the unit in the short style where the locale does, for the line of a narrow page", () => {
+    expect(formatRelative("en", before(4 * 86_400_000), now, "short")).toBe("4 days ago");
+    expect(formatRelative("en", before(20 * 86_400_000), now, "short")).toBe("3 wk. ago");
+    expect(formatRelative("fr", before(4 * 86_400_000), now, "short")).toBe("il y a 4\u00a0j");
+    expect(formatRelative("fr", before(86_400_000), now, "short")).toBe("hier");
+  });
+
   it("speaks of the future when the first date is later than the second", () => {
     expect(formatRelative("en", new Date(now.getTime() + 2 * 3_600_000), now)).toBe("in 2 hours");
     expect(formatRelative("fr", new Date(now.getTime() + 86_400_000), now)).toBe("demain");

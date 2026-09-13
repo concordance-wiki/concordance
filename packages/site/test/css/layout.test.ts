@@ -134,3 +134,116 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
     ]);
   });
 });
+
+describe("Mobile first: the base layer is the phone's, the tablet and the desktop add their columns", () => {
+  it("reduces the bar to the menu button and the name: the search field and the mode switch are folded away, the button is a 48 px target drawn as ☰, as ✕ once open", () => {
+    expect(components).toContain(
+      '.site-search-fold,\n.site-nav > concordance-island[data-island="mode-switch"] {\n  display: none;\n}',
+    );
+    expect(components).toContain(
+      ".site-menu {\n  flex: none;\n  justify-content: center;\n  inline-size: 3rem;\n  min-block-size: 3rem;",
+    );
+    expect(components).toContain('.site-menu::before {\n  content: "☰" / "";');
+    expect(components).toContain('.site-drawer[open] > .site-menu::before {\n  content: "✕" / "";');
+  });
+
+  it("gives every entry of the drawer a 48 px target and hides the tree of the column, the breadcrumb ancestors, the space and the long date on the phone", () => {
+    expect(components).toContain(
+      ".drawer-spaces-title,\n.drawer-space-list a,\n.drawer .site-links a {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n  min-block-size: 3rem;",
+    );
+    expect(components).toContain(
+      ".drawer-space .space-head,\n.drawer-space .space-folder-name,\n.drawer-space .space-page > a,\n.drawer-space .space-page > span {\n  min-block-size: 3rem;\n}",
+    );
+    expect(components).toContain(".entity > .space {\n  display: none;\n}");
+    expect(components).toContain(
+      ".breadcrumbs-list > li:not(:nth-last-child(-n + 2)) {\n  display: none;\n}",
+    );
+    expect(components).toContain(
+      ".entity-badge > .entity-space,\n.entity-changed-long {\n  display: none;\n}",
+    );
+    // The related pages beyond the first three are only folded where the panel is condensed.
+    expect(components).toContain(
+      ".related-others::details-content {\n  display: block;\n  content-visibility: visible;\n}\n\n.related-others > summary {\n  display: none;\n}",
+    );
+  });
+
+  it("opens the drawer over the whole screen under the desktop width: the header fixed, the search field first, the content then the mode switch, the trail hidden", () => {
+    const narrow = media(components, "(width < 73.75rem)");
+    expect(narrow).toContain(
+      ".site-header:has(.site-drawer[open]) {\n    position: fixed;\n    inset: 0;\n    z-index: 3;\n    overflow-y: auto;\n  }",
+    );
+    expect(narrow).toContain("body:has(.site-drawer[open]) {\n    overflow: hidden;\n  }");
+    expect(narrow).toContain(
+      ".site-drawer[open],\n  .site-drawer[open]::details-content {\n    display: contents;\n  }",
+    );
+    expect(narrow).toContain(".drawer {\n    flex-basis: 100%;\n    order: 2;");
+    expect(narrow).toContain(
+      ".site-drawer[open] ~ .site-search-fold {\n    display: block;\n    flex-basis: 100%;\n    order: 1;",
+    );
+    expect(narrow).toContain(
+      ".site-drawer[open] ~ .site-search-fold::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
+    );
+    expect(narrow).toContain(
+      '.site-drawer[open] ~ concordance-island[data-island="mode-switch"] {\n    display: block;\n    flex-basis: 100%;\n    order: 3;\n  }',
+    );
+    expect(narrow).toContain(
+      '.site-header:has(.site-drawer[open]) > concordance-island[data-island="trail"] {\n    display: none;\n  }',
+    );
+  });
+
+  it("adds the search button and the mode switch to the bar from 768 px, and restores the breadcrumb, the space and the long date", () => {
+    const medium = media(components, "(min-width: 48rem)");
+    expect(medium).toContain(
+      ".site-search-fold {\n    display: block;\n    position: relative;\n    margin-inline-start: auto;\n  }",
+    );
+    expect(medium).toContain(".site-search-button {\n    display: inline-flex;");
+    expect(medium).toContain(
+      '.site-nav > concordance-island[data-island="mode-switch"] {\n    display: block;\n  }',
+    );
+    expect(medium).toContain(
+      ".breadcrumbs-list > li:not(:nth-last-child(-n + 2)) {\n    display: block;\n  }",
+    );
+    expect(medium).toContain(".entity-changed-short,\n  .panel-count {\n    display: none;\n  }");
+  });
+
+  it("condenses the panel between 768 and 1179 px: the values of the properties alone, three related titles and the others folded, the neighbourhood at the foot of the page, the search field unfolded under its button", () => {
+    const tablet = media(components, "(48rem <= width < 73.75rem)");
+    expect(tablet).toContain(
+      '.site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {\n    position: absolute;',
+    );
+    expect(tablet).toContain(".entity {\n    grid-template-areas: none;\n  }");
+    expect(tablet).toContain(".entity-main {\n    grid-area: 1 / 1 / 7 / 2;");
+    expect(tablet).toContain(".entity-side {\n    display: contents;\n  }");
+    expect(tablet).toContain(".entity-side > .panel-block {\n    grid-column: 2;");
+    expect(tablet).toContain(".entity-side > .neighbourhood-fold {\n    grid-area: 7 / 1 / 8 / 3;");
+    expect(tablet).toContain(
+      ".entity-panel .attributes dt {\n    position: absolute;\n    inline-size: 1px;\n    block-size: 1px;",
+    );
+    expect(tablet).toContain(
+      ".mentions-controls,\n  .related-type,\n  .related-count,\n  .related-excerpt,\n  .related-note {\n    display: none;\n  }",
+    );
+    expect(tablet).toContain(
+      ".related-others:not([open])::details-content {\n    display: none;\n  }",
+    );
+    expect(tablet).toContain(
+      ".related-others > summary {\n    display: flex;\n    min-block-size: 2.5rem;",
+    );
+  });
+
+  it("keeps the desktop as it was from 1180 px: the menu button gone, the links and the search field of the drawer in view in the bar, the tree back in its column", () => {
+    const wide = media(components, "(min-width: 73.75rem)");
+    expect(wide).toContain(".site-menu {\n    display: none;\n  }");
+    expect(wide).toContain(
+      ".site-drawer::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
+    );
+    expect(wide).toContain(".drawer-space-list,\n  .drawer-space {\n    display: none;\n  }");
+    expect(wide).toContain(
+      ".drawer .site-links {\n    flex-direction: row;\n    align-items: center;\n    gap: var(--space-3);",
+    );
+    expect(wide).toContain(".site-search-button {\n    display: none;\n  }");
+    expect(wide).toContain(
+      ".site-search-fold::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
+    );
+    expect(wide).toContain(".entity > .space {\n    display: block;\n  }");
+  });
+});

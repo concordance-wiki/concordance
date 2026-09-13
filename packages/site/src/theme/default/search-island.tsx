@@ -9,8 +9,8 @@ import { labels } from "./labels.js";
 /** The key that reaches the field from anywhere on the page, shown in it as a hint. */
 export const SEARCH_SHORTCUT = "/";
 
-/** The magnifier before the field, decorative: the label names the field. */
-function SearchGlyph({ size = 15 }: { size?: number }): JSX.Element {
+/** The magnifier before the field and on the button that unfolds it, decorative: the label names the field, the text the button. */
+export function SearchGlyph({ size = 15 }: { size?: number }): JSX.Element {
   return (
     <svg
       class="search-glyph"

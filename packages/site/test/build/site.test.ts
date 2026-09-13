@@ -319,9 +319,11 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
 
   it("names the attributes and the other attributes of a page, the declared ones by the profile in the site language, the others as written", () => {
     const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
-    expect(page).toContain('<h2 id="entity-properties">Properties</h2>');
+    expect(page).toContain('<h2 id="entity-properties">Properties<span class="count panel-count">');
     expect(page).toContain("<dt>Broader term</dt>");
-    expect(page).toContain('<h2 id="entity-other-attributes">Other attributes</h2>');
+    expect(page).toContain(
+      '<h2 id="entity-other-attributes">Other attributes<span class="count panel-count">',
+    );
     expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');
   });
 
@@ -329,8 +331,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
     expect(home).toContain('<a class="site-title" href="index.html">Concordance notes</a>');
+    expect(home).toContain('<a class="drawer-spaces-title" href="index.html#home-tree">Spaces</a>');
     expect(home).toContain(
-      '<ul class="site-links"><li><a href="index.html#home-tree">Spaces</a></li><li><a href="index/index.html">A–Z index</a></li><li><a href="index.html#home-recent">Recent</a></li></ul>',
+      '<ul class="site-links"><li><a href="index/index.html">A–Z index</a></li><li><a href="index.html#home-recent">Recent</a></li></ul>',
     );
     expect(home).toContain('<h2 id="home-tree">');
     expect(home).toContain('<h2 id="home-recent">');
@@ -342,6 +345,36 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(home).not.toContain("Built with");
     expect(home).toContain("version 0.1.0");
     expect(home).toContain('<time datetime="2026-09-12T12:00:00.000Z">');
+  });
+
+  it("lists every space in the drawer of every page with its initials and its note count, and the tree of the page on an entity page and a keyword page", () => {
+    const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
+    expect(home).toContain(
+      '<details class="site-drawer" aria-label="Menu"><summary class="site-menu">',
+    );
+    expect(home).toContain(
+      '<ul class="drawer-space-list"><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">FR</span><span class="drawer-space-name">framing</span><span class="count">1</span></a></li><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">GL</span><span class="drawer-space-name">glossary</span><span class="count">2</span></a></li><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">SP</span><span class="drawer-space-name">specs</span><span class="count">2</span></a></li></ul>',
+    );
+    expect(home).not.toContain('class="drawer-space"');
+    expect(home).toContain(
+      '<details class="site-search-fold"><summary class="site-search-button">',
+    );
+    const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    expect(entity).toContain(
+      '<div class="drawer-space"><details class="space-tree" open><summary class="space-head"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></summary>',
+    );
+    // The tree of the column is the same, served closed; the drawer copy is no landmark.
+    expect(entity).toContain(
+      '<nav class="space" aria-label="Tree of the space"><details class="space-tree"><summary class="space-head">',
+    );
+    expect(entity.match(/<nav class="space"/g)).toHaveLength(1);
+    // A keyword page is filed in the glossary: its drawer carries that tree, the word at its place.
+    const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
+    expect(keyword).toContain(
+      '<div class="drawer-space"><details class="space-tree" open><summary class="space-head"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></summary>',
+    );
+    expect(keyword).toContain('<li class="space-page space-current"><span aria-current="page">');
+    expect(keyword.match(/<nav class="space"/g)).toHaveLength(1);
   });
 
   it("writes nothing for the previews, which wait for the conversion of documents", () => {
@@ -677,8 +710,14 @@ describe("The labels of the site come from the message catalogue of the project 
     const { fileSystem } = await build({ locale: "fr" });
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
-      '<li><a href="index.html#home-tree">Espaces</a></li><li><a href="index/index.html">Index A–Z</a></li><li><a href="index.html#home-recent">Récent</a></li>',
+      '<a class="drawer-spaces-title" href="index.html#home-tree">Espaces</a>',
     );
+    expect(home).toContain(
+      '<li><a href="index/index.html">Index A–Z</a></li><li><a href="index.html#home-recent">Récent</a></li>',
+    );
+    expect(home).toContain('<details class="site-drawer" aria-label="Menu">');
+    expect(home).toContain('<summary class="site-search-button">');
+    expect(home).toContain("</svg>Rechercher</summary>");
     expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
     expect(home).toContain('placeholder="Rechercher dans la documentation"');
     expect(home).toContain('<h1 id="home-question">Que cherchez-vous ?</h1>');

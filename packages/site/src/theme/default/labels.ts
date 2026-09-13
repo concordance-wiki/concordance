@@ -2,6 +2,7 @@
 export const labels = {
   skipToContent: "Skip to content",
   siteNavigation: "Site",
+  menu: "Menu",
   siteSearch: "Site search",
   search: "Search",
   searchSubmit: "Search",
@@ -45,6 +46,8 @@ export const labels = {
   passage: "passage",
   passagesOf: "passages",
   showOthers: "Show the {count} others",
+  other: "{count} other",
+  others: "{count} others",
   loadingOthers: "Loading the other pages",
   othersUnavailable: "The other pages could not be loaded.",
   fullList: "Open the full list (JSON)",

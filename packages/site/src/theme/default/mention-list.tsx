@@ -106,12 +106,10 @@ export interface RelatedListProps {
   labels: RelatedLabels;
 }
 
-/**
- * One entry per page: its title linking to it, its type, its number of passages, then the
- * excerpt linking to the passage, prefixed "cited" when the page writes a link to the entity
- * and by the page, slide or timecode when the passage was read from a document.
- */
-export function RelatedList({ pages, labels }: RelatedListProps): JSX.Element {
+/** How many entries stay in view where the panel is condensed; the others fold behind their count. */
+export const RELATED_CONDENSED = 3;
+
+function Entries({ pages, labels }: RelatedListProps): JSX.Element {
   return (
     <ol class="related-list">
       {pages.map((page) => (
@@ -139,5 +137,29 @@ export function RelatedList({ pages, labels }: RelatedListProps): JSX.Element {
         </li>
       ))}
     </ol>
+  );
+}
+
+/**
+ * One entry per page: its title linking to it, its type, its number of passages, then the
+ * excerpt linking to the passage, prefixed "cited" when the page writes a link to the entity
+ * and by the page, slide or timecode when the passage was read from a document. The entries
+ * beyond the first three stand in a disclosure of their own, closed only where the stylesheet
+ * condenses the panel, so that a narrow page shows three titles and the count of the others.
+ */
+export function RelatedList({ pages, labels }: RelatedListProps): JSX.Element {
+  const rest = pages.slice(RELATED_CONDENSED);
+  return (
+    <>
+      <Entries pages={pages.slice(0, RELATED_CONDENSED)} labels={labels} />
+      {rest.length > 0 && (
+        <details class="related-others">
+          <summary>
+            {fill(rest.length === 1 ? labels.other : labels.others, { count: rest.length })}
+          </summary>
+          <Entries pages={rest} labels={labels} />
+        </details>
+      )}
+    </>
   );
 }
