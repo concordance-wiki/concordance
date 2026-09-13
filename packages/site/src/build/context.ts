@@ -1,4 +1,11 @@
-import type { CanonicalModel, Entity, Link, Locale, StalenessConfig } from "@concordance-wiki/core";
+import type {
+  CanonicalModel,
+  Entity,
+  FolderConfig,
+  Link,
+  Locale,
+  StalenessConfig,
+} from "@concordance-wiki/core";
 import {
   formatMessage,
   type Catalogue,
@@ -9,11 +16,16 @@ import type { Label, Profile } from "@concordance-wiki/profile";
 
 import type { EntityFragment } from "./fragments.js";
 
-/** Titles the configuration gives to applications and domains, by identifier. */
+/** Titles the configuration gives to applications, domains and sources, by identifier. */
 export interface SiteNames {
   applications?: Record<string, string>;
   domains?: Record<string, string>;
+  /** The `title` of every source that declares one: what names its space wherever the name was shown. */
+  sources?: Record<string, string>;
 }
+
+/** The title and the description every source gives its folders, by source name then by folder path. */
+export type SiteFolders = Record<string, Record<string, FolderConfig>>;
 
 export interface SiteContextInput {
   model: CanonicalModel;
@@ -23,6 +35,10 @@ export interface SiteContextInput {
   names?: SiteNames;
   /** Pattern of the edit link, with `{source}`, `{path}` and `{commit}` placeholders. */
   editUrl?: string;
+  /** `project.contribute_url` of the configuration: where every call to action leads when no forge link can be built. */
+  contributeUrl?: string;
+  /** `sources[].folders` of the configuration, by source name. */
+  folders?: SiteFolders;
   /** The `ref` every source declares, by name; `main` is assumed for the others. */
   sourceRefs?: Record<string, string>;
   /** The `description` every source declares, by name: the content of its space on the spaces page. */
@@ -101,6 +117,11 @@ export function siteContext(input: SiteContextInput): SiteContext {
     language,
     collate: input.collate ?? defaultCollation(input.locale ?? language),
   };
+}
+
+/** The title of a space: the one the configuration gives its source, else the source name. */
+export function spaceTitle(context: SiteContext, source: string): string {
+  return context.names?.sources?.[source] ?? source;
 }
 
 /** A message of the catalogue that takes no argument. */

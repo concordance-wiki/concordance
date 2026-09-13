@@ -12,9 +12,9 @@ import type {
   SpaceNode,
   SpaceTree,
 } from "../slots.js";
-import { message, type SiteContext } from "./context.js";
+import { message, spaceTitle, type SiteContext } from "./context.js";
 import { entityHref, spaceHref } from "./paths.js";
-import { initialsOf } from "./space.js";
+import { spaceTreeOf, withListLink } from "./space.js";
 
 /** The type whose page the meeting template lays out. */
 export const MEETING_TYPE = "meeting";
@@ -49,13 +49,14 @@ export function isDatedSpace(context: SiteContext, source: string): boolean {
   return notes.length > 0 && notes.every((note) => dateOf(note) !== undefined);
 }
 
-interface DatedNote {
+/** A note of a dated space with its day, `YYYY-MM-DD`. */
+export interface DatedNote {
   entity: Entity;
   date: string;
 }
 
 /** The notes of a dated space, newest first, the title then the identifier breaking ties. */
-function datedNotesOf(context: SiteContext, source: string): DatedNote[] {
+export function datedNotesOf(context: SiteContext, source: string): DatedNote[] {
   return notesOf(context, source)
     .flatMap((entity): DatedNote[] => {
       const date = dateOf(entity);
@@ -70,7 +71,10 @@ function datedNotesOf(context: SiteContext, source: string): DatedNote[] {
 }
 
 /** The notes grouped under a key, in the order met; the map keeps the insertion order of the keys. */
-function groupBy(notes: readonly DatedNote[], keyOf: (note: DatedNote) => string) {
+export function groupBy(
+  notes: readonly DatedNote[],
+  keyOf: (note: DatedNote) => string,
+): Map<string, DatedNote[]> {
   const groups = new Map<string, DatedNote[]>();
   for (const note of notes) {
     const key = keyOf(note);
@@ -84,52 +88,108 @@ function groupBy(notes: readonly DatedNote[], keyOf: (note: DatedNote) => string
   return groups;
 }
 
-function monthOf(context: SiteContext, date: string): string {
+/** The name of the month of a date in the language of the site, "August". */
+export function monthOf(context: SiteContext, date: string): string {
   return formatMonthName(context.locale ?? context.language, new Date(date));
 }
 
+/** The folders a year and a month of a dated space stand for in the addresses of their lists: `["2026", "08"]` for `2026-08`. */
+export function datedFoldersOf(month: string): string[] {
+  return month.split("-");
+}
+
+/** What the tree of a dated space opens on: a day, `2026-08-27`, for a page; a month or a year alone for the list of that month or year. */
+interface DatedFocus {
+  date: string;
+  /** The note marked as the current page; absent when a list is the current page. */
+  entity?: Entity;
+}
+
 /**
- * The tree of a dated space: one node per year, newest first, each counting its notes; the year
- * of the page lists its months, newest first, each counting its notes; the month of the page
- * lists its notes, newest first, the page marked as current.
+ * The nodes of a dated space: one per year, newest first, each counting its notes and linked to
+ * its list; the year of the focus lists its months, newest first, each counting its notes and
+ * linked to its list; the month of the focus lists its notes, newest first, the page marked as
+ * current; the year or the month whose list is the current page is marked and closed.
  */
-export function datedSpaceOf(context: SiteContext, page: string, entity: Entity): SpaceTree {
-  const source = entity.source.name;
-  const current = dateOf(entity) ?? "";
+function datedNodesOf(
+  context: SiteContext,
+  page: string,
+  source: string,
+  focus: DatedFocus,
+): SpaceNode[] {
   const years = groupBy(datedNotesOf(context, source), (note) => note.date.slice(0, 4));
-  const nodes = [...years.entries()].map(([year, ofYear]): SpaceNode => {
-    if (year !== current.slice(0, 4)) return { label: year, count: ofYear.length };
+  return [...years.entries()].map(([year, ofYear]): SpaceNode => {
+    const node: SpaceNode = { label: year, count: ofYear.length };
+    if (year !== focus.date.slice(0, 4)) return withListLink(context, page, source, [year], node);
+    if (focus.date.length === 4) return { ...node, current: true };
     const months = groupBy(ofYear, (note) => note.date.slice(0, 7));
     const children = [...months.entries()].map(([month, ofMonth]): SpaceNode => {
-      const label = monthOf(context, `${month}-01`);
-      if (month !== current.slice(0, 7)) return { label, count: ofMonth.length };
-      return {
-        label,
+      const folders = datedFoldersOf(month);
+      const monthNode: SpaceNode = {
+        label: monthOf(context, `${month}-01`),
         count: ofMonth.length,
+      };
+      if (month !== focus.date.slice(0, 7)) {
+        return withListLink(context, page, source, folders, monthNode);
+      }
+      if (focus.entity === undefined) return { ...monthNode, current: true };
+      const current = focus.entity.id;
+      return {
+        ...withListLink(context, page, source, folders, monthNode),
         children: ofMonth.map(({ entity: note }): SpaceNode =>
-          note.id === entity.id
+          note.id === current
             ? { label: note.title, current: true }
             : { label: note.title, href: entityHref(page, note.id) },
         ),
       };
     });
-    return { label: year, count: ofYear.length, children };
+    return { ...withListLink(context, page, source, [year], node), children };
   });
-  return { name: source, initials: initialsOf(source), nodes };
 }
 
-/** Space › month year › page: the space linking to its own page, the month worded, the page the current one. */
+/** The tree of a dated space from the page of one of its notes: the year and the month of the page open, the page marked as current. */
+export function datedSpaceOf(context: SiteContext, page: string, entity: Entity): SpaceTree {
+  const source = entity.source.name;
+  return spaceTreeOf(
+    context,
+    page,
+    source,
+    datedNodesOf(context, page, source, { date: dateOf(entity) ?? "", entity }),
+  );
+}
+
+/** The tree of a dated space from the list of one of its years or months, named by its folders: the year open, the year or the month marked as the current page and closed. */
+export function datedFolderTreeOf(
+  context: SiteContext,
+  page: string,
+  source: string,
+  folders: readonly string[],
+): SpaceTree {
+  return spaceTreeOf(
+    context,
+    page,
+    source,
+    datedNodesOf(context, page, source, { date: folders.join("-") }),
+  );
+}
+
+/** Space › month year › page: the space linking to its own page, the month worded and linked to its list, the page the current one. */
 export function datedBreadcrumbOf(
   context: SiteContext,
   page: string,
   entity: Entity,
 ): BreadcrumbItem[] {
   const date = dateOf(entity);
+  const source = entity.source.name;
   return [
-    { label: entity.source.name, href: spaceHref(page, entity.source.name) },
+    { label: spaceTitle(context, source), href: spaceHref(page, source) },
     ...(date === undefined
       ? []
-      : [{ label: formatMonth(context.locale ?? context.language, new Date(date)) }]),
+      : [
+          withListLink(context, page, source, datedFoldersOf(date.slice(0, 7)), {
+            label: formatMonth(context.locale ?? context.language, new Date(date)),
+          }),
+        ]),
     { label: entity.title },
   ];
 }

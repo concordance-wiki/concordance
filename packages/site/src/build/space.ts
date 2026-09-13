@@ -3,7 +3,7 @@ import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type { BreadcrumbItem, SpaceLink, SpaceNode, SpaceTree } from "../slots.js";
-import type { SiteContext } from "./context.js";
+import { spaceTitle, type SiteContext } from "./context.js";
 import { exposedOperations } from "./operations.js";
 import { entityHref, relativeHref, spaceHref } from "./paths.js";
 
@@ -23,7 +23,13 @@ export function initialsOf(name: string): string {
   return letters.join("").toUpperCase();
 }
 
-interface Folder {
+/** The initials of a space as its badge shows them: those of its title. */
+export function spaceInitials(context: SiteContext, source: string): string {
+  return initialsOf(spaceTitle(context, source));
+}
+
+/** A folder of a source as the tree draws it: its folders and its pages, by name. */
+export interface Folder {
   folders: Map<string, Folder>;
   pages: { file: string; entity: Entity }[];
 }
@@ -36,7 +42,8 @@ function folderIn(folders: Map<string, Folder>, name: string): Folder {
   return created;
 }
 
-function pagesIn(folder: Folder): number {
+/** How many pages a folder holds, its folders included. */
+export function pagesIn(folder: Folder): number {
   return [...folder.folders.values()].reduce(
     (total, child) => total + pagesIn(child),
     folder.pages.length,
@@ -44,7 +51,7 @@ function pagesIn(folder: Folder): number {
 }
 
 /** The folders of a path, `screens/service` giving `["screens", "service"]`; none for a file at the root. */
-function foldersOf(path: string): string[] {
+export function foldersOf(path: string): string[] {
   const cut = path.lastIndexOf("/");
   return cut < 0 ? [] : path.slice(0, cut).split("/");
 }
@@ -81,7 +88,7 @@ export function topFoldersOf(context: SiteContext, source: string): FolderCount[
 }
 
 /** The notes of one source, folded into its folders. */
-function treeOf(context: SiteContext, source: string): Folder {
+export function treeOf(context: SiteContext, source: string): Folder {
   const root: Folder = { folders: new Map(), pages: [] };
   for (const entity of context.model.entities) {
     if (entity.keyword === true || entity.source.name !== source) continue;
@@ -93,6 +100,51 @@ function treeOf(context: SiteContext, source: string): Folder {
     current.pages.push({ file: path.slice(path.lastIndexOf("/") + 1), entity });
   }
   return root;
+}
+
+/** The label of a folder of a space, named by the folders on its way: the title the configuration gives it, else its name as written on the paths. */
+export function folderLabel(
+  context: SiteContext,
+  source: string,
+  folders: readonly string[],
+): string {
+  const path = folders.join("/");
+  return context.folders?.[source]?.[path]?.title ?? path.slice(path.lastIndexOf("/") + 1);
+}
+
+/** The sentence the configuration gives a folder of a space; none without one. */
+export function folderDescription(
+  context: SiteContext,
+  source: string,
+  folders: readonly string[],
+): string | undefined {
+  return context.folders?.[source]?.[folders.join("/")]?.description;
+}
+
+/**
+ * Where the list of a folder of a space lands, named by the folders on its way:
+ * `<source>/<folder slugs>/index.html`, the address a note of that identifier would take;
+ * none when a note takes it.
+ */
+export function categoryPagePathOf(
+  context: SiteContext,
+  source: string,
+  folders: readonly string[],
+): string | undefined {
+  const id = [source, ...folders.map(slugify)].join("/");
+  return context.entities.has(id) ? undefined : pagePath(id);
+}
+
+/** A folder node linked to its list from `page`, when the folder has one. */
+export function withListLink(
+  context: SiteContext,
+  page: string,
+  source: string,
+  folders: readonly string[],
+  node: SpaceNode,
+): SpaceNode {
+  const target = categoryPagePathOf(context, source, folders);
+  return target === undefined ? node : { ...node, href: relativeHref(page, target) };
 }
 
 /**
@@ -107,32 +159,49 @@ function underOf(context: SiteContext, page: string, entity: Entity): SpaceNode[
   }));
 }
 
+/** What the tree opens on: the folders on the way to the current page, which is a note or the list of the last folder. */
+interface TreeFocus {
+  /** The folders on the way, as written on the paths. */
+  way: readonly string[];
+  /** The note marked as the current page; absent when the list of the last folder of the way is the current page. */
+  entity?: Entity;
+}
+
 /**
- * The nodes of a folder: its folders first, sorted by name, then its pages sorted by file name;
- * a folder on the way to the current page lists its contents, the others show their count alone;
- * the current page lists what hangs under it.
+ * The nodes of a folder: its folders first, sorted by name, each linked to its list when it has
+ * one, then its pages sorted by file name; a folder on the way to the current page lists its
+ * contents, the others show their count alone; the folder whose list is the current page is
+ * marked and closed; the current page lists what hangs under it.
  */
 function nodesOf(
   context: SiteContext,
   page: string,
-  entity: Entity,
+  source: string,
   folder: Folder,
-  way: readonly string[],
+  prefix: readonly string[],
+  focus: TreeFocus,
 ): SpaceNode[] {
-  const [next, ...rest] = way;
+  const next = focus.way[prefix.length];
   const folders = [...folder.folders.entries()]
     .sort(([a], [b]) => byCodeUnit(a, b))
-    .map(([name, child]): SpaceNode => ({
-      label: name,
-      count: pagesIn(child),
-      ...(name === next ? { children: nodesOf(context, page, entity, child, rest) } : {}),
-    }));
-  // Two notes of a source never share a path: the file name alone orders a folder.
+    .map(([name, child]): SpaceNode => {
+      const path = [...prefix, name];
+      const node: SpaceNode = { label: folderLabel(context, source, path), count: pagesIn(child) };
+      if (name !== next) return withListLink(context, page, source, path, node);
+      if (focus.entity === undefined && path.length === focus.way.length) {
+        return { ...node, current: true };
+      }
+      return {
+        ...withListLink(context, page, source, path, node),
+        children: nodesOf(context, page, source, child, path, focus),
+      };
+    });
   const pages = [...folder.pages]
-    .sort((a, b) => byCodeUnit(a.file, b.file))
+    .sort((a, b) => byCodeUnit(a.file, b.file) || byCodeUnit(a.entity.id, b.entity.id))
     .map(({ entity: note }): SpaceNode => {
-      if (note.id !== entity.id) return { label: note.title, href: entityHref(page, note.id) };
-      const under = underOf(context, page, entity);
+      if (note.id !== focus.entity?.id)
+        return { label: note.title, href: entityHref(page, note.id) };
+      const under = underOf(context, page, note);
       return {
         label: note.title,
         current: true,
@@ -167,46 +236,33 @@ function windowOf(context: SiteContext, pages: SpaceNode[]): SpaceNode[] {
   return [...omitted(start), ...pages.slice(start, end), ...omitted(pages.length - end)];
 }
 
-/**
- * Where the list of a folder at the top of a space lands: `<source>/<folder slug>/index.html`,
- * the address a note of that identifier would take; none when a note takes it.
- */
-export function categoryPagePathOf(
-  context: SiteContext,
-  source: string,
-  folder: string,
-): string | undefined {
-  const id = `${source}/${slugify(folder)}`;
-  return context.entities.has(id) ? undefined : pagePath(id);
-}
-
-/** The folders at the top of the space linked to their lists, from `page`; the rest of the nodes as given. */
-function withCategoryLinks(
+/** The head of the tree of a space from `page`: its title, its initials and the link to its page, over the nodes given. */
+export function spaceTreeOf(
   context: SiteContext,
   page: string,
   source: string,
   nodes: SpaceNode[],
-): SpaceNode[] {
-  return nodes.map((node) => {
-    if (node.count === undefined) return node;
-    const target = categoryPagePathOf(context, source, node.label);
-    return target === undefined ? node : { ...node, href: relativeHref(page, target) };
-  });
+): SpaceTree {
+  return {
+    name: spaceTitle(context, source),
+    initials: spaceInitials(context, source),
+    href: spaceHref(page, source),
+    nodes,
+  };
 }
 
-/** The tree of the space of an entity: its source, the folders on the way to the page open, the page marked as current, every folder at the top linked to its list. */
+/** The tree of the space of an entity: its source, the folders on the way to the page open, the page marked as current, every folder linked to its list. */
 export function spaceOf(context: SiteContext, page: string, entity: Entity): SpaceTree {
   const source = entity.source.name;
-  return {
-    name: source,
-    initials: initialsOf(source),
-    nodes: withCategoryLinks(
-      context,
-      page,
-      source,
-      nodesOf(context, page, entity, treeOf(context, source), foldersOf(entity.source.path)),
-    ),
-  };
+  return spaceTreeOf(
+    context,
+    page,
+    source,
+    nodesOf(context, page, source, treeOf(context, source), [], {
+      way: foldersOf(entity.source.path),
+      entity,
+    }),
+  );
 }
 
 /**
@@ -222,11 +278,27 @@ export function spaceWithPageOf(
 ): SpaceTree {
   const root = treeOf(context, source);
   root.pages.push({ file: `${entity.id.slice(entity.id.lastIndexOf("/") + 1)}.md`, entity });
-  return {
-    name: source,
-    initials: initialsOf(source),
-    nodes: withCategoryLinks(context, page, source, nodesOf(context, page, entity, root, [])),
-  };
+  return spaceTreeOf(
+    context,
+    page,
+    source,
+    nodesOf(context, page, source, root, [], { way: [], entity }),
+  );
+}
+
+/** The tree of a space from the list of one of its folders: the folders on the way open, that folder marked as the current page and closed. */
+export function folderTreeOf(
+  context: SiteContext,
+  page: string,
+  source: string,
+  folders: readonly string[],
+): SpaceTree {
+  return spaceTreeOf(
+    context,
+    page,
+    source,
+    nodesOf(context, page, source, treeOf(context, source), [], { way: folders }),
+  );
 }
 
 /** A space of the site as the drawer lists it: its name, its initials and how many notes it holds. */
@@ -248,28 +320,42 @@ export function spaceCountsOf(context: SiteContext): SpaceCount[] {
   }
   return [...counts.entries()]
     .sort(([a], [b]) => byCodeUnit(a, b))
-    .map(([name, count]) => ({ name, initials: initialsOf(name), count }));
+    .map(([name, count]) => ({ name, initials: spaceInitials(context, name), count }));
 }
 
-/** The spaces as the drawer of a page links them: each to its own page. */
-export function spaceLinksOf(page: string, spaces: readonly SpaceCount[]): SpaceLink[] {
+/** The spaces as the drawer of a page links them: each to its own page, by its title. */
+export function spaceLinksOf(
+  context: SiteContext,
+  page: string,
+  spaces: readonly SpaceCount[],
+): SpaceLink[] {
   return spaces.map(({ name, initials, count }) => ({
-    label: name,
+    label: spaceTitle(context, name),
     href: spaceHref(page, name),
     initials,
     count,
   }));
 }
 
-/** Space › folders › page: the space links to its page, the folder at the top to its list, a deeper folder has no page, the page is the current one. */
+/** A step of the breadcrumb for a folder of a space, named by the folders on its way: linked to its list from `page` when it has one. */
+export function folderCrumb(
+  context: SiteContext,
+  page: string,
+  source: string,
+  folders: readonly string[],
+): BreadcrumbItem {
+  const label = folderLabel(context, source, folders);
+  const target = categoryPagePathOf(context, source, folders);
+  return target === undefined ? { label } : { label, href: relativeHref(page, target) };
+}
+
+/** Space › folders › page: the space links to its page, every folder to its list when it has one, the page is the current one. */
 export function breadcrumbOf(context: SiteContext, page: string, entity: Entity): BreadcrumbItem[] {
   const source = entity.source.name;
+  const folders = foldersOf(entity.source.path);
   return [
-    { label: source, href: spaceHref(page, source) },
-    ...foldersOf(entity.source.path).map((label, index): BreadcrumbItem => {
-      const target = index === 0 ? categoryPagePathOf(context, source, label) : undefined;
-      return target === undefined ? { label } : { label, href: relativeHref(page, target) };
-    }),
+    { label: spaceTitle(context, source), href: spaceHref(page, source) },
+    ...folders.map((_, index) => folderCrumb(context, page, source, folders.slice(0, index + 1))),
     { label: entity.title },
   ];
 }

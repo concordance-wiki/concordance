@@ -13,6 +13,38 @@
   list-style: none;
 }
 
+/* In the column, the head is the link to the page of the space and the summary of the disclosure, kept for the drawer, gives way to it. */
+
+.space-head-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.space-head-link:hover .space-name {
+  text-decoration: underline;
+}
+
+.space-head-link + .space-tree > .space-head {
+  display: none;
+}
+
+/* The column carries the rule on its side, so that the head and the tree share it whatever their heights. */
+
+.space {
+  border-inline-end: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.space > .space-tree {
+  block-size: auto;
+  border-inline-end: 0;
+}
+
 .space-initials {
   display: inline-flex;
   align-items: center;

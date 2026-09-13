@@ -37,7 +37,14 @@ import {
   type WrittenDocument,
 } from "./assemble.js";
 import { categoryDocumentsOf, categorySearchField, listedCategoriesOf } from "./category.js";
-import { message, siteContext, typeLabel, type SiteContext, type SiteNames } from "./context.js";
+import {
+  message,
+  siteContext,
+  typeLabel,
+  type SiteContext,
+  type SiteFolders,
+  type SiteNames,
+} from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf, type ViewerBundles } from "./entity-page.js";
 import type { EntityFragment } from "./fragments.js";
@@ -79,6 +86,10 @@ export interface SiteInput {
   names?: SiteNames;
   /** `project.edit_url` of the configuration. */
   editUrl?: string;
+  /** `project.contribute_url` of the configuration: where every call to action leads when no forge link can be built. */
+  contributeUrl?: string;
+  /** `sources[].folders` of the configuration, by source name: the titles and descriptions of the folders. */
+  folders?: SiteFolders;
   /** The `ref` of every source that declares one, for the edit links when `edit_url` is unset. */
   sourceRefs?: Record<string, string>;
   /** The `description` of every source that declares one: the content of its space on the spaces page. */
@@ -185,7 +196,7 @@ function chromeFor(
     spaces: {
       label: message(context, "site.spaces"),
       href: relativeHref(page, SPACES_PAGE),
-      items: spaceLinksOf(page, spaces),
+      items: spaceLinksOf(context, page, spaces),
     },
     navigation: [
       { label: message(context, "nav.index"), href: relativeHref(page, INDEX_PAGE) },
@@ -300,6 +311,8 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     locale: input.locale,
     ...(input.names === undefined ? {} : { names: input.names }),
     ...(input.editUrl === undefined ? {} : { editUrl: input.editUrl }),
+    ...(input.contributeUrl === undefined ? {} : { contributeUrl: input.contributeUrl }),
+    ...(input.folders === undefined ? {} : { folders: input.folders }),
     ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
     ...(input.sourceDescriptions === undefined
       ? {}

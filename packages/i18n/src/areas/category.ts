@@ -8,11 +8,13 @@ export const categoryMessages = {
   fr,
   arguments: {
     "category.all": {},
+    "category.filedUnder": { count: "plural", path: "argument" },
     "category.firstLine": {},
     "category.links": {},
     "category.linksNote": { name: "argument" },
     "category.page": {},
     "category.pages": { count: "plural" },
+    "category.pagesName": {},
     "category.pagination": {},
     "category.searchIn": { name: "argument" },
     "category.shown": { shown: "argument", name: "argument", total: "argument" },

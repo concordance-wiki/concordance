@@ -35,6 +35,11 @@
         "edit_url": {
           "description": "Pattern of the edit link in the footer of every page, with {source}, {path} and {commit} placeholders. Without it, a source hosted on github.com or on a GitLab instance gets the edit URL of its forge, and a local source gets none.",
           "type": "string"
+        },
+        "contribute_url": {
+          "description": "HTTPS address every call to action of the site leads to when no forge link can be built for it: proposing a definition, editing a page. Without it and without a forge link, the call to action is not shown.",
+          "type": "string",
+          "pattern": "^https://[^\\s]+$"
         }
       }
     },
@@ -207,10 +212,38 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           },
+          "title": {
+            "description": "Title of the space of the source, shown wherever the site names it: the tree, the breadcrumb, the spaces and the facets; the name stands in without it and stays the identifier in every address.",
+            "type": "string",
+            "minLength": 1
+          },
           "description": {
             "description": "One sentence saying what the source holds, shown as the content of its space on the spaces page; without it, the dominant types of the space stand in.",
             "type": "string",
             "minLength": 1
+          },
+          "folders": {
+            "description": "The folders of the source the site titles and describes, keyed by their path relative to the source root, such as rules/links; a folder not listed is named as written.",
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[^/\\s][^\\s]*[^/\\s]$|^[^/\\s]$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "description": "Title of the folder wherever the site names it: the tree, the breadcrumb, the categories of the space and the heading of its list.",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "description": "One sentence on what the folder holds, shown on its card on the page of the space.",
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
           },
           "glossary": {
             "description": "Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary.",

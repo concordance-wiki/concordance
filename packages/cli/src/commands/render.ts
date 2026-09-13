@@ -23,6 +23,7 @@ import {
   isContractUrl,
   parseFragment,
   type EntityFragment,
+  type SiteFolders,
   type SiteNames,
 } from "@concordance-wiki/site";
 
@@ -64,7 +65,24 @@ export function siteNames(config: Config): SiteNames {
     }
   };
   walk(config.domains ?? [], "");
-  return { applications, domains };
+  const sources: Record<string, string> = {};
+  for (const source of config.sources) {
+    if (source.title !== undefined) {
+      sources[source.name] = source.title;
+    }
+  }
+  return { applications, domains, sources };
+}
+
+/** The `folders` of every source that declares some, by source name: the titles and descriptions of its folders. */
+export function sourceFolders(config: Config): SiteFolders {
+  const folders: SiteFolders = {};
+  for (const source of config.sources) {
+    if (source.folders !== undefined) {
+      folders[source.name] = source.folders;
+    }
+  }
+  return folders;
 }
 
 /** The fragments written next to the model, by entity; an entity without one renders without sections. */
@@ -228,9 +246,13 @@ export async function renderSite(
     names: siteNames(config),
     sourceRefs: sourceRefs(config),
     sourceDescriptions: sourceDescriptions(config),
+    folders: sourceFolders(config),
     tokenize: (text, locale) => searchTokens(text, languagePack(locale)),
     glossarySources: [...glossarySources(config)],
     ...(config.project.edit_url === undefined ? {} : { editUrl: config.project.edit_url }),
+    ...(config.project.contribute_url === undefined
+      ? {}
+      : { contributeUrl: config.project.contribute_url }),
     ...(config.build?.mentions_inline === undefined
       ? {}
       : { mentionsInline: config.build.mentions_inline }),

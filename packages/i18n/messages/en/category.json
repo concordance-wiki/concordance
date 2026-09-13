@@ -3,6 +3,10 @@
     "defaultMessage": "All",
     "description": "Entry of the attribute selector of a category list that lifts the filter."
   },
+  "category.filedUnder": {
+    "defaultMessage": "{count, plural, one {# page filed under {path}} other {# pages filed under {path}}}",
+    "description": "Count of a category that is a folder below the top of its space, a year or a month, above the list; the path names the folders on the way, separated by ›."
+  },
   "category.firstLine": {
     "defaultMessage": "First line",
     "description": "Heading of the column of a category list giving the summary of every page."
@@ -22,6 +26,10 @@
   "category.pages": {
     "defaultMessage": "{count, plural, one {# page} other {# pages}}",
     "description": "Count of a category whose folder maps to no type, above the list."
+  },
+  "category.pagesName": {
+    "defaultMessage": "pages",
+    "description": "What the sentences of the list of a year or a month count with, in place of a folder name."
   },
   "category.pagination": {
     "defaultMessage": "Pages of the list",

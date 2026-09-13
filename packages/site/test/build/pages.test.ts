@@ -405,11 +405,12 @@ describe("entityPageOf", () => {
     ).toBe(1);
   });
 
-  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to its page, the folders at the top and the first step to their lists", () => {
+  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to its page, every folder and every step to their lists", () => {
     const props = entityPageOf(context(), screen);
     expect(props.space).toEqual({
       name: "specs",
       initials: "SP",
+      href: "../../index.html",
       nodes: [
         { label: "rules", count: 1, href: "../../rules/index.html" },
         {
@@ -429,6 +430,7 @@ describe("entityPageOf", () => {
     expect(glossary).toEqual({
       name: "glossary",
       initials: "GL",
+      href: "../index.html",
       nodes: [
         { label: "Keyword page", current: true },
         { label: "Page", href: "../page/index.html" },
@@ -438,7 +440,7 @@ describe("entityPageOf", () => {
       { label: "glossary", href: "../index.html" },
       { label: "Keyword page" },
     ]);
-    // A page two folders deep opens both, its siblings listed at every level.
+    // A page two folders deep opens both, its siblings listed at every level, every folder linked to its list.
     const deep = entity({
       ...screen,
       id: "specs/screens/service/query",
@@ -464,6 +466,7 @@ describe("entityPageOf", () => {
           {
             label: "service",
             count: 2,
+            href: "../index.html",
             children: [
               { label: "Other", href: "../other/index.html" },
               { label: "Query", current: true },
@@ -476,9 +479,38 @@ describe("entityPageOf", () => {
     expect(breadcrumbOf(nested, "specs/screens/service/query/index.html", deep)).toEqual([
       { label: "specs", href: "../../../index.html" },
       { label: "screens", href: "../../index.html" },
+      { label: "service", href: "../index.html" },
+      { label: "Query" },
+    ]);
+    // A note that takes the address of a deeper folder: that folder alone has no list to link to.
+    const service = entity({
+      id: "specs/screens/service",
+      type: "document",
+      title: "Service",
+      source: { name: "specs", path: "screens/service.md", line: 1 },
+    });
+    const shadowedDeep = context({
+      model: model({ entities: [...model().entities, deep, sibling, service] }),
+    });
+    expect(breadcrumbOf(shadowedDeep, "specs/screens/service/query/index.html", deep)).toEqual([
+      { label: "specs", href: "../../../index.html" },
+      { label: "screens", href: "../../index.html" },
       { label: "service" },
       { label: "Query" },
     ]);
+    const [, screensNode] = spaceOf(
+      shadowedDeep,
+      "specs/screens/service/query/index.html",
+      deep,
+    ).nodes;
+    expect(screensNode?.children?.[0]).toEqual({
+      label: "service",
+      count: 2,
+      children: [
+        { label: "Other", href: "../other/index.html" },
+        { label: "Query", current: true },
+      ],
+    });
     // A note that takes the address of a folder at the top: the folder has no list to link to.
     const taken = entity({
       id: "specs/screens",
@@ -535,7 +567,7 @@ describe("entityPageOf", () => {
       "notes:1",
       "specs:2",
     ]);
-    expect(spaceLinksOf(pagePath, spaceCountsOf(context()).slice(1))).toEqual([
+    expect(spaceLinksOf(context(), pagePath, spaceCountsOf(context()).slice(1))).toEqual([
       { label: "glossary", href: "../index.html", initials: "GL", count: 2 },
       { label: "specs", href: "../../specs/index.html", initials: "SP", count: 2 },
     ]);
@@ -1451,6 +1483,7 @@ describe("keywordPageOf", () => {
     expect(props.space).toEqual({
       name: "glossary",
       initials: "GL",
+      href: "../../glossary/index.html",
       nodes: [
         { label: "build summary", current: true },
         { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },

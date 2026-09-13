@@ -36,6 +36,7 @@ The project: its name, its interface language, its theme file and its edit link.
 | `locale` | string | `"en"` | pattern `^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$` | Interface language and default locale of the sources, as a BCP 47 tag; the engine ships en and fr, plugins may add others. |
 | `theme` | string | — | — | Path of the theme file, relative to this configuration. Without it, theme.yaml next to the configuration is used when it exists, else a neutral default theme. |
 | `edit_url` | string | — | — | Pattern of the edit link in the footer of every page, with {source}, {path} and {commit} placeholders. Without it, a source hosted on github.com or on a GitLab instance gets the edit URL of its forge, and a local source gets none. |
+| `contribute_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address every call to action of the site leads to when no forge link can be built for it: proposing a definition, editing a page. Without it and without a forge link, the call to action is not shown. |
 
 ## `plugins[]`
 
@@ -106,7 +107,9 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | `type` | string | — | pattern `^[a-z][a-z0-9_]*$` | Type given to every markdown file of the source, above default_type and below the rules and the frontmatter. |
 | `default_type` | string | `"document"` | pattern `^[a-z][a-z0-9_]*$` | Type of a note when nothing else applies. |
 | `application` | string | — | pattern `^[a-z][a-z0-9-]*$` | Application every entity of the source belongs to, unless a rule or the frontmatter says otherwise. |
+| `title` | string | — | non-empty | Title of the space of the source, shown wherever the site names it: the tree, the breadcrumb, the spaces and the facets; the name stands in without it and stays the identifier in every address. |
 | `description` | string | — | non-empty | One sentence saying what the source holds, shown as the content of its space on the spaces page; without it, the dominant types of the space stand in. |
+| `folders` | map of object | — | keys: pattern `^[^/\s][^\s]*[^/\s]$\|^[^/\s]$` | The folders of the source the site titles and describes, keyed by their path relative to the source root, such as rules/links; a folder not listed is named as written. See [`sources[].folders.*`](#sourcesfolders). |
 | `glossary` | boolean | `false` | — | Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary. |
 | `convert` | boolean | `false` | — | Whether the office documents of the source are converted, for preview and text extraction. |
 | `previews` | boolean | `true` | — | Whether the previews of the converted documents of the source are published with the site; false keeps them out of the artefact. |
@@ -114,6 +117,15 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | `rules` | object[] | — | — | Typing rules evaluated in order on every file of the source; the last matching rule wins, over type and under the frontmatter. See [`sources[].rules[]`](#sourcesrules). |
 | `provider` | string | — | — | Provider of a tracker source; accepted but not read in this version. |
 | `project` | string | — | — | Project identifier in the tracker of a tracker source; accepted but not read in this version. |
+
+### `sources[].folders.*`
+
+The folders of the source the site titles and describes, keyed by their path relative to the source root, such as rules/links; a folder not listed is named as written.
+
+| Key | Type | Default | Allowed values | Description |
+|---|---|---|---|---|
+| `title` | string | — | non-empty | Title of the folder wherever the site names it: the tree, the breadcrumb, the categories of the space and the heading of its list. |
+| `description` | string | — | non-empty | One sentence on what the folder holds, shown on its card on the page of the space. |
 
 ### `sources[].rules[]`
 

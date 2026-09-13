@@ -411,15 +411,18 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(entity).toContain(
       '<div class="drawer-space"><details class="space-tree" open><summary class="space-head"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></summary>',
     );
-    // The tree of the column is the same, served closed; the drawer copy is no landmark.
+    // The tree of the column is the same, served closed under the link to the space; the drawer copy is no landmark.
     expect(entity).toContain(
-      '<nav class="space" aria-label="Tree of the space"><details class="space-tree"><summary class="space-head">',
+      '<nav class="space" aria-label="Tree of the space"><a class="space-head space-head-link" href="../index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></a><details class="space-tree"><summary class="space-head">',
     );
     expect(entity.match(/<nav class="space"/g)).toHaveLength(1);
     // A keyword page is filed in the glossary: its drawer carries that tree, the word at its place.
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
     expect(keyword).toContain(
       '<div class="drawer-space"><details class="space-tree" open><summary class="space-head"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></summary>',
+    );
+    expect(keyword).toContain(
+      '<nav class="space" aria-label="Tree of the space"><a class="space-head space-head-link" href="../../glossary/index.html">',
     );
     expect(keyword).toContain('<li class="space-page space-current"><span aria-current="page">');
     expect(keyword.match(/<nav class="space"/g)).toHaveLength(1);

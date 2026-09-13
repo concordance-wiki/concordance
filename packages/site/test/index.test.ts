@@ -102,6 +102,7 @@ const PART: Readonly<Record<string, readonly string[]>> = {
     "SPACE_PAGES_MAX",
     "breadcrumbOf",
     "categoryOf",
+    "folderTreeOf",
     "initialsOf",
     "spaceCountsOf",
     "spaceLinksOf",

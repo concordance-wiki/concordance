@@ -260,6 +260,23 @@ describe("freshness", () => {
       text: "framing. Le seuil d'alerte est fixé à 180 jours dans la configuration.",
     });
   });
+
+  it("names a dormant space by its title, the source behind it read from the space, or from its name when the space carries none", () => {
+    const titled = fresh({ names: { sources: { framing: "Framing decks" } } });
+    expect(alertsOf(titled, spacesOf(titled)).map((alert) => [alert.space, alert.text])).toEqual([
+      [
+        "Framing decks",
+        "Framing decks. The alert threshold is set to 180 days in the configuration.",
+      ],
+    ]);
+    expect(spacesOf(titled)[0]?.source).toBe("framing");
+    const nameless = spacesOf(fresh()).map((space) => {
+      const { source, ...rest } = space;
+      expect(source).toBeDefined();
+      return rest;
+    });
+    expect(alertsOf(fresh(), nameless).map((alert) => alert.space)).toEqual(["framing"]);
+  });
 });
 
 describe("homeOf", () => {

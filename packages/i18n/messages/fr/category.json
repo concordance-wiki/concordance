@@ -1,10 +1,12 @@
 {
   "category.all": "Tous",
+  "category.filedUnder": "{count, plural, one {# page rangée sous {path}} other {# pages rangées sous {path}}}",
   "category.firstLine": "Première ligne",
   "category.links": "Liens",
   "category.linksNote": "La colonne « Liens » compte les pages en relation, ce qui fait remonter les {name} les plus centraux du parcours.",
   "category.page": "Page",
   "category.pages": "{count, plural, one {# page} other {# pages}}",
+  "category.pagesName": "pages",
   "category.pagination": "Pages de la liste",
   "category.searchIn": "Rechercher dans les {name}",
   "category.shown": "{shown} {name} sur {total} — pagination par vingt.",
