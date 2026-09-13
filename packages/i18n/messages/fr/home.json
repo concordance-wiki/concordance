@@ -4,6 +4,7 @@
   "home.documents": "{count, plural, one {# document} other {# documents}}",
   "home.enterKey": "Entrée",
   "home.explanation": "Tapez un mot du métier. S'il est employé quelque part dans la documentation, il a une page — même si personne ne l'a encore défini.",
+  "home.glossaryTerm": "Terme du glossaire — cité dans {count, plural, one {# page} other {# pages}}",
   "home.matches": "{count, plural, one {# correspondance} other {# correspondances}}",
   "home.moreSpaces": "{count, plural, one {# espace de plus, moins cité} other {# espaces de plus, moins cités}}",
   "home.mostCited": "Les plus citées",
@@ -15,5 +16,6 @@
   "home.spacesLead": "alimentés par vos dépôts",
   "home.stale": "Un espace n'a pas bougé depuis {count, plural, one {# jour} other {# jours}}",
   "home.staleThreshold": "{space}. Le seuil d'alerte est fixé à {count, plural, one {# jour} other {# jours}} dans la configuration.",
+  "home.typeSummary": "'{type}' — '{summary}'",
   "home.usedIn": "Employé dans {count, plural, one {# document} other {# documents}}, jamais défini"
 }

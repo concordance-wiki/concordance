@@ -16,12 +16,12 @@ import { citations, message, spaceTitle, type SiteContext } from "./context.js";
 import { entityHref, HOME_PAGE, spaceHref } from "./paths.js";
 import { spaceInitials } from "./space.js";
 
-/** The most cited words offered as shortcuts next to the search field. */
-export const HOME_SHORTCUTS = 12;
+/** The most cited words offered as shortcuts next to the search field: one line of chips. */
+export const HOME_SHORTCUTS = 5;
 /** The spaces in view; the others fold behind a line counting them. */
 export const HOME_SPACES_SHOWN = 5;
 /** The latest changes the home page lists. */
-export const HOME_RECENT = 8;
+export const HOME_RECENT = 4;
 /** Days without a change after which a source is dormant when `staleness.warn_after_days` says nothing. */
 export const DEFAULT_WARN_AFTER_DAYS = 180;
 
@@ -36,12 +36,22 @@ export function mentionCount(context: SiteContext, entity: Entity): number {
   return typeof occurrences === "number" ? occurrences : 0;
 }
 
-/** The most cited pages first, the identifier breaking ties; a page nobody cites is left out. */
+/**
+ * The most cited pages first, the identifier breaking ties, one page per title: two pages of the
+ * same title would read as one chip twice, so the most cited of them stands for both; a page
+ * nobody cites is left out.
+ */
 export function shortcutsOf(context: SiteContext): Link[] {
+  const titles = new Set<string>();
   return [...context.model.entities]
     .map((entity) => ({ entity, count: mentionCount(context, entity) }))
     .filter(({ count }) => count > 0)
     .sort((a, b) => b.count - a.count || byCodeUnit(a.entity.id, b.entity.id))
+    .filter(({ entity }) => {
+      if (titles.has(entity.title)) return false;
+      titles.add(entity.title);
+      return true;
+    })
     .slice(0, HOME_SHORTCUTS)
     .map(({ entity }) => ({ label: entity.title, href: entityHref(HOME_PAGE, entity.id) }));
 }
@@ -214,6 +224,8 @@ export function suggestionLabels(catalogue: Catalogue): SuggestionLabels {
   return {
     matches: pluralForms(catalogue, "home.matches"),
     usedIn: pluralForms(catalogue, "home.usedIn"),
+    typeSummary: formatMessage(catalogue, "home.typeSummary"),
+    glossaryTerm: pluralForms(catalogue, "home.glossaryTerm"),
     browse: formatMessage(catalogue, "home.browse"),
     enter: formatMessage(catalogue, "home.enterKey"),
     open: formatMessage(catalogue, "home.open"),

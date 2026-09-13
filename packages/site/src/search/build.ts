@@ -77,6 +77,8 @@ export interface SearchIndexInput {
   /** The locale the counts are pluralised in. */
   locale: Locale;
   names?: SiteNames;
+  /** The names of the glossary sources, whose notes the live results present as glossary terms. */
+  glossarySources?: readonly string[];
   /** Characters of the body text indexed per entity, the rest being cut. */
   bodyMaxChars?: number;
 }
@@ -335,6 +337,7 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
         entries.map((entry) => entry.source),
         (name) => names.sources?.[name] ?? name,
       ),
+      glossary: [...new Set(input.glossarySources ?? [])].sort(byCodeUnit),
       counts: countFacets(entries, emptyState()),
       labels: input.labels,
       locale: input.locale,

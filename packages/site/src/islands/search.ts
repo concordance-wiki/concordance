@@ -200,16 +200,49 @@ export function closestOf(state: SearchState, meta: SearchMeta): ClosestFormProp
   };
 }
 
-/** A hit as the live results show it: the title, the type or the documents of a keyword page, the space, the href from the page through `root`. */
+/**
+ * A hit as the live results show it: the title, the href from the page through `root`, the
+ * space, and what the detail line reads: the documents of a keyword page, the citations of a
+ * note of a glossary source, the type and the summary of any other note.
+ */
 export function suggestionOf(entry: SearchEntry, meta: SearchMeta, root: string): Suggestion {
   const typeLabel = meta.types[entry.type];
   return {
     title: entry.title,
     href: `${root}${entry.url}`,
     ...(typeLabel === undefined ? {} : { typeLabel }),
-    ...(entry.keyword === true ? { keyword: true, documents: entry.documents ?? 0 } : {}),
+    ...(entry.keyword === true
+      ? { keyword: true, documents: entry.documents ?? 0 }
+      : {
+          ...(entry.summary === undefined ? {} : { summary: entry.summary }),
+          ...(meta.glossary.includes(entry.source) ? { glossary: true } : {}),
+          cited: entry.cited ?? 0,
+        }),
     space: meta.sources[entry.source] ?? entry.source,
   };
+}
+
+/** The folders of an entry under its space, `objects/ingestion` for `specs/objects/ingestion/source`; empty for a page at the root of its space. */
+function folderOf(entry: SearchEntry): string {
+  return entry.id.split("/").slice(1, -1).join("/");
+}
+
+/**
+ * The rows of the live results, those sharing a title told apart: by their space when no
+ * namesake shares it, by their folder otherwise, the space again for a page at its root.
+ */
+export function disambiguated(
+  rows: readonly { entry: SearchEntry; suggestion: Suggestion }[],
+): Suggestion[] {
+  return rows.map(({ entry, suggestion }) => {
+    const namesakes = rows.filter((row) => row.suggestion.title === suggestion.title);
+    if (namesakes.length < 2) return suggestion;
+    const sameSpace = namesakes.filter((row) => row.suggestion.space === suggestion.space);
+    return {
+      ...suggestion,
+      qualifier: sameSpace.length === 1 ? suggestion.space : folderOf(entry) || suggestion.space,
+    };
+  });
 }
 
 /**
@@ -686,7 +719,12 @@ function suggest<P extends SearchPanel>(
     const shown =
       meta === undefined || queryWords(query).length === 0
         ? []
-        : hits.slice(0, SUGGESTIONS).map((hit) => suggestionOf(hit.entry, meta, site));
+        : disambiguated(
+            hits.slice(0, SUGGESTIONS).map((hit) => ({
+              entry: hit.entry,
+              suggestion: suggestionOf(hit.entry, meta, site),
+            })),
+          );
     const total = shown.length === 0 ? 0 : hits.length;
     const locale = meta?.locale ?? "en";
     if (field.panel !== null) {

@@ -135,6 +135,8 @@ export interface SearchMeta {
   domains: Record<string, string>;
   /** The declared sources, each labelled by its title, else its name, so that the facet lists them like the others. */
   sources: Record<string, string>;
+  /** The names of the glossary sources, sorted: a note of one of them is a glossary term, whose row in the live results counts its citations rather than quoting its definition. */
+  glossary: string[];
   /** The counts of every facet value over the whole table: what the results page shows before a query. */
   counts: FacetCounts;
   labels: SearchLabels;

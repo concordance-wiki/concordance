@@ -19,6 +19,10 @@
     "defaultMessage": "Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.",
     "description": "Explanation under the question that heads the home page, saying that every word used has a page."
   },
+  "home.glossaryTerm": {
+    "defaultMessage": "Glossary term — cited in {count, plural, one {# page} other {# pages}}",
+    "description": "Under the title of a glossary term in the live results of a search field, counting the pages that cite it in place of its definition."
+  },
   "home.matches": {
     "defaultMessage": "{count, plural, one {# match} other {# matches}}",
     "description": "Number of pages a query matches, shown in the search field of the home page as the reader types."
@@ -62,6 +66,10 @@
   "home.staleThreshold": {
     "defaultMessage": "{space}. The alert threshold is set to {count, plural, one {# day} other {# days}} in the configuration.",
     "description": "Text of the alert on a dormant space, naming the space and the threshold of the configuration in days."
+  },
+  "home.typeSummary": {
+    "defaultMessage": "'{type}' — '{summary}'",
+    "description": "Under the title of a note in the live results of a search field: its type, then its first line, the quoted placeholders being filled in the browser."
   },
   "home.usedIn": {
     "defaultMessage": "Used in {count, plural, one {# document} other {# documents}}, never defined",

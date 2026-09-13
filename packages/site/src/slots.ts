@@ -134,6 +134,10 @@ export interface SuggestionLabels {
   matches: CountForms;
   /** Under the title of a keyword page: "Used in N documents, never defined". */
   usedIn: CountForms;
+  /** The detail line of a note, "{type} — {summary}", the placeholders filled in the browser. */
+  typeSummary: string;
+  /** The detail line of a glossary term: "Glossary term — cited in N pages". */
+  glossaryTerm: CountForms;
   /** The keyboard help: the arrow keys "browse", the Enter key "open". */
   browse: string;
   enter: string;

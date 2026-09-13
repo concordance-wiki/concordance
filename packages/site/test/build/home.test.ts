@@ -61,9 +61,13 @@ describe("shortcutsOf", () => {
     ]);
   });
 
-  it("stops at twelve shortcuts and leaves out a page nobody cites", () => {
-    const cited = Array.from({ length: 15 }, (_, index) =>
-      entity({ id: `glossary/word-${String(index).padStart(2, "0")}`, type: "term", title: "w" }),
+  it("stops at five shortcuts and leaves out a page nobody cites", () => {
+    const cited = Array.from({ length: 8 }, (_, index) =>
+      entity({
+        id: `glossary/word-${String(index).padStart(2, "0")}`,
+        type: "term",
+        title: `w${String(index)}`,
+      }),
     );
     const ctx = context({
       model: model({
@@ -78,11 +82,41 @@ describe("shortcutsOf", () => {
       }),
     });
     const shortcuts = shortcutsOf(ctx);
-    expect(HOME_SHORTCUTS).toBe(12);
-    expect(shortcuts).toHaveLength(12);
+    expect(HOME_SHORTCUTS).toBe(5);
+    expect(shortcuts).toHaveLength(5);
     expect(shortcuts[0]?.href).toBe("glossary/word-00/index.html");
-    expect(shortcuts[11]?.href).toBe("glossary/word-11/index.html");
+    expect(shortcuts[4]?.href).toBe("glossary/word-04/index.html");
     expect(shortcuts.some((link) => link.label === "Page")).toBe(false);
+  });
+
+  it("offers one chip per title, the most cited of two pages of the same title standing for both", () => {
+    const twins = [
+      entity({ id: "specs/objects/source", type: "business_object", title: "Source" }),
+      entity({ id: "glossary/source", type: "term", title: "Source" }),
+      entity({ id: "glossary/note", type: "term", title: "Note" }),
+    ];
+    const citing = (to: string, from: string) => ({
+      from,
+      to,
+      relation: "related",
+      confidence: 0.5,
+      provenance: [],
+    });
+    const ctx = context({
+      model: model({
+        entities: [...twins, page],
+        links: [
+          citing("glossary/source", "glossary/page"),
+          citing("glossary/source", "specs/objects/source"),
+          citing("specs/objects/source", "glossary/page"),
+          citing("glossary/note", "glossary/page"),
+        ],
+      }),
+    });
+    expect(shortcutsOf(ctx)).toEqual([
+      { label: "Source", href: "glossary/source/index.html" },
+      { label: "Note", href: "glossary/note/index.html" },
+    ]);
   });
 });
 
@@ -224,16 +258,16 @@ describe("freshness", () => {
     ]);
   });
 
-  it("stops at eight changes and breaks a tie on the instant by identifier", () => {
+  it("stops at four changes and breaks a tie on the instant by identifier", () => {
     const same = "2026-09-01T00:00:00.000Z";
-    const notes = Array.from({ length: 12 }, (_, index) =>
-      dated(`glossary/n-${String(11 - index).padStart(2, "0")}`, "glossary", "n.md", same),
+    const notes = Array.from({ length: 6 }, (_, index) =>
+      dated(`glossary/n-${String(5 - index).padStart(2, "0")}`, "glossary", "n.md", same),
     );
     const recent = recentOf(context({ model: model({ entities: notes }) }));
-    expect(HOME_RECENT).toBe(8);
-    expect(recent).toHaveLength(8);
+    expect(HOME_RECENT).toBe(4);
+    expect(recent).toHaveLength(4);
     expect(recent[0]?.label).toBe("n-00");
-    expect(recent[7]?.label).toBe("n-07");
+    expect(recent[3]?.label).toBe("n-03");
   });
 
   it("raises one alert per dormant space, in the order of the spaces, counting the days since its newest change and naming its threshold", () => {
@@ -334,6 +368,11 @@ describe("homeOf", () => {
         one: "Used in # document, never defined",
         other: "Used in # documents, never defined",
       },
+      typeSummary: "{type} — {summary}",
+      glossaryTerm: {
+        one: "Glossary term — cited in # page",
+        other: "Glossary term — cited in # pages",
+      },
       browse: "browse",
       enter: "Enter",
       open: "open",
@@ -346,5 +385,11 @@ describe("homeOf", () => {
       other: "Voir les # résultats",
     });
     expect(fr.enter).toBe("Entrée");
+    expect(fr.typeSummary).toBe("{type} — {summary}");
+    expect(fr.glossaryTerm).toEqual({
+      many: "Terme du glossaire — cité dans # pages",
+      one: "Terme du glossaire — cité dans # page",
+      other: "Terme du glossaire — cité dans # pages",
+    });
   });
 });

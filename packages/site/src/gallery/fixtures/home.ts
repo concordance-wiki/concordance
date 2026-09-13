@@ -82,9 +82,9 @@ function corporateSpace(
 }
 
 /**
- * The home page of the corporate state: the question and the field with its shortcuts, five
- * spaces of the fixtures corpus with two more folded, the pages changed last, and the alert on
- * the space that has not moved past the threshold.
+ * The home page of the corporate state: the question and the field, five shortcuts on one line,
+ * five spaces of the fixtures corpus with two more folded, the four pages changed last, and the
+ * alert on the space that has not moved past the threshold.
  */
 export const corporateHome: SlotProps["Home"] = {
   search: { action: "search/", placeholder: "Search the documentation" },
@@ -94,7 +94,6 @@ export const corporateHome: SlotProps["Home"] = {
     { label: "Keyword page", href: "glossary/publication/keyword-page/" },
     { label: "Source", href: "glossary/ingestion/source/" },
     { label: "Mentions panel", href: "specs/screens/mentions-panel/" },
-    { label: "build summary", href: "keywords/build-summary/" },
   ],
   spaces: [
     corporateSpace("glossary", "GL", 48, "pages", "2026-09-11", "2 days ago"),

@@ -186,11 +186,17 @@ describe("buildSearchIndex", () => {
     expect(meta.applications).toEqual({ probe: "Probe application" });
     expect(meta.domains).toEqual({ probe: "probe" });
     expect(meta.sources).toEqual({ probe: "probe", specs: "Specifications" });
+    expect(meta.glossary).toEqual([]);
     expect(meta.labels).toBe(labels);
     expect(meta.locale).toBe("en");
     expect(meta.shards).toEqual([...meta.shards].sort());
     expect(meta.shards).toContain("pr");
     expect(meta.bytes).toBeGreaterThan(0);
+  });
+
+  it("names the glossary sources in the table, sorted and once each, so that the live results know a glossary term", () => {
+    const { meta } = buildSearchIndex(input({ glossarySources: ["specs", "glossary", "specs"] }));
+    expect(meta.glossary).toEqual(["glossary", "specs"]);
   });
 
   it("carries what a row shows beyond the title: the summary, the other names, the broader term by its title, and the pages citing the entity", () => {
