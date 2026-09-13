@@ -112,11 +112,14 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(files).toContain("search/meta.js");
     expect(files).toContain("search/sc.js");
     expect(files).toContain("assets/site.css");
-    // One note fragment per entity, and one mentions fragment per entity another note cites.
+    // One note fragment per entity, and one mentions fragment per entity with a related page, the keyword pages among them.
     expect(io.fs.listFiles("/work/dist/fragments")).toEqual([
       "keywords/build-summary.json",
+      "keywords/build-summary.mentions.json",
       "keywords/build.json",
+      "keywords/build.mentions.json",
       "keywords/summary.json",
+      "keywords/summary.mentions.json",
       "notes/a.json",
       "notes/a.mentions.json",
       "notes/a/figures/a.svg",

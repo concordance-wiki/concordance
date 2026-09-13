@@ -49,12 +49,11 @@ describe("One mentions fragment per entity, never a global index, on the realist
     rmSync(output, { recursive: true, force: true });
   });
 
-  it("writes fragments/<id>.mentions.json for exactly the entities another note cites, and nothing global", () => {
+  it("writes fragments/<id>.mentions.json for exactly the entities with a related page, and nothing global", () => {
     const written = files.filter((file) => file.endsWith(".mentions.json")).sort();
     expect(written.length).toBeGreaterThan(50);
-    // The entities whose page counts at least one mention; keyword pages list passages instead.
+    // The entities whose page counts at least one related page, the keyword pages among them.
     const cited = model.entities
-      .filter((entity) => entity.keyword !== true)
       .filter((entity) => {
         const page = readFileSync(join(output, pagePath(entity.id)), "utf8");
         return !page.includes('<h2 id="mentions-title">Related pages <span class="count">0</span>');
@@ -83,9 +82,10 @@ describe("One mentions fragment per entity, never a global index, on the realist
     }
   });
 
-  it("serves the first twenty mentions of the most cited entity in its page, one entry per citing page, the rest reachable through its fragment", () => {
+  it("serves the first twenty mentions of the most cited entity in its page, one entry per related page, the rest reachable through its fragment", () => {
+    // The notes alone: a keyword page lists the pages using the word, none of which writes a link to it.
     const fragments = files
-      .filter((file) => file.endsWith(".mentions.json"))
+      .filter((file) => file.endsWith(".mentions.json") && !file.startsWith("fragments/keywords/"))
       .map((file) => JSON.parse(readFileSync(join(output, file), "utf8")) as MentionsFragment)
       .sort((a, b) => b.mentions.length - a.mentions.length);
     const [most] = fragments;
@@ -111,8 +111,10 @@ describe("One mentions fragment per entity, never a global index, on the realist
     for (const href of pages) {
       expect(page).toContain(`<a class="related-title" href="${href}">`);
     }
-    expect(inline.some((mention) => mention.kind === "written")).toBe(true);
-    expect(page).toContain('<span class="related-mark">Cited · </span>');
+    expect(most.mentions.some((mention) => mention.kind === "written")).toBe(true);
+    expect(page.includes('<span class="related-mark">Cited · </span>')).toBe(
+      inline.some((mention) => mention.kind === "written"),
+    );
   });
 
   it("marks the words naming the entity in the passages the scan kept, as written in the note", () => {
