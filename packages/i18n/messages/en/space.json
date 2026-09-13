@@ -1,0 +1,38 @@
+{
+  "space.browse": {
+    "defaultMessage": "Browse",
+    "description": "Heading of the categories of a space page, the top-level folders of its repository."
+  },
+  "space.categoriesLead": {
+    "defaultMessage": "{count, plural, one {# category, as filed in the repository} other {# categories, as filed in the repository}}",
+    "description": "After the browse heading of a space page, counting its categories."
+  },
+  "space.categoriesNote": {
+    "defaultMessage": "Each category opens its own list. The tree on the left appears only once in a page, so that nothing has to be unfolded from the home page.",
+    "description": "Note under the categories of a space page, saying that each one opens a list and that the page carries no tree."
+  },
+  "space.footer": {
+    "defaultMessage": "A space reads like a small wiki within the wiki: its own search, its own vocabulary, its own news.",
+    "description": "Closing sentence of a space page, at the foot of its right column."
+  },
+  "space.mostCited": {
+    "defaultMessage": "The most cited words here",
+    "description": "Heading of the most cited words of a space page, counted in that space only."
+  },
+  "space.repository": {
+    "defaultMessage": "repository",
+    "description": "Lead of the repository name on the line under the title of a space page."
+  },
+  "space.searchPlaceholder": {
+    "defaultMessage": "Search in this space",
+    "description": "Placeholder of the search field on a space page, whose query is confined to the space."
+  },
+  "space.updated": {
+    "defaultMessage": "updated {when}",
+    "description": "Last change of a space on the line under its title, the relative duration rendered separately."
+  },
+  "space.wordsNote": {
+    "defaultMessage": "Counted in this space only, which gives its own vocabulary.",
+    "description": "Note under the most cited words of a space page."
+  }
+}

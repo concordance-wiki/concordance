@@ -1,0 +1,10 @@
+{
+  "transcript.duration": {
+    "defaultMessage": "Duration",
+    "description": "Label of the total duration of a transcript."
+  },
+  "transcript.speakers": {
+    "defaultMessage": "Speakers",
+    "description": "Heading of the list of speakers of a transcript."
+  }
+}

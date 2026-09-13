@@ -1,0 +1,42 @@
+{
+  "site.generatedAt": {
+    "defaultMessage": "Generated on {date, date, long}",
+    "description": "Footer line giving the day the site was built."
+  },
+  "site.home": {
+    "defaultMessage": "Home",
+    "description": "Link to the landing page of the site."
+  },
+  "site.index": {
+    "defaultMessage": "Index",
+    "description": "Link to the alphabetical index of entries."
+  },
+  "site.recent": {
+    "defaultMessage": "Recent",
+    "description": "Link of the top bar to the latest changes on the home page."
+  },
+  "site.search": {
+    "defaultMessage": "Search",
+    "description": "Label of the search field and of the search page."
+  },
+  "site.searchPlaceholder": {
+    "defaultMessage": "Search the documentation",
+    "description": "Placeholder shown inside the empty search field."
+  },
+  "site.skipToContent": {
+    "defaultMessage": "Skip to content",
+    "description": "Link that jumps over the navigation to the main content."
+  },
+  "site.spaces": {
+    "defaultMessage": "Spaces",
+    "description": "Link of the top bar to the sources, listed as spaces on the home page."
+  },
+  "site.todo": {
+    "defaultMessage": "To do",
+    "description": "Link to the page listing the findings of the build."
+  },
+  "site.version": {
+    "defaultMessage": "Version",
+    "description": "Label preceding the version of the generated site."
+  }
+}

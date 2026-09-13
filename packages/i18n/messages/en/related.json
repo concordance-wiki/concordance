@@ -1,0 +1,70 @@
+{
+  "related.cited": {
+    "defaultMessage": "Cited",
+    "description": "Prefix of a related page that writes a link to the current one."
+  },
+  "related.clearAll": {
+    "defaultMessage": "Clear all",
+    "description": "Link that lifts every type filter of the related pages."
+  },
+  "related.filter": {
+    "defaultMessage": "Filter these pages",
+    "description": "Placeholder of the text filter of the related pages."
+  },
+  "related.fullList": {
+    "defaultMessage": "Open the full list (JSON)",
+    "description": "Link to the fragment of every mention, offered before any script runs."
+  },
+  "related.loadingOthers": {
+    "defaultMessage": "Loading the other pages…",
+    "description": "Text of the button while the other related pages load."
+  },
+  "related.noMatch": {
+    "defaultMessage": "No page matches the filter.",
+    "description": "Notice shown when the filters of the related pages keep no page."
+  },
+  "related.none": {
+    "defaultMessage": "No other page evokes this one yet.",
+    "description": "Notice shown when no page cites the current one."
+  },
+  "related.orderNote": {
+    "defaultMessage": "From the surest to the weakest: written links first, then recognised mentions.",
+    "description": "Note under the related pages saying how they are ordered, the pages that write a link before the ones the scan found."
+  },
+  "related.other": {
+    "defaultMessage": "'{count}' other",
+    "description": "Line that unfolds the one related page beyond the first three where the panel is condensed, the quoted placeholder being filled in the browser."
+  },
+  "related.others": {
+    "defaultMessage": "'{count}' others",
+    "description": "Line that unfolds the related pages beyond the first three where the panel is condensed, the quoted placeholder being filled in the browser."
+  },
+  "related.othersUnavailable": {
+    "defaultMessage": "The other pages could not be loaded.",
+    "description": "Status shown when the fragment of the related pages could not be fetched."
+  },
+  "related.pagesOf": {
+    "defaultMessage": "'{shown}' of '{total}' pages",
+    "description": "Count under the type filter, the two quoted placeholders being filled in the browser."
+  },
+  "related.passage": {
+    "defaultMessage": "passage",
+    "description": "Unit after the count of a related page holding one passage, for assistive technologies."
+  },
+  "related.passages": {
+    "defaultMessage": "passages",
+    "description": "Unit after the count of a related page holding several passages, for assistive technologies."
+  },
+  "related.showOthers": {
+    "defaultMessage": "Show the '{count}' others",
+    "description": "Button that reveals the related pages beyond the served ones, the quoted placeholder being filled in the browser."
+  },
+  "related.title": {
+    "defaultMessage": "Related pages",
+    "description": "Heading of the block listing the pages that evoke the current one."
+  },
+  "related.types": {
+    "defaultMessage": "Types",
+    "description": "Button opening the type filter of the related pages."
+  }
+}

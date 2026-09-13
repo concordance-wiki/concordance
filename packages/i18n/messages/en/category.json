@@ -1,0 +1,50 @@
+{
+  "category.all": {
+    "defaultMessage": "All",
+    "description": "Entry of the attribute selector of a category list that lifts the filter."
+  },
+  "category.firstLine": {
+    "defaultMessage": "First line",
+    "description": "Heading of the column of a category list giving the summary of every page."
+  },
+  "category.links": {
+    "defaultMessage": "Links",
+    "description": "Heading of the column of a category list counting the related pages of every page."
+  },
+  "category.linksNote": {
+    "defaultMessage": "The Links column counts the related pages, which brings the most central {name} of the journey to the top.",
+    "description": "Note under a category list, the category name lowercased in it."
+  },
+  "category.page": {
+    "defaultMessage": "Page",
+    "description": "Heading of the first column of a category list whose folder maps to no type."
+  },
+  "category.pages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "Count of a category whose folder maps to no type, above the list."
+  },
+  "category.pagination": {
+    "defaultMessage": "Pages of the list",
+    "description": "Accessible name of the page links under a category list."
+  },
+  "category.searchIn": {
+    "defaultMessage": "Search in {name}",
+    "description": "Placeholder of the search field on a category list, the category name lowercased in it."
+  },
+  "category.shown": {
+    "defaultMessage": "{shown} {name} of {total} — pagination by twenty.",
+    "description": "Under a category list: how many rows the page shows of the whole, the category name lowercased in it."
+  },
+  "category.sort": {
+    "defaultMessage": "Sort",
+    "description": "Accessible name of the sort selector of a category list."
+  },
+  "category.sortLinks": {
+    "defaultMessage": "Links",
+    "description": "Entry of the sort selector ordering a category list by number of related pages."
+  },
+  "category.sortTitle": {
+    "defaultMessage": "A–Z",
+    "description": "Entry of the sort selector ordering a category list by title."
+  }
+}

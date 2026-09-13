@@ -1,0 +1,6 @@
+{
+  "time.updatedAgo": {
+    "defaultMessage": "Updated {when}",
+    "description": "Frame around a relative duration rendered separately, such as three days ago."
+  }
+}

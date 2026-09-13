@@ -20,7 +20,7 @@ describe("validateOverride", () => {
       path: "labels.en.site.nowhere",
       message: "unknown message identifier",
       received: "site.nowhere",
-      expected: "an identifier of the source catalogue, messages/en.json",
+      expected: "an identifier of the source catalogue, messages/en/",
     });
   });
 

@@ -619,7 +619,7 @@ Depends on: L2-12.
 
 As a French- or English-speaking reader, I want a site entirely in my language, dates and plurals included.
 
-- Every label comes from a per-locale message catalogue in ICU MessageFormat, FormatJS JSON (`messages/en.json` source with `defaultMessage` and `description`, flat translations per locale); no visible string is hard-coded in a component.
+- Every label comes from a per-locale message catalogue in ICU MessageFormat, FormatJS JSON (`messages/en/<area>.json` source files with `defaultMessage` and `description`, flat translations per locale under `messages/<language>/`); no visible string is hard-coded in a component.
 - Message identifiers are typed from the source catalogue: a missing key or variable is a compile error.
 - A test verifies each shipped locale carries every key of the source with the same variables; `en` and `fr` ship complete.
 - Messages are resolved at build; the published HTML carries the final strings and no localisation library runs in the browser; islands receive their labels as props.

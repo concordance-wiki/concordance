@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src", "test", "messages/*.json"],
+  "include": ["src", "test", "messages/**/*.json"],
   "references": [
     {
       "path": "../core/tsconfig.build.json"

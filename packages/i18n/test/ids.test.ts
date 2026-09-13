@@ -5,11 +5,10 @@ import {
   argumentNames,
   messageArguments,
   messageIds,
-  type ArgumentValues,
   type MessageArguments,
   type MessageId,
 } from "../src/ids.js";
-import fr from "../messages/fr.json" with { type: "json" };
+import type { french } from "../src/ids.js";
 
 type Declared = typeof messageArguments;
 
@@ -18,28 +17,12 @@ type WithArguments = {
   [Id in MessageId]: keyof Declared[Id] extends never ? never : Id;
 }[MessageId];
 
-/** The argument object the runtime declaration of an identifier implies. */
-type ImpliedArguments<Id extends MessageId> = {
-  -readonly [Name in keyof Declared[Id]]: Declared[Id][Name] extends keyof ArgumentValues
-    ? ArgumentValues[Declared[Id][Name]]
-    : never;
-};
-
-/** The identifiers whose hand-written interface disagrees with the runtime declaration. */
-type Mismatches = {
-  [Id in keyof MessageArguments]: [MessageArguments[Id]] extends [ImpliedArguments<Id>]
-    ? [ImpliedArguments<Id>] extends [MessageArguments[Id]]
-      ? never
-      : Id
-    : Id;
-}[keyof MessageArguments];
-
 describe("message identifiers", () => {
   it("are typed from the source catalogue, so an unknown identifier does not compile", () => {
     const catalogue = loadCatalogue("en");
     // @ts-expect-error -- the identifier is not in the source catalogue
     expect(() => formatMessage(catalogue, "site.nowhere")).toThrow();
-    expectTypeOf<MessageId>().toEqualTypeOf<keyof typeof fr>();
+    expectTypeOf<MessageId>().toEqualTypeOf<keyof typeof french>();
   });
 
   it("require every variable of a message and refuse a variable it does not declare", () => {
@@ -53,9 +36,9 @@ describe("message identifiers", () => {
     expect(formatMessage(catalogue, "entity.mentionsCount", { count: 2 })).toBe("2 mentions");
   });
 
-  it("declare in the interface exactly the identifiers that take arguments, with the kinds' types", () => {
+  it("type exactly the identifiers that take arguments, from the kinds the areas declare", () => {
     expectTypeOf<keyof MessageArguments>().toEqualTypeOf<WithArguments>();
-    expectTypeOf<Mismatches>().toEqualTypeOf<never>();
+    expectTypeOf<MessageArguments["entity.confidence"]>().toEqualTypeOf<{ value: number }>();
     expectTypeOf<MessageArguments["site.generatedAt"]>().toEqualTypeOf<{ date: Date }>();
     expectTypeOf<MessageArguments["mentions.inSection"]>().toEqualTypeOf<{ section: string }>();
     expect(Object.keys(messageArguments).sort()).toEqual([...messageIds]);

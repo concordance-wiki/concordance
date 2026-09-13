@@ -1,0 +1,14 @@
+{
+  "neighbourhood.capNote": "Six voisins au plus, toujours nommés. Au-delà, la carte n’apprend plus rien : c’est la liste qui prend le relais.",
+  "neighbourhood.distance": "Distance",
+  "neighbourhood.existingPage": "page existante",
+  "neighbourhood.hop": "{count, plural, one {# saut} other {# sauts}}",
+  "neighbourhood.list": "{count, plural, one {Le voisin} other {Les # voisins}}",
+  "neighbourhood.map": "Carte du voisinage",
+  "neighbourhood.mapCaption": "La liste ci-dessous porte la même information que la carte.",
+  "neighbourhood.none": "Aucun voisin enregistré.",
+  "neighbourhood.noteless": "mot sans définition",
+  "neighbourhood.seeMentions": "voir le volet des mentions",
+  "neighbourhood.textualEquivalent": "équivalent textuel",
+  "neighbourhood.total": "{count, plural, one {# voisin en tout, plus que la carte n’en montre} other {# voisins en tout, plus que la carte n’en montre}}"
+}

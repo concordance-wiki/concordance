@@ -1,0 +1,26 @@
+{
+  "spaces.content": {
+    "defaultMessage": "Content",
+    "description": "Column of the spaces page: what a space holds."
+  },
+  "spaces.datesNote": {
+    "defaultMessage": "The dates come from the git history, so they are always exact. A space past the freshness threshold — {count, plural, one {# day} other {# days}} by default — is marked in accent, the only case where colour carries an alert, doubled by the value in days.",
+    "description": "Note under the table of the spaces page, naming the default staleness threshold in days."
+  },
+  "spaces.lastUpdate": {
+    "defaultMessage": "Last update",
+    "description": "Column of the spaces page: the newest change of a space."
+  },
+  "spaces.lead": {
+    "defaultMessage": "{count, plural, one {# space, fed by the repositories declared in the configuration.} other {# spaces, fed by the repositories declared in the configuration.}} A repository may carry several spaces, and a space may spread over several repositories.",
+    "description": "Sentence under the title of the spaces page, counting the spaces."
+  },
+  "spaces.pages": {
+    "defaultMessage": "Pages",
+    "description": "Column of the spaces page: how many pages a space holds."
+  },
+  "spaces.space": {
+    "defaultMessage": "Space",
+    "description": "Column of the spaces page: the badge and the name of a space."
+  }
+}

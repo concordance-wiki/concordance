@@ -1,0 +1,11 @@
+{
+  "space.browse": "Parcourir",
+  "space.categoriesLead": "{count, plural, one {# catégorie, telle que rangée dans le dépôt} other {# catégories, telles que rangées dans le dépôt}}",
+  "space.categoriesNote": "Chaque catégorie ouvre sa propre liste. L'arborescence de gauche n'apparaît qu'une fois dans une page, pour ne pas avoir à tout déplier depuis l'accueil.",
+  "space.footer": "Un espace se lit comme un petit wiki dans le wiki : sa propre recherche, son propre vocabulaire, ses propres nouveautés.",
+  "space.mostCited": "Les mots les plus cités ici",
+  "space.repository": "dépôt",
+  "space.searchPlaceholder": "Rechercher dans cet espace",
+  "space.updated": "mis à jour {when}",
+  "space.wordsNote": "Comptés dans cet espace seulement, ce qui donne son vocabulaire propre."
+}

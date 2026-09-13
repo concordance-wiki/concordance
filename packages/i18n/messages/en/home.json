@@ -1,0 +1,70 @@
+{
+  "home.browse": {
+    "defaultMessage": "browse",
+    "description": "Keyboard help under the live results of a search field, after the arrow keys."
+  },
+  "home.datesNote": {
+    "defaultMessage": "The dates come from the history of the repositories, so they are always right.",
+    "description": "Note under the spaces of the home page, saying where their dates come from."
+  },
+  "home.documents": {
+    "defaultMessage": "{count, plural, one {# document} other {# documents}}",
+    "description": "Number of documents of a space whose notes mostly stand for converted documents, on its row of the home page."
+  },
+  "home.enterKey": {
+    "defaultMessage": "Enter",
+    "description": "Name of the Enter key in the keyboard help under the live results of a search field."
+  },
+  "home.explanation": {
+    "defaultMessage": "Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.",
+    "description": "Explanation under the question that heads the home page, saying that every word used has a page."
+  },
+  "home.matches": {
+    "defaultMessage": "{count, plural, one {# match} other {# matches}}",
+    "description": "Number of pages a query matches, shown in the search field of the home page as the reader types."
+  },
+  "home.moreSpaces": {
+    "defaultMessage": "{count, plural, one {# more space, less cited} other {# more spaces, less cited}}",
+    "description": "Line folding the spaces of the home page beyond the first five, the less cited ones."
+  },
+  "home.mostCited": {
+    "defaultMessage": "Most cited",
+    "description": "Lead of the shortcuts of the home page, the most cited pages."
+  },
+  "home.open": {
+    "defaultMessage": "open",
+    "description": "Keyboard help under the live results of a search field, after the Enter key."
+  },
+  "home.pages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "Number of pages of a space, on its row of the home page."
+  },
+  "home.question": {
+    "defaultMessage": "What are you looking for?",
+    "description": "The question that heads the home page, above the search field."
+  },
+  "home.recent": {
+    "defaultMessage": "Recently changed",
+    "description": "Heading of the home page list of the pages changed last, each with its space and its date."
+  },
+  "home.seeResults": {
+    "defaultMessage": "See the {count, plural, one {# result} other {# results}}",
+    "description": "Link from the live results of a search field to the results page, with the number of matches."
+  },
+  "home.spacesLead": {
+    "defaultMessage": "fed by your repositories",
+    "description": "After the heading of the spaces on the home page, saying that they come from the declared repositories."
+  },
+  "home.stale": {
+    "defaultMessage": "A space has not moved for {count, plural, one {# day} other {# days}}",
+    "description": "Title of the alert of the home page on a space whose newest change is older than the staleness threshold."
+  },
+  "home.staleThreshold": {
+    "defaultMessage": "{space}. The alert threshold is set to {count, plural, one {# day} other {# days}} in the configuration.",
+    "description": "Text of the alert on a dormant space, naming the space and the threshold of the configuration in days."
+  },
+  "home.usedIn": {
+    "defaultMessage": "Used in {count, plural, one {# document} other {# documents}}, never defined",
+    "description": "Under the title of a keyword page in the live results of a search field, with the number of documents using the expression."
+  }
+}

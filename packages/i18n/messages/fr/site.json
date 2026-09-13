@@ -1,0 +1,12 @@
+{
+  "site.generatedAt": "Généré le {date, date, long}",
+  "site.home": "Accueil",
+  "site.index": "Index",
+  "site.recent": "Récent",
+  "site.search": "Rechercher",
+  "site.searchPlaceholder": "Rechercher dans la documentation",
+  "site.skipToContent": "Aller au contenu",
+  "site.spaces": "Espaces",
+  "site.todo": "À faire",
+  "site.version": "Version"
+}

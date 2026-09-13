@@ -1,0 +1,70 @@
+{
+  "index.bySpace": {
+    "defaultMessage": "By space",
+    "description": "Heading of the filter of the index by space, the sources of the model."
+  },
+  "index.byType": {
+    "defaultMessage": "By type",
+    "description": "Heading of the filter of the index by type of page."
+  },
+  "index.columnDescription": {
+    "defaultMessage": "First line of the page, or most cited passage",
+    "description": "Heading of the column of the index showing the summary of a page or, for a word without a definition, the passage that uses it most."
+  },
+  "index.columnPages": {
+    "defaultMessage": "Pages",
+    "description": "Heading of the column of the index counting the pages that cite a word."
+  },
+  "index.columnType": {
+    "defaultMessage": "Type",
+    "description": "Heading of the column of the index naming the type of a page."
+  },
+  "index.columnWord": {
+    "defaultMessage": "Word",
+    "description": "Heading of the column of the index giving the word itself."
+  },
+  "index.empty": {
+    "defaultMessage": "No entry under this letter",
+    "description": "Notice shown when a letter of the index has no entry."
+  },
+  "index.filters": {
+    "defaultMessage": "Filters",
+    "description": "Button folding the filters of the index."
+  },
+  "index.lead": {
+    "defaultMessage": "{words, plural, one {# word} other {# words}} used in the documentation. {notes, plural, one {# has a written page} other {# have a written page}}, the others exist through their uses alone.",
+    "description": "Sentence under the title of the index, with the number of indexed words and the number of them that have a note."
+  },
+  "index.letters": {
+    "defaultMessage": "Browse by initial letter",
+    "description": "Label of the letter navigation of the index."
+  },
+  "index.lettersWithout": {
+    "defaultMessage": "{count, plural, one {# letter without an entry} other {# letters without an entry}}",
+    "description": "After the letter bar of the index, counting the letters no title opens with."
+  },
+  "index.noDefinition": {
+    "defaultMessage": "no definition",
+    "description": "In the type column of the index, for a word without a note."
+  },
+  "index.note": {
+    "defaultMessage": "Words without a definition sit in the index like the others, dotted, with the passage that uses them most in place of a definition. That is the working list of a glossary owner.",
+    "description": "Note at the foot of the index explaining how the words without a definition are listed."
+  },
+  "index.passage": {
+    "defaultMessage": "“{passage}” — {title}",
+    "description": "In the index, the passage that uses a word without a definition most, quoted, then the title of the page it comes from."
+  },
+  "index.title": {
+    "defaultMessage": "A–Z index",
+    "description": "Title of the alphabetical index page."
+  },
+  "index.withoutDefinition": {
+    "defaultMessage": "without a definition",
+    "description": "The filter of the index keeping the words without a note."
+  },
+  "index.words": {
+    "defaultMessage": "{count, plural, one {# word} other {# words}}",
+    "description": "After a letter heading of the index, counting its entries."
+  }
+}

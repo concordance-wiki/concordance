@@ -1,0 +1,22 @@
+{
+  "todo.findings": {
+    "defaultMessage": "{count, plural, one {# finding} other {# findings}}",
+    "description": "Number of findings listed on the to-do page."
+  },
+  "todo.severity.error": {
+    "defaultMessage": "Error",
+    "description": "Severity label of a finding that fails the build."
+  },
+  "todo.severity.info": {
+    "defaultMessage": "Information",
+    "description": "Severity label of a finding given for information only."
+  },
+  "todo.severity.warning": {
+    "defaultMessage": "Warning",
+    "description": "Severity label of a finding that is reported but tolerated."
+  },
+  "todo.title": {
+    "defaultMessage": "To do",
+    "description": "Heading of the page listing the findings of the build."
+  }
+}
