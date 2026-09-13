@@ -6,16 +6,22 @@ import {
   hitsOf,
   isEditable,
   mountSearch,
+  REPLACE_DELAY,
   resultOf,
   resultsPropsOf,
+  SCROLL_KEY,
+  scrollMemory,
   searchRunner,
   shardLoader,
+  storageOf,
   SUGGESTIONS,
   wireShortcuts,
   type KeyEvent,
   type ScriptInjector,
   type SearchInput,
   type SearchIslandElement,
+  type Defer,
+  type ScrollMemory,
   type SearchIslands,
   type SearchLocation,
   type SearchPanel,
@@ -408,20 +414,102 @@ const settled = async (): Promise<void> => {
 interface FakeLocation extends SearchLocation {
   /** The query strings pushed, in order. */
   pushed: string[];
+  /** The query strings the current entry was rewritten with, in order. */
+  replaced: string[];
   current: string;
+  /** Goes back to a query string, as the browser does on the back button. */
+  pop(search: string): void;
 }
 
 function fakeLocation(search = ""): FakeLocation {
+  const listeners: (() => void)[] = [];
   const location: FakeLocation = {
     current: search,
     pushed: [],
+    replaced: [],
     search: () => location.current,
+    href: () => `file:///dist/search/index.html${location.current}`,
     push: (next) => {
       location.current = next;
       location.pushed.push(next);
     },
+    replace: (next) => {
+      location.current = next;
+      location.replaced.push(next);
+    },
+    onPop: (listener) => {
+      listeners.push(listener);
+    },
+    pop: (next) => {
+      location.current = next;
+      for (const listener of listeners) listener();
+    },
   };
   return location;
+}
+
+interface FakeScroll extends ScrollMemory {
+  /** The position by query string, as the storage would keep it. */
+  stored: Record<string, number>;
+  scrolledTo: number[];
+  /** The position of the view, which a test moves before it fires a scroll event. */
+  at: number;
+  fire(): void;
+}
+
+function fakeScroll(stored: Record<string, number> = {}): FakeScroll {
+  const listeners: (() => void)[] = [];
+  const scroll: FakeScroll = {
+    stored,
+    scrolledTo: [],
+    at: 0,
+    remembered: (search) => scroll.stored[search],
+    remember: (search, position) => {
+      scroll.stored[search] = position;
+    },
+    position: () => scroll.at,
+    scrollTo: (position) => {
+      scroll.scrolledTo.push(position);
+    },
+    onScroll: (listener) => {
+      listeners.push(listener);
+    },
+    fire: () => {
+      for (const listener of listeners) listener();
+    },
+  };
+  return scroll;
+}
+
+interface FakeDefer {
+  defer: Defer;
+  /** The callbacks waiting, with their delays; `flush` runs and drops them. */
+  pending: { callback: () => void; delay: number }[];
+  cancelled: number;
+  flush(): void;
+}
+
+function fakeDefer(): FakeDefer {
+  const timers: FakeDefer = {
+    pending: [],
+    cancelled: 0,
+    defer: (callback, delay) => {
+      const entry = { callback, delay };
+      timers.pending.push(entry);
+      return () => {
+        if (timers.pending.includes(entry)) {
+          timers.cancelled += 1;
+          timers.pending = timers.pending.filter((candidate) => candidate !== entry);
+        }
+      };
+    },
+    flush: () => {
+      const due = timers.pending;
+      timers.pending = [];
+      for (const { callback } of due) callback();
+    },
+  };
+  return timers;
 }
 
 describe("mountSearch", () => {
@@ -439,6 +527,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render,
@@ -492,6 +583,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render,
@@ -525,6 +619,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation("?q=keyword+page"),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render,
@@ -575,6 +672,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render,
@@ -609,6 +709,9 @@ describe("mountSearch", () => {
       ],
       document,
       location: fakeLocation("?q=key"),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render,
@@ -631,13 +734,26 @@ describe("mountSearch", () => {
         ],
         document: fakeDocument(),
         location: fakeLocation("?q=key"),
+        scroll: fakeScroll(),
+        clipboard: undefined,
+        defer: fakeDefer().defer,
         inject,
         host,
         render,
       }),
     ).toBe(1);
     expect(
-      mountSearch({ islands: [], document, location: fakeLocation(), inject, host, render }),
+      mountSearch({
+        islands: [],
+        document,
+        location: fakeLocation(),
+        scroll: fakeScroll(),
+        clipboard: undefined,
+        defer: fakeDefer().defer,
+        inject,
+        host,
+        render,
+      }),
     ).toBe(0);
     expect(results.html).toBe("");
   });
@@ -655,6 +771,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render: rendered().render,
@@ -682,6 +801,9 @@ describe("mountSearch", () => {
       ],
       document: fakeDocument(),
       location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
       inject,
       host,
       render: (vnode, container) => {
@@ -716,6 +838,9 @@ describe("mountSearch", () => {
         islands: [element],
         document: fakeDocument(),
         location: fakeLocation(),
+        scroll: fakeScroll(),
+        clipboard: undefined,
+        defer: fakeDefer().defer,
         inject,
         host,
         render: rendered().render,
@@ -724,20 +849,29 @@ describe("mountSearch", () => {
   });
 });
 
-/** A results page mounted on an address, the table answered, ready for the facets. */
-async function resultsPage(search: string): Promise<{
+interface ResultsPage {
   results: Panel;
   input: FakeInput;
   location: FakeLocation;
+  scroll: FakeScroll;
+  timers: FakeDefer;
   view: Rendered;
   injected: Injected[];
   answer: (name: string, data?: unknown) => void;
   follow: (href: string) => Promise<void>;
-}> {
+}
+
+/** A results page mounted on an address, the table answered, ready for the facets. */
+async function resultsPage(
+  search: string,
+  options: { scroll?: FakeScroll; clipboard?: { writeText(text: string): Promise<void> } } = {},
+): Promise<ResultsPage> {
   const { host, inject, injected, answer } = page();
   const input = fakeInput();
   const results: Panel = { hidden: false, html: "" };
   const location = fakeLocation(search);
+  const scroll = options.scroll ?? fakeScroll();
+  const timers = fakeDefer();
   const view = rendered();
   mountSearch({
     islands: [
@@ -752,6 +886,9 @@ async function resultsPage(search: string): Promise<{
     ],
     document: fakeDocument(),
     location,
+    scroll,
+    clipboard: options.clipboard,
+    defer: timers.defer,
     inject,
     host,
     render: view.render,
@@ -762,6 +899,8 @@ async function resultsPage(search: string): Promise<{
     results,
     input,
     location,
+    scroll,
+    timers,
     view,
     injected,
     answer,
@@ -989,17 +1128,237 @@ describe("Active filters are recalled above the results and removable one by one
 
   it("gives an empty view without the table, the address keeping its query", () => {
     expect(
-      resultsPropsOf(
-        parseSearchState("?q=key&type=term"),
-        { query: "key", hits: [] },
-        "",
-        () => undefined,
-      ),
+      resultsPropsOf(parseSearchState("?q=key&type=term"), { query: "key", hits: [] }, "", {
+        onNavigate: () => undefined,
+      }),
     ).toEqual({
       query: "key",
       total: 0,
       results: [],
       facets: [],
     });
+  });
+});
+
+describe("The query and active filters are encoded in the URL parameters", () => {
+  it("pushes an entry to the history for a facet followed, and rewrites the current one once the reader pauses typing", async () => {
+    const { input, location, timers, answer } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    input.value = "ke";
+    input.fire("input");
+    input.value = "key";
+    input.fire("input");
+    expect(location.replaced).toEqual([]);
+    expect(timers.pending.map((entry) => entry.delay)).toEqual([300]);
+    expect(timers.cancelled).toBe(1);
+    timers.flush();
+    expect(location.replaced).toEqual(["?q=key"]);
+    input.value = "keyword";
+    input.fire("input");
+    await settled();
+    answer("ke", shards["ke"]);
+    expect(timers.pending).toHaveLength(1);
+    expect(location.current).toBe("?q=key");
+  });
+
+  it("drops a pending rewrite when a facet is followed, the pushed address carrying the query typed", async () => {
+    const { input, location, timers, follow, answer } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    input.value = "keyword";
+    input.fire("input");
+    await settled();
+    await follow("?q=keyword&type=term");
+    expect(timers.pending).toEqual([]);
+    expect(timers.cancelled).toBe(1);
+    expect(location.pushed).toEqual(["?q=keyword&type=term"]);
+    expect(location.replaced).toEqual([]);
+    expect(input.value).toBe("keyword");
+  });
+});
+
+describe("Opening the URL restores the query, the filters and the scroll position", () => {
+  it("reads the state of the address, runs the query with the facets applied, then scrolls where the address was left", async () => {
+    const scroll = fakeScroll({ "?q=key&type=term": 480, "?q=key": 40 });
+    const { results, input, view, answer } = await resultsPage("?q=key&type=term", { scroll });
+    expect(input.value).toBe("key");
+    expect(scroll.scrolledTo).toEqual([]);
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain("Keyword page");
+    expect(view.props().active?.map((filter) => filter.value)).toEqual(["term"]);
+    expect(scroll.scrolledTo).toEqual([480]);
+  });
+
+  it("opens at the top an address never left, and remembers the position by address as the reader scrolls", async () => {
+    const scroll = fakeScroll();
+    const { follow, input, timers } = await resultsPage("", { scroll });
+    expect(scroll.scrolledTo).toEqual([]);
+    scroll.at = 120;
+    scroll.fire();
+    expect(scroll.stored).toEqual({ "": 120 });
+    await follow("?type=term");
+    scroll.at = 60;
+    scroll.fire();
+    expect(scroll.stored).toEqual({ "": 120, "?type=term": 60 });
+    input.value = "ke";
+    input.fire("input");
+    timers.flush();
+    scroll.at = 10;
+    scroll.fire();
+    expect(scroll.stored["?q=ke&type=term"]).toBe(10);
+    expect(scroll.scrolledTo).toEqual([]);
+  });
+});
+
+describe("The current URL is visible in the interface, which makes the state explicit", () => {
+  it("shows the address of the search from the root of the site under the summary, and follows every change", async () => {
+    const { results, follow, input, view, answer } = await resultsPage("?q=key&type=term");
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain(
+      '<p class="search-address"><span class="visually-hidden">Address of this search</span><code class="search-url">search/index.html?q=key&amp;type=term</code></p>',
+    );
+    expect(results.html).not.toContain("copy-address");
+    await follow("?type=term");
+    expect(view.props().address).toBe("search/index.html?type=term");
+    input.value = "";
+    input.fire("input");
+    await follow("?");
+    expect(view.props().address).toBe("search/index.html");
+  });
+
+  it("offers a copy button when the page has a clipboard, and says so once the address is copied", async () => {
+    const written: string[] = [];
+    const { results, view, answer } = await resultsPage("?q=key", {
+      clipboard: {
+        writeText: (text) => {
+          written.push(text);
+          return Promise.resolve();
+        },
+      },
+    });
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain(
+      '<code class="search-url">search/index.html?q=key</code><button type="button" class="copy-address">Copy</button><span class="copied" role="status"></span></p>',
+    );
+    view.props().onCopy?.();
+    await settled();
+    expect(written).toEqual(["file:///dist/search/index.html?q=key"]);
+    expect(results.html).toContain('<span class="copied" role="status">Address copied</span>');
+    expect(view.props().copied).toBe(true);
+  });
+
+  it("stays quiet when the clipboard refuses, and forgets the copy on the next change", async () => {
+    const refusing = await resultsPage("", {
+      clipboard: { writeText: () => Promise.reject(new Error("denied")) },
+    });
+    refusing.view.props().onCopy?.();
+    await settled();
+    expect(refusing.view.props().copied).toBe(false);
+    expect(refusing.results.html).toContain('<span class="copied" role="status"></span>');
+    const accepting = await resultsPage("", { clipboard: { writeText: () => Promise.resolve() } });
+    accepting.view.props().onCopy?.();
+    await settled();
+    expect(accepting.view.props().copied).toBe(true);
+    await accepting.follow("?type=term");
+    expect(accepting.view.props().copied).toBe(false);
+    expect(accepting.results.html).toContain('<span class="copied" role="status"></span>');
+  });
+});
+
+describe("The browser's back navigation returns to the previous state", () => {
+  it("replays the state of the address on popstate, the field, the facets and the scroll included", async () => {
+    const scroll = fakeScroll({ "?q=key": 200 });
+    const { results, input, location, follow, view, answer, timers } = await resultsPage("?q=key", {
+      scroll,
+    });
+    answer("ke", shards["ke"]);
+    await settled();
+    await follow("?q=key&type=term");
+    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    input.value = "keyw";
+    input.fire("input");
+    expect(timers.pending).toHaveLength(1);
+    location.pop("?q=key");
+    await settled();
+    expect(timers.pending).toEqual([]);
+    expect(input.value).toBe("key");
+    expect(view.props().active).toBeUndefined();
+    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    expect(scroll.scrolledTo).toEqual([200, 200]);
+    expect(location.pushed).toEqual(["?q=key&type=term"]);
+    location.pop("");
+    await settled();
+    expect(input.value).toBe("");
+    expect(results.html).toContain('<p class="search-summary">3 results</p>');
+    expect(scroll.scrolledTo).toEqual([200, 200]);
+  });
+});
+
+describe("scrollMemory and storageOf", () => {
+  it("keeps the position by query string in the storage, restores a finite one, and drives the view", () => {
+    const store = new Map<string, string>();
+    const listeners: (() => void)[] = [];
+    const view = {
+      scrollY: 0,
+      moved: [] as [number, number][],
+      scrollTo(x: number, y: number) {
+        view.moved.push([x, y]);
+      },
+      addEventListener(_type: "scroll", listener: () => void) {
+        listeners.push(listener);
+      },
+    };
+    const memory = scrollMemory(
+      { getItem: (key) => store.get(key) ?? null, setItem: (key, value) => store.set(key, value) },
+      view,
+    );
+    expect(memory.remembered("?q=key")).toBeUndefined();
+    memory.remember("?q=key", 250);
+    expect(store.get(`${SCROLL_KEY}?q=key`)).toBe("250");
+    expect(memory.remembered("?q=key")).toBe(250);
+    store.set(`${SCROLL_KEY}?q=bad`, "far");
+    expect(memory.remembered("?q=bad")).toBeUndefined();
+    view.scrollY = 30;
+    expect(memory.position()).toBe(30);
+    memory.scrollTo(250);
+    expect(view.moved).toEqual([[0, 250]]);
+    let fired = 0;
+    memory.onScroll(() => {
+      fired += 1;
+    });
+    for (const listener of listeners) listener();
+    expect(fired).toBe(1);
+  });
+
+  it("remembers nothing without a storage or with one that refuses, and gives none when the storage cannot be reached", () => {
+    const view = { scrollY: 0, scrollTo: () => undefined, addEventListener: () => undefined };
+    const none = scrollMemory(undefined, view);
+    none.remember("?q=key", 1);
+    expect(none.remembered("?q=key")).toBeUndefined();
+    const refusing = scrollMemory(
+      {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("quota");
+        },
+      },
+      view,
+    );
+    expect(() => {
+      refusing.remember("?q=key", 1);
+    }).not.toThrow();
+    expect(
+      storageOf(() => {
+        throw new Error("denied");
+      }),
+    ).toBeUndefined();
+    const storage = { getItem: () => null, setItem: () => undefined };
+    expect(storageOf(() => storage)).toBe(storage);
+    expect(REPLACE_DELAY).toBe(300);
   });
 });

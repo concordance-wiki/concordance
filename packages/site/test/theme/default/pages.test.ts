@@ -16,6 +16,10 @@ describe("SearchResults", () => {
         defaultTheme,
       ),
     ).toContain('<p class="search-summary">2 results for <q>threshold</q></p>');
+    expect(html).toContain(
+      '<p class="search-address"><span class="visually-hidden">Address of this search</span><code class="search-url">search/index.html?q=threshold&amp;source=glossary</code></p>',
+    );
+    expect(html).not.toContain("copy-address");
     expect(html).toContain('<nav class="facets" aria-label="Facets">');
     expect(html).toContain(
       '<a href="?q=threshold&amp;type=term">term <span class="count">1</span></a>',

@@ -360,6 +360,9 @@ export interface SearchResultsLabels {
   activeFilters: string;
   removeFilter: string;
   clear: string;
+  address: string;
+  copyAddress: string;
+  copied: string;
 }
 
 export interface SearchResultsProps {
@@ -373,11 +376,17 @@ export interface SearchResultsProps {
   /** The address of the search with every facet open again; shown with the active filters. */
   clearHref?: string;
   labels?: Partial<SearchResultsLabels>;
+  /** The address of the search from the root of the site, `search/index.html?q=…`, shown under the summary so that the state is explicit. */
+  address?: string;
+  /** Whether the address was just copied: the status line says so. */
+  copied?: boolean;
   /**
    * What a facet, an active filter or the clear link does once the search island runs: it
    * follows the address without leaving the page. Never serialised; the served page has links.
    */
   onNavigate?: (href: string) => void;
+  /** Copies the address of the search; set by the island when the page has a clipboard. */
+  onCopy?: () => void;
 }
 
 export interface IndexLetter {

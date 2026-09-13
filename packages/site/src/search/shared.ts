@@ -68,6 +68,10 @@ export interface SearchLabels {
   noResult: string;
   /** "N results", by plural category. */
   results: PluralForms;
+  /** The line showing the address of the search, its copy button and the status once copied. */
+  address: string;
+  copyAddress: string;
+  copied: string;
 }
 
 /** The number of entities carrying every value of every facet, values in code-unit order. */

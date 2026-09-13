@@ -9,4 +9,7 @@ export const searchLabels: SearchLabels = {
   clear: "Clear filters",
   noResult: "No result",
   results: { one: "# result", other: "# results" },
+  address: "Address of this search",
+  copyAddress: "Copy",
+  copied: "Address copied",
 };
