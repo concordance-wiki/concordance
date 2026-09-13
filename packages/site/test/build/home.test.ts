@@ -87,39 +87,27 @@ describe("shortcutsOf", () => {
 });
 
 describe("spacesOf", () => {
-  it("ranks the spaces by the citations of their notes, the name breaking ties, each with its initials, its page count worded and its whole tree, keyword pages left out", () => {
+  it("ranks the spaces by the citations of their notes, the name breaking ties, each with its initials, its page count worded and the href of its page, keyword pages left out", () => {
     const spaces = spacesOf(context());
     expect(spaces.map((space) => [space.name, space.initials, space.countLabel])).toEqual([
       ["glossary", "GL", "2 pages"],
       ["framing", "FR", "1 page"],
       ["specs", "SP", "2 pages"],
     ]);
+    expect(spaces.map((space) => space.href)).toEqual([
+      "glossary/index.html",
+      "framing/index.html",
+      "specs/index.html",
+    ]);
     expect(spaces.map((space) => space.stale)).toEqual([false, false, false]);
     expect(spaces.every((space) => space.date === undefined)).toBe(true);
-    expect(spaces[2]?.nodes).toEqual([
-      {
-        label: "rules",
-        count: 1,
-        children: [
-          { label: "Épreuve du seuil", href: "specs/rules/publication-threshold/index.html" },
-        ],
-      },
-      {
-        label: "screens",
-        count: 1,
-        children: [{ label: "Mentions panel", href: "specs/screens/mentions-panel/index.html" }],
-      },
-    ]);
-    expect(spaces[0]?.nodes).toEqual([
-      { label: "Keyword page", href: "glossary/keyword-page/index.html" },
-      { label: "Page", href: "glossary/page/index.html" },
-    ]);
+    expect(spaces.every((space) => !("nodes" in space))).toBe(true);
   });
 
-  it("opens every folder of the tree as deep as the paths go, keeps a declared source without a note, adds a source met only on a note and orders two notes of one file by identifier", () => {
+  it("keeps a declared source without a note, adds a source met only on a note and dates each space from its newest note", () => {
     const same = "2026-09-01T00:00:00.000Z";
     const deep = dated("specs/a/b/c/deep", "specs", "a/b/c/deep.md", same);
-    const shallow = dated("specs/a/shallow", "specs", "a/shallow.md", same);
+    const shallow = dated("specs/a/shallow", "specs", "a/shallow.md", "2026-08-01T00:00:00.000Z");
     const stray = dated("notes/stray", "notes", "stray.md", same);
     const twin = dated("notes/aaa", "notes", "stray.md", same);
     const spaces = spacesOf(context({ model: model({ entities: [deep, shallow, stray, twin] }) }));
@@ -128,27 +116,6 @@ describe("spacesOf", () => {
       ["glossary", 0, undefined],
       ["notes", 2, "2026-09-01"],
       ["specs", 2, "2026-09-01"],
-    ]);
-    expect(spaces[2]?.nodes.map((node) => node.label)).toEqual(["aaa", "stray"]);
-    expect(spaces[3]?.nodes).toEqual([
-      {
-        label: "a",
-        count: 2,
-        children: [
-          {
-            label: "b",
-            count: 1,
-            children: [
-              {
-                label: "c",
-                count: 1,
-                children: [{ label: "deep", href: "specs/a/b/c/deep/index.html" }],
-              },
-            ],
-          },
-          { label: "shallow", href: "specs/a/shallow/index.html" },
-        ],
-      },
     ]);
   });
 

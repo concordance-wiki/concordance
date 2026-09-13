@@ -16,6 +16,7 @@ import {
   SCROLL_KEY,
   scrollMemory,
   searchRunner,
+  fieldState,
   seeResultsHref,
   shardLoader,
   storageOf,
@@ -679,6 +680,43 @@ describe("mountSearch", () => {
     expect(SUGGESTIONS).toBe(8);
   });
 
+  it("keeps the live results of the field of a space page to that space, the link to the results page carrying the source facet", async () => {
+    const { host, inject, answer } = page();
+    const input = fakeInput();
+    const panel = fakePanel(true);
+    const { render } = rendered();
+    mountSearch({
+      islands: [
+        island(
+          {
+            root: "../",
+            search: { action: "../search/index.html", placeholder: "Search", source: "specs" },
+          },
+          { input, panel, container: panel },
+        ),
+      ],
+      document: fakeDocument(),
+      location: fakeLocation(),
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
+      inject,
+      host,
+      render,
+    });
+    input.fire("focus");
+    answer("meta", meta);
+    input.value = "key";
+    input.fire("input");
+    await settled();
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(panel.hidden).toBe(false);
+    expect(panel.html).toBe(
+      '<ol class="suggestions"><li class="suggestion suggestion-keyword"><a href="../keywords/build-summary/index.html"><span class="suggestion-title">build summary</span><span class="suggestion-detail">Used in 6 documents, never defined</span><span class="suggestion-space">specs</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="../search/index.html?q=key&amp;source=specs">See the 1 result</a></p>',
+    );
+  });
+
   it("counts the matches next to the field of the home page, words the rows with the labels the field carries, and reaches that field with the / shortcut before the field of the header", async () => {
     const { host, inject, answer } = page();
     const headerInput = fakeInput();
@@ -1204,11 +1242,19 @@ describe("suggestionOf and seeResultsHref", () => {
     expect(suggestionOf(uncounted, meta, "").documents).toBe(0);
   });
 
-  it("leads to the results page with the query alone, readable in the address", () => {
+  it("leads to the results page with the query alone, readable in the address, the space of a space page kept as the source facet", () => {
     expect(seeResultsHref({ action: "../search/index.html", placeholder: "" }, "key word")).toBe(
       "../search/index.html?q=key+word",
     );
     expect(seeResultsHref({ action: "search/", placeholder: "" }, "")).toBe("search/");
+    expect(seeResultsHref({ action: "search/", placeholder: "", source: "specs" }, "key")).toBe(
+      "search/?q=key&source=specs",
+    );
+    expect(fieldState({ action: "search/", placeholder: "", source: "specs" }, "")).toEqual({
+      query: "",
+      filters: { type: [], source: ["specs"], domain: [], application: [] },
+      noteless: "any",
+    });
   });
 });
 

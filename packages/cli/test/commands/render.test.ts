@@ -11,6 +11,7 @@ import {
   readFragments,
   renderCommand,
   siteNames,
+  sourceDescriptions,
   sourceRefs,
 } from "../../src/commands/render.js";
 import type { ThemeDependencies } from "../../src/commands/theme.js";
@@ -382,7 +383,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(await buildCommand([], dormant)).toBe(0);
     const home = dormant.fs.readText("/work/dist/index.html");
     expect(home).toContain(
-      '<li class="home-space stale"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">NO</span><span class="home-space-text"><span class="home-space-name">notes</span><span class="home-space-meta">',
+      '<li class="home-space stale"><a class="home-space-row" href="notes/index.html"><span class="space-initials" aria-hidden="true">NO</span><span class="home-space-text"><span class="home-space-name">notes</span><span class="home-space-meta">',
     );
     expect(home).toContain(
       '<div class="home-alert"><h3>A space has not moved for 20,708 days</h3><p>notes. The alert threshold is set to 180 days in the configuration.</p></div>',
@@ -390,6 +391,43 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const patient = corpus(`${validConfig}staleness: { warn_after_days: { notes: 100000 } }\n`);
     expect(await buildCommand([], patient)).toBe(0);
     expect(patient.fs.readText("/work/dist/index.html")).not.toContain("home-alert");
+  });
+
+  it("writes the spaces page and one page per space, the content of a space being the description its source declares, else its dominant types", async () => {
+    const plain = corpus();
+    expect(await buildCommand([], plain)).toBe(0);
+    const spaces = plain.fs.readText("/work/dist/spaces/index.html");
+    expect(spaces).toContain("<title>Spaces – Wiki</title>");
+    expect(spaces).toContain(
+      '<a href="../notes/index.html">notes</a></th><td class="spaces-content">Document, Screen, Term</td><td class="spaces-count">3</td><td class="spaces-date"><time datetime="1970-01-01">20,708 days ago</time></td>',
+    );
+    const space = plain.fs.readText("/work/dist/notes/index.html");
+    expect(space).toContain("<title>notes – Wiki</title>");
+    expect(space).toContain('<input type="hidden" name="source" value="notes"/>');
+    expect(space).toContain(
+      '<p class="space-meta"><span>3 pages</span><span>repository <code>notes</code></span><time datetime="1970-01-01">updated 57 years ago</time></p>',
+    );
+    expect(space).not.toContain("space-description");
+    const described = corpus(
+      "version: 1\nproject: { name: Wiki }\nsources: [{ name: notes, path: ./notes, description: Notes about the build. }]\n",
+    );
+    expect(await buildCommand([], described)).toBe(0);
+    expect(described.fs.readText("/work/dist/spaces/index.html")).toContain(
+      '<td class="spaces-content">Notes about the build.</td>',
+    );
+    expect(described.fs.readText("/work/dist/notes/index.html")).toContain(
+      '<p class="space-description">Notes about the build.</p>',
+    );
+    expect(
+      sourceDescriptions({
+        version: 1,
+        project: { name: "W" },
+        sources: [
+          { name: "a", path: "./a", description: "About a." },
+          { name: "b", path: "./b" },
+        ],
+      }),
+    ).toEqual({ a: "About a." });
   });
 
   it("cuts the body indexed for the search at build.extracted_text_max_chars", async () => {
@@ -504,9 +542,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
     expect(await renderCommand([], io, fakeDependencies(BareFooter)).catch(() => 2)).toBe(2);
     expect(await buildCommand([], io, fakeDependencies(BareFooter))).toBe(0);
-    // One page more than the entities and the three fixed ones: the search page carries the footer too.
+    // Every page carries the footer: the entities, the home, index, to-do and search pages, the spaces page and the page of the one space.
     expect(io.stdout.find((line) => line.startsWith("accessibility: "))).toBe(
-      "accessibility: 10 findings",
+      "accessibility: 12 findings",
     );
     expect(io.stderr).toContain(
       'warning: index.html: img-alt: <img src="x.png"> has no alt attribute',

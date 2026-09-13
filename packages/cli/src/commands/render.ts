@@ -97,6 +97,17 @@ export function sourceRefs(config: Config): Record<string, string> {
   return refs;
 }
 
+/** The `description` of every source that declares one, the content of its space on the spaces page. */
+export function sourceDescriptions(config: Config): Record<string, string> {
+  const descriptions: Record<string, string> = {};
+  for (const source of config.sources) {
+    if (source.description !== undefined) {
+      descriptions[source.name] = source.description;
+    }
+  }
+  return descriptions;
+}
+
 /**
  * Places the images of the notes next to their pages, from the copies the build kept under
  * `fragments/`; an image the build did not keep is skipped. Returns how many were placed.
@@ -216,6 +227,7 @@ export async function renderSite(
     projectName: config.project.name,
     names: siteNames(config),
     sourceRefs: sourceRefs(config),
+    sourceDescriptions: sourceDescriptions(config),
     tokenize: (text, locale) => searchTokens(text, languagePack(locale)),
     glossarySources: [...glossarySources(config)],
     ...(config.project.edit_url === undefined ? {} : { editUrl: config.project.edit_url }),

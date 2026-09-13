@@ -99,7 +99,7 @@ describe("Header", () => {
       '<input id="site-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button><kbd class="search-shortcut" aria-hidden="true">/</kbd></span>',
     );
     expect(html).toContain(
-      '<ul class="site-links"><li><a href="../#home-tree">Spaces</a></li><li><a href="../index/">A–Z index</a></li><li><a href="../#home-recent">Recent</a></li></ul>',
+      '<ul class="site-links"><li><a href="../spaces/">Spaces</a></li><li><a href="../index/">A–Z index</a></li><li><a href="../#home-recent">Recent</a></li></ul>',
     );
     expect(html).not.toContain('class="count"');
     expect(html).toContain('<concordance-island data-island="mode-switch"');

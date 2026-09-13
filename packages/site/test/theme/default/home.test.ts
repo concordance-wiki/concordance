@@ -54,28 +54,27 @@ describe("Home", () => {
     );
   });
 
-  it("lists the spaces under the heading the top bar links to, one row each with the initials, the name, the count and the freshness, the tree of the space folded behind the row", () => {
+  it("lists the spaces under the heading of the tree, one row each with the initials, the name, the count and the freshness, the row leading to the page of the space and folding nothing", () => {
     const html = renderSlot("Home", home, defaultTheme);
     expect(html).toContain(
       '<section class="home-spaces" aria-labelledby="home-tree"><h2 id="home-tree">Spaces <span class="home-lead">fed by your repositories</span></h2><ul class="home-space-list">',
     );
     expect(html).toContain(
-      '<li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages · <time datetime="2024-04-30">yesterday</time></span></span></summary><ul class="space-nodes"><li class="space-page"><a href="glossary/keyword-page/">Keyword page</a></li><li class="space-page"><a href="glossary/source/">Source</a></li></ul></details></li>',
+      '<li class="home-space"><a class="home-space-row" href="glossary/"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages · <time datetime="2024-04-30">yesterday</time></span></span></a></li>',
     );
     // A count the page did not word is worded by the theme, a change it did not word shows its date.
     expect(html).toContain(
       '<span class="home-space-name">specs</span><span class="home-space-meta">1 pages · <time datetime="2024-04-20">11 days ago</time></span>',
     );
     expect(html).toContain(
-      '<li class="home-space stale"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">RU</span><span class="home-space-text"><span class="home-space-name">rules</span><span class="home-space-meta">1 pages · <time datetime="2023-01-01">2023-01-01</time></span>',
+      '<li class="home-space stale"><a class="home-space-row" href="rules/"><span class="space-initials" aria-hidden="true">RU</span><span class="home-space-text"><span class="home-space-name">rules</span><span class="home-space-meta">1 pages · <time datetime="2023-01-01">2023-01-01</time></span>',
     );
-    // A space without a dated note shows its count alone, its tree empty.
+    // A space without a dated note shows its count alone.
     expect(html).toContain(
-      '<span class="home-space-name">framing</span><span class="home-space-meta">0 pages</span></span></summary><ul class="space-nodes"></ul></details></li></ul>',
+      '<span class="home-space-name">framing</span><span class="home-space-meta">0 pages</span></span></a></li></ul>',
     );
-    expect(html).toContain(
-      '<li class="space-folder space-open"><span class="space-folder-name">screens<span class="count">1</span></span><ul class="space-nodes"><li class="space-page"><a href="specs/screens/home-page/">Home page</a></li></ul></li>',
-    );
+    expect(html).not.toContain("space-nodes");
+    expect(html).not.toContain("<details");
     expect(html).not.toContain("home-more-spaces");
     expect(html).toContain(
       '<p class="home-note">The dates come from the history of the repositories, so they are always right.</p></section>',
@@ -86,7 +85,7 @@ describe("Home", () => {
     const html = renderSlot("Home", corporateHome, defaultTheme);
     expect(count(html, '<li class="home-space')).toBe(7);
     expect(html).toContain(
-      '</ul><details class="home-more-spaces"><summary>2 more spaces, less cited</summary><ul class="home-space-list"><li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">BR</span>',
+      '</ul><details class="home-more-spaces"><summary>2 more spaces, less cited</summary><ul class="home-space-list"><li class="home-space"><a class="home-space-row" href="briefs/"><span class="space-initials" aria-hidden="true">BR</span>',
     );
     expect(html).toContain("12 documents · <time");
     const { labels, ...unlabelled } = corporateHome;

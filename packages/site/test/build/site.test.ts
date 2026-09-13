@@ -11,6 +11,8 @@ import {
   mentionsFragmentPath,
   SEARCH_PAGE,
   siteRootOf,
+  SPACES_PAGE,
+  spacePagePath,
   TODO_PAGE,
 } from "../../src/build/paths.js";
 import { fontFiles } from "../../src/css/fonts.js";
@@ -29,7 +31,7 @@ import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
 import { count, expectBalanced } from "../helpers/html.js";
 import { localTargets, references } from "../helpers/links.js";
-import { fragments, model, profile, term, tokenize } from "./fixture.js";
+import { fragments, model, profile, screen as screenEntity, term, tokenize } from "./fixture.js";
 
 type Options = SiteOptions & { fileSystem: ReturnType<typeof memoryFileSystem> };
 
@@ -81,8 +83,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ({ fileSystem, report } = await build());
   });
 
-  it("writes the home, the index, the to-do page, the search page, one page per entity and per keyword, the search index and the assets", () => {
+  it("writes the home, the index, the to-do page, the search page, the spaces page and one page per space, one page per entity and per keyword, the search index and the assets", () => {
     const entities = model().entities.map((entity) => pagePath(entity.id));
+    const spaces = ["framing", "glossary", "specs"].map(spacePagePath);
     const index = fileSystem.listFiles("/dist").filter((file) => /^search\/.*\.js$/.test(file));
     expect(index).toContain(searchFilePath(SEARCH_META));
     expect(index.length).toBeGreaterThan(10);
@@ -92,6 +95,8 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         INDEX_PAGE,
         TODO_PAGE,
         SEARCH_PAGE,
+        SPACES_PAGE,
+        ...spaces,
         ...entities,
         ...index,
         ...cited.map(mentionsFragmentPath),
@@ -103,7 +108,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
 
     expect(report.files).toEqual(fileSystem.listFiles("/dist"));
     expect(report.pages.map((page) => page.path)).toEqual(
-      [HOME_PAGE, ...entities, INDEX_PAGE, SEARCH_PAGE, TODO_PAGE].sort(),
+      [HOME_PAGE, ...entities, ...spaces, INDEX_PAGE, SEARCH_PAGE, SPACES_PAGE, TODO_PAGE].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
       "contract-viewer",
@@ -253,14 +258,15 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
   });
 
-  it("lists the spaces on the home page with their trees folded behind their rows, the recent changes, and no letter, no statistic and no to-do link outside the footer", () => {
+  it("lists the spaces on the home page, each row leading to the page of its space, the recent changes, and no letter, no statistic and no to-do link outside the footer", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
-      '<h2 id="home-tree">Spaces <span class="home-lead">fed by your repositories</span></h2><ul class="home-space-list"><li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages</span></span></summary><ul class="space-nodes"><li class="space-page"><a href="glossary/keyword-page/index.html">Keyword page</a></li>',
+      '<h2 id="home-tree">Spaces <span class="home-lead">fed by your repositories</span></h2><ul class="home-space-list"><li class="home-space"><a class="home-space-row" href="glossary/index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages</span></span></a></li>',
     );
     expect(home).toContain(
-      '<li class="space-folder space-open"><span class="space-folder-name">screens<span class="count">1</span></span><ul class="space-nodes"><li class="space-page"><a href="specs/screens/mentions-panel/index.html">Mentions panel</a></li></ul></li>',
+      '<li class="home-space"><a class="home-space-row" href="specs/index.html"><span class="space-initials" aria-hidden="true">SP</span>',
     );
+    expect(home).not.toContain("space-nodes");
     expect(home).toContain(
       '<p class="home-note">The dates come from the history of the repositories, so they are always right.</p>',
     );
@@ -336,7 +342,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
     expect(home).toContain('<a class="site-title" href="index.html">Concordance notes</a>');
-    expect(home).toContain('<a class="drawer-spaces-title" href="index.html#home-tree">Spaces</a>');
+    expect(home).toContain('<a class="drawer-spaces-title" href="spaces/index.html">Spaces</a>');
     expect(home).toContain(
       '<ul class="site-links"><li><a href="index/index.html">A–Z index</a></li><li><a href="index.html#home-recent">Recent</a></li></ul>',
     );
@@ -358,7 +364,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<details class="site-drawer" aria-label="Menu"><summary class="site-menu">',
     );
     expect(home).toContain(
-      '<ul class="drawer-space-list"><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">FR</span><span class="drawer-space-name">framing</span><span class="count">1</span></a></li><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">GL</span><span class="drawer-space-name">glossary</span><span class="count">2</span></a></li><li><a href="index.html#home-tree"><span class="space-initials" aria-hidden="true">SP</span><span class="drawer-space-name">specs</span><span class="count">2</span></a></li></ul>',
+      '<ul class="drawer-space-list"><li><a href="framing/index.html"><span class="space-initials" aria-hidden="true">FR</span><span class="drawer-space-name">framing</span><span class="count">1</span></a></li><li><a href="glossary/index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="drawer-space-name">glossary</span><span class="count">2</span></a></li><li><a href="specs/index.html"><span class="space-initials" aria-hidden="true">SP</span><span class="drawer-space-name">specs</span><span class="count">2</span></a></li></ul>',
     );
     expect(home).not.toContain('class="drawer-space"');
     expect(home).toContain(
@@ -547,12 +553,12 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.maxPageBytes).toBe(SITE_PAGE_BUDGET);
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.summary[0]).toBe("site: 11 pages written to /dist");
+    expect(report.summary[0]).toBe("site: 15 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
     expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(6);
     expect(
-      report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
+      report.summary.some((line) => /^pages: 15, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
@@ -714,9 +720,7 @@ describe("The labels of the site come from the message catalogue of the project 
   it("writes the French labels of the chrome and the pages for a French project, the theme overriding a message", async () => {
     const { fileSystem } = await build({ locale: "fr" });
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
-    expect(home).toContain(
-      '<a class="drawer-spaces-title" href="index.html#home-tree">Espaces</a>',
-    );
+    expect(home).toContain('<a class="drawer-spaces-title" href="spaces/index.html">Espaces</a>');
     expect(home).toContain(
       '<li><a href="index/index.html">Index A–Z</a></li><li><a href="index.html#home-recent">Récent</a></li>',
     );
@@ -837,6 +841,8 @@ describe("siteDocuments", () => {
       HOME_PAGE,
       INDEX_PAGE,
       TODO_PAGE,
+      SPACES_PAGE,
+      ...["framing", "glossary", "specs"].map(spacePagePath),
       SEARCH_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),
       ...index.map((document) => document.path),
@@ -859,7 +865,7 @@ describe("siteDocuments", () => {
     expect(shardOf(cut, "bu")).toContain('"built"');
   });
 
-  it("passes the mentions_inline, the edit link pattern, the names, the staleness thresholds and the collation of the configuration to the pages", () => {
+  it("passes the mentions_inline, the edit link pattern, the names, the staleness thresholds, the source descriptions and the collation of the configuration to the pages", () => {
     const dated = {
       ...term,
       source: { ...term.source, last_modified: "2026-09-01T00:00:00.000Z" },
@@ -869,6 +875,7 @@ describe("siteDocuments", () => {
         mentionsInline: 1,
         editUrl: "https://forge.example/{source}/{path}",
         staleness: { warn_after_days: { default: 1 } },
+        sourceDescriptions: { glossary: "The vocabulary of the tool." },
         names: { domains: { publication: "Publication" } },
         collate: (a, b) => b.localeCompare(a),
         model: model({
@@ -889,7 +896,7 @@ describe("siteDocuments", () => {
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );
     expect(home?.content).toContain(
-      '<li class="home-space stale"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages · <time datetime="2026-09-01">2 weeks ago</time></span>',
+      '<li class="home-space stale"><a class="home-space-row" href="glossary/index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages · <time datetime="2026-09-01">2 weeks ago</time></span>',
     );
     expect(home?.content).toContain(
       '<li class="home-change"><a href="glossary/keyword-page/index.html"><span class="home-change-title">Keyword page</span><span class="home-change-meta">glossary · <time datetime="2026-09-01">2 weeks ago</time></span></a></li>',
@@ -897,6 +904,21 @@ describe("siteDocuments", () => {
     expect(home?.content).toContain(
       '<div class="home-alert"><h3>A space has not moved for 11 days</h3><p>glossary. The alert threshold is set to 1 day in the configuration.</p></div>',
     );
+    const spaces = documents.find((document) => document.path === SPACES_PAGE);
+    expect(spaces?.content).toContain(
+      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">GL</span><a href="../glossary/index.html">glossary</a></th><td class="spaces-content">The vocabulary of the tool.</td><td class="spaces-count">2</td><td class="spaces-date"><time datetime="2026-09-01">11 days ago</time></td></tr>',
+    );
+    expect(spaces?.content).toContain(
+      '<td class="spaces-content">Business rule, Screen</td><td class="spaces-count">2</td><td class="spaces-date"></td>',
+    );
+    const space = documents.find((document) => document.path === spacePagePath("glossary"));
+    expect(space?.content).toContain("<title>glossary – Concordance notes</title>");
+    expect(space?.content).toContain(
+      '<h1>glossary</h1><p class="space-description">The vocabulary of the tool.</p><p class="space-meta"><span>2 pages</span><span>repository <code>glossary</code></span><time datetime="2026-09-01">updated 2 weeks ago</time></p>',
+    );
+    expect(space?.content).toContain('<input type="hidden" name="source" value="glossary"/>');
+    expect(space?.content).toContain('placeholder="Search in this space"');
+    expect(space?.content).not.toContain('class="drawer-space"');
   });
 
   it("gives the trail of every page its labels in the site language, the way to the root and, on an entity page, the page itself", () => {
@@ -939,10 +961,12 @@ describe("siteDocuments", () => {
       { name: "specs", url: "https://gitlab.com/concordance-wiki/demo-specs" },
       { name: "framing" },
     ];
-    const [, , , , , entity, , , , , screen] = siteDocuments(
+    const { documents } = siteDocuments(
       options({ model: withForge, sourceRefs: { specs: "develop" } }),
       bundles,
-    ).documents;
+    );
+    const entity = documents.find((document) => document.path === pagePath(term.id));
+    const screen = documents.find((document) => document.path === pagePath(screenEntity.id));
     expect(entity?.content).toContain(
       '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit this page</a></span></p>',
     );

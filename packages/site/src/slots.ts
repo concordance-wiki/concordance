@@ -13,6 +13,8 @@ export const SLOT_NAMES = [
   "SearchResults",
   "Index",
   "Todo",
+  "Spaces",
+  "Space",
 ] as const;
 
 export type SlotName = (typeof SLOT_NAMES)[number];
@@ -112,6 +114,8 @@ export interface SearchField {
   root?: string;
   /** The strings of the live results under the field, worded at build; the island's own English when absent. */
   suggestions?: SuggestionLabels;
+  /** The space the field is confined to: the form submits it as the source facet, and the live results keep to it. */
+  source?: string;
 }
 
 /** A message by plural category of the locale, `#` standing for the number, as the island words a count. */
@@ -218,9 +222,11 @@ export interface FooterProps {
   credit: boolean;
 }
 
-/** A space of the home page: a source, how much it holds and when it last moved, its tree folded behind its row. */
+/** A space of the home page: a source, how much it holds and when it last moved; its row leads to its page. */
 export interface HomeSpace {
   name: string;
+  /** Where the page of the space stands. */
+  href: string;
   /** Two letters standing for the space in its badge. */
   initials: string;
   /** How many pages the space holds. */
@@ -235,8 +241,6 @@ export interface HomeSpace {
   dateLabel?: string;
   /** Whether the staleness threshold makes the space dormant. */
   stale: boolean;
-  /** The whole tree of the space, every folder open, drawn as the tree of the entity page. */
-  nodes: SpaceNode[];
 }
 
 /** A page of the list of recent changes: where it leads, its space and when it changed. */
@@ -987,6 +991,122 @@ export interface TodoProps {
   terms: TodoEntry[];
 }
 
+/** A row of the spaces page: a source, what it holds, how many pages and when it last moved. */
+export interface SpaceRow {
+  name: string;
+  /** Where the page of the space stands. */
+  href: string;
+  /** Two letters standing for the space in its badge. */
+  initials: string;
+  /** What the space holds: the sentence the configuration declares, else the labels of its dominant types; empty for a space without a note. */
+  content: string;
+  /** How many pages the space holds. */
+  count: number;
+  /** ISO 8601 date of the newest change among its notes; absent when none carries a git date. */
+  date?: string;
+  /** The change worded relative to the build, "2 days ago", in days past the threshold, "193 days ago"; the theme shows `date` when absent. */
+  dateLabel?: string;
+  /** Whether the staleness threshold makes the space dormant: its date is then marked in the accent. */
+  stale: boolean;
+}
+
+/** The strings of the spaces page in the language of the site; the theme's own English when absent. */
+export interface SpacesLabels {
+  /** The title of the page. */
+  title: string;
+  /** Under the title, already counted: how many spaces, and that a repository and a space do not map one to one. */
+  lead: string;
+  /** The four column headings. */
+  space: string;
+  content: string;
+  pages: string;
+  lastUpdate: string;
+  /** Under the table, the threshold already worded: where the dates come from and what the accent means. */
+  datesNote: string;
+}
+
+export interface SpacesProps {
+  /** Every space of the site, the most cited first. */
+  spaces: SpaceRow[];
+  labels?: Partial<SpacesLabels>;
+}
+
+/** A category of a space: a top-level folder of its repository, with the list it opens. */
+export interface SpaceCategory extends Link {
+  /** One sentence on what the folder holds; absent when nothing declares one. */
+  description?: string;
+  /** How many pages the folder holds. */
+  count: number;
+}
+
+/** A page of a space changed last: where it leads, its category and when it changed. */
+export interface SpaceChange extends Link {
+  /** The top-level folder the page is filed under; absent for a page at the root of the repository. */
+  category?: string;
+  /** ISO 8601 date of the change. */
+  date: string;
+  /** The change worded relative to the build, "4 days ago"; the theme shows `date` when absent. */
+  dateLabel?: string;
+}
+
+/** A word cited in a space: a page with how many times the notes of the space cite it. */
+export interface SpaceWord extends Link {
+  count: number;
+  /** `true` for a keyword page, the page of a recurring expression nobody defined: the chip is dashed. */
+  keyword?: boolean;
+}
+
+/** The strings of a space page in the language of the site; the theme's own English when absent. */
+export interface SpaceLabels {
+  /** Accessible name of the breadcrumb. */
+  breadcrumb: string;
+  /** The first step of the breadcrumb, the spaces page. */
+  spaces: string;
+  /** The count worded, "486 pages". */
+  pages: string;
+  /** Before the repository name: "repository". */
+  repository: string;
+  /** The newest change worded, "updated 4 days ago"; absent when no note carries a git date. */
+  updated?: string;
+  /** Heading of the categories. */
+  browse: string;
+  /** After that heading, already counted: "5 categories, as filed in the repository". */
+  categoriesLead: string;
+  /** Under the categories: that each one opens a list and that the page carries no tree. */
+  categoriesNote: string;
+  /** Heading of the recent changes. */
+  recent: string;
+  /** Heading of the most cited words. */
+  mostCited: string;
+  /** Under the words: that they are counted in the space only. */
+  wordsNote: string;
+  /** The closing sentence of the page. */
+  footer: string;
+}
+
+export interface SpaceProps {
+  name: string;
+  /** Two letters standing for the space in its badge. */
+  initials: string;
+  /** The sentence the configuration declares for the source; absent when it declares none. */
+  description?: string;
+  /** Where the spaces page stands, the first step of the breadcrumb. */
+  spacesHref: string;
+  /** The name of the repository the space is fed by, on the line under the title. */
+  repository: string;
+  /** How many pages the space holds. */
+  count: number;
+  /** ISO 8601 date of the newest change among its notes; absent when none carries a git date. */
+  date?: string;
+  /** The top-level folders of the repository, in name order. */
+  categories: SpaceCategory[];
+  /** The pages of the space changed last, newest first, four at most. */
+  recent: SpaceChange[];
+  /** The pages the notes of the space cite most, five at most. */
+  words: SpaceWord[];
+  labels?: Partial<SpaceLabels>;
+}
+
 /** The view model of every slot, the contract between the site generator and a theme. */
 export interface SlotProps {
   Shell: ShellProps;
@@ -1000,4 +1120,6 @@ export interface SlotProps {
   SearchResults: SearchResultsProps;
   Index: IndexProps;
   Todo: TodoProps;
+  Spaces: SpacesProps;
+  Space: SpaceProps;
 }

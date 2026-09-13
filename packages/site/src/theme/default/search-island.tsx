@@ -48,6 +48,7 @@ function ClearButton({ search }: { search: SearchField }): JSX.Element {
  * The form of the header: a plain `GET` to the results page, so that it works before any
  * script runs; the field shows the shortcut that reaches it once the search island runs, and
  * the button clearing it, served hidden, which the island shows while the field holds a query.
+ * On a space page the form carries the space as the source facet, so that the results keep to it.
  */
 export function SearchForm({ search }: { search: SearchField }): JSX.Element {
   return (
@@ -61,6 +62,7 @@ export function SearchForm({ search }: { search: SearchField }): JSX.Element {
       <label class="visually-hidden" for="site-search">
         {search.label ?? labels.search}
       </label>
+      {search.source !== undefined && <input type="hidden" name="source" value={search.source} />}
       <span class="site-search-field">
         <SearchGlyph />
         <input

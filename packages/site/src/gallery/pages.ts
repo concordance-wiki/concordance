@@ -28,6 +28,7 @@ import {
   searchResultsEmpty,
   todo,
 } from "./fixtures.js";
+import { corporateSpace, corporateSpaceHeader, corporateSpaces } from "./spaces.js";
 
 /** One page of the gallery: a slot in one state, rendered through the theme with fixture data. */
 export type GalleryPage = {
@@ -362,7 +363,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "Home",
     state: "corporate",
     description:
-      "the home page in the corporate chrome: the question and the field with its live results to come, the most cited pages as shortcuts, five spaces of the fixtures corpus with their counts and freshness and two more folded, the pages changed last, the alert on a space that has not moved past the threshold",
+      "the home page in the corporate chrome: the question and the field with its live results to come, the most cited pages as shortcuts, five spaces of the fixtures corpus with their counts and freshness and two more folded, each row leading to the page of its space, the pages changed last, the alert on a space that has not moved past the threshold",
     ...chrome,
     header: corporateHeader,
     footer: corporateFooter,
@@ -403,5 +404,29 @@ export const galleryPages: readonly GalleryPage[] = [
     header: corporateHeader,
     footer: corporateFooter,
     props: corporateScreenPage,
+  },
+  {
+    file: "spaces-corporate.html",
+    slot: "Spaces",
+    rendered: "Spaces",
+    state: "corporate",
+    description:
+      "the spaces page in the corporate chrome: the seven spaces of the fixtures corpus in one table, none folded, with their content, their page count and their newest change from the git history, the dormant one dated in the accent and in days, and the note on the threshold",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: corporateSpaces,
+  },
+  {
+    file: "space-corporate.html",
+    slot: "Space",
+    rendered: "Space",
+    state: "corporate",
+    description:
+      "the page of the specifications space in the corporate chrome: the search field confined to the space, the breadcrumb from the spaces page, the badge, the title, the sentence of the configuration and the line counting the pages, naming the repository and dating the newest change; the categories of the repository with their counts, each opening its own list; the pages changed last and the most cited words counted in the space only, one of them without a note; no tree",
+    ...chrome,
+    header: corporateSpaceHeader,
+    footer: corporateFooter,
+    props: corporateSpace,
   },
 ];

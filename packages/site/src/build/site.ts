@@ -53,16 +53,13 @@ import {
   relativeHref,
   SEARCH_PAGE,
   siteRootOf,
+  SPACES_PAGE,
+  spacePagePath,
   TODO_PAGE,
 } from "./paths.js";
 import { redirectBody, redirectHref, redirectsOf } from "./redirect.js";
-import {
-  HOME_RECENT_ANCHOR,
-  HOME_TREE_ANCHOR,
-  spaceCountsOf,
-  spaceLinksOf,
-  type SpaceCount,
-} from "./space.js";
+import { HOME_RECENT_ANCHOR, spaceCountsOf, spaceLinksOf, type SpaceCount } from "./space.js";
+import { spacePageOf, spacesPageOf } from "./spaces.js";
 import { todoOf } from "./todo.js";
 
 /** Excluding previews, per page. */
@@ -83,6 +80,8 @@ export interface SiteInput {
   editUrl?: string;
   /** The `ref` of every source that declares one, for the edit links when `edit_url` is unset. */
   sourceRefs?: Record<string, string>;
+  /** The `description` of every source that declares one: the content of its space on the spaces page. */
+  sourceDescriptions?: Record<string, string>;
   /** The names of the glossary sources, where the lead of a keyword page offers to write the note. */
   glossarySources?: string[];
   /** `build.mentions_inline` of the configuration. */
@@ -157,6 +156,8 @@ interface PageChrome {
   current?: TrailPage;
   /** The tree of the space of an entity page, for the drawer. */
   space?: SpaceTree;
+  /** The space a space page confines the search field to. */
+  searchSource?: string;
 }
 
 /** The header and footer of one page, every href relative to it. */
@@ -164,16 +165,16 @@ function chromeFor(
   input: SiteInput,
   context: SiteContext,
   page: string,
-  { todoCount, spaces, current, space }: PageChrome,
+  { todoCount, spaces, current, space, searchSource }: PageChrome,
 ): SiteChrome {
   const chrome = themeChrome(input, assetsBaseOf(page));
   const header: SlotProps["Header"] = {
     siteTitle: chrome.siteTitle,
     homeHref: relativeHref(page, HOME_PAGE),
-    search: searchFieldOf(context, page),
+    search: searchFieldOf(context, page, searchSource),
     spaces: {
       label: message(context, "site.spaces"),
-      href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`,
+      href: relativeHref(page, SPACES_PAGE),
       items: spaceLinksOf(page, spaces),
     },
     navigation: [
@@ -229,15 +230,23 @@ function chromeFor(
   };
 }
 
-/** The search field of a page, in the header and at the head of the home page: it submits to the results page, and its island words the live results. */
-function searchFieldOf(context: SiteContext, page: string): SearchField {
+/**
+ * The search field of a page, in the header and at the head of the home page: it submits to the
+ * results page, and its island words the live results; on a space page it says so and keeps to
+ * the space.
+ */
+function searchFieldOf(context: SiteContext, page: string, source?: string): SearchField {
   return {
     action: relativeHref(page, SEARCH_PAGE),
-    placeholder: message(context, "site.searchPlaceholder"),
+    placeholder: message(
+      context,
+      source === undefined ? "site.searchPlaceholder" : "space.searchPlaceholder",
+    ),
     label: message(context, "site.search"),
     clearLabel: message(context, "results.clearQuery"),
     root: siteRootOf(page),
     suggestions: suggestionLabels(context.catalogue),
+    ...(source === undefined ? {} : { source }),
   };
 }
 
@@ -282,6 +291,9 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     ...(input.names === undefined ? {} : { names: input.names }),
     ...(input.editUrl === undefined ? {} : { editUrl: input.editUrl }),
     ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
+    ...(input.sourceDescriptions === undefined
+      ? {}
+      : { sourceDescriptions: input.sourceDescriptions }),
     ...(input.staleness === undefined ? {} : { staleness: input.staleness }),
     ...(input.collate === undefined ? {} : { collate: input.collate }),
     ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
@@ -295,12 +307,14 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     locale: string,
     current?: TrailPage,
     space?: SpaceTree,
+    searchSource?: string,
   ): RenderOptions => {
     const chrome = chromeFor(input, context, page, {
       todoCount,
       spaces,
       ...(current === undefined ? {} : { current }),
       ...(space === undefined ? {} : { space }),
+      ...(searchSource === undefined ? {} : { searchSource }),
     });
     return {
       theme: input.theme,
@@ -384,6 +398,18 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     };
   });
   const siteTitle = themeChrome(input, "").siteTitle;
+  const spacesTitle = message(context, "site.spaces");
+  // The page of a space: its search field says it keeps to the space, and does.
+  const spacePage = (source: string): WrittenDocument => {
+    const page = spacePagePath(source);
+    return {
+      path: page,
+      content: renderDocument(
+        h(input.theme.components.Space, spacePageOf(context, source)),
+        optionsFor(page, source, input.locale, undefined, undefined, source),
+      ),
+    };
+  };
   const indexTitle = message(context, "site.index");
   const index = planIndex(context, (props) =>
     Buffer.byteLength(render(INDEX_PAGE, "Index", props, indexTitle, input.locale).content),
@@ -430,6 +456,8 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
         ),
       ),
       render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
+      render(SPACES_PAGE, "Spaces", spacesPageOf(context), spacesTitle, input.locale),
+      ...spaces.map((space) => spacePage(space.name)),
       searchPage,
       ...input.model.entities.map(entityPage),
       ...redirects,

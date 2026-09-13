@@ -213,9 +213,17 @@ export function suggestionOf(entry: SearchEntry, meta: SearchMeta, root: string)
   };
 }
 
-/** The results page with the query typed: the action of the form, then the query string of that query alone. */
+/** The state a field submits: its query alone, with the source facet set on the field of a space page. */
+export function fieldState(search: SearchField, query: string): SearchState {
+  const state = withQuery(emptyState(), query);
+  return search.source === undefined
+    ? state
+    : { ...state, filters: { ...state.filters, source: [search.source] } };
+}
+
+/** The results page with the query typed: the action of the form, then the query string of that query, the space kept. */
 export function seeResultsHref(search: SearchField, query: string): string {
-  return `${search.action}${searchQueryString(withQuery(emptyState(), query))}`;
+  return `${search.action}${searchQueryString(fieldState(search, query))}`;
 }
 
 /**
@@ -668,11 +676,13 @@ function suggest<P extends SearchPanel>(
       return;
     }
     const meta = answer.meta;
+    // The field of a space page keeps its live results to the space.
+    const hits = filterEntries(answer.hits, (hit) => hit.entry, fieldState(field.search, query));
     const shown =
       meta === undefined || queryWords(query).length === 0
         ? []
-        : answer.hits.slice(0, SUGGESTIONS).map((hit) => suggestionOf(hit.entry, meta, site));
-    const total = shown.length === 0 ? 0 : answer.hits.length;
+        : hits.slice(0, SUGGESTIONS).map((hit) => suggestionOf(hit.entry, meta, site));
+    const total = shown.length === 0 ? 0 : hits.length;
     const locale = meta?.locale ?? "en";
     if (field.panel !== null) {
       options.render(
