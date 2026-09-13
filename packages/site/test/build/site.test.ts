@@ -61,6 +61,15 @@ function withoutJavaScript(html: string): string {
     .replace(/<[a-z-]+[^>]*\sdata-island="[^"]*"[^>]*>[\s\S]*?<\/[a-z-]+>/g, "");
 }
 
+/** How many mentions the served page carries inline: the props of the related pages island. */
+function inlineMentions(html: string): number {
+  const match = /<concordance-island data-island="mentions-panel" data-props="([^"]*)"/.exec(html);
+  if (match === null) return 0;
+  // The panel serialises its own props: the shape is the island's.
+  const props = JSON.parse((match[1] ?? "").replaceAll("&quot;", '"')) as { mentions: unknown[] };
+  return props.mentions.length;
+}
+
 /** The entities of the fixture model that another note cites: those whose mentions fragment the build writes. */
 const cited = ["framing/vision", "glossary/keyword-page", "glossary/page"];
 
@@ -216,7 +225,8 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(entity).toContain(
       'data-props="{&quot;root&quot;:&quot;../../&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;../../search/index.html&quot;',
     );
-    expect(entity).toContain('placeholder="Search entities and keywords…"');
+    expect(entity).toContain('placeholder="Search the documentation"');
+    expect(entity).toContain('<kbd class="search-shortcut" aria-hidden="true">/</kbd>');
     expect(entity).toContain('<div class="search-suggestions" hidden></div>');
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
@@ -230,7 +240,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<div class="home-search-slot" data-slot="search"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
     );
     expect(home).toContain(
-      '<input id="home-search" type="search" name="q" placeholder="Search entities and keywords…"/>',
+      '<input id="home-search" type="search" name="q" placeholder="Search the documentation"/>',
     );
   });
 
@@ -238,7 +248,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
     expect(entity.startsWith('<!doctype html>\n<html lang="en" dir="ltr">')).toBe(true);
     expect(entity).toContain("<title>Keyword page – Concordance notes</title>");
-    expect(entity).toContain('<div class="entity">');
+    expect(entity).toContain('<div class="entity entity-with-space">');
     expect(entity).toContain("<h1>Keyword page</h1>");
     expect(entity).toContain('<article class="entity-body">');
     expect(entity).toContain('<span class="badge">Term</span>');
@@ -277,7 +287,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain("<p>4 declared attributes</p>");
     expect(page).toContain("<p>note, supersedes, weight</p>");
     expect(files.readText("/dist/specs/screens/mentions-panel/index.html")).toContain(
-      '<div class="entity"><header class="entity-header">',
+      '<div class="entity entity-with-space"><nav class="space" aria-label="Tree of the space">',
     );
     expect(typed.summary).toContain(
       "override EntityPage@term: plugin @example/theme, theme custom",
@@ -292,12 +302,20 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');
   });
 
-  it("writes the project name as the site title, the index and to-do links with the count in the header, and no credit without a theme", () => {
+  it("writes the project name as the site title, the spaces, index and recent links in the top bar, the to-do link with its count in the footer, and no credit without a theme", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
     expect(home).toContain('<a class="site-title" href="index.html">Concordance notes</a>');
-    expect(home).toContain('<a href="index/index.html">Index</a>');
-    expect(home).toContain('<a href="todo/index.html">To do<span class="count">5</span></a>');
+    expect(home).toContain(
+      '<ul class="site-links"><li><a href="index.html#home-tree">Spaces</a></li><li><a href="index/index.html">A–Z index</a></li><li><a href="index.html#home-recent">Recent</a></li></ul>',
+    );
+    expect(home).toContain('<h2 id="home-tree">');
+    expect(home).toContain('<h2 id="home-recent">');
+    const header = home.slice(home.indexOf("<header"), home.indexOf("</header>"));
+    expect(header).not.toContain("todo/index.html");
+    expect(home).toContain(
+      '<li class="site-footer-todo"><a href="todo/index.html">To do<span class="count">5</span></a></li>',
+    );
     expect(home).not.toContain("Built with");
     expect(home).toContain("version 0.1.0");
     expect(home).toContain('<time datetime="2026-09-12T12:00:00.000Z">');
@@ -522,11 +540,12 @@ describe("One mentions fragment per entity, never a global index", () => {
     expect(fragment.id).toBe("glossary/keyword-page");
     expect(fragment.mentions).toHaveLength(5);
     const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    // Every inline mention travels in the props of the island; the served list quotes one passage per page.
     for (const mention of fragment.mentions as { href: string; context: string }[]) {
-      expect(page).toContain(`href="${mention.href}"`);
+      expect(page).toContain(mention.href);
     }
     expect(page).toContain(
-      "lists the <mark>keyword page</mark>s that cite the entity, grouped by file",
+      '<a class="related-excerpt mention-passage" href="../../specs/screens/mentions-panel/index.html#L7"><span class="related-mark">Cited · </span><q class="mention-context">keyword pages</q></a>',
     );
   });
 
@@ -563,7 +582,7 @@ describe("One mentions fragment per entity, never a global index", () => {
     expect(fragment.mentions).toHaveLength(305);
     // From two hundred mentions on, the page embeds nothing: it stays small and the island fetches the fragment.
     const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
-    expect(count(page, '<li class="mention')).toBe(20);
+    expect(inlineMentions(page)).toBe(20);
     expect(page).not.toContain('id="mentions-embedded"');
     expect(page).toContain('href="../../fragments/glossary/keyword-page.mentions.json"');
     expect(report.warnings).toEqual([]);
@@ -571,15 +590,18 @@ describe("One mentions fragment per entity, never a global index", () => {
 });
 
 describe("Without JavaScript, the first twenty mentions remain readable and the links work", () => {
-  it("keeps the inline mentions, their file and passage links and the link to the fragment once scripts are removed, every target written", async () => {
+  it("keeps the related pages of the inline mentions, their title and passage links and the link to the fragment once scripts are removed, every target written", async () => {
     const { fileSystem } = await build({ mentionsInline: 3 });
     const path = "glossary/keyword-page/index.html";
     const html = fileSystem.readText(`/dist/${path}`).replace(/<script[\s\S]*?<\/script>/g, "");
     expect(html).not.toContain("<script");
-    expect(count(html, '<li class="mention')).toBe(3);
-    expect(html).toContain('<span class="mention-file">rules/publication-threshold.md</span>');
+    expect(inlineMentions(html)).toBe(3);
+    expect(count(html, '<li class="related-page')).toBe(3);
     expect(html).toContain(
-      '<a class="mention-passage" href="../../specs/rules/publication-threshold/index.html#L1">line 1</a>',
+      '<a class="related-title" href="../../specs/rules/publication-threshold/index.html">Épreuve du seuil</a><span class="related-type">Business rule</span>',
+    );
+    expect(html).toContain(
+      '<a class="related-excerpt mention-passage" href="../../specs/rules/publication-threshold/index.html#L1"><span class="related-mark">Cited · </span>',
     );
     expect(html).toContain('<a href="../../fragments/glossary/keyword-page.mentions.json">');
     // The header carries the mode switch button on every page: only the main landmark is inspected.
@@ -616,7 +638,7 @@ describe("The threshold of twenty is configurable (build.mentions_inline)", () =
         model: grown,
         ...(mentionsInline === undefined ? {} : { mentionsInline }),
       });
-      return count(fileSystem.readText(`/dist/${page}`), '<li class="mention');
+      return inlineMentions(fileSystem.readText(`/dist/${page}`));
     };
     expect(await inline()).toBe(20);
     expect(await inline(5)).toBe(5);
@@ -629,8 +651,11 @@ describe("The labels of the site come from the message catalogue of the project 
   it("writes the French labels of the chrome and the pages for a French project, the theme overriding a message", async () => {
     const { fileSystem } = await build({ locale: "fr" });
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
-    expect(home).toContain('<a href="index/index.html">Index</a>');
+    expect(home).toContain(
+      '<li><a href="index.html#home-tree">Espaces</a></li><li><a href="index/index.html">Index A–Z</a></li><li><a href="index.html#home-recent">Récent</a></li>',
+    );
     expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
+    expect(home).toContain('placeholder="Rechercher dans la documentation"');
     expect(home).toContain(">Par arborescence</h2>");
     expect(home).toContain(">Par mot</a>");
     expect(home).toContain(">Derniers changements</h2>");
@@ -639,6 +664,16 @@ describe("The labels of the site come from the message catalogue of the project 
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
     expect(entity).toContain('<span class="badge">Terme</span>');
     expect(entity).toContain('<html lang="en"');
+    expect(entity).toContain('<nav class="space" aria-label="Arborescence de l’espace">');
+    expect(entity).toContain('<nav class="breadcrumbs" aria-label="Vous êtes ici">');
+    expect(entity).toContain('<h2 id="entity-toc">Sur cette page</h2>');
+    expect(entity).toContain('<p class="panel-note">Déclarées en tête du fichier.</p>');
+    expect(entity).toContain(
+      '<h2 id="mentions-title">Pages en relation <span class="count">3</span></h2>',
+    );
+    expect(entity).toContain(
+      '<span class="neighbourhood-lead">Voir la carte du voisinage</span><span class="neighbourhood-count">3 pages</span>',
+    );
   });
 
   it("takes the site title, favicon, stylesheets, footer and label overrides from the theme.yaml of the theme", async () => {
@@ -771,7 +806,7 @@ describe("siteDocuments", () => {
       index?.content.indexOf(">#hash</a>") ?? -1,
     );
     expect(entity?.content).toContain("<details");
-    expect(count(entity?.content ?? "", '<li class="mention')).toBe(1);
+    expect(inlineMentions(entity?.content ?? "")).toBe(1);
     expect(entity?.content).toContain(
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );
@@ -825,7 +860,7 @@ describe("siteDocuments", () => {
       bundles,
     ).documents;
     expect(entity?.content).toContain(
-      '<p class="entity-source">source: <code>glossary/keyword-page.md</code><a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit in the forge</a></p>',
+      '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit this page</a></span></p>',
     );
     expect(screen?.content).toContain(
       '<a class="entity-edit" href="https://gitlab.com/concordance-wiki/demo-specs/-/edit/develop/screens/mentions-panel.md">',

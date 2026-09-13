@@ -160,6 +160,8 @@ export interface FooterProps {
   generatedAt: string;
   text?: string;
   links: Link[];
+  /** The link to the to-do page with the number of its entries: a build statistic, kept out of the top bar. */
+  todo?: NavigationItem;
   /** Whether the discreet credit of the tool, a link to its repository, is shown; nothing else names it. */
   credit: boolean;
 }
@@ -293,12 +295,65 @@ export interface TypeDeclaration {
   };
 }
 
-/** The headings the generic page adds itself, in the language of the site; the theme's own English when absent. */
+/** The headings and notes the generic page adds itself, in the language of the site; the theme's own English when absent. */
 export interface EntityPageLabels {
   /** Heading of the panel of declared attributes. */
   properties: string;
+  /** Note under the declared attributes: that they come from the top of the file. */
+  declaredAtTop: string;
   /** Heading of the section listing the attributes the type does not declare. */
   otherAttributes: string;
+  /** Heading of the table of contents of the note. */
+  onThisPage: string;
+  /** Accessible name of the tree of the space. */
+  spaceTree: string;
+  /** Accessible name of the breadcrumb. */
+  breadcrumb: string;
+  /** The question before the edit link of the footer. */
+  correction: string;
+  /** The edit link of the footer. */
+  edit: string;
+  /** The line that unfolds the neighbourhood. */
+  seeNeighbourhood: string;
+  /** How many pages the neighbourhood holds, already worded: "5 pages". */
+  neighbourPages: string;
+}
+
+/** A step of the breadcrumb: the space, a folder, the page; only the space has a page of its own. */
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+/** A node of the tree of the current space: a folder with its page count, a page, or the pages a long folder leaves out. */
+export interface SpaceNode {
+  label: string;
+  /** Where a page leads; a folder has none. */
+  href?: string;
+  /** How many pages a folder holds. */
+  count?: number;
+  /** The folders on the way to the current page open, their contents listed; a closed folder shows its count alone. */
+  children?: SpaceNode[];
+  /** The page of the tree that is the current one. */
+  current?: boolean;
+  /** A node standing for the pages of a long folder the tree leaves out, its label saying how many. */
+  omitted?: boolean;
+}
+
+/** The space of a page: the source it comes from, as the reader browses it in the left column. */
+export interface SpaceTree {
+  name: string;
+  /** Two letters standing for the space in the badge above the tree. */
+  initials: string;
+  nodes: SpaceNode[];
+}
+
+/** When the note last changed, for the line under the title. */
+export interface ChangeDate {
+  /** ISO 8601 date. */
+  date: string;
+  /** Worded in the language of the site: "changed 9 days ago". */
+  label: string;
 }
 
 /** The value of one attribute of an entity page, what an `Attribute@<name>` component receives. */
@@ -392,6 +447,12 @@ export interface EntityPageProps {
   entity: EntityRef;
   /** The type as the profile declares it; absent for a type the profile does not declare. */
   declaration?: TypeDeclaration;
+  /** The space of the page and its tree, for the left column; absent, the page has no left column. */
+  space?: SpaceTree;
+  /** Space, folders, page; absent, the page has no breadcrumb. */
+  breadcrumb?: BreadcrumbItem[];
+  /** The last change of the note, on the line under the title; absent when the source recorded none. */
+  changed?: ChangeDate;
   /**
    * Qualifying properties, in the order of `display.highlight` of the type: the first two sit
    * next to the badge, the next three on a line under it, the template shows at most five.
@@ -465,12 +526,20 @@ export interface KeywordPageProps {
   similarLead: string;
   neighbours: NeighbourhoodProps;
   mentions: MentionsPanelProps;
+  /** The line that unfolds the neighbourhood and its count; the theme's own English when absent. */
+  labels?: Partial<Pick<EntityPageLabels, "seeNeighbourhood" | "neighbourPages">>;
 }
 
 export interface Mention {
   /** A link written in a note, or a file that merely cites the entity. */
   kind: "written" | "recognised";
   file: Link;
+  /** The title of the page that cites the entity; the file label stands in when absent. */
+  title?: string;
+  /** The type of the citing page, as a slug, which the related pages filter by. */
+  type?: string;
+  /** The label of that type in the language of the site. */
+  typeLabel?: string;
   context: string;
   line: number;
   href: string;
@@ -480,10 +549,37 @@ export interface Mention {
   location?: string;
 }
 
-/** The headings of the two sections of the panel, in the locale of the site. */
-export interface MentionsHeadings {
-  written: string;
-  recognised: string;
+/** The strings of the related pages block in the language of the site; the theme's own English when absent. */
+export interface RelatedLabels {
+  /** Heading of the block. */
+  related: string;
+  /** Placeholder of the text filter. */
+  filterPages: string;
+  /** The button opening the type filter. */
+  types: string;
+  /** "{shown} of {total} pages", the two placeholders replaced by the island. */
+  pagesOf: string;
+  /** Lifts every type filter. */
+  clearAll: string;
+  /** Prefix of an entry whose page writes a link to the current one. */
+  cited: string;
+  /** "passage" and "passages", after the count of an entry. */
+  passage: string;
+  passages: string;
+  /** "Show the {count} others", the placeholder replaced by the island. */
+  showOthers: string;
+  /** Shown while the others load. */
+  loadingOthers: string;
+  /** Shown when the others could not be loaded. */
+  othersUnavailable: string;
+  /** The link to the JSON fragment, before the island runs. */
+  fullList: string;
+  /** Under the list: how it is ordered and what "cited" marks. */
+  orderNote: string;
+  /** When no page evokes the entity. */
+  noRelated: string;
+  /** When no page matches the filters. */
+  noMatch: string;
 }
 
 export interface MentionsPanelProps {
@@ -491,8 +587,10 @@ export interface MentionsPanelProps {
   mentions: Mention[];
   /** How many mentions are in the served HTML; the rest is revealed on demand. */
   initial: number;
+  /** How many pages cite the entity in all, the served ones included; counted from `mentions` when absent. */
+  pages?: number;
   /** Absent, the theme uses its own English labels. */
-  headings?: MentionsHeadings;
+  labels?: Partial<RelatedLabels>;
   /** Href, relative to the page, of the JSON fragment holding every mention of the entity; absent when none was written. */
   fragmentHref?: string;
 }

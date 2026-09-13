@@ -84,7 +84,7 @@ describe("Shell", () => {
 });
 
 describe("Header", () => {
-  it("renders the site title as a link home, the search form and the navigation with counts", () => {
+  it("renders the site title as a link home, the search field with its shortcut, the three links and the mode switch, no statistic", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain('<nav class="site-nav" aria-label="Site">');
     expect(html).toContain('<a class="site-title" href="../">My wiki</a>');
@@ -92,10 +92,27 @@ describe("Header", () => {
       '<form class="site-search" role="search" aria-label="Site search" action="../search/" method="get">',
     );
     expect(html).toContain('<label class="visually-hidden" for="site-search">Search</label>');
-    expect(html).toContain('<a href="../todo/">To do<span class="count">12</span></a>');
-    expect(html).toContain('<a href="../index/">Index</a>');
+    expect(html).toContain(
+      '<span class="site-search-field"><svg class="search-glyph" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false">',
+    );
+    expect(html).toContain(
+      '<input id="site-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><kbd class="search-shortcut" aria-hidden="true">/</kbd></span>',
+    );
+    expect(html).toContain(
+      '<ul class="site-links"><li><a href="../#home-tree">Spaces</a></li><li><a href="../index/">A–Z index</a></li><li><a href="../#home-recent">Recent</a></li></ul>',
+    );
+    expect(html).not.toContain('class="count"');
     expect(html).toContain('<concordance-island data-island="mode-switch"');
     expectBalanced(html);
+  });
+
+  it("renders a navigation item with its count when the site gives one", () => {
+    const html = renderSlot(
+      "Header",
+      { ...header, navigation: [{ label: "Pending", href: "../pending/", count: 3 }] },
+      defaultTheme,
+    );
+    expect(html).toContain('<a href="../pending/">Pending<span class="count">3</span></a>');
   });
 
   it("inlines an SVG logo hidden from assistive technology, the title next to it being the name", () => {
@@ -139,17 +156,38 @@ describe("Footer", () => {
     expect(html).toContain(
       '<time datetime="2024-05-01T10:00:00.000Z">2024-05-01T10:00:00.000Z</time>',
     );
-    expect(html).toContain('<a href="https://forge.example/wiki">Forge</a>');
+    expect(html).toContain(
+      '<ul class="site-footer-links"><li><a href="https://forge.example/wiki">Forge</a></li><li class="site-footer-todo"><a href="../todo/">To do<span class="count">12</span></a></li></ul>',
+    );
     expect(html).toContain(
       `<p class="site-footer-credit"><a href="${REPOSITORY_URL}">Built with Concordance</a></p>`,
     );
     expectBalanced(html);
   });
 
+  it("carries the to-do link with its count without any project link, and neither without a to-do page", () => {
+    const { todo, ...bare } = footer;
+    expect(todo).toBeDefined();
+    const alone = renderSlot("Footer", { ...bare, links: [], todo }, defaultTheme);
+    expect(alone).toContain(
+      '<ul class="site-footer-links"><li class="site-footer-todo"><a href="../todo/">To do<span class="count">12</span></a></li></ul>',
+    );
+    expect(
+      renderSlot(
+        "Footer",
+        { ...bare, links: [], todo: { label: "To do", href: "../todo/" } },
+        defaultTheme,
+      ),
+    ).toContain('<li class="site-footer-todo"><a href="../todo/">To do</a></li>');
+    expect(renderSlot("Footer", { ...bare, links: [] }, defaultTheme)).not.toContain("<ul");
+  });
+
   it("imposes no mention of the tool and renders the project text when given", () => {
+    const { todo, ...bare } = footer;
+    expect(todo).toBeDefined();
     const html = renderSlot(
       "Footer",
-      { ...footer, links: [], credit: false, text: "Internal use only" },
+      { ...bare, links: [], credit: false, text: "Internal use only" },
       defaultTheme,
     );
     expect(html).not.toContain("Concordance");

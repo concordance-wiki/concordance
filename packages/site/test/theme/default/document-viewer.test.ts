@@ -43,7 +43,7 @@ describe("The original file remains downloadable", () => {
   it("places the documents under the note and before the side panel, and renders nothing for a note alone", () => {
     const html = render();
     expect(html.indexOf('class="document')).toBeGreaterThan(html.indexOf('class="markdown"'));
-    expect(html.indexOf('class="document')).toBeLessThan(html.indexOf('class="entity-panel"'));
+    expect(html.indexOf('class="document')).toBeLessThan(html.indexOf('class="entity-side"'));
     const { documents, ...alone } = documentEntityPage;
     expect(documents).toHaveLength(2);
     expect(renderSlot("EntityPage", alone, defaultTheme)).not.toContain('class="document');

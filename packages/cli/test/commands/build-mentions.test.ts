@@ -57,7 +57,7 @@ describe("One mentions fragment per entity, never a global index, on the realist
       .filter((entity) => entity.keyword !== true)
       .filter((entity) => {
         const page = readFileSync(join(output, pagePath(entity.id)), "utf8");
-        return !page.includes('<h2 id="mentions-title">Mentions <span class="count">0</span>');
+        return !page.includes('<h2 id="mentions-title">Related pages <span class="count">0</span>');
       })
       .map((entity) => mentionsFragmentPath(entity.id))
       .sort();
@@ -83,7 +83,7 @@ describe("One mentions fragment per entity, never a global index, on the realist
     }
   });
 
-  it("serves the first twenty mentions of the most cited entity in its page, grouped by file, the rest reachable through its fragment", () => {
+  it("serves the first twenty mentions of the most cited entity in its page, one entry per citing page, the rest reachable through its fragment", () => {
     const fragments = files
       .filter((file) => file.endsWith(".mentions.json"))
       .map((file) => JSON.parse(readFileSync(join(output, file), "utf8")) as MentionsFragment)
@@ -92,16 +92,27 @@ describe("One mentions fragment per entity, never a global index, on the realist
     if (most === undefined) throw new Error("no fragment");
     expect(most.mentions.length).toBeGreaterThan(20);
     const page = readFileSync(join(output, pagePath(most.id)), "utf8");
-    expect(page.split('<li class="mention').length - 1).toBe(20);
-    expect(page).toContain('<details class="mention-group" open><summary>');
+    const island = /<concordance-island data-island="mentions-panel" data-props="([^"]*)"/.exec(
+      page,
+    );
+    const props = JSON.parse((island?.[1] ?? "").replaceAll("&quot;", '"')) as {
+      mentions: { href: string; kind: string; file: { href: string } }[];
+    };
+    expect(props.mentions).toHaveLength(20);
     expect(page).toContain(
       `href="${resolveFrom(pagePath(most.id), mentionsFragmentPath(most.id))}"`,
     );
     const inline = most.mentions.slice(0, 20);
-    for (const mention of inline) {
-      expect(page).toContain(`<a class="mention-passage" href="${mention.href}">`);
+    expect(props.mentions.map((mention) => mention.href)).toEqual(
+      inline.map((mention) => mention.href),
+    );
+    const pages = new Set(inline.map((mention) => mention.file.href));
+    expect(page.split('<li class="related-page').length - 1).toBe(pages.size);
+    for (const href of pages) {
+      expect(page).toContain(`<a class="related-title" href="${href}">`);
     }
     expect(inline.some((mention) => mention.kind === "written")).toBe(true);
+    expect(page).toContain('<span class="related-mark">Cited · </span>');
   });
 
   it("marks the words naming the entity in the passages the scan kept, as written in the note", () => {

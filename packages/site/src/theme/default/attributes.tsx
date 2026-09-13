@@ -3,13 +3,28 @@ import type { JSX } from "preact";
 import type { Attribute, AttributeValue, EntityRef } from "../../slots.js";
 import { useAttributePart } from "../context.js";
 
-export function Value({ value }: { value: AttributeValue }): JSX.Element {
-  return value.href === undefined ? (
-    <span class="value">{value.text}</span>
-  ) : (
-    <a class="value" href={value.href}>
-      {value.text}
-    </a>
+/** A separator between two values, so that a list reads as one whatever the stylesheet. */
+export const VALUE_SEPARATOR = ", ";
+
+export function Value({
+  value,
+  separated = false,
+}: {
+  value: AttributeValue;
+  /** Whether a separator precedes the value: every value but the first of a list. */
+  separated?: boolean;
+}): JSX.Element {
+  return (
+    <>
+      {separated && VALUE_SEPARATOR}
+      {value.href === undefined ? (
+        <span class="value">{value.text}</span>
+      ) : (
+        <a class="value" href={value.href}>
+          {value.text}
+        </a>
+      )}
+    </>
   );
 }
 
@@ -28,7 +43,7 @@ export function AttributeValues({
   return (
     <>
       {attribute.values.map((value, index) => (
-        <Value key={index} value={value} />
+        <Value key={index} value={value} separated={index > 0} />
       ))}
     </>
   );

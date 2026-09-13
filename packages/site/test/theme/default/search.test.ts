@@ -44,7 +44,7 @@ describe("the search island in the header", () => {
   it("carries no root when the site has no index, the field then only submitting the form", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain(
-      '<concordance-island data-island="search" data-props="{&quot;search&quot;:{&quot;action&quot;:&quot;../search/&quot;,&quot;placeholder&quot;:&quot;Search a word of your business&quot;}}">',
+      '<concordance-island data-island="search" data-props="{&quot;search&quot;:{&quot;action&quot;:&quot;../search/&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;}}">',
     );
     expect(html).toContain('<label class="visually-hidden" for="site-search">Search</label>');
   });

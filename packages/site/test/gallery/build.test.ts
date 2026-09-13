@@ -87,11 +87,13 @@ describe("A concordance gallery command renders every slot with fixture view mod
 
   it("shows the states: an empty mentions list, more than twenty mentions behind the island, a right-to-left page", () => {
     const empty = fileSystem.readText("/out/mentions-panel-empty.html");
-    expect(empty).toContain('<p class="empty">No note links here.</p>');
+    expect(empty).toContain('<p class="empty">No other page evokes this one yet.</p>');
     expect(empty).not.toContain("mentions-panel-");
     const island = fileSystem.readText("/out/mentions-panel-island.html");
-    expect(count(island, '<li class="mention')).toBe(20);
-    expect(count(island, '<details class="mention-group"')).toBe(8);
+    expect(count(island, '<li class="related-page')).toBe(7);
+    expect(island).toContain(
+      '<h2 id="mentions-title">Related pages <span class="count">9</span></h2>',
+    );
     expect(island).toContain('<concordance-island data-island="mentions-panel"');
     expect(island).toContain('<script type="application/json" id="mentions-embedded">');
     expect(island).toMatch(

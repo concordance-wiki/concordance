@@ -1,4 +1,4 @@
-import type { Link } from "@concordance-wiki/core";
+import type { Entity, Link } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
 import type { Profile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
@@ -19,11 +19,13 @@ import {
   type SiteContextInput,
 } from "../../src/build/context.js";
 import {
+  changedOf,
   contractOf,
   declarationOf,
   entityPageOf,
   highlightsOf,
   neighbourhoodOf,
+  neighbourPages,
   othersOf,
   panelOf,
   sectionsOf,
@@ -38,6 +40,7 @@ import {
   weightsOf,
 } from "../../src/build/keyword-page.js";
 import { DEFAULT_MENTIONS_INLINE, mentionsPanelOf } from "../../src/build/mentions.js";
+import { breadcrumbOf, initialsOf, SPACE_PAGES_MAX, spaceOf } from "../../src/build/space.js";
 import {
   entity,
   fragments,
@@ -328,11 +331,173 @@ describe("entityPageOf", () => {
     ]);
     expect(stranger.labels).toEqual({
       properties: "Attributes",
+      declaredAtTop: "Declared at the top of the file.",
       otherAttributes: "Other attributes",
+      onThisPage: "On this page",
+      spaceTree: "Tree of the space",
+      breadcrumb: "You are here",
+      correction: "Something to correct?",
+      edit: "Edit this page",
+      seeNeighbourhood: "See the neighbourhood map",
+      neighbourPages: "3 pages",
     });
+    expect(stranger.neighbours.total).toBe(3);
     const declared = entityPageOf(context(), screen);
     expect(declared.declaration?.type).toBe("screen");
     expect(declared.otherAttributes).toBeUndefined();
+  });
+
+  it("words the last change of the note relative to the build instant, in the project locale, and none without a git date", () => {
+    const dated = entity({
+      ...term,
+      source: { ...term.source, last_modified: "2026-09-09T08:00:00.000Z" },
+    });
+    expect(changedOf(context(), dated)).toEqual({
+      date: "2026-09-09",
+      label: "Changed 3 days ago",
+    });
+    // The project locale words the duration; the language of the catalogue when the context names none.
+    expect(changedOf(context({ locale: "fr" }), dated)?.label).toBe("Changed il y a 3 jours");
+    expect(changedOf(context({ catalogue: loadCatalogue("fr") }), dated)?.label).toBe(
+      "Modifié il y a 3 jours",
+    );
+    expect(changedOf(context(), term)).toBeUndefined();
+    expect(entityPageOf(context(), dated).changed?.date).toBe("2026-09-09");
+    expect(entityPageOf(context(), term).changed).toBeUndefined();
+  });
+
+  it("counts the pages of the neighbourhood from the total of the model, or from the listed neighbours without one", () => {
+    expect(neighbourPages({ centre: "x", neighbours: [], total: 7 })).toBe(7);
+    expect(
+      neighbourPages({
+        centre: "x",
+        neighbours: [{ id: "a", label: "a", href: "a/", weight: 1 }],
+      }),
+    ).toBe(1);
+  });
+
+  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to the home tree", () => {
+    const props = entityPageOf(context(), screen);
+    expect(props.space).toEqual({
+      name: "specs",
+      initials: "SP",
+      nodes: [
+        { label: "rules", count: 1 },
+        {
+          label: "screens",
+          count: 1,
+          children: [{ label: "Mentions panel", current: true }],
+        },
+      ],
+    });
+    expect(props.breadcrumb).toEqual([
+      { label: "specs", href: "../../../index.html#home-tree" },
+      { label: "screens" },
+      { label: "Mentions panel" },
+    ]);
+    const glossary = spaceOf(context(), pagePath, term);
+    expect(glossary).toEqual({
+      name: "glossary",
+      initials: "GL",
+      nodes: [
+        { label: "Keyword page", current: true },
+        { label: "Page", href: "../page/index.html" },
+      ],
+    });
+    expect(breadcrumbOf(pagePath, term)).toEqual([
+      { label: "glossary", href: "../../index.html#home-tree" },
+      { label: "Keyword page" },
+    ]);
+    // A page two folders deep opens both, its siblings listed at every level.
+    const deep = entity({
+      ...screen,
+      id: "specs/screens/service/query",
+      title: "Query",
+      source: { name: "specs", path: "screens/service/query.md", line: 1 },
+      representations: [],
+    });
+    const sibling = entity({
+      ...screen,
+      id: "specs/screens/service/other",
+      title: "Other",
+      source: { name: "specs", path: "screens/service/other.md", line: 1 },
+      representations: [],
+    });
+    const nested = context({ model: model({ entities: [...model().entities, deep, sibling] }) });
+    expect(spaceOf(nested, "specs/screens/service/query/index.html", deep).nodes).toEqual([
+      { label: "rules", count: 1 },
+      {
+        label: "screens",
+        count: 3,
+        children: [
+          {
+            label: "service",
+            count: 2,
+            children: [
+              { label: "Other", href: "../other/index.html" },
+              { label: "Query", current: true },
+            ],
+          },
+          { label: "Mentions panel", href: "../../mentions-panel/index.html" },
+        ],
+      },
+    ]);
+    expect(initialsOf("demo-specs")).toBe("DS");
+    expect(SPACE_PAGES_MAX).toBe(40);
+    expect(initialsOf("Glossary of the tool")).toBe("GO");
+    expect(initialsOf("x")).toBe("X");
+    expect(initialsOf("--")).toBe("--");
+  });
+
+  it("lists at most forty pages of a folder, a window around the current page, the pages left out counted at each end", () => {
+    const notes = Array.from({ length: 100 }, (_, index) =>
+      entity({
+        ...page,
+        id: `glossary/note-${String(index).padStart(3, "0")}`,
+        title: `Note ${String(index)}`,
+        source: { name: "glossary", path: `note-${String(index).padStart(3, "0")}.md`, line: 1 },
+      }),
+    );
+    const nested = entity({
+      ...page,
+      id: "glossary/deep/note",
+      title: "Deep note",
+      source: { name: "glossary", path: "deep/note.md", line: 1 },
+    });
+    const ctx = context({ model: model({ entities: [...notes, nested] }) });
+    const labels = (nodes: ReturnType<typeof spaceOf>["nodes"]): string[] =>
+      nodes.map((node) => (node.omitted === true ? `[${node.label}]` : node.label));
+    const middle = labels(spaceOf(ctx, "glossary/note-050/index.html", notes[50] as Entity).nodes);
+    expect(middle).toHaveLength(43);
+    expect(middle[0]).toBe("deep");
+    expect(middle[1]).toBe("[30 other pages]");
+    expect(middle[2]).toBe("Note 30");
+    expect(middle[41]).toBe("Note 69");
+    expect(middle[42]).toBe("[30 other pages]");
+    const first = labels(spaceOf(ctx, "glossary/note-003/index.html", notes[3] as Entity).nodes);
+    expect(first.slice(0, 2)).toEqual(["deep", "Note 0"]);
+    expect(first.at(-1)).toBe("[60 other pages]");
+    const last = labels(spaceOf(ctx, "glossary/note-099/index.html", notes[99] as Entity).nodes);
+    expect(last[1]).toBe("[60 other pages]");
+    expect(last.at(-1)).toBe("Note 99");
+    // From a page deeper down, the folder above lists its first pages.
+    const deep = labels(spaceOf(ctx, "glossary/deep/note/index.html", nested).nodes);
+    expect(deep.slice(0, 2)).toEqual(["deep", "Note 0"]);
+    expect(deep.at(-1)).toBe("[60 other pages]");
+    expect(spaceOf(ctx, "glossary/deep/note/index.html", nested).nodes[0]?.children).toEqual([
+      { label: "Deep note", current: true },
+    ]);
+    // One page short of the cap lists everything.
+    const few = context({ model: model({ entities: notes.slice(0, 40) }) });
+    expect(spaceOf(few, "glossary/note-000/index.html", notes[0] as Entity).nodes).toHaveLength(40);
+    const one = labels(
+      spaceOf(
+        context({ model: model({ entities: notes.slice(0, 41) }) }),
+        "glossary/note-000/index.html",
+        notes[0] as Entity,
+      ).nodes,
+    );
+    expect(one.at(-1)).toBe("[1 other page]");
   });
 
   it("exposes the declaration of the type, labelled in the site language, and none for an undeclared type", () => {
@@ -553,11 +718,13 @@ describe("entityPageOf", () => {
       { source: "specs", path: "screens/mentions-panel.pptx" },
     ]);
     expect(props.sections).toEqual([]);
-    expect(props.mentions).toEqual({
+    expect(props.mentions).toMatchObject({
       mentions: [],
       initial: DEFAULT_MENTIONS_INLINE,
-      headings: { written: "Explicit mentions", recognised: "Inferred mentions" },
+      pages: 0,
     });
+    expect(props.mentions.labels?.related).toBe("Related pages");
+    expect(props.mentions.fragmentHref).toBeUndefined();
     const withNote = entityPageOf(context(), term, { mentionsInline: 3 });
     expect(withNote.entity).toEqual({
       id: "glossary/keyword-page",

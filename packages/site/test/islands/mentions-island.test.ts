@@ -8,25 +8,25 @@ import { mention, mentions } from "../../src/gallery/fixtures.js";
 import { renderSlot } from "../../src/render.js";
 import type { Mention } from "../../src/slots.js";
 import {
-  initialOpen,
   MentionsIsland,
   type MentionsIslandProps,
   type MentionsRest,
 } from "../../src/theme/default/mentions-island.js";
+import { defaultRelatedLabels } from "../../src/theme/default/mentions-panel.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 
-const headings = { written: "Explicit mentions", recognised: "Inferred mentions" };
 const fragmentHref = "../../fragments/glossary/entity.mentions.json";
+
+function pagesOf(all: Mention[]): number {
+  return new Set(all.map((item) => item.file.href)).size;
+}
 
 function props(all: Mention[], inline = 20, rest?: MentionsRest): MentionsIslandProps {
   return {
     mentions: all.slice(0, inline),
     total: all.length,
-    counts: {
-      written: all.filter((item) => item.kind === "written").length,
-      recognised: all.filter((item) => item.kind === "recognised").length,
-    },
-    headings,
+    pages: pagesOf(all),
+    labels: defaultRelatedLabels,
     fragmentHref,
     ...(rest === undefined ? {} : { rest }),
   };
@@ -50,26 +50,26 @@ function q(host: Element, selector: string): HTMLElement {
   return found;
 }
 
-const selectOf = (host: Element): HTMLSelectElement => {
-  const found = q(host, ".mentions-controls").querySelector("select");
-  if (found === null) throw new Error("select: not found");
-  return found;
-};
-
 const searchOf = (host: Element): HTMLInputElement => {
-  const found = q(host, ".mentions-controls").querySelector("input");
+  const found = q(host, ".mentions-controls").querySelector("input[type=search]");
   if (found === null) throw new Error("input: not found");
-  return found;
+  return found as HTMLInputElement;
 };
 
-const summaries = (host: Element): string[] =>
-  [...host.querySelectorAll("details.mention-group > summary")].map((summary) =>
-    summary.textContent.trim(),
+/** The title, type and count of every entry shown. */
+const entries = (host: Element): string[] =>
+  [...host.querySelectorAll(".related-page")].map((entry) =>
+    [
+      entry.querySelector(".related-title")?.textContent ?? "",
+      entry.querySelector(".related-type")?.textContent ?? "",
+      entry.querySelector(".related-count")?.firstChild?.textContent ?? "",
+    ].join(" "),
   );
-const openStates = (host: Element): boolean[] =>
-  [...host.querySelectorAll<HTMLDetailsElement>("details.mention-group")].map(
-    (details) => details.open,
-  );
+
+const checkboxes = (host: Element): HTMLInputElement[] => [
+  ...host.querySelectorAll<HTMLInputElement>(".related-type-list input"),
+];
+
 const button = (host: Element, text: string): HTMLButtonElement => {
   const found = [...host.querySelectorAll("button")].find((candidate) =>
     candidate.textContent.startsWith(text),
@@ -78,69 +78,58 @@ const button = (host: Element, text: string): HTMLButtonElement => {
   return found;
 };
 
+function tick(box: HTMLInputElement, checked: boolean): void {
+  box.checked = checked;
+  box.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 afterEach(() => {
   document.body.innerHTML = "";
   vi.restoreAllMocks();
 });
 
-describe("The panel offers sorting, filtering and a collapse all", () => {
+describe("The related pages offer a text filter and a type filter once the island runs", () => {
   it("renders the same markup as the served HTML until it mounts, then adds labelled controls in a named group", async () => {
     const input = props(mentions(7));
     const served = renderToString(h(MentionsIsland, input));
     expect(served).not.toContain("mentions-controls");
+    expect(served).toContain('<ol class="related-list">');
     const host = await mount(input);
     const controls = q(host, '.mentions-controls[role="group"]');
-    expect(controls.getAttribute("aria-label")).toBe("Mentions controls");
-    const select = selectOf(host);
-    expect(select.closest("label")?.textContent).toContain("Sort");
-    expect([...select.options].map((option) => [option.value, option.text])).toEqual([
-      ["file", "by file"],
-      ["count", "by count"],
-      ["line", "by line"],
-    ]);
+    expect(controls.getAttribute("aria-label")).toBe("Related pages");
     const search = searchOf(host);
     expect(search.type).toBe("search");
-    expect(search.closest("label")?.textContent).toContain("Filter");
-    expect(button(controls, "Collapse all").type).toBe("button");
+    expect(search.placeholder).toBe("Filter these pages");
+    expect(search.closest("label")?.textContent).toContain("Filter these pages");
+    const types = q(controls, "details.related-types");
+    expect(q(types, "summary").textContent).toBe("Types 2");
+    expect(
+      checkboxes(host).map((box) => [box.closest("label")?.textContent.trim(), box.checked]),
+    ).toEqual([
+      ["Term 2", true],
+      ["Screen 1", true],
+    ]);
+    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("3 of 3 pages");
+    expect(button(host, "Clear all").type).toBe("button");
     expect(host.querySelector("[tabindex]")).toBeNull();
-    // The groups keep their served state: the first of each section open.
-    expect(openStates(host)).toEqual([true, true, false, false]);
+    expect(entries(host)).toEqual(["Note 1 Term 3", "Note 2 Screen 3", "Note 3 Term 1"]);
   });
 
-  it("sorts the file groups by count, by first line or back to the build order, ignoring an unknown key", async () => {
+  it("orders the pages by number of passages, written and recognised alike, the corpus order breaking ties", async () => {
     const all = [
       mention(1, "written"),
-      { ...mention(2), line: 30, href: "../notes/note-1/#L30" },
       mention(4),
       mention(5),
       mention(6),
-      { ...mention(7), line: 2, href: "../notes/note-3/#L2" },
+      mention(7),
+      mention(8),
+      mention(2),
     ];
     const host = await mount(props(all));
-    const select = selectOf(host);
-    expect(summaries(host)).toEqual(["note-1.md 1", "note-1.md 1", "note-2.md 3", "note-3.md 1"]);
-    select.value = "count";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    await settle();
-    expect(summaries(host)).toEqual(["note-1.md 1", "note-2.md 3", "note-1.md 1", "note-3.md 1"]);
-    select.value = "line";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    await settle();
-    expect(summaries(host)).toEqual(["note-1.md 1", "note-3.md 1", "note-2.md 3", "note-1.md 1"]);
-    select.value = "file";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    await settle();
-    expect(summaries(host)).toEqual(["note-1.md 1", "note-1.md 1", "note-2.md 3", "note-3.md 1"]);
-    const option = document.createElement("option");
-    option.value = "colour";
-    select.append(option);
-    select.value = "colour";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    await settle();
-    expect(summaries(host)).toEqual(["note-1.md 1", "note-1.md 1", "note-2.md 3", "note-3.md 1"]);
+    expect(entries(host)).toEqual(["Note 2 Screen 3", "Note 1 Term 2", "Note 3 Term 2"]);
   });
 
-  it("filters on the file path and on the context without regard to case, the counts and a status line following", async () => {
+  it("filters on the title, the type and the passages without regard to case, the counts and a status line following", async () => {
     const all = [
       mention(1, "written"),
       mention(2, "written"),
@@ -150,95 +139,91 @@ describe("The panel offers sorting, filtering and a collapse all", () => {
     ];
     const host = await mount(props(all));
     const input = searchOf(host);
-    expect(host.querySelector(".mentions-status")).toBeNull();
-    input.value = "NOTE-2";
+    input.value = "NOTE 2";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
-    expect(summaries(host)).toEqual(["note-2.md 2"]);
-    expect(q(host, "#mentions-written .count").textContent).toBe("0");
-    expect(q(host, "#mentions-recognised .count").textContent).toBe("2");
-    expect(q(host, '.mentions-status[role="status"]').textContent).toBe("2 of 5 mentions shown");
-    expect(q(host, '[aria-labelledby="mentions-written"] .empty').textContent).toBe(
-      "No mention matches the filter.",
-    );
+    expect(entries(host)).toEqual(["Note 2 Screen 2"]);
+    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("1 of 3 pages");
     input.value = "build LOG";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
-    expect(summaries(host)).toEqual(["note-2.md 1"]);
-    expect(host.querySelector(".mention-context")?.textContent).toBe(
-      "The build log lists the entity",
-    );
+    expect(entries(host)).toEqual(["Note 2 Screen 2"]);
+    input.value = "screen";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await settle();
+    expect(entries(host)).toEqual(["Note 2 Screen 2"]);
+    input.value = "nothing of the kind";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await settle();
+    expect(entries(host)).toEqual([]);
+    expect(q(host, '.empty[role="status"]').textContent).toBe("No page matches the filter.");
     input.value = "   ";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
-    expect(summaries(host)).toEqual(["note-1.md 2", "note-2.md 2", "note-3.md 1"]);
-    expect(host.querySelector(".mentions-status")).toBeNull();
+    expect(entries(host)).toEqual(["Note 1 Term 2", "Note 2 Screen 2", "Note 3 Term 1"]);
     expect(host.querySelector(".empty")).toBeNull();
   });
 
-  it("collapses every group with one button, which then expands them all, and follows the groups a reader toggles", async () => {
+  it("hides the pages of an unticked type, counts the types ticked, and clears every type at once", async () => {
     const host = await mount(props(mentions(7)));
-    expect(openStates(host)).toEqual([true, true, false, false]);
-    button(host, "Collapse all").click();
+    const [term, screen] = checkboxes(host);
+    if (term === undefined || screen === undefined) throw new Error("two types expected");
+    tick(term, false);
     await settle();
-    expect(openStates(host)).toEqual([false, false, false, false]);
-    expect(button(host, "Expand all")).toBeDefined();
-    button(host, "Expand all").click();
+    expect(entries(host)).toEqual(["Note 2 Screen 3"]);
+    expect(q(host, ".related-types > summary").textContent).toBe("Types 1");
+    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("1 of 3 pages");
+    tick(screen, false);
     await settle();
-    expect(openStates(host)).toEqual([true, true, true, true]);
-    expect(button(host, "Collapse all")).toBeDefined();
-    const [first, ...others] = [...host.querySelectorAll<HTMLDetailsElement>("details")];
-    for (const details of others) {
-      details.open = false;
-      details.dispatchEvent(new Event("toggle"));
-    }
+    expect(entries(host)).toEqual([]);
+    expect(q(host, ".related-types > summary").textContent).toBe("Types 0");
+    tick(term, true);
     await settle();
-    expect(openStates(host)).toEqual([true, false, false, false]);
-    expect(button(host, "Collapse all")).toBeDefined();
-    if (first === undefined) throw new Error("no group");
-    first.open = false;
-    first.dispatchEvent(new Event("toggle"));
+    expect(entries(host)).toEqual(["Note 1 Term 3", "Note 3 Term 1"]);
+    button(host, "Clear all").click();
     await settle();
-    expect(button(host, "Expand all")).toBeDefined();
+    expect(entries(host)).toEqual(["Note 1 Term 3", "Note 2 Screen 3", "Note 3 Term 1"]);
+    expect(checkboxes(host).every((box) => box.checked)).toBe(true);
   });
 
-  it("starts with the first group of each section open, whatever the number of files", () => {
-    expect(initialOpen(mentions(7))).toEqual({
-      "written ../notes/note-1/": true,
-      "recognised ../notes/note-1/": true,
-      "recognised ../notes/note-2/": false,
-      "recognised ../notes/note-3/": false,
+  it("offers no type filter when no page carries a type, names a page by its file when it has no title, and keeps an untyped page whatever the filter", async () => {
+    const untyped = mentions(4).map(({ type, typeLabel, title, ...rest }) => {
+      expect([type, typeLabel, title].every((value) => value !== undefined)).toBe(true);
+      return rest;
     });
-    expect(initialOpen([])).toEqual({});
+    const host = await mount(props(untyped));
+    expect(host.querySelector(".related-types")).toBeNull();
+    expect(entries(host)).toEqual(["note-1.md  3", "note-2.md  1"]);
+    const mixed = await mount(props([...untyped.slice(0, 3), mention(4)]));
+    tick(checkboxes(mixed)[0] as HTMLInputElement, false);
+    await settle();
+    expect(entries(mixed)).toEqual(["note-1.md  3"]);
   });
 });
 
 describe("The rest is loaded on demand", () => {
-  it("shows the embedded mentions on request, their new groups closed, the link to the fragment giving way to the button", async () => {
+  it("shows the embedded pages on request, the link to the fragment giving way to the button naming the other pages", async () => {
     const all = mentions(25);
     const host = await mount(props(all, 20, { kind: "embedded", mentions: all.slice(20) }));
     expect(host.querySelector(".mentions-more a")).toBeNull();
-    const more = button(host, "Show the remaining mentions (5)");
-    expect(host.querySelectorAll("li.mention")).toHaveLength(20);
+    const more = button(host, "Show the 2 others");
+    expect(host.querySelectorAll(".related-page")).toHaveLength(7);
     more.click();
     await settle();
-    expect(host.querySelectorAll("li.mention")).toHaveLength(25);
+    expect(host.querySelectorAll(".related-page")).toHaveLength(9);
     expect(host.querySelector(".mentions-more")).toBeNull();
-    expect(summaries(host).at(-1)).toBe("note-9.md 1");
-    expect(openStates(host).slice(-2)).toEqual([false, false]);
-    expect(q(host, "#mentions-recognised .count").textContent).toBe("23");
+    expect(entries(host).at(-1)).toBe("Note 9 Term 1");
   });
 
-  it("opens the first group of a section that had no inline mention once the rest arrives", async () => {
-    const all = [...mentions(20, 20), ...mentions(5, 0)];
+  it("names at least one other page while the served pages are not all shown", async () => {
+    const all = [...mentions(20), mention(21)];
     const host = await mount(props(all, 20, { kind: "embedded", mentions: all.slice(20) }));
-    expect(openStates(host)).toEqual([true, false, false, false, false, false, false]);
-    button(host, "Show the remaining mentions (5)").click();
-    await settle();
-    expect(openStates(host)).toEqual([true, false, false, false, false, false, false, true, false]);
+    expect(button(host, "Show the 1 others")).toBeDefined();
+    const partial = await mount(props([...mentions(3), mention(4)], 3, { kind: "link" }));
+    expect(partial.querySelector(".mentions-more a")).not.toBeNull();
   });
 
-  it("fetches the fragment on request, says so while loading, then shows every mention", async () => {
+  it("fetches the fragment on request, says so while loading, then shows every page", async () => {
     const all = mentions(25);
     let resolve: (value: Mention[]) => void = () => undefined;
     const load = vi.fn(
@@ -248,14 +233,14 @@ describe("The rest is loaded on demand", () => {
         }),
     );
     const host = await mount(props(all, 20, { kind: "fetch", load }));
-    button(host, "Show the remaining mentions (5)").click();
+    button(host, "Show the 2 others").click();
     await settle();
-    const loading = button(host, "Loading the remaining mentions (5)");
+    const loading = button(host, "Loading the other pages");
     expect(loading.disabled).toBe(true);
     expect(load).toHaveBeenCalledTimes(1);
     resolve(all);
     await settle();
-    expect(host.querySelectorAll("li.mention")).toHaveLength(25);
+    expect(host.querySelectorAll(".related-page")).toHaveLength(9);
     expect(host.querySelector("button[disabled]")).toBeNull();
     expect(host.querySelector(".mentions-more")).toBeNull();
   });
@@ -264,11 +249,11 @@ describe("The rest is loaded on demand", () => {
     const host = await mount(
       props(mentions(25), 20, { kind: "fetch", load: () => Promise.reject(new Error("offline")) }),
     );
-    button(host, "Show the remaining mentions (5)").click();
+    button(host, "Show the 2 others").click();
     await settle();
     const status = q(host, '.mentions-more[role="status"]');
     expect(status.textContent).toBe(
-      `The remaining mentions could not be loaded. Open the full list (JSON) (25)`,
+      "The other pages could not be loaded. Open the full list (JSON) (25)",
     );
     expect(q(status, "a").getAttribute("href")).toBe(fragmentHref);
     expect(host.querySelector("button[disabled]")).toBeNull();
@@ -301,22 +286,22 @@ describe("the mentions-panel hydration entry", () => {
     const all = mentions(25);
     document.body.innerHTML = renderSlot(
       "MentionsPanel",
-      { mentions: all, initial: 20, headings, fragmentHref },
+      { mentions: all, initial: 20, fragmentHref },
       defaultTheme,
     );
     await import("../../src/islands/mentions-panel.client.js");
     await settle();
     const host = document.body;
     expect(host.querySelector(".mentions-controls")).not.toBeNull();
-    button(host, "Show the remaining mentions (5)").click();
+    button(host, "Show the 2 others").click();
     await settle();
-    expect(host.querySelectorAll("li.mention")).toHaveLength(25);
+    expect(host.querySelectorAll(".related-page")).toHaveLength(9);
   });
 
   it("hydrates a panel whose mentions are all inline without any source for a rest", async () => {
     document.body.innerHTML = renderSlot(
       "MentionsPanel",
-      { mentions: mentions(3), initial: 20, headings },
+      { mentions: mentions(3), initial: 20 },
       defaultTheme,
     );
     vi.resetModules();
@@ -324,7 +309,7 @@ describe("the mentions-panel hydration entry", () => {
     await settle();
     expect(document.body.querySelector(".mentions-controls")).not.toBeNull();
     expect(document.body.querySelector(".mentions-more")).toBeNull();
-    expect(document.body.querySelectorAll("li.mention")).toHaveLength(3);
+    expect(document.body.querySelectorAll(".related-page")).toHaveLength(1);
   });
 });
 
@@ -341,17 +326,17 @@ describe("the mentions-panel hydration entry behind a server", () => {
     vi.stubGlobal("fetch", fetched);
     document.body.innerHTML = renderSlot(
       "MentionsPanel",
-      { mentions: all, initial: 20, headings, fragmentHref },
+      { mentions: all, initial: 20, fragmentHref },
       defaultTheme,
     );
     // A fresh copy of the entry, since the module of the previous test already ran on another page.
     vi.resetModules();
     await import("../../src/islands/mentions-panel.client.js");
     await settle();
-    button(document.body, "Show the remaining mentions (180)").click();
+    button(document.body, "Show the 60 others").click();
     await settle();
     expect(fetched).toHaveBeenCalledWith(fragmentHref);
-    expect(document.body.querySelectorAll("li.mention")).toHaveLength(200);
+    expect(document.body.querySelectorAll(".related-page")).toHaveLength(67);
     vi.unstubAllGlobals();
   });
 });
