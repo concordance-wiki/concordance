@@ -40,8 +40,8 @@
     "description": "Question before the edit link in the footer of an entity page."
   },
   "entity.declaredAtTop": {
-    "defaultMessage": "Declared at the top of the file.",
-    "description": "Note under the declared properties of an entity page, saying where they come from."
+    "defaultMessage": "{count, plural, one {# declared key} other {# declared keys}}. The rest of the file is free text.",
+    "description": "Note under the declared properties of an entity page, counting the keys of the frontmatter and saying that the rest of the file is prose."
   },
   "entity.domain": {
     "defaultMessage": "Domain",
@@ -50,6 +50,18 @@
   "entity.edit": {
     "defaultMessage": "Edit this page",
     "description": "Link to the edit page of the note on its forge."
+  },
+  "entity.imageNote": {
+    "defaultMessage": "Image of the repository, shown in the flow of the text",
+    "description": "Note under an image of the sources embedded in a note, before the path of the file."
+  },
+  "entity.legendRecognised": {
+    "defaultMessage": "recognised word",
+    "description": "Legend of the dotted underline of a word the scan recognised in the text."
+  },
+  "entity.legendWritten": {
+    "defaultMessage": "written link",
+    "description": "Legend of the underline of a link the author wrote in the text."
   },
   "entity.mentions": {
     "defaultMessage": "Mentions",
@@ -448,8 +460,8 @@
     "description": "Notice shown when no page cites the current one."
   },
   "related.orderNote": {
-    "defaultMessage": "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
-    "description": "Note under the related pages saying how they are ordered and what the cited mark means."
+    "defaultMessage": "From the surest to the weakest: written links first, then recognised mentions.",
+    "description": "Note under the related pages saying how they are ordered, the pages that write a link before the ones the scan found."
   },
   "related.other": {
     "defaultMessage": "'{count}' other",

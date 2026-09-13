@@ -69,6 +69,10 @@ const files = {
     "![the pipeline](figures/pipeline.svg) ![the panel](../specs/screens/mentions-panel.png)",
     "![a lost figure](missing.png) ![the forge](https://forge.example/logo.png)",
     "",
+    "![the sketch of the panel](../specs/screens/mentions-panel.png)",
+    "",
+    "![a lost sketch](missing.png)",
+    "",
     "## Not to be confused with",
     "",
     "An entity page, which a page of the site links to.",
@@ -109,9 +113,9 @@ const recognised = new Map<string, RecognisedWord[]>([
     [
       { line: 6, position: 2, text: "page", target: "glossary/page" },
       { line: 6, position: 24, text: "mentions panel", target: "specs/screens/mentions-panel" },
-      { line: 15, position: 3, text: "entity page", target: "glossary/keyword-page" },
-      { line: 15, position: 24, text: "page", target: "glossary/page" },
-      { line: 15, position: 41, text: "links", target: "glossary/gone" },
+      { line: 19, position: 3, text: "entity page", target: "glossary/keyword-page" },
+      { line: 19, position: 24, text: "page", target: "glossary/page" },
+      { line: 19, position: 41, text: "links", target: "glossary/gone" },
     ],
   ],
 ]);
@@ -185,6 +189,10 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     expect(lead).toContain('<img src="specs/screens/mentions-panel.png" alt="the panel">');
     expect(lead).toContain('<img src="missing.png" alt="a lost figure">');
     expect(lead).toContain('<img src="https://forge.example/logo.png" alt="the forge">');
+    expect(lead).toContain(
+      '<figure class="figure"><img src="specs/screens/mentions-panel.png" alt="the sketch of the panel"><figcaption><span class="figure-caption">the sketch of the panel</span><code class="figure-path">screens/mentions-panel.png</code></figcaption></figure>',
+    );
+    expect(lead).toContain('<p><img src="missing.png" alt="a lost sketch"></p>');
     expect(keywordPage?.images).toEqual([
       {
         source: "glossary",

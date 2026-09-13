@@ -740,7 +740,12 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(entity).toContain('<nav class="space" aria-label="Arborescence de l’espace">');
     expect(entity).toContain('<nav class="breadcrumbs" aria-label="Vous êtes ici">');
     expect(entity).toContain('<h2 id="entity-toc">Sur cette page</h2>');
-    expect(entity).toContain('<p class="panel-note">Déclarées en tête du fichier.</p>');
+    expect(entity).toContain(
+      '<p class="panel-note">4 clés déclarées. Le reste du fichier est du texte libre.</p>',
+    );
+    expect(entity).toContain(
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu</span></p>',
+    );
     expect(entity).toContain(
       '<h2 id="mentions-title">Pages en relation <span class="count">3</span></h2>',
     );

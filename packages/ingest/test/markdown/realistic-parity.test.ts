@@ -31,6 +31,8 @@ const headings: Readonly<Record<string, string>> = {
   Affecte: "Affects",
   Consommateurs: "Consumers",
   "À ne pas confondre avec": "Not to be confused with",
+  "Contrôles appliqués": "Checks applied",
+  "Maquette d'origine": "Original sketch",
 };
 
 // French application and domain identifiers, mapped to their English counterpart.
@@ -158,7 +160,7 @@ describe("the realistic corpus has the same structure in both languages", () => 
       "glossary markdown: 45",
       "meetings markdown: 6",
       "specs markdown: 57",
-      "specs other: 2",
+      "specs other: 3",
     ]);
   });
 
@@ -169,7 +171,7 @@ describe("the realistic corpus has the same structure in both languages", () => 
   it("has the same section headings once translated", () => {
     const translated = sectionHeadings(fr, (heading) => translate(headings, heading));
     expect(translated).toEqual(sectionHeadings(en, identity));
-    expect(translated).toHaveLength(68);
+    expect(translated).toHaveLength(70);
   });
 
   it("gives every note a title and a valid frontmatter", () => {

@@ -5,6 +5,7 @@ import type {
   Link,
   LinkReference,
   Nodes,
+  Paragraph,
   Parent,
   Root,
   RootContent,
@@ -19,6 +20,7 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 
 import type { Section } from "../slots.js";
+import { FIGURE_CAPTION_CLASS, FIGURE_CLASS, FIGURE_PATH_CLASS } from "./figures.js";
 
 /** Class of an anchor the author wrote whose target is a page of the site. */
 export const WRITTEN_CLASS = "written";
@@ -53,6 +55,12 @@ export interface MarkdownOptions {
    * its text is found in its unit, unless it sits inside a link already.
    */
   recognised?: readonly RecognisedSpan[];
+  /**
+   * The path of an image of the sources in its repository, for its target as written; undefined
+   * for any other image. An image of the sources that holds a paragraph of its own is rendered as
+   * a figure captioned with its alternative text and that path; an image among text stays inline.
+   */
+  imagePath?: (target: string) => string | undefined;
 }
 
 export interface RenderedMarkdown {
@@ -71,19 +79,29 @@ const parser = unified().use(remarkParse).use(remarkGfm).use(remarkFrontmatter);
 
 type AttributeRules = NonNullable<SanitizeSchema["attributes"]>[string];
 
-// The default schema declares the attributes of every element it allows, anchors among them.
-const anchorRules = (defaultSchema.attributes as Record<"a", AttributeRules>).a;
+// The default schema declares the attributes of every element it allows, anchors and code among them.
+const defaultRules = defaultSchema.attributes as Record<"a" | "code", AttributeRules>;
+// The default schema lists the elements it allows.
+const defaultTags = defaultSchema.tagNames as string[];
 
-// The default schema, plus the two classes the build sets on anchors; nothing else of a note reaches a page.
+/** The rules of an element, the given classes allowed on it besides the ones the default schema names. */
+function withClasses(rules: AttributeRules, ...classes: string[]): AttributeRules {
+  return rules.map((rule) =>
+    Array.isArray(rule) && rule[0] === "className" ? [...rule, ...classes] : rule,
+  );
+}
+
+// The default schema, plus the classes the build sets on anchors and on the figures of the images
+// of the sources; nothing else of a note reaches a page.
 const schema: SanitizeSchema = {
   ...defaultSchema,
+  tagNames: [...defaultTags, "figure", "figcaption"],
   attributes: {
     ...defaultSchema.attributes,
-    a: anchorRules.map((rule) =>
-      Array.isArray(rule) && rule[0] === "className"
-        ? [...rule, WRITTEN_CLASS, RECOGNISED_CLASS]
-        : rule,
-    ),
+    a: withClasses(defaultRules.a, WRITTEN_CLASS, RECOGNISED_CLASS),
+    code: withClasses(defaultRules.code, FIGURE_PATH_CLASS),
+    figure: [["className", FIGURE_CLASS]],
+    span: [["className", FIGURE_CAPTION_CLASS]],
   },
 };
 
@@ -306,6 +324,74 @@ function markRecognised(tree: Root, spans: readonly RecognisedSpan[]): void {
   }
 }
 
+/** A paragraph that holds one image and nothing else: an image at a place of its own in the text. */
+interface LoneImage {
+  paragraph: Paragraph;
+  image: Image;
+}
+
+function loneImages(parent: Parent, found: LoneImage[] = []): LoneImage[] {
+  for (const child of parent.children) {
+    const only = child.type === "paragraph" ? child.children[0] : undefined;
+    if (child.type === "paragraph" && child.children.length === 1 && only?.type === "image") {
+      found.push({ paragraph: child, image: only });
+    } else if ("children" in child) {
+      loneImages(child, found);
+    }
+  }
+  return found;
+}
+
+/** A lone image of the sources, with the path of its file in its repository. */
+interface Figure extends LoneImage {
+  path: string;
+}
+
+/** The lone images of the sources, their paths looked up on the targets as written. */
+function figuresOf(tree: Root, imagePath: NonNullable<MarkdownOptions["imagePath"]>): Figure[] {
+  return loneImages(tree).flatMap((lone) => {
+    const path = imagePath(lone.image.url);
+    return path === undefined ? [] : [{ ...lone, path }];
+  });
+}
+
+type HastChild = NonNullable<NonNullable<Paragraph["data"]>["hChildren"]>[number];
+
+function hastElement(
+  tagName: string,
+  properties: Record<string, string | string[]>,
+  children: HastChild[],
+): HastChild {
+  return { type: "element", tagName, properties, children };
+}
+
+/**
+ * Turns the paragraph of a lone image of the sources into a figure: the image, then a caption
+ * made of its alternative text when it has one and of the path of its file. The markup is given
+ * to the compiler whole, so that the caption is neither searched nor scanned for words.
+ */
+function wrapFigure({ paragraph, image, path }: Figure): void {
+  // remark-parse gives every image an alt, empty when none was written; the field is nullable only for synthetic trees.
+  const alt = image.alt as string;
+  paragraph.data = {
+    hName: "figure",
+    hProperties: { className: [FIGURE_CLASS] },
+    hChildren: [
+      hastElement("img", { src: image.url, alt }, []),
+      hastElement("figcaption", {}, [
+        ...(alt === ""
+          ? []
+          : [
+              hastElement("span", { className: [FIGURE_CAPTION_CLASS] }, [
+                { type: "text", value: alt },
+              ]),
+            ]),
+        hastElement("code", { className: [FIGURE_PATH_CLASS] }, [{ type: "text", value: path }]),
+      ]),
+    ],
+  };
+}
+
 interface OpenSection {
   id: string;
   heading?: string;
@@ -332,11 +418,16 @@ function toHtml(nodes: RootContent[]): string {
  */
 export function renderMarkdown(text: string, options: MarkdownOptions = {}): RenderedMarkdown {
   const tree = parser.parse(text);
+  // The paths are looked up before the targets are rewritten, the figures built after: the image keeps its page href.
+  const figures = options.imagePath === undefined ? [] : figuresOf(tree, options.imagePath);
   if (options.resolveHref !== undefined) {
     markReferences(tree, rewriteTargets(tree, options.resolveHref));
   }
   if (options.recognised !== undefined) {
     markRecognised(tree, options.recognised);
+  }
+  for (const figure of figures) {
+    wrapFigure(figure);
   }
   const sections: Section[] = [];
   const body: RootContent[] = [];

@@ -115,7 +115,7 @@ describe("The related pages offer a text filter and a type filter once the islan
     expect(entries(host)).toEqual(["Note 1 Term 3", "Note 2 Screen 3", "Note 3 Term 1"]);
   });
 
-  it("orders the pages by number of passages, written and recognised alike, the corpus order breaking ties", async () => {
+  it("orders the pages that write a link first, then by number of passages, written and recognised alike, the corpus order breaking ties", async () => {
     const all = [
       mention(1, "written"),
       mention(4),
@@ -126,7 +126,7 @@ describe("The related pages offer a text filter and a type filter once the islan
       mention(2),
     ];
     const host = await mount(props(all));
-    expect(entries(host)).toEqual(["Note 2 Screen 3", "Note 1 Term 2", "Note 3 Term 2"]);
+    expect(entries(host)).toEqual(["Note 1 Term 2", "Note 2 Screen 3", "Note 3 Term 2"]);
   });
 
   it("filters on the title, the type and the passages without regard to case, the counts and a status line following", async () => {
