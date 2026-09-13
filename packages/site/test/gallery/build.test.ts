@@ -97,9 +97,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     );
     expect(island).toContain('<concordance-island data-island="mentions-panel"');
     expect(island).toContain('<script type="application/json" id="mentions-embedded">');
-    expect(island).toMatch(
-      /<script type="module" defer src="assets\/mentions-panel-[A-Z0-9]{8}\.js"><\/script>/,
-    );
+    expect(island).toMatch(/<script defer src="assets\/mentions-panel-[A-Z0-9]{8}\.js"><\/script>/);
     expect(fileSystem.readText("/out/shell-rtl.html")).toContain('<html lang="ar" dir="rtl">');
     expect(fileSystem.readText("/out/header-logo.html")).toContain('<img class="site-logo"');
     expect(fileSystem.readText("/out/footer-text.html")).toContain(

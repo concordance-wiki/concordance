@@ -542,7 +542,7 @@ describe("the trail passes the accessibility audit once rendered", () => {
       islands: [
         { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
         { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
-        { name: "search", file: "search-00000000.js", bytes: 0, classic: true },
+        { name: "search", file: "search-00000000.js", bytes: 0 },
         { name: "trail", file: "trail-00000000.js", bytes: 0 },
       ],
       header: { ...header, trail: { base: "../../", labels, current: entity } },

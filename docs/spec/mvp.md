@@ -597,7 +597,7 @@ As a reader, I want pages that read without JavaScript and interactive component
 
 - HTML is rendered at build time by Preact components (`preact-render-to-string`); the published HTML contains the full content of every page.
 - Only interactive components are hydrated (islands), each with its props serialised in the page; a page without an island loads no framework JavaScript.
-- Client bundles are produced by esbuild, one per island, with hashed names, `modulepreload` and `defer`; two builds give byte-identical bundles.
+- Client bundles are produced by esbuild, one per island, with hashed names, loaded with a deferred classic script so that a page opened from the disk runs them in every browser; two builds give byte-identical bundles.
 - The site is a set of named slots (`Shell`, `Header`, `Footer`, `Home`, `EntityPage`, `KeywordPage`, `MentionsPanel`, `Neighbourhood`, `SearchResults`, `Index`, `Todo`) with a typed, documented view model; the default theme implements every slot.
 - A theme brought by a plugin (`theme` contribution, `components` field) overrides any slot with a component receiving the same props; slots it does not provide come from the default theme; an example theme in the fixtures overrides one slot and is tested.
 - Native CSS: cascade layers `tokens, base, components, project`, custom properties generated from `theme.yaml`, `color-scheme`, `prefers-reduced-motion`; the project's `stylesheet:` enters the `project` layer.

@@ -24,10 +24,11 @@ export interface IslandEntry {
   /** Absolute path of the hydration entry module. */
   entry: string;
   /**
-   * Bundled as a classic script rather than a module: browsers load a classic script from a
-   * `file://` page, whereas a module script from `file://` is refused by some of them.
+   * Bundled as a module rather than a classic script. Some browsers refuse a module script on a
+   * `file://` page, so every island a page loads is a classic script; only a bundle imported on
+   * demand, whose entry exports something, is a module.
    */
-  classic?: boolean;
+  module?: boolean;
 }
 
 export interface IslandBundle {
@@ -35,8 +36,8 @@ export interface IslandBundle {
   /** File name under the output folder, carrying a hash of the content. */
   file: string;
   bytes: number;
-  /** Loaded with a deferred classic script tag instead of a module one. */
-  classic?: boolean;
+  /** Loaded with a module script tag instead of a deferred classic one. */
+  module?: boolean;
 }
 
 export interface BundleOptions {
@@ -73,7 +74,6 @@ export function defaultIslands(): IslandEntry[] {
     {
       name: SEARCH_ISLAND,
       entry: fileURLToPath(new URL("./search.client", import.meta.url)),
-      classic: true,
     },
     {
       name: TRAIL_ISLAND,
@@ -97,7 +97,8 @@ export function mergeIslands(
 
 /**
  * The viewer and its worker, built from the legacy build of pdf.js: heavy, so only a site with a
- * PDF to show bundles them, and no page loads them before the reader asks.
+ * PDF to show bundles them, and no page loads them before the reader asks. Both are modules: the
+ * document island imports the viewer, which exports its entry, and pdf.js loads its worker as one.
  */
 export function viewerIslands(): IslandEntry[] {
   const require = createRequire(import.meta.url);
@@ -105,10 +106,12 @@ export function viewerIslands(): IslandEntry[] {
     {
       name: VIEWER_ISLAND,
       entry: fileURLToPath(new URL("./viewer-pdf.client", import.meta.url)),
+      module: true,
     },
     {
       name: VIEWER_WORKER_ISLAND,
       entry: require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs"),
+      module: true,
     },
   ];
 }
@@ -122,7 +125,7 @@ export function contentHash(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex").slice(0, 8).toUpperCase();
 }
 
-/** One minified script per island, a module unless the island asks for a classic one, named after its content, written through the file system. */
+/** One minified script per island, classic unless the island asks for a module, named after its content, written through the file system. */
 export async function bundleIslands(options: BundleOptions): Promise<IslandBundle[]> {
   const fileSystem = options.fileSystem ?? nodeFileSystem;
   const bundles: IslandBundle[] = [];
@@ -132,7 +135,7 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
       outdir: options.outDir,
       entryNames: "[name]",
       bundle: true,
-      format: island.classic === true ? "iife" : "esm",
+      format: island.module === true ? "esm" : "iife",
       platform: "browser",
       target: "es2022",
       minify: true,
@@ -153,7 +156,7 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
         name: island.name,
         file,
         bytes: output.contents.byteLength,
-        ...(island.classic === true ? { classic: true } : {}),
+        ...(island.module === true ? { module: true } : {}),
       });
     }
   }

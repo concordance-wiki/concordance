@@ -12,12 +12,7 @@ import { count, expectBalanced } from "./helpers/html.js";
 
 const bundle: IslandBundle = { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 };
 const modeBundle: IslandBundle = { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 };
-const searchBundle: IslandBundle = {
-  name: "search",
-  file: "search-0123ABCD.js",
-  bytes: 1,
-  classic: true,
-};
+const searchBundle: IslandBundle = { name: "search", file: "search-0123ABCD.js", bytes: 1 };
 const trailBundle: IslandBundle = { name: "trail", file: "trail-789ABC.js", bytes: 1 };
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
@@ -64,26 +59,46 @@ describe("renderPage", () => {
     const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
     expect(count(html, "<concordance-island")).toBe(3);
-    expect(count(html, '<script type="module"')).toBe(2);
-    expect(html).toContain('<script type="module" defer src="../assets/mode-switch-DEF456.js">');
-    expect(html).toContain('<script type="module" defer src="../assets/trail-789ABC.js">');
-  });
-
-  it("loads the bundle of a classic island with a deferred classic script tag, never as a module nor preloaded", () => {
-    const html = renderPage("EntityPage", entityPage, options());
+    expect(count(html, "<script defer")).toBe(3);
+    expect(html).toContain('<script defer src="../assets/mode-switch-DEF456.js"></script>');
     expect(html).toContain('<script defer src="../assets/search-0123ABCD.js"></script>');
-    expect(html).not.toContain('<script type="module" defer src="../assets/search-0123ABCD.js">');
-    expect(html).not.toContain('<link rel="modulepreload" href="../assets/search-0123ABCD.js"');
-    expect(count(html, "<script defer")).toBe(1);
+    expect(html).toContain('<script defer src="../assets/trail-789ABC.js"></script>');
   });
 
-  it("emits no module script at all when a theme's header carries no island", () => {
+  it("loads the bundle of every island with a deferred classic script tag, never as a module nor preloaded, so that a file:// page runs it in every browser", () => {
+    const page = { ...entityPage, mentions: { mentions: mentions(25), initial: 20 } };
+    const html = renderPage("EntityPage", page, options());
+    expect(html).toContain('<script defer src="../assets/mentions-panel-ABC123.js"></script>');
+    expect(html).not.toContain('type="module"');
+    expect(html).not.toContain("modulepreload");
+    expect(count(html, "<script defer")).toBe(4);
+  });
+
+  it("loads a bundle declared as a module with a preloaded module script tag, the others staying classic", () => {
+    const page = { ...entityPage, mentions: { mentions: mentions(25), initial: 20 } };
+    const html = renderPage(
+      "EntityPage",
+      page,
+      options({ islands: [{ ...bundle, module: true }, modeBundle, searchBundle, trailBundle] }),
+    );
+    expect(html).toContain('<link rel="modulepreload" href="../assets/mentions-panel-ABC123.js"');
+    expect(html).toContain(
+      '<script type="module" defer src="../assets/mentions-panel-ABC123.js"></script>',
+    );
+    expect(count(html, '<script type="module"')).toBe(1);
+    expect(count(html, "modulepreload")).toBe(1);
+    expect(count(html, "<script defer")).toBe(3);
+    expect(html).not.toContain('<script defer src="../assets/mentions-panel-ABC123.js">');
+  });
+
+  it("emits no script tag at all when a theme's header carries no island", () => {
     const Header = () => h("header", { class: "plain" }, "plain");
     const theme: ResolvedTheme = {
       components: { ...defaultComponents, Header },
       overrides: [{ slot: "Header", plugin: "@example/plain", theme: "plain" }],
     };
     const html = renderPage("EntityPage", uncited, options({ theme }));
+    expect(html).not.toContain("<script defer");
     expect(html).not.toContain('<script type="module"');
     expect(html).not.toContain("modulepreload");
     expect(html).not.toContain("<concordance-island");
@@ -104,14 +119,11 @@ describe("renderPage", () => {
     );
   });
 
-  it("preloads and defers the bundle of every island the page uses, once each", () => {
+  it("defers the bundle of every island the page uses, once each", () => {
     const page = { ...entityPage, mentions: { mentions: mentions(25), initial: 20 } };
     const html = renderPage("EntityPage", page, options());
-    expect(html).toContain('<link rel="modulepreload" href="../assets/mentions-panel-ABC123.js"');
-    expect(html).toContain(
-      '<script type="module" defer src="../assets/mentions-panel-ABC123.js"></script>',
-    );
-    expect(count(html, '<script type="module"')).toBe(3);
+    expect(count(html, "mentions-panel-ABC123.js")).toBe(1);
+    expect(count(html, "<script defer")).toBe(4);
     expect(html).toContain('<concordance-island data-island="mentions-panel"');
     expectBalanced(html);
   });
@@ -143,7 +155,7 @@ describe("renderPage", () => {
     );
     expect(html).not.toContain("</script><script>");
     expect(html).toContain("&lt;/script>&lt;script>alert(&quot;x&quot;)&lt;/script>");
-    expect(count(html, '<script type="module"')).toBe(3);
+    expect(count(html, "<script defer")).toBe(4);
   });
 
   it("writes dir=rtl for a right-to-left locale", () => {

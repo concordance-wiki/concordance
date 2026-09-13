@@ -23,7 +23,7 @@ function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
 const bundles: IslandBundle[] = [
   { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
   { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
-  { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
+  { name: "search", file: "search-0123ABCD.js", bytes: 1 },
   { name: "trail", file: "trail-789ABC.js", bytes: 1 },
 ];
 

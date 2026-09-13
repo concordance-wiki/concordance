@@ -106,9 +106,12 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(worker?.bytes).toBeGreaterThan(1_000_000);
     expect(opener?.bytes).toBeLessThan(3_000);
     expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(9);
-    // The page loads the opener as any island; the viewer bundles are only named in its props.
+    // The page loads the opener as any island, once; the viewer bundles are only named in its props.
     const loaded = references(html).filter((reference) => reference.includes("/assets/"));
-    expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(2);
+    expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(1);
+    expect(html).toMatch(
+      /<script defer src="\.\.\/\.\.\/\.\.\/assets\/document-viewer-[A-Z0-9]{8}\.js">/,
+    );
     expect(loaded.some((reference) => reference.includes("viewer-pdf"))).toBe(false);
     expect(html).toContain(
       `&quot;viewerHref&quot;:&quot;../../../assets/${viewer?.file ?? ""}&quot;`,
@@ -119,8 +122,11 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(fileSystem.exists(`/dist/assets/${viewer?.file ?? ""}`)).toBe(true);
     expect(fileSystem.exists(`/dist/assets/${worker?.file ?? ""}`)).toBe(true);
     // Both bundles are modules that pdf.js can run in a browser: the viewer exports its opener.
+    expect(viewer?.module).toBe(true);
+    expect(worker?.module).toBe(true);
+    expect(opener?.module).toBeUndefined();
     const bundle = fileSystem.readText(`/dist/assets/${viewer?.file ?? ""}`);
-    expect(bundle).toContain("openViewer");
+    expect(bundle.trimEnd()).toMatch(/export\{\w+ as openViewer\};$/);
     expect(bundle).toContain("workerSrc");
   });
 
