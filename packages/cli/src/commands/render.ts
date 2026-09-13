@@ -14,8 +14,11 @@ import { glossarySources, languagePack, searchTokens } from "@concordance-wiki/n
 import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
+  contractFileTarget,
+  contractFragmentPath,
   fragmentImagePath,
   fragmentPath,
+  isContractUrl,
   parseFragment,
   type EntityFragment,
   type SiteNames,
@@ -141,6 +144,34 @@ export function placeDocuments(
 }
 
 /**
+ * Places what the api pages link to for their contracts, from what the build kept next to the
+ * model: the JSON view under `fragments/`, served from the same path under the output, and the
+ * copy of a path contract next to the page. A file the build did not keep is skipped. Returns how
+ * many files were placed.
+ */
+export function placeContracts(
+  fs: FileSystem,
+  model: CanonicalModel,
+  modelDirectory: string,
+  output: string,
+): number {
+  let placed = 0;
+  const copy = (from: string, to: string): void => {
+    if (!fs.exists(from)) return;
+    if (from !== to) fs.writeBytes(to, fs.readBytes(from));
+    placed += 1;
+  };
+  for (const record of model.build.contracts ?? []) {
+    const view = contractFragmentPath(record.api);
+    copy(join(modelDirectory, view), join(output, view));
+    if (isContractUrl(record.location)) continue;
+    const target = contractFileTarget(record.api, record.location);
+    copy(join(modelDirectory, fragmentImagePath(target)), join(output, target));
+  }
+  return placed;
+}
+
+/**
  * Renders the site from a model and its fragments through the theme of the configuration, prints
  * the summary on stdout and every warning on stderr; a page over budget or with an accessibility
  * finding is reported, never a failure.
@@ -192,6 +223,7 @@ export async function renderSite(
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   placeDocuments(io.fs, fragments, input.modelDirectory, input.output);
+  placeContracts(io.fs, input.model, input.modelDirectory, input.output);
   for (const line of report.summary) {
     io.out(line);
   }

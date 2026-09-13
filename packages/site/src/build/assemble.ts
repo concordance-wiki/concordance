@@ -7,6 +7,7 @@ import type { ThemeConfig } from "../css/theme-config.js";
 import {
   bundleIslands,
   defaultIslands,
+  mergeIslands,
   type IslandBundle,
   type IslandEntry,
 } from "../islands/bundle.js";
@@ -58,15 +59,16 @@ export interface Assembled {
 }
 
 /**
- * What a gallery and a site share: the island bundles and the theme files under `assets/`, the
- * documents written, every page measured against the budget and checked for accessibility.
+ * What a gallery and a site share: the island bundles (the default islands and the UI components
+ * the theme resolution collected) and the theme files under `assets/`, the documents written,
+ * every page measured against the budget and checked for accessibility.
  */
 export async function assemblePages(options: AssembleOptions): Promise<Assembled> {
   const { output, theme, fileSystem } = options;
   const assets = `${output}/${ASSETS_DIRECTORY}`;
   const islands = await bundleIslands({
     outDir: assets,
-    islands: options.islands ?? defaultIslands(),
+    islands: mergeIslands(options.islands ?? defaultIslands(), theme.islands ?? []),
     fileSystem,
   });
   const source = theme.config ?? { config: options.fallback, assets: [], fileSystem };

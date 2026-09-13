@@ -15,6 +15,7 @@ describe("@concordance-wiki/core", () => {
       "PluginLoadError",
       "assembleModel",
       "cachedContractPath",
+      "cachedContractViewPath",
       "canonicalJson",
       "commandExists",
       "compareContracts",
@@ -23,6 +24,7 @@ describe("@concordance-wiki/core", () => {
       "compareLinks",
       "compareProvenances",
       "compileGlobs",
+      "contractViewOf",
       "createSpeakerNumbering",
       "declaredContracts",
       "definePlugin",
@@ -53,6 +55,7 @@ describe("@concordance-wiki/core", () => {
       "pseudonymizeTranscript",
       "quote",
       "readCachedContract",
+      "readCachedContractView",
       "readSchema",
       "relationshipType",
       "resolveDuplicates",
@@ -71,6 +74,7 @@ describe("@concordance-wiki/core", () => {
       "validateModel",
       "validateTheme",
       "writeCachedContract",
+      "writeCachedContractView",
       "xmlRootOf",
     ]);
   });

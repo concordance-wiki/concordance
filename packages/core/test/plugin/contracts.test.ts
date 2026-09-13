@@ -8,19 +8,24 @@ import type { Entity } from "../../src/model/entity.js";
 import type { PluginContext, SourceInput } from "../../src/plugin/api.js";
 import {
   cachedContractPath,
+  cachedContractViewPath,
   CONTRACT_METHOD,
   CONTRACT_RELATION,
   CONTRACT_UNREACHABLE,
+  contractViewOf,
   declaredContracts,
   DEFAULT_CONTRACT_CONFIDENCE,
   fingerprintOf,
   loadContracts,
   readCachedContract,
+  readCachedContractView,
   writeCachedContract,
+  writeCachedContractView,
   xmlRootOf,
   type ContractOperation,
   type ContractReader,
   type ContractSummary,
+  type ContractView,
 } from "../../src/plugin/contracts.js";
 
 /** A contract format for the tests: one operation per non-empty line, `name|summary|object,object`. */
@@ -51,6 +56,16 @@ const linesReader: ContractReader<LinesContract> = {
           lines: text.split("\n").filter((line) => line !== ""),
         },
   operations: (contract) => contract.lines.map(operationOf),
+};
+
+/** The same format, whose reader also describes every referenced object as a schema with one field. */
+const describingReader: ContractReader<LinesContract> = {
+  ...linesReader,
+  schemas: (contract) =>
+    [...new Set(contract.lines.flatMap((line) => operationOf(line).objects))].map((name) => ({
+      name,
+      fields: [{ name: "id", type: "string", required: true }],
+    })),
 };
 
 function api(overrides: Partial<Entity> = {}): Entity {
@@ -120,6 +135,7 @@ function harness(files: Record<string, string> = {}, fetchStub?: typeof fetch): 
 const text = "createLink|Create a link|Link,Entity\ngetLink||Link\n";
 const fingerprint = createHash("sha256").update(text).digest("hex");
 const cachePath = `/pipeline/.concordance-cache/contracts/${fingerprint}.json`;
+const viewPath = `/pipeline/.concordance-cache/contracts/${fingerprint}.view.json`;
 const localFile = { "/repos/specs/api/model-query.lines": text };
 
 describe("the contract constants", () => {
@@ -185,6 +201,47 @@ describe("the contract cache", () => {
     writeCachedContract(fs, path, contract);
     expect(fs.files.get(path)).toBe(`${JSON.stringify(contract, null, 2)}\n`);
     expect(readCachedContract(fs, path)).toEqual(contract);
+  });
+
+  it("keeps the view of a contract next to it, under the same fingerprint with the view suffix", () => {
+    const fs = memoryFileSystem();
+    const view: ContractView = { title: "T", version: "1", operations: [], schemas: [] };
+    const path = cachedContractViewPath("/cache", fingerprintOf("x"));
+    expect(path).toBe(
+      "/cache/contracts/2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881.view.json",
+    );
+    expect(readCachedContractView(fs, path)).toBeUndefined();
+    writeCachedContractView(fs, path, view);
+    expect(fs.files.get(path)).toBe(`${JSON.stringify(view, null, 2)}\n`);
+    expect(readCachedContractView(fs, path)).toEqual(view);
+  });
+});
+
+describe("contractViewOf", () => {
+  const contract: LinesContract = {
+    title: "Lines",
+    version: "1",
+    lines: ["getLink||Link", "createLink|Create a link|Link,Entity"],
+  };
+  const operations = linesReader.operations(contract);
+
+  it("keeps the title, the version and the operations in contract order, and sorts the schemas by name", () => {
+    expect(contractViewOf(contract, describingReader, operations)).toEqual({
+      title: "Lines",
+      version: "1",
+      operations: [
+        operationOf("getLink||Link"),
+        operationOf("createLink|Create a link|Link,Entity"),
+      ],
+      schemas: [
+        { name: "Entity", fields: [{ name: "id", type: "string", required: true }] },
+        { name: "Link", fields: [{ name: "id", type: "string", required: true }] },
+      ],
+    });
+  });
+
+  it("lists no schema for a reader that describes none", () => {
+    expect(contractViewOf(contract, linesReader, operations).schemas).toEqual([]);
   });
 });
 
@@ -399,6 +456,26 @@ describe("loadContracts", () => {
     );
   });
 
+  it("writes the view of the contract next to it at every load, from the cached contract on a hit", async () => {
+    const { fs, input } = harness(localFile);
+    await loadContracts(input([api()]), describingReader);
+    const first = readCachedContractView(fs, viewPath);
+    expect(first).toEqual({
+      title: "Lines",
+      version: "1",
+      operations: [
+        operationOf("createLink|Create a link|Link,Entity"),
+        operationOf("getLink||Link"),
+      ],
+      schemas: [
+        { name: "Entity", fields: [{ name: "id", type: "string", required: true }] },
+        { name: "Link", fields: [{ name: "id", type: "string", required: true }] },
+      ],
+    });
+    await loadContracts(input([api()]), linesReader);
+    expect(readCachedContractView(fs, viewPath)).toEqual({ ...first, schemas: [] });
+  });
+
   it("reads the extracted contract from the cache on a fingerprint hit instead of parsing the bytes again", async () => {
     const cached = JSON.stringify({ title: "Cached", version: "9", lines: ["cachedOp"] });
     const { fs, input } = harness({ ...localFile, [cachePath]: cached });
@@ -408,6 +485,9 @@ describe("loadContracts", () => {
       ["Cached", "9"],
     ]);
     expect(fs.files.get(cachePath)).toBe(cached);
+    expect(readCachedContractView(fs, viewPath)?.operations.map((o) => o.name)).toEqual([
+      "cachedOp",
+    ]);
   });
 
   it("leaves a contract the reader does not accept alone: nothing imported, nothing cached, nothing reported", async () => {

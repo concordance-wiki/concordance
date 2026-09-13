@@ -134,8 +134,11 @@ describe("readOpenApi", () => {
           summary: "List members",
           tags: [],
           schemas: [],
+          parameters: [],
+          responses: [{ status: "200", description: "OK" }],
         },
       ],
+      schemas: [],
     });
   });
 
@@ -216,6 +219,8 @@ describe("readOpenApi", () => {
       path: "/payments/{id}",
       tags: [],
       schemas: ["Member"],
+      parameters: [{ name: "member", in: "query", required: false, type: "Member" }],
+      responses: [{ status: "204", description: "gone" }],
     });
     expect(remove !== undefined && "operationId" in remove).toBe(false);
     expect(remove !== undefined && "summary" in remove).toBe(false);
@@ -313,6 +318,220 @@ describe("readOpenApi", () => {
       title: "",
       version: "",
       operations: [],
+      schemas: [],
     });
+  });
+
+  it("lists the parameters of the path item then of the operation, dereferenced, a path parameter always required", () => {
+    const document = {
+      openapi: "3.1.0",
+      components: {
+        parameters: {
+          Locale: {
+            name: "locale",
+            in: "header",
+            description: "BCP 47 tag",
+            schema: { type: "string" },
+          },
+        },
+      },
+      paths: {
+        "/entities/{id}": {
+          parameters: [
+            { name: "id", in: "path", schema: { type: "string" } },
+            { $ref: "#/components/parameters/Locale" },
+            { name: "verbose", in: "query", schema: { type: "boolean" } },
+          ],
+          get: {
+            parameters: [
+              { name: "verbose", in: "query", required: true, schema: { type: "boolean" } },
+              { name: "unnamed" },
+              { $ref: "#/components/parameters/Missing" },
+              { $ref: "https://example.invalid/params.json#/Remote" },
+              "not a parameter",
+              { name: "fields" },
+            ],
+          },
+        },
+      },
+    };
+    expect(contract(JSON.stringify(document)).operations[0]?.parameters).toEqual([
+      { name: "id", in: "path", required: true, type: "string" },
+      { name: "locale", in: "header", required: false, type: "string", description: "BCP 47 tag" },
+      { name: "verbose", in: "query", required: true, type: "boolean" },
+      { name: "unnamed", in: "query", required: false, type: "any" },
+      { name: "fields", in: "query", required: false, type: "any" },
+    ]);
+  });
+
+  it("names the type of the request body and of each response, JSON preferred, statuses sorted, references followed", () => {
+    const document = {
+      openapi: "3.1.0",
+      components: {
+        schemas: { Entity: { type: "object", properties: {} } },
+        requestBodies: {
+          Query: {
+            content: {
+              "text/plain": { schema: { type: "string" } },
+              "application/json": { schema: { $ref: "#/components/schemas/Entity" } },
+            },
+          },
+        },
+        responses: {
+          NotFound: { description: "Unknown identifier" },
+        },
+      },
+      paths: {
+        "/search": {
+          post: {
+            requestBody: { $ref: "#/components/requestBodies/Query" },
+            responses: {
+              default: { description: "Anything else" },
+              "404": { $ref: "#/components/responses/NotFound" },
+              "200": {
+                content: {
+                  "application/json": {
+                    schema: { type: "array", items: { $ref: "#/components/schemas/Entity" } },
+                  },
+                },
+              },
+              "202": { content: { "text/plain": "not a media type object" } },
+              "204": { content: {} },
+              "500": { $ref: "#/components/responses/Missing" },
+            },
+          },
+          put: {
+            requestBody: {
+              content: { "text/csv": { schema: { type: "string" } }, "text/plain": {} },
+            },
+          },
+          patch: { requestBody: { content: "none" }, responses: "none" },
+        },
+      },
+    };
+    // Methods come in the fixed order: put, post, patch.
+    const [put, post, patch] = contract(JSON.stringify(document)).operations;
+    expect(post?.request).toBe("Entity");
+    expect(post?.responses).toEqual([
+      { status: "200", schema: "Entity[]" },
+      { status: "202" },
+      { status: "204" },
+      { status: "404", description: "Unknown identifier" },
+      { status: "500" },
+      { status: "default", description: "Anything else" },
+    ]);
+    expect(put?.request).toBe("string");
+    expect(put?.responses).toEqual([]);
+    expect(patch !== undefined && "request" in patch).toBe(false);
+    expect(patch?.responses).toEqual([]);
+  });
+
+  it("describes the referenced component schemas: their fields with type, requirement and description, allOf parts merged", () => {
+    const document = {
+      openapi: "3.1.0",
+      components: {
+        schemas: {
+          Entity: {
+            description: "One node of the model",
+            type: "object",
+            required: ["id"],
+            properties: {
+              id: { type: "string", description: "Lowercase, hyphens, a slash" },
+              links: { type: "array", items: { $ref: "#/components/schemas/Link" } },
+              status: { enum: ["valid", "planned"] },
+              locale: { type: ["string", "null"] },
+              origin: { oneOf: [{ type: "string" }, { $ref: "#/components/schemas/Link" }] },
+              nested: { properties: { count: { type: "integer" } } },
+              raw: 3,
+            },
+          },
+          Link: {
+            allOf: [
+              { $ref: "#/components/schemas/Edge" },
+              { $ref: "#/components/schemas/Edge" },
+              { properties: { confidence: { type: "number" } }, required: ["confidence"] },
+              "not a schema",
+            ],
+          },
+          Edge: { type: "object", properties: { from: { type: "string" }, to: {} } },
+          Severity: { type: "string", enum: ["error", "warning", "info"] },
+          Hits: { type: "array", items: { $ref: "#/components/schemas/Entity" } },
+          Anything: {},
+          Empty: { type: "object" },
+          Composite: { anyOf: [{ type: "string" }, { type: "number" }] },
+          Loop: { allOf: [{ $ref: "#/components/schemas/Loop" }] },
+          Unreferenced: { type: "object" },
+          Broken: "not an object",
+        },
+      },
+      paths: {
+        "/x": {
+          get: {
+            responses: {
+              "200": {
+                content: {
+                  "application/json": {
+                    schema: {
+                      oneOf: [
+                        { $ref: "#/components/schemas/Entity" },
+                        { $ref: "#/components/schemas/Severity" },
+                        { $ref: "#/components/schemas/Hits" },
+                        { $ref: "#/components/schemas/Anything" },
+                        { $ref: "#/components/schemas/Empty" },
+                        { $ref: "#/components/schemas/Composite" },
+                        { $ref: "#/components/schemas/Loop" },
+                        { $ref: "#/components/schemas/Broken" },
+                        { $ref: "#/components/schemas/Missing" },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    expect(contract(JSON.stringify(document)).schemas).toEqual([
+      { name: "Anything", type: "any", fields: [] },
+      { name: "Composite", type: "string | number", fields: [] },
+      {
+        name: "Edge",
+        fields: [
+          { name: "from", type: "string", required: false },
+          { name: "to", type: "any", required: false },
+        ],
+      },
+      { name: "Empty", type: "object", fields: [] },
+      {
+        name: "Entity",
+        description: "One node of the model",
+        fields: [
+          {
+            name: "id",
+            type: "string",
+            required: true,
+            description: "Lowercase, hyphens, a slash",
+          },
+          { name: "links", type: "Link[]", required: false },
+          { name: "status", type: "enum", required: false },
+          { name: "locale", type: "string | null", required: false },
+          { name: "origin", type: "string | Link", required: false },
+          { name: "nested", type: "object", required: false },
+          { name: "raw", type: "any", required: false },
+        ],
+      },
+      { name: "Hits", type: "Entity[]", fields: [] },
+      {
+        name: "Link",
+        fields: [
+          { name: "from", type: "string", required: false },
+          { name: "to", type: "any", required: false },
+          { name: "confidence", type: "number", required: true },
+        ],
+      },
+      { name: "Loop", type: "Loop", fields: [] },
+      { name: "Severity", type: "string", fields: [] },
+    ]);
   });
 });

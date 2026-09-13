@@ -24,6 +24,25 @@ export interface ContractRecord {
   imported_at: string;
 }
 
+/** One field of a schema, as the contract viewer lists it. */
+export interface ContractField {
+  name: string;
+  /** The type as the format writes it, or the name of the schema it references. */
+  type: string;
+  required: boolean;
+  description?: string;
+}
+
+/** A schema or type a contract declares, reduced to what a reader of the note needs. */
+export interface ContractSchema {
+  name: string;
+  description?: string;
+  /** The type of a schema that is not an object: an enumeration, an alias of a primitive, an array. */
+  type?: string;
+  /** In declaration order; empty for a schema without properties. */
+  fields: ContractField[];
+}
+
 function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
 }

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
-import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
+import { nodeFileSystem, type FileSystem, type UiComponent } from "@concordance-wiki/core";
 import { build } from "esbuild";
 
 import { byCodeUnit } from "../order.js";
@@ -10,6 +10,7 @@ import { DOCUMENT_VIEWER_ISLAND } from "../theme/default/document-viewer.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
+import { defaultUiComponents } from "../theme/default/plugin.js";
 
 /** The bundle of the PDF viewer, imported on demand by the document island, never by a page. */
 export const VIEWER_ISLAND = "viewer-pdf";
@@ -42,7 +43,12 @@ export interface BundleOptions {
   fileSystem?: FileSystem;
 }
 
-/** The islands shipped with the default theme, each with its hydration entry next to this module. */
+/** The island a UI component contribution becomes: its slot names the island, its bundle is the hydration entry. */
+export function islandOf(component: UiComponent): IslandEntry {
+  return { name: component.slot, entry: component.bundle };
+}
+
+/** The islands shipped with the default theme, each with its hydration entry next to this module, then its UI components. */
 export function defaultIslands(): IslandEntry[] {
   // No extension: the bundler picks the compiled module in a build and the source under test.
   return [
@@ -63,7 +69,20 @@ export function defaultIslands(): IslandEntry[] {
       entry: fileURLToPath(new URL("./search.client", import.meta.url)),
       classic: true,
     },
+    ...defaultUiComponents().map(islandOf),
   ];
+}
+
+/** The default islands, then the contributed ones whose name no earlier island took; sorted by name. */
+export function mergeIslands(
+  defaults: readonly IslandEntry[],
+  contributed: readonly IslandEntry[],
+): IslandEntry[] {
+  const merged = new Map<string, IslandEntry>();
+  for (const island of [...defaults, ...contributed]) {
+    if (!merged.has(island.name)) merged.set(island.name, island);
+  }
+  return [...merged.values()].sort((a, b) => byCodeUnit(a.name, b.name));
 }
 
 /**

@@ -1,10 +1,11 @@
-import { definePlugin, type PluginManifest } from "@concordance-wiki/core";
+import { definePlugin, parseModel, type PluginManifest } from "@concordance-wiki/core";
 import { defaultComponents } from "@concordance-wiki/site";
 import { h, type JSX } from "preact";
 import { describe, expect, it } from "vitest";
 
 import { buildCommand } from "../../src/commands/build.js";
 import {
+  placeContracts,
   placeDocuments,
   placeImages,
   readFragments,
@@ -250,6 +251,72 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "notes/c/framing/c.pdf",
     ]);
     expect(io.fs.readText("/work/site/notes/c/framing/c.pdf")).toBe("%PDF-c");
+  });
+
+  it("places the contract view and the copy of a path contract from what the build kept, skipping what it did not keep and never rewriting a file onto itself", () => {
+    const io = corpus();
+    const model = {
+      ...parseModel(
+        JSON.stringify({
+          version: 1,
+          build: {
+            tool: "0.0.0",
+            at: "2026-09-12T12:00:00.000Z",
+            profile_hash: "x",
+            sources: [],
+            contracts: [
+              {
+                api: "notes/model-query",
+                location: "contracts/model-query.openapi.json",
+                title: "Model query API",
+                version: "0.1.0",
+                fingerprint: "a".repeat(64),
+                imported_at: "2026-09-12T12:00:00.000Z",
+              },
+              {
+                api: "notes/forge-bridge",
+                location: "https://example.invalid/forge-bridge.wsdl",
+                title: "Forge bridge",
+                version: "",
+                fingerprint: "b".repeat(64),
+                imported_at: "2026-09-12T12:00:00.000Z",
+              },
+              {
+                api: "notes/lost",
+                location: "contracts/lost.json",
+                title: "Lost",
+                version: "",
+                fingerprint: "c".repeat(64),
+                imported_at: "2026-09-12T12:00:00.000Z",
+              },
+            ],
+          },
+          entities: [],
+          links: [],
+          findings: [],
+          candidates: { terms: [], duplicates: [] },
+        }),
+        "model.json",
+      ),
+    };
+    io.fs.writeText("/work/dist/fragments/notes/model-query.contract.json", "{}");
+    io.fs.writeText("/work/dist/fragments/notes/model-query/model-query.openapi.json", "{ }");
+    io.fs.writeText("/work/dist/fragments/notes/forge-bridge.contract.json", "{}");
+    expect(placeContracts(io.fs, model, "/work/dist", "/work/site")).toBe(3);
+    expect(io.fs.listFiles("/work/site")).toEqual([
+      "fragments/notes/forge-bridge.contract.json",
+      "fragments/notes/model-query.contract.json",
+      "notes/model-query/model-query.openapi.json",
+    ]);
+    const before = io.fs.listFiles("/work/dist");
+    expect(placeContracts(io.fs, model, "/work/dist", "/work/dist")).toBe(3);
+    expect(io.fs.listFiles("/work/dist")).toEqual([
+      ...before,
+      "notes/model-query/model-query.openapi.json",
+    ]);
+    const withoutContracts = { ...model, build: { ...model.build } };
+    delete withoutContracts.build.contracts;
+    expect(placeContracts(io.fs, withoutContracts, "/work/dist", "/work/site")).toBe(0);
   });
 
   it("renders the pages without their note text and warns when the fragments are missing", async () => {

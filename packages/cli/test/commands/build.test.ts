@@ -58,6 +58,7 @@ function expectSiteSummary(stdout: string[], pages: number, output: string, redi
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
+    expect.stringMatching(/^island contract-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
@@ -416,6 +417,125 @@ describe("concordance build", () => {
     });
   });
 
+  describe("The api page shows its imported contract without copying it into the note", () => {
+    const openapi = JSON.stringify(
+      {
+        openapi: "3.1.0",
+        info: { title: "Model query API", version: "0.1.0" },
+        paths: {
+          "/entities": {
+            get: {
+              operationId: "listEntities",
+              summary: "List the entities of the model",
+              responses: {
+                "200": {
+                  description: "OK",
+                  content: {
+                    "application/json": {
+                      schema: { type: "array", items: { $ref: "#/components/schemas/Entity" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "/search": {
+            get: { operationId: "searchModel", summary: "Search the model", responses: {} },
+          },
+        },
+        components: {
+          schemas: {
+            Entity: {
+              type: "object",
+              required: ["id"],
+              properties: { id: { type: "string" }, title: { type: "string" } },
+            },
+          },
+        },
+      },
+      null,
+      2,
+    );
+
+    const withOpenApi = {
+      load: async (name: string) => {
+        expect(name).toBe("@concordance-wiki/plugin-contract-openapi");
+        return (await import("@concordance-wiki/plugin-contract-openapi")).default;
+      },
+      commandAvailable: () => Promise.resolve(true),
+    };
+
+    function contractCorpus(): RecordedIo {
+      return recordedIo({
+        "/work/concordance.yaml": `${validConfig}plugins: ["@concordance-wiki/plugin-contract-openapi"]\n`,
+        "/work/notes/model-query.md":
+          "---\ntype: api\ncontract: contracts/model-query.openapi.json\n---\n# Model query API\n\nServes the canonical model over HTTP.\n",
+        "/work/notes/contracts/model-query.openapi.json": openapi,
+        "/work/notes/list-entities.md":
+          "---\ntype: endpoint\napi: model-query\noperation_id: listEntities\n---\n# List the entities\n\nReturns the entities of the last build.\n",
+      });
+    }
+
+    it("writes the JSON view of the contract under fragments/ and the copy of the path contract next to the page", async () => {
+      const io = contractCorpus();
+      expect(await buildCommand([], io, withOpenApi)).toBe(0);
+      const view = JSON.parse(
+        io.fs.readText("/work/dist/fragments/notes/model-query.contract.json"),
+      ) as { title: string; operations: { name: string }[]; schemas: { name: string }[] };
+      expect(view.title).toBe("Model query API");
+      expect(view.operations.map((operation) => operation.name)).toEqual([
+        "listEntities",
+        "searchModel",
+      ]);
+      expect(view.schemas.map((schema) => schema.name)).toEqual(["Entity"]);
+      expect(io.fs.readText("/work/dist/notes/model-query/model-query.openapi.json")).toBe(openapi);
+      expect(io.fs.readText("/work/dist/fragments/notes/model-query.json")).not.toContain(
+        "listEntities",
+      );
+    });
+
+    it("renders the contract section after the note with the plain list of operations, the download link and the viewer island loaded on demand", async () => {
+      const io = contractCorpus();
+      await buildCommand([], io, withOpenApi);
+      const page = io.fs.readText("/work/dist/notes/model-query/index.html");
+      const article = page.slice(
+        page.indexOf('<article class="entity-body">'),
+        page.indexOf('<section class="contract"'),
+      );
+      expect(article).toContain("Serves the canonical model over HTTP.");
+      expect(article).not.toContain("listEntities");
+      expect(article).not.toContain("/search");
+      expect(page).toContain(
+        '<h2 id="contract-title">Contract <span class="contract-name">Model query API</span></h2>',
+      );
+      expect(page).toContain("version <code>0.1.0</code>");
+      expect(page).toContain(
+        '<a class="contract-download" href="model-query.openapi.json" download>Download the contract</a>',
+      );
+      expect(page).toContain(
+        '<li><a href="../list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
+      );
+      expect(page).toContain(
+        '<li><a href="searchmodel/index.html">GET /search</a><span class="contract-summary"> Search the model</span></li>',
+      );
+      expect(page).toContain(
+        '<concordance-island data-island="contract-viewer" data-props="{&quot;href&quot;:&quot;../../fragments/notes/model-query.contract.json&quot;}"><p class="contract-data"><a href="../../fragments/notes/model-query.contract.json">Contract data (JSON)</a></p></concordance-island>',
+      );
+      expect(page).toMatch(
+        /<script type="module" defer src="\.\.\/\.\.\/assets\/contract-viewer-[A-Z0-9]{8}\.js">/,
+      );
+      const contract = page.slice(
+        page.indexOf('<section class="contract"'),
+        page.indexOf('<aside class="entity-panel"'),
+      );
+      expect(contract).not.toContain("<form");
+      expect(page.match(/<form/g)).toEqual(["<form"]);
+      expect(io.fs.readText("/work/dist/notes/list-entities/index.html")).not.toContain(
+        'class="contract"',
+      );
+    });
+  });
+
   describe("Sources contributions of plugins run after typing and add their endpoint entities, exposes links, candidates and contracts records", () => {
     const record = {
       api: "notes/model-query",
@@ -557,6 +677,21 @@ describe("concordance build", () => {
       expect(model.findings.map((finding) => finding.check)).toContain("W-EXAMPLE-API");
       expect(io.stdout).toContain("  contract_import: 1");
       expect(io.stdout).toContain("  W-EXAMPLE-API: 1");
+    });
+
+    it("registers the default theme as a built-in before the declared plugins, so that the registry lists its contract viewer", async () => {
+      const io = pluginCorpus();
+      const rival = definePlugin({
+        name: "example-contracts",
+        version: "1.0.0",
+        apiVersion: "1",
+        contributes: { uiComponents: [{ slot: "contract-viewer", bundle: "./viewer.js" }] },
+      });
+      await expect(
+        buildCommand([], io, { ...offline, load: () => Promise.resolve(rival) }),
+      ).rejects.toThrow(
+        "plugin example-contracts: ui slot contract-viewer is already contributed by @concordance-wiki/site",
+      );
     });
 
     it("reports a plugin that cannot be loaded as an execution error before touching the sources", async () => {

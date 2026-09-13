@@ -99,13 +99,13 @@ describe("A concordance gallery command renders every slot with fixture view mod
 
   it("exits 1 and names every problem when a page fails the accessibility checks", async () => {
     const io = recordedIo();
-    // A footer rendering nothing: every page but the entity pages, which carry their own footer, loses the landmark.
+    // A footer rendering nothing: every page but the four entity pages, which carry their own footer, loses the landmark.
     const deps = fakeDependencies(
       { "@example/theme": themePlugin("@example/theme", { Footer: "./footer.js" }) },
       () => null,
     );
     expect(await galleryCommand(["--theme", "@example/theme"], io, deps)).toBe(1);
-    const failing = pageCount - 3;
+    const failing = pageCount - 4;
     expect(io.stderr).toHaveLength(failing + 1);
     expect(io.stderr[0]).toBe("footer-text.html: landmarks: no footer landmark");
     expect(io.stderr.at(-1)).toBe(`gallery failed: ${String(failing)} problem(s)`);
@@ -200,7 +200,8 @@ describe("Every theme override is visible there", () => {
     expect(await galleryCommand([], io, deps)).toBe(0);
     expect(deps.asked).toEqual([]);
     expect(io.stdout[0]).toBe("/work/concordance.yaml: valid configuration");
-    expect(io.stdout[2]).toMatch(/^island document-viewer: /);
+    expect(io.stdout[2]).toMatch(/^island contract-viewer: /);
+    expect(io.stdout[3]).toMatch(/^island document-viewer: /);
   });
 
   it("reads the theme.yaml next to the configuration, or the one project.theme names, and lets it win over plugin tokens", async () => {

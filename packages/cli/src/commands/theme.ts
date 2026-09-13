@@ -14,6 +14,7 @@ import {
   type PluginRegistry,
 } from "@concordance-wiki/core";
 import {
+  defaultThemeManifest,
   importThemeModule,
   loadTheme,
   packageDirectoryOf,
@@ -88,6 +89,7 @@ export async function themeOf(
   const { registry, findings } = await loadPlugins(declarations, {
     load: (name) => deps.load(specifier(name, io.cwd)),
     commandAvailable: deps.commandAvailable,
+    builtin: [defaultThemeManifest()],
   });
   for (const finding of findings) {
     io.err(formatFinding(finding));

@@ -1,10 +1,17 @@
 import { fingerprintOf } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
+import { readWsdl, type WsdlContract } from "../src/contract.js";
 import { loadContracts, wsdlReader } from "../src/source.js";
 import { api, forgeBridge, harness, members, modelQueryOpenApi, orders } from "./fixtures.js";
 
 const localFile = { "/repos/specs/api/orders.wsdl": orders };
+
+function readOrders(): WsdlContract {
+  const read = readWsdl(orders, "orders.wsdl");
+  if ("error" in read) throw new Error(read.error);
+  return read;
+}
 
 describe("wsdlReader", () => {
   it("accepts a WSDL contract by content, a definitions or description root, whatever the extension", () => {
@@ -176,6 +183,47 @@ describe("loadContracts", () => {
     expect(output.links.map((link) => link.to)).not.toContain("Order");
   });
 
+  it("hands the viewer the input as request and the output and faults as responses, with the inline types as schemas", async () => {
+    const { input } = harness(localFile);
+    const output = await loadContracts(input([api()]));
+    const [admin, cancel, place] = wsdlReader.operations(readOrders());
+    expect(place).toMatchObject({
+      parameters: [],
+      request: "placeOrder",
+      responses: [
+        { status: "output", schema: "placeOrderResponse" },
+        { status: "fault", description: "failure", schema: "Note" },
+      ],
+    });
+    expect(cancel?.request).toBe("orderId: string, reason: Reason, untyped: any");
+    expect(admin !== undefined && "request" in admin).toBe(false);
+    expect(admin?.responses).toEqual([]);
+    expect(wsdlReader.schemas?.(readOrders()).map((schema) => schema.name)).toEqual([
+      "Line",
+      "Note",
+      "Order",
+      "OrderAck",
+      "OrderLine",
+      "placeOrder",
+      "placeOrderResponse",
+    ]);
+    expect(output.entities.map((entity) => Object.keys(entity.attributes))).not.toContainEqual(
+      expect.arrayContaining(["request"]),
+    );
+  });
+
+  it("names a fault without a message by its name alone", () => {
+    const text = `<definitions xmlns:tns="urn:t">
+      <portType name="P"><operation name="fetchReport"><output element="tns:report"/><fault name="Overflow"/></operation></portType>
+    </definitions>`;
+    const read = readWsdl(text, "faults.wsdl");
+    if ("error" in read) throw new Error(read.error);
+    expect(wsdlReader.operations(read)[0]?.responses).toEqual([
+      { status: "output", schema: "report" },
+      { status: "fault", description: "Overflow" },
+    ]);
+  });
+
   it("caches the extracted contract by fingerprint and records the title read with the import date", async () => {
     const { fs, input } = harness(localFile);
     const output = await loadContracts(input([api()]));
@@ -199,7 +247,10 @@ describe("loadContracts", () => {
       wsdl: "1.1",
       title: "Cached",
       version: "",
-      operations: [{ name: "cachedOp", interface: "P", port: "Q", binding: "B", types: [] }],
+      operations: [
+        { name: "cachedOp", interface: "P", port: "Q", binding: "B", types: [], faults: [] },
+      ],
+      types: [],
     });
     const { input } = harness({
       ...localFile,

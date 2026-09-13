@@ -74,6 +74,9 @@ describe("readWsdl", () => {
           soapAction: "urn:example:members:getMember",
           documentation: "Read a member",
           types: ["Member", "MemberQuery", "getMember", "member"],
+          input: "getMember",
+          output: "member",
+          faults: [],
         },
         {
           name: "ping",
@@ -81,6 +84,21 @@ describe("readWsdl", () => {
           port: "MembersEndpoint",
           binding: "MembersSoapBinding",
           types: [],
+          faults: [],
+        },
+      ],
+      types: [
+        { name: "Member", fields: [{ name: "name", type: "string", required: true }] },
+        { name: "MemberQuery", fields: [{ name: "id", type: "string", required: true }] },
+        {
+          name: "getMember",
+          type: "MemberQuery",
+          fields: [{ name: "id", type: "string", required: true }],
+        },
+        {
+          name: "member",
+          type: "Member",
+          fields: [{ name: "name", type: "string", required: true }],
         },
       ],
     });
@@ -94,7 +112,121 @@ describe("readWsdl", () => {
       title: "",
       version: "",
       operations: [],
+      types: [],
     });
+  });
+
+  it("names what each operation exchanges: the element of a single part, the parts of a message with several, the faults", () => {
+    const [admin, cancel, place] = contract(orders).operations;
+    expect(place).toMatchObject({
+      input: "placeOrder",
+      output: "placeOrderResponse",
+      faults: [{ name: "failure", type: "Note" }],
+    });
+    expect(cancel).toMatchObject({
+      input: "orderId: string, reason: Reason, untyped: any",
+      output: "cancelOrderResponse",
+      faults: [],
+    });
+    expect(admin !== undefined && "input" in admin).toBe(false);
+    expect(admin !== undefined && "output" in admin).toBe(false);
+  });
+
+  it("describes the inline elements and complex types the operations reference: fields, requirement, derivation base and documentation", () => {
+    expect(contract(orders).types).toEqual([
+      { name: "Line", fields: [{ name: "sku", type: "string", required: true }] },
+      { name: "Note", type: "string", fields: [] },
+      {
+        name: "Order",
+        fields: [
+          { name: "customer", type: "Customer", required: true },
+          { name: "status", type: "Status", required: true },
+          { name: "lines", type: "OrderLine", required: true },
+        ],
+      },
+      { name: "OrderAck", fields: [{ name: "order", type: "Order", required: true }] },
+      {
+        name: "OrderLine",
+        fields: [
+          { name: "sku", type: "string", required: true },
+          { name: "quantity", type: "int", required: true },
+        ],
+      },
+      {
+        name: "placeOrder",
+        fields: [
+          { name: "order", type: "Order", required: true },
+          { name: "Note", type: "Note", required: false },
+        ],
+      },
+      {
+        name: "placeOrderResponse",
+        type: "OrderAck",
+        fields: [{ name: "order", type: "Order", required: true }],
+      },
+    ]);
+  });
+
+  it("reads attributes, anonymous elements, documented fields, a base that is no complex type and a derivation cycle", () => {
+    const text = `<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:t">
+      <types>
+        <xsd:schema>
+          <xsd:complexType name="Report">
+            <xsd:annotation><xsd:documentation>A build   report</xsd:documentation></xsd:annotation>
+            <xsd:complexContent>
+              <xsd:extension base="tns:Report">
+                <xsd:sequence>
+                  <xsd:element name="lines"><xsd:complexType><xsd:sequence><xsd:element name="hidden" type="xsd:string"/></xsd:sequence></xsd:complexType></xsd:element>
+                  <xsd:element name="verdict" type="tns:Verdict">
+                    <xsd:annotation><xsd:documentation>The fail-on verdict</xsd:documentation></xsd:annotation>
+                  </xsd:element>
+                </xsd:sequence>
+                <xsd:attribute name="id" type="xsd:string" use="required"/>
+                <xsd:attribute name="stale" type="xsd:boolean"/>
+                <xsd:element/>
+              </xsd:extension>
+            </xsd:complexContent>
+          </xsd:complexType>
+          <xsd:complexType name="Verdict">
+            <xsd:simpleContent><xsd:restriction base="xsd:string"/></xsd:simpleContent>
+          </xsd:complexType>
+          <xsd:complexType name="Baseless">
+            <xsd:complexContent><xsd:extension><xsd:sequence/></xsd:extension></xsd:complexContent>
+          </xsd:complexType>
+          <xsd:element name="report" type="tns:Report"/>
+          <xsd:element name="missingType" type="tns:Elsewhere"/>
+          <xsd:element name="baseless" type="tns:Baseless"/>
+        </xsd:schema>
+      </types>
+      <message name="in"><part name="body" element="tns:report"/></message>
+      <message name="out"><part name="body" element="tns:missingType"/></message>
+      <message name="baselessOut"><part name="body" element="tns:baseless"/></message>
+      <portType name="P">
+        <operation name="fetchReport"><input message="tns:in"/><output message="tns:out"/><fault/><outfault ref="tns:Overflow"/></operation>
+        <operation name="pushReport"><output message="tns:baselessOut"/></operation>
+      </portType>
+    </definitions>`;
+    const read = contract(text);
+    expect(read.operations.map((operation) => [operation.input, operation.output])).toEqual([
+      ["report", "missingType"],
+      [undefined, "baseless"],
+    ]);
+    expect(read.operations[0]?.faults).toEqual([{ name: "" }, { name: "Overflow" }]);
+    const reportFields = [
+      { name: "lines", type: "anonymous", required: true },
+      { name: "verdict", type: "Verdict", required: true, description: "The fail-on verdict" },
+      { name: "id", type: "string", required: true },
+      { name: "stale", type: "boolean", required: false },
+      { name: "", type: "anonymous", required: true },
+    ];
+    expect(read.types).toEqual([
+      { name: "Baseless", fields: [] },
+      { name: "Report", description: "A build report", fields: reportFields },
+      { name: "Verdict", fields: [] },
+      { name: "baseless", type: "Baseless", fields: [] },
+      { name: "missingType", type: "Elsewhere", fields: [] },
+      { name: "report", type: "Report", fields: reportFields },
+    ]);
   });
 
   it("reports malformed XML with the reason and the line, naming the location", () => {

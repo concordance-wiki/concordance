@@ -266,6 +266,80 @@ export const documentEntityPage: SlotProps["EntityPage"] = {
   ],
 };
 
+/** The page of an API whose contract was imported: the contract section after the note, two operations, one without a note. */
+export const apiPage: SlotProps["EntityPage"] = {
+  ...entityPage,
+  entity: {
+    id: "specs/api/model-query",
+    type: "api",
+    typeLabel: "API",
+    title: "Model query API",
+    locale: "en",
+  },
+  highlights: [
+    { name: "protocol", label: "protocol", values: [{ text: "rest" }] },
+    { name: "version", label: "version", values: [{ text: "0" }] },
+  ],
+  sections: [
+    {
+      id: "definition",
+      html: "<p>Serves the canonical model of the last build over HTTP, for the service screens and for the tools that cannot read <code>model.json</code>.</p>",
+    },
+  ],
+  attributes: [
+    { name: "status", label: "Status", values: [{ text: "target" }] },
+    {
+      name: "contract",
+      label: "contract",
+      values: [{ text: "contracts/model-query.openapi.json" }],
+    },
+  ],
+  neighbours: {
+    centre: "Model query API",
+    neighbours: [
+      {
+        id: "specs/endpoints/list-entities",
+        label: "List the entities",
+        href: "../../endpoints/list-entities/",
+        typeLabel: "endpoint",
+        relation: "exposes",
+        weight: 3,
+        rank: 0,
+      },
+    ],
+  },
+  mentions: { mentions: [], initial: 20 },
+  sources: [{ source: "specs", path: "api/model-query.md" }],
+  contract: {
+    title: "Model query API",
+    version: "0.1.0",
+    importedAt: "2026-09-12T10:00:00.000Z",
+    location: "contracts/model-query.openapi.json",
+    downloadHref: "model-query.openapi.json",
+    fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
+    operations: [
+      {
+        name: "listEntities",
+        title: "List the entities",
+        summary: "Returns the entities of the last build, in identifier order.",
+        href: "../../endpoints/list-entities/",
+      },
+      {
+        name: "getEntity",
+        title: "Read an entity",
+        summary: "Returns one entity of the last build by identifier.",
+        href: "../../endpoints/get-entity/",
+      },
+      {
+        name: "searchModel",
+        title: "GET /search",
+        summary: "Search the model",
+        href: "searchmodel/",
+      },
+    ],
+  },
+};
+
 export const keywordPage: SlotProps["KeywordPage"] = {
   entity: {
     id: "keywords/build-summary",

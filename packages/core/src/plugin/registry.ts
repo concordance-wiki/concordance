@@ -46,6 +46,12 @@ export interface PluginLoaderDependencies {
   /** Resolves a package name to its default export. */
   load: (packageName: string) => Promise<unknown>;
   commandAvailable: (command: string) => Promise<boolean>;
+  /**
+   * Manifests registered before the declared plugins without being loaded: the contributions the
+   * tool ships itself, the UI components of the default theme for instance. They claim their
+   * keys like any plugin, so a declared plugin cannot take them over silently.
+   */
+  builtin?: readonly PluginManifest[];
 }
 
 export interface LoadedPlugins {
@@ -152,6 +158,11 @@ export async function loadPlugins(
   const findings: Finding[] = [];
   const seen = new Set<string>();
   const claimed = new Map<string, string>();
+  for (const manifest of deps.builtin ?? []) {
+    seen.add(manifest.name);
+    claim(manifest, claimed);
+    registered.push({ name: manifest.name, manifest, options: {} });
+  }
   for (const declaration of declarations) {
     const { name, options } = declared(declaration);
     const manifest = manifestOf(await deps.load(name), name);

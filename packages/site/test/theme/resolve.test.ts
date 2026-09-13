@@ -59,6 +59,41 @@ describe("resolveTheme", () => {
     expect(defaultTheme.components).toBe(defaultComponents);
   });
 
+  it("collects the UI components of every registration as islands: an absolute bundle as is, a relative one under the plugin package", async () => {
+    const builtin = definePlugin({
+      name: "@concordance-wiki/site",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { uiComponents: [{ slot: "contract-viewer", bundle: "/site/viewer.client" }] },
+    });
+    const pdf = definePlugin({
+      name: "@example/viewer-pdf",
+      version: "1.0.0",
+      apiVersion: "1",
+      contributes: { uiComponents: [{ slot: "pdf-viewer", bundle: "./ui/pdf.js" }] },
+    });
+    const registry = await registryOf({
+      "@concordance-wiki/site": builtin,
+      "@example/viewer-pdf": pdf,
+    });
+    const located = await resolveTheme(registry, {
+      load: () => Promise.reject(new Error("unused")),
+      rootOf: (plugin) => `/packages/${plugin}`,
+    });
+    expect(located.islands).toEqual([
+      { name: "contract-viewer", entry: "/site/viewer.client" },
+      { name: "pdf-viewer", entry: "/packages/@example/viewer-pdf/ui/pdf.js" },
+    ]);
+    const unlocated = await resolveTheme(registry, {
+      load: () => Promise.reject(new Error("unused")),
+    });
+    expect(unlocated.islands).toEqual([{ name: "contract-viewer", entry: "/site/viewer.client" }]);
+    const empty = await resolveTheme(await registryOf({}), {
+      load: () => Promise.reject(new Error("unused")),
+    });
+    expect(empty.islands).toEqual([]);
+  });
+
   it("ignores plugins without a theme and themes without components", async () => {
     const reader = definePlugin({
       name: "@example/reader",

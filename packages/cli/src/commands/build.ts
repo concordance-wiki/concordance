@@ -25,7 +25,10 @@ import {
   type Profile,
 } from "@concordance-wiki/profile";
 
+import { defaultThemeManifest } from "@concordance-wiki/site";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
+import { writeContractFragments } from "../pipeline/contracts.js";
 import { writeFragments } from "../pipeline/fragments.js";
 import { formatFinding } from "./findings.js";
 import { runPipeline } from "../pipeline/run.js";
@@ -167,7 +170,10 @@ export async function buildCommand(
   );
 
   // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
-  const plugins = await loadPlugins(config.plugins ?? [], deps);
+  const plugins = await loadPlugins(config.plugins ?? [], {
+    ...deps,
+    builtin: [defaultThemeManifest()],
+  });
   const checks = createRegistry(catalogue, plugins.registry.checks());
   const ingested = await ingestSources(config, {
     fs: io.fs,
@@ -233,6 +239,16 @@ export async function buildCommand(
       recognised: result.recognised,
       documents: result.documents,
       config,
+      fs: io.fs,
+    },
+    output,
+  );
+  writeContractFragments(
+    {
+      contracts: result.contracts,
+      entities: result.entities,
+      sources: ingested.sources,
+      cacheDirectory,
       fs: io.fs,
     },
     output,

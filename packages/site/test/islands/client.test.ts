@@ -18,6 +18,24 @@ describe("the mentions-panel hydration entry", () => {
   });
 });
 
+describe("the contract-viewer hydration entry", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("looks for the islands of the contract viewer in the document as soon as it loads", async () => {
+    const selectors: string[] = [];
+    vi.stubGlobal("document", {
+      querySelectorAll: (selector: string) => {
+        selectors.push(selector);
+        return [];
+      },
+    });
+    await import("../../src/islands/contract-viewer.client.js");
+    expect(selectors).toEqual(['concordance-island[data-island="contract-viewer"]']);
+  });
+});
+
 describe("the mode-switch entry", () => {
   afterEach(() => {
     vi.unstubAllGlobals();

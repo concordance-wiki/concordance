@@ -40,6 +40,12 @@ const FOCUS_RING = [
   "[tabindex]:focus-visible",
 ].join(",\n");
 
+const CONTRACT_BUTTONS = [
+  ".contract-data button",
+  ".contract-operation > button",
+  ".contract-schema-list button",
+].join(",\n");
+
 describe("The accent colour never carries information on its own", () => {
   const base = accentRules(baseStylesheet());
   const components = accentRules(componentsStylesheet());
@@ -64,14 +70,16 @@ describe("The accent colour never carries information on its own", () => {
       ".banner",
       ".mentions-group h3",
       ".mentions-more button",
+      CONTRACT_BUTTONS,
     ]);
   });
 
-  it("underlines links and the disclosure of the remaining mentions, so that colour is not their only mark", () => {
+  it("underlines links, the disclosure of the remaining mentions and the buttons of the contract viewer, so that colour is not their only mark", () => {
     expect(ruleFor(base, "a").body).toContain("text-decoration: underline;");
     expect(ruleFor(components, ".mentions-more button").body).toContain(
       "text-decoration: underline;",
     );
+    expect(ruleFor(components, CONTRACT_BUTTONS).body).toContain("text-decoration: underline;");
   });
 
   it("draws the focus ring as an offset outline, visible whatever the accent", () => {
