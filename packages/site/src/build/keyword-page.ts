@@ -16,6 +16,7 @@ import {
   fileKey,
   glyphNameOf,
   message,
+  spaceTitle,
   typeLabel,
   type SiteContext,
 } from "./context.js";
@@ -261,7 +262,7 @@ export function keywordPageOf(
       : {
           space: spaceWithPageOf(context, page, entity, space),
           breadcrumb: [
-            { label: space, href: spaceHref(page, space) },
+            { label: spaceTitle(context, space), href: spaceHref(page, space) },
             { label: message(context, "keyword.terms") },
             { label: entity.title },
           ],
@@ -280,7 +281,9 @@ export function keywordPageOf(
       files,
       sources: new Set(passages.map((passage) => passage.source)).size,
     },
-    spaces: [...new Set(groups.map((group) => group.source))],
+    spaces: [...new Set(groups.map((group) => group.source))].map((source) =>
+      spaceTitle(context, source),
+    ),
     summary: formatMessage(context.catalogue, "keyword.filesSummary", { count: files }),
     passages: groups.map((group) => group.group),
     similar: similarOf(context, page, entity),

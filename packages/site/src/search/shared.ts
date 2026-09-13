@@ -133,7 +133,7 @@ export interface SearchMeta {
   types: Record<string, string>;
   applications: Record<string, string>;
   domains: Record<string, string>;
-  /** The declared sources, each labelled by its name, so that the facet lists them like the others. */
+  /** The declared sources, each labelled by its title, else its name, so that the facet lists them like the others. */
   sources: Record<string, string>;
   /** The counts of every facet value over the whole table: what the results page shows before a query. */
   counts: FacetCounts;

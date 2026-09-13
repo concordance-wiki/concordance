@@ -11,7 +11,7 @@ import type {
   IndexLetter,
   IndexProps,
 } from "../slots.js";
-import { fileKey, glyphOf, message, typeLabel, type SiteContext } from "./context.js";
+import { fileKey, glyphOf, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
 import type { FragmentPassage } from "./fragments.js";
 import { entityHref, INDEX_PAGE, relativeHref, SEARCH_PAGE } from "./paths.js";
 
@@ -205,7 +205,7 @@ export function filtersOf(context: SiteContext, from: string, filed: Filed[]): I
   }
   return {
     types: valuesOf(from, "type", types, (type) => typeLabel(context, type)),
-    spaces: valuesOf(from, "source", spaces, (space) => space),
+    spaces: valuesOf(from, "source", spaces, (space) => spaceTitle(context, space)),
     withoutDefinition: {
       label: message(context, "index.withoutDefinition"),
       href: filterHref(from, NOTELESS_FACET, "only"),

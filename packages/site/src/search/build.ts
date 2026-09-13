@@ -333,7 +333,7 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
       ),
       sources: labelled(
         entries.map((entry) => entry.source),
-        (name) => name,
+        (name) => names.sources?.[name] ?? name,
       ),
       counts: countFacets(entries, emptyState()),
       labels: input.labels,
