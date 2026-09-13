@@ -62,7 +62,12 @@ const reader: Reader = {
         metadata: { format: "vtt" },
         text: "Threshold review starts.\nThree occurrences in two files.",
         units: [
-          { label: "00:00:04", text: "Threshold review starts.", anchor: "t-4000" },
+          {
+            label: "00:00:04",
+            text: "Threshold review starts.",
+            anchor: "t-4000",
+            speaker: "Participant-1",
+          },
           { label: "00:01:10", text: "Three occurrences in two files." },
         ],
       };
@@ -182,7 +187,13 @@ describe("readDocuments", () => {
       fs,
     });
     expect(output.documents[0]?.pages).toEqual([
-      { number: 1, label: "00:00:04", text: "Threshold review starts.", anchor: "t-4000" },
+      {
+        number: 1,
+        label: "00:00:04",
+        text: "Threshold review starts.",
+        anchor: "t-4000",
+        speaker: "Participant-1",
+      },
       { number: 2, label: "00:01:10", text: "Three occurrences in two files." },
     ]);
     expect(output.documents[0]?.pdf).toBeUndefined();

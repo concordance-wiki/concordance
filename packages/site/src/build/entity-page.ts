@@ -423,7 +423,12 @@ export function documentsOf(
           },
         }),
     unit: document.unit,
-    positions: document.pages.map(({ number, label, text }) => ({ number, label, text })),
+    positions: document.pages.map(({ number, label, text, speaker }) => ({
+      number,
+      label,
+      text,
+      ...(speaker === undefined ? {} : { speaker }),
+    })),
   }));
 }
 

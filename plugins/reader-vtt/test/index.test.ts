@@ -43,8 +43,8 @@ describe("the reader-vtt plugin", () => {
         },
         text: "Bonjour. Commençons.\nD'accord.",
         units: [
-          { label: "00:00:01", text: "Bonjour. Commençons.", anchor: "t-1000" },
-          { label: "00:00:03", text: "D'accord.", anchor: "t-3500" },
+          { label: "00:00:01", text: "Bonjour. Commençons.", anchor: "t-1000", speaker: "Alice" },
+          { label: "00:00:03", text: "D'accord.", anchor: "t-3500", speaker: "Bob" },
         ],
       },
     );
@@ -53,8 +53,8 @@ describe("the reader-vtt plugin", () => {
         metadata: { format: "srt", duration: 4, cues: 2, speakers: ["ALICE", "BOB"] },
         text: "Hi\nHey",
         units: [
-          { label: "00:00:00", text: "Hi", anchor: "t-0" },
-          { label: "00:00:02", text: "Hey", anchor: "t-2000" },
+          { label: "00:00:00", text: "Hi", anchor: "t-0", speaker: "ALICE" },
+          { label: "00:00:02", text: "Hey", anchor: "t-2000", speaker: "BOB" },
         ],
       },
     );

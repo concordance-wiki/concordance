@@ -44,10 +44,10 @@ describe("transcriptText", () => {
 });
 
 describe("transcriptUnits", () => {
-  it("cuts the spoken text into one addressable unit per speaker turn, labelled by its first timecode", () => {
+  it("cuts the spoken text into one addressable unit per speaker turn, labelled by its first timecode and named after its speaker", () => {
     expect(transcriptUnits(transcript)).toEqual([
-      { label: "00:00:00", text: "Hello there. How are you?", anchor: "t-0" },
-      { label: "00:00:02", text: "Fine.", anchor: "t-2000" },
+      { label: "00:00:00", text: "Hello there. How are you?", anchor: "t-0", speaker: "Alice" },
+      { label: "00:00:02", text: "Fine.", anchor: "t-2000", speaker: "Bob" },
       { label: "00:00:03", text: " (laughs)", anchor: "t-3000" },
     ]);
   });

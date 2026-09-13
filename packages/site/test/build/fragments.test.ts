@@ -111,7 +111,14 @@ describe("fragments", () => {
           format: "vtt",
           target: "glossary/keyword-page/threshold-review.vtt",
           unit: "cue",
-          pages: [{ number: 1, label: "00:00:04", text: "Let us start with the threshold." }],
+          pages: [
+            {
+              number: 1,
+              label: "00:00:04",
+              text: "Let us start with the threshold.",
+              speaker: "Participant-1",
+            },
+          ],
         },
       ],
     };
@@ -147,6 +154,7 @@ describe("fragments", () => {
       { ...valid, pages: [{ number: "1", label: "page 1", text: "" }] },
       { ...valid, pages: [{ number: 1, label: 1, text: "" }] },
       { ...valid, pages: [{ number: 1, label: "page 1" }] },
+      { ...valid, pages: [{ number: 1, label: "page 1", text: "", speaker: 1 }] },
       { ...valid, pages: [3] },
       3,
     ]) {

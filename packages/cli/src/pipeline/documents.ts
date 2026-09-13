@@ -28,6 +28,8 @@ export interface DocumentPage {
   text: string;
   /** Fragment identifier of the position in the reader's own rendering, when it has one. */
   anchor?: string;
+  /** Who speaks the position, for a transcript cue with a speaker. */
+  speaker?: string;
 }
 
 /** A file of a source that a reader or a converter knows, once read: the last time the pipeline opens it. */
@@ -152,6 +154,7 @@ function pagesOfReader(output: ReaderOutput): DocumentPage[] {
       label: unit.label,
       text: unit.text,
       ...(unit.anchor === undefined ? {} : { anchor: unit.anchor }),
+      ...(unit.speaker === undefined ? {} : { speaker: unit.speaker }),
     }));
   }
   return output.text.trim() === "" ? [] : [{ number: 1, label: "page 1", text: output.text }];
