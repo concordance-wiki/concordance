@@ -1237,7 +1237,7 @@ export interface CategoryListLabels {
   links: string;
   /** Accessible name of the page links. */
   pagination: string;
-  /** "{shown} screens of {total} — pagination by twenty", the two placeholders replaced by the list. */
+  /** "{shown} screens of {total} — pagination by twenty.", the two placeholders replaced by the list. */
   shownOf: string;
   /** The note under the list on what the links column counts. */
   note: string;

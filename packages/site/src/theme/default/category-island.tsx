@@ -197,7 +197,8 @@ function Pages({ view }: { view: CategoryView }): JSX.Element | null {
 /**
  * The list itself: the selectors of the attribute and of the sort, the table with the title, the
  * highlighted attribute, the first line and the number of related pages of every row, then how
- * many rows the page shows of the whole, the page links and the note on the links column.
+ * many rows the page shows of the whole, the page links and the note on the links column. The
+ * attribute selector stands only when a value exists to choose; its column keeps its label.
  */
 export function CategoryBody({ view }: { view: CategoryView }): JSX.Element {
   const { filter, labels, onFilter, onSort } = view;
@@ -207,7 +208,7 @@ export function CategoryBody({ view }: { view: CategoryView }): JSX.Element {
     <>
       {view.controls && (
         <div class="category-toolbar">
-          {filter !== undefined && (
+          {filter !== undefined && filter.choices.length > 1 && (
             <Selector
               className="category-filter"
               {...(kept === undefined ? {} : { name: filter.label })}

@@ -66,7 +66,7 @@ function commonLabel(context: SiteContext, key: Common): string {
 }
 
 /** The label of an attribute in the site language: what the type or the common attributes declare, else the name itself. */
-function attributeLabel(context: SiteContext, type: string, key: string): string {
+export function attributeLabel(context: SiteContext, type: string, key: string): string {
   const { profile } = context;
   const label =
     profile.types[type]?.attributes?.[key]?.label ?? profile.common_attributes?.[key]?.label;

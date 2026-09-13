@@ -2588,7 +2588,7 @@ export const corporateCategoryList: SlotProps["CategoryList"] = {
     firstLine: "First line",
     links: "Links",
     pagination: "Pages of the list",
-    shownOf: "{shown} screens of {total} — pagination by twenty",
+    shownOf: "{shown} screens of {total} — pagination by twenty.",
     note: "The Links column counts the related pages, which brings the most central screens of the journey to the top.",
   },
 };

@@ -207,7 +207,7 @@ export const labels = {
   firstLine: "First line",
   linksColumn: "Links",
   pagesOfList: "Pages of the list",
-  shownOf: "{shown} of {total} \u2014 pagination by twenty",
+  shownOf: "{shown} of {total} \u2014 pagination by twenty.",
   linksNote:
     "The Links column counts the related pages, which brings the most central pages of the journey to the top.",
 } as const;

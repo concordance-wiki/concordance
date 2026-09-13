@@ -37,7 +37,7 @@
   },
   "description": {
     "defaultMessage": "An operation is one call of an API, with its parameters and its responses as the contract declares them.",
-    "description": "One sentence saying what a operation is, shown under the count of a category of operations."
+    "description": "One sentence saying what an operation is, shown under the count of a category of operations."
   },
   "label": {
     "defaultMessage": "Operation",
