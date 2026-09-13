@@ -1,4 +1,4 @@
-import { MODE_STORAGE_KEY, MODES, type ModeChoice } from "../mode.js";
+import { MODE_GLYPHS, MODE_STORAGE_KEY, MODES, modeSwitchName, type ModeChoice } from "../mode.js";
 import type { ModeSwitchProps } from "../theme/default/mode-switch.js";
 
 /** The part of `localStorage` the switch uses; every call may throw when storage is disabled. */
@@ -67,7 +67,10 @@ export function nextChoice(choice: ModeChoice): ModeChoice {
   return MODES[(MODES.indexOf(choice) + 1) % MODES.length] as ModeChoice;
 }
 
-/** Reveals the button of one island and makes it cycle through the modes, the label naming the current one. */
+/**
+ * Reveals the button of one island and makes it cycle through the modes: the glyph draws the
+ * current one, its name and its title read the current choice for assistive technology.
+ */
 export function wireModeSwitch(
   element: ModeSwitchElement,
   storage: ModeStorage,
@@ -79,12 +82,20 @@ export function wireModeSwitch(
   }
   // Written by island() at build: the attribute carries the props of the switch.
   const props = JSON.parse(element.getAttribute("data-props") ?? "{}") as Partial<ModeSwitchProps>;
+  const glyph = button.querySelector(".mode-switch-glyph");
   const value = button.querySelector(".mode-switch-value");
   let current = readChoice(storage);
   const show = (): void => {
+    const choice = props.labels?.[current] ?? current;
+    const name = modeSwitchName(props.name ?? "", choice);
     button.setAttribute("aria-pressed", current === "system" ? "false" : "true");
+    button.setAttribute("aria-label", name);
+    button.setAttribute("title", name);
+    if (glyph !== null) {
+      glyph.textContent = MODE_GLYPHS[current];
+    }
     if (value !== null) {
-      value.textContent = props.labels?.[current] ?? current;
+      value.textContent = choice;
     }
   };
   button.addEventListener("click", () => {

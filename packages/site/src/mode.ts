@@ -7,6 +7,18 @@ export const MODES = ["system", "light", "dark"] as const;
 /** A colour scheme a reader can force; `system` leaves the theme's default and the system preference in charge. */
 export type ModeChoice = (typeof MODES)[number];
 
+/** The glyph the mode switch draws for each choice: a half disc for the system preference, a sun, a moon. */
+export const MODE_GLYPHS: Readonly<Record<ModeChoice, string>> = {
+  system: "◐",
+  light: "☀",
+  dark: "☾",
+};
+
+/** The accessible name of the mode switch: the name of the control, then the current choice. */
+export function modeSwitchName(name: string, choice: string): string {
+  return `${name}: ${choice}`;
+}
+
 /**
  * The only inline script of a page: it applies the stored choice to `data-mode` on the root
  * before the first paint, so that a reader who chose a scheme never sees the other one flash.

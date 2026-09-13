@@ -199,7 +199,7 @@ describe("The accent colour never carries information on its own", () => {
   it("names the colour scheme in the mode switch instead of showing a coloured state alone", () => {
     for (const [file, page] of pages) {
       expect(page, file).toContain(
-        '<span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span>',
+        '<span class="visually-hidden"><span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span></span>',
       );
     }
   });

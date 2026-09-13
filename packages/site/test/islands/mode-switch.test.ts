@@ -12,7 +12,8 @@ import {
   type ModeSwitchButton,
   type ModeSwitchElement,
 } from "../../src/islands/mode-switch.js";
-import { MODE_SCRIPT, MODE_STORAGE_KEY, MODES } from "../../src/mode.js";
+import { MODE_GLYPHS, MODE_SCRIPT, MODE_STORAGE_KEY, MODES } from "../../src/mode.js";
+import { componentsStylesheet } from "../../src/css/stylesheet.js";
 import { renderSlot } from "../../src/render.js";
 import { header } from "../../src/gallery/fixtures.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
@@ -48,16 +49,19 @@ const broken: ModeStorage = {
 interface FakeButton extends ModeSwitchButton {
   attributes: Record<string, string>;
   listeners: (() => void)[];
+  glyph: { textContent: string | null } | null;
   text: { textContent: string | null } | null;
   click: () => void;
 }
 
 function button(withText = true): FakeButton {
+  const glyph = withText ? { textContent: "" } : null;
   const text = withText ? { textContent: "" } : null;
   const fake: FakeButton = {
     hidden: true,
     attributes: {},
     listeners: [],
+    glyph,
     text,
     setAttribute(name, value) {
       fake.attributes[name] = value;
@@ -65,7 +69,7 @@ function button(withText = true): FakeButton {
     addEventListener(_type, listener) {
       fake.listeners.push(listener);
     },
-    querySelector: () => text,
+    querySelector: (selector) => (selector === ".mode-switch-glyph" ? glyph : text),
     click: () => {
       for (const listener of fake.listeners) listener();
     },
@@ -76,6 +80,7 @@ function button(withText = true): FakeButton {
 function element(
   target: ModeSwitchButton | null,
   props: string | null = JSON.stringify({
+    name: "Colour scheme",
     labels: { system: "automatic", light: "light", dark: "dark" },
   }),
 ): ModeSwitchElement {
@@ -117,29 +122,41 @@ describe("Light and dark modes, following the system preference and remembered",
     expect(root.dataset.mode).toBeUndefined();
   });
 
-  it("reveals the served button, names the current choice and presses it only when a scheme is forced", () => {
+  it("draws a half disc for the system preference, a sun for light and a moon for dark", () => {
+    expect(MODE_GLYPHS).toEqual({ system: "◐", light: "☀", dark: "☾" });
+  });
+
+  it("reveals the served button, draws and names the current choice and presses it only when a scheme is forced", () => {
     const target = button();
     const store = storage();
     const root: ModeRoot = { dataset: {} };
     expect(wireModeSwitch(element(target), store, root)).toBe(true);
     expect(target.hidden).toBe(false);
     expect(target.attributes["aria-pressed"]).toBe("false");
+    expect(target.attributes["aria-label"]).toBe("Colour scheme: automatic");
+    expect(target.attributes["title"]).toBe("Colour scheme: automatic");
+    expect(target.glyph?.textContent).toBe("◐");
     expect(target.text?.textContent).toBe("automatic");
     target.click();
     expect(root.dataset.mode).toBe("light");
     expect(target.attributes["aria-pressed"]).toBe("true");
+    expect(target.attributes["aria-label"]).toBe("Colour scheme: light");
+    expect(target.glyph?.textContent).toBe("☀");
     expect(target.text?.textContent).toBe("light");
     target.click();
     expect(root.dataset.mode).toBe("dark");
+    expect(target.attributes["title"]).toBe("Colour scheme: dark");
+    expect(target.glyph?.textContent).toBe("☾");
     expect(target.text?.textContent).toBe("dark");
     expect(store.items.get(MODE_STORAGE_KEY)).toBe("dark");
     target.click();
     expect(root.dataset.mode).toBeUndefined();
     expect(target.attributes["aria-pressed"]).toBe("false");
+    expect(target.glyph?.textContent).toBe("◐");
     expect(target.text?.textContent).toBe("automatic");
   });
 
-  it("starts from the remembered choice and falls back to the mode name without labels or value element", () => {
+  it("starts from the remembered choice and falls back to the mode name without labels, glyph or value element", () => {
     const target = button(false);
     expect(
       wireModeSwitch(element(target, null), storage({ [MODE_STORAGE_KEY]: "dark" }), {
@@ -147,10 +164,12 @@ describe("Light and dark modes, following the system preference and remembered",
       }),
     ).toBe(true);
     expect(target.attributes["aria-pressed"]).toBe("true");
+    expect(target.attributes["aria-label"]).toBe(": dark");
     const labelled = button();
     wireModeSwitch(element(labelled, "{}"), storage({ [MODE_STORAGE_KEY]: "dark" }), {
       dataset: {},
     });
+    expect(labelled.glyph?.textContent).toBe("☾");
     expect(labelled.text?.textContent).toBe("dark");
   });
 
@@ -158,13 +177,17 @@ describe("Light and dark modes, following the system preference and remembered",
     expect(wireModeSwitch(element(null), storage(), { dataset: {} })).toBe(false);
   });
 
-  it("serves the switch hidden with its labels serialised, so that nothing dead shows without JavaScript", () => {
+  it("serves the switch hidden with its labels serialised, a square drawing the glyph, its name and the choice written for assistive technology alone", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain(
-      '<concordance-island data-island="mode-switch" data-props="{&quot;labels&quot;:{&quot;system&quot;:&quot;automatic&quot;,&quot;light&quot;:&quot;light&quot;,&quot;dark&quot;:&quot;dark&quot;}}">',
+      '<concordance-island data-island="mode-switch" data-props="{&quot;name&quot;:&quot;Colour scheme&quot;,&quot;labels&quot;:{&quot;system&quot;:&quot;automatic&quot;,&quot;light&quot;:&quot;light&quot;,&quot;dark&quot;:&quot;dark&quot;}}">',
     );
     expect(html).toContain(
-      '<button type="button" class="mode-switch" aria-pressed="false" hidden><span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span></button>',
+      '<button type="button" class="mode-switch" aria-pressed="false" aria-label="Colour scheme: automatic" title="Colour scheme: automatic" hidden><span class="mode-switch-glyph" aria-hidden="true">◐</span><span class="visually-hidden"><span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span></span></button>',
+    );
+    const css = componentsStylesheet();
+    expect(css).toContain(
+      ".mode-switch {\n  display: inline-flex;\n  flex: none;\n  align-items: center;\n  justify-content: center;\n  inline-size: 2.5rem;\n  block-size: 2.5rem;\n  padding: 0;\n  border: 1px solid var(--color-border);\n  border-radius: var(--radius);",
     );
   });
 
