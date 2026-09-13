@@ -45,6 +45,34 @@ export interface SearchEntry {
   source: string;
 }
 
+/** The facets of the results page, in the order they are shown; each one filters on the field of the same name. */
+export const FACET_NAMES = ["type", "source", "domain", "application"] as const;
+
+export type FacetName = (typeof FACET_NAMES)[number];
+
+/**
+ * A plural message frozen at build for the browser: the text of every plural category of the
+ * locale, `#` standing for the number; `plural` picks the category with `Intl.PluralRules`.
+ */
+export type PluralForms = Record<string, string>;
+
+/** The strings of the results page, formatted at build in the site language and written in the table. */
+export interface SearchLabels {
+  /** Heading of the facets. */
+  facets: string;
+  /** Heading of every facet, by name. */
+  facet: Record<FacetName, string>;
+  activeFilters: string;
+  removeFilter: string;
+  clear: string;
+  noResult: string;
+  /** "N results", by plural category. */
+  results: PluralForms;
+}
+
+/** The number of entities carrying every value of every facet, values in code-unit order. */
+export type FacetCounts = Record<FacetName, Record<string, number>>;
+
 export interface SearchMeta {
   entities: SearchEntry[];
   /** Every shard written, sorted, so that the client never asks for one that does not exist. */
@@ -53,8 +81,21 @@ export interface SearchMeta {
   types: Record<string, string>;
   applications: Record<string, string>;
   domains: Record<string, string>;
+  /** The declared sources, each labelled by its name, so that the facet lists them like the others. */
+  sources: Record<string, string>;
+  /** The counts of every facet value over the whole table: what the results page shows before a query. */
+  counts: FacetCounts;
+  labels: SearchLabels;
+  /** BCP 47 tag of the site, for the plural rules of the counts. */
+  locale: string;
   /** Bytes of every shard file together; the entity table is not counted in itself. */
   bytes: number;
+}
+
+/** The text of a plural message for a count: the category's text, `other` when the locale has none for it, the number written in the locale. */
+export function plural(forms: PluralForms, count: number, locale: string): string {
+  const text = forms[new Intl.PluralRules(locale).select(count)] ?? forms["other"] ?? "";
+  return text.replaceAll("#", new Intl.NumberFormat(locale).format(count));
 }
 
 /** Token to its `[entity index, weight]` pairs, indices ascending. */

@@ -1,17 +1,27 @@
 import { h, type JSX } from "preact";
 
+import { activeFiltersOf, countFacets, facetsOf, filterEntries } from "../search/facets.js";
 import {
+  plural,
   queryWords,
   rank,
   SEARCH_DIRECTORY,
   SEARCH_META,
   shardHref,
   shardOf,
+  type SearchEntry,
   type SearchIslandProps,
   type SearchMeta,
   type ShardData,
 } from "../search/shared.js";
-import type { SearchResult } from "../slots.js";
+import {
+  clearFilters,
+  parseSearchState,
+  searchQueryString,
+  withQuery,
+  type SearchState,
+} from "../search/state.js";
+import type { SearchResult, SearchResultsProps } from "../slots.js";
 import { ResultList } from "../theme/default/result-list.js";
 import { SearchResults } from "../theme/default/search-results.js";
 
@@ -74,42 +84,56 @@ export function shardLoader(index: string, inject: ScriptInjector, host: ShardHo
   };
 }
 
+/** One entity a query matched, with its score; every entity, scored 0, for a query without a word. */
+export interface SearchHit {
+  entry: SearchEntry;
+  score: number;
+}
+
 export interface SearchOutcome {
   query: string;
-  /** Every match, best first, as the results page shows them. */
-  results: SearchResult[];
+  /** Every match, best first. */
+  hits: SearchHit[];
+  /** The entity table; absent when the site has no index or its table failed to load. */
+  meta?: SearchMeta;
 }
 
 /** Runs a query against the index of a site: the entity table once, then one shard per word. */
 export type SearchRunner = (query: string) => Promise<SearchOutcome>;
 
-/** The results of a query over the loaded files, hrefs relative to the page through `root`. */
-export function outcomeOf(
+/**
+ * The hits of a query over the loaded files: the ranked entities for a query with words, the
+ * whole table in its order for a query without, so that the results page lists the site under
+ * the facets alone.
+ */
+export function hitsOf(
   query: string,
   meta: SearchMeta,
   shards: ReadonlyMap<string, ShardData>,
-  root: string,
-): SearchOutcome {
-  const results = rank(queryWords(query), shards).flatMap(({ entity }) => {
+): SearchHit[] {
+  const words = queryWords(query);
+  if (words.length === 0) {
+    return meta.entities.map((entry) => ({ entry, score: 0 }));
+  }
+  return rank(words, shards).flatMap(({ entity, score }) => {
     const entry = meta.entities[entity];
-    if (entry === undefined) {
-      return [];
-    }
-    const breadcrumb = [
-      entry.application === undefined ? undefined : meta.applications[entry.application],
-      entry.domain === undefined ? undefined : meta.domains[entry.domain],
-    ].filter((part) => part !== undefined);
-    const typeLabel = meta.types[entry.type];
-    return [
-      {
-        title: entry.title,
-        href: `${root}${entry.url}`,
-        ...(typeLabel === undefined ? {} : { typeLabel }),
-        ...(breadcrumb.length === 0 ? {} : { breadcrumb }),
-      },
-    ];
+    return entry === undefined ? [] : [{ entry, score }];
   });
-  return { query, results };
+}
+
+/** A hit as the lists show it: the title, the type badge, the breadcrumb and the href from the page through `root`. */
+export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): SearchResult {
+  const breadcrumb = [
+    entry.application === undefined ? undefined : meta.applications[entry.application],
+    entry.domain === undefined ? undefined : meta.domains[entry.domain],
+  ].filter((part) => part !== undefined);
+  const typeLabel = meta.types[entry.type];
+  return {
+    title: entry.title,
+    href: `${root}${entry.url}`,
+    ...(typeLabel === undefined ? {} : { typeLabel }),
+    ...(breadcrumb.length === 0 ? {} : { breadcrumb }),
+  };
 }
 
 /**
@@ -124,7 +148,7 @@ export function searchRunner(root: string, inject: ScriptInjector, host: ShardHo
     // Written by the build: the files carry the shapes the index builder serialises.
     const meta = (await load(SEARCH_META)) as SearchMeta | undefined;
     if (meta === undefined) {
-      return { query, results: [] };
+      return { query, hits: [] };
     }
     const wanted = queryWords(query)
       .map(shardOf)
@@ -136,7 +160,7 @@ export function searchRunner(root: string, inject: ScriptInjector, host: ShardHo
         shards.set(name, data ?? {});
       }),
     );
-    return outcomeOf(query, meta, shards, root);
+    return { query, hits: hitsOf(query, meta, shards), meta };
   };
 }
 
@@ -215,20 +239,69 @@ export interface SearchIslandElement<P extends SearchPanel> {
   container(): P;
 }
 
+/** The address of the page, as far as the island reads and writes it: its query string. */
+export interface SearchLocation {
+  /** The query string of the address, `?q=…` or empty. */
+  search(): string;
+  /** Adds an entry to the history with this query string, the page staying. */
+  push(search: string): void;
+}
+
 export interface SearchIslands<P extends SearchPanel> {
   islands: Iterable<SearchIslandElement<P>>;
   document: SearchDocument;
-  /** The `q` parameter of the page address, empty when absent. */
-  initialQuery: string;
+  location: SearchLocation;
   inject: ScriptInjector;
   host: ShardHost;
   render(vnode: JSX.Element, container: P): void;
 }
 
+/** The href of a state from the results page: its query string, `?` alone for the empty state so that the link stays a link. */
+export function resultsHref(state: SearchState): string {
+  const search = searchQueryString(state);
+  return search === "" ? "?" : search;
+}
+
+/** The view model of the results page for a state and the hits of its query, facets counted over those hits. */
+export function resultsPropsOf(
+  state: SearchState,
+  outcome: SearchOutcome,
+  root: string,
+  onNavigate: (href: string) => void,
+): SearchResultsProps {
+  const { meta } = outcome;
+  if (meta === undefined) {
+    return { query: state.query, total: 0, results: [], facets: [] };
+  }
+  const entries = outcome.hits.map((hit) => hit.entry);
+  const kept = filterEntries(entries, (entry) => entry, state);
+  const hrefOf = resultsHref;
+  const filters = activeFiltersOf(meta, state, hrefOf);
+  return {
+    query: state.query,
+    total: kept.length,
+    results: kept.map((entry) => resultOf(entry, meta, root)),
+    facets: facetsOf(meta, state, countFacets(entries, state), hrefOf),
+    summary:
+      kept.length === 0
+        ? meta.labels.noResult
+        : plural(meta.labels.results, kept.length, meta.locale),
+    ...(filters.length === 0 ? {} : { active: filters, clearHref: hrefOf(clearFilters(state)) }),
+    labels: {
+      facets: meta.labels.facets,
+      activeFilters: meta.labels.activeFilters,
+      removeFilter: meta.labels.removeFilter,
+      clear: meta.labels.clear,
+    },
+    onNavigate,
+  };
+}
+
 /**
  * Wires every search island of a page: the field of the header gets the shortcuts and, when the
  * site has an index, suggestions as the reader types; the results island, when the page has
- * one, shows the full list for the query of the address and follows the field.
+ * one, shows the list for the state of the address, filtered by its facets, and follows the
+ * field and the facets, every change of state going through the address.
  */
 export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): number {
   let root: string | undefined;
@@ -261,41 +334,44 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
   if (root === undefined) {
     return mounted;
   }
-  const run = searchRunner(root, options.inject, options.host);
+  const site = root;
+  const run = searchRunner(site, options.inject, options.host);
+  let state = parseSearchState(options.location.search());
   let latest = 0;
-  const show = async (query: string): Promise<void> => {
+  const show = async (): Promise<void> => {
     const ticket = (latest += 1);
-    const outcome = await run(query);
+    const outcome = await run(state.query);
     if (ticket !== latest) {
       return;
     }
     if (results !== null) {
-      options.render(
-        h(SearchResults, {
-          query: outcome.query,
-          total: outcome.results.length,
-          results: outcome.results,
-          facets: [],
-        }),
-        results,
-      );
+      options.render(h(SearchResults, resultsPropsOf(state, outcome, site, navigate)), results);
     } else if (suggestions !== null) {
-      options.render(
-        h(ResultList, { results: outcome.results.slice(0, SUGGESTIONS) }),
-        suggestions,
-      );
-      suggestions.hidden = outcome.results.length === 0;
+      const meta = outcome.meta;
+      const shown =
+        meta === undefined || queryWords(state.query).length === 0
+          ? []
+          : outcome.hits.slice(0, SUGGESTIONS).map((hit) => resultOf(hit.entry, meta, site));
+      options.render(h(ResultList, { results: shown }), suggestions);
+      suggestions.hidden = shown.length === 0;
     }
+  };
+  const navigate = (href: string): void => {
+    state = parseSearchState(href);
+    field.value = state.query;
+    options.location.push(searchQueryString(state));
+    void show();
   };
   field.addEventListener("focus", () => {
     void run("");
   });
   field.addEventListener("input", () => {
-    void show(field.value);
+    state = withQuery(state, field.value);
+    void show();
   });
-  if (results !== null && options.initialQuery !== "") {
-    field.value = options.initialQuery;
-    void show(options.initialQuery);
+  if (results !== null) {
+    field.value = state.query;
+    void show();
   }
   return mounted;
 }

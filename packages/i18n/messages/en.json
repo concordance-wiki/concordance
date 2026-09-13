@@ -147,6 +147,10 @@
     "defaultMessage": "Types",
     "description": "Navigation entry for the list of entity types."
   },
+  "search.activeFilters": {
+    "defaultMessage": "Active filters",
+    "description": "Heading of the list recalling the facets selected on the search page."
+  },
   "search.clear": {
     "defaultMessage": "Clear filters",
     "description": "Button that resets every facet of the search."
@@ -159,6 +163,10 @@
     "defaultMessage": "Domain",
     "description": "Facet that filters search results by domain."
   },
+  "search.facet.source": {
+    "defaultMessage": "Source",
+    "description": "Facet that filters search results by the source repository of the note."
+  },
   "search.facet.type": {
     "defaultMessage": "Type",
     "description": "Facet that filters search results by entity type."
@@ -170,6 +178,10 @@
   "search.noResult": {
     "defaultMessage": "No result",
     "description": "Notice shown when a search matches nothing."
+  },
+  "search.removeFilter": {
+    "defaultMessage": "Remove this filter",
+    "description": "Accessible name of the control that lifts one selected facet of the search."
   },
   "search.results": {
     "defaultMessage": "{count, plural, one {# result} other {# results}}",

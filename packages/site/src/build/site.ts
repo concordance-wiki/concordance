@@ -13,7 +13,12 @@ import type { ContrastFinding } from "../a11y/contrast.js";
 import { formatKilobytes, type BudgetReport } from "../budget.js";
 import type { IslandBundle } from "../islands/bundle.js";
 import { renderDocument, type PageSlot, type RenderOptions } from "../render.js";
-import { buildSearchIndex, searchIndexFiles, type SearchTokenizer } from "../search/build.js";
+import {
+  buildSearchIndex,
+  searchIndexFiles,
+  searchLabels,
+  type SearchTokenizer,
+} from "../search/build.js";
 import type { SearchField, SlotProps } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
 import { SearchIsland } from "../theme/default/search-island.js";
@@ -317,6 +322,8 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       fragments: input.fragments,
       tokenize: input.tokenize,
       typeLabel: (type) => searchTypeLabel(context, type),
+      labels: searchLabels(catalogue),
+      locale: catalogue.locale,
       ...(input.names === undefined ? {} : { names: input.names }),
       ...(input.bodyMaxChars === undefined ? {} : { bodyMaxChars: input.bodyMaxChars }),
     }),

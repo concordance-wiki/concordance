@@ -148,9 +148,11 @@ export {
   FIELD_WEIGHTS,
   buildSearchIndex,
   compactJson,
+  pluralForms,
   searchFields,
   searchFilePath,
   searchIndexFiles,
+  searchLabels,
   searchType,
 } from "./search/build.js";
 export type {
@@ -161,6 +163,7 @@ export type {
   SearchTokenizer,
 } from "./search/build.js";
 export {
+  FACET_NAMES,
   SEARCH_DIRECTORY,
   SEARCH_GLOBAL,
   SEARCH_ISLAND,
@@ -168,6 +171,7 @@ export {
   SHARD_PREFIX_LENGTH,
   SUGGESTIONS_CLASS,
   normalizeQuery,
+  plural,
   queryWords,
   rank,
   shardFile,
@@ -177,17 +181,45 @@ export {
   trimEdges,
 } from "./search/shared.js";
 export type {
+  FacetCounts,
+  FacetName,
+  PluralForms,
   Ranked,
   SearchEntry,
   SearchIslandProps,
+  SearchLabels,
   SearchMeta,
   ShardData,
 } from "./search/shared.js";
 export {
+  QUERY_PARAMETER,
+  clearFilters,
+  emptyState,
+  hasFilters,
+  isSelected,
+  parseSearchState,
+  searchQueryString,
+  toggleValue,
+  withQuery,
+} from "./search/state.js";
+export type { SearchState } from "./search/state.js";
+export {
+  activeFiltersOf,
+  countFacets,
+  facetLabels,
+  facetValue,
+  facetsOf,
+  filterEntries,
+  matchesOthers,
+} from "./search/facets.js";
+export {
   SUGGESTIONS,
+  hitsOf,
   isEditable,
   mountSearch,
-  outcomeOf,
+  resultOf,
+  resultsHref,
+  resultsPropsOf,
   searchRunner,
   shardLoader,
   wireShortcuts,
@@ -196,9 +228,11 @@ export type {
   KeyEvent,
   ScriptInjector,
   SearchDocument,
+  SearchHit,
   SearchInput,
   SearchIslandElement,
   SearchIslands,
+  SearchLocation,
   SearchOutcome,
   SearchPanel,
   SearchRunner,

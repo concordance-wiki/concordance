@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderSlot } from "../../src/render.js";
 import type { SearchMeta, ShardData } from "../../src/search/shared.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
+import { searchLabels } from "../helpers/search.js";
 
 const meta: SearchMeta = {
   entities: [
@@ -23,6 +24,15 @@ const meta: SearchMeta = {
   types: { term: "Term" },
   applications: { "concordance-cli": "Command line" },
   domains: { publication: "Publication" },
+  sources: { glossary: "glossary" },
+  counts: {
+    type: { term: 1 },
+    source: { glossary: 1 },
+    domain: { publication: 1 },
+    application: { "concordance-cli": 1 },
+  },
+  labels: searchLabels,
+  locale: "en",
   bytes: 40,
 };
 const shard: ShardData = { keyword: [[0, 5]] };
@@ -60,7 +70,9 @@ describe("the search entry on the results page", () => {
       ),
       '<main><concordance-island data-island="search" data-props=\'{"root":"../","results":{"query":"","total":0,"results":[],"facets":[]}}\'><div class="search-results"><h1>Search</h1></div></concordance-island></main>',
     ].join("");
-    vi.stubGlobal("location", { search: "?q=Keyword" });
+    vi.stubGlobal("location", { search: "?q=Keyword", pathname: "/dist/search/index.html" });
+    const pushState = vi.fn();
+    vi.stubGlobal("history", { pushState });
     await import("../../src/islands/search.client.js");
     const input = document.querySelector("input");
     expect(input?.value).toBe("Keyword");
@@ -71,11 +83,69 @@ describe("the search entry on the results page", () => {
     window.__concordanceSearch?.shard("ke", shard);
     await settled();
     const results = document.querySelector("main")?.innerHTML ?? "";
-    expect(results).toContain('<p class="search-summary">1 results for <q>Keyword</q></p>');
+    expect(results).toContain('<p class="search-summary">1 result</p>');
+    expect(results).toContain('<nav class="facets" aria-label="Filters">');
     expect(results).toContain(
       '<li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span></li>',
     );
     expect(document.querySelector(".search-suggestions")?.hasAttribute("hidden")).toBe(true);
     input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+  });
+
+  it("follows a facet in place, the address pushed to the history, and lifts it from the active filters the same way", async () => {
+    document.body.innerHTML = [
+      renderSlot(
+        "Header",
+        {
+          siteTitle: "Notes",
+          homeHref: "../index.html",
+          navigation: [],
+          search: { action: "index.html", placeholder: "Search", root: "../" },
+        },
+        defaultTheme,
+      ),
+      '<main><concordance-island data-island="search" data-props=\'{"root":"../","results":{"query":"","total":0,"results":[],"facets":[]}}\'></concordance-island></main>',
+    ].join("");
+    vi.stubGlobal("location", { search: "?q=Keyword", pathname: "/dist/search/index.html" });
+    const pushState = vi.fn();
+    vi.stubGlobal("history", { pushState });
+    await import("../../src/islands/search.client.js");
+    window.__concordanceSearch?.shard("meta", meta);
+    await settled();
+    window.__concordanceSearch?.shard("ke", shard);
+    await settled();
+    const facet = document.querySelector<HTMLAnchorElement>(
+      '.facet a[href="?q=Keyword&type=term"]',
+    );
+    expect(facet).not.toBeNull();
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    facet?.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(pushState.mock.calls).toEqual([[null, "", "?q=Keyword&type=term"]]);
+    await settled();
+    expect(document.querySelector(".active-filter")?.textContent).toBe(
+      "Type Term ×Remove this filter",
+    );
+    expect(scripts()).toEqual(["../search/meta.js", "../search/ke.js"]);
+    document
+      .querySelector<HTMLAnchorElement>(".remove-filter")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    await settled();
+    expect(pushState.mock.calls[1]).toEqual([null, "", "?q=Keyword"]);
+    expect(document.querySelector(".active-filter")).toBeNull();
+    const input = document.querySelector("input");
+    if (input !== null) input.value = "";
+    input?.dispatchEvent(new Event("input"));
+    await settled();
+    expect(document.querySelector(".search-summary")?.textContent).toBe("1 result");
+    document
+      .querySelector<HTMLAnchorElement>('.facet a[href="?type=term"]')
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(pushState.mock.calls[2]).toEqual([null, "", "?type=term"]);
+    await settled();
+    document
+      .querySelector<HTMLAnchorElement>('.facet a[href="?"]')
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(pushState.mock.calls[3]).toEqual([null, "", "/dist/search/index.html"]);
   });
 });
