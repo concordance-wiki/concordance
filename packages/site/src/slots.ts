@@ -266,6 +266,8 @@ export interface Mention {
   href: string;
   /** The words of the context that name the entity, as written there; the panel marks them. */
   surface?: string;
+  /** How the position is named when the file is not a note: `page 3`, `slide 3`, a timecode; the panel shows it instead of the line. */
+  location?: string;
 }
 
 /** The headings of the two sections of the panel, in the locale of the site. */

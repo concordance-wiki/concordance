@@ -34,6 +34,15 @@
     },
     {
       "path": "../lint/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/convert-libreoffice/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/reader-office/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/reader-vtt/tsconfig.build.json"
     }
   ]
 }

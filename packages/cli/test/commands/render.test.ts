@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildCommand } from "../../src/commands/build.js";
 import {
+  placeDocuments,
   placeImages,
   readFragments,
   renderCommand,
@@ -187,6 +188,68 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ]);
     expect(placeImages(io.fs, fragments, "/work/dist", "/work/site")).toBe(1);
     expect(io.fs.listFiles("/work/site")).toEqual(["notes/a/figures/a.svg"]);
+  });
+
+  it("places the documents the build kept under fragments/ next to their pages, the original and its preview, skipping what the build did not keep", () => {
+    const io = corpus();
+    io.fs.writeText("/work/dist/fragments/notes/a/decks/a.pptx", "PK");
+    io.fs.writeText("/work/dist/fragments/notes/a/decks/a.pdf", "%PDF");
+    io.fs.writeText("/work/dist/fragments/notes/c/framing/c.pdf", "%PDF-c");
+    const pages = [{ number: 1, label: "page 1", text: "" }];
+    const fragments = new Map([
+      [
+        "notes/a",
+        {
+          id: "notes/a",
+          sections: [],
+          documents: [
+            {
+              source: "notes",
+              path: "decks/a.pptx",
+              format: "pptx",
+              target: "notes/a/decks/a.pptx",
+              preview: "notes/a/decks/a.pdf",
+              unit: "slide" as const,
+              pages,
+            },
+            {
+              source: "notes",
+              path: "decks/gone.vtt",
+              format: "vtt",
+              target: "notes/a/decks/gone.vtt",
+              unit: "cue" as const,
+              pages,
+            },
+          ],
+        },
+      ],
+      [
+        "notes/c",
+        {
+          id: "notes/c",
+          sections: [],
+          documents: [
+            {
+              source: "notes",
+              path: "framing/c.pdf",
+              format: "pdf",
+              target: "notes/c/framing/c.pdf",
+              preview: "notes/c/framing/c.pdf",
+              unit: "page" as const,
+              pages,
+            },
+          ],
+        },
+      ],
+      ["notes/b", { id: "notes/b", sections: [] }],
+    ]);
+    expect(placeDocuments(io.fs, fragments, "/work/dist", "/work/site")).toBe(3);
+    expect(io.fs.listFiles("/work/site")).toEqual([
+      "notes/a/decks/a.pdf",
+      "notes/a/decks/a.pptx",
+      "notes/c/framing/c.pdf",
+    ]);
+    expect(io.fs.readText("/work/site/notes/c/framing/c.pdf")).toBe("%PDF-c");
   });
 
   it("renders the pages without their note text and warns when the fragments are missing", async () => {

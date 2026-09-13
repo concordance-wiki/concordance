@@ -6,7 +6,7 @@ import {
 } from "@concordance-wiki/core";
 
 import { parseTranscript, type TranscriptFormat } from "./parse.js";
-import { transcriptText } from "./text.js";
+import { transcriptText, transcriptUnits } from "./text.js";
 
 export { parseTranscript, type Cue, type Transcript, type TranscriptFormat } from "./parse.js";
 export {
@@ -17,13 +17,13 @@ export {
   renderTranscript,
   type CueGroup,
 } from "./render.js";
-export { transcriptText, type CueOffset, type TranscriptText } from "./text.js";
+export { transcriptText, transcriptUnits, type CueOffset, type TranscriptText } from "./text.js";
 
 function formatOf(path: string): TranscriptFormat {
   return path.toLowerCase().endsWith(".srt") ? "srt" : "vtt";
 }
 
-/** Metadata of the transcript and its spoken text, one line per speaker turn. */
+/** Metadata of the transcript and its spoken text, one line and one addressable unit per speaker turn. */
 export function readTranscript(input: ReaderInput): ReaderOutput {
   const transcript = parseTranscript(
     new TextDecoder("utf-8").decode(input.payload.bytes),
@@ -38,6 +38,7 @@ export function readTranscript(input: ReaderInput): ReaderOutput {
       speakers: transcript.speakers,
     },
     text: transcriptText(transcript).text,
+    units: transcriptUnits(transcript),
   };
 }
 

@@ -12,6 +12,7 @@ import type { Profile } from "@concordance-wiki/profile";
 
 import { compileDomains } from "./domains.js";
 import { buildEntity } from "./entity.js";
+import { buildResourceEntity, type Resource } from "./resource.js";
 
 export {
   resolveApplication,
@@ -37,11 +38,20 @@ export {
 } from "./domains.js";
 export { buildEntity, typeSuffixesOf, type BuildEntityInput, type BuiltEntity } from "./entity.js";
 export { filingFindings, type FilingInput } from "./filing.js";
+export {
+  buildResourceEntity,
+  resourceAttributes,
+  type BuildResourceEntityInput,
+  type BuiltResourceEntity,
+  type Resource,
+} from "./resource.js";
 
 export interface TypeSourcesInput {
   sources: IngestedSource[];
   /** Parsed markdown files keyed by `<source name>/<path>`; a file without a document is skipped. */
   documents: ReadonlyMap<string, ParsedMarkdown>;
+  /** The other files a reader or a converter knows, keyed the same way; a file listed nowhere is not an entity. */
+  resources?: ReadonlyMap<string, Resource>;
   config: Config;
   profile: Profile;
 }
@@ -67,8 +77,8 @@ function configOf(config: Config, name: string): SourceConfig {
 }
 
 /**
- * Builds one entity per parsed markdown file, files it under its application and domain,
- * resolves duplicate identifiers and sorts everything canonically.
+ * Builds one entity per parsed markdown file and per known resource, files it under its
+ * application and domain, resolves duplicate identifiers and sorts everything canonically.
  */
 export function typeSources(input: TypeSourcesInput): TypedSources {
   const { sources, documents, config, profile } = input;
@@ -79,17 +89,25 @@ export function typeSources(input: TypeSourcesInput): TypedSources {
   for (const source of sources) {
     const sourceConfig = configOf(config, source.name);
     for (const file of source.files) {
-      const document = documents.get(`${source.name}/${file.path}`);
-      if (!file.path.endsWith(".md") || document === undefined) continue;
-      const built = buildEntity({
-        file,
-        source,
-        sourceConfig,
-        document,
-        profile,
-        applications,
-        domains,
-      });
+      const key = `${source.name}/${file.path}`;
+      const document = documents.get(key);
+      const resource = input.resources?.get(key);
+      const built = file.path.endsWith(".md")
+        ? document === undefined
+          ? undefined
+          : buildEntity({ file, source, sourceConfig, document, profile, applications, domains })
+        : resource === undefined
+          ? undefined
+          : buildResourceEntity({
+              file,
+              source,
+              sourceConfig,
+              resource,
+              profile,
+              applications,
+              domains,
+            });
+      if (built === undefined) continue;
       candidates.push({
         id: built.entity.id,
         source: source.name,

@@ -24,6 +24,12 @@ import { combineProducedLinks } from "./combine.js";
 import { keywordNeighbours } from "./companions.js";
 import { buildDictionaries } from "./dictionary.js";
 import { displayedNeighbourhoodBlock } from "./display.js";
+import {
+  documentsWithoutMarkdown,
+  readDocuments,
+  resourcesOf,
+  type ReadDocument,
+} from "./documents.js";
 import { reconcileTwins } from "./duplicates.js";
 import { discoverKeywords, type KeywordLead } from "./keywords.js";
 import { produceLinks } from "./links.js";
@@ -51,6 +57,8 @@ export interface PipelineInput {
   clock: Clock;
   /** Absent when the build runs without network access. */
   fetch?: typeof fetch;
+  /** How many documents are converted at a time; one when unset. */
+  parallelism?: number;
 }
 
 export interface PipelineResult {
@@ -73,19 +81,38 @@ export interface PipelineResult {
   /** The recognised words of every note by `<source>/<path>`, which its fragment links in the text. */
   recognised: Map<string, RecognisedWord[]>;
   duplicates: DuplicateCounts;
+  /** The documents that are not notes, read once, with their pages and PDF representation, for the fragments. */
+  documents: ReadDocument[];
+  /** Documents a converter could not convert, which `build.fail_on.unconverted_max` counts. */
+  unconverted: number;
 }
 
 /**
  * The inference chain, from the ingested sources to the blocks of the model, each step a pure
- * function of the previous ones: parse, type, plugin sources, operation notes, dictionary, scan,
- * links, combination, relation typing, keywords, twin resources, model checks, displayed
- * neighbourhood.
+ * function of the previous ones: parse, documents, type, plugin sources, operation notes,
+ * dictionary, scan, links, combination, relation typing, keywords, twin resources, documents
+ * without a note, model checks, displayed neighbourhood.
  */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
   const { config, profile, sources, fs, clock } = input;
   const parsed = parseSources(sources, fs);
   const documents = indexDocuments(parsed.documents);
-  const typed = typeNotes({ sources, documents, config, profile });
+  const read = await readDocuments({
+    sources,
+    readers: input.plugins.readers(),
+    converters: input.plugins.converters(),
+    config,
+    cacheDirectory: input.cacheDirectory,
+    parallelism: input.parallelism ?? 1,
+    fs,
+  });
+  const typed = typeNotes({
+    sources,
+    documents,
+    resources: resourcesOf(read.documents),
+    config,
+    profile,
+  });
   const contributed = await loadPluginSources({
     providers: input.plugins.sources(),
     entities: typed.entities,
@@ -111,6 +138,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   });
   const occurrences = scanNotes({
     documents: parsed.documents,
+    resources: read.documents,
     sources,
     dictionaries: dictionaries.byLocale,
     profile,
@@ -121,6 +149,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   const refined = refineRelations(combined, { profile, entities });
   const keywords = discoverKeywords({
     documents: parsed.documents,
+    resources: read.documents,
     sources,
     dictionaries: dictionaries.byLocale,
     config,
@@ -131,6 +160,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     entities,
     links: refined.links,
     documents,
+    resources: read.documents,
     sources,
     dictionaries: dictionaries.byLocale,
     config,
@@ -150,6 +180,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     [
       ...input.findings,
       ...parsed.findings,
+      ...read.findings,
       ...typed.findings,
       ...contributed.findings,
       ...attached.findings,
@@ -158,6 +189,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...refined.findings,
       ...keywords.findings,
       ...twins.findings,
+      ...documentsWithoutMarkdown(twins.entities, read.documents),
       ...checked,
     ],
     config.checks,
@@ -194,5 +226,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     takenOver: keywords.takenOver,
     recognised: recognisedWords({ occurrences, documents: parsed.documents, sources }),
     duplicates: twins.counts,
+    documents: read.documents,
+    unconverted: read.unconverted,
   };
 }

@@ -24,13 +24,16 @@ import type { Profile } from "@concordance-wiki/profile";
 
 import { combineProducedLinks } from "./combine.js";
 import type { LocaleDictionary } from "./dictionary.js";
+import type { ReadDocument } from "./documents.js";
 import { documentKey } from "./parse.js";
 
 export interface ReconcileTwinsInput {
   entities: readonly Entity[];
   links: readonly Link[];
-  /** Parsed notes keyed by `<source name>/<path>`; an entity without one, or a keyword page, is not a resource. */
+  /** Parsed notes keyed by `<source name>/<path>`; an entity with neither a note nor a document, or a keyword page, is not a resource. */
   documents: ReadonlyMap<string, ParsedMarkdown>;
+  /** The documents that are not notes, whose title and extracted text enter the comparison. */
+  resources?: readonly ReadDocument[];
   sources: readonly IngestedSource[];
   dictionaries: ReadonlyMap<string, LocaleDictionary>;
   config: Config;
@@ -51,10 +54,16 @@ export interface ReconciledTwins {
   counts: DuplicateCounts;
 }
 
-/** The file name without its extension; every resource is a markdown note, so there is one. */
+/** The file name without its extension; every resource is a file with one. */
 function baseNameOf(path: string): string {
   const name = posix.basename(path);
   return name.slice(0, name.lastIndexOf("."));
+}
+
+/** The title a reader reported for a document, when it is a string worth comparing. */
+function titleOf(document: ReadDocument): string | undefined {
+  const title = document.metadata["title"];
+  return typeof title === "string" && title.trim() !== "" ? title : undefined;
 }
 
 function folderOf(path: string): string {
@@ -62,28 +71,51 @@ function folderOf(path: string): string {
   return folder === "." ? "" : folder;
 }
 
-/** The markdown notes of one source as the reconciliation reads them; the text is the plain text of the note. */
+/** What locates a resource, note or document alike: its identifier, file, folder, base name, declaration and commit. */
+function locationOf(entity: Entity, source: IngestedSource) {
+  const declared = entity.attributes["source"];
+  return {
+    id: entity.id,
+    source: source.name,
+    path: entity.source.path,
+    folder: folderOf(entity.source.path),
+    baseName: baseNameOf(entity.source.path),
+    ...(typeof declared === "string" ? { declaredSource: declared } : {}),
+    ...(entity.source.commit === undefined ? {} : { commit: entity.source.commit }),
+  };
+}
+
+/**
+ * The notes and documents of one source as the reconciliation reads them: the text of a note is
+ * its plain text, the text of a document is the text extracted from its pages, and a document
+ * brings the title its reader reported where a note brings its heading.
+ */
 function resourcesOf(
   entities: readonly Entity[],
   documents: ReadonlyMap<string, ParsedMarkdown>,
+  read: ReadonlyMap<string, ReadDocument>,
   source: IngestedSource,
 ): DuplicateResource[] {
   const resources: DuplicateResource[] = [];
   for (const entity of entities) {
     // A keyword page is located on the note that first mentions its expression: it has no file of its own.
     if (entity.source.name !== source.name || entity.keyword === true) continue;
-    const document = documents.get(documentKey(entity.source.name, entity.source.path));
+    const key = documentKey(entity.source.name, entity.source.path);
+    const resource = read.get(key);
+    if (resource !== undefined) {
+      const title = titleOf(resource);
+      resources.push({
+        ...locationOf(entity, source),
+        ...(title === undefined ? {} : { title }),
+        text: resource.pages.map((page) => page.text).join("\n"),
+      });
+      continue;
+    }
+    const document = documents.get(key);
     if (document === undefined) continue;
-    const declared = entity.attributes["source"];
     resources.push({
-      id: entity.id,
-      source: source.name,
-      path: entity.source.path,
-      folder: folderOf(entity.source.path),
-      baseName: baseNameOf(entity.source.path),
+      ...locationOf(entity, source),
       ...(document.title === undefined ? {} : { heading: document.title }),
-      ...(typeof declared === "string" ? { declaredSource: declared } : {}),
-      ...(entity.source.commit === undefined ? {} : { commit: entity.source.commit }),
       text: scannableText(document)
         .map((unit) => unit.text)
         .join("\n"),
@@ -148,11 +180,11 @@ function repointLinks(
 }
 
 /**
- * Twin resources among the markdown notes, locale by locale: notes declaring each other under
- * `source`, sharing a base name or a heading, or similar in text. Above the merge threshold the
- * notes become one entity carrying every representation; from the candidate threshold they stay
- * separate with a finding. The text similarity works on the words of the language pack of the
- * locale, its stopwords removed.
+ * Twin resources among the notes and the documents, locale by locale: notes declaring a twin
+ * under `source`, files sharing a base name, a document whose title is the heading of a note, or
+ * texts that are similar. Above the merge threshold the resources become one entity carrying
+ * every representation; from the candidate threshold they stay separate with a finding. The
+ * text similarity works on the words of the language pack of the locale, its stopwords removed.
  */
 export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
   const options = duplicateOptions(input.config.inference);
@@ -168,6 +200,12 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
     candidates: 0,
     timeMs: 0,
   };
+  const read = new Map(
+    (input.resources ?? []).map((document) => [
+      documentKey(document.source, document.path),
+      document,
+    ]),
+  );
   for (const [locale, { stopwords }] of input.dictionaries) {
     const pack = languagePack(locale);
     const excluded = new Set([...stopwords].flatMap((word) => comparisonWords(word, pack)));
@@ -175,7 +213,7 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
     const result = resolveDuplicateResources(
       {
         resources: sources.flatMap((source) =>
-          resourcesOf(input.entities, input.documents, source),
+          resourcesOf(input.entities, input.documents, read, source),
         ),
         normalizeText: (text) => comparisonWords(text, pack).filter((word) => !excluded.has(word)),
         clock: input.clock,

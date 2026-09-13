@@ -12,11 +12,14 @@ import {
   renderMarkdown,
   serializeFragment,
   type EntityFragment,
+  type FragmentDocument,
   type FragmentImage,
+  type FragmentPage,
   type FragmentPassage,
   type RecognisedSpan,
 } from "@concordance-wiki/site";
 
+import { documentKey, type ReadDocument } from "./documents.js";
 import type { KeywordLead } from "./keywords.js";
 import type { RecognisedWord } from "./recognised.js";
 
@@ -31,10 +34,15 @@ export interface FragmentsInput {
   takenOver?: ReadonlyMap<string, readonly string[]>;
   /** The recognised words of every note by `<source>/<path>`, marked in the rendered text. */
   recognised: ReadonlyMap<string, readonly RecognisedWord[]>;
+  /** The documents that are not notes, with their pages and PDF; none when the corpus has only notes. */
+  documents?: readonly ReadDocument[];
   /** Whether a link may reach another source, as the link production decided (`inference.cross_source_links`). */
   config: Config;
   fs: FileSystem;
 }
+
+/** How many characters of extracted text a document keeps in its fragment when `build.extracted_text_max_chars` is unset. */
+export const DEFAULT_EXTRACTED_TEXT_MAX_CHARS = 20_000;
 
 function fileKey(source: string, path: string): string {
   return `${source}/${path}`;
@@ -72,6 +80,95 @@ export function imageTarget(entity: Entity, located: { source: string; path: str
   return `${entity.id}/${own ? "" : `${located.source}/`}${located.path}`;
 }
 
+/** Where a file of an entity is copied: under the folder of the page, at its path in the source. */
+export function fileTarget(entity: Entity, path: string): string {
+  return `${entity.id}/${path}`;
+}
+
+/**
+ * The pages with their text cut where the budget runs out, in all: the search index and the page
+ * read what is kept, the download gives the rest.
+ */
+export function truncatePages(pages: readonly FragmentPage[], maxChars: number): FragmentPage[] {
+  let remaining = maxChars;
+  return pages.map((page) => {
+    const text = page.text.slice(0, Math.max(0, remaining));
+    remaining -= text.length;
+    return { ...page, text };
+  });
+}
+
+/**
+ * The documents of an entity: its own file when it is not a note, and the files among its
+ * representations, in path order; each copied for download and, when previews are on for its
+ * source and a PDF exists, its PDF copied as the preview.
+ */
+export function documentsOf(
+  entity: Entity,
+  documents: ReadonlyMap<string, ReadDocument>,
+  config: Config,
+): FragmentDocument[] {
+  const maxChars = config.build?.extracted_text_max_chars ?? DEFAULT_EXTRACTED_TEXT_MAX_CHARS;
+  const paths = [
+    entity.source.path,
+    ...(entity.representations ?? [])
+      .filter((representation) => representation.kind === undefined)
+      .map((representation) => representation.path),
+  ];
+  const previews =
+    config.sources.find((source) => source.name === entity.source.name)?.previews !== false;
+  const found: FragmentDocument[] = [];
+  for (const path of [...new Set(paths)].sort(byCodeUnit)) {
+    const document = documents.get(documentKey(entity.source.name, path));
+    if (document === undefined) continue;
+    const target = fileTarget(entity, path);
+    const preview =
+      document.pdf === undefined || !previews
+        ? undefined
+        : document.format === "pdf"
+          ? target
+          : fileTarget(entity, path.replace(/\.[^./]+$/, ".pdf"));
+    found.push({
+      source: entity.source.name,
+      path,
+      format: document.format,
+      target,
+      ...(preview === undefined ? {} : { preview }),
+      unit: document.unit,
+      pages: truncatePages(
+        document.pages.map(({ number, label, text }) => ({ number, label, text })),
+        maxChars,
+      ),
+    });
+  }
+  return found;
+}
+
+/** The text of the documents of an entity as the search index reads it, one page per line. */
+function textOf(documents: readonly FragmentDocument[]): string {
+  return documents
+    .flatMap((document) => document.pages.map((page) => page.text))
+    .filter((text) => text.trim() !== "")
+    .join("\n");
+}
+
+/** The fragment with the documents of the entity and their text added, when it has any. */
+function withDocuments(
+  fragment: EntityFragment,
+  entity: Entity,
+  documents: ReadonlyMap<string, ReadDocument>,
+  config: Config,
+): EntityFragment {
+  const found = documentsOf(entity, documents, config);
+  if (found.length === 0) return fragment;
+  const text = [fragment.text, textOf(found)].filter((part) => part !== undefined && part !== "");
+  return {
+    ...fragment,
+    ...(text.length === 0 ? {} : { text: text.join("\n") }),
+    documents: found,
+  };
+}
+
 /** The recognised words as the renderer links them; the page's own name and a lost target are passed over. */
 function spansOf(
   words: readonly RecognisedWord[],
@@ -86,13 +183,21 @@ function spansOf(
   );
 }
 
+/** The documents keyed by `<source>/<path>`. */
+function indexDocuments(documents: readonly ReadDocument[] = []): Map<string, ReadDocument> {
+  return new Map(
+    documents.map((document) => [documentKey(document.source, document.path), document]),
+  );
+}
+
 /**
  * The fragment of every entity: the passages of a keyword page, the note of a typed entity
  * rendered to sanitised HTML with its written links turned into page hrefs, its recognised
- * words linked, its images of the sources listed for the copy, and its plain text for the
- * search index, in identifier order.
+ * words linked, its images of the sources listed for the copy, its plain text for the search
+ * index, and its documents with their extracted text, in identifier order.
  */
 export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
+  const documents = indexDocuments(input.documents);
   const sources = new Map(input.sources.map((source) => [source.name, source]));
   const files: SourceFiles = new Map(
     input.sources.map((source) => [source.name, new Set(source.files.map((file) => file.path))]),
@@ -124,7 +229,12 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
     const path = notePath(entity);
     const file = source?.files.find((candidate) => candidate.path === path);
     if (source === undefined || path === undefined || file === undefined) {
-      return { id: entity.id, sections: [], ...takenOver };
+      return withDocuments(
+        { id: entity.id, sections: [], ...takenOver },
+        entity,
+        documents,
+        input.config,
+      );
     }
     const page = pagePath(entity.id);
     const images = new Map<string, FragmentImage>();
@@ -154,22 +264,27 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
         byId,
       ),
     });
-    return {
-      id: entity.id,
-      sections: rendered.sections,
-      ...takenOver,
-      ...(images.size === 0
-        ? {}
-        : { images: [...images.values()].sort((a, b) => byCodeUnit(a.target, b.target)) }),
-      text: rendered.text,
-    };
+    return withDocuments(
+      {
+        id: entity.id,
+        sections: rendered.sections,
+        ...takenOver,
+        ...(images.size === 0
+          ? {}
+          : { images: [...images.values()].sort((a, b) => byCodeUnit(a.target, b.target)) }),
+        text: rendered.text,
+      },
+      entity,
+      documents,
+      input.config,
+    );
   });
 }
 
 /**
  * Writes `fragments/<id>.json` under the output folder for every entity, with the images the
- * notes embed under `fragments/` at their target path, where the rendering takes them from;
- * returns how many fragments were written.
+ * notes embed and the documents of the entities under `fragments/` at their target path, where
+ * the rendering takes them from; returns how many fragments were written.
  */
 export function writeFragments(input: FragmentsInput, output: string): number {
   const fragments = fragmentsOf(input);
@@ -178,12 +293,23 @@ export function writeFragments(input: FragmentsInput, output: string): number {
       source.files.map((file) => [fileKey(source.name, file.path), file.absolutePath] as const),
     ),
   );
+  const documents = indexDocuments(input.documents);
+  const copy = (from: string, target: string): void => {
+    input.fs.writeBytes(join(output, fragmentImagePath(target)), input.fs.readBytes(from));
+  };
   for (const fragment of fragments) {
     input.fs.writeText(join(output, fragmentPath(fragment.id)), serializeFragment(fragment));
     for (const image of fragment.images ?? []) {
       // The resolver only lists files the sources hold, so every image has an absolute path.
-      const from = files.get(fileKey(image.source, image.path)) as string;
-      input.fs.writeBytes(join(output, fragmentImagePath(image.target)), input.fs.readBytes(from));
+      copy(files.get(fileKey(image.source, image.path)) as string, image.target);
+    }
+    for (const document of fragment.documents ?? []) {
+      // documentsOf only lists documents the step read, and only gives a preview to one with a PDF.
+      const read = documents.get(documentKey(document.source, document.path)) as ReadDocument;
+      copy(read.absolutePath, document.target);
+      if (document.preview !== undefined && document.preview !== document.target) {
+        copy(read.pdf as string, document.preview);
+      }
     }
   }
   return fragments.length;

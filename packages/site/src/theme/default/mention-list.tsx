@@ -101,7 +101,7 @@ export function MentionGroups({ groups, open, onToggle }: MentionGroupsProps): J
             {group.mentions.map((mention, index) => (
               <li key={index} class={`mention mention-${mention.kind}`}>
                 <a class="mention-passage" href={mention.href}>
-                  {labels.line} {mention.line}
+                  {mention.location ?? `${labels.line} ${String(mention.line)}`}
                 </a>{" "}
                 <Context mention={mention} />
               </li>

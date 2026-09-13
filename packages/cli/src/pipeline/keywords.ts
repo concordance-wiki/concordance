@@ -31,10 +31,13 @@ import {
 import type { Profile } from "@concordance-wiki/profile";
 
 import type { LocaleDictionary } from "./dictionary.js";
+import { pageParagraphs, type ReadDocument } from "./documents.js";
 import type { ParsedDocument } from "./parse.js";
 
 export interface DiscoverKeywordsInput {
   documents: readonly ParsedDocument[];
+  /** The documents that are not notes, whose pages count as usage like any paragraph. */
+  resources?: readonly ReadDocument[];
   sources: readonly IngestedSource[];
   dictionaries: ReadonlyMap<string, LocaleDictionary>;
   config: Config;
@@ -109,9 +112,10 @@ function readable(unit: ScannableUnit, labels: ReadonlySet<string>): string | un
   return text.trim() === "" ? undefined : text;
 }
 
-/** The text units of the notes of the sources of one locale, in source then document order. */
+/** The text units of the notes, then the pages of the documents, of the sources of one locale, in source then document order. */
 function unitsOf(
   documents: readonly ParsedDocument[],
+  resources: readonly ReadDocument[],
   sources: readonly IngestedSource[],
   labels: ReadonlySet<string>,
 ): KeywordUnit[] {
@@ -122,6 +126,11 @@ function unitsOf(
         const text = readable(unit, labels);
         if (text === undefined) continue;
         units.push({ source: source.name, path: note.path, line: unit.line, text });
+      }
+    }
+    for (const document of resources.filter((candidate) => candidate.source === source.name)) {
+      for (const page of pageParagraphs(document)) {
+        units.push({ source: source.name, path: document.path, line: page.line, text: page.text });
       }
     }
   }
@@ -236,9 +245,9 @@ function takenOverOf(
 
 /**
  * The recurring expressions no note defines, locale by locale: n-grams over the scannable units
- * of every note, headings and section labels left out, scored by C-value × IDF against the
- * dictionary of the locale, then split by the publication threshold into keyword pages and
- * discarded expressions.
+ * of every note and the pages of every document, headings and section labels left out, scored
+ * by C-value × IDF against the dictionary of the locale, then split by the publication
+ * threshold into keyword pages and discarded expressions.
  */
 export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywords {
   const { config } = input;
@@ -259,10 +268,14 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
   for (const [locale, { dictionary, stopwords }] of input.dictionaries) {
     const pack = languagePack(locale);
     const sources = input.sources.filter((source) => source.locale === locale);
-    const ngrams = extractNgrams(unitsOf(input.documents, sources, labels), pack, {
-      ...options,
-      stopwords,
-    });
+    const ngrams = extractNgrams(
+      unitsOf(input.documents, input.resources ?? [], sources, labels),
+      pack,
+      {
+        ...options,
+        stopwords,
+      },
+    );
     const candidates = scoreCandidates(ngrams, {
       ...options,
       pack,

@@ -28,9 +28,36 @@ export interface FragmentImage {
   target: string;
 }
 
+/** One position of a document and its extracted text, as the page shows and searches it. */
+export interface FragmentPage {
+  /** From 1, in document order; the mentions cite it as their line. */
+  number: number;
+  /** `page 3`, `slide 3`, or the timecode of a transcript cue. */
+  label: string;
+  text: string;
+}
+
+/** A document of an entity that is not a note: a deck, a PDF, a transcript, with what the page needs from it. */
+export interface FragmentDocument {
+  source: string;
+  /** Forward-slash path relative to the source root. */
+  path: string;
+  /** Lowercase extension without its dot. */
+  format: string;
+  /** Where the original file is copied under the site, for the download link; the build keeps the bytes under `fragments/` at the same path. */
+  target: string;
+  /** Where its PDF representation is copied, when the conversion produced one and previews are on. */
+  preview?: string;
+  /** How the positions are named: the pages of a PDF, the slides of a deck, the cues of a transcript. */
+  unit: "page" | "slide" | "cue";
+  /** Every position in order; the text beyond `build.extracted_text_max_chars` in all is cut. */
+  pages: FragmentPage[];
+}
+
 /**
  * What the build writes next to the model for one entity, so that `render` needs no source:
- * the note rendered to sanitised HTML, the images it embeds, and the passages of a keyword page.
+ * the note rendered to sanitised HTML, the images it embeds, the passages of a keyword page,
+ * and the documents of an entity that is not only a note.
  */
 export interface EntityFragment {
   id: string;
@@ -49,6 +76,8 @@ export interface EntityFragment {
   images?: FragmentImage[];
   /** The plain text of the note, what the search index reads as the body; absent for an entity without a note. */
   text?: string;
+  /** In path order; absent for an entity without a document. */
+  documents?: FragmentDocument[];
 }
 
 export class FragmentError extends Error {
@@ -107,6 +136,29 @@ function isImage(value: unknown): value is FragmentImage {
   );
 }
 
+function isPage(value: unknown): value is FragmentPage {
+  return (
+    isRecord(value) &&
+    typeof value["number"] === "number" &&
+    typeof value["label"] === "string" &&
+    typeof value["text"] === "string"
+  );
+}
+
+function isDocument(value: unknown): value is FragmentDocument {
+  return (
+    isRecord(value) &&
+    typeof value["source"] === "string" &&
+    typeof value["path"] === "string" &&
+    typeof value["format"] === "string" &&
+    typeof value["target"] === "string" &&
+    (value["preview"] === undefined || typeof value["preview"] === "string") &&
+    (value["unit"] === "page" || value["unit"] === "slide" || value["unit"] === "cue") &&
+    Array.isArray(value["pages"]) &&
+    value["pages"].every(isPage)
+  );
+}
+
 /** Reads a fragment back, refusing anything but the shape the build writes. */
 export function parseFragment(text: string, file: string): EntityFragment {
   let document: unknown;
@@ -153,6 +205,15 @@ export function parseFragment(text: string, file: string): EntityFragment {
       throw new FragmentError(file, "text must be a string");
     }
     fragment.text = document["text"];
+  }
+  if (document["documents"] !== undefined) {
+    if (!Array.isArray(document["documents"]) || !document["documents"].every(isDocument)) {
+      throw new FragmentError(
+        file,
+        "documents must be a list of { source, path, format, target, preview?, unit, pages }",
+      );
+    }
+    fragment.documents = document["documents"];
   }
   return fragment;
 }

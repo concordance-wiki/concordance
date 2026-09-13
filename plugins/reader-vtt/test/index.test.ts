@@ -42,12 +42,20 @@ describe("the reader-vtt plugin", () => {
           speakers: ["Alice", "Bob"],
         },
         text: "Bonjour. Commençons.\nD'accord.",
+        units: [
+          { label: "00:00:01", text: "Bonjour. Commençons.", anchor: "t-1000" },
+          { label: "00:00:03", text: "D'accord.", anchor: "t-3500" },
+        ],
       },
     );
     expect(readTranscript({ path: "meetings/REVIEW.SRT", payload: { bytes: bytes(srt) } })).toEqual(
       {
         metadata: { format: "srt", duration: 4, cues: 2, speakers: ["ALICE", "BOB"] },
         text: "Hi\nHey",
+        units: [
+          { label: "00:00:00", text: "Hi", anchor: "t-0" },
+          { label: "00:00:02", text: "Hey", anchor: "t-2000" },
+        ],
       },
     );
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Transcript } from "../src/parse.js";
-import { transcriptText } from "../src/text.js";
+import { transcriptText, transcriptUnits } from "../src/text.js";
 
 const transcript: Transcript = {
   format: "vtt",
@@ -40,5 +40,19 @@ describe("transcriptText", () => {
       text: "",
       offsets: [],
     });
+  });
+});
+
+describe("transcriptUnits", () => {
+  it("cuts the spoken text into one addressable unit per speaker turn, labelled by its first timecode", () => {
+    expect(transcriptUnits(transcript)).toEqual([
+      { label: "00:00:00", text: "Hello there. How are you?", anchor: "t-0" },
+      { label: "00:00:02", text: "Fine.", anchor: "t-2000" },
+      { label: "00:00:03", text: " (laughs)", anchor: "t-3000" },
+    ]);
+  });
+
+  it("gives no unit without cues", () => {
+    expect(transcriptUnits({ format: "srt", cues: [], speakers: [], duration: 0 })).toEqual([]);
   });
 });

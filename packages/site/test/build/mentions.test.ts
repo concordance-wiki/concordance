@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { siteContext, type SiteContext, type SiteContextInput } from "../../src/build/context.js";
 import {
   DEFAULT_MENTIONS_INLINE,
+  locationOf,
   mentionsFragmentOf,
   mentionsOf,
   mentionsPanelOf,
@@ -143,6 +144,80 @@ describe("mentionsOf", () => {
     expect(
       surfaceOf(term, { method: "glossary_occurrence", confidence: 0.6, path: "page.md", line: 3 }),
     ).toBeUndefined();
+  });
+});
+
+describe("mentions read from a document", () => {
+  it("names the position of a mention read from a deck, a PDF or a transcript instead of a line, and keeps the line for a note", () => {
+    const cited = context({
+      model: model({
+        links: [
+          {
+            from: "specs/screens/mentions-panel",
+            to: "glossary/keyword-page",
+            relation: "related",
+            confidence: 0.6,
+            provenance: [
+              {
+                method: "glossary_occurrence",
+                confidence: 0.6,
+                path: "screens/mentions-panel.pptx",
+                line: 3,
+                occurrences: [
+                  { line: 3, context: "The keyword page on a slide", section: "slide 3" },
+                ],
+              },
+              {
+                method: "glossary_occurrence",
+                confidence: 0.6,
+                path: "screens/mentions-panel.md",
+                line: 12,
+                occurrences: [{ line: 12, context: "The keyword page in prose", section: "Steps" }],
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    expect(
+      mentionsOf(cited, pagePath, term).map((mention) => [
+        mention.file.label,
+        mention.line,
+        mention.href,
+        mention.location,
+      ]),
+    ).toEqual([
+      [
+        "screens/mentions-panel.md",
+        12,
+        "../../specs/screens/mentions-panel/index.html#L12",
+        undefined,
+      ],
+      [
+        "screens/mentions-panel.pptx",
+        3,
+        "../../specs/screens/mentions-panel/index.html#L3",
+        "slide 3",
+      ],
+    ]);
+  });
+
+  it("takes the label from the passage first, then from the provenance section, and only for a file that is not a note", () => {
+    const base = { method: "glossary_occurrence" as const, confidence: 0.6, line: 1 };
+    expect(locationOf({ ...base, path: "a.vtt", section: "00:00:04" })).toBe("00:00:04");
+    expect(
+      locationOf({
+        ...base,
+        path: "a.pdf",
+        section: "old",
+        occurrences: [{ line: 1, context: "c", section: "page 1" }],
+      }),
+    ).toBe("page 1");
+    expect(
+      locationOf({ ...base, path: "a.pdf", occurrences: [{ line: 1, context: "c" }] }),
+    ).toBeUndefined();
+    expect(locationOf({ ...base, path: "a.md", section: "Steps" })).toBeUndefined();
+    expect(locationOf({ ...base, section: "Steps" })).toBeUndefined();
   });
 });
 

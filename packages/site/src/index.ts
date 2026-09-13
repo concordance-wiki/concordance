@@ -128,8 +128,10 @@ export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
   EntityFragment,
+  FragmentDocument,
   FragmentImage,
   FragmentLead,
+  FragmentPage,
   FragmentPassage,
 } from "./build/fragments.js";
 export { defaultThemeConfig } from "./build/default-theme.js";

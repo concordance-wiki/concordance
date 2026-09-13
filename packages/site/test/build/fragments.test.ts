@@ -85,6 +85,72 @@ describe("fragments", () => {
     expect(parseFragment(serializeFragment(note), "f.json")).toEqual(note);
   });
 
+  it("keeps the plain text of a note and the documents of an entity, with their pages", () => {
+    const deck: EntityFragment = {
+      ...fragment,
+      text: "A page.\na",
+      documents: [
+        {
+          source: "glossary",
+          path: "meetings/threshold-review.pptx",
+          format: "pptx",
+          target: "glossary/keyword-page/threshold-review.pptx",
+          preview: "glossary/keyword-page/threshold-review.pdf",
+          unit: "slide",
+          pages: [
+            { number: 1, label: "slide 1", text: "Keyword page threshold" },
+            { number: 2, label: "slide 2", text: "" },
+          ],
+        },
+        {
+          source: "glossary",
+          path: "meetings/threshold-review.vtt",
+          format: "vtt",
+          target: "glossary/keyword-page/threshold-review.vtt",
+          unit: "cue",
+          pages: [{ number: 1, label: "00:00:04", text: "Let us start with the threshold." }],
+        },
+      ],
+    };
+    expect(parseFragment(serializeFragment(deck), "f.json")).toEqual(deck);
+  });
+
+  it("refuses a text or documents of another shape", () => {
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "text": 3}', "f.json")).toThrow(
+      "f.json: text must be a string",
+    );
+    const documents = (value: string): string =>
+      `{"id": "a/b", "sections": [], "documents": ${value}}`;
+    const message =
+      "f.json: documents must be a list of { source, path, format, target, preview?, unit, pages }";
+    expect(() => parseFragment(documents("{}"), "f.json")).toThrow(message);
+    const valid = {
+      source: "s",
+      path: "a.pdf",
+      format: "pdf",
+      target: "x/a.pdf",
+      unit: "page",
+      pages: [{ number: 1, label: "page 1", text: "" }],
+    };
+    expect(parseFragment(documents(JSON.stringify([valid])), "f.json").documents).toEqual([valid]);
+    for (const broken of [
+      { ...valid, source: 1 },
+      { ...valid, path: 1 },
+      { ...valid, format: 1 },
+      { ...valid, target: 1 },
+      { ...valid, preview: 1 },
+      { ...valid, unit: "line" },
+      { ...valid, pages: {} },
+      { ...valid, pages: [{ number: "1", label: "page 1", text: "" }] },
+      { ...valid, pages: [{ number: 1, label: 1, text: "" }] },
+      { ...valid, pages: [{ number: 1, label: "page 1" }] },
+      { ...valid, pages: [3] },
+      3,
+    ]) {
+      expect(() => parseFragment(documents(JSON.stringify([broken])), "f.json")).toThrow(message);
+    }
+  });
+
   it("refuses text that is not JSON, not an object with an id, or whose sections, passages, images or text have another shape, naming the file", () => {
     expect(() => parseFragment("{", "f.json")).toThrow(FragmentError);
     expect(() => parseFragment("{", "f.json")).toThrow(/^f\.json: not valid JSON: /);
