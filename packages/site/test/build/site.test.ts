@@ -234,14 +234,39 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
   });
 
-  it("fills the search region of the home page with the same field as the header, submitting to the results page", () => {
+  it("heads the home page with the same field as the header, drawn large and submitting to the results page, the strings of its live results travelling with the island", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
-      '<div class="home-search-slot" data-slot="search"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
+      '<h1 id="home-question">What are you looking for?</h1><p class="home-explanation">Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.</p><concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;,&quot;label&quot;:&quot;Search&quot;,&quot;root&quot;:&quot;&quot;,&quot;suggestions&quot;:{&quot;matches&quot;:{&quot;one&quot;:&quot;# match&quot;,&quot;other&quot;:&quot;# matches&quot;},&quot;usedIn&quot;:{&quot;one&quot;:&quot;Used in # document, never defined&quot;,&quot;other&quot;:&quot;Used in # documents, never defined&quot;},&quot;browse&quot;:&quot;browse&quot;,&quot;enter&quot;:&quot;Enter&quot;,&quot;open&quot;:&quot;open&quot;,&quot;seeResults&quot;:{&quot;one&quot;:&quot;See the # result&quot;,&quot;other&quot;:&quot;See the # results&quot;}}},&quot;home&quot;:true}"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
     );
     expect(home).toContain(
-      '<input id="home-search" type="search" name="q" placeholder="Search the documentation"/>',
+      '<input id="home-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><span class="search-count" aria-live="polite"></span>',
     );
+    expect(home).toContain('<div class="search-suggestions home-suggestions" hidden></div>');
+    expect(home).toContain(
+      '<nav class="home-frequent" aria-label="Frequently consulted"><span class="home-frequent-lead">Frequently consulted</span><ul class="home-shortcuts"><li><a class="chip" href="keywords/build-summary/index.html">build summary</a></li>',
+    );
+  });
+
+  it("lists the spaces on the home page with their trees folded behind their rows, the recent changes, and no letter, no statistic and no to-do link outside the footer", () => {
+    const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
+    expect(home).toContain(
+      '<h2 id="home-tree">Spaces <span class="home-lead">fed by your repositories</span></h2><ul class="home-space-list"><li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages</span></span></summary><ul class="space-nodes"><li class="space-page"><a href="glossary/keyword-page/index.html">Keyword page</a></li>',
+    );
+    expect(home).toContain(
+      '<li class="space-folder space-open"><span class="space-folder-name">screens<span class="count">1</span></span><ul class="space-nodes"><li class="space-page"><a href="specs/screens/mentions-panel/index.html">Mentions panel</a></li></ul></li>',
+    );
+    expect(home).toContain(
+      '<p class="home-note">The dates come from the history of the repositories, so they are always right.</p>',
+    );
+    expect(home).toContain(
+      '<h2 id="home-recent">Recently changed</h2><ul class="home-change-list"></ul>',
+    );
+    expect(home).not.toContain("home-more-spaces");
+    expect(home).not.toContain("home-alert");
+    expect(home).not.toContain('class="letter');
+    expect(home).not.toContain("home-todo");
+    expect(home).not.toContain("home-stats");
   });
 
   it("renders a typed entity through the entity page and a keyword through the keyword page, both complete documents", () => {
@@ -656,10 +681,14 @@ describe("The labels of the site come from the message catalogue of the project 
     );
     expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
     expect(home).toContain('placeholder="Rechercher dans la documentation"');
-    expect(home).toContain(">Par arborescence</h2>");
-    expect(home).toContain(">Par mot</a>");
-    expect(home).toContain(">Derniers changements</h2>");
-    expect(home).toContain("12 septembre 2026</time>");
+    expect(home).toContain('<h1 id="home-question">Que cherchez-vous ?</h1>');
+    expect(home).toContain(
+      '<h2 id="home-tree">Espaces <span class="home-lead">alimentés par vos dépôts</span></h2>',
+    );
+    expect(home).toContain('<span class="home-space-meta">2 pages</span>');
+    expect(home).toContain('aria-label="Fréquemment consulté"');
+    expect(home).toContain(">Modifié récemment</h2>");
+    expect(home).toContain("&quot;enter&quot;:&quot;Entrée&quot;");
     expect(home).toContain('<html lang="fr"');
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
     expect(entity).toContain('<span class="badge">Terme</span>');
@@ -811,7 +840,13 @@ describe("siteDocuments", () => {
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );
     expect(home?.content).toContain(
-      '<li class="home-item stale"><a href="glossary/keyword-page/index.html">Keyword page</a><time datetime="2026-09-01">Sep 1, 2026</time><span class="stale-mark">dormant</span></li>',
+      '<li class="home-space stale"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">GL</span><span class="home-space-text"><span class="home-space-name">glossary</span><span class="home-space-meta">2 pages · <time datetime="2026-09-01">2 weeks ago</time></span>',
+    );
+    expect(home?.content).toContain(
+      '<li class="home-change"><a href="glossary/keyword-page/index.html"><span class="home-change-title">Keyword page</span><span class="home-change-meta">glossary · <time datetime="2026-09-01">2 weeks ago</time></span></a></li>',
+    );
+    expect(home?.content).toContain(
+      '<div class="home-alert"><h3>A space has not moved for 11 days</h3><p>glossary. The alert threshold is set to 1 day in the configuration.</p></div>',
     );
   });
 

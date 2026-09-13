@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+Home page of the default theme: the question "What are you looking for?" and its explanation, the search field drawn large with its live results in the flow of the page (one link per match with the query marked in its title, its type or the notice that no note defines the expression, and its space; the number of matches next to the field; the keyboard help, the arrow keys walking the rows and Enter opening the one in focus; the link to the whole list), the field of the header showing the same rows; the twelve most cited pages as chips; the spaces most cited first, one row per source with its initials, its count in pages or in documents, the date of its newest change from the git history and its whole tree folded behind the row, the spaces past the fifth folded behind a line counting them; the eight latest changes with their space and date; one alert per source dormant past `staleness.warn_after_days`, naming the threshold; the `Home` slot receiving `spaces`, `moreSpaces`, `recent`, `alerts` and `labels` instead of the statistics, the entries and the to-do link, the letters staying on the index page and the to-do link in the footer; the `home-corporate` gallery state; the `home.*` messages in both catalogues, `home.index` and `home.tree` retired.

@@ -1,26 +1,31 @@
 import type { Entity } from "@concordance-wiki/core";
-import { formatDate } from "@concordance-wiki/i18n";
+import { formatMessage, formatRelative, type Catalogue } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
-import type { HomeEntry, HomeItem, HomeProps, HomeSource, HomeTreeNode, Link } from "../slots.js";
+import { pluralForms } from "../search/build.js";
+import type {
+  HomeAlert,
+  HomeChange,
+  HomeLabels,
+  HomeProps,
+  HomeSpace,
+  Link,
+  SuggestionLabels,
+} from "../slots.js";
 import { citations, message, type SiteContext } from "./context.js";
-import { entityHref, HOME_PAGE, INDEX_PAGE, relativeHref, TODO_PAGE } from "./paths.js";
+import { entityHref, HOME_PAGE } from "./paths.js";
+import { initialsOf, wholeTreeOf } from "./space.js";
 
 /** The most cited words offered as shortcuts next to the search field. */
 export const HOME_SHORTCUTS = 12;
-/** The latest changes the freshness entry lists. */
-export const HOME_RECENT = 20;
+/** The spaces in view; the others fold behind a line counting them. */
+export const HOME_SPACES_SHOWN = 5;
+/** The latest changes the home page lists. */
+export const HOME_RECENT = 8;
 /** Days without a change after which a source is dormant when `staleness.warn_after_days` says nothing. */
 export const DEFAULT_WARN_AFTER_DAYS = 180;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-export interface HomeOptions {
-  /** The number of entries of the to-do page, shown on its link. */
-  todoCount: number;
-  /** The letters of the index that have entries, each leading to its place in the index. */
-  letters: HomeItem[];
-}
 
 /** What the shortcuts rank by: the links pointing at a note, the occurrences of a keyword page. */
 export function mentionCount(context: SiteContext, entity: Entity): number {
@@ -55,62 +60,17 @@ function sourceNames(context: SiteContext): string[] {
   return [...names].sort(byCodeUnit);
 }
 
-interface Folder {
-  folders: Map<string, Folder>;
-  notes: { file: string; entity: Entity }[];
-}
-
-function folderIn(folders: Map<string, Folder>, name: string): Folder {
-  const known = folders.get(name);
-  if (known !== undefined) {
-    return known;
-  }
-  const created: Folder = { folders: new Map(), notes: [] };
-  folders.set(name, created);
-  return created;
-}
-
-function notesIn(contents: Folder): number {
-  return [...contents.folders.values()].reduce(
-    (total, child) => total + notesIn(child),
-    contents.notes.length,
-  );
-}
-
-function nodeOf(label: string, contents: Folder): HomeTreeNode {
-  const folders = [...contents.folders.entries()]
-    .sort(([a], [b]) => byCodeUnit(a, b))
-    .map(([name, child]) => nodeOf(name, child));
-  const notes = [...contents.notes]
-    .sort((a, b) => byCodeUnit(a.file, b.file) || byCodeUnit(a.entity.id, b.entity.id))
-    .map(({ entity }) => ({ label: entity.title, href: entityHref(HOME_PAGE, entity.id) }));
-  return { label, count: notesIn(contents), children: [...folders, ...notes] };
-}
-
-/** One node per source, its folders first then its notes at every level, each folder counting its notes. */
-export function treeOf(context: SiteContext): HomeTreeNode[] {
-  const roots = new Map<string, Folder>();
-  for (const name of sourceNames(context)) {
-    folderIn(roots, name);
-  }
-  for (const entity of notesOf(context)) {
-    const { path } = entity.source;
-    const cut = path.lastIndexOf("/");
-    let current = folderIn(roots, entity.source.name);
-    for (const segment of cut < 0 ? [] : path.slice(0, cut).split("/")) {
-      current = folderIn(current.folders, segment);
-    }
-    current.notes.push({ file: path.slice(cut + 1), entity });
-  }
-  return [...roots.entries()].map(([name, contents]) => nodeOf(name, contents));
-}
-
 function instant(iso: string): number {
   return Date.parse(iso);
 }
 
-function spelled(context: SiteContext, iso: string): string {
-  return formatDate(context.locale ?? context.language, new Date(iso), "medium");
+/** A change worded relative to the build instant, "2 days ago", so that two builds of the same corpus agree. */
+function ago(context: SiteContext, iso: string): string {
+  return formatRelative(
+    context.locale ?? context.language,
+    new Date(iso),
+    new Date(context.model.build.at),
+  );
 }
 
 /** The newest `last_modified` among the notes of every source, by source name. */
@@ -127,36 +87,61 @@ function newestChanges(context: SiteContext): Map<string, string> {
   return newest;
 }
 
-/** Whether a source that last changed at `newest` is dormant at the build instant, by its own threshold or the default one. */
-export function isDormant(context: SiteContext, source: string, newest: string): boolean {
+/** The days without a change after which a source is dormant: its own threshold, the default one or 180 days. */
+export function warnAfterDays(context: SiteContext, source: string): number {
   const thresholds = context.staleness?.warn_after_days ?? {};
-  const days = thresholds[source] ?? thresholds["default"] ?? DEFAULT_WARN_AFTER_DAYS;
-  return instant(context.model.build.at) - instant(newest) > days * DAY_MS;
+  return thresholds[source] ?? thresholds["default"] ?? DEFAULT_WARN_AFTER_DAYS;
 }
 
-/** Every source with the date of its newest change; a source without a dated note is never dormant. */
-export function sourcesOf(context: SiteContext): HomeSource[] {
-  const newest = newestChanges(context);
-  return sourceNames(context).map((name) => {
-    const changed = newest.get(name);
-    return changed === undefined
-      ? { name, stale: false }
-      : {
-          name,
-          date: changed.slice(0, 10),
-          dateLabel: spelled(context, changed),
-          stale: isDormant(context, name, changed),
-        };
-  });
-}
-
-/** The notes changed last, newest first then by identifier, each flagged when its source is dormant. */
-export function recentOf(context: SiteContext): HomeItem[] {
-  const dormant = new Set(
-    sourcesOf(context)
-      .filter((source) => source.stale)
-      .map((source) => source.name),
+/** Whether a source that last changed at `newest` is dormant at the build instant. */
+export function isDormant(context: SiteContext, source: string, newest: string): boolean {
+  return (
+    instant(context.model.build.at) - instant(newest) > warnAfterDays(context, source) * DAY_MS
   );
+}
+
+/** Whether a note stands for a converted document: a deck, a transcript, a PDF merged with it, never an operation of a contract. */
+function hasDocument(entity: Entity): boolean {
+  return (entity.representations ?? []).some(
+    (representation) => representation.format !== "markdown" && representation.kind === undefined,
+  );
+}
+
+/**
+ * Every space of the site, the most cited first: a source with its initials, its page count,
+ * counted in documents when its notes mostly stand for converted documents, the date of its
+ * newest change worded relative to the build, whether it is dormant, and its whole tree.
+ */
+export function spacesOf(context: SiteContext): HomeSpace[] {
+  const newest = newestChanges(context);
+  const notes = notesOf(context);
+  return sourceNames(context)
+    .map((name) => {
+      const own = notes.filter((note) => note.source.name === name);
+      const documents = own.filter(hasDocument).length;
+      const changed = newest.get(name);
+      const unit = documents * 2 > own.length ? "documents" : "pages";
+      const space: HomeSpace = {
+        name,
+        initials: initialsOf(name),
+        count: own.length,
+        unit,
+        countLabel: formatMessage(context.catalogue, `home.${unit}`, { count: own.length }),
+        stale: changed !== undefined && isDormant(context, name, changed),
+        nodes: wholeTreeOf(context, HOME_PAGE, name),
+      };
+      if (changed !== undefined) {
+        space.date = changed.slice(0, 10);
+        space.dateLabel = ago(context, changed);
+      }
+      return { space, cited: own.reduce((total, note) => total + citations(context, note.id), 0) };
+    })
+    .sort((a, b) => b.cited - a.cited || byCodeUnit(a.space.name, b.space.name))
+    .map(({ space }) => space);
+}
+
+/** The notes changed last, newest first then by identifier, each with its space and its change worded relative to the build. */
+export function recentOf(context: SiteContext): HomeChange[] {
   return notesOf(context)
     .flatMap((entity) => {
       const changed = entity.source.last_modified;
@@ -167,48 +152,68 @@ export function recentOf(context: SiteContext): HomeItem[] {
     .map(({ entity, changed }) => ({
       label: entity.title,
       href: entityHref(HOME_PAGE, entity.id),
+      space: entity.source.name,
       date: changed.slice(0, 10),
-      dateLabel: spelled(context, changed),
-      ...(dormant.has(entity.source.name) ? { stale: true } : {}),
+      dateLabel: ago(context, changed),
     }));
 }
 
-/** The three entry points: the file tree, the letters of the index, the latest changes with the sources. */
-export function entriesOf(context: SiteContext, letters: HomeItem[]): HomeEntry[] {
-  return [
-    { kind: "tree", title: message(context, "home.tree"), items: [], tree: treeOf(context) },
-    {
-      kind: "index",
-      title: message(context, "home.index"),
-      href: relativeHref(HOME_PAGE, INDEX_PAGE),
-      items: letters,
-    },
-    {
-      kind: "recent",
-      title: message(context, "home.recent"),
-      items: recentOf(context),
-      sources: sourcesOf(context),
-    },
-  ];
+/** One alert per dormant space, in the order of the spaces: how long it has not moved, and the threshold that flags it. */
+export function alertsOf(context: SiteContext, spaces: readonly HomeSpace[]): HomeAlert[] {
+  const newest = newestChanges(context);
+  return spaces.flatMap((space) => {
+    const changed = newest.get(space.name);
+    if (changed === undefined || !isDormant(context, space.name, changed)) return [];
+    const days = Math.floor((instant(context.model.build.at) - instant(changed)) / DAY_MS);
+    return [
+      {
+        title: formatMessage(context.catalogue, "home.stale", { count: days }),
+        space: space.name,
+        text: formatMessage(context.catalogue, "home.staleThreshold", {
+          space: space.name,
+          count: warnAfterDays(context, space.name),
+        }),
+      },
+    ];
+  });
 }
 
-/** The view model of the home page; the search field is a slot the search index fills. */
-export function homeOf(context: SiteContext, title: string, options: HomeOptions): HomeProps {
-  const { build } = context.model;
+/** The strings of the home page in the site language, the folded spaces counted. */
+export function homeLabels(context: SiteContext, folded: number): HomeLabels {
   return {
-    title,
+    question: message(context, "home.question"),
+    explanation: message(context, "home.explanation"),
+    frequent: message(context, "home.frequent"),
+    spaces: message(context, "site.spaces"),
+    spacesLead: message(context, "home.spacesLead"),
+    moreSpaces: formatMessage(context.catalogue, "home.moreSpaces", { count: folded }),
+    datesNote: message(context, "home.datesNote"),
+    recent: message(context, "home.recent"),
+  };
+}
+
+/** The strings of the live results under a search field, the plurals frozen by category as the entity table does. */
+export function suggestionLabels(catalogue: Catalogue): SuggestionLabels {
+  return {
+    matches: pluralForms(catalogue, "home.matches"),
+    usedIn: pluralForms(catalogue, "home.usedIn"),
+    browse: formatMessage(catalogue, "home.browse"),
+    enter: formatMessage(catalogue, "home.enterKey"),
+    open: formatMessage(catalogue, "home.open"),
+    seeResults: pluralForms(catalogue, "home.seeResults"),
+  };
+}
+
+/** The view model of the home page; the search field is added by the site, which knows where the index lives. */
+export function homeOf(context: SiteContext): HomeProps {
+  const spaces = spacesOf(context);
+  const folded = spaces.slice(HOME_SPACES_SHOWN);
+  return {
     shortcuts: shortcutsOf(context),
-    stats: {
-      sources: build.sources.length,
-      files: build.sources.reduce((total, source) => total + (source.files ?? 0), 0),
-      builtAt: build.at,
-      builtAtLabel: formatDate(context.locale ?? context.language, new Date(build.at), "long"),
-    },
-    entries: entriesOf(context, options.letters),
-    todo: {
-      label: message(context, "site.todo"),
-      href: relativeHref(HOME_PAGE, TODO_PAGE),
-      count: options.todoCount,
-    },
+    spaces: spaces.slice(0, HOME_SPACES_SHOWN),
+    ...(folded.length === 0 ? {} : { moreSpaces: folded }),
+    recent: recentOf(context),
+    alerts: alertsOf(context, spaces),
+    labels: homeLabels(context, folded.length),
   };
 }

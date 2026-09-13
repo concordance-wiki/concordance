@@ -1,5 +1,5 @@
 import type { ThemeConfig } from "../css/theme-config.js";
-import type { Mention, Passage, PassageGroup, SlotProps } from "../slots.js";
+import type { HomeSpace, Mention, Passage, PassageGroup, SlotProps } from "../slots.js";
 import { defaultThemeConfig } from "../build/default-theme.js";
 
 /** The neutral palette of a project without `theme.yaml`, named after the gallery. */
@@ -1109,73 +1109,211 @@ export const corporateKeywordPage: SlotProps["KeywordPage"] = {
 };
 
 export const home: SlotProps["Home"] = {
-  title: "My wiki",
   search: { action: "search/", placeholder: "Search a word of your business" },
   shortcuts: [
     { label: "entity", href: "glossary/entity/" },
     { label: "source", href: "glossary/source/" },
   ],
-  stats: {
-    sources: 7,
-    files: 1894,
-    builtAt: "2024-05-01T10:00:00.000Z",
-    builtAtLabel: "May 1, 2024",
-  },
-  entries: [
+  spaces: [
     {
-      kind: "tree",
-      title: "By file tree",
-      href: "tree/",
-      items: [{ label: "glossary", href: "tree/glossary/", count: 120 }],
-      tree: [
+      name: "glossary",
+      initials: "GL",
+      count: 2,
+      unit: "pages",
+      countLabel: "2 pages",
+      date: "2024-04-30",
+      dateLabel: "yesterday",
+      stale: false,
+      nodes: [
+        { label: "Keyword page", href: "glossary/keyword-page/" },
+        { label: "Source", href: "glossary/source/" },
+      ],
+    },
+    {
+      name: "specs",
+      initials: "SP",
+      count: 1,
+      unit: "pages",
+      date: "2024-04-20",
+      dateLabel: "11 days ago",
+      stale: false,
+      nodes: [
         {
-          label: "glossary",
-          count: 2,
-          children: [
-            { label: "Keyword page", href: "glossary/keyword-page/" },
-            { label: "Source", href: "glossary/source/" },
-          ],
-        },
-        {
-          label: "specs",
+          label: "screens",
           count: 1,
-          children: [
-            {
-              label: "screens",
-              count: 1,
-              children: [{ label: "Home page", href: "specs/screens/home-page/" }],
-            },
-          ],
+          children: [{ label: "Home page", href: "specs/screens/home-page/" }],
         },
       ],
     },
     {
-      kind: "index",
-      title: "By word",
-      href: "index/",
-      items: [{ label: "A", href: "index/a/", count: 40 }],
+      name: "rules",
+      initials: "RU",
+      count: 1,
+      unit: "pages",
+      date: "2023-01-01",
+      stale: true,
+      nodes: [{ label: "Old rule", href: "rules/old-rule/" }],
     },
+    { name: "framing", initials: "FR", count: 0, unit: "pages", stale: false, nodes: [] },
+  ],
+  recent: [
     {
-      kind: "recent",
-      title: "Latest changes",
-      href: "recent/",
-      items: [
-        {
-          label: "Keyword page",
-          href: "glossary/keyword-page/",
-          date: "2024-04-30",
-          dateLabel: "Apr 30, 2024",
-        },
-        { label: "Old rule", href: "rules/old-rule/", date: "2023-01-01", stale: true },
-      ],
-      sources: [
-        { name: "glossary", date: "2024-04-30", dateLabel: "Apr 30, 2024", stale: false },
-        { name: "rules", date: "2023-01-01", stale: true },
-        { name: "framing", stale: false },
-      ],
+      label: "Keyword page",
+      href: "glossary/keyword-page/",
+      space: "glossary",
+      date: "2024-04-30",
+      dateLabel: "yesterday",
+    },
+    { label: "Old rule", href: "rules/old-rule/", space: "rules", date: "2023-01-01" },
+  ],
+  alerts: [
+    {
+      title: "A space has not moved for 486 days",
+      space: "rules",
+      text: "rules. The alert threshold is set to 180 days in the configuration.",
     },
   ],
-  todo: { label: "To do", href: "todo/", count: 12 },
+};
+
+/** A space of the corporate home: its tree lists a few pages under one folder, enough to fold behind the row. */
+function corporateSpace(
+  name: string,
+  initials: string,
+  count: number,
+  unit: "pages" | "documents",
+  date: string,
+  dateLabel: string,
+  folder: string,
+  pages: string[],
+  stale = false,
+): HomeSpace {
+  return {
+    name,
+    initials,
+    count,
+    unit,
+    countLabel: `${String(count)} ${unit}`,
+    date,
+    dateLabel,
+    stale,
+    nodes: [
+      {
+        label: folder,
+        count: pages.length,
+        children: pages.map((title) => ({
+          label: title,
+          href: `${name}/${folder}/${title.toLowerCase().replaceAll(" ", "-")}/`,
+        })),
+      },
+    ],
+  };
+}
+
+/**
+ * The home page of the corporate state: the question and the field with its shortcuts, five
+ * spaces of the fixtures corpus with two more folded, the pages changed last, and the alert on
+ * the space that has not moved past the threshold.
+ */
+export const corporateHome: SlotProps["Home"] = {
+  search: { action: "search/", placeholder: "Search the documentation" },
+  shortcuts: [
+    { label: "Entity", href: "glossary/inference/entity/" },
+    { label: "Publication threshold", href: "specs/rules/publication-threshold/" },
+    { label: "Keyword page", href: "glossary/publication/keyword-page/" },
+    { label: "Source", href: "glossary/ingestion/source/" },
+    { label: "Mentions panel", href: "specs/screens/mentions-panel/" },
+    { label: "build summary", href: "keywords/build-summary/" },
+  ],
+  spaces: [
+    corporateSpace("glossary", "GL", 48, "pages", "2026-09-11", "2 days ago", "inference", [
+      "Confidence",
+      "Entity",
+      "Link",
+      "Neighbourhood",
+    ]),
+    corporateSpace("specs", "SP", 57, "pages", "2026-09-09", "4 days ago", "rules", [
+      "Fail-on policy",
+      "Publication threshold",
+      "Twin size ratio",
+    ]),
+    corporateSpace("meetings", "ME", 12, "documents", "2026-09-12", "yesterday", "2026", [
+      "Keyword page threshold review",
+      "Neighbourhood cap",
+      "Theme override model",
+    ]),
+    corporateSpace("decisions", "DE", 8, "pages", "2026-09-01", "12 days ago", "publication", [
+      "Static site with islands",
+      "Self-hosted fonts",
+    ]),
+    corporateSpace(
+      "framing",
+      "FR",
+      4,
+      "pages",
+      "2026-03-03",
+      "6 months ago",
+      "public",
+      ["Vision", "Non-goals", "Roadmap outline"],
+      true,
+    ),
+  ],
+  moreSpaces: [
+    corporateSpace("briefs", "BR", 3, "documents", "2026-08-20", "3 weeks ago", "2026", [
+      "Language pack brief",
+    ]),
+    corporateSpace("runbooks", "RU", 2, "pages", "2026-07-30", "last month", "operations", [
+      "Nightly build",
+      "Cache pruning",
+    ]),
+  ],
+  recent: [
+    {
+      label: "Keyword page threshold review",
+      href: "meetings/2026/keyword-page-threshold-review/",
+      space: "meetings",
+      date: "2026-09-12",
+      dateLabel: "yesterday",
+    },
+    {
+      label: "Entity",
+      href: "glossary/inference/entity/",
+      space: "glossary",
+      date: "2026-09-11",
+      dateLabel: "2 days ago",
+    },
+    {
+      label: "Publication threshold",
+      href: "specs/rules/publication-threshold/",
+      space: "specs",
+      date: "2026-09-09",
+      dateLabel: "4 days ago",
+    },
+    {
+      label: "Static site with islands",
+      href: "decisions/publication/static-site-with-islands/",
+      space: "decisions",
+      date: "2026-09-01",
+      dateLabel: "12 days ago",
+    },
+  ],
+  alerts: [
+    {
+      title: "A space has not moved for 194 days",
+      space: "framing",
+      text: "framing. The alert threshold is set to 180 days in the configuration.",
+    },
+  ],
+  labels: {
+    question: "What are you looking for?",
+    explanation:
+      "Type a word of the business. If it is used anywhere in the documentation, it has a page \u2014 even if nobody has defined it yet.",
+    frequent: "Frequently consulted",
+    spaces: "Spaces",
+    spacesLead: "fed by your repositories",
+    moreSpaces: "2 more spaces, less consulted",
+    datesNote: "The dates come from the history of the repositories, so they are always right.",
+    recent: "Recently changed",
+  },
 };
 
 export const searchResults: SlotProps["SearchResults"] = {

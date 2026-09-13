@@ -109,11 +109,11 @@ describe("The to-do page is reachable from the home page and the header with its
   const page = documents.find((document) => document.path === TODO_PAGE)?.content ?? "";
   const home = documents.find((document) => document.path === HOME_PAGE)?.content ?? "";
 
-  it("counts the documents and the words in the header link of every page and in the link of the home page", () => {
-    expect(home).toContain('<a href="todo/index.html">To do<span class="count">5</span></a>');
+  it("counts the documents and the words in the footer link of every page, the home page included, and nowhere else on the home page", () => {
     expect(home).toContain(
-      '<p class="home-todo"><a href="todo/index.html">To do<span class="count">5</span></a></p>',
+      '<li class="site-footer-todo"><a href="todo/index.html">To do<span class="count">5</span></a></li>',
     );
+    expect(home.match(/todo\/index\.html/g)).toHaveLength(1);
     expect(page).toContain('<a href="index.html">To do<span class="count">5</span></a>');
   });
 

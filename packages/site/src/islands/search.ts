@@ -16,14 +16,19 @@ import {
 } from "../search/shared.js";
 import {
   clearFilters,
+  emptyState,
   parseSearchState,
   searchQueryString,
   withQuery,
   type SearchState,
 } from "../search/state.js";
-import type { SearchResult, SearchResultsProps } from "../slots.js";
-import { ResultList } from "../theme/default/result-list.js";
+import type { SearchField, SearchResult, SearchResultsProps, SuggestionLabels } from "../slots.js";
 import { SearchResults } from "../theme/default/search-results.js";
+import {
+  defaultSuggestionLabels,
+  SearchSuggestions,
+  type Suggestion,
+} from "../theme/default/search-suggestions.js";
 
 /** How many results the suggestions under the header field show; the results page shows them all. */
 export const SUGGESTIONS = 8;
@@ -157,6 +162,23 @@ export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): Se
   };
 }
 
+/** A hit as the live results show it: the title, the type or the documents of a keyword page, the space, the href from the page through `root`. */
+export function suggestionOf(entry: SearchEntry, meta: SearchMeta, root: string): Suggestion {
+  const typeLabel = meta.types[entry.type];
+  return {
+    title: entry.title,
+    href: `${root}${entry.url}`,
+    ...(typeLabel === undefined ? {} : { typeLabel }),
+    ...(entry.keyword === true ? { keyword: true, documents: entry.documents ?? 0 } : {}),
+    space: meta.sources[entry.source] ?? entry.source,
+  };
+}
+
+/** The results page with the query typed: the action of the form, then the query string of that query alone. */
+export function seeResultsHref(search: SearchField, query: string): string {
+  return `${search.action}${searchQueryString(withQuery(emptyState(), query))}`;
+}
+
 /**
  * The runner of one page: loads `meta` on the first call, then the shard of every word of the
  * query that the table lists, and ranks. A word whose shard the table does not list matches
@@ -221,6 +243,16 @@ export interface SearchDocument {
   addEventListener(type: "keydown", listener: (event: KeyEvent) => void): void;
 }
 
+/** `Escape` in the field leaves it and tells the caller, so that the live results go. */
+export function wireEscape(input: SearchInput, onEscape: () => void): void {
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      input.blur();
+      onEscape();
+    }
+  });
+}
+
 /** `/` anywhere but in a text control focuses the field; `Escape` in the field leaves it. */
 export function wireShortcuts(
   document: SearchDocument,
@@ -237,25 +269,74 @@ export function wireShortcuts(
     event.preventDefault();
     input.focus();
   });
+  wireEscape(input, onEscape);
+}
+
+/** An element the keyboard can reach: a link of the live results. */
+export interface Focusable {
+  focus(): void;
+}
+
+/**
+ * The arrow keys walk the live results: `ArrowDown` in the field reaches the first row, then
+ * moves down the rows, `ArrowUp` moves up and, from the first row, back to the field;
+ * `Escape` on a row hides the results and returns to the field. A row is a link, so `Enter`
+ * opens it as any link.
+ */
+export function wireArrows(
+  input: SearchInput,
+  panel: SearchPanel,
+  links: () => readonly Focusable[],
+): void {
   input.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      input.blur();
-      onEscape();
+    if (event.key !== "ArrowDown" || panel.hidden) return;
+    const [first] = links();
+    if (first === undefined) return;
+    event.preventDefault();
+    first.focus();
+  });
+  panel.addEventListener("keydown", (event) => {
+    const rows = links();
+    const at = rows.findIndex((row) => row === event.target);
+    if (at < 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      rows[Math.min(at + 1, rows.length - 1)]?.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (at === 0) {
+        input.focus();
+      } else {
+        rows[at - 1]?.focus();
+      }
+    } else if (event.key === "Escape") {
+      panel.hidden = true;
+      input.focus();
     }
   });
 }
 
-/** Where a list is drawn: the suggestions panel of the header, or the island of the results page. */
+/** Where a list is drawn: the panel of the live results under a field, or the island of the results page. */
 export interface SearchPanel {
   hidden: boolean;
+  addEventListener(type: "keydown", listener: (event: KeyEvent) => void): void;
+}
+
+/** Where the number of matches is written, next to the field of the home page. */
+export interface CounterSlot {
+  textContent: string | null;
 }
 
 export interface SearchIslandElement<P extends SearchPanel> {
   getAttribute(name: string): string | null;
-  /** The field of the header island, none on the results island. */
+  /** The field of a field island, none on the results island. */
   input(): SearchInput | null;
-  /** The suggestions panel of the header island, none on the results island. */
+  /** The panel of the live results of a field island, none on the results island. */
   panel(): P | null;
+  /** The links of the rows the panel shows, in order; none before the island draws them. */
+  links(): readonly Focusable[];
+  /** The counter of matches of the field of the home page; none on the header field. */
+  counter(): CounterSlot | null;
   /** The island itself, which the results page renders into. */
   container(): P;
 }
@@ -413,9 +494,21 @@ export function resultsPropsOf(
   };
 }
 
+/** A field island once read: its input, its panel and counter, and the field it was served with. */
+interface Field<P extends SearchPanel> {
+  input: SearchInput;
+  panel: P | null;
+  counter: CounterSlot | null;
+  links: () => readonly Focusable[];
+  search: SearchField;
+  home: boolean;
+}
+
 /**
- * Wires every search island of a page: the field of the header gets the shortcuts and, when the
- * site has an index, suggestions as the reader types; the results island, when the page has
+ * Wires every search island of a page: each field, the one of the header and the one at the
+ * head of the home page, gets the `Escape` shortcut and, when the site has an index, its live
+ * results as the reader types, walked by the arrow keys; `/` reaches the field of the home
+ * page when there is one, else the field of the header. The results island, when the page has
  * one, shows the list for the state of the address, filtered by its facets, and follows the
  * field and the facets. Every change of state goes through the address: a facet followed
  * pushes an entry to the history, typing rewrites the current one once the reader pauses, and
@@ -423,42 +516,125 @@ export function resultsPropsOf(
  */
 export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): number {
   let root: string | undefined;
-  let input: SearchInput | null = null;
-  let panel: P | null = null;
+  const fields: Field<P>[] = [];
   let results: P | null = null;
   let mounted = 0;
   for (const element of options.islands) {
     // Written by island() at build: the attribute carries the props of the island.
     const props = JSON.parse(element.getAttribute("data-props") ?? "{}") as SearchIslandProps;
     root ??= props.root;
-    if (props.search !== undefined) {
-      input = element.input();
-      panel = element.panel();
+    const input = element.input();
+    if (props.search !== undefined && input !== null) {
+      fields.push({
+        input,
+        panel: element.panel(),
+        counter: element.counter(),
+        links: () => element.links(),
+        search: props.search,
+        home: props.home === true,
+      });
     }
     if (props.results !== undefined) {
       results = element.container();
     }
     mounted += 1;
   }
-  if (input === null) {
+  const primary = fields.find((field) => field.home) ?? fields[0];
+  if (primary === undefined) {
     return mounted;
   }
-  const field = input;
-  const suggestions = panel;
-  const hide = (): void => {
-    if (suggestions !== null) suggestions.hidden = true;
-  };
-  wireShortcuts(options.document, field, hide);
+  for (const field of fields) {
+    const hide = (): void => {
+      if (field.panel !== null) field.panel.hidden = true;
+    };
+    if (field === primary) {
+      wireShortcuts(options.document, field.input, hide);
+    } else {
+      wireEscape(field.input, hide);
+    }
+  }
   if (root === undefined) {
     return mounted;
   }
   const site = root;
   const run = searchRunner(site, options.inject, options.host);
+  for (const field of fields) {
+    if (results === null || field !== primary) {
+      suggest(field, run, site, options);
+    }
+  }
+  if (results !== null) {
+    follow(primary, results, run, site, options);
+  }
+  return mounted;
+}
+
+/** The live results of a field: drawn under it as the reader types, the matches counted next to it, hidden when nothing matches. */
+function suggest<P extends SearchPanel>(
+  field: Field<P>,
+  run: SearchRunner,
+  site: string,
+  options: SearchIslands<P>,
+): void {
+  const labels: SuggestionLabels = field.search.suggestions ?? defaultSuggestionLabels;
+  let latest = 0;
+  const draw = async (): Promise<void> => {
+    const ticket = (latest += 1);
+    const query = field.input.value;
+    const answer = await run(query);
+    if (ticket !== latest) {
+      return;
+    }
+    const meta = answer.meta;
+    const shown =
+      meta === undefined || queryWords(query).length === 0
+        ? []
+        : answer.hits.slice(0, SUGGESTIONS).map((hit) => suggestionOf(hit.entry, meta, site));
+    const total = shown.length === 0 ? 0 : answer.hits.length;
+    const locale = meta?.locale ?? "en";
+    if (field.panel !== null) {
+      options.render(
+        h(SearchSuggestions, {
+          query,
+          suggestions: shown,
+          total,
+          resultsHref: seeResultsHref(field.search, query),
+          locale,
+          labels,
+        }),
+        field.panel,
+      );
+      field.panel.hidden = shown.length === 0;
+    }
+    if (field.counter !== null) {
+      field.counter.textContent = total === 0 ? "" : plural(labels.matches, total, locale);
+    }
+  };
+  field.input.addEventListener("focus", () => {
+    void run("");
+  });
+  field.input.addEventListener("input", () => {
+    void draw();
+  });
+  if (field.panel !== null) {
+    wireArrows(field.input, field.panel, field.links);
+  }
+}
+
+/** The results page: its list follows the field and the address, and the address follows the field. */
+function follow<P extends SearchPanel>(
+  field: Field<P>,
+  results: P,
+  run: SearchRunner,
+  site: string,
+  options: SearchIslands<P>,
+): void {
+  const input = field.input;
   let state = parseSearchState(options.location.search());
   let copied = false;
   let latest = 0;
   let cancelReplace: (() => void) | undefined;
-  const draw = (target: P, answer: SearchOutcome): void => {
+  const draw = (answer: SearchOutcome): void => {
     const clipboard = options.clipboard;
     const actions: ResultsActions =
       clipboard === undefined
@@ -470,13 +646,13 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
               clipboard.writeText(options.location.href()).then(
                 () => {
                   copied = true;
-                  draw(target, answer);
+                  draw(answer);
                 },
                 () => undefined,
               );
             },
           };
-    options.render(h(SearchResults, resultsPropsOf(state, answer, site, actions)), target);
+    options.render(h(SearchResults, resultsPropsOf(state, answer, site, actions)), results);
   };
   const show = async (restoreScroll = false): Promise<void> => {
     const ticket = (latest += 1);
@@ -485,54 +661,36 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
       return;
     }
     copied = false;
-    if (results !== null) {
-      draw(results, answer);
-      const position = restoreScroll
-        ? options.scroll.remembered(searchQueryString(state))
-        : undefined;
-      if (position !== undefined) options.scroll.scrollTo(position);
-    } else if (suggestions !== null) {
-      const meta = answer.meta;
-      const shown =
-        meta === undefined || queryWords(state.query).length === 0
-          ? []
-          : answer.hits.slice(0, SUGGESTIONS).map((hit) => resultOf(hit.entry, meta, site));
-      options.render(h(ResultList, { results: shown }), suggestions);
-      suggestions.hidden = shown.length === 0;
-    }
+    draw(answer);
+    const position = restoreScroll
+      ? options.scroll.remembered(searchQueryString(state))
+      : undefined;
+    if (position !== undefined) options.scroll.scrollTo(position);
   };
   const navigate = (href: string): void => {
     cancelReplace?.();
     state = parseSearchState(href);
-    field.value = state.query;
+    input.value = state.query;
     options.location.push(searchQueryString(state));
     void show();
   };
-  field.addEventListener("focus", () => {
-    void run("");
-  });
-  field.addEventListener("input", () => {
-    state = withQuery(state, field.value);
-    if (results !== null) {
-      cancelReplace?.();
-      cancelReplace = options.defer(() => {
-        options.location.replace(searchQueryString(state));
-      }, REPLACE_DELAY);
-    }
+  input.addEventListener("input", () => {
+    state = withQuery(state, input.value);
+    cancelReplace?.();
+    cancelReplace = options.defer(() => {
+      options.location.replace(searchQueryString(state));
+    }, REPLACE_DELAY);
     void show();
   });
-  if (results !== null) {
-    field.value = state.query;
-    options.location.onPop(() => {
-      cancelReplace?.();
-      state = parseSearchState(options.location.search());
-      field.value = state.query;
-      void show(true);
-    });
-    options.scroll.onScroll(() => {
-      options.scroll.remember(searchQueryString(state), options.scroll.position());
-    });
+  input.value = state.query;
+  options.location.onPop(() => {
+    cancelReplace?.();
+    state = parseSearchState(options.location.search());
+    input.value = state.query;
     void show(true);
-  }
-  return mounted;
+  });
+  options.scroll.onScroll(() => {
+    options.scroll.remember(searchQueryString(state), options.scroll.position());
+  });
+  void show(true);
 }

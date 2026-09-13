@@ -227,6 +227,7 @@ export {
   initialsOf,
   spaceOf,
   spaceWithPageOf,
+  wholeTreeOf,
 } from "./build/space.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
@@ -326,10 +327,16 @@ export {
   resultsHref,
   resultsPropsOf,
   searchRunner,
+  seeResultsHref,
   shardLoader,
+  suggestionOf,
+  wireArrows,
+  wireEscape,
   wireShortcuts,
 } from "./islands/search.js";
 export type {
+  CounterSlot,
+  Focusable,
   KeyEvent,
   ScriptInjector,
   SearchDocument,
@@ -345,6 +352,10 @@ export type {
   ShardLoader,
   ShardReceiver,
 } from "./islands/search.js";
-export { SearchForm, SearchIsland } from "./theme/default/search-island.js";
+export { HomeSearchForm, SearchForm, SearchIsland } from "./theme/default/search-island.js";
+export { SearchSuggestions, defaultSuggestionLabels } from "./theme/default/search-suggestions.js";
+export type { SearchSuggestionsProps, Suggestion } from "./theme/default/search-suggestions.js";
+export { markTitle } from "./search/highlight.js";
+export type { TitlePiece } from "./search/highlight.js";
 export { ResultList } from "./theme/default/result-list.js";
 export type { SiteNames } from "./build/context.js";
