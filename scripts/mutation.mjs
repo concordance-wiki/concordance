@@ -33,7 +33,8 @@ if (since !== -1) {
     process.exit(0);
   }
   console.log(`mutation: ${String(changed.length)} changed file(s) since ${ref}`);
-  args.push("--mutate", changed.join(","));
+  // A change limited to types or interfaces yields no mutant; that is a pass, not a misconfiguration.
+  args.push("--mutate", changed.join(","), "--allowEmpty");
 }
 
 const run = spawnSync("pnpm", args, { stdio: "inherit" });
