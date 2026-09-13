@@ -183,12 +183,12 @@ describe("EntityPage", () => {
     const html = render();
     expectInOrder(html, [
       '<section class="panel-block entity-panel"',
-      '<section class="panel-block entity-toc" aria-labelledby="entity-toc"><details class="panel-fold"><summary><h2 id="entity-toc">On this page</h2></summary><ol class="toc-list"><li><a href="#not-to-be-confused-with">Not to be confused with</a></li></ol></details></section>',
+      '<section class="panel-block entity-toc" aria-labelledby="entity-toc"><details class="panel-fold"><summary><h2 id="entity-toc">On this page<span class="count panel-count">1</span></h2></summary><concordance-island data-island="toc" data-props="{&quot;entries&quot;:[{&quot;id&quot;:&quot;not-to-be-confused-with&quot;,&quot;heading&quot;:&quot;Not to be confused with&quot;}]}"><ol class="toc-list"><li><a href="#not-to-be-confused-with" aria-current="location">Not to be confused with</a></li></ol></concordance-island></details></section>',
       '<aside class="mentions panel-block"',
     ]);
     expect(render({ sections: entityPage.sections.slice(0, 1) })).not.toContain("entity-toc");
     expect(render({ labels: { onThisPage: "Sur cette page" } })).toContain(
-      '<h2 id="entity-toc">Sur cette page</h2>',
+      '<h2 id="entity-toc">Sur cette page<span class="count panel-count">1</span></h2>',
     );
   });
 
@@ -412,8 +412,9 @@ describe("EntityPage", () => {
     expect(render({ labels: { properties: "Propriétés" } })).toContain(
       '<h2 id="entity-properties">Propriétés<span class="count panel-count">2</span></h2>',
     );
-    // The table of contents counts nothing: its heading stands alone.
-    expect(render()).toContain('<h2 id="entity-toc">On this page</h2>');
+    expect(render()).toContain(
+      '<h2 id="entity-toc">On this page<span class="count panel-count">1</span></h2>',
+    );
   });
 
   it("renders an attribute value and a mapped section through the parts the theme resolved, the theme's before the type module's", () => {

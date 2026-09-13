@@ -101,6 +101,81 @@ describe("the mode-switch entry", () => {
   });
 });
 
+describe("the toc entry", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  /** A document holding one table of contents whose two sections exist, recording what the entry observes. */
+  function fakeDocument(): {
+    selectors: string[];
+    observed: string[];
+    links: { attributes: Map<string, string> }[];
+  } {
+    const selectors: string[] = [];
+    const observed: string[] = [];
+    const links = ["#scope", "#history"].map((href) => {
+      const attributes = new Map([["href", href]]);
+      return {
+        attributes,
+        getAttribute: (name: string) => attributes.get(name) ?? null,
+        setAttribute: (name: string, value: string) => {
+          attributes.set(name, value);
+        },
+        removeAttribute: (name: string) => {
+          attributes.delete(name);
+        },
+      };
+    });
+    vi.stubGlobal("document", {
+      querySelectorAll: (selector: string) => {
+        selectors.push(selector);
+        return [{ querySelectorAll: () => links }];
+      },
+      getElementById: (id: string) => ({ id }),
+    });
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(
+          private readonly callback: (
+            entries: { target: { id: string }; isIntersecting: boolean }[],
+          ) => void,
+          public readonly options: { rootMargin: string },
+        ) {}
+        observe(target: { id: string }): void {
+          observed.push(`${target.id} in ${this.options.rootMargin}`);
+          this.callback([{ target, isIntersecting: target.id === "history" }]);
+        }
+      },
+    );
+    return { selectors, observed, links };
+  }
+
+  it("wires every table of contents of the document with an intersection observer over the top third of the viewport", async () => {
+    const { selectors, observed, links } = fakeDocument();
+    await import("../../src/islands/toc.client.js");
+    expect(selectors).toEqual(['concordance-island[data-island="toc"]']);
+    expect(observed).toEqual(["scope in 0px 0px -66% 0px", "history in 0px 0px -66% 0px"]);
+    expect(links.map((entry) => entry.attributes.get("aria-current"))).toEqual([
+      undefined,
+      "location",
+    ]);
+  });
+
+  it("leaves the served mark alone in a browser without an intersection observer", async () => {
+    const { observed, links } = fakeDocument();
+    vi.stubGlobal("IntersectionObserver", undefined);
+    await import("../../src/islands/toc.client.js");
+    expect(observed).toEqual([]);
+    expect(links.map((entry) => entry.attributes.get("aria-current"))).toEqual([
+      undefined,
+      undefined,
+    ]);
+  });
+});
+
 describe("the search entry", () => {
   afterEach(() => {
     vi.unstubAllGlobals();

@@ -16,7 +16,7 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the category list, document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
+  it("declares the category list, document viewer, mentions panel, mode switch, search, table of contents and trail islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
       "category-list",
@@ -24,6 +24,7 @@ describe("defaultIslands", () => {
       "mentions-panel",
       "mode-switch",
       "search",
+      "toc",
       "trail",
       "contract-viewer",
     ]);
@@ -32,10 +33,11 @@ describe("defaultIslands", () => {
     expect(islands[2]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[3]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
     expect(islands[4]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands[5]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
-    expect(islands[6]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
-    expect(islands[6]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
-    expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 7 }));
+    expect(islands[5]?.entry.endsWith("/src/islands/toc.client")).toBe(true);
+    expect(islands[6]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
+    expect(islands[7]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
+    expect(islands[7]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
+    expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 8 }));
   });
 
   it("keeps the PDF viewer and its worker apart, the only modules, built from the legacy build of pdf.js only for a site that shows a PDF", () => {
@@ -98,7 +100,7 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(7);
+    expect(bundles).toHaveLength(8);
     const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
     expect(bundles.map((candidate) => candidate.name)).toEqual([
       "category-list",
@@ -107,6 +109,7 @@ describe("bundleIslands", () => {
       "mentions-panel",
       "mode-switch",
       "search",
+      "toc",
       "trail",
     ]);
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
@@ -152,7 +155,7 @@ describe("bundleIslands", () => {
   it("bundles every default island as a classic script, without import or export, so that a file:// page runs it in every browser", async () => {
     const fileSystem = memoryFileSystem();
     const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
-    expect(bundles).toHaveLength(7);
+    expect(bundles).toHaveLength(8);
     for (const bundle of bundles) {
       expect(bundle.module, bundle.name).toBeUndefined();
       const written = fileSystem.readText(`/out/${bundle.file}`);

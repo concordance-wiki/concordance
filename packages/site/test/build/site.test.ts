@@ -153,6 +153,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "mentions-panel",
       "mode-switch",
       "search",
+      "toc",
       "trail",
     ]);
   });
@@ -602,7 +603,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.summary[0]).toBe("site: 23 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(7);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(8);
     expect(
       report.summary.some((line) => /^pages: 23, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
@@ -629,6 +630,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
       "mode-switch",
       "pdf-viewer",
       "search",
+      "toc",
       "trail",
     ]);
     const viewer = report.budget.islands.find((island) => island.name === "contract-viewer");
@@ -791,7 +793,7 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(entity).toContain('<html lang="en"');
     expect(entity).toContain('<nav class="space" aria-label="Arborescence de l’espace">');
     expect(entity).toContain('<nav class="breadcrumbs" aria-label="Vous êtes ici">');
-    expect(entity).toContain('<h2 id="entity-toc">Sur cette page</h2>');
+    expect(entity).toContain('<h2 id="entity-toc">Sur cette page<span class="count panel-count">');
     expect(entity).toContain(
       '<p class="panel-note">4 clés déclarées. Le reste du fichier est du texte libre.</p>',
     );
@@ -877,6 +879,7 @@ describe("siteDocuments", () => {
     { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
     { name: "search", file: "search-0123ABCD.js", bytes: 1 },
+    { name: "toc", file: "toc-789ABC.js", bytes: 1 },
     { name: "trail", file: "trail-789ABC.js", bytes: 1 },
   ];
 
