@@ -8,6 +8,8 @@ import {
   facetValue,
   filterEntries,
   matchesOthers,
+  notelessCount,
+  notelessFacetOf,
 } from "../../src/search/facets.js";
 import type { SearchEntry, SearchMeta } from "../../src/search/shared.js";
 import { emptyState, parseSearchState, searchQueryString } from "../../src/search/state.js";
@@ -65,6 +67,7 @@ describe("countFacets", () => {
       source: { glossary: 1, specs: 2 },
       domain: { publication: 2, quality: 1 },
       application: { "concordance-cli": 2 },
+      nonote: { only: 0, exclude: 3 },
     });
   });
 
@@ -74,12 +77,14 @@ describe("countFacets", () => {
       source: { glossary: 1 },
       domain: {},
       application: {},
+      nonote: { only: 0, exclude: 0 },
     });
     expect(countFacets(entries, parseSearchState("?domain=quality"))).toEqual({
       type: { rule: 1 },
       source: { specs: 1 },
       domain: { publication: 2, quality: 1 },
       application: {},
+      nonote: { only: 0, exclude: 1 },
     });
   });
 });
@@ -121,6 +126,7 @@ describe("facetsOf and activeFiltersOf", () => {
       ["source", "Source"],
       ["domain", "Domain"],
       ["application", "Application"],
+      ["nonote", "Without a note"],
     ]);
     expect(facets[0]?.values).toEqual([
       {
@@ -206,5 +212,120 @@ describe("facetsOf and activeFiltersOf", () => {
       },
     ]);
     expect(activeFiltersOf(meta, emptyState(), searchQueryString)).toEqual([]);
+  });
+});
+
+describe("The no-note facet over the entries", () => {
+  const summary: SearchEntry = {
+    id: "keywords/build-summary",
+    title: "build summary",
+    type: "keyword",
+    url: "keywords/build-summary/index.html",
+    status: "valid",
+    source: "specs",
+    keyword: true,
+    occurrences: 5,
+    documents: 3,
+  };
+  const all = [...entries, summary];
+
+  it("keeps every entry under any, the keyword pages alone under only, the others under exclude, the field facets still applying", () => {
+    const ids = (search: string): string[] =>
+      filterEntries(all, (entry) => entry, parseSearchState(search)).map((entry) => entry.id);
+    expect(ids("")).toHaveLength(4);
+    expect(ids("?nonote=only")).toEqual(["keywords/build-summary"]);
+    expect(ids("?nonote=exclude")).toEqual(entries.map((entry) => entry.id));
+    expect(ids("?nonote=only&source=glossary")).toEqual([]);
+    expect(ids("?nonote=exclude&source=specs")).toEqual([
+      "specs/screens/search-results",
+      "specs/rules/publication-threshold",
+    ]);
+    expect(matchesOthers(summary, parseSearchState("?nonote=exclude"), "nonote")).toBe(true);
+    expect(matchesOthers(summary, parseSearchState("?nonote=exclude"), "type")).toBe(false);
+  });
+
+  it("counts the keyword pages and the others under the field facets, and draws the three values with one always active", () => {
+    const state = parseSearchState("?source=specs");
+    const counts = countFacets(all, state);
+    expect(counts.nonote).toEqual({ only: 1, exclude: 2 });
+    expect(notelessCount(counts, "any")).toBe(3);
+    expect(notelessCount(counts, "only")).toBe(1);
+    expect(notelessCount(counts, "exclude")).toBe(2);
+    expect(notelessFacetOf(meta, state, counts, searchQueryString)).toEqual({
+      name: "nonote",
+      label: "Without a note",
+      values: [
+        {
+          value: "any",
+          label: "Included",
+          count: 3,
+          href: "?source=specs",
+          active: true,
+          disabled: false,
+        },
+        {
+          value: "only",
+          label: "Only",
+          count: 1,
+          href: "?source=specs&nonote=only",
+          active: false,
+          disabled: false,
+        },
+        {
+          value: "exclude",
+          label: "Excluded",
+          count: 2,
+          href: "?source=specs&nonote=exclude",
+          active: false,
+          disabled: false,
+        },
+      ],
+    });
+    const only = parseSearchState("?source=glossary&nonote=only");
+    const none = countFacets(all, only);
+    expect(none.nonote).toEqual({ only: 0, exclude: 1 });
+    expect(none.type).toEqual({});
+    expect(notelessFacetOf(meta, only, none, searchQueryString).values).toEqual([
+      {
+        value: "any",
+        label: "Included",
+        count: 1,
+        href: "?source=glossary",
+        active: false,
+        disabled: false,
+      },
+      {
+        value: "only",
+        label: "Only",
+        count: 0,
+        href: "?source=glossary",
+        active: true,
+        disabled: false,
+      },
+      {
+        value: "exclude",
+        label: "Excluded",
+        count: 1,
+        href: "?source=glossary&nonote=exclude",
+        active: false,
+        disabled: false,
+      },
+    ]);
+    expect(facetsOf(meta, only, none, searchQueryString)[4]?.name).toBe("nonote");
+  });
+
+  it("recalls the choice after the field facets, with the address that lifts it", () => {
+    expect(
+      activeFiltersOf(meta, parseSearchState("?type=term&nonote=exclude"), searchQueryString),
+    ).toEqual([
+      { name: "type", value: "term", facetLabel: "Type", label: "Term", href: "?nonote=exclude" },
+      {
+        name: "nonote",
+        value: "exclude",
+        facetLabel: "Without a note",
+        label: "Excluded",
+        href: "?type=term",
+      },
+    ]);
   });
 });

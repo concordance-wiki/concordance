@@ -191,7 +191,35 @@ describe("buildSearchIndex", () => {
       source: { probe: 1, specs: 8 },
       domain: { probe: 1 },
       application: { probe: 1 },
+      nonote: { only: 0, exclude: 9 },
     });
+  });
+
+  it("flags a keyword page in the table with its occurrences and documents, 0 when the attributes lack them", () => {
+    const summary = entity({
+      id: "keywords/build-summary",
+      type: "term",
+      title: "build summary",
+      keyword: true,
+      attributes: { occurrences: 17, documents: 6 },
+    });
+    const bare = entity({
+      id: "keywords/cold-start",
+      type: "term",
+      title: "cold start",
+      keyword: true,
+    });
+    const { meta } = buildSearchIndex(
+      input({ model: model({ entities: [summary, bare, probes.title] }) }),
+    );
+    expect(
+      meta.entities.map((entry) => [entry.keyword, entry.occurrences, entry.documents]),
+    ).toEqual([
+      [true, 17, 6],
+      [true, 0, 0],
+      [undefined, undefined, undefined],
+    ]);
+    expect(meta.counts.nonote).toEqual({ only: 2, exclude: 1 });
   });
 
   it("shards the tokens by their first two characters, tokens sorted within a shard, shards sorted", () => {
@@ -282,6 +310,10 @@ describe("searchLabels and pluralForms", () => {
       address: "Address of this search",
       copyAddress: "Copy",
       copied: "Address copied",
+      noteless: { label: "Without a note", any: "Included", only: "Only", exclude: "Excluded" },
+      undefinedExpression: "Expression without a note",
+      occurrences: { one: "# occurrence", other: "# occurrences" },
+      documents: { one: "# document", other: "# documents" },
     });
     const fr = searchLabels(loadCatalogue("fr"));
     expect(fr.facets).toBe("Filtres");

@@ -43,12 +43,25 @@ export interface SearchEntry {
   domain?: string;
   status: string;
   source: string;
+  /** `true` for a keyword page, the page of a recurring expression nobody defined. */
+  keyword?: true;
+  /** How many times the expression was read and in how many files, for a keyword page. */
+  occurrences?: number;
+  documents?: number;
 }
 
 /** The facets of the results page, in the order they are shown; each one filters on the field of the same name. */
 export const FACET_NAMES = ["type", "source", "domain", "application"] as const;
 
 export type FacetName = (typeof FACET_NAMES)[number];
+
+/** The fifth facet, on the keyword pages: its parameter in the address and its name in the view. */
+export const NOTELESS_FACET = "nonote";
+
+/** What the no-note facet does with the keyword pages: keeps them among the results, keeps them alone, or leaves them out. */
+export const NOTELESS_FILTERS = ["any", "only", "exclude"] as const;
+
+export type NotelessFilter = (typeof NOTELESS_FILTERS)[number];
 
 /**
  * A plural message frozen at build for the browser: the text of every plural category of the
@@ -72,10 +85,19 @@ export interface SearchLabels {
   address: string;
   copyAddress: string;
   copied: string;
+  /** The no-note facet: its heading and its three values. */
+  noteless: Record<"label" | NotelessFilter, string>;
+  /** What a keyword page row says under its title. */
+  undefinedExpression: string;
+  /** "N occurrences" and "N documents", by plural category, for the row of a keyword page. */
+  occurrences: PluralForms;
+  documents: PluralForms;
 }
 
-/** The number of entities carrying every value of every facet, values in code-unit order. */
-export type FacetCounts = Record<FacetName, Record<string, number>>;
+/** The number of entities carrying every value of every facet, values in code-unit order; the keyword pages and the others under `nonote`. */
+export type FacetCounts = Record<FacetName, Record<string, number>> & {
+  nonote: Record<Exclude<NotelessFilter, "any">, number>;
+};
 
 export interface SearchMeta {
   entities: SearchEntry[];
@@ -180,9 +202,14 @@ export interface Ranked {
 /**
  * The entities matching every word of the query as a prefix of one of their tokens, best first:
  * each word counts the heaviest token it prefixes, the score is their sum, and ties keep the
- * table order. The shards given are those of the words; a word without a shard matches nothing.
+ * table order, except that a keyword page, when `keyword` names it, never comes before an entity
+ * of the same score. The shards given are those of the words; a word without a shard matches nothing.
  */
-export function rank(words: readonly string[], shards: ReadonlyMap<string, ShardData>): Ranked[] {
+export function rank(
+  words: readonly string[],
+  shards: ReadonlyMap<string, ShardData>,
+  keyword: (entity: number) => boolean = () => false,
+): Ranked[] {
   let scores: Map<number, number> | undefined;
   for (const word of words) {
     const best = new Map<number, number>();
@@ -206,5 +233,10 @@ export function rank(words: readonly string[], shards: ReadonlyMap<string, Shard
   }
   return [...(scores ?? new Map<number, number>())]
     .map(([entity, score]) => ({ entity, score }))
-    .sort((a, b) => b.score - a.score || a.entity - b.entity);
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        Number(keyword(a.entity)) - Number(keyword(b.entity)) ||
+        a.entity - b.entity,
+    );
 }

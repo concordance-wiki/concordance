@@ -743,6 +743,20 @@ concordance-island[data-island="search"] {
   color: var(--color-muted);
 }
 
+/* A word without a note: outlined in dots, like its square on the map. */
+.result-keyword {
+  padding-inline: var(--space-2);
+  border: 1px dotted var(--color-ink);
+  border-radius: calc(var(--radius) * 0.75);
+}
+
+.result-subtitle,
+.result-detail {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
 .result .badge {
   margin-inline-start: var(--space-2);
 }

@@ -108,6 +108,10 @@ export function searchFields(
   };
 }
 
+function countOf(value: unknown): number {
+  return typeof value === "number" ? value : 0;
+}
+
 function entryOf(entity: Entity): SearchEntry {
   return {
     id: entity.id,
@@ -118,6 +122,13 @@ function entryOf(entity: Entity): SearchEntry {
     ...(entity.domain === undefined ? {} : { domain: entity.domain }),
     status: entity.status,
     source: entity.source.name,
+    ...(entity.keyword === true
+      ? {
+          keyword: true,
+          occurrences: countOf(entity.attributes["occurrences"]),
+          documents: countOf(entity.attributes["documents"]),
+        }
+      : {}),
   };
 }
 
@@ -183,6 +194,15 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     address: plain(catalogue, "search.address"),
     copyAddress: plain(catalogue, "search.copyAddress"),
     copied: plain(catalogue, "search.copied"),
+    noteless: {
+      label: plain(catalogue, "search.facet.noNote"),
+      any: plain(catalogue, "search.noNote.any"),
+      only: plain(catalogue, "search.noNote.only"),
+      exclude: plain(catalogue, "search.noNote.exclude"),
+    },
+    undefinedExpression: plain(catalogue, "keyword.undefinedExpression"),
+    occurrences: pluralForms(catalogue, "keyword.occurrences"),
+    documents: pluralForms(catalogue, "keyword.documents"),
   };
 }
 

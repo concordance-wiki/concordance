@@ -8,12 +8,15 @@ import { byCodeUnit } from "../order.js";
 import type { ActiveFilter, Facet } from "../slots.js";
 import {
   FACET_NAMES,
+  NOTELESS_FACET,
+  NOTELESS_FILTERS,
   type FacetCounts,
   type FacetName,
+  type NotelessFilter,
   type SearchEntry,
   type SearchMeta,
 } from "./shared.js";
-import { isSelected, toggleValue, type SearchState } from "./state.js";
+import { isSelected, toggleNoteless, toggleValue, type SearchState } from "./state.js";
 
 /** The value of an entry for a facet; none for an entity filed under no application or domain. */
 export function facetValue(entry: SearchEntry, name: FacetName): string | undefined {
@@ -28,13 +31,25 @@ function passes(entry: SearchEntry, state: SearchState, name: FacetName): boolea
   return value !== undefined && values.includes(value);
 }
 
+/** Whether an entry passes the no-note facet: every entry under `any`, the keyword pages alone under `only`, the others under `exclude`. */
+function passesNoteless(entry: SearchEntry, noteless: NotelessFilter): boolean {
+  return noteless === "any" || (noteless === "only") === (entry.keyword === true);
+}
+
 /**
  * Whether an entry passes every facet but the one named, the facets combining by intersection.
  * Leaving one out is what gives its values a count worth showing: what selecting each of them
  * would keep, so that a second value of the same facet stays selectable.
  */
-export function matchesOthers(entry: SearchEntry, state: SearchState, except?: FacetName): boolean {
-  return FACET_NAMES.every((name) => name === except || passes(entry, state, name));
+export function matchesOthers(
+  entry: SearchEntry,
+  state: SearchState,
+  except?: FacetName | typeof NOTELESS_FACET,
+): boolean {
+  return (
+    (except === NOTELESS_FACET || passesNoteless(entry, state.noteless)) &&
+    FACET_NAMES.every((name) => name === except || passes(entry, state, name))
+  );
 }
 
 /** The entries every selected value keeps, in the order given. */
@@ -48,7 +63,17 @@ export function filterEntries<T>(
 
 /** The number of entries carrying every value of every facet, each facet counted under the filters of the others; values in code-unit order. */
 export function countFacets(entries: readonly SearchEntry[], state: SearchState): FacetCounts {
-  const counts: FacetCounts = { type: {}, source: {}, domain: {}, application: {} };
+  const counts: FacetCounts = {
+    type: {},
+    source: {},
+    domain: {},
+    application: {},
+    nonote: { only: 0, exclude: 0 },
+  };
+  for (const entry of entries) {
+    if (!matchesOthers(entry, state, NOTELESS_FACET)) continue;
+    counts.nonote[entry.keyword === true ? "only" : "exclude"] += 1;
+  }
   for (const name of FACET_NAMES) {
     const table = counts[name];
     for (const entry of entries) {
@@ -83,7 +108,7 @@ export function facetsOf(
   counts: FacetCounts,
   hrefOf: (state: SearchState) => string,
 ): Facet[] {
-  return FACET_NAMES.map((name) => {
+  const fields: Facet[] = FACET_NAMES.map((name) => {
     const labels = facetLabels(meta, name);
     return {
       name,
@@ -102,6 +127,37 @@ export function facetsOf(
       }),
     };
   });
+  return [...fields, notelessFacetOf(meta, state, counts, hrefOf)];
+}
+
+/** The count of a no-note value: the keyword pages under `only`, the others under `exclude`, both under `any`. */
+export function notelessCount(counts: FacetCounts, value: NotelessFilter): number {
+  return value === "any" ? counts.nonote.only + counts.nonote.exclude : counts.nonote[value];
+}
+
+/** The no-note facet: one value is always active, `any` by default, and the others show what they would keep. */
+export function notelessFacetOf(
+  meta: SearchMeta,
+  state: SearchState,
+  counts: FacetCounts,
+  hrefOf: (state: SearchState) => string,
+): Facet {
+  return {
+    name: NOTELESS_FACET,
+    label: meta.labels.noteless.label,
+    values: NOTELESS_FILTERS.map((value) => {
+      const count = notelessCount(counts, value);
+      const active = state.noteless === value;
+      return {
+        value,
+        label: meta.labels.noteless[value],
+        count,
+        href: hrefOf(toggleNoteless(state, value)),
+        active,
+        disabled: count === 0 && !active,
+      };
+    }),
+  };
 }
 
 /** The selected values recalled above the results, in facet then value order, each with the address that lifts it. */
@@ -110,7 +166,7 @@ export function activeFiltersOf(
   state: SearchState,
   hrefOf: (state: SearchState) => string,
 ): ActiveFilter[] {
-  return FACET_NAMES.flatMap((name) =>
+  const fields = FACET_NAMES.flatMap((name) =>
     state.filters[name].map((value) => ({
       name,
       value,
@@ -119,4 +175,15 @@ export function activeFiltersOf(
       href: hrefOf(toggleValue(state, name, value)),
     })),
   );
+  if (state.noteless === "any") return fields;
+  return [
+    ...fields,
+    {
+      name: NOTELESS_FACET,
+      value: state.noteless,
+      facetLabel: meta.labels.noteless.label,
+      label: meta.labels.noteless[state.noteless],
+      href: hrefOf(toggleNoteless(state, state.noteless)),
+    },
+  ];
 }

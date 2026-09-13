@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   FACET_NAMES,
   normalizeQuery,
+  NOTELESS_FACET,
+  NOTELESS_FILTERS,
   plural,
   queryWords,
   rank,
@@ -108,6 +110,42 @@ describe("rank", () => {
     expect(rank(["panel", "key"], shards)).toEqual([]);
   });
 
+  it("never puts a keyword page before an entity of the same score, the table order deciding otherwise", () => {
+    const keyword = (entity: number): boolean => entity === 1;
+    expect(rank(["key"], shards, keyword)).toEqual([
+      { entity: 1, score: 5 },
+      { entity: 2, score: 4 },
+      { entity: 3, score: 1 },
+    ]);
+    const tied = new Map<string, ShardData>([
+      [
+        "ke",
+        {
+          keyword: [
+            [1, 5],
+            [2, 5],
+            [3, 5],
+          ],
+        },
+      ],
+    ]);
+    expect(rank(["ke"], tied, keyword)).toEqual([
+      { entity: 2, score: 5 },
+      { entity: 3, score: 5 },
+      { entity: 1, score: 5 },
+    ]);
+    expect(rank(["ke"], tied, (entity) => entity !== 1)).toEqual([
+      { entity: 1, score: 5 },
+      { entity: 2, score: 5 },
+      { entity: 3, score: 5 },
+    ]);
+    expect(rank(["ke"], tied)).toEqual([
+      { entity: 1, score: 5 },
+      { entity: 2, score: 5 },
+      { entity: 3, score: 5 },
+    ]);
+  });
+
   it("matches nothing without a word, for a word without a shard, and without typo correction", () => {
     expect(rank([], shards)).toEqual([]);
     expect(rank(["zz"], shards)).toEqual([]);
@@ -132,5 +170,7 @@ describe("plural", () => {
     expect(plural({ other: "# results" }, 1, "en")).toBe("1 results");
     expect(plural({}, 2, "en")).toBe("");
     expect(FACET_NAMES).toEqual(["type", "source", "domain", "application"]);
+    expect(NOTELESS_FACET).toBe("nonote");
+    expect(NOTELESS_FILTERS).toEqual(["any", "only", "exclude"]);
   });
 });

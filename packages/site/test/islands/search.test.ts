@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   hitsOf,
   isEditable,
+  keywordDetail,
   mountSearch,
   REPLACE_DELAY,
   resultOf,
@@ -27,7 +28,7 @@ import {
   type SearchPanel,
   type ShardHost,
 } from "../../src/islands/search.js";
-import type { SearchMeta, ShardData } from "../../src/search/shared.js";
+import type { SearchEntry, SearchMeta, ShardData } from "../../src/search/shared.js";
 import { parseSearchState } from "../../src/search/state.js";
 import type { SearchResultsProps } from "../../src/slots.js";
 import { searchLabels } from "../helpers/search.js";
@@ -61,6 +62,9 @@ const meta: SearchMeta = {
       url: "keywords/build-summary/index.html",
       status: "valid",
       source: "specs",
+      keyword: true,
+      occurrences: 17,
+      documents: 6,
     },
   ],
   shards: ["ke", "pa", "se"],
@@ -73,6 +77,7 @@ const meta: SearchMeta = {
     source: { glossary: 1, specs: 2 },
     domain: { publication: 1 },
     application: { "concordance-cli": 2 },
+    nonote: { only: 1, exclude: 2 },
   },
   labels: searchLabels,
   locale: "en",
@@ -171,6 +176,9 @@ describe("hitsOf and resultOf", () => {
         title: "build summary",
         href: "../keywords/build-summary/index.html",
         typeLabel: "Keyword",
+        keyword: true,
+        subtitle: "Expression without a note",
+        detail: "17 occurrences · 6 documents",
       },
     ]);
     expect(hitsOf("search", meta, loaded).map((hit) => resultOf(hit.entry, meta, ""))).toEqual([
@@ -544,7 +552,7 @@ describe("mountSearch", () => {
     await settled();
     expect(panel.hidden).toBe(false);
     expect(panel.html).toBe(
-      '<ol class="results"><li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span></li><li class="result"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span></li></ol>',
+      '<ol class="results"><li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span></li><li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span><span class="result-detail">17 occurrences · 6 documents</span></li></ol>',
     );
     input.value = "zebra";
     input.fire("input");
@@ -989,6 +997,29 @@ describe("Facets on type, source, domain and application, with counts frozen at 
           },
         ],
       },
+      {
+        name: "nonote",
+        label: "Without a note",
+        values: [
+          { value: "any", label: "Included", count: 3, href: "?", active: true, disabled: false },
+          {
+            value: "only",
+            label: "Only",
+            count: 1,
+            href: "?nonote=only",
+            active: false,
+            disabled: false,
+          },
+          {
+            value: "exclude",
+            label: "Excluded",
+            count: 2,
+            href: "?nonote=exclude",
+            active: false,
+            disabled: false,
+          },
+        ],
+      },
     ]);
     expect(results.html).toContain(
       '<nav class="facets" aria-label="Filters"><section class="facet"><h2>Type</h2><ul><li><a href="?type=keyword">Keyword <span class="count">1</span></a></li>',
@@ -1011,6 +1042,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       ["glossary:1", "specs:1"],
       ["publication:1"],
       ["concordance-cli:1"],
+      ["any:2", "only:1", "exclude:1"],
     ]);
   });
 });
@@ -1360,5 +1392,143 @@ describe("scrollMemory and storageOf", () => {
     const storage = { getItem: () => null, setItem: () => undefined };
     expect(storageOf(() => storage)).toBe(storage);
     expect(REPLACE_DELAY).toBe(300);
+  });
+});
+
+describe("Recurring expressions without a note appear among the results, with a dotted outline", () => {
+  it("draws a keyword page as a result of class result-keyword, on the results page and under the header field alike", async () => {
+    const { results, answer } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain(
+      '<li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span>',
+    );
+    expect(results.html).toContain(
+      '<li class="result"><a href="../glossary/keyword-page/index.html">',
+    );
+  });
+});
+
+describe("Their row states the number of occurrences and files", () => {
+  it("words the counts of the table in the site language, 0 for a page without them", () => {
+    const summary = meta.entities[2];
+    expect(summary === undefined ? "" : keywordDetail(summary, meta)).toBe(
+      "17 occurrences · 6 documents",
+    );
+    expect(keywordDetail({ ...(summary as SearchEntry), occurrences: 1, documents: 1 }, meta)).toBe(
+      "1 occurrence · 1 document",
+    );
+    expect(
+      keywordDetail(
+        {
+          id: "k",
+          title: "k",
+          type: "keyword",
+          url: "k/",
+          status: "valid",
+          source: "specs",
+          keyword: true,
+        },
+        meta,
+      ),
+    ).toBe("0 occurrences · 0 documents");
+    expect(resultOf(summary as SearchEntry, meta, "").detail).toBe("17 occurrences · 6 documents");
+  });
+});
+
+describe("A no-note facet isolates or excludes them", () => {
+  it("keeps the keyword pages alone under only, leaves them out under exclude, and recalls the choice above the results", async () => {
+    const { results, view, follow, answer, location } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    await follow("?q=key&nonote=only");
+    expect(location.current).toBe("?q=key&nonote=only");
+    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain("build summary");
+    expect(results.html).not.toContain("Keyword page");
+    expect(view.props().active).toEqual([
+      {
+        name: "nonote",
+        value: "only",
+        facetLabel: "Without a note",
+        label: "Only",
+        href: "?q=key",
+      },
+    ]);
+    expect(
+      view
+        .props()
+        .facets[4]?.values.map((value) => [value.value, value.count, value.active, value.disabled]),
+    ).toEqual([
+      ["any", 2, false, false],
+      ["only", 1, true, false],
+      ["exclude", 1, false, false],
+    ]);
+    expect(view.props().facets[0]?.values.map((value) => [value.value, value.count])).toEqual([
+      ["keyword", 1],
+      ["term", 0],
+    ]);
+    await follow("?q=key&nonote=exclude");
+    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain("Keyword page");
+    expect(results.html).not.toContain("build summary");
+    await follow("?q=key&type=term&nonote=only");
+    expect(results.html).toContain('<p class="search-summary">No result</p>');
+    expect(
+      view.props().facets[4]?.values.map((value) => [value.value, value.count, value.disabled]),
+    ).toEqual([
+      ["any", 1, false],
+      ["only", 0, false],
+      ["exclude", 1, false],
+    ]);
+    await follow("?q=key");
+    expect(view.props().active).toBeUndefined();
+  });
+});
+
+describe("They are never ranked before an entity of equivalent relevance", () => {
+  it("puts an entity before a keyword page of the same score whatever their order in the table, and lists the keyword pages last without a query", () => {
+    const table: SearchMeta = {
+      ...meta,
+      entities: [
+        { ...(meta.entities[2] as SearchEntry) },
+        { ...(meta.entities[0] as SearchEntry) },
+        { ...(meta.entities[1] as SearchEntry) },
+      ],
+    };
+    const tied = new Map<string, ShardData>([
+      [
+        "ke",
+        {
+          keyword: [
+            [0, 5],
+            [1, 5],
+            [2, 5],
+          ],
+          keywords: [[0, 1]],
+        },
+      ],
+    ]);
+    expect(hitsOf("key", table, tied).map((hit) => [hit.entry.id, hit.score])).toEqual([
+      ["glossary/keyword-page", 5],
+      ["specs/screens/search-results", 5],
+      ["keywords/build-summary", 5],
+    ]);
+    tied.set("ke", {
+      keyword: [
+        [0, 6],
+        [1, 5],
+      ],
+    });
+    expect(hitsOf("key", table, tied).map((hit) => hit.entry.id)).toEqual([
+      "keywords/build-summary",
+      "glossary/keyword-page",
+    ]);
+    expect(hitsOf("", table, tied).map((hit) => hit.entry.id)).toEqual([
+      "glossary/keyword-page",
+      "specs/screens/search-results",
+      "keywords/build-summary",
+    ]);
   });
 });

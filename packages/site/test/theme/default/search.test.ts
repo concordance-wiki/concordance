@@ -103,6 +103,51 @@ describe("ResultList", () => {
     );
   });
 
+  it("outlines a word without a note with the result-keyword class, its notice and its counts under the title", () => {
+    const html = renderToString(
+      h(ResultList, {
+        results: [
+          {
+            title: "build summary",
+            href: "../keywords/build-summary/index.html",
+            typeLabel: "Keyword",
+            keyword: true,
+            subtitle: "Expression without a note",
+            detail: "17 occurrences · 6 documents",
+          },
+        ],
+      }),
+    );
+    expect(html).toBe(
+      '<ol class="results"><li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span><span class="result-detail">17 occurrences · 6 documents</span></li></ol>',
+    );
+  });
+
+  it("names a disabled facet value by its value when it has no label, like an enabled one", () => {
+    const html = renderSlot(
+      "SearchResults",
+      {
+        query: "",
+        total: 0,
+        results: [],
+        facets: [
+          {
+            name: "type",
+            label: "Type",
+            values: [
+              { value: "screen", count: 0, href: "?type=screen", disabled: true },
+              { value: "term", count: 0, href: "?type=term" },
+            ],
+          },
+        ],
+      },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      '<li><a class="facet-value" role="link" aria-disabled="true">screen <span class="count">0</span></a></li><li><a href="?type=term">term <span class="count">0</span></a></li>',
+    );
+  });
+
   it("is what the results slot lists", () => {
     const html = renderSlot(
       "SearchResults",

@@ -5,19 +5,36 @@
  */
 
 import { byCodeUnit } from "../order.js";
-import { FACET_NAMES, type FacetName } from "./shared.js";
+import {
+  FACET_NAMES,
+  NOTELESS_FACET,
+  NOTELESS_FILTERS,
+  type FacetName,
+  type NotelessFilter,
+} from "./shared.js";
 
 export interface SearchState {
   query: string;
   /** The selected values of every facet, in code-unit order; an empty list leaves the facet open. */
   filters: Record<FacetName, string[]>;
+  /** What is done with the keyword pages; `any` keeps them among the results and is the default. */
+  noteless: NotelessFilter;
 }
 
 /** The parameter of the query in the address. */
 export const QUERY_PARAMETER = "q";
 
 export function emptyState(): SearchState {
-  return { query: "", filters: { type: [], source: [], domain: [], application: [] } };
+  return {
+    query: "",
+    filters: { type: [], source: [], domain: [], application: [] },
+    noteless: "any",
+  };
+}
+
+function isNotelessFilter(value: string): value is NotelessFilter {
+  // Widened so that any string can be looked up; the guard narrows it back.
+  return (NOTELESS_FILTERS as readonly string[]).includes(value);
 }
 
 /** The values of a facet parameter: split on commas, blanks dropped, once each, in code-unit order. */
@@ -34,6 +51,8 @@ export function parseSearchState(search: string): SearchState {
   for (const name of FACET_NAMES) {
     state.filters[name] = valuesOf(parameters.get(name));
   }
+  const noteless = parameters.get(NOTELESS_FACET) ?? "any";
+  if (isNotelessFilter(noteless)) state.noteless = noteless;
   return state;
 }
 
@@ -50,11 +69,12 @@ export function searchQueryString(state: SearchState): string {
     const values = state.filters[name];
     if (values.length > 0) parts.push(`${name}=${values.map(encode).join(",")}`);
   }
+  if (state.noteless !== "any") parts.push(`${NOTELESS_FACET}=${state.noteless}`);
   return parts.length === 0 ? "" : `?${parts.join("&")}`;
 }
 
 export function hasFilters(state: SearchState): boolean {
-  return FACET_NAMES.some((name) => state.filters[name].length > 0);
+  return state.noteless !== "any" || FACET_NAMES.some((name) => state.filters[name].length > 0);
 }
 
 export function isSelected(state: SearchState, name: FacetName, value: string): boolean {
@@ -67,6 +87,11 @@ export function toggleValue(state: SearchState, name: FacetName, value: string):
     ? state.filters[name].filter((selected) => selected !== value)
     : [...state.filters[name], value].sort(byCodeUnit);
   return { ...state, filters: { ...state.filters, [name]: values } };
+}
+
+/** The state with the no-note facet on a value, or back to `any` when that value is the current one. */
+export function toggleNoteless(state: SearchState, value: NotelessFilter): SearchState {
+  return { ...state, noteless: state.noteless === value ? "any" : value };
 }
 
 /** The state with every facet open again, the query kept. */

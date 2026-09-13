@@ -112,16 +112,30 @@ export function hitsOf(
   shards: ReadonlyMap<string, ShardData>,
 ): SearchHit[] {
   const words = queryWords(query);
+  const keyword = (entity: number): boolean => meta.entities[entity]?.keyword === true;
   if (words.length === 0) {
-    return meta.entities.map((entry) => ({ entry, score: 0 }));
+    // Every entity scores the same: the entities keep the table order, the keyword pages after them.
+    const all = meta.entities.map((entry, entity) => ({ entry, score: 0, entity }));
+    return [
+      ...all.filter(({ entity }) => !keyword(entity)),
+      ...all.filter(({ entity }) => keyword(entity)),
+    ].map(({ entry, score }) => ({ entry, score }));
   }
-  return rank(words, shards).flatMap(({ entity, score }) => {
+  return rank(words, shards, keyword).flatMap(({ entity, score }) => {
     const entry = meta.entities[entity];
     return entry === undefined ? [] : [{ entry, score }];
   });
 }
 
-/** A hit as the lists show it: the title, the type badge, the breadcrumb and the href from the page through `root`. */
+/** What the row of a keyword page states: its occurrences and its files, worded in the site language. */
+export function keywordDetail(entry: SearchEntry, meta: SearchMeta): string {
+  return [
+    plural(meta.labels.occurrences, entry.occurrences ?? 0, meta.locale),
+    plural(meta.labels.documents, entry.documents ?? 0, meta.locale),
+  ].join(" · ");
+}
+
+/** A hit as the lists show it: the title, the type badge, the breadcrumb and the href from the page through `root`; a keyword page with its notice and its counts. */
 export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): SearchResult {
   const breadcrumb = [
     entry.application === undefined ? undefined : meta.applications[entry.application],
@@ -133,6 +147,13 @@ export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): Se
     href: `${root}${entry.url}`,
     ...(typeLabel === undefined ? {} : { typeLabel }),
     ...(breadcrumb.length === 0 ? {} : { breadcrumb }),
+    ...(entry.keyword === true
+      ? {
+          keyword: true,
+          subtitle: meta.labels.undefinedExpression,
+          detail: keywordDetail(entry, meta),
+        }
+      : {}),
   };
 }
 

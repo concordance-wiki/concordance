@@ -30,6 +30,7 @@ const meta: SearchMeta = {
     source: { glossary: 1 },
     domain: { publication: 1 },
     application: { "concordance-cli": 1 },
+    nonote: { only: 0, exclude: 1 },
   },
   labels: searchLabels,
   locale: "en",

@@ -323,6 +323,12 @@ export interface SearchResult {
   /** Where the entity is filed: the titles of its application and domain, when it has them. */
   breadcrumb?: string[];
   snippet?: string;
+  /** `true` for a keyword page, the page of a recurring expression nobody defined: the row is outlined in dots. */
+  keyword?: boolean;
+  /** What stands under the title of a keyword page: that no note defines the expression. */
+  subtitle?: string;
+  /** The counts of a keyword page, "17 occurrences · 6 documents", worded in the site language. */
+  detail?: string;
 }
 
 export interface FacetValue {
