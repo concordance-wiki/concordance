@@ -235,6 +235,8 @@ export interface ContractOperationItem {
   title: string;
   summary?: string;
   href: string;
+  /** Whether a hand-written note describes the operation; the page flags the operations that have none yet. */
+  documented: boolean;
 }
 
 /** The contract section of an `api` page: what the model knows of the imported contract, the viewer loading the rest. */

@@ -98,6 +98,8 @@ export const labels = {
   contractImportedOn: "imported on",
   contractOperations: "Operations",
   contractNoOperation: "The contract declares no operation.",
+  withoutNote: "without a note",
+  noNoteYet: "no note yet",
   downloadContract: "Download the contract",
   contractData: "Contract data (JSON)",
   showContract: "Show the contract",

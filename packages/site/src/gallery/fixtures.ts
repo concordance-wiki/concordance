@@ -266,7 +266,7 @@ export const documentEntityPage: SlotProps["EntityPage"] = {
   ],
 };
 
-/** The page of an API whose contract was imported: the contract section after the note, two operations, one without a note. */
+/** The page of an API whose contract was imported: the contract section after the note, three operations, one without a note. */
 export const apiPage: SlotProps["EntityPage"] = {
   ...entityPage,
   entity: {
@@ -323,18 +323,21 @@ export const apiPage: SlotProps["EntityPage"] = {
         title: "List the entities",
         summary: "Returns the entities of the last build, in identifier order.",
         href: "../../endpoints/list-entities/",
+        documented: true,
       },
       {
         name: "getEntity",
         title: "Read an entity",
         summary: "Returns one entity of the last build by identifier.",
         href: "../../endpoints/get-entity/",
+        documented: true,
       },
       {
         name: "searchModel",
         title: "GET /search",
         summary: "Search the model",
         href: "searchmodel/",
+        documented: false,
       },
     ],
   },

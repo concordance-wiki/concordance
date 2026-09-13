@@ -34,8 +34,14 @@ const contract: ContractSectionProps = {
       title: "List the entities",
       summary: "Returns the entities of the last build.",
       href: "../../endpoints/list-entities/index.html",
+      documented: true,
     },
-    { name: "searchModel", title: "GET /search", href: "../model-query/searchmodel/index.html" },
+    {
+      name: "searchModel",
+      title: "GET /search",
+      href: "../model-query/searchmodel/index.html",
+      documented: false,
+    },
   ],
 };
 
@@ -149,17 +155,35 @@ describe("the contract section of an api page", () => {
   it("lists the operations as plain text with their summaries, linked to their pages, so that nothing is lost without JavaScript", () => {
     const html = render({ contract });
     expect(html).toContain(
-      '<h3 id="contract-operations">Operations <span class="count">2</span></h3>',
+      '<li class="contract-documented"><a href="../../endpoints/list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
     );
     expect(html).toContain(
-      '<li><a href="../../endpoints/list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
-    );
-    expect(html).toContain(
-      '<li><a href="../model-query/searchmodel/index.html">GET /search</a></li>',
+      '<li class="contract-undocumented"><a href="../model-query/searchmodel/index.html">GET /search</a>',
     );
     const empty = render({ contract: { ...contract, version: "", operations: [] } });
     expect(empty).toContain('<p class="empty">The contract declares no operation.</p>');
     expect(empty).not.toContain("version <code>");
+  });
+
+  it("flags an operation present in the contract without a note and counts them in the heading", () => {
+    const html = render({ contract });
+    expect(html).toContain(
+      '<h3 id="contract-operations">Operations <span class="count">2</span><span class="contract-gap">1 without a note</span></h3>',
+    );
+    expect(html).toContain(
+      '<li class="contract-undocumented"><a href="../model-query/searchmodel/index.html">GET /search</a><span class="contract-flag">no note yet</span></li>',
+    );
+    expect(count(html, '<span class="contract-flag">')).toBe(1);
+    const complete = render({
+      contract: {
+        ...contract,
+        operations: contract.operations.map((operation) => ({ ...operation, documented: true })),
+      },
+    });
+    expect(complete).toContain(
+      '<h3 id="contract-operations">Operations <span class="count">2</span></h3>',
+    );
+    expect(complete).not.toContain("no note yet");
   });
 
   it("keeps the original contract downloadable at its declared URL, or at the copy placed next to the page", () => {

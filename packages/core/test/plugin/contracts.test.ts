@@ -240,6 +240,18 @@ describe("contractViewOf", () => {
     });
   });
 
+  it("sorts the schemas by name whatever the order the reader gives them", () => {
+    const unsorted: ContractReader<LinesContract> = {
+      ...linesReader,
+      schemas: () => ["Zone", "Entity", "Link"].map((name) => ({ name, fields: [] })),
+    };
+    expect(contractViewOf(contract, unsorted, operations).schemas.map((s) => s.name)).toEqual([
+      "Entity",
+      "Link",
+      "Zone",
+    ]);
+  });
+
   it("lists no schema for a reader that describes none", () => {
     expect(contractViewOf(contract, linesReader, operations).schemas).toEqual([]);
   });

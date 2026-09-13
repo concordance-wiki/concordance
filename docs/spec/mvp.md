@@ -135,7 +135,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`, `W-TYPE-UNKNOWN`, `W-ATTRIBUTE-UNKNOWN` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-DOMAIN-UNKNOWN`, `W-APP-MISSING`, `W-APP-UNKNOWN`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-TERM-HOMONYM`, `I-PII-DETECTED` |
-| Contracts | `W-CONTRACT-UNREACHABLE`, `W-OPERATION-AMBIGUOUS`, `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
+| Contracts | `W-CONTRACT-UNREACHABLE`, `W-OPERATION-AMBIGUOUS`, `W-OPERATION-UNMATCHED`, `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
 | Plugins | `W-PLUGIN-DISABLED` |
 
 ## 4. Batches and stories
@@ -826,7 +826,7 @@ Depends on: L5-01, L5-02.
 As an architect, I want to know what exists in the contract without being documented so that I can measure my documentation debt.
 
 - An operation present in the contract without a note is listed and flagged in the page.
-- An operation note with no match in the contract yields a finding: either the operation disappeared or the note is ahead.
+- An operation note with no match in the contract yields a `W-OPERATION-UNMATCHED` finding: either the operation disappeared or the note is ahead.
 - An API declaring a consumer that does not cite it, or the reverse, yields a `W-API-CONSUMER-MISMATCH` finding.
 - An API with no declared nor inferred consumer yields a `W-API-NOCONSUMER` finding.
 

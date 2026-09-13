@@ -12,6 +12,7 @@ describe("@concordance-wiki/inference", () => {
       "MATCH_RUNGS",
       "MAX_DISPLAYED_NEIGHBOURS",
       "OPERATION_AMBIGUOUS",
+      "OPERATION_UNMATCHED",
       "RELATION_ORIGIN",
       "accumulateCooccurrences",
       "attachOperations",

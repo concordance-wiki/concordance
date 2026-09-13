@@ -474,8 +474,14 @@ describe("contractOf", () => {
           title: "List the entities",
           summary: "Returns the entities of the last build.",
           href: "../../endpoints/list-entities/index.html",
+          documented: true,
         },
-        { name: "searchModel", title: "GET /search", href: "searchmodel/index.html" },
+        {
+          name: "searchModel",
+          title: "GET /search",
+          href: "searchmodel/index.html",
+          documented: false,
+        },
       ],
     });
   });
@@ -506,6 +512,7 @@ describe("contractOf", () => {
         title: "List the entities",
         summary: "Returns the entities of the last build.",
         href: "../../endpoints/list-entities/index.html",
+        documented: true,
       },
     ]);
   });

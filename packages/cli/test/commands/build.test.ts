@@ -513,10 +513,13 @@ describe("concordance build", () => {
         '<a class="contract-download" href="model-query.openapi.json" download>Download the contract</a>',
       );
       expect(page).toContain(
-        '<li><a href="../list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
+        '<h3 id="contract-operations">Operations <span class="count">2</span><span class="contract-gap">1 without a note</span></h3>',
       );
       expect(page).toContain(
-        '<li><a href="searchmodel/index.html">GET /search</a><span class="contract-summary"> Search the model</span></li>',
+        '<li class="contract-documented"><a href="../list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
+      );
+      expect(page).toContain(
+        '<li class="contract-undocumented"><a href="searchmodel/index.html">GET /search</a><span class="contract-summary"> Search the model</span><span class="contract-flag">no note yet</span></li>',
       );
       expect(page).toContain(
         '<concordance-island data-island="contract-viewer" data-props="{&quot;href&quot;:&quot;../../fragments/notes/model-query.contract.json&quot;}"><p class="contract-data"><a href="../../fragments/notes/model-query.contract.json">Contract data (JSON)</a></p></concordance-island>',

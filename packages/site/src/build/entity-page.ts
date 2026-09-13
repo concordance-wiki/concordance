@@ -215,6 +215,8 @@ function operationsOf(context: SiteContext, page: string, entity: Entity): Contr
       title: operation.title,
       ...(operation.summary === undefined ? {} : { summary: operation.summary }),
       href: entityHref(page, operation.id),
+      // An operation left to the contract alone keeps the origin the import gave it; a note has its own.
+      documented: operation.type_origin !== "contract",
     });
   }
   return operations;
