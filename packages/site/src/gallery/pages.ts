@@ -1,6 +1,7 @@
 import type { PageSlot } from "../render.js";
 import type { SlotName, SlotProps } from "../slots.js";
 import {
+  documentEntityPage,
   entityPage,
   footer,
   footerWithText,
@@ -104,6 +105,16 @@ export const galleryPages: readonly GalleryPage[] = [
       neighbours: { centre: entityPage.entity.title, neighbours: [] },
       mentions: { mentions: [], initial: 20 },
     },
+  },
+  {
+    file: "entity-page-document.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "document",
+    description:
+      "a workshop with a deck and a transcript: download links, the viewer opened on demand, the rail of slides, the extracted text",
+    ...chrome,
+    props: documentEntityPage,
   },
   {
     file: "keyword-page.html",

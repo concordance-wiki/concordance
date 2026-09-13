@@ -4,7 +4,12 @@ import { checkAccessibility, type A11yFinding } from "../a11y/check.js";
 import { checkContrast, type ContrastFinding } from "../a11y/contrast.js";
 import { measureBudget, type BudgetReport, type PageSize } from "../budget.js";
 import type { ThemeConfig } from "../css/theme-config.js";
-import { bundleIslands, defaultIslands, type IslandBundle } from "../islands/bundle.js";
+import {
+  bundleIslands,
+  defaultIslands,
+  type IslandBundle,
+  type IslandEntry,
+} from "../islands/bundle.js";
 import { byCodeUnit } from "../order.js";
 import { writeThemeAssets } from "../theme/chrome.js";
 import type { ResolvedTheme } from "../theme/types.js";
@@ -33,6 +38,8 @@ export interface AssembleOptions {
   /** The palette the stylesheet is written from when the theme carries no `theme.yaml`. */
   fallback: ThemeConfig;
   maxPageBytes: number;
+  /** The islands to bundle; those of the default theme when absent. */
+  islands?: IslandEntry[];
   /** Every document to write, once the island bundles are known. */
   documents: (islands: IslandBundle[]) => WrittenDocument[];
 }
@@ -57,7 +64,11 @@ export interface Assembled {
 export async function assemblePages(options: AssembleOptions): Promise<Assembled> {
   const { output, theme, fileSystem } = options;
   const assets = `${output}/${ASSETS_DIRECTORY}`;
-  const islands = await bundleIslands({ outDir: assets, islands: defaultIslands(), fileSystem });
+  const islands = await bundleIslands({
+    outDir: assets,
+    islands: options.islands ?? defaultIslands(),
+    fileSystem,
+  });
   const source = theme.config ?? { config: options.fallback, assets: [], fileSystem };
   const files = [
     ...islands.map((island) => `${ASSETS_DIRECTORY}/${island.file}`),

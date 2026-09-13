@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/cli": minor
+---
+
+Document viewer: the page of an entity with documents lists each file for download (`<a download>`), links its PDF, draws a rail of its pages, slides or cues captioned by the first line of their extracted text and serves that text position by position in disclosure blocks anchored as the mentions cite them, all without JavaScript; a `document-viewer` island of plain JavaScript reveals an "Open the viewer" button that imports the `viewer-pdf` bundle on demand, built from the legacy build of pdf.js with its worker as a second bundle, and opens the PDF on a canvas with previous and next, zoom steps and a find box over the extracted text that jumps to the first matching page; the two viewer bundles are built only for a site that shows a PDF, are announced in the build summary with their size and are never referenced by a page's scripts or preloads, their hashed names travelling in the island props; when the import fails, over `file://` in browsers that refuse module scripts from the disk, the reader gets a link to the PDF; image thumbnails per slide come with the converter's thumbnail output, the rail names the slides by their text until then; `concordance render` places the original files and the PDFs the build kept under `fragments/<id>/` next to the pages.

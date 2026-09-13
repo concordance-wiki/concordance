@@ -5,20 +5,40 @@ import { join } from "node:path";
 import { memoryFileSystem } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
-import { bundleIslands, contentHash, defaultIslands } from "../../src/islands/bundle.js";
+import {
+  bundleIslands,
+  contentHash,
+  defaultIslands,
+  viewerIslands,
+} from "../../src/islands/bundle.js";
 
 describe("defaultIslands", () => {
-  it("declares the mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic", () => {
+  it("declares the document viewer, mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
+      "document-viewer",
       "mentions-panel",
       "mode-switch",
       "search",
     ]);
-    expect(islands[0]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
-    expect(islands[1]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
-    expect(islands[2]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands.map((island) => island.classic)).toEqual([undefined, undefined, true]);
+    expect(islands[0]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
+    expect(islands[1]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
+    expect(islands[2]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
+    expect(islands[3]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands.map((island) => island.classic)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      true,
+    ]);
+  });
+
+  it("keeps the PDF viewer and its worker apart, built from the legacy build of pdf.js only for a site that shows a PDF", () => {
+    const islands = viewerIslands();
+    expect(islands.map((island) => island.name)).toEqual(["viewer-pdf", "viewer-pdf-worker"]);
+    expect(islands[0]?.entry.endsWith("/src/islands/viewer-pdf.client")).toBe(true);
+    expect(islands[1]?.entry.endsWith("/pdfjs-dist/legacy/build/pdf.worker.mjs")).toBe(true);
+    expect(defaultIslands().map((island) => island.name)).not.toContain("viewer-pdf");
   });
 });
 
@@ -50,8 +70,8 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(3);
-    const [bundle] = bundles;
+    expect(bundles).toHaveLength(4);
+    const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
     expect(bundle?.name).toBe("mentions-panel");
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/site/assets/${bundle?.file ?? ""}`);

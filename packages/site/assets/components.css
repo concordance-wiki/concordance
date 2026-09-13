@@ -831,3 +831,109 @@ concordance-island[data-island="search"] {
   color: var(--color-muted);
   font-size: 0.8125rem;
 }
+
+/* Document: download links, the viewer opened on demand, the rail of positions, the extracted text */
+
+.document {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.document-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.document-open {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.document-viewer {
+  margin-block: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  overflow: auto;
+}
+
+.viewer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.viewer-toolbar button {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.viewer-counter,
+.viewer-status {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.viewer-page {
+  display: block;
+  max-inline-size: 100%;
+  margin: var(--space-2) auto;
+  background: white;
+}
+
+.document-rail ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.document-rail a {
+  display: block;
+  min-inline-size: 8rem;
+  max-inline-size: 12rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.document-rail a.current {
+  border-color: var(--color-ink);
+}
+
+.document-position {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.document-caption {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-text details {
+  margin-block: var(--space-1);
+}
+
+.document-text summary {
+  color: var(--color-muted);
+  cursor: pointer;
+}

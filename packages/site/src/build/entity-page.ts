@@ -4,6 +4,7 @@ import { byCodeUnit } from "../order.js";
 import type {
   Attribute,
   AttributeValue,
+  DocumentView,
   EntityPageProps,
   Neighbour,
   NeighbourhoodProps,
@@ -18,7 +19,7 @@ import {
   type SiteContext,
 } from "./context.js";
 import { mentionsPanelOf } from "./mentions.js";
-import { entityHref } from "./paths.js";
+import { entityHref, relativeHref } from "./paths.js";
 
 /** The properties every entity carries outside `attributes`, and the message that labels each. */
 const COMMON = ["application", "domain", "status"] as const;
@@ -187,17 +188,60 @@ export function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
   }));
 }
 
-export interface EntityPageOptions {
-  mentionsInline?: number;
+/** The bundles of the viewer, as paths under the output folder, when the build produced them. */
+export interface ViewerBundles {
+  viewer: string;
+  worker: string;
 }
 
-/** The view model of the page of a typed entity, its sections read from its fragment. */
+export interface EntityPageOptions {
+  mentionsInline?: number;
+  viewer?: ViewerBundles;
+}
+
+/**
+ * The documents of the entity as its page offers them, from its fragment: the original file to
+ * download, the PDF to open, with the viewer bundles when the build produced them, and the
+ * extracted text of every position; nothing for an entity without a document.
+ */
+export function documentsOf(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+  viewer?: ViewerBundles,
+): DocumentView[] {
+  return (context.fragments.get(entity.id)?.documents ?? []).map((document) => ({
+    file: {
+      label: document.path.slice(document.path.lastIndexOf("/") + 1),
+      href: relativeHref(page, document.target),
+      format: document.format,
+    },
+    ...(document.preview === undefined
+      ? {}
+      : {
+          preview: {
+            href: relativeHref(page, document.preview),
+            ...(viewer === undefined
+              ? {}
+              : {
+                  viewerHref: relativeHref(page, viewer.viewer),
+                  workerHref: relativeHref(page, viewer.worker),
+                }),
+          },
+        }),
+    unit: document.unit,
+    positions: document.pages.map(({ number, label, text }) => ({ number, label, text })),
+  }));
+}
+
+/** The view model of the page of a typed entity, its sections and documents read from its fragment. */
 export function entityPageOf(
   context: SiteContext,
   entity: Entity,
   options: EntityPageOptions = {},
 ): EntityPageProps {
   const page = pagePath(entity.id);
+  const documents = documentsOf(context, page, entity, options.viewer);
   return {
     entity: {
       id: entity.id,
@@ -212,5 +256,6 @@ export function entityPageOf(
     neighbours: neighbourhoodOf(context, page, entity),
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),
+    ...(documents.length === 0 ? {} : { documents }),
   };
 }

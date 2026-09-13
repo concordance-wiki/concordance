@@ -272,7 +272,7 @@ describe("L4-07 extracted text indexed", () => {
     // Keyword discovery reads the pages too: "build summary" recurs in the note, the deck and the transcript.
     const summary = result.candidates.terms.find((term) => term.text === "build summary");
     expect(summary).toMatchObject({ occurrences: 3, documents: 3 });
-    expect(summary?.contexts.map((context) => [context.path, context.line])).toEqual([
+    expect(summary?.contexts?.map((context) => [context.path, context.line])).toEqual([
       ["meetings/neighbourhood-cap.vtt", 2],
       ["meetings/threshold-review.md", 5],
       ["meetings/threshold-review.pptx", 2],
