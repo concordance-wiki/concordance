@@ -1,58 +1,91 @@
-import type { JSX, TargetedEvent } from "preact";
+import type { JSX } from "preact";
 
-import type { Link, Mention } from "../../slots.js";
-import { labels } from "./labels.js";
+import type { Mention, RelatedLabels } from "../../slots.js";
 
-/** The mentions of one file and one kind, in line order; the key names both, unique in the panel. */
-export interface MentionGroup {
+/** One page that evokes the entity: every mention it holds, written and recognised alike, and what the entry shows of it. */
+export interface RelatedPage {
+  /** The href of the page, unique in the panel. */
   key: string;
-  file: Link;
+  title: string;
+  href: string;
+  type?: string;
+  typeLabel?: string;
   mentions: Mention[];
+  /** Whether the page writes a link to the entity, the "cited" mark. */
+  cited: boolean;
+  /** The passage the entry quotes: the first written mention when there is one, else the first of all. */
+  excerpt: Mention;
 }
 
-export type MentionSort = "file" | "count" | "line";
-
-export const MENTION_SORTS: readonly MentionSort[] = ["file", "count", "line"];
-
-/** Groups mentions by file in the order the files first appear: the corpus order of the build. */
-export function groupByFile(mentions: readonly Mention[]): MentionGroup[] {
-  const groups = new Map<string, MentionGroup>();
+/**
+ * Groups mentions by the page they come from, in the order the pages first appear, then orders
+ * the pages by number of passages, written and recognised counted alike; the first appearance
+ * breaks ties, so that the corpus order holds among equals.
+ */
+export function groupByPage(mentions: readonly Mention[]): RelatedPage[] {
+  const pages = new Map<string, RelatedPage>();
   for (const mention of mentions) {
-    const key = `${mention.kind} ${mention.file.href}`;
-    const group = groups.get(key);
-    if (group === undefined) {
-      groups.set(key, { key, file: mention.file, mentions: [mention] });
+    const key = mention.file.href;
+    const page = pages.get(key);
+    if (page === undefined) {
+      pages.set(key, {
+        key,
+        title: mention.title ?? mention.file.label,
+        href: mention.file.href,
+        ...(mention.type === undefined ? {} : { type: mention.type }),
+        ...(mention.typeLabel === undefined ? {} : { typeLabel: mention.typeLabel }),
+        mentions: [mention],
+        cited: mention.kind === "written",
+        excerpt: mention,
+      });
     } else {
-      group.mentions.push(mention);
+      page.mentions.push(mention);
+      if (mention.kind === "written" && !page.cited) {
+        page.cited = true;
+        page.excerpt = mention;
+      }
     }
   }
-  return [...groups.values()];
+  return [...pages.values()].sort((a, b) => b.mentions.length - a.mentions.length);
 }
 
-/** The groups reordered; `file` keeps the build order, the other keys are stable on ties. */
-export function sortGroups(groups: readonly MentionGroup[], sort: MentionSort): MentionGroup[] {
-  const sorted = [...groups];
-  if (sort === "count") {
-    sorted.sort((a, b) => b.mentions.length - a.mentions.length);
-  } else if (sort === "line") {
-    const earliest = (group: MentionGroup): number =>
-      group.mentions.reduce((line, mention) => Math.min(line, mention.line), Infinity);
-    sorted.sort((a, b) => earliest(a) - earliest(b));
-  }
-  return sorted;
-}
-
-/** Whether a mention matches a filter typed by the reader: on the file path and on the context, without regard to case. */
-export function matchesFilter(mention: Mention, filter: string): boolean {
+/** Whether a page matches a filter typed by the reader: on its title, its type and its passages, without regard to case. */
+export function matchesFilter(page: RelatedPage, filter: string): boolean {
   const needle = filter.trim().toLowerCase();
   return (
     needle === "" ||
-    mention.file.label.toLowerCase().includes(needle) ||
-    mention.context.toLowerCase().includes(needle)
+    page.title.toLowerCase().includes(needle) ||
+    (page.typeLabel ?? "").toLowerCase().includes(needle) ||
+    page.mentions.some((mention) => mention.context.toLowerCase().includes(needle))
   );
 }
 
-/** The context of a mention, the words naming the entity marked when the build found them. */
+/** The type slugs among pages with their labels and counts, most pages first, the slug breaking ties. */
+export function typeCounts(
+  pages: readonly RelatedPage[],
+): { type: string; label: string; count: number }[] {
+  const counts = new Map<string, { type: string; label: string; count: number }>();
+  for (const page of pages) {
+    if (page.type === undefined) continue;
+    const known = counts.get(page.type);
+    if (known === undefined) {
+      counts.set(page.type, { type: page.type, label: page.typeLabel ?? page.type, count: 1 });
+    } else {
+      known.count += 1;
+    }
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count || (a.type < b.type ? -1 : 1));
+}
+
+/** A message with `{name}` placeholders, each replaced by the value given. */
+export function fill(pattern: string, values: Record<string, number | string>): string {
+  return Object.entries(values).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+    pattern,
+  );
+}
+
+/** The passage of a mention, the words naming the entity marked when the build found them. */
 export function Context({ mention }: { mention: Mention }): JSX.Element {
   const { context, surface } = mention;
   const at = surface === undefined ? -1 : context.indexOf(surface);
@@ -68,47 +101,43 @@ export function Context({ mention }: { mention: Mention }): JSX.Element {
   );
 }
 
-export interface MentionGroupsProps {
-  groups: readonly MentionGroup[];
-  /** Whether the group of that key is open; a key absent from the record is closed. */
-  open: Readonly<Record<string, boolean>>;
-  onToggle?: (key: string, open: boolean) => void;
+export interface RelatedListProps {
+  pages: readonly RelatedPage[];
+  labels: RelatedLabels;
 }
 
-/** One collapsible block per file: its path and count in the summary, its mentions in line order inside, each linking to the passage. */
-export function MentionGroups({ groups, open, onToggle }: MentionGroupsProps): JSX.Element {
+/**
+ * One entry per page: its title linking to it, its type, its number of passages, then the
+ * excerpt linking to the passage, prefixed "cited" when the page writes a link to the entity
+ * and by the page, slide or timecode when the passage was read from a document.
+ */
+export function RelatedList({ pages, labels }: RelatedListProps): JSX.Element {
   return (
-    <div class="mention-groups">
-      {groups.map((group) => (
-        <details
-          key={group.key}
-          class="mention-group"
-          open={open[group.key] === true}
-          onToggle={
-            onToggle === undefined
-              ? undefined
-              : (event: TargetedEvent<HTMLDetailsElement>) => {
-                  onToggle(group.key, event.currentTarget.open);
-                }
-          }
-        >
-          {/* No link inside the summary, which is interactive itself: the passages lead to the page of the file. */}
-          <summary>
-            <span class="mention-file">{group.file.label}</span>{" "}
-            <span class="count">{group.mentions.length}</span>
-          </summary>
-          <ul class="mention-list">
-            {group.mentions.map((mention, index) => (
-              <li key={index} class={`mention mention-${mention.kind}`}>
-                <a class="mention-passage" href={mention.href}>
-                  {mention.location ?? `${labels.line} ${String(mention.line)}`}
-                </a>{" "}
-                <Context mention={mention} />
-              </li>
-            ))}
-          </ul>
-        </details>
+    <ol class="related-list">
+      {pages.map((page) => (
+        <li key={page.key} class={page.cited ? "related-page related-cited" : "related-page"}>
+          <span class="related-head">
+            <a class="related-title" href={page.href}>
+              {page.title}
+            </a>
+            {page.typeLabel !== undefined && <span class="related-type">{page.typeLabel}</span>}
+            <span class="related-count">
+              {page.mentions.length}
+              <span class="visually-hidden">
+                {" "}
+                {page.mentions.length === 1 ? labels.passage : labels.passages}
+              </span>
+            </span>
+          </span>
+          <a class="related-excerpt mention-passage" href={page.excerpt.href}>
+            {page.cited && <span class="related-mark">{labels.cited} · </span>}
+            {page.excerpt.location !== undefined && (
+              <span class="related-location">{page.excerpt.location} · </span>
+            )}
+            <Context mention={page.excerpt} />
+          </a>
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }

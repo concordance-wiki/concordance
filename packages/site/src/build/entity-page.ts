@@ -1,14 +1,17 @@
 import { CONTRACT_METHOD, CONTRACT_RELATION, pagePath, type Entity } from "@concordance-wiki/core";
+import { formatMessage, formatRelative } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type {
   Attribute,
   AttributeValue,
+  ChangeDate,
   ContractOperationItem,
   ContractSectionProps,
   DeclaredAttribute,
   DeclaredSection,
   DocumentView,
+  EntityPageLabels,
   EntityPageProps,
   Neighbour,
   NeighbourhoodProps,
@@ -26,6 +29,7 @@ import {
   type SiteContext,
 } from "./context.js";
 import { mentionsPanelOf } from "./mentions.js";
+import { breadcrumbOf, spaceOf } from "./space.js";
 import {
   contractFileTarget,
   contractFragmentPath,
@@ -397,6 +401,42 @@ export function documentsOf(
   }));
 }
 
+/** When the note last changed, relative to the build instant so that two builds of the same corpus agree; none without a git date. */
+export function changedOf(context: SiteContext, entity: Entity): ChangeDate | undefined {
+  const changed = entity.source.last_modified;
+  if (changed === undefined) return undefined;
+  const locale = context.locale ?? context.language;
+  return {
+    date: changed.slice(0, 10),
+    label: formatMessage(context.catalogue, "entity.changed", {
+      when: formatRelative(locale, new Date(changed), new Date(context.model.build.at)),
+    }),
+  };
+}
+
+/** How many pages the neighbourhood holds: every neighbour of the model when the build counted them, the listed ones otherwise. */
+export function neighbourPages(neighbourhood: NeighbourhoodProps): number {
+  return neighbourhood.total ?? neighbourhood.neighbours.length;
+}
+
+/** The headings and notes of the page in the site language. */
+export function entityPageLabels(context: SiteContext, neighbours: number): EntityPageLabels {
+  return {
+    properties: message(context, "entity.attributes"),
+    declaredAtTop: message(context, "entity.declaredAtTop"),
+    otherAttributes: message(context, "entity.otherAttributes"),
+    onThisPage: message(context, "entity.onThisPage"),
+    spaceTree: message(context, "entity.spaceTree"),
+    breadcrumb: message(context, "entity.breadcrumb"),
+    correction: message(context, "entity.correction"),
+    edit: message(context, "entity.edit"),
+    seeNeighbourhood: message(context, "entity.seeNeighbourhood"),
+    neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
+      count: neighbours,
+    }),
+  };
+}
+
 /** The view model of the page of a typed entity, its sections and documents read from its fragment. */
 export function entityPageOf(
   context: SiteContext,
@@ -408,6 +448,8 @@ export function entityPageOf(
   const contract = contractOf(context, page, entity);
   const declaration = declarationOf(context, entity.type);
   const otherAttributes = othersOf(context, entity);
+  const changed = changedOf(context, entity);
+  const neighbours = neighbourhoodOf(context, page, entity);
   return {
     entity: {
       id: entity.id,
@@ -417,15 +459,15 @@ export function entityPageOf(
       locale: entity.locale,
     },
     ...(declaration === undefined ? {} : { declaration }),
+    space: spaceOf(context, page, entity),
+    breadcrumb: breadcrumbOf(page, entity),
+    ...(changed === undefined ? {} : { changed }),
     highlights: highlightsOf(context, page, entity),
     sections: sectionsOf(context, entity),
     attributes: panelOf(context, page, entity),
     ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
-    labels: {
-      properties: message(context, "entity.attributes"),
-      otherAttributes: message(context, "entity.otherAttributes"),
-    },
-    neighbours: neighbourhoodOf(context, page, entity),
+    labels: entityPageLabels(context, neighbourPages(neighbours)),
+    neighbours,
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),
     ...(documents.length === 0 ? {} : { documents }),

@@ -92,7 +92,9 @@ describe("the gallery renders the white-label fixture theme with --theme", () =>
     expect(css).toContain("  --color-accent: #1F5FA8;");
     expect(css).toContain("  --color-bg: #0F1419;");
     expect(css).toContain("  --radius: 2px;");
-    expect(css).toContain('  --font-display: "Pipeline Serif", "Pipeline Sans", "Instrument Sans", system-ui');
+    expect(css).toContain(
+      '  --font-display: "Pipeline Serif", "Pipeline Sans", "Instrument Sans", system-ui',
+    );
     expect(css).toContain('  --font-ui: "Pipeline Sans", "Instrument Sans", system-ui');
     expect(css).toContain('  --font-mono: "Pipeline Mono", "IBM Plex Mono", ui-monospace');
   });

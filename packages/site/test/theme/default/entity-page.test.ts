@@ -43,24 +43,28 @@ function expectInOrder(html: string, markers: string[]): void {
 }
 
 describe("EntityPage", () => {
-  it("imposes the page order: type badge and two qualifying properties, title, then the rendered markdown at full column width", () => {
+  it("imposes the page order: title, the line naming the type with two qualifying properties, the rendered markdown at full column width, then the panel", () => {
     const html = render();
     expectInOrder(html, [
+      "<h1>Keyword page</h1>",
       '<span class="badge">term</span>',
       '<span class="highlight-label">aliases</span>',
       '<span class="highlight-label">broader</span>',
-      "<h1>Keyword page</h1>",
       '<article class="entity-body">',
       '<div class="markdown">',
-      '<aside class="entity-panel"',
+      '<section class="panel-block entity-panel"',
     ]);
-    // Nothing but the header's closing tag stands between the title and the article.
-    expect(html).toContain('<h1>Keyword page</h1></header><article class="entity-body">');
-    expect(html.startsWith('<div class="entity"><header class="entity-header">')).toBe(true);
+    // Nothing but the closing tags of the header stands between the line under the title and the article.
+    expect(html).toContain('</p></header><article class="entity-body">');
+    expect(
+      html.startsWith(
+        '<div class="entity"><div class="entity-main"><header class="entity-header"><h1>Keyword page</h1>',
+      ),
+    ).toBe(true);
     expectBalanced(html);
   });
 
-  it("renders the highlights next to the badge, linked when they have a target", () => {
+  it("renders the highlights on the line under the title, after the badge, linked when they have a target", () => {
     const html = render();
     expect(html).toContain(
       '<p class="entity-badge"><span class="badge">term</span><span class="highlight"><span class="highlight-label">aliases</span> <span class="value">word page</span></span>',
@@ -69,16 +73,117 @@ describe("EntityPage", () => {
     expect(html).not.toContain("entity-highlights");
   });
 
-  it("keeps the declared metadata in the side panel, never between the title and the text", () => {
+  it("names the last change and the space on the line under the title when the page has them", () => {
+    const html = render({
+      changed: { date: "2026-09-04", label: "Changed 9 days ago" },
+      space: { name: "glossary", initials: "GL", nodes: [] },
+    });
+    expect(html).toContain(
+      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04">Changed 9 days ago</time><span class="entity-space">glossary</span><span class="highlight">',
+    );
+    expect(render()).not.toContain("entity-changed");
+    expect(render()).not.toContain("entity-space");
+  });
+
+  it("keeps the declared metadata in the side panel, never between the title and the text, with the note saying where they come from", () => {
     const html = render();
     expectInOrder(html, [
       "<h1>Keyword page</h1>",
       '<article class="entity-body">',
       "</article>",
-      '<aside class="entity-panel" aria-labelledby="entity-properties"><h2 id="entity-properties">Properties</h2>',
+      '<div class="entity-side"><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties</h2></summary>',
       '<dt>Owner</dt><dd><a class="value" href="../publication/">Publication</a></dd>',
+      '<p class="panel-note">Declared at the top of the file.</p></details></section>',
     ]);
     expect(render({ attributes: [] })).not.toContain("entity-panel");
+    expect(render({ labels: { declaredAtTop: "Déclarées en tête du fichier." } })).toContain(
+      '<p class="panel-note">Déclarées en tête du fichier.</p>',
+    );
+  });
+
+  it("separates the values of an attribute with a comma", () => {
+    const html = render({
+      attributes: [
+        {
+          name: "applies_to",
+          label: "Applies to",
+          values: [{ text: "Keyword page", href: "../keyword-page/" }, { text: "Search results" }],
+        },
+      ],
+    });
+    expect(html).toContain(
+      '<dt>Applies to</dt><dd><a class="value" href="../keyword-page/">Keyword page</a>, <span class="value">Search results</span></dd>',
+    );
+  });
+
+  it("lists the tree of the space in the left column, the folders on the way open, the current page ruled and named as current", () => {
+    const html = render({
+      space: {
+        name: "specs",
+        initials: "SP",
+        nodes: [
+          { label: "api", count: 3 },
+          {
+            label: "rules",
+            count: 2,
+            children: [
+              { label: "Fail-on policy", href: "../fail-on-policy/" },
+              { label: "Keyword page", current: true },
+            ],
+          },
+        ],
+      },
+    });
+    expect(html).toContain(
+      '<div class="entity entity-with-space"><nav class="space" aria-label="Tree of the space"><details class="space-tree"><summary class="space-head"><span class="space-initials" aria-hidden="true">SP</span><span class="space-name">specs</span></summary><ul class="space-nodes"><li class="space-folder"><span class="space-folder-name">api<span class="count">3</span></span></li><li class="space-folder space-open"><span class="space-folder-name">rules<span class="count">2</span></span><ul class="space-nodes"><li class="space-page"><a href="../fail-on-policy/">Fail-on policy</a></li><li class="space-page space-current"><span aria-current="page">Keyword page</span></li></ul></li></ul></details></nav><div class="entity-main">',
+    );
+    expect(render()).not.toContain("space-tree");
+    expect(render({ labels: { spaceTree: "Arborescence" } })).not.toContain("Arborescence");
+  });
+
+  it("writes the breadcrumb above the title: the space linked, the folders plain, the page current", () => {
+    const html = render({
+      breadcrumb: [
+        { label: "specs", href: "../../#home-tree" },
+        { label: "rules" },
+        { label: "Keyword page" },
+      ],
+      labels: { breadcrumb: "Vous êtes ici" },
+    });
+    expect(html).toContain(
+      '<div class="entity-main"><nav class="breadcrumbs" aria-label="Vous êtes ici"><ol class="breadcrumbs-list"><li><a href="../../#home-tree">specs</a></li><li><span>rules</span></li><li><span aria-current="page">Keyword page</span></li></ol></nav><header class="entity-header">',
+    );
+    expect(render()).not.toContain("breadcrumbs");
+    expect(render({ breadcrumb: [] })).not.toContain("breadcrumbs");
+  });
+
+  it("lists the sections of the note with a heading in the table of contents, after the properties and before the related pages", () => {
+    const html = render();
+    expectInOrder(html, [
+      '<section class="panel-block entity-panel"',
+      '<section class="panel-block entity-toc" aria-labelledby="entity-toc"><details class="panel-fold"><summary><h2 id="entity-toc">On this page</h2></summary><ol class="toc-list"><li><a href="#not-to-be-confused-with">Not to be confused with</a></li></ol></details></section>',
+      '<aside class="mentions panel-block"',
+    ]);
+    expect(render({ sections: entityPage.sections.slice(0, 1) })).not.toContain("entity-toc");
+    expect(render({ labels: { onThisPage: "Sur cette page" } })).toContain(
+      '<h2 id="entity-toc">Sur cette page</h2>',
+    );
+  });
+
+  it("folds the neighbourhood behind its line at the foot of the panel, the number of pages worded", () => {
+    const html = render();
+    expect(html).toContain(
+      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span></summary><section class="neighbourhood"',
+    );
+    expect(html.indexOf('<aside class="mentions')).toBeLessThan(
+      html.indexOf('<details class="neighbourhood-fold">'),
+    );
+    expect(render({ neighbours: { centre: "Keyword page", neighbours: [], total: 7 } })).toContain(
+      '<span class="neighbourhood-count">7 pages</span>',
+    );
+    expect(
+      render({ labels: { seeNeighbourhood: "Voir la carte", neighbourPages: "2 pages" } }),
+    ).toContain('<span class="neighbourhood-lead">Voir la carte</span>');
   });
 
   it("caps the highlighted properties at five, two with the badge and three under it; beyond that they stay in the panel", () => {
@@ -93,12 +198,12 @@ describe("EntityPage", () => {
     expect(badgeLine).not.toContain("Highlight 2");
     const secondLine = html.slice(
       html.indexOf('<p class="entity-highlights">'),
-      html.indexOf("<h1>"),
+      html.indexOf("</header>"),
     );
     expect(count(secondLine, '<span class="highlight">')).toBe(3);
     expect(secondLine).toContain("Highlight 4");
     expect(secondLine).not.toContain("Highlight 5");
-    const panel = html.slice(html.indexOf('<aside class="entity-panel"'));
+    const panel = html.slice(html.indexOf('<section class="panel-block entity-panel"'));
     expect(panel).toContain("<dt>Highlight 5</dt>");
     expect(panel).toContain("<dt>Highlight 6</dt>");
   });
@@ -118,7 +223,8 @@ describe("EntityPage", () => {
         .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge-and-highlights/>")
         .replace(/<p class="entity-highlights">[\s\S]*?<\/p>/, "")
         .replace(/<figure[\s\S]*?<\/figure>/, "<map/>")
-        .replace(/<ul id="neighbourhood-list"[\s\S]*?<\/ul>/, "<neighbours/>");
+        .replace(/<ul id="neighbourhood-list"[\s\S]*?<\/ul>/, "<neighbours/>")
+        .replace(/<summary><span class="neighbourhood-lead">[\s\S]*?<\/summary>/, "<lead/>");
     expect(skeleton(screen)).toBe(skeleton(term));
     expect(screen).not.toBe(term);
     expect(screen).toContain('<p class="entity-badge"><span class="badge">screen</span>');
@@ -153,26 +259,29 @@ describe("EntityPage", () => {
       overrides: [],
     };
     const html = renderSlot("EntityPage", entityPage, theme);
-    expect(html).not.toContain("neighbourhood");
-    expect(html).not.toContain("mentions");
+    expect(html).not.toContain('class="neighbourhood"');
+    expect(html).not.toContain('class="mentions');
     const withDefaults = render();
     expect(withDefaults).toContain('<section class="neighbourhood"');
-    expect(withDefaults).toContain('<aside class="mentions"');
+    expect(withDefaults).toContain('<aside class="mentions panel-block"');
   });
 
-  it("shows the source file path and an edit link to the forge in the footer, the link only when the forge is known", () => {
+  it("shows the source file path and the edit link to the forge under the note, the link only when the forge is known", () => {
     const html = render();
     expect(html).toContain(
-      '<footer class="entity-footer"><p class="entity-source">source: <code>glossary/keyword-page.md</code><a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit in the forge</a></p></footer>',
+      '<footer class="entity-footer"><p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit this page</a></span></p></footer></div><div class="entity-side">',
     );
     const without = render({ sources: [{ source: "framing", path: "a.md" }] });
-    expect(without).toContain('<p class="entity-source">source: <code>framing/a.md</code></p>');
+    expect(without).toContain('<p class="entity-source"><code>framing/a.md</code></p>');
     expect(without).not.toContain("entity-edit");
+    expect(render({ labels: { correction: "Une correction ?", edit: "Modifier" } })).toContain(
+      '<span class="entity-edit-lead">Une correction ? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Modifier</a></span>',
+    );
   });
 
   it("refuses to render outside a theme, naming the slot it needed", () => {
     expect(() => renderToString(h(EntityPage, entityPage))).toThrow(
-      "useSlot(Neighbourhood): no theme in context; render through renderPage or renderSlot",
+      "useSlot(MentionsPanel): no theme in context; render through renderPage or renderSlot",
     );
     expect(() =>
       renderToString(h(AttributeValues, { entity: entityPage.entity, attribute: highlight(1) })),
@@ -194,9 +303,10 @@ describe("EntityPage", () => {
     });
     expectInOrder(html, [
       '<h2 id="entity-properties">Properties</h2>',
-      '<aside class="entity-panel entity-others" aria-labelledby="entity-other-attributes"><h2 id="entity-other-attributes">Autres attributs</h2>',
+      '<section class="panel-block entity-panel entity-others" aria-labelledby="entity-other-attributes"><details class="panel-fold"><summary><h2 id="entity-other-attributes">Autres attributs</h2></summary>',
       '<dt>ticket</dt><dd><span class="value">WIKI-12</span></dd>',
-      '<dt>steps</dt><dd><span class="value">{&quot;action&quot;:&quot;rebuild&quot;}</span><span class="value">check</span></dd>',
+      '<dt>steps</dt><dd><span class="value">{&quot;action&quot;:&quot;rebuild&quot;}</span>, <span class="value">check</span></dd>',
+      '<section class="panel-block entity-toc"',
       '<section class="neighbourhood"',
     ]);
     expect(render()).not.toContain("entity-others");

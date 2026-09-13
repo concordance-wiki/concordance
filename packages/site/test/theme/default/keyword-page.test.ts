@@ -43,7 +43,7 @@ describe("KeywordPage", () => {
     // What the keyword page adds in their place: its own body and panel.
     const keywordShell = keywordHtml
       .replace(/<section class="keyword-body"[\s\S]*?<\/section>/, "")
-      .replace(/<aside class="keyword-panel"[\s\S]*?<\/aside>/, "");
+      .replace(/<aside class="keyword-panel panel-block"[\s\S]*?<\/aside>/, "");
     const skeleton = (html: string): string =>
       html
         .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge/>")
@@ -55,14 +55,19 @@ describe("KeywordPage", () => {
     expect(keywordHtml).not.toContain("entity-footer");
     expect(keywordHtml).not.toContain("<article");
     expectInOrder(keywordHtml, [
-      '<div class="entity keyword"><header class="entity-header">',
-      '<p class="entity-badge"><span class="badge">Keyword</span><span class="noteless">no note</span></p>',
-      "<h1>build summary</h1></header>",
+      '<div class="entity keyword"><div class="entity-main"><header class="entity-header">',
+      "<h1>build summary</h1>",
+      '<p class="entity-badge"><span class="badge">Keyword</span><span class="noteless">no note</span></p></header>',
       '<section class="keyword-body"',
-      '<aside class="keyword-panel"',
-      '<section class="neighbourhood"',
-      '<aside class="mentions"',
+      '<div class="entity-side"><aside class="keyword-panel panel-block"',
+      '<aside class="mentions panel-block"',
+      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span></summary><section class="neighbourhood"',
     ]);
+    expect(
+      render({
+        labels: { seeNeighbourhood: "Voir la carte du voisinage", neighbourPages: "2 pages" },
+      }),
+    ).toContain('<span class="neighbourhood-lead">Voir la carte du voisinage</span>');
     expectBalanced(keywordHtml);
   });
 
@@ -150,15 +155,15 @@ describe("KeywordPage", () => {
       overrides: [],
     };
     const html = renderSlot("KeywordPage", keywordPage, theme);
-    expect(html).not.toContain("neighbourhood");
-    expect(html).not.toContain("mentions");
+    expect(html).not.toContain('class="neighbourhood"');
+    expect(html).not.toContain('class="mentions');
     expect(render()).toContain('<section class="neighbourhood"');
-    expect(render()).toContain('<aside class="mentions"');
+    expect(render()).toContain('<aside class="mentions panel-block"');
   });
 
   it("refuses to render outside a theme, naming the slot it needed", () => {
     expect(() => renderToString(h(KeywordPage, keywordPage))).toThrow(
-      "useSlot(Neighbourhood): no theme in context; render through renderPage or renderSlot",
+      "useSlot(MentionsPanel): no theme in context; render through renderPage or renderSlot",
     );
   });
 });

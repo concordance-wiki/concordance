@@ -56,6 +56,7 @@ import {
   TODO_PAGE,
 } from "./paths.js";
 import { redirectBody, redirectHref, redirectsOf } from "./redirect.js";
+import { HOME_RECENT_ANCHOR, HOME_TREE_ANCHOR } from "./space.js";
 import { todoOf } from "./todo.js";
 
 /** Excluding previews, per page. */
@@ -157,11 +158,14 @@ function chromeFor(
     homeHref: relativeHref(page, HOME_PAGE),
     search: searchFieldOf(context, page),
     navigation: [
-      { label: message(context, "site.index"), href: relativeHref(page, INDEX_PAGE) },
       {
-        label: message(context, "site.todo"),
-        href: relativeHref(page, TODO_PAGE),
-        count: todoCount,
+        label: message(context, "site.spaces"),
+        href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`,
+      },
+      { label: message(context, "nav.index"), href: relativeHref(page, INDEX_PAGE) },
+      {
+        label: message(context, "site.recent"),
+        href: `${relativeHref(page, HOME_PAGE)}#${HOME_RECENT_ANCHOR}`,
       },
     ],
   };
@@ -183,6 +187,12 @@ function chromeFor(
     version: input.model.build.tool,
     generatedAt: input.model.build.at,
     links: chrome.footer.links ?? [],
+    // A build statistic: it stays out of the top bar.
+    todo: {
+      label: message(context, "site.todo"),
+      href: relativeHref(page, TODO_PAGE),
+      count: todoCount,
+    },
     credit: chrome.footer.credit,
   };
   if (chrome.footer.text !== undefined) {

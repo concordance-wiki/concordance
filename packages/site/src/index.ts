@@ -209,9 +209,24 @@ export {
   relativeHref,
   siteRootOf,
 } from "./build/paths.js";
-export { DEFAULT_MENTIONS_INLINE, mentionsOf, mentionsPanelOf } from "./build/mentions.js";
+export {
+  DEFAULT_MENTIONS_INLINE,
+  mentionsOf,
+  mentionsPanelOf,
+  relatedLabels,
+} from "./build/mentions.js";
 export type { MentionsFragment } from "./build/mentions.js";
 export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions-island.js";
+export { groupByPage, typeCounts } from "./theme/default/mention-list.js";
+export type { RelatedPage } from "./theme/default/mention-list.js";
+export {
+  HOME_RECENT_ANCHOR,
+  HOME_TREE_ANCHOR,
+  SPACE_PAGES_MAX,
+  breadcrumbOf,
+  initialsOf,
+  spaceOf,
+} from "./build/space.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
   EntityFragment,

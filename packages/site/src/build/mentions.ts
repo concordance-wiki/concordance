@@ -8,8 +8,8 @@ import {
 import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
-import type { Mention, MentionsPanelProps } from "../slots.js";
-import { fileKey, message, type SiteContext } from "./context.js";
+import type { Mention, MentionsPanelProps, RelatedLabels } from "../slots.js";
+import { fileKey, message, typeLabel, type SiteContext } from "./context.js";
 import { entityHref, mentionsFragmentPath, relativeHref } from "./paths.js";
 
 /** How many mentions the served HTML carries when the configuration says nothing (`build.mentions_inline`). */
@@ -114,6 +114,9 @@ function mentionOf(
     mention: {
       kind: WRITTEN.has(provenance.method) ? "written" : "recognised",
       file: { label: provenance.path, href },
+      title: note.title,
+      type: note.type,
+      typeLabel: typeLabel(context, note.type),
       context: contextOf(context, entity, provenance),
       line,
       href: `${href}#L${String(line)}`,
@@ -146,7 +149,28 @@ export function mentionsOf(context: SiteContext, page: string, entity: Entity): 
     .map((item) => item.mention);
 }
 
-/** The view model of the panel of a page: its mentions, the inline threshold, the headings of the site locale and its fragment. */
+/** The strings of the related pages block in the site language; the two patterns keep their placeholders for the island. */
+export function relatedLabels(context: SiteContext): RelatedLabels {
+  return {
+    related: message(context, "related.title"),
+    filterPages: message(context, "related.filter"),
+    types: message(context, "related.types"),
+    pagesOf: message(context, "related.pagesOf"),
+    clearAll: message(context, "related.clearAll"),
+    cited: message(context, "related.cited"),
+    passage: message(context, "related.passage"),
+    passages: message(context, "related.passages"),
+    showOthers: message(context, "related.showOthers"),
+    loadingOthers: message(context, "related.loadingOthers"),
+    othersUnavailable: message(context, "related.othersUnavailable"),
+    fullList: message(context, "related.fullList"),
+    orderNote: message(context, "related.orderNote"),
+    noRelated: message(context, "related.none"),
+    noMatch: message(context, "related.noMatch"),
+  };
+}
+
+/** The view model of the related pages of a page: its mentions, the inline threshold, how many pages cite it, the labels of the site locale and its fragment. */
 export function mentionsPanelOf(
   context: SiteContext,
   page: string,
@@ -157,10 +181,8 @@ export function mentionsPanelOf(
   return {
     mentions,
     initial: inline,
-    headings: {
-      written: message(context, "mentions.explicit"),
-      recognised: message(context, "mentions.inferred"),
-    },
+    pages: new Set(mentions.map((mention) => mention.file.href)).size,
+    labels: relatedLabels(context),
     ...(mentions.length === 0
       ? {}
       : { fragmentHref: relativeHref(page, mentionsFragmentPath(entity.id)) }),

@@ -19,15 +19,7 @@ function fontStack(family: string | undefined, fallback: string): string {
 
 /** A colour of a palette as the stylesheet names it, `--color-<name>`. */
 export type PaletteColour =
-  | "bg"
-  | "surface"
-  | "soft"
-  | "border"
-  | "ink"
-  | "muted"
-  | "label"
-  | "accent"
-  | "highlight";
+  "bg" | "surface" | "soft" | "border" | "ink" | "muted" | "label" | "accent" | "highlight";
 
 /** The nine colours of a palette, the three optional ones derived from the six required when absent. */
 export function paletteColours(palette: ThemePalette): Record<PaletteColour, string> {

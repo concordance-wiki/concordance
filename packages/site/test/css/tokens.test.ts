@@ -29,9 +29,7 @@ describe("tokensStylesheet", () => {
   it("writes the fonts, the radius, the spacing scale and the light palette on the root", () => {
     const css = tokensStylesheet(theme);
     expect(css).toContain(":root {\n  color-scheme: light dark;\n");
-    expect(css).toContain(
-      '  --font-display: "Instrument Serif", "Instrument Sans", system-ui,',
-    );
+    expect(css).toContain('  --font-display: "Instrument Serif", "Instrument Sans", system-ui,');
     expect(css).toContain('  --font-ui: "Instrument Sans", system-ui,');
     expect(css).toContain('  --font-mono: "IBM Plex Mono", ui-monospace,');
     expect(css).toContain("  --radius: 4px;\n  --radius-small: 2px;\n  --radius-large: 6px;");

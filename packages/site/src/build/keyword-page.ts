@@ -4,7 +4,7 @@ import { formatMessage } from "@concordance-wiki/i18n";
 import { byCodeUnit } from "../order.js";
 import type { Companion, KeywordPageProps, Link, PassageGroup } from "../slots.js";
 import { createNoteHref, fileKey, message, type SiteContext } from "./context.js";
-import { neighbourhoodOf } from "./entity-page.js";
+import { neighbourhoodOf, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
 import { mentionsPanelOf } from "./mentions.js";
 import { entityHref } from "./paths.js";
@@ -123,6 +123,7 @@ export function keywordPageOf(
   options: KeywordPageOptions = {},
 ): KeywordPageProps {
   const page = pagePath(entity.id);
+  const neighbourhood = neighbourhoodOf(context, page, entity);
   const passages = context.fragments.get(entity.id)?.passages ?? [];
   const occurrences = numberOf(entity.attributes["occurrences"]);
   const slug = entity.id.replace(/^.*\//, "");
@@ -150,7 +151,13 @@ export function keywordPageOf(
     companions: companionsOf(context, page, entity),
     similar: similarOf(context, page, entity),
     similarLead: message(context, "keyword.similarLead"),
-    neighbours: neighbourhoodOf(context, page, entity),
+    neighbours: neighbourhood,
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
+    labels: {
+      seeNeighbourhood: message(context, "entity.seeNeighbourhood"),
+      neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
+        count: neighbourPages(neighbourhood),
+      }),
+    },
   };
 }

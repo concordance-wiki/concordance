@@ -35,6 +35,9 @@ describe("mentionsOf", () => {
           label: "rules/publication-threshold.md",
           href: "../../specs/rules/publication-threshold/index.html",
         },
+        title: "Épreuve du seuil",
+        type: "rule",
+        typeLabel: "Business rule",
         context: "applies_to",
         line: 1,
         href: "../../specs/rules/publication-threshold/index.html#L1",
@@ -45,6 +48,9 @@ describe("mentionsOf", () => {
           label: "screens/mentions-panel.md",
           href: "../../specs/screens/mentions-panel/index.html",
         },
+        title: "Mentions panel",
+        type: "screen",
+        typeLabel: "Screen",
         context: "keyword pages",
         line: 7,
         href: "../../specs/screens/mentions-panel/index.html#L7",
@@ -52,6 +58,9 @@ describe("mentionsOf", () => {
       {
         kind: "recognised",
         file: { label: "page.md", href: "../page/index.html" },
+        title: "Page",
+        type: "term",
+        typeLabel: "Term",
         context: "in section See also",
         line: 5,
         href: "../page/index.html#L5",
@@ -62,6 +71,9 @@ describe("mentionsOf", () => {
           label: "screens/mentions-panel.md",
           href: "../../specs/screens/mentions-panel/index.html",
         },
+        title: "Mentions panel",
+        type: "screen",
+        typeLabel: "Screen",
         context: "Keyword page",
         line: 9,
         href: "../../specs/screens/mentions-panel/index.html#L9",
@@ -72,6 +84,9 @@ describe("mentionsOf", () => {
           label: "screens/mentions-panel.md",
           href: "../../specs/screens/mentions-panel/index.html",
         },
+        title: "Mentions panel",
+        type: "screen",
+        typeLabel: "Screen",
         context: "…lists the keyword pages that cite the entity, grouped by file…",
         line: 15,
         href: "../../specs/screens/mentions-panel/index.html#L15",
@@ -87,6 +102,9 @@ describe("mentionsOf", () => {
       {
         kind: "written",
         file: { label: "keyword-page.md", href: "../keyword-page/index.html" },
+        title: "Keyword page",
+        type: "term",
+        typeLabel: "Term",
         context: "broader",
         line: 2,
         href: "../keyword-page/index.html#L2",
@@ -222,21 +240,41 @@ describe("mentions read from a document", () => {
 });
 
 describe("mentionsPanelOf", () => {
-  it("carries the mentions, the inline threshold, the headings of the site locale and the href of the fragment of the entity", () => {
+  it("carries the mentions, the inline threshold, the number of citing pages, the labels of the site locale and the href of the fragment of the entity", () => {
     const panel = mentionsPanelOf(context(), pagePath, term, 3);
     expect(panel.mentions).toHaveLength(5);
     expect(panel.initial).toBe(3);
-    expect(panel.headings).toEqual({
-      written: "Explicit mentions",
-      recognised: "Inferred mentions",
+    expect(panel.pages).toBe(3);
+    expect(panel.labels).toEqual({
+      related: "Related pages",
+      filterPages: "Filter these pages",
+      types: "Types",
+      pagesOf: "{shown} of {total} pages",
+      clearAll: "Clear all",
+      cited: "Cited",
+      passage: "passage",
+      passages: "passages",
+      showOthers: "Show the {count} others",
+      loadingOthers: "Loading the other pages…",
+      othersUnavailable: "The other pages could not be loaded.",
+      fullList: "Open the full list (JSON)",
+      orderNote:
+        "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
+      noRelated: "No other page evokes this one yet.",
+      noMatch: "No page matches the filter.",
     });
     expect(panel.fragmentHref).toBe("../../fragments/glossary/keyword-page.mentions.json");
     const french = mentionsPanelOf(
       context({ catalogue: loadCatalogue("fr") }),
       pagePath,
       term,
-    ).headings;
-    expect(french).toEqual({ written: "Mentions explicites", recognised: "Mentions inférées" });
+    ).labels;
+    expect(french?.related).toBe("Pages en relation");
+    expect(french?.pagesOf).toBe("{shown} pages sur {total}");
+    expect(french?.showOthers).toBe("Afficher les {count} autres");
+    expect(french?.orderNote).toBe(
+      "Ordonnées par nombre de passages, écrits et relevés confondus. « Cité » signale un lien présent dans le texte.",
+    );
   });
 
   it("defaults the threshold to twenty and names no fragment for an entity without a mention", () => {
@@ -244,6 +282,7 @@ describe("mentionsPanelOf", () => {
     expect(DEFAULT_MENTIONS_INLINE).toBe(20);
     expect(panel.initial).toBe(20);
     expect(panel.mentions).toEqual([]);
+    expect(panel.pages).toBe(0);
     expect(panel.fragmentHref).toBeUndefined();
   });
 });

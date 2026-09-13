@@ -19,13 +19,33 @@
     "defaultMessage": "Attributes",
     "description": "Heading of the attribute table of an entity page."
   },
+  "entity.breadcrumb": {
+    "defaultMessage": "You are here",
+    "description": "Accessible name of the breadcrumb of an entity page, space then folders then page."
+  },
+  "entity.changed": {
+    "defaultMessage": "Changed {when}",
+    "description": "Frame around the relative date of the last change of a note, such as nine days ago."
+  },
   "entity.confidence": {
     "defaultMessage": "Confidence: {value, number, percent}",
     "description": "Confidence of an inferred link, as a percentage between 0 and 1."
   },
+  "entity.correction": {
+    "defaultMessage": "Something to correct?",
+    "description": "Question before the edit link in the footer of an entity page."
+  },
+  "entity.declaredAtTop": {
+    "defaultMessage": "Declared at the top of the file.",
+    "description": "Note under the declared properties of an entity page, saying where they come from."
+  },
   "entity.domain": {
     "defaultMessage": "Domain",
     "description": "Label of the domain an entity belongs to."
+  },
+  "entity.edit": {
+    "defaultMessage": "Edit this page",
+    "description": "Link to the edit page of the note on its forge."
   },
   "entity.mentions": {
     "defaultMessage": "Mentions",
@@ -35,17 +55,33 @@
     "defaultMessage": "{count, plural, one {# mention} other {# mentions}}",
     "description": "Number of mentions of an entity, with the plural handled by the message."
   },
+  "entity.neighbourPages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "Number of pages of the neighbourhood, after the line that unfolds it."
+  },
   "entity.neighbours": {
     "defaultMessage": "Neighbourhood",
     "description": "Heading of the one-hop neighbourhood of an entity."
+  },
+  "entity.onThisPage": {
+    "defaultMessage": "On this page",
+    "description": "Heading of the table of contents of an entity page, one entry per section of the note."
   },
   "entity.otherAttributes": {
     "defaultMessage": "Other attributes",
     "description": "Heading of the section listing the frontmatter keys the profile does not declare for the type."
   },
+  "entity.otherPages": {
+    "defaultMessage": "{count, plural, one {# other page} other {# other pages}}",
+    "description": "Node of the tree of the space standing for the pages of a long folder it leaves out."
+  },
   "entity.relatedTo": {
     "defaultMessage": "Related to",
     "description": "Heading of the list of entities linked to the current one."
+  },
+  "entity.seeNeighbourhood": {
+    "defaultMessage": "See the neighbourhood map",
+    "description": "Line of the right panel that unfolds the neighbourhood of the page."
   },
   "entity.showLess": {
     "defaultMessage": "Show less",
@@ -58,6 +94,10 @@
   "entity.sources": {
     "defaultMessage": "Sources",
     "description": "Heading of the list of sources an entity comes from."
+  },
+  "entity.spaceTree": {
+    "defaultMessage": "Tree of the space",
+    "description": "Accessible name of the tree of the space in the left column of an entity page."
   },
   "entity.status": {
     "defaultMessage": "Status",
@@ -127,17 +167,9 @@
     "defaultMessage": "line {line, number}",
     "description": "Location of a mention inside a document, given by its line number."
   },
-  "mentions.explicit": {
-    "defaultMessage": "Explicit mentions",
-    "description": "Group heading for mentions written as links in the sources."
-  },
   "mentions.inSection": {
     "defaultMessage": "in section {section}",
     "description": "Location of a mention inside a document, given by its section heading."
-  },
-  "mentions.inferred": {
-    "defaultMessage": "Inferred mentions",
-    "description": "Group heading for mentions found by inference."
   },
   "nav.applications": {
     "defaultMessage": "Applications",
@@ -147,9 +179,73 @@
     "defaultMessage": "Domains",
     "description": "Navigation entry for the domain hierarchy."
   },
+  "nav.index": {
+    "defaultMessage": "A–Z index",
+    "description": "Link of the top bar to the alphabetical index."
+  },
   "nav.types": {
     "defaultMessage": "Types",
     "description": "Navigation entry for the list of entity types."
+  },
+  "related.cited": {
+    "defaultMessage": "Cited",
+    "description": "Prefix of a related page that writes a link to the current one."
+  },
+  "related.clearAll": {
+    "defaultMessage": "Clear all",
+    "description": "Link that lifts every type filter of the related pages."
+  },
+  "related.filter": {
+    "defaultMessage": "Filter these pages",
+    "description": "Placeholder of the text filter of the related pages."
+  },
+  "related.fullList": {
+    "defaultMessage": "Open the full list (JSON)",
+    "description": "Link to the fragment of every mention, offered before any script runs."
+  },
+  "related.loadingOthers": {
+    "defaultMessage": "Loading the other pages…",
+    "description": "Text of the button while the other related pages load."
+  },
+  "related.noMatch": {
+    "defaultMessage": "No page matches the filter.",
+    "description": "Notice shown when the filters of the related pages keep no page."
+  },
+  "related.none": {
+    "defaultMessage": "No other page evokes this one yet.",
+    "description": "Notice shown when no page cites the current one."
+  },
+  "related.orderNote": {
+    "defaultMessage": "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
+    "description": "Note under the related pages saying how they are ordered and what the cited mark means."
+  },
+  "related.othersUnavailable": {
+    "defaultMessage": "The other pages could not be loaded.",
+    "description": "Status shown when the fragment of the related pages could not be fetched."
+  },
+  "related.pagesOf": {
+    "defaultMessage": "'{shown}' of '{total}' pages",
+    "description": "Count under the type filter, the two quoted placeholders being filled in the browser."
+  },
+  "related.passage": {
+    "defaultMessage": "passage",
+    "description": "Unit after the count of a related page holding one passage, for assistive technologies."
+  },
+  "related.passages": {
+    "defaultMessage": "passages",
+    "description": "Unit after the count of a related page holding several passages, for assistive technologies."
+  },
+  "related.showOthers": {
+    "defaultMessage": "Show the '{count}' others",
+    "description": "Button that reveals the related pages beyond the served ones, the quoted placeholder being filled in the browser."
+  },
+  "related.title": {
+    "defaultMessage": "Related pages",
+    "description": "Heading of the block listing the pages that evoke the current one."
+  },
+  "related.types": {
+    "defaultMessage": "Types",
+    "description": "Button opening the type filter of the related pages."
   },
   "search.activeFilters": {
     "defaultMessage": "Active filters",
@@ -231,17 +327,25 @@
     "defaultMessage": "Index",
     "description": "Link to the alphabetical index of entries."
   },
+  "site.recent": {
+    "defaultMessage": "Recent",
+    "description": "Link of the top bar to the latest changes on the home page."
+  },
   "site.search": {
     "defaultMessage": "Search",
     "description": "Label of the search field and of the search page."
   },
   "site.searchPlaceholder": {
-    "defaultMessage": "Search entities and keywords…",
+    "defaultMessage": "Search the documentation",
     "description": "Placeholder shown inside the empty search field."
   },
   "site.skipToContent": {
     "defaultMessage": "Skip to content",
     "description": "Link that jumps over the navigation to the main content."
+  },
+  "site.spaces": {
+    "defaultMessage": "Spaces",
+    "description": "Link of the top bar to the sources, listed as spaces on the home page."
   },
   "site.todo": {
     "defaultMessage": "To do",

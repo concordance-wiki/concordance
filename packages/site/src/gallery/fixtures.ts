@@ -5,14 +5,28 @@ import { defaultThemeConfig } from "../build/default-theme.js";
 /** The neutral palette of a project without `theme.yaml`, named after the gallery. */
 export const galleryTheme: ThemeConfig = defaultThemeConfig("Gallery");
 
-/** The mentions of the fixtures come three per note, so that the panel shows its file groups. */
+/** The mentions of the fixtures come three per note, so that the related pages count several passages. */
 export const MENTIONS_PER_NOTE = 3;
 
+/** The notes of the fixtures alternate between two types, so that the type filter has something to filter. */
+const NOTE_TYPES = [
+  { type: "term", typeLabel: "Term" },
+  { type: "screen", typeLabel: "Screen" },
+] as const;
+
 export function mention(index: number, kind: Mention["kind"] = "recognised"): Mention {
-  const note = `note-${String(Math.ceil(index / MENTIONS_PER_NOTE))}`;
+  const number = Math.ceil(index / MENTIONS_PER_NOTE);
+  const note = `note-${String(number)}`;
+  // The index is always in range: the modulo keeps it under the length of the list.
+  const { type, typeLabel } = NOTE_TYPES[
+    (number - 1) % NOTE_TYPES.length
+  ] as (typeof NOTE_TYPES)[number];
   return {
     kind,
     file: { label: `${note}.md`, href: `../notes/${note}/` },
+    title: `Note ${String(number)}`,
+    type,
+    typeLabel,
     context: `passage ${String(index)} cites the entity`,
     line: index,
     href: `../notes/${note}/#L${String(index)}`,
@@ -30,10 +44,11 @@ export const header: SlotProps["Header"] = {
   siteTitle: "My wiki",
   homeHref: "../",
   navigation: [
-    { label: "Index", href: "../index/" },
-    { label: "To do", href: "../todo/", count: 12 },
+    { label: "Spaces", href: "../#home-tree" },
+    { label: "A–Z index", href: "../index/" },
+    { label: "Recent", href: "../#home-recent" },
   ],
-  search: { action: "../search/", placeholder: "Search a word of your business" },
+  search: { action: "../search/", placeholder: "Search the documentation" },
 };
 
 /** The header with a logo and without a search field, the other shape a project may configure. */
@@ -51,6 +66,7 @@ export const footer: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
   links: [{ label: "Forge", href: "https://forge.example/wiki" }],
+  todo: { label: "To do", href: "../todo/", count: 12 },
   credit: true,
 };
 
@@ -195,6 +211,325 @@ export const entityPage: SlotProps["EntityPage"] = {
       source: "glossary",
       path: "keyword-page.md",
       editHref: "https://forge.example/glossary/edit/main/keyword-page.md",
+    },
+  ],
+};
+
+/** The mark of the tool, inlined so that the top bar of the corporate state carries a mark next to the name. */
+const MARK_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22"><rect x="7" y="11" width="27" height="6" rx="3" fill="currentColor"/><rect x="5" y="21" width="31" height="6" rx="3" fill="currentColor"/><rect x="11" y="31" width="26" height="6" rx="3" fill="currentColor"/><rect x="20" y="5" width="8" height="38" rx="4" fill="var(--color-accent)"/></svg>';
+
+/** The top bar of the corporate state: the mark and the name, the search field, the three links; no statistic. */
+export const corporateHeader: SlotProps["Header"] = {
+  siteTitle: "Concordance documentation",
+  homeHref: "../",
+  logo: { svg: MARK_SVG },
+  navigation: [
+    { label: "Spaces", href: "../#home-tree" },
+    { label: "A–Z index", href: "../index/" },
+    { label: "Recent", href: "../#home-recent" },
+  ],
+  search: { action: "../search/", placeholder: "Search the documentation" },
+};
+
+/** The footer of the corporate state: the same as the others, the to-do page with its count kept out of the top bar. */
+export const corporateFooter: SlotProps["Footer"] = footer;
+
+/** A page of the specifications space that evokes the publication threshold rule. */
+function relatedMention(
+  index: number,
+  page: { id: string; title: string; type: string; typeLabel: string; path: string },
+  context: string,
+  kind: Mention["kind"] = "recognised",
+): Mention {
+  const href = `../../../${page.id}/`;
+  return {
+    kind,
+    file: { label: page.path, href },
+    title: page.title,
+    type: page.type,
+    typeLabel: page.typeLabel,
+    context,
+    line: index,
+    href: `${href}#L${String(index)}`,
+    surface: "publication threshold",
+  };
+}
+
+const canonicalModel = {
+  id: "specs/api/canonical-model",
+  title: "Canonical model API",
+  type: "api",
+  typeLabel: "API",
+  path: "api/canonical-model.md",
+};
+const keywordScreen = {
+  id: "specs/screens/keyword-page",
+  title: "Keyword page",
+  type: "screen",
+  typeLabel: "Screen",
+  path: "screens/keyword-page.md",
+};
+const thresholdDecision = {
+  id: "decisions/threshold-applied-in-model",
+  title: "Threshold applied in model",
+  type: "decision",
+  typeLabel: "Decision",
+  path: "threshold-applied-in-model.md",
+};
+const thresholdReview = {
+  id: "meetings/2026-03-12-keyword-page-threshold-review",
+  title: "Keyword page threshold review",
+  type: "meeting",
+  typeLabel: "Meeting",
+  path: "2026-03-12-keyword-page-threshold-review.md",
+};
+const keywordObject = {
+  id: "specs/objects/keyword-page",
+  title: "Keyword page",
+  type: "business_object",
+  typeLabel: "Business object",
+  path: "objects/keyword-page.md",
+};
+const candidateTerm = {
+  id: "glossary/candidate-expression",
+  title: "Candidate expression",
+  type: "term",
+  typeLabel: "Term",
+  path: "candidate-expression.md",
+};
+
+/** The pages of the fixtures corpus that evoke the rule, written links first, then recognised mentions, each in corpus order. */
+export const corporateMentions: Mention[] = [
+  relatedMention(
+    14,
+    thresholdDecision,
+    "Publication threshold, the rule this decision applies once.",
+    "written",
+  ),
+  relatedMention(
+    8,
+    canonicalModel,
+    "The only place where the publication threshold and the related relation cap are applied.",
+    "written",
+  ),
+  relatedMention(
+    9,
+    keywordScreen,
+    "The passages of an expression that crosses the publication threshold without any note defining it.",
+    "written",
+  ),
+  relatedMention(
+    25,
+    keywordScreen,
+    "Publication threshold, applied to every keyword page.",
+    "written",
+  ),
+  relatedMention(
+    8,
+    thresholdDecision,
+    "The publication threshold is applied once, when the canonical model is written.",
+  ),
+  relatedMention(6, candidateTerm, "Above the publication threshold it gets a keyword page."),
+  relatedMention(
+    8,
+    thresholdReview,
+    "Participant-3 asked where the publication threshold lives; Participant-2 answered: in the Canonical model API only.",
+  ),
+  relatedMention(
+    12,
+    thresholdReview,
+    "The publication threshold stays at three occurrences in two files.",
+  ),
+  relatedMention(
+    6,
+    keywordObject,
+    "Counted at every build, published above the publication threshold.",
+  ),
+  relatedMention(
+    31,
+    keywordScreen,
+    "The counts come from the model; the publication threshold is never recounted here.",
+  ),
+];
+
+/** The rule of the fixtures corpus that states the publication threshold, laid out as the corporate chrome shows a page: the tree of its space, the breadcrumb, the line under the title, the three blocks of the panel. */
+export const corporateEntityPage: SlotProps["EntityPage"] = {
+  entity: {
+    id: "specs/rules/publication-threshold",
+    type: "rule",
+    typeLabel: "Business rule",
+    title: "Publication threshold",
+    locale: "en",
+  },
+  space: {
+    name: "specs",
+    initials: "SP",
+    nodes: [
+      { label: "api", count: 3 },
+      { label: "batches", count: 3 },
+      { label: "endpoints", count: 6 },
+      { label: "objects", count: 12 },
+      { label: "processes", count: 5 },
+      { label: "roles", count: 3 },
+      {
+        label: "rules",
+        count: 10,
+        children: [
+          { label: "Cross-source links off", href: "../cross-source-links-off/" },
+          { label: "Fail-on policy", href: "../fail-on-policy/" },
+          { label: "Identifier pattern", href: "../identifier-pattern/" },
+          { label: "Keyword page identifier", href: "../keyword-page-identifier/" },
+          { label: "Publication threshold", current: true },
+          { label: "Rejected terms never proposed", href: "../rejected-terms-never-proposed/" },
+          { label: "Related relation cap", href: "../related-relation-cap/" },
+          { label: "Section heading match", href: "../section-heading-match/" },
+          { label: "Stale after 180 days", href: "../stale-after-180-days/" },
+          { label: "Twin size ratio", href: "../twin-size-ratio/" },
+        ],
+      },
+      { label: "screens", count: 11 },
+      { label: "tables", count: 4 },
+    ],
+  },
+  breadcrumb: [
+    { label: "specs", href: "../../../#home-tree" },
+    { label: "rules" },
+    { label: "Publication threshold" },
+  ],
+  changed: { date: "2026-09-04", label: "Changed 9 days ago" },
+  highlights: [],
+  sections: [
+    {
+      id: "definition",
+      html: '<p>A <a href="../../../glossary/candidate-expression/" class="recognised">candidate expression</a> gets a <a href="../../../glossary/keyword-page/" class="recognised">keyword page</a> when it occurs at least three times across at least two files. The count happens when the <a href="../../api/canonical-model/" class="written">Canonical model API</a> is written, as recorded in <a href="../../../decisions/threshold-applied-in-model/" class="written">threshold applied in model</a>.</p>',
+    },
+    {
+      id: "applies-to",
+      heading: "Applies to",
+      key: "applies_to",
+      html: '<ul><li><a href="../../../specs/screens/keyword-page/" class="written">Keyword page</a></li><li><a href="../../../specs/screens/search-results/" class="written">Search results</a></li><li><a href="../../api/canonical-model/" class="written">Canonical model API</a></li><li><a href="../../../specs/objects/keyword-page/" class="written">Keyword page</a></li></ul>',
+    },
+    {
+      id: "history",
+      heading: "History of the rule",
+      html: "<p>The threshold was first applied by every page that counted occurrences, which produced counts that disagreed between the site and the linter. Applying it once, when the model is written, was decided at the review of March 2026.</p>",
+    },
+  ],
+  attributes: [
+    { name: "status", label: "Status", values: [{ text: "valid" }] },
+    { name: "severity", label: "Severity", values: [{ text: "blocking" }] },
+    {
+      name: "condition",
+      label: "Condition",
+      values: [{ text: "an expression occurs fewer than three times or in fewer than two files" }],
+    },
+    {
+      name: "applies_to",
+      label: "Applies to",
+      values: [
+        { text: "Keyword page", href: "../../../specs/screens/keyword-page/" },
+        { text: "Canonical model API", href: "../../api/canonical-model/" },
+      ],
+    },
+  ],
+  labels: {
+    properties: "Properties",
+    declaredAtTop: "Declared at the top of the file.",
+    otherAttributes: "Other attributes",
+    onThisPage: "On this page",
+    spaceTree: "Tree of the space",
+    breadcrumb: "You are here",
+    correction: "Something to correct?",
+    edit: "Edit this page",
+    seeNeighbourhood: "See the neighbourhood map",
+    neighbourPages: "5 pages",
+  },
+  neighbours: {
+    centre: "Publication threshold",
+    neighbours: [
+      {
+        id: "specs/screens/keyword-page",
+        label: "Keyword page",
+        href: "../../../specs/screens/keyword-page/",
+        typeLabel: "Screen",
+        typeGlyph: "screen",
+        relation: "constrains",
+        weight: 4,
+        rank: 0,
+      },
+      {
+        id: "specs/api/canonical-model",
+        label: "Canonical model API",
+        href: "../../api/canonical-model/",
+        typeLabel: "API",
+        typeGlyph: "api",
+        relation: "constrains",
+        weight: 3,
+        rank: 1,
+      },
+      {
+        id: "specs/objects/keyword-page",
+        label: "Keyword page",
+        href: "../../../specs/objects/keyword-page/",
+        typeLabel: "Business object",
+        typeGlyph: "object",
+        relation: "constrains",
+        weight: 2,
+        rank: 2,
+      },
+      {
+        id: "decisions/threshold-applied-in-model",
+        label: "Threshold applied in model",
+        href: "../../../decisions/threshold-applied-in-model/",
+        typeLabel: "Decision",
+        typeGlyph: "decision",
+        relation: "related",
+        weight: 2,
+        rank: 3,
+      },
+      {
+        id: "glossary/publication-threshold",
+        label: "Publication threshold",
+        href: "../../../glossary/publication-threshold/",
+        typeLabel: "Term",
+        typeGlyph: "term",
+        relation: "related",
+        weight: 5,
+        rank: 4,
+      },
+    ],
+    total: 5,
+  },
+  mentions: {
+    mentions: corporateMentions,
+    initial: 20,
+    pages: 6,
+    labels: {
+      related: "Related pages",
+      filterPages: "Filter these pages",
+      types: "Types",
+      pagesOf: "{shown} of {total} pages",
+      clearAll: "Clear all",
+      cited: "Cited",
+      passage: "passage",
+      passages: "passages",
+      showOthers: "Show the {count} others",
+      loadingOthers: "Loading the other pages…",
+      othersUnavailable: "The other pages could not be loaded.",
+      fullList: "Open the full list (JSON)",
+      orderNote:
+        "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
+      noRelated: "No other page evokes this one yet.",
+      noMatch: "No page matches the filter.",
+    },
+    fragmentHref: "../../../fragments/specs/rules/publication-threshold.mentions.json",
+  },
+  sources: [
+    {
+      source: "specs",
+      path: "rules/publication-threshold.rule.md",
+      editHref: "https://forge.example/specs/edit/main/rules/publication-threshold.rule.md",
     },
   ],
 };

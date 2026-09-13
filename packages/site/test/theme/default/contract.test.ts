@@ -129,7 +129,7 @@ describe("the contract section of an api page", () => {
     const html = render({ contract });
     const article = html.indexOf('<article class="entity-body">');
     const section = html.indexOf('<section class="contract" aria-labelledby="contract-title">');
-    const panel = html.indexOf('<aside class="entity-panel"');
+    const panel = html.indexOf('<div class="entity-side">');
     expect(article).toBeGreaterThanOrEqual(0);
     expect(section).toBeGreaterThan(article);
     expect(panel).toBeGreaterThan(section);
@@ -212,7 +212,7 @@ describe("the contract section of an api page", () => {
     const page = render({ contract });
     const section = page.slice(
       page.indexOf('<section class="contract"'),
-      page.indexOf('<aside class="entity-panel"'),
+      page.indexOf('<footer class="entity-footer">'),
     );
     expect([...section.matchAll(/href="([^"]*)"/g)].map((match) => match[1])).toEqual([
       "model-query.openapi.json",

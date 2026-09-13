@@ -62,24 +62,34 @@ describe("The accent colour never carries information on its own", () => {
     );
   });
 
-  it("uses the accent in a known, documented set of places and nowhere else", () => {
+  it("uses the accent in a known, documented set of places and nowhere else: links and the current position, never a status or a decoration", () => {
     expect(base.map((rule) => rule.selector)).toEqual(["a", FOCUS_RING]);
     expect(components.map((rule) => rule.selector)).toEqual([
+      ".space-current > span",
       ".markdown .written",
       ".legend-written::before,\n.legend-recognised::before",
       ".banner",
-      ".mentions-group h3",
-      ".mentions-more button",
+      ".related-clear",
+      ".related-mark",
       CONTRACT_BUTTONS,
     ]);
   });
 
-  it("underlines links, the disclosure of the remaining mentions and the buttons of the contract viewer, so that colour is not their only mark", () => {
+  it("underlines links, the clearing of the type filter and the buttons of the contract viewer, so that colour is not their only mark", () => {
     expect(ruleFor(base, "a").body).toContain("text-decoration: underline;");
-    expect(ruleFor(components, ".mentions-more button").body).toContain(
-      "text-decoration: underline;",
-    );
+    expect(ruleFor(components, ".related-clear").body).toContain("text-decoration: underline;");
     expect(ruleFor(components, CONTRACT_BUTTONS).body).toContain("text-decoration: underline;");
+  });
+
+  it("marks the current page of the tree by a rule and the bold weight, and a cited page by a word, never by the colour alone", () => {
+    const current = ruleFor(components, ".space-current > span").body;
+    expect(current).toContain("border-inline-start: 3px solid var(--color-accent);");
+    expect(current).toContain("font-weight: 600;");
+    const page = pages.get("entity-page-corporate.html") ?? "";
+    expect(page).toContain(
+      '<li class="space-page space-current"><span aria-current="page">Publication threshold</span></li>',
+    );
+    expect(page).toContain('<span class="related-mark">Cited · </span>');
   });
 
   it("draws the focus ring as an offset outline, visible whatever the accent", () => {
@@ -104,17 +114,10 @@ describe("The accent colour never carries information on its own", () => {
     expect(page).toContain('<span class="legend-recognised">word recognised at indexing</span>');
   });
 
-  it("gives the accent-bordered banner and the accent headings of the mentions a text of their own", () => {
+  it("gives the accent-bordered banner a text of its own", () => {
     const keyword = pages.get("keyword-page.html") ?? "";
     expect(keyword).toMatch(
       /<p class="banner" role="note">Expression without a note\. \d+ passages recorded\. <a class="create-note" [^>]*>Create a note<\/a><\/p>/,
-    );
-    const mentions = pages.get("mentions-panel.html") ?? "";
-    expect(mentions).toContain(
-      '<h3 id="mentions-written">Written in notes <span class="count">2</span></h3>',
-    );
-    expect(mentions).toContain(
-      '<h3 id="mentions-recognised">Recognised in files <span class="count">1</span></h3>',
     );
   });
 

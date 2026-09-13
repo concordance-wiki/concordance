@@ -1,16 +1,42 @@
 import type { JSX } from "preact";
 
-import type { Attribute, EntityPageProps, EntityRef, Section } from "../../slots.js";
+import type {
+  Attribute,
+  BreadcrumbItem,
+  EntityPageLabels,
+  EntityPageProps,
+  EntityRef,
+  NeighbourhoodProps,
+  Section,
+  SourceRef,
+} from "../../slots.js";
 import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList, AttributeValues } from "./attributes.js";
 import { ContractSection } from "./contract-section.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
+import { SpaceTree } from "./space-tree.js";
 
 /** How many highlights sit on the badge line; the next ones go on a line of their own. */
 export const HIGHLIGHTS_WITH_BADGE = 2;
 /** How many highlights the header shows in all; the rest stays in the panel. */
 export const HIGHLIGHTS_MAX = 5;
+
+/** The labels of the default theme, used for every label the page does not receive; the neighbour count is worded from the page. */
+export function defaultEntityPageLabels(neighbours: number): EntityPageLabels {
+  return {
+    properties: labels.properties,
+    declaredAtTop: labels.declaredAtTop,
+    otherAttributes: labels.otherAttributes,
+    onThisPage: labels.onThisPage,
+    spaceTree: labels.spaceTree,
+    breadcrumb: labels.breadcrumb,
+    correction: labels.correction,
+    edit: labels.edit,
+    seeNeighbourhood: labels.seeNeighbourhood,
+    neighbourPages: `${String(neighbours)} ${labels.neighbourPages}`,
+  };
+}
 
 function Highlight({
   entity,
@@ -62,16 +88,135 @@ function NoteSection({ entity, section }: { entity: EntityRef; section: Section 
   );
 }
 
+/** Space › folder › page: the space links to its place on the home page, the page is where the reader stands. */
+function Breadcrumb({ items, label }: { items: BreadcrumbItem[]; label: string }): JSX.Element {
+  const last = items.length - 1;
+  return (
+    <nav class="breadcrumbs" aria-label={label}>
+      <ol class="breadcrumbs-list">
+        {items.map((item, index) => (
+          <li key={index}>
+            {index === last ? (
+              <span aria-current="page">{item.label}</span>
+            ) : item.href === undefined ? (
+              <span>{item.label}</span>
+            ) : (
+              <a href={item.href}>{item.label}</a>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 /**
- * The page of every typed entity, whatever its type: the badge and the highlights, the title,
- * the note at full column width, its documents under it, the contract of an API after it, then
- * the side panel of declared attributes, the attributes the type does not declare, the
- * neighbourhood, the mentions and the sources. An attribute value or a mapped section goes
- * through the `Attribute@<name>` or `Section@<key>` component of the theme or of the type
- * module when one exists; the rest of the page is the same for every type.
+ * A block of the right panel: a disclosure whose summary is the heading, served closed and
+ * unfolded by the stylesheet where the layout has room for the panel.
+ */
+function PanelBlock({
+  id,
+  className,
+  heading,
+  children,
+}: {
+  id: string;
+  className: string;
+  heading: string;
+  children: JSX.Element | (JSX.Element | false)[];
+}): JSX.Element {
+  return (
+    <section class={`panel-block ${className}`} aria-labelledby={id}>
+      <details class="panel-fold">
+        <summary>
+          <h2 id={id}>{heading}</h2>
+        </summary>
+        {children}
+      </details>
+    </section>
+  );
+}
+
+/** The table of contents: one entry per section of the note with a heading. */
+function TableOfContents({
+  sections,
+  heading,
+}: {
+  sections: Section[];
+  heading: string;
+}): JSX.Element {
+  return (
+    <PanelBlock id="entity-toc" className="entity-toc" heading={heading}>
+      <ol class="toc-list">
+        {sections.map((section) => (
+          <li key={section.id}>
+            <a href={`#${section.id}`}>{section.heading}</a>
+          </li>
+        ))}
+      </ol>
+    </PanelBlock>
+  );
+}
+
+/** The path of the file in the monospace family, then the edit link when the forge is known. */
+function Source({ source, text }: { source: SourceRef; text: EntityPageLabels }): JSX.Element {
+  return (
+    <p class="entity-source">
+      <code>
+        {source.source}/{source.path}
+      </code>
+      {source.editHref !== undefined && (
+        <span class="entity-edit-lead">
+          {text.correction}{" "}
+          <a class="entity-edit" href={source.editHref}>
+            {text.edit}
+          </a>
+        </span>
+      )}
+    </p>
+  );
+}
+
+/** The neighbourhood folded behind its line at the foot of the panel, the number of pages worded. */
+export function NeighbourhoodFold({
+  neighbours,
+  labels: given,
+}: {
+  neighbours: NeighbourhoodProps;
+  labels: Partial<EntityPageLabels>;
+}): JSX.Element {
+  const Neighbourhood = useSlot("Neighbourhood");
+  const text = {
+    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...given,
+  };
+  return (
+    <details class="neighbourhood-fold">
+      <summary>
+        <span class="neighbourhood-lead">{text.seeNeighbourhood}</span>
+        <span class="neighbourhood-count">{text.neighbourPages}</span>
+      </summary>
+      <Neighbourhood {...neighbours} />
+    </details>
+  );
+}
+
+/**
+ * The page of every typed entity, whatever its type: the tree of its space on the left; in the
+ * centre the breadcrumb, the title, the line naming the type, the last change and the space
+ * with the highlights, the note at full column width, its documents under it, the contract of
+ * an API after it, then the path of the file with its edit link; on the right three stacked
+ * blocks, the declared attributes (and the attributes the type does not declare, when the note
+ * sets some), the table of contents of the note, the related pages, then the neighbourhood
+ * folded behind its line. An attribute value or a mapped section goes through the
+ * `Attribute@<name>` or `Section@<key>` component of the theme or of the type module when one
+ * exists; the rest of the page is the same for every type.
  */
 export function EntityPage({
   entity,
+  space,
+  breadcrumb = [],
+  changed,
   highlights,
   sections,
   attributes,
@@ -83,72 +228,82 @@ export function EntityPage({
   contract,
   documents = [],
 }: EntityPageProps): JSX.Element {
-  const Neighbourhood = useSlot("Neighbourhood");
   const MentionsPanel = useSlot("MentionsPanel");
+  const text: EntityPageLabels = {
+    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...given,
+  };
   const withBadge = highlights.slice(0, HIGHLIGHTS_WITH_BADGE);
   const underBadge = highlights.slice(HIGHLIGHTS_WITH_BADGE, HIGHLIGHTS_MAX);
+  const headed = sections.filter((section) => section.heading !== undefined);
   return (
-    <div class="entity">
-      <header class="entity-header">
-        <p class="entity-badge">
-          <span class="badge">{entity.typeLabel}</span>
-          {withBadge.map((attribute) => (
-            <Highlight key={attribute.name} entity={entity} attribute={attribute} />
-          ))}
-        </p>
-        {underBadge.length > 0 && (
-          <p class="entity-highlights">
-            {underBadge.map((attribute) => (
+    <div class={space === undefined ? "entity" : "entity entity-with-space"}>
+      {space !== undefined && <SpaceTree space={space} label={text.spaceTree} />}
+      <div class="entity-main">
+        {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
+        <header class="entity-header">
+          <h1>{entity.title}</h1>
+          <p class="entity-badge">
+            <span class="badge">{entity.typeLabel}</span>
+            {changed !== undefined && (
+              <time class="entity-changed" dateTime={changed.date}>
+                {changed.label}
+              </time>
+            )}
+            {space !== undefined && <span class="entity-space">{space.name}</span>}
+            {withBadge.map((attribute) => (
               <Highlight key={attribute.name} entity={entity} attribute={attribute} />
             ))}
           </p>
+          {underBadge.length > 0 && (
+            <p class="entity-highlights">
+              {underBadge.map((attribute) => (
+                <Highlight key={attribute.name} entity={entity} attribute={attribute} />
+              ))}
+            </p>
+          )}
+        </header>
+        <article class="entity-body">
+          {sections.map((section) => (
+            <NoteSection key={section.id} entity={entity} section={section} />
+          ))}
+          {sections.length > 0 && (
+            <footer class="legend">
+              <span class="legend-written">{labels.legendWritten}</span>
+              <span class="legend-recognised">{labels.legendRecognised}</span>
+            </footer>
+          )}
+          {documents.map((document, index) => (
+            <DocumentBlock key={document.file.href} document={document} index={index + 1} />
+          ))}
+        </article>
+        {contract !== undefined && <ContractSection {...contract} />}
+        <footer class="entity-footer">
+          {sources.map((source) => (
+            <Source key={source.path} source={source} text={text} />
+          ))}
+        </footer>
+      </div>
+      <div class="entity-side">
+        {attributes.length > 0 && (
+          <PanelBlock id="entity-properties" className="entity-panel" heading={text.properties}>
+            <AttributeList entity={entity} attributes={attributes} />
+            <p class="panel-note">{text.declaredAtTop}</p>
+          </PanelBlock>
         )}
-        <h1>{entity.title}</h1>
-      </header>
-      <article class="entity-body">
-        {sections.map((section) => (
-          <NoteSection key={section.id} entity={entity} section={section} />
-        ))}
-        {sections.length > 0 && (
-          <footer class="legend">
-            <span class="legend-written">{labels.legendWritten}</span>
-            <span class="legend-recognised">{labels.legendRecognised}</span>
-          </footer>
+        {otherAttributes.length > 0 && (
+          <PanelBlock
+            id="entity-other-attributes"
+            className="entity-panel entity-others"
+            heading={text.otherAttributes}
+          >
+            <AttributeList entity={entity} attributes={otherAttributes} />
+          </PanelBlock>
         )}
-        {documents.map((document, index) => (
-          <DocumentBlock key={document.file.href} document={document} index={index + 1} />
-        ))}
-      </article>
-      {contract !== undefined && <ContractSection {...contract} />}
-      {attributes.length > 0 && (
-        <aside class="entity-panel" aria-labelledby="entity-properties">
-          <h2 id="entity-properties">{given.properties ?? labels.properties}</h2>
-          <AttributeList entity={entity} attributes={attributes} />
-        </aside>
-      )}
-      {otherAttributes.length > 0 && (
-        <aside class="entity-panel entity-others" aria-labelledby="entity-other-attributes">
-          <h2 id="entity-other-attributes">{given.otherAttributes ?? labels.otherAttributes}</h2>
-          <AttributeList entity={entity} attributes={otherAttributes} />
-        </aside>
-      )}
-      <Neighbourhood {...neighbours} />
-      <MentionsPanel {...mentions} />
-      <footer class="entity-footer">
-        {sources.map((source) => (
-          <p key={source.path} class="entity-source">
-            {labels.source}{" "}
-            <code>
-              {source.source}/{source.path}
-            </code>
-            {source.editHref !== undefined && (
-              <a class="entity-edit" href={source.editHref}>
-                {labels.editInForge}
-              </a>
-            )}
-          </p>
-        ))}
-      </footer>
+        {headed.length > 0 && <TableOfContents sections={headed} heading={text.onThisPage} />}
+        <MentionsPanel {...mentions} />
+        <NeighbourhoodFold neighbours={neighbours} labels={given} />
+      </div>
     </div>
   );
 }

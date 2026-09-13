@@ -132,7 +132,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain(
       '<footer class="legend"><span class="legend-written">link written in the note</span><span class="legend-recognised">word recognised at indexing</span></footer>',
     );
-    expect(page).toContain('<p class="entity-source">source: <code>notes/a.md</code></p>');
+    expect(page).toContain('<p class="entity-source"><code>notes/a.md</code></p>');
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");
     const keyword = io.fs.readText("/work/dist/keywords/build-summary/index.html");
@@ -344,7 +344,10 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(await buildCommand([], io)).toBe(0);
     const page = io.fs.readText("/work/dist/notes/b/index.html");
     expect(page).toContain('<a class="entity-edit" href="https://forge.example/notes/edit/b.md">');
-    expect(page.split('<li class="mention').length - 1).toBe(1);
+    expect(page.split('<li class="related-page').length - 1).toBe(1);
+    expect(page).toMatch(
+      /data-props="\{&quot;mentions&quot;:\[\{[^\]]*\}\],&quot;total&quot;:[2-9]/,
+    );
     expect(page).toContain('<a href="../../fragments/notes/b.mentions.json">');
     const mentions = JSON.parse(io.fs.readText("/work/dist/fragments/notes/b.mentions.json")) as {
       mentions: unknown[];
@@ -359,7 +362,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     });
     expect(await buildCommand([], io)).toBe(0);
     expect(io.fs.readText("/work/dist/specs/readme/index.html")).toContain(
-      '<a class="entity-edit" href="https://github.com/concordance-wiki/demo-specs/edit/develop/README.md">Edit in the forge</a>',
+      '<a class="entity-edit" href="https://github.com/concordance-wiki/demo-specs/edit/develop/README.md">Edit this page</a>',
     );
     expect(
       sourceRefs({

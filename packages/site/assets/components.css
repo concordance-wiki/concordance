@@ -1,4 +1,4 @@
-/* Components layer: one block per slot of the default theme. */
+/* Components layer: one block per slot of the default theme. Text never under 13 px, targets of 40 px. */
 
 concordance-island {
   display: block;
@@ -10,28 +10,41 @@ concordance-island {
   margin-inline-start: var(--space-1);
   padding-inline: var(--space-1);
   border-radius: 1em;
-  background: var(--color-bg);
-  color: var(--color-muted);
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 400;
   text-align: center;
 }
 
+/* The type of a page: a chip in the soft colour, read in the secondary text colour. */
 .badge {
   display: inline-block;
-  padding: 0.1em 0.5em;
-  border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-ink);
-  color: var(--color-bg);
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.25em 0.625em;
+  border-radius: calc(var(--radius) * 0.625);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .empty {
-  color: var(--color-muted);
+  color: var(--color-label);
 }
 
-/* Header */
+/* A small capital label above a block of the panel. */
+.panel-block h2,
+.section-label {
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Top bar: mark and site name, the search field, three links, the mode switch; no statistic. */
 
 .site-header {
   background: var(--color-surface);
@@ -42,9 +55,8 @@ concordance-island {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
-  max-inline-size: 72rem;
-  margin-inline: auto;
+  gap: var(--space-2) var(--space-3);
+  min-block-size: 3.5rem;
   padding: var(--space-2) var(--space-4);
 }
 
@@ -52,44 +64,90 @@ concordance-island {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-block-size: 2.5rem;
   color: var(--color-ink);
+  font-size: 0.9375rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
 .site-logo {
-  block-size: 1.5rem;
+  block-size: 1.375rem;
 }
 
 .site-logo svg {
   display: block;
-  block-size: 1.5rem;
+  block-size: 1.375rem;
   inline-size: auto;
-}
-
-.site-search {
-  margin-inline-start: auto;
 }
 
 /* Search island: the field, and the suggestions its script draws under it. */
 
 concordance-island[data-island="search"] {
   position: relative;
-  margin-inline-start: auto;
+  flex: 1 1 16rem;
+  max-inline-size: 26rem;
+}
+
+.site-search {
+  margin: 0;
+}
+
+.site-search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding-inline: var(--space-2);
+  border-radius: calc(var(--radius) * 1.125);
+  background: var(--color-soft);
+  color: var(--color-label);
+}
+
+.search-glyph {
+  flex: none;
+}
+
+.site-search input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+}
+
+.site-search input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.search-shortcut {
+  flex: none;
+  padding: 0.25em 0.5em;
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .search-suggestions {
   position: absolute;
-  inset-inline-end: 0;
+  inset-inline-start: 0;
   inset-block-start: 100%;
   z-index: 1;
-  min-inline-size: 20rem;
+  min-inline-size: 100%;
   max-block-size: 60vh;
   overflow-y: auto;
+  margin-block-start: var(--space-1);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-bg);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
 }
 
 .search-suggestions .result {
@@ -100,34 +158,46 @@ concordance-island[data-island="search"] {
   border-block-end: none;
 }
 
-.site-search input,
 .home-search input {
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-bg);
+  background: var(--color-surface);
 }
 
 .site-links {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
-  margin: 0;
+  margin: 0 0 0 auto;
   padding: 0;
   list-style: none;
 }
 
 .site-links a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
   color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
   text-decoration: none;
+}
+
+.site-links a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
 }
 
 /* Mode switch: served hidden, revealed by its script; the label names the current scheme. */
 
 .mode-switch {
+  min-block-size: 2.5rem;
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-bg);
+  border-radius: var(--radius);
+  background: var(--color-soft);
   color: var(--color-muted);
   font-size: 0.8125rem;
   cursor: pointer;
@@ -148,10 +218,8 @@ concordance-island[data-island="search"] {
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2) var(--space-3);
-  max-inline-size: 72rem;
-  margin-inline: auto;
   padding: 0 var(--space-4) var(--space-2);
-  color: var(--color-muted);
+  color: var(--color-label);
   font-size: 0.8125rem;
 }
 
@@ -179,10 +247,6 @@ concordance-island[data-island="search"] {
   font-weight: 600;
 }
 
-.trail-earlier summary {
-  cursor: pointer;
-}
-
 .trail-earlier[open] .trail-list {
   margin-block: var(--space-1);
   padding-inline-start: var(--space-3);
@@ -193,10 +257,11 @@ concordance-island[data-island="search"] {
 }
 
 .trail-pin {
+  min-block-size: 2.5rem;
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: calc(var(--radius) * 0.75);
-  background: var(--color-bg);
+  border-radius: var(--radius);
+  background: var(--color-soft);
   color: var(--color-muted);
   font-size: 0.8125rem;
   cursor: pointer;
@@ -206,22 +271,27 @@ concordance-island[data-island="search"] {
   color: var(--color-ink);
 }
 
-/* Footer */
+/* Footer: the project text and links, the to-do page with its count, the build line. */
 
 .site-footer {
-  max-inline-size: 72rem;
-  margin-inline: auto;
   padding: var(--space-3) var(--space-4);
   border-block-start: 1px solid var(--color-border);
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  color: var(--color-label);
+  font-size: 0.8125rem;
 }
 
 .site-footer-links {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   padding: 0;
   list-style: none;
+}
+
+.site-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
 }
 
 .site-footer-credit {
@@ -254,12 +324,16 @@ concordance-island[data-island="search"] {
 }
 
 .chip {
-  display: inline-block;
-  padding: 0.1em 0.75em;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  padding: 0 0.875rem;
   border: 1px solid var(--color-border);
-  border-radius: 1em;
+  border-radius: 1.25rem;
   background: var(--color-surface);
   color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -272,7 +346,7 @@ concordance-island[data-island="search"] {
 .home-entry {
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-large);
   background: var(--color-surface);
 }
 
@@ -302,10 +376,6 @@ concordance-island[data-island="search"] {
   padding-inline-start: var(--space-3);
 }
 
-.home-tree summary {
-  cursor: pointer;
-}
-
 .home-entry-index .home-items {
   display: flex;
   flex-wrap: wrap;
@@ -321,7 +391,7 @@ concordance-island[data-island="search"] {
 .home-item time,
 .home-source time {
   margin-inline-start: var(--space-1);
-  color: var(--color-muted);
+  color: var(--color-label);
   font-size: 0.8125rem;
 }
 
@@ -335,90 +405,255 @@ concordance-island[data-island="search"] {
   color: var(--color-muted);
 }
 
-/* Entity and keyword pages */
+/* Every page but the entity page reads in one measured column. */
 
-.entity,
-.keyword {
+.home,
+.index,
+.todo,
+.search-results,
+.redirect,
+.gallery,
+.gallery-panel {
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+}
+
+/* Entity page: the tree of the space, the text in the centre, what is computed in the right panel. */
+
+.entity {
   display: grid;
-  grid-template-columns: minmax(0, var(--measure)) minmax(16rem, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "header header"
-    "body panel"
-    "body neighbourhood"
-    "body mentions"
-    "contract contract"
-    "footer footer";
-  column-gap: var(--space-5);
+    "space"
+    "main"
+    "side";
 }
 
-.entity-header {
-  grid-area: header;
-}
+/* Three widths: one column; the tree folded above the text with the panel beside it; three columns. */
 
-.entity-body {
-  grid-area: body;
-  font-size: 1.0625rem;
-}
-
-.entity-panel {
-  grid-area: panel;
-}
-
-.neighbourhood {
-  grid-area: neighbourhood;
-}
-
-.mentions {
-  grid-area: mentions;
-}
-
-.contract {
-  grid-area: contract;
-}
-
-.entity-footer {
-  grid-area: footer;
-}
-
-@media (max-width: 60rem) {
-  .entity,
-  .keyword {
-    grid-template-columns: minmax(0, 1fr);
+@media (min-width: 48rem) {
+  .entity {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.5rem);
     grid-template-areas:
-      "header"
-      "body"
-      "contract"
-      "panel"
-      "neighbourhood"
-      "mentions"
-      "footer";
+      "space space"
+      "main side";
+  }
+
+  .entity-side {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--color-border);
   }
 }
 
-.entity-badge {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: baseline;
+@media (min-width: 73.75rem) {
+  .entity {
+    grid-template-columns: minmax(0, 1fr) 21.5rem;
+    grid-template-areas: "main side";
+  }
+
+  .entity-with-space {
+    grid-template-columns: 16rem minmax(0, 1fr) 21.5rem;
+    grid-template-areas: "space main side";
+  }
+
+  .space-tree {
+    block-size: 100%;
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  /* The tree stands in its column: the stylesheet keeps the content of the disclosure in view. */
+  .space-tree::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .space-head::before {
+    content: none;
+  }
+}
+
+.space {
+  grid-area: space;
+}
+
+.entity-main {
+  grid-area: main;
+  min-inline-size: 0;
+}
+
+.entity-side {
+  grid-area: side;
+  min-inline-size: 0;
+}
+
+.entity-main {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.entity-main > * {
+  max-inline-size: 50rem;
+  margin-inline: auto;
+}
+
+/* The tree of the space: the initials badge and the name head it, folded behind them where the layout has no column. */
+
+.space-tree {
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.space-head {
+  min-block-size: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.space-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: calc(var(--radius) * 0.875);
+  background: var(--color-soft);
   color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.space-nodes {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  list-style: none;
   font-size: 0.875rem;
 }
 
+.space-nodes .space-nodes {
+  padding: 0 0 0 var(--space-3);
+}
+
+.space-folder-name,
+.space-page > a,
+.space-page > span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.space-folder-name .count {
+  margin-inline-start: auto;
+}
+
+.space-open > .space-folder-name {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.space-page > a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* The current page: a rule on its side and the bold weight, never a colour alone. */
+
+.space-current > span {
+  border-inline-start: 3px solid var(--color-accent);
+  border-radius: calc(var(--radius) * 0.875);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* Breadcrumb: space › folder › page. */
+
+.breadcrumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  margin: 0 auto var(--space-3);
+  padding: 0;
+  list-style: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.breadcrumbs-list > li + li::before {
+  content: "›" / "";
+  margin-inline-end: var(--space-2);
+}
+
+.breadcrumbs-list a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  text-decoration: none;
+}
+
+.breadcrumbs-list a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs-list [aria-current="page"] {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+/* Title, then the line naming the type, the last change, the space and the highlighted properties. */
+
+.entity-header h1 {
+  margin-block: 0 var(--space-2);
+}
+
+.entity-badge,
 .entity-highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-block-start: calc(-1 * var(--space-2));
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.entity-badge {
+  margin: 0;
+  padding-block-end: var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.entity-highlights {
+  margin-block: var(--space-2) 0;
+}
+
+.entity-badge > * + *::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-3);
+}
+
+.entity-badge > .badge + *::before {
+  content: none;
 }
 
 .highlight-label {
   margin-inline-end: var(--space-1);
 }
 
-.entity-header h1 {
-  margin-block-start: var(--space-2);
+.entity-body {
+  margin-block-start: var(--space-4);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.entity-body > section > h2:first-child {
+  margin-block-start: var(--space-4);
 }
 
 .markdown .written {
@@ -441,7 +676,7 @@ concordance-island[data-island="search"] {
   flex-wrap: wrap;
   gap: var(--space-4);
   margin-block-start: var(--space-4);
-  color: var(--color-muted);
+  color: var(--color-label);
   font-size: 0.8125rem;
 }
 
@@ -460,39 +695,120 @@ concordance-island[data-island="search"] {
   border-color: var(--color-ink);
 }
 
-.entity-panel,
-.mentions,
-.neighbourhood {
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  margin-block-end: var(--space-3);
-}
+/* The footer of the note: the path of the file, then the edit link. */
 
-.entity-panel h2,
-.mentions h2,
-.neighbourhood h2 {
-  margin-block-start: 0;
-}
-
-.attributes dt {
-  color: var(--color-muted);
+.entity-footer {
+  margin-block-start: var(--space-4);
+  padding-block: var(--space-3) var(--space-4);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-label);
   font-size: 0.8125rem;
-}
-
-.attributes dd {
-  margin-inline-start: 0;
-  margin-block-end: var(--space-2);
 }
 
 .entity-source {
-  color: var(--color-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.entity-source code {
   font-size: 0.8125rem;
 }
 
-.entity-edit {
-  margin-inline-start: var(--space-2);
+.entity-edit-lead {
+  margin-inline-start: auto;
+}
+
+/* The right panel: stacked blocks, never tabs; each one a disclosure whose summary is its heading. */
+
+.entity-side {
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.panel-block {
+  margin: 0;
+  padding: 0 var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+}
+
+/* Every block is served folded; from the width where the panel has a column, the stylesheet keeps its content in view. */
+@media (min-width: 48rem) {
+  .panel-fold::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .panel-fold > summary::before {
+    content: none;
+  }
+}
+
+.panel-fold > summary {
+  min-block-size: 3rem;
+  list-style: none;
+}
+
+.panel-fold > summary::before {
+  order: 1;
+  margin-inline-start: auto;
+}
+
+.panel-note,
+.related-note {
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.attributes {
+  margin: 0;
+}
+
+.attribute {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+  font-size: 0.8125rem;
+}
+
+.attributes dt {
+  flex: none;
+  inline-size: 6.75rem;
+  color: var(--color-label);
+}
+
+.attributes dd {
+  flex: 1;
+  margin: 0;
+  font-weight: 500;
+}
+
+.toc-list {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+
+.toc-list a {
+  display: flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  padding-inline-start: var(--space-2);
+  border-inline-start: 2px solid var(--color-border);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.toc-list a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
 }
 
 .banner {
@@ -507,7 +823,7 @@ concordance-island[data-island="search"] {
 }
 
 .counts dt {
-  color: var(--color-muted);
+  color: var(--color-label);
   font-size: 0.8125rem;
 }
 
@@ -517,12 +833,12 @@ concordance-island[data-island="search"] {
   font-weight: 600;
 }
 
-.keyword-body {
-  grid-area: body;
+.keyword-panel {
+  padding-block: var(--space-2) var(--space-3);
 }
 
-.keyword-panel {
-  grid-area: panel;
+.keyword-panel h2 {
+  margin-block-start: var(--space-2);
 }
 
 .companions {
@@ -553,42 +869,194 @@ concordance-island[data-island="search"] {
   font-size: 1.5rem;
 }
 
-/* Mentions and neighbourhood */
+/* Related pages: one entry per page that evokes the entity, most passages first. */
 
-.mentions-group h3 {
-  color: var(--color-accent);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.mentions .panel-fold > summary .count {
+  margin-inline-start: var(--space-2);
 }
 
-.mention-list,
-.neighbour-list {
+.mentions-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+  font-size: 0.8125rem;
+}
+
+.related-filter {
+  flex: 1 1 10rem;
+  display: flex;
+}
+
+.mentions-controls input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+}
+
+.mentions-controls input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.related-types {
+  position: relative;
+  flex: none;
+}
+
+.related-types > summary {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.related-types > summary::before {
+  order: 1;
+}
+
+.related-types > summary .count {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.related-type-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 2;
+  min-inline-size: 14rem;
+  margin-block-start: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  overflow: hidden;
+}
+
+.related-type-list {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.mention-list {
-  margin-block: var(--space-2) 0;
-  padding-inline-start: var(--space-3);
-}
-
-.mention-group {
-  margin-block-end: var(--space-2);
-}
-
-.mention-group summary {
+.related-type-list label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
   cursor: pointer;
 }
 
-.mention {
-  margin-block-end: var(--space-2);
+.related-type-list .count {
+  margin-inline-start: auto;
+}
+
+.related-type-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-soft);
+  color: var(--color-label);
+}
+
+.related-clear {
+  margin-inline-start: auto;
+  min-block-size: 2rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.related-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.related-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.related-title {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-title:hover {
+  text-decoration: underline;
+}
+
+.related-type,
+.related-count {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.related-count {
+  min-inline-size: 1.5em;
+  font-family: var(--font-mono);
+  text-align: end;
+}
+
+.related-excerpt {
+  display: block;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-excerpt:hover {
+  text-decoration: underline;
+}
+
+/* The mark of a page that writes a link to this one: a word in the accent, never the colour alone. */
+
+.related-mark {
+  color: var(--color-accent);
 }
 
 .mention-context {
-  display: block;
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  quotes: none;
 }
 
 /* The words naming the entity: the same weight as a recognised word in the note, no colour of their own. */
@@ -598,46 +1066,74 @@ concordance-island[data-island="search"] {
   font-weight: 600;
 }
 
-.mentions-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin-block-end: var(--space-3);
-  font-size: 0.875rem;
-}
-
-.mentions-controls select,
-.mentions-controls input {
-  font: inherit;
-  color: inherit;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-1) var(--space-2);
-}
-
-.mentions-controls button {
-  cursor: pointer;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-1) var(--space-2);
-}
-
-.mentions-status {
-  color: var(--color-muted);
-  font-size: 0.8125rem;
+.mentions-more {
+  margin: var(--space-2) 0 0;
 }
 
 .mentions-more button {
+  inline-size: 100%;
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
-  color: var(--color-accent);
-  background: none;
-  border: none;
+}
+
+.mentions-more button[disabled] {
+  cursor: progress;
+  color: var(--color-label);
+}
+
+.mentions-more a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  font-size: 0.8125rem;
+}
+
+/* The neighbourhood, folded behind its line at the foot of the panel. */
+
+.neighbourhood-fold {
+  margin: 0;
+}
+
+.neighbourhood-fold > summary {
+  min-block-size: 3.25rem;
+  padding: 0 var(--space-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  list-style: none;
+}
+
+.neighbourhood-fold > summary::before {
+  order: 2;
+}
+
+.neighbourhood-lead {
+  flex: 1;
+}
+
+.neighbourhood-count {
+  color: var(--color-label);
+  font-weight: 400;
+}
+
+.neighbourhood {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.neighbourhood h2 {
+  margin-block-start: 0;
+  font-size: 1rem;
+}
+
+.neighbour-list {
   padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  list-style: none;
 }
 
 /* Contract of an API page */
@@ -753,7 +1249,7 @@ concordance-island[data-island="search"] {
 
 .contract-required {
   color: var(--color-muted);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-style: italic;
 }
 

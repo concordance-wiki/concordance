@@ -2,6 +2,9 @@ import type { PageSlot } from "../render.js";
 import type { SlotName, SlotProps } from "../slots.js";
 import {
   apiPage,
+  corporateEntityPage,
+  corporateFooter,
+  corporateHeader,
   documentEntityPage,
   entityPage,
   footer,
@@ -88,9 +91,21 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "EntityPage",
     state: "default",
     description:
-      "badge, highlights, two sections, the side panel, the neighbourhood, three mentions and a source",
+      "title, badge and highlights, two sections, the properties and the table of contents in the panel, one related page, the neighbourhood folded, a source",
     ...chrome,
     props: entityPage,
+  },
+  {
+    file: "entity-page-corporate.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "corporate",
+    description:
+      "a rule of the specifications space in the corporate chrome: the top bar with the mark, the tree of the space with the current folder open and the current page ruled, the breadcrumb, the line under the title, the note, the path and the edit link, then the three blocks of the panel, properties, table of contents and related pages with their types, the neighbourhood folded behind its line",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: corporateEntityPage,
   },
   {
     file: "entity-page-empty.html",
@@ -157,7 +172,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "MentionsPanel",
     state: "default",
     description:
-      "three mentions in one note, two written and one recognised, all inline in one file group",
+      "three mentions in one note, two written and one recognised: one related page, cited, with three passages",
     ...chrome,
     props: { mentions: mentions(3), initial: 20 },
   },
@@ -166,7 +181,7 @@ export const galleryPages: readonly GalleryPage[] = [
     slot: "MentionsPanel",
     rendered: "MentionsPanel",
     state: "empty",
-    description: "no mention at all: both groups show their empty message",
+    description: "no mention at all: the block says that no page evokes the entity yet",
     ...chrome,
     props: { mentions: [], initial: 20 },
   },
@@ -176,9 +191,13 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "MentionsPanel",
     state: "island",
     description:
-      "twenty-five mentions in nine notes: twenty inline in collapsible file groups, the rest embedded for the island, readable without JavaScript",
+      "twenty-five mentions in nine notes: the seven pages of the first twenty inline, the rest embedded for the island, the link to the fragment standing meanwhile, readable without JavaScript",
     ...chrome,
-    props: { mentions: mentions(25), initial: 20 },
+    props: {
+      mentions: mentions(25),
+      initial: 20,
+      fragmentHref: "../fragments/glossary/keyword-page.mentions.json",
+    },
   },
   {
     file: "neighbourhood.html",

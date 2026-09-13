@@ -531,7 +531,7 @@ describe("concordance build", () => {
       );
       const contract = page.slice(
         page.indexOf('<section class="contract"'),
-        page.indexOf('<aside class="entity-panel"'),
+        page.indexOf('<footer class="entity-footer">'),
       );
       expect(contract).not.toContain("<form");
       expect(page.match(/<form/g)).toEqual(["<form"]);
@@ -846,7 +846,7 @@ describe("concordance build", () => {
       const page = io.fs.readText(`/work/dist/${pagePath("notes/rebuild")}`);
       expect(page).toContain('<div class="entity runbook"><h1>Runbook: Rebuild the site</h1>');
       expect(io.fs.readText(`/work/dist/${pagePath("notes/a")}`)).toContain(
-        '<div class="entity"><header class="entity-header">',
+        '<div class="entity entity-with-space"><nav class="space"',
       );
       expect(io.stdout).toContain(
         "override EntityPage@runbook: plugin types-plugin, theme type module",
