@@ -1,13 +1,14 @@
 name: pages
 
-# Publishes the home page of the organisation, docs/site, on GitHub Pages at the
-# root of the project site. The whole folder is the artifact: the page, its fonts
-# and their licence; nothing is generated. One human step, once: in the settings
-# of the repository, Pages → Source → "GitHub Actions".
+# Publishes the project site on GitHub Pages: the home page of the organisation,
+# docs/site, at the root, and the component gallery of the default theme under
+# gallery/, rendered by the command line from the fixtures so that every slot,
+# state and width of the theme can be looked at without a build of one's own.
+# One human step, once: in the settings of the repository, Pages → Source →
+# "GitHub Actions".
 on:
   push:
     branches: [main]
-    paths: ["docs/site/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -28,8 +29,20 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Assemble the site
+        run: |
+          mkdir -p site
+          cp -R docs/site/. site/
+          node packages/cli/dist/bin.js gallery --output site/gallery
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          path: docs/site
+          path: site
       - id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
