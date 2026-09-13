@@ -1,0 +1,12 @@
+# Type module of data_object; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: active
+glyph: table
+attributes:
+  business_object: { type: ref, target: business_object, relation: represents }
+  fields: { type: "string[]" }
+  schema: { type: string }
+display:
+  highlight: [ business_object, schema ]
+  neighbours_order: [ business_object, batch, api, screen ]

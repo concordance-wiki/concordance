@@ -9,6 +9,9 @@ docs/
 fixtures/
 brand/
 packages/profile/default.yaml
+# Hand-written in the compact flow style of the profile.
+packages/profile/base.yaml
+packages/profile/types/*/type.yaml
 *.md
 # A byte-for-byte copy of docs/templates, refreshed by scripts/sync-templates.mjs.
 packages/cli/templates/

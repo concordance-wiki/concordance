@@ -1,0 +1,10 @@
+{
+  "attributes.parent": {
+    "defaultMessage": "Parent",
+    "description": "Label of the parent attribute."
+  },
+  "label": {
+    "defaultMessage": "Domain",
+    "description": "Label of the domain type."
+  }
+}

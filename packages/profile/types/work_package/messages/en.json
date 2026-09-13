@@ -1,0 +1,18 @@
+{
+  "attributes.deliverables": {
+    "defaultMessage": "Deliverables",
+    "description": "Label of the deliverables attribute."
+  },
+  "attributes.end": {
+    "defaultMessage": "End",
+    "description": "Label of the end attribute."
+  },
+  "attributes.start": {
+    "defaultMessage": "Start",
+    "description": "Label of the start attribute."
+  },
+  "label": {
+    "defaultMessage": "Work package",
+    "description": "Label of the work_package type."
+  }
+}

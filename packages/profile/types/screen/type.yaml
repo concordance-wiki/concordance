@@ -1,0 +1,26 @@
+# Type module of screen; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: active
+glyph: screen
+attributes:
+  roles: { type: "ref[]", target: role, relation: assigned_to, inverse: true }
+  reads: { type: "ref[]", target: [ business_object, data_object ], relation: accesses, attributes: { mode: read } }
+  writes: { type: "ref[]", target: [ business_object, data_object ], relation: accesses, attributes: { mode: write } }
+  actions: { type: list, schema: { label: string, to: ref, condition: ref } }
+  rules: { type: "ref[]", target: rule, relation: constrains, inverse: true }
+  url_pattern: { type: string }
+sections:
+  objects:
+    parse: bullet-list
+    produces: accesses
+  actions:
+    parse: ordered-list
+    produces: triggers
+  rules:
+    parse: bullet-list
+    produces: constrains
+    inverse: true
+display:
+  highlight: [ roles, url_pattern, status ]
+  neighbours_order: [ business_object, data_object, screen, api, rule, process ]

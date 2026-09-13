@@ -1,0 +1,9 @@
+# Type module of standard; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: motivation
+status: planned
+glyph: standard
+attributes:
+  applies_to_types: { type: "string[]" }
+  mandatory: { type: boolean }
+  version: { type: string }

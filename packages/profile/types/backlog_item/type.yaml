@@ -1,0 +1,12 @@
+# Type module of backlog_item; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: implementation
+status: planned
+glyph: item
+attributes:
+  ref: { type: string }
+  tool: { type: string }
+  status: { type: string }
+  work_package: { type: ref, target: work_package }
+  affects: { type: "ref[]", target: any, relation: implements }
+  requirement: { type: ref, target: requirement, relation: implements }

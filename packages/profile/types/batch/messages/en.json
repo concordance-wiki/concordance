@@ -1,0 +1,34 @@
+{
+  "attributes.depends_on": {
+    "defaultMessage": "Depends on",
+    "description": "Label of the depends_on attribute."
+  },
+  "attributes.reads": {
+    "defaultMessage": "Reads",
+    "description": "Label of the reads attribute."
+  },
+  "attributes.schedule": {
+    "defaultMessage": "Schedule",
+    "description": "Label of the schedule attribute."
+  },
+  "attributes.window": {
+    "defaultMessage": "Window",
+    "description": "Label of the window attribute."
+  },
+  "attributes.writes": {
+    "defaultMessage": "Writes",
+    "description": "Label of the writes attribute."
+  },
+  "label": {
+    "defaultMessage": "Batch",
+    "description": "Label of the batch type."
+  },
+  "sections.reads": {
+    "defaultMessage": "Reads",
+    "description": "Heading of the reads section."
+  },
+  "sections.writes": {
+    "defaultMessage": "Writes",
+    "description": "Heading of the writes section."
+  }
+}

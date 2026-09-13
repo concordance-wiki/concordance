@@ -1,0 +1,9 @@
+# Type module of message; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: planned
+glyph: message
+attributes:
+  schema: { type: string }
+  carries: { type: ref, target: business_event }
+  objects: { type: "ref[]", target: business_object }

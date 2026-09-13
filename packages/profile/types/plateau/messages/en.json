@@ -1,0 +1,14 @@
+{
+  "attributes.applications": {
+    "defaultMessage": "Applications",
+    "description": "Label of the applications attribute."
+  },
+  "attributes.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date attribute."
+  },
+  "label": {
+    "defaultMessage": "Plateau",
+    "description": "Label of the plateau type."
+  }
+}

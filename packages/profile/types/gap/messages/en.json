@@ -1,0 +1,14 @@
+{
+  "attributes.from": {
+    "defaultMessage": "From",
+    "description": "Label of the from attribute."
+  },
+  "attributes.to": {
+    "defaultMessage": "To",
+    "description": "Label of the to attribute."
+  },
+  "label": {
+    "defaultMessage": "Gap",
+    "description": "Label of the gap type."
+  }
+}

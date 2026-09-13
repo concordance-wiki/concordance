@@ -1,0 +1,22 @@
+{
+  "attributes.automated": {
+    "defaultMessage": "Automated",
+    "description": "Label of the automated attribute."
+  },
+  "attributes.covers": {
+    "defaultMessage": "Covers",
+    "description": "Label of the covers attribute."
+  },
+  "attributes.level": {
+    "defaultMessage": "Level",
+    "description": "Label of the level attribute."
+  },
+  "attributes.ref": {
+    "defaultMessage": "Reference",
+    "description": "Label of the ref attribute."
+  },
+  "label": {
+    "defaultMessage": "Test",
+    "description": "Label of the test type."
+  }
+}

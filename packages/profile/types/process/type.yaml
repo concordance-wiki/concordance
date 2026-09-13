@@ -1,0 +1,16 @@
+# Type module of process; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: active
+glyph: process
+attributes:
+  execution: { type: enum, values: [ human, service, mixed, scheduled ] }
+  triggers: { type: "string[]" }
+  steps: { type: list }
+sections:
+  steps:
+    parse: ordered-list
+    produces: related
+display:
+  highlight: [ execution, triggers ]
+  neighbours_order: [ role, screen, api, business_object, rule ]

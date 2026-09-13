@@ -1,0 +1,22 @@
+{
+  "attributes.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date attribute."
+  },
+  "attributes.decisions": {
+    "defaultMessage": "Decisions",
+    "description": "Label of the decisions attribute."
+  },
+  "attributes.duration": {
+    "defaultMessage": "Duration",
+    "description": "Label of the duration attribute."
+  },
+  "attributes.participants": {
+    "defaultMessage": "Participants",
+    "description": "Label of the participants attribute."
+  },
+  "label": {
+    "defaultMessage": "Meeting",
+    "description": "Label of the meeting type."
+  }
+}

@@ -1,0 +1,9 @@
+# Type module of domain; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: container
+status: active
+glyph: domain
+attributes:
+  parent: { type: ref, target: domain }
+display:
+  highlight: [ parent ]

@@ -1,0 +1,27 @@
+# Type module of endpoint; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: active
+glyph: endpoint
+# An imported operation carries `operation_id`, `summary` and `style` whatever the contract,
+# then `method` and `path` from an OpenAPI contract, `port`, `binding` and `soap_action` from a WSDL.
+attributes:
+  method: { type: string }
+  path: { type: string }
+  api: { type: ref, target: api }
+  operation_id: { type: string }
+  style: { type: enum, values: [ http, soap ] }
+  port: { type: string }
+  binding: { type: string }
+  soap_action: { type: string }
+sections:
+  consumers:
+    parse: bullet-list
+    produces: serves
+  rules:
+    parse: bullet-list
+    produces: constrains
+    inverse: true
+display:
+  highlight: [ method, path ]
+  neighbours_order: [ screen, rule, business_object ]

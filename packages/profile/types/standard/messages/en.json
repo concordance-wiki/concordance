@@ -1,0 +1,18 @@
+{
+  "attributes.applies_to_types": {
+    "defaultMessage": "Applies to types",
+    "description": "Label of the applies_to_types attribute."
+  },
+  "attributes.mandatory": {
+    "defaultMessage": "Mandatory",
+    "description": "Label of the mandatory attribute."
+  },
+  "attributes.version": {
+    "defaultMessage": "Version",
+    "description": "Label of the version attribute."
+  },
+  "label": {
+    "defaultMessage": "Standard",
+    "description": "Label of the standard type."
+  }
+}

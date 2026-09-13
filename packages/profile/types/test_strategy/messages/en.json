@@ -1,0 +1,14 @@
+{
+  "attributes.applies_to": {
+    "defaultMessage": "Applies to",
+    "description": "Label of the applies_to attribute."
+  },
+  "attributes.levels": {
+    "defaultMessage": "Levels",
+    "description": "Label of the levels attribute."
+  },
+  "label": {
+    "defaultMessage": "Test strategy",
+    "description": "Label of the test_strategy type."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "attributes.api": {
+    "defaultMessage": "API",
+    "description": "Label of the api attribute."
+  },
+  "attributes.binding": {
+    "defaultMessage": "Binding",
+    "description": "Label of the binding attribute."
+  },
+  "attributes.method": {
+    "defaultMessage": "Method",
+    "description": "Label of the method attribute."
+  },
+  "attributes.operation_id": {
+    "defaultMessage": "Operation id",
+    "description": "Label of the operation_id attribute."
+  },
+  "attributes.path": {
+    "defaultMessage": "Path",
+    "description": "Label of the path attribute."
+  },
+  "attributes.port": {
+    "defaultMessage": "Port",
+    "description": "Label of the port attribute."
+  },
+  "attributes.soap_action": {
+    "defaultMessage": "SOAP action",
+    "description": "Label of the soap_action attribute."
+  },
+  "attributes.style": {
+    "defaultMessage": "Style",
+    "description": "Label of the style attribute."
+  },
+  "label": {
+    "defaultMessage": "Operation",
+    "description": "Label of the endpoint type."
+  },
+  "sections.consumers": {
+    "defaultMessage": "Consumers",
+    "description": "Heading of the consumers section."
+  },
+  "sections.rules": {
+    "defaultMessage": "Rules",
+    "description": "Heading of the rules section."
+  }
+}

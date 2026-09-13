@@ -1,0 +1,13 @@
+{
+  "attributes.api": "API",
+  "attributes.binding": "Binding",
+  "attributes.method": "Méthode",
+  "attributes.operation_id": "Identifiant d'opération",
+  "attributes.path": "Chemin",
+  "attributes.port": "Port",
+  "attributes.soap_action": "Action SOAP",
+  "attributes.style": "Style",
+  "label": "Opération",
+  "sections.consumers": "Consommateurs",
+  "sections.rules": "Règles"
+}

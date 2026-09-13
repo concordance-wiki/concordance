@@ -19,6 +19,8 @@ export type AttributeType =
 
 export interface AttributeDefinition {
   type: AttributeType;
+  /** Display label of the attribute; the name is shown when absent. */
+  label?: Label;
   values?: string[];
   default?: unknown;
   /** A type slug, `any` or `same`, or a list of type slugs. */

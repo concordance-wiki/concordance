@@ -1,0 +1,10 @@
+{
+  "attributes.depends_on": "Dépend de",
+  "attributes.reads": "Lit",
+  "attributes.schedule": "Planification",
+  "attributes.window": "Fenêtre",
+  "attributes.writes": "Écrit",
+  "label": "Batch",
+  "sections.reads": "Lit",
+  "sections.writes": "Écrit"
+}

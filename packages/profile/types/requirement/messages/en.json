@@ -1,0 +1,14 @@
+{
+  "attributes.origin": {
+    "defaultMessage": "Origin",
+    "description": "Label of the origin attribute."
+  },
+  "attributes.priority": {
+    "defaultMessage": "Priority",
+    "description": "Label of the priority attribute."
+  },
+  "label": {
+    "defaultMessage": "Requirement",
+    "description": "Label of the requirement type."
+  }
+}

@@ -1,0 +1,13 @@
+# Type module of application; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: container
+status: active
+glyph: application
+attributes:
+  code: { type: string }
+  owner: { type: string }
+  status: { type: enum, values: [ active, legacy, target ] }
+  plateau: { type: ref, target: plateau }
+display:
+  highlight: [ code, status, owner ]
+  neighbours_order: [ screen, api, process, batch ]

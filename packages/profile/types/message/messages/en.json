@@ -1,0 +1,18 @@
+{
+  "attributes.carries": {
+    "defaultMessage": "Carries",
+    "description": "Label of the carries attribute."
+  },
+  "attributes.objects": {
+    "defaultMessage": "Objects",
+    "description": "Label of the objects attribute."
+  },
+  "attributes.schema": {
+    "defaultMessage": "Schema",
+    "description": "Label of the schema attribute."
+  },
+  "label": {
+    "defaultMessage": "Message",
+    "description": "Label of the message type."
+  }
+}

@@ -12,7 +12,9 @@
   },
   "files": [
     "dist",
-    "default.yaml"
+    "base.yaml",
+    "default.yaml",
+    "types"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"

@@ -16,6 +16,7 @@ Everything a reader, an integrator or a contributor needs, in English, next to t
 | [Publishing transcripts](guides/publishing-transcripts.md) | compliance owner | what pseudonymisation does, what it cannot decide, what to settle before publishing |
 | [Theming](guides/theming.md) | theme author | the slots of the site, their view models, white label, overriding a slot from a plugin, the stylesheet layers, the gallery |
 | [Plugins](guides/plugins.md) | plugin author | the official plugins, declaring one, the contribution points |
+| [Adding a type](guides/adding-a-type.md) | architect | the type module format, a complete example, how the core types are assembled, publishing a type in a plugin |
 | [Distributing the linter](guides/lint-distribution.md) | integrator | `npx`, standalone binary, GitHub action, GitLab component, container image, pre-commit hook |
 | [Architecture](guides/architecture.md) | contributor | the decisions that shape the tool and the build pipeline step by step |
 | [Releasing](guides/releasing.md) | maintainer | versions, changesets, cutting a release, the container image |
@@ -30,6 +31,7 @@ Generated from the JSON schemas of [`packages/core/schemas`](../packages/core/sc
 | [Theme reference](reference/theme.md) | `theme.yaml` |
 | [Profile reference](reference/profile.md) | `profile.yaml` and the default profile |
 | [Lock file reference](reference/lock.md) | `concordance.lock.yaml` |
+| [Type module reference](reference/type-module.md) | `type.yaml` of a type module |
 
 ## Checks
 

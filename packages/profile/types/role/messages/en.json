@@ -1,0 +1,10 @@
+{
+  "attributes.actors": {
+    "defaultMessage": "Actors",
+    "description": "Label of the actors attribute."
+  },
+  "label": {
+    "defaultMessage": "Role",
+    "description": "Label of the role type."
+  }
+}

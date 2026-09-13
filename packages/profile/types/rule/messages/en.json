@@ -1,0 +1,22 @@
+{
+  "attributes.applies_to": {
+    "defaultMessage": "Applies to",
+    "description": "Label of the applies_to attribute."
+  },
+  "attributes.condition": {
+    "defaultMessage": "Condition",
+    "description": "Label of the condition attribute."
+  },
+  "attributes.severity": {
+    "defaultMessage": "Severity",
+    "description": "Label of the severity attribute."
+  },
+  "label": {
+    "defaultMessage": "Business rule",
+    "description": "Label of the rule type."
+  },
+  "sections.applies_to": {
+    "defaultMessage": "Applies to",
+    "description": "Heading of the applies_to section."
+  }
+}

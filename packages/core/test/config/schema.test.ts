@@ -6,6 +6,7 @@ describe("readSchema", () => {
   it.each([
     "config",
     "profile",
+    "type-module",
     "model",
     "lock",
     "theme",

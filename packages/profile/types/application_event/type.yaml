@@ -1,0 +1,7 @@
+# Type module of application_event; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: planned
+glyph: event
+attributes:
+  channel: { type: ref, target: channel }

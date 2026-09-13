@@ -1,0 +1,14 @@
+{
+  "attributes.attributes": {
+    "defaultMessage": "Attributes",
+    "description": "Label of the attributes attribute."
+  },
+  "attributes.lifecycle": {
+    "defaultMessage": "Lifecycle",
+    "description": "Label of the lifecycle attribute."
+  },
+  "label": {
+    "defaultMessage": "Business object",
+    "description": "Label of the business_object type."
+  }
+}

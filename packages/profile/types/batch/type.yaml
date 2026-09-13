@@ -1,0 +1,23 @@
+# Type module of batch; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: active
+glyph: batch
+attributes:
+  schedule: { type: string }
+  window: { type: string }
+  depends_on: { type: "ref[]", target: batch, relation: flows_to, inverse: true }
+  reads: { type: "ref[]", target: [ business_object, data_object ], relation: accesses, attributes: { mode: read } }
+  writes: { type: "ref[]", target: [ business_object, data_object ], relation: accesses, attributes: { mode: write } }
+sections:
+  reads:
+    parse: bullet-list
+    produces: accesses
+    attributes: { mode: read }
+  writes:
+    parse: bullet-list
+    produces: accesses
+    attributes: { mode: write }
+display:
+  highlight: [ schedule, window ]
+  neighbours_order: [ data_object, business_object, batch ]

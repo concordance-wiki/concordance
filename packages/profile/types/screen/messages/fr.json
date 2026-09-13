@@ -1,0 +1,12 @@
+{
+  "attributes.actions": "Actions",
+  "attributes.reads": "Lit",
+  "attributes.roles": "Rôles",
+  "attributes.rules": "Règles",
+  "attributes.url_pattern": "Motif d'URL",
+  "attributes.writes": "Écrit",
+  "label": "Écran",
+  "sections.actions": "Actions",
+  "sections.objects": "Objets",
+  "sections.rules": "Règles"
+}
