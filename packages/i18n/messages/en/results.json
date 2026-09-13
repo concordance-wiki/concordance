@@ -27,9 +27,17 @@
     "defaultMessage": "No result for “'{query}'”",
     "description": "Notice shown when a search with words matches nothing, the quoted placeholder being filled in the browser."
   },
+  "results.noteless": {
+    "defaultMessage": "Without a definition",
+    "description": "Label of the words without a note in the type facet of the results page and on the chip of their rows, in place of a type name."
+  },
   "results.notelessNote": {
     "defaultMessage": "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
     "description": "Note under the list of results."
+  },
+  "results.showNext": {
+    "defaultMessage": "{count, plural, one {Show the next one} other {Show the next #}}",
+    "description": "Button under the results page that draws the next twenty rows, with how many the next batch holds."
   },
   "results.usedIn": {
     "defaultMessage": "{count, plural, one {Used in # document, never defined in the glossary} other {Used in # documents, never defined in the glossary}}",

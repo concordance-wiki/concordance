@@ -127,34 +127,6 @@ function ActiveFilters({
   );
 }
 
-/** The address of the search, shown so that the state is explicit, with a copy button once the island runs on a page with a clipboard. */
-function Address({
-  address,
-  copied,
-  onCopy,
-  wording,
-}: {
-  address: string;
-  copied: boolean | undefined;
-  onCopy: (() => void) | undefined;
-  wording: SearchResultsLabels;
-}): JSX.Element {
-  return (
-    <p class="search-address">
-      <span class="visually-hidden">{wording.address}</span>
-      <code class="search-url">{address}</code>
-      {onCopy !== undefined && (
-        <>
-          <button type="button" class="copy-address" onClick={onCopy}>
-            {wording.copyAddress}
-          </button>
-          <output class="copied">{copied === true ? wording.copied : ""}</output>
-        </>
-      )}
-    </p>
-  );
-}
-
 /** The closest form of the dictionary, proposed when nothing matched: a link to the search on it, with its counts. */
 function Closest({
   closest,
@@ -177,10 +149,12 @@ function Closest({
 }
 
 /**
- * The results page: the facets in the left column, folded behind their heading where the page
- * has no room for a column, the note on their counters under them; on the right the active
- * filters as chips with the summary, the address of the search, the closest form when nothing
- * matched, the list, and the note on the words without a note.
+ * The results page, its heading kept for assistive technology alone: the facets in the left
+ * column, folded behind their heading where the page has no room for a column, the note on
+ * their counters under them; on the right the active filters as chips with the summary, the
+ * closest form when nothing matched, the list, the button drawing the next rows when the list
+ * holds the first of more, and the note on the words without a note. The query and the filters
+ * live in the address, which replays the search: nothing on the page repeats it.
  */
 export function SearchResults(props: SearchResultsProps): JSX.Element {
   const { query, total, results, facets, active, summary, clearHref, closest, onNavigate } = props;
@@ -189,9 +163,6 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
     activeFilters: theme.activeFilters,
     removeFilter: theme.removeFilter,
     clear: theme.clearFilters,
-    address: theme.searchAddress,
-    copyAddress: theme.copyAddress,
-    copied: theme.addressCopied,
     countersNote: theme.resultsCountersNote,
     notelessNote: theme.resultsNotelessNote,
     closestForm: theme.closestForm,
@@ -199,7 +170,7 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
   };
   return (
     <div class="search-results">
-      <h1>{theme.search}</h1>
+      <h1 class="visually-hidden">{theme.search}</h1>
       <div class="results-layout">
         {facets.length > 0 && (
           <nav class="facets" aria-label={wording.facets}>
@@ -232,18 +203,15 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
               )}
             </p>
           </div>
-          {props.address !== undefined && (
-            <Address
-              address={props.address}
-              copied={props.copied}
-              onCopy={props.onCopy}
-              wording={wording}
-            />
-          )}
           {closest !== undefined && (
             <Closest closest={closest} navigate={onNavigate} wording={wording} />
           )}
           <ResultList results={results} />
+          {props.more !== undefined && (
+            <button type="button" class="results-more" onClick={props.more.onMore}>
+              {props.more.label}
+            </button>
+          )}
           {results.length > 0 && <p class="results-note">{wording.notelessNote}</p>}
         </div>
       </div>

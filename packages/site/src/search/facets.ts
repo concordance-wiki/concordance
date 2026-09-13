@@ -101,12 +101,18 @@ export function facetLabels(meta: SearchMeta, name: FacetName): Record<string, s
 /** The facets the page opens: the type and the space; the others stand folded under them. */
 export const PRIMARY_FACETS: readonly FacetName[] = ["type", "source"];
 
+/** Whether a value of a facet stands for the words without a note: the keyword type of the type facet. */
+function isKeywordValue(name: FacetName, value: string): boolean {
+  return name === "type" && value === KEYWORD_TYPE;
+}
+
 /**
  * The facets as the results page draws them: every value the site knows, in the order of the
- * table, with its count under the current filters, selected or not, and disabled when nothing
- * would come of selecting it; `hrefOf` gives the address of the state a click leads to. The
- * type and the space are open, the domain, the application and the no-note facet folded; the
- * keyword type is flagged so that the page draws it dotted like the rows of the words without a note.
+ * table, the keyword type last among the types, with its count under the current filters,
+ * selected or not, and disabled when nothing would come of selecting it; `hrefOf` gives the
+ * address of the state a click leads to. The type and the space are open, the domain, the
+ * application and the no-note facet folded; the keyword type is flagged so that the page draws
+ * it dotted like the rows of the words without a note.
  */
 export function facetsOf(
   meta: SearchMeta,
@@ -116,11 +122,14 @@ export function facetsOf(
 ): Facet[] {
   const fields: Facet[] = FACET_NAMES.map((name) => {
     const labels = facetLabels(meta, name);
+    const values = Object.entries(labels).sort(
+      ([a], [b]) => Number(isKeywordValue(name, a)) - Number(isKeywordValue(name, b)),
+    );
     return {
       name,
       label: meta.labels.facet[name],
       ...(PRIMARY_FACETS.includes(name) ? {} : { folded: true }),
-      values: Object.entries(labels).map(([value, label]) => {
+      values: values.map(([value, label]) => {
         const count = counts[name][value] ?? 0;
         const active = isSelected(state, name, value);
         return {
@@ -130,7 +139,7 @@ export function facetsOf(
           href: hrefOf(toggleValue(state, name, value)),
           active,
           disabled: count === 0 && !active,
-          ...(name === "type" && value === KEYWORD_TYPE ? { keyword: true } : {}),
+          ...(isKeywordValue(name, value) ? { keyword: true } : {}),
         };
       }),
     };

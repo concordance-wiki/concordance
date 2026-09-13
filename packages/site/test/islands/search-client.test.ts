@@ -70,7 +70,7 @@ describe("the search entry on the results page", () => {
         },
         defaultTheme,
       ),
-      '<main><concordance-island data-island="search" data-props=\'{"root":"../","results":{"query":"","total":0,"results":[],"facets":[]}}\'><div class="search-results"><h1>Search</h1></div></concordance-island></main>',
+      '<main><concordance-island data-island="search" data-props=\'{"root":"../","results":{"query":"","total":0,"results":[],"facets":[]}}\'><div class="search-results"><h1 class="visually-hidden">Search</h1></div></concordance-island></main>',
     ].join("");
     vi.stubGlobal("location", { search: "?q=Keyword", pathname: "/dist/search/index.html" });
     const pushState = vi.fn();
@@ -91,7 +91,7 @@ describe("the search entry on the results page", () => {
     );
     expect(results).toContain('<nav class="facets" aria-label="Filters">');
     expect(results).toContain(
-      '<li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a><span class="result-cited">cited in 0 pages</span></p><p class="result-facts"><span>glossary</span></p></li>',
+      '<li class="result result-lead"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a></p><p class="result-facts"><span>glossary</span></p></li>',
     );
     expect(document.querySelector(".search-suggestions")?.hasAttribute("hidden")).toBe(true);
     // The field holds a query: the clear button stands, and clicking it empties the field.
@@ -131,8 +131,6 @@ describe("the search entry on the results page", () => {
     const pushState = vi.fn();
     const replaceState = vi.fn();
     vi.stubGlobal("history", { pushState, replaceState });
-    const writeText = vi.fn(() => Promise.resolve());
-    vi.stubGlobal("navigator", { clipboard: { writeText } });
     vi.useFakeTimers();
     sessionStorage.setItem("concordance-search-scroll:?q=Keyword", "320");
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
@@ -171,7 +169,7 @@ describe("the search entry on the results page", () => {
     expect(pushState.mock.calls[3]).toEqual([null, "", "/dist/search/index.html"]);
     await settled();
     expect(scrollTo.mock.calls).toEqual([[0, 320]]);
-    expect(document.querySelector(".search-url")?.textContent).toBe("search/index.html");
+    expect(document.querySelector(".search-address")).toBeNull();
     if (input !== null) input.value = "Key";
     input?.dispatchEvent(new Event("input"));
     expect(replaceState).not.toHaveBeenCalled();
@@ -188,10 +186,6 @@ describe("the search entry on the results page", () => {
       "1 result, most cited first",
     );
     expect(scrollTo.mock.calls).toEqual([[0, 320]]);
-    document.querySelector<HTMLButtonElement>(".copy-address")?.click();
-    await settled();
-    expect(writeText.mock.calls).toEqual([["file:///dist/search/index.html?q=Keyword"]]);
-    expect(document.querySelector(".copied")?.textContent).toBe("Address copied");
     location.search = "";
     window.dispatchEvent(new PopStateEvent("popstate"));
     await settled();

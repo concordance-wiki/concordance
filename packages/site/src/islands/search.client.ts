@@ -23,7 +23,6 @@ mountSearch({
   document,
   location: {
     search: () => location.search,
-    href: () => location.href,
     // A query string alone keeps the page; an empty one names the page so that the parameters go.
     push: (search) => {
       history.pushState(null, "", search === "" ? location.pathname : search);
@@ -39,7 +38,6 @@ mountSearch({
     storageOf(() => sessionStorage),
     window,
   ),
-  clipboard: navigator.clipboard,
   defer: (callback, delay) => {
     const handle = setTimeout(callback, delay);
     return () => {

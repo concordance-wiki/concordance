@@ -7,7 +7,7 @@ export const searchResultsState: GalleryPage = {
   rendered: "SearchResults",
   state: "default",
   description:
-    "three results, one with a type, a summary and its facts, one a word without a note, the address of the search, an active filter recalled above them, and three facets with a selected value, a disabled one and the keyword type dashed",
+    "three results, the first expanded with its type, its summary and its facts, the second condensed with its bare count, the third a word without a note, an active filter recalled above them, and three facets with a selected value, a disabled one and the keyword type dashed",
   ...chrome,
   props: searchResults,
 };

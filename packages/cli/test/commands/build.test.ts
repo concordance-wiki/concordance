@@ -1406,7 +1406,9 @@ describe("concordance build", () => {
         );
         expect(meta.entities.every((entry) => entry.url === pagePath(entry.id))).toBe(true);
         expect(meta.shards.map(searchFilePath).sort()).toEqual([...shards].sort());
-        expect(meta.types["keyword"]).toBe(corpus === "minimal/fr" ? "Mot-clé" : "Keyword");
+        expect(meta.types["keyword"]).toBe(
+          corpus === "minimal/fr" ? "Sans définition" : "Without a definition",
+        );
         const total = [...built.index.values()].reduce(
           (sum, content) => sum + Buffer.byteLength(content),
           0,

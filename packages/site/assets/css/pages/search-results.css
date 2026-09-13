@@ -1,40 +1,25 @@
-/* Search results: the facets in the left column, the rows as cards, the words without a note dotted. */
+/* Search results: the facets in a full-height column on the left, the first row expanded and the others condensed as cards, the words without a note dotted. The heading of the page is kept for assistive technology alone: the query in the field names the page. */
 
 /* The island of the results page is the page itself: the measure the header gives the search island does not apply. */
 main > concordance-island[data-island="search"] {
   max-inline-size: none;
 }
 
+/* The page spans the main landmark: the column of the facets stands against the left edge, under the bar. */
 .search-results {
-  max-inline-size: 90rem;
+  max-inline-size: none;
+  margin: 0;
+  padding: 0;
 }
 
 .results-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: start;
-}
-
-/* The facets take a column from 768 px; under it they fold behind their heading above the results. */
-@media (min-width: 48rem) {
-  .results-layout {
-    grid-template-columns: 16rem minmax(0, 1fr);
-  }
-
-  .facets-fold::details-content {
-    display: block;
-    content-visibility: visible;
-  }
-
-  .facets-head::before {
-    content: none;
-  }
+  align-items: stretch;
 }
 
 .facets {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-block-end: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
@@ -52,7 +37,7 @@ main > concordance-island[data-island="search"] {
 .facet-groups {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: 0 var(--space-3) var(--space-3);
 }
 
@@ -81,11 +66,11 @@ main > concordance-island[data-island="search"] {
   list-style: none;
 }
 
-/* A value: its box, its label covering the row, its count; a selected value is filled and bold, never a colour alone. */
+/* A value: its box, its label covering the row, its count in the monospace family; a selected value is filled and bold, never a colour alone. */
 .facet-value {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.625rem;
   min-block-size: 2.5rem;
 }
 
@@ -118,15 +103,17 @@ main > concordance-island[data-island="search"] {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.625rem;
   min-block-size: 2.5rem;
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: 0.84375rem;
   cursor: pointer;
 }
 
 .facet-value label .count {
   margin-inline-start: auto;
+  padding: 0;
+  background: transparent;
 }
 
 .facet-active label {
@@ -145,19 +132,70 @@ main > concordance-island[data-island="search"] {
 }
 
 .facets-note {
-  margin: 0;
+  margin: auto 0 0;
   color: var(--color-label);
   font-size: 0.8125rem;
   line-height: 1.6;
 }
 
-/* The active filters as chips, then the summary, on one line above the results. */
+/* The facets take a 250 px column from 768 px, as tall as the page; under it they fold behind their heading above the results. */
+@media (min-width: 48rem) {
+  .results-layout {
+    grid-template-columns: 15.625rem minmax(0, 1fr);
+    min-block-size: calc(100vh - 3.5rem);
+  }
+
+  .facets {
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  .facets-fold::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  /* The heading that folds the column is kept for assistive technology where the column stands open. */
+  .facets-head {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .facets-head::before {
+    content: none;
+  }
+
+  /* The column is as tall as the page, so that the note on the counters sits at its foot. */
+  .facets-fold,
+  .facets-fold::details-content {
+    block-size: 100%;
+  }
+
+  .facet-groups {
+    box-sizing: border-box;
+    min-block-size: 100%;
+    padding: 1.5rem 1.125rem;
+  }
+}
+
+/* The results in their region, the active filters as chips then the summary on one line above them. */
+.results-main {
+  min-inline-size: 0;
+  padding: 1.625rem 2rem;
+}
+
 .results-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin-block-end: var(--space-2);
+  gap: var(--space-2) 0.625rem;
+  margin-block-end: var(--space-3);
 }
 
 .active-filters {
@@ -174,7 +212,7 @@ main > concordance-island[data-island="search"] {
   align-items: center;
   gap: var(--space-2);
   min-block-size: 2.5rem;
-  padding-inline: var(--space-3);
+  padding-inline: 0.8125rem;
   border-radius: 1.25rem;
   background: var(--color-ink);
   color: var(--color-surface);
@@ -200,24 +238,6 @@ main > concordance-island[data-island="search"] {
   font-size: 0.8125rem;
 }
 
-/* The address of the search, shown so that the state is explicit and can be copied. */
-.search-address {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: baseline;
-  color: var(--color-label);
-  font-size: 0.8125rem;
-}
-
-.search-url {
-  overflow-wrap: anywhere;
-}
-
-.copied:empty {
-  display: none;
-}
-
 .search-closest {
   color: var(--color-muted);
 }
@@ -225,14 +245,18 @@ main > concordance-island[data-island="search"] {
 .results {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* A condensed row: the chip, the title and the count on one line, the summary cut to the next. */
 .result {
-  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 1.0625rem 1.375rem;
   border: 1px solid var(--color-border);
   border-radius: calc(var(--radius) * 1.25);
   background: var(--color-surface);
@@ -240,17 +264,21 @@ main > concordance-island[data-island="search"] {
 
 .result-head {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
+  gap: 0.6875rem;
   margin: 0;
 }
 
 .result-title {
+  min-inline-size: 0;
+  overflow: hidden;
   color: var(--color-ink);
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 600;
+  line-height: 1.25;
   text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-title:hover {
@@ -258,30 +286,62 @@ main > concordance-island[data-island="search"] {
 }
 
 .result-cited {
+  flex: none;
   margin-inline-start: auto;
   color: var(--color-label);
   font-size: 0.8125rem;
 }
 
+.result-cited-count {
+  font-family: var(--font-mono);
+}
+
 .snippet {
-  margin: var(--space-2) 0 0;
+  margin: 0;
+  overflow: hidden;
   color: var(--color-muted);
-  font-size: 0.9375rem;
+  font-size: 0.90625rem;
   line-height: 1.7;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The first row, expanded: the title larger, the whole summary, then the line of facts. */
+.result-lead {
+  gap: 0.5625rem;
+  padding: 1.25rem 1.375rem;
+}
+
+.result-lead .result-head {
+  flex-wrap: wrap;
+}
+
+.result-lead .result-title {
+  overflow: visible;
+  font-size: 1.1875rem;
+  white-space: normal;
+}
+
+.result-lead .snippet {
+  overflow: visible;
+  color: var(--color-ink);
+  font-size: 0.9375rem;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .result-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin: var(--space-2) 0 0;
+  gap: var(--space-1) 0.875rem;
+  margin: 0;
   color: var(--color-label);
   font-size: 0.8125rem;
 }
 
 .result-facts > span + span::before {
   content: "·" / "";
-  margin-inline-end: var(--space-3);
+  margin-inline-end: 0.875rem;
 }
 
 .breadcrumb {
@@ -290,8 +350,12 @@ main > concordance-island[data-island="search"] {
   font-size: 0.875rem;
 }
 
-/* A word without a note: outlined in dashes, its chip too, its title dotted, like its square on the map. */
+/* A word without a note: outlined in dashes, its chip too, its title dotted, like its square on the map; its notice on the same line as the title. */
 .result-keyword {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem;
   border-style: dashed;
 }
 
@@ -301,21 +365,39 @@ main > concordance-island[data-island="search"] {
 }
 
 .result-keyword .result-title {
+  overflow: visible;
   text-decoration: underline dotted;
   text-underline-offset: 0.2em;
+  white-space: normal;
 }
 
 .result-subtitle,
 .result-detail {
   display: block;
-  margin: var(--space-1) 0 0;
+  margin: 0;
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* The button drawing the next rows in place, under the rows drawn so far. */
+.results-more {
+  inline-size: 100%;
+  min-block-size: 2.5rem;
+  margin-block-start: 0.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .results-note {
   margin: var(--space-3) 0 0;
-  padding-block-start: var(--space-3);
+  padding-block-start: 0.875rem;
   border-block-start: 1px solid var(--color-border);
   color: var(--color-label);
   font-size: 0.8125rem;

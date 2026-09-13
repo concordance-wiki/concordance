@@ -3,21 +3,9 @@
     "defaultMessage": "Active filters",
     "description": "Heading of the list recalling the facets selected on the search page."
   },
-  "search.address": {
-    "defaultMessage": "Address of this search",
-    "description": "Label of the line showing the address that replays the current search."
-  },
   "search.clear": {
     "defaultMessage": "Clear filters",
     "description": "Button that resets every facet of the search."
-  },
-  "search.copied": {
-    "defaultMessage": "Address copied",
-    "description": "Status shown once the address of the search is in the clipboard."
-  },
-  "search.copyAddress": {
-    "defaultMessage": "Copy",
-    "description": "Button that copies the address of the current search."
   },
   "search.facet.application": {
     "defaultMessage": "Application",

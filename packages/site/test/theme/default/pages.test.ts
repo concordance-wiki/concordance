@@ -6,8 +6,9 @@ import { searchResults, searchResultsEmpty } from "../../../src/gallery/fixtures
 import { expectBalanced } from "../../helpers/html.js";
 
 describe("SearchResults", () => {
-  it("renders the facets as boxes in their column with the note on the counters, the active filters as chips, the summary, the address and the rows", () => {
+  it("renders the heading for assistive technology alone, the facets as boxes in their column with the note on the counters, the active filters as chips, the summary and the rows, the first expanded", () => {
     const html = renderSlot("SearchResults", searchResults, defaultTheme);
+    expect(html).toContain('<div class="search-results"><h1 class="visually-hidden">Search</h1>');
     expect(html).toContain(
       '<p class="search-summary" role="status">3 results, most cited first</p>',
     );
@@ -18,10 +19,7 @@ describe("SearchResults", () => {
         defaultTheme,
       ),
     ).toContain('<p class="search-summary" role="status">2 results for <q>threshold</q></p>');
-    expect(html).toContain(
-      '<p class="search-address"><span class="visually-hidden">Address of this search</span><code class="search-url">search/index.html?q=threshold&amp;source=glossary</code></p>',
-    );
-    expect(html).not.toContain("copy-address");
+    expect(html).not.toContain("search-address");
     expect(html).toContain(
       '<nav class="facets" aria-label="Facets"><details class="facets-fold"><summary class="facets-head">Facets</summary><div class="facet-groups"><details class="facet" open><summary><h2>Page type</h2></summary><ul class="facet-values">',
     );
@@ -47,13 +45,29 @@ describe("SearchResults", () => {
       '<ul class="active-filters" aria-label="Active filters"><li class="active-filter"><a href="?q=threshold" class="remove-filter"><span class="visually-hidden">Remove this filter Space: </span>glossary <span aria-hidden="true">✕</span></a></li><li class="clear-filters"><a href="?q=threshold">Clear filters</a></li></ul>',
     );
     expect(html).toContain(
-      '<li class="result"><p class="result-head"><span class="badge">term</span><a class="result-title" href="../glossary/publication-threshold/">Publication threshold</a><span class="result-cited">cited in 12 pages</span></p><p class="snippet">Three occurrences in two files before a word gets a page.</p><p class="result-facts"><span>glossary</span><span>Also called: threshold</span></p></li>',
+      '<li class="result result-lead"><p class="result-head"><span class="badge">term</span><a class="result-title" href="../glossary/publication-threshold/">Publication threshold</a><span class="result-cited">cited in 12 pages</span></p><p class="snippet">Three occurrences in two files before a word gets a page.</p><p class="result-facts"><span>glossary</span><span>Also called: threshold</span></p></li>',
     );
     expect(html).toContain(
-      '<li class="result result-keyword"><p class="result-head"><span class="badge">Keyword</span><a class="result-title" href="../keywords/threshold-review/">threshold review</a></p><p class="result-detail">Used in 2 documents, never defined in the glossary</p></li>',
+      '<li class="result"><p class="result-head"><a class="result-title" href="../meetings/threshold-review/">Keyword page threshold review</a><span class="result-cited result-cited-count">1</span></p></li>',
+    );
+    expect(html).toContain(
+      '<li class="result result-keyword"><p class="result-head"><span class="badge">Without a definition</span><a class="result-title" href="../keywords/threshold-review/">threshold review</a></p><p class="result-detail">Used in 2 documents, never defined in the glossary</p></li>',
     );
     expect(html).toContain(
       '</ol><p class="results-note">Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.</p>',
+    );
+    expect(html).not.toContain("results-more");
+    expectBalanced(html);
+  });
+
+  it("draws the button of the next rows under the list when the island says more remain", () => {
+    const html = renderSlot(
+      "SearchResults",
+      { ...searchResults, more: { label: "Show the next 20", onMore: () => undefined } },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      '</ol><button type="button" class="results-more">Show the next 20</button><p class="results-note">',
     );
     expectBalanced(html);
   });

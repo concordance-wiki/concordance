@@ -267,7 +267,7 @@ describe("the search island on the results page", () => {
       },
     );
     expect(html).toBe(
-      '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:{&quot;query&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;results&quot;:[],&quot;facets&quot;:[]}}"><div class="search-results"><h1>Search</h1><div class="results-layout"><div class="results-main"><div class="results-head"><p class="search-summary" role="status">0 results for <q></q></p></div><ol class="results"></ol></div></div></div></concordance-island>',
+      '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:{&quot;query&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;results&quot;:[],&quot;facets&quot;:[]}}"><div class="search-results"><h1 class="visually-hidden">Search</h1><div class="results-layout"><div class="results-main"><div class="results-head"><p class="search-summary" role="status">0 results for <q></q></p></div><ol class="results"></ol></div></div></div></concordance-island>',
     );
     const theme: ResolvedTheme = {
       components: {
@@ -284,7 +284,7 @@ describe("the search island on the results page", () => {
 });
 
 describe("ResultList", () => {
-  it("shows the type chip, the title as a link, the citations, the breadcrumb, the summary and the facts, each when given", () => {
+  it("expands the first row with the type chip, the title as a link, the citations worded, the breadcrumb, the summary and the facts, each when given, and condenses the others with the bare count", () => {
     const html = renderToString(
       h(ResultList, {
         results: [
@@ -293,9 +293,19 @@ describe("ResultList", () => {
             href: "../glossary/keyword-page/index.html",
             typeLabel: "Term",
             cited: "cited in 4 pages",
+            citedCount: 4,
             breadcrumb: ["Command line", "Publication"],
             snippet: "A page built for every word above the threshold.",
             facts: ["glossary", "Also called: word page", "Broader term: Page"],
+          },
+          {
+            title: "Publication threshold",
+            href: "../glossary/publication-threshold/index.html",
+            typeLabel: "Term",
+            cited: "cited in 38 pages",
+            citedCount: 38,
+            snippet: "Three occurrences in two files before a word gets a page.",
+            facts: ["glossary", "Also called: threshold"],
           },
           {
             title: "build summary",
@@ -307,18 +317,33 @@ describe("ResultList", () => {
       }),
     );
     expect(html).toBe(
-      '<ol class="results"><li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a><span class="result-cited">cited in 4 pages</span></p><span class="breadcrumb">Command line / Publication</span><p class="snippet">A page built for every word above the threshold.</p><p class="result-facts"><span>glossary</span><span>Also called: word page</span><span>Broader term: Page</span></p></li><li class="result"><p class="result-head"><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p></li></ol>',
+      '<ol class="results"><li class="result result-lead"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a><span class="result-cited">cited in 4 pages</span></p><span class="breadcrumb">Command line / Publication</span><p class="snippet">A page built for every word above the threshold.</p><p class="result-facts"><span>glossary</span><span>Also called: word page</span><span>Broader term: Page</span></p></li><li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/publication-threshold/index.html">Publication threshold</a><span class="result-cited result-cited-count">38</span></p><p class="snippet">Three occurrences in two files before a word gets a page.</p></li><li class="result"><p class="result-head"><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p></li></ol>',
     );
   });
 
-  it("outlines a word without a note with the result-keyword class, its notice and its documents under the title", () => {
+  it("shows no count for a page nothing cites, expanded or condensed", () => {
+    const html = renderToString(
+      h(ResultList, {
+        results: [
+          { title: "Vision", href: "../framing/vision/", citedCount: 0, facts: ["framing"] },
+          { title: "Roadmap", href: "../framing/roadmap/", citedCount: 0 },
+          { title: "Non-goals", href: "../framing/non-goals/" },
+        ],
+      }),
+    );
+    expect(html).toBe(
+      '<ol class="results"><li class="result result-lead"><p class="result-head"><a class="result-title" href="../framing/vision/">Vision</a></p><p class="result-facts"><span>framing</span></p></li><li class="result"><p class="result-head"><a class="result-title" href="../framing/roadmap/">Roadmap</a></p></li><li class="result"><p class="result-head"><a class="result-title" href="../framing/non-goals/">Non-goals</a></p></li></ol>',
+    );
+  });
+
+  it("outlines a word without a note with the result-keyword class, its notice and its documents after the title", () => {
     const html = renderToString(
       h(ResultList, {
         results: [
           {
             title: "build summary",
             href: "../keywords/build-summary/index.html",
-            typeLabel: "Keyword",
+            typeLabel: "Without a definition",
             keyword: true,
             subtitle: "Expression without a note",
             detail: "Used in 6 documents, never defined in the glossary",
@@ -327,7 +352,7 @@ describe("ResultList", () => {
       }),
     );
     expect(html).toBe(
-      '<ol class="results"><li class="result result-keyword"><p class="result-head"><span class="badge">Keyword</span><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p><span class="result-subtitle">Expression without a note</span><p class="result-detail">Used in 6 documents, never defined in the glossary</p></li></ol>',
+      '<ol class="results"><li class="result result-lead result-keyword"><p class="result-head"><span class="badge">Without a definition</span><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p><span class="result-subtitle">Expression without a note</span><p class="result-detail">Used in 6 documents, never defined in the glossary</p></li></ol>',
     );
   });
 

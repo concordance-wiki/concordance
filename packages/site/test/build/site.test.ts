@@ -172,7 +172,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     return received;
   }
 
-  it("writes the entity table with one row per page, keyword pages typed as such, and the labels the results show", () => {
+  it('writes the entity table with one row per page, keyword pages typed "Without a definition", and the labels the results show', () => {
     // The table is read back from the file the build wrote.
     const meta = readIndexFile(SEARCH_META) as SearchMeta;
     expect(meta.entities).toHaveLength(7);
@@ -203,7 +203,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     });
     expect(meta.types).toEqual({
       document: "Document",
-      keyword: "Keyword",
+      keyword: "Without a definition",
       rule: "Business rule",
       screen: "Screen",
       term: "Term",
@@ -260,7 +260,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain(
       '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:',
     );
-    expect(page).toContain('<div class="search-results"><h1>Search</h1>');
+    expect(page).toContain('<div class="search-results"><h1 class="visually-hidden">Search</h1>');
     expect(page).toContain(
       '<form class="site-search" role="search" aria-label="Site search" action="index.html" method="get">',
     );

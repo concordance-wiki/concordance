@@ -99,10 +99,6 @@ export interface SearchLabels {
   results: PluralForms;
   /** The note under the facets: that the counters are set at publication and the filtering runs in the browser. */
   countersNote: string;
-  /** The line showing the address of the search, its copy button and the status once copied. */
-  address: string;
-  copyAddress: string;
-  copied: string;
   /** The no-note facet: its heading and its three values. */
   noteless: Record<"label" | NotelessFilter, string>;
   /** "cited in N pages", by plural category, for the row of a note. */
@@ -118,6 +114,8 @@ export interface SearchLabels {
   closestForm: string;
   /** "N occurrences", by plural category, for the closest form when it is a keyword page. */
   occurrences: PluralForms;
+  /** "Show the next N", by plural category, on the button under the rows drawn so far. */
+  showNext: PluralForms;
 }
 
 /** The number of entities carrying every value of every facet, values in code-unit order; the keyword pages and the others under `nonote`. */

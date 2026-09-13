@@ -134,6 +134,7 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
       ".passage-at",
       ".similar-count",
       ".neighbour > .weight",
+      ".result-cited-count",
       ".cue-time",
       ".spaces-table .spaces-count",
       ".space-category-count",
@@ -262,18 +263,52 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
 });
 
 describe("Search results: the facets in a column from 768 px, folded above the list under it, every control a target", () => {
-  it("gives the facets a 16 rem column from 768 px and keeps their disclosure in view, the marker of its head gone", () => {
+  it("gives the facets a 250 px column from 768 px, as tall as the page and ruled on its right, keeps their disclosure in view and its head for assistive technology alone", () => {
     const medium = media(components, "(min-width: 48rem)");
     expect(medium).toContain(
-      ".results-layout {\n    grid-template-columns: 16rem minmax(0, 1fr);\n  }",
+      ".results-layout {\n    grid-template-columns: 15.625rem minmax(0, 1fr);\n    min-block-size: calc(100vh - 3.5rem);\n  }",
+    );
+    expect(medium).toContain(
+      ".facets {\n    border-block-end: 0;\n    border-inline-end: 1px solid var(--color-border);\n  }",
     );
     expect(medium).toContain(
       ".facets-fold::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
     );
-    expect(medium).toContain(".facets-head::before {\n    content: none;\n  }");
-    expect(components).toContain(
-      ".results-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr);",
+    expect(medium).toContain(
+      ".facets-head {\n    position: absolute;\n    inline-size: 1px;\n    block-size: 1px;",
     );
+    expect(medium).toContain(".facets-head::before {\n    content: none;\n  }");
+    expect(medium).toContain(
+      ".facet-groups {\n    box-sizing: border-box;\n    min-block-size: 100%;\n    padding: 1.5rem 1.125rem;\n  }",
+    );
+    expect(components).toContain(
+      ".results-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr);\n  align-items: stretch;\n}",
+    );
+    expect(components).toContain(
+      ".search-results {\n  max-inline-size: none;\n  margin: 0;\n  padding: 0;\n}",
+    );
+    expect(components).toContain(".facets {\n  border-block-end: 1px solid var(--color-border);");
+    expect(components).not.toContain(".facets {\n  border: 1px solid");
+  });
+
+  it("expands the first row alone, with its title at 19 px and its facts, and condenses the others on one line with the bare count in the monospace family", () => {
+    expect(components).toContain(
+      ".result-lead .result-title {\n  overflow: visible;\n  font-size: 1.1875rem;\n  white-space: normal;\n}",
+    );
+    expect(components).toContain(
+      ".result-title {\n  min-inline-size: 0;\n  overflow: hidden;\n  color: var(--color-ink);\n  font-size: 1rem;",
+    );
+    expect(components).toContain(
+      ".snippet {\n  margin: 0;\n  overflow: hidden;\n  color: var(--color-muted);\n  font-size: 0.90625rem;\n  line-height: 1.7;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}",
+    );
+    expect(components).toContain(
+      ".result-lead .snippet {\n  overflow: visible;\n  color: var(--color-ink);\n  font-size: 0.9375rem;",
+    );
+    expect(components).toContain(".result-cited-count {\n  font-family: var(--font-mono);\n}");
+    expect(components).toContain(
+      ".results-more {\n  inline-size: 100%;\n  min-block-size: 2.5rem;",
+    );
+    expect(components).not.toContain(".search-address");
   });
 
   it("lifts the measure of the header field from the island of the results page, which is the page itself", () => {
@@ -296,9 +331,11 @@ describe("Search results: the facets in a column from 768 px, folded above the l
       expect(body, selector).toMatch(/min-(block-size|inline-size): 2\.5rem;/);
     }
     expect(components).toContain(".facet-keyword input {\n  border-style: dashed;\n}");
-    expect(components).toContain(".result-keyword {\n  border-style: dashed;\n}");
     expect(components).toContain(
-      ".result-keyword .result-title {\n  text-decoration: underline dotted;",
+      ".result-keyword {\n  flex-direction: row;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 0.875rem;\n  border-style: dashed;\n}",
+    );
+    expect(components).toContain(
+      ".result-keyword .result-title {\n  overflow: visible;\n  text-decoration: underline dotted;",
     );
     expect(components).toContain(
       ".facet-active label {\n  color: var(--color-ink);\n  font-weight: 600;\n}",

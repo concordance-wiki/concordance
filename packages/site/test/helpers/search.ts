@@ -12,9 +12,6 @@ export const searchLabels: SearchLabels = {
   results: { one: "# result, most cited first", other: "# results, most cited first" },
   countersNote:
     "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
-  address: "Address of this search",
-  copyAddress: "Copy",
-  copied: "Address copied",
   noteless: { label: "Without a note", any: "Included", only: "Only", exclude: "Excluded" },
   cited: { one: "cited in # page", other: "cited in # pages" },
   alsoCalled: "Also called: {aliases}",
@@ -27,4 +24,5 @@ export const searchLabels: SearchLabels = {
     "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
   closestForm: "Closest form:",
   occurrences: { one: "# occurrence", other: "# occurrences" },
+  showNext: { one: "Show the next one", other: "Show the next #" },
 };

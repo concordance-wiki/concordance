@@ -1019,8 +1019,10 @@ export interface SearchResult {
   breadcrumb?: string[];
   /** The summary of the note, shown under the title. */
   snippet?: string;
-  /** "cited in 64 pages", worded in the site language, on the line of the title. */
+  /** "cited in 64 pages", worded in the site language, on the line of the first result; absent when nothing cites the page. */
   cited?: string;
+  /** How many pages cite the page, the bare count the condensed rows show; absent or 0 when nothing cites it. */
+  citedCount?: number;
   /** The line under the summary: the space, then what the note declares, "Also called: VL", "Broader term: payment", each already worded. */
   facts?: string[];
   /** `true` for a keyword page, the page of a recurring expression nobody defined: the row is outlined in dashes, its title dotted. */
@@ -1070,9 +1072,6 @@ export interface SearchResultsLabels {
   activeFilters: string;
   removeFilter: string;
   clear: string;
-  address: string;
-  copyAddress: string;
-  copied: string;
   /** The note under the facets: that the counters are set at publication and the filtering runs in the browser. */
   countersNote: string;
   /** The note under the results: that the words without a note appear dotted among the others. */
@@ -1100,10 +1099,6 @@ export interface SearchResultsProps {
   /** The address of the search with every facet open again; shown with the active filters. */
   clearHref?: string;
   labels?: Partial<SearchResultsLabels>;
-  /** The address of the search from the root of the site, `search/index.html?q=…`, shown under the summary so that the state is explicit. */
-  address?: string;
-  /** Whether the address was just copied: the status line says so. */
-  copied?: boolean;
   /** The closest form of the dictionary, proposed when the query matched nothing. */
   closest?: ClosestFormProposal;
   /**
@@ -1111,8 +1106,11 @@ export interface SearchResultsProps {
    * follows the address without leaving the page. Never serialised; the served page has links.
    */
   onNavigate?: (href: string) => void;
-  /** Copies the address of the search; set by the island when the page has a clipboard. */
-  onCopy?: () => void;
+  /**
+   * The button under the rows when `results` holds the first of more: its label, "Show the
+   * next 20", and what it does, drawing the next rows in place. Set by the island; never serialised.
+   */
+  more?: { label: string; onMore: () => void };
 }
 
 export interface IndexLetter {

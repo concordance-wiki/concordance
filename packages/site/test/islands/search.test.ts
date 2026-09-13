@@ -13,6 +13,7 @@ import {
   mountSearch,
   REPLACE_DELAY,
   resultOf,
+  RESULTS_BATCH,
   resultsPropsOf,
   SCROLL_KEY,
   scrollMemory,
@@ -189,6 +190,7 @@ describe("hitsOf and resultOf", () => {
         href: "../glossary/keyword-page/index.html",
         typeLabel: "Term",
         cited: "cited in 4 pages",
+        citedCount: 4,
         snippet: "The page built for a word above the threshold.",
         facts: ["glossary", "Also called: word page", "Broader term: Page"],
       },
@@ -205,6 +207,7 @@ describe("hitsOf and resultOf", () => {
         title: "Search results",
         href: "specs/screens/search-results/index.html",
         cited: "cited in 1 page",
+        citedCount: 1,
         facts: ["specs"],
       },
     ]);
@@ -220,6 +223,12 @@ describe("hitsOf and resultOf", () => {
     expect(factsOf(elsewhere, unlabelled)).toEqual(["elsewhere"]);
     expect(factsOf({ ...elsewhere, aliases: [] }, unlabelled)).toEqual(["elsewhere"]);
     expect(citedDetail(elsewhere, meta)).toBe("cited in 0 pages");
+    // A page nothing cites carries no count at all: neither worded nor bare.
+    expect(resultOf(elsewhere, meta, "")).toEqual({
+      title: "Note",
+      href: "elsewhere/note/index.html",
+      facts: ["elsewhere"],
+    });
   });
 
   it("lists the whole table, scored 0, for a query without a word, the most cited first, so that the facets alone browse the site", () => {
@@ -552,7 +561,6 @@ function fakeLocation(search = ""): FakeLocation {
     pushed: [],
     replaced: [],
     search: () => location.current,
-    href: () => `file:///dist/search/index.html${location.current}`,
     push: (next) => {
       location.current = next;
       location.pushed.push(next);
@@ -652,7 +660,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -701,7 +708,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -761,7 +767,6 @@ describe("mountSearch", () => {
         document,
         location: fakeLocation(),
         scroll: fakeScroll(),
-        clipboard: undefined,
         defer: fakeDefer().defer,
         inject,
         host,
@@ -824,7 +829,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -877,7 +881,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -914,7 +917,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation("?q=keyword+page"),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -927,7 +929,9 @@ describe("mountSearch", () => {
     answer("ke", shards["ke"]);
     answer("pa", shards["pa"]);
     await settled();
-    expect(results.html).toContain('<div class="search-results"><h1>Search</h1>');
+    expect(results.html).toContain(
+      '<div class="search-results"><h1 class="visually-hidden">Search</h1>',
+    );
     expect(results.html).toContain(
       '<p class="search-summary" role="status">1 result, most cited first</p>',
     );
@@ -973,7 +977,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1011,7 +1014,6 @@ describe("mountSearch", () => {
       document,
       location: fakeLocation("?q=key"),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1043,7 +1045,6 @@ describe("mountSearch", () => {
         document: fakeDocument(),
         location: fakeLocation("?q=key"),
         scroll: fakeScroll(),
-        clipboard: undefined,
         defer: fakeDefer().defer,
         inject,
         host,
@@ -1056,7 +1057,6 @@ describe("mountSearch", () => {
         document,
         location: fakeLocation(),
         scroll: fakeScroll(),
-        clipboard: undefined,
         defer: fakeDefer().defer,
         inject,
         host,
@@ -1080,7 +1080,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1110,7 +1109,6 @@ describe("mountSearch", () => {
       document: fakeDocument(),
       location: fakeLocation(),
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1150,7 +1148,6 @@ describe("mountSearch", () => {
         document: fakeDocument(),
         location: fakeLocation(),
         scroll: fakeScroll(),
-        clipboard: undefined,
         defer: fakeDefer().defer,
         inject,
         host,
@@ -1346,7 +1343,7 @@ interface ResultsPage {
 /** A results page mounted on an address, the table answered, ready for the facets. */
 async function resultsPage(
   search: string,
-  options: { scroll?: FakeScroll; clipboard?: { writeText(text: string): Promise<void> } } = {},
+  options: { scroll?: FakeScroll; table?: SearchMeta } = {},
 ): Promise<ResultsPage> {
   const { host, inject, injected, answer } = page();
   const input = fakeInput();
@@ -1369,13 +1366,12 @@ async function resultsPage(
     document: fakeDocument(),
     location,
     scroll,
-    clipboard: options.clipboard,
     defer: timers.defer,
     inject,
     host,
     render: view.render,
   });
-  answer("meta", meta);
+  answer("meta", options.table ?? meta);
   await settled();
   return {
     results,
@@ -1406,6 +1402,14 @@ describe("Facets on type, source, domain and application, with counts frozen at 
         label: "Page type",
         values: [
           {
+            value: "term",
+            label: "Term",
+            count: 1,
+            href: "?type=term",
+            active: false,
+            disabled: false,
+          },
+          {
             value: "keyword",
             label: "Keyword",
             count: 1,
@@ -1413,14 +1417,6 @@ describe("Facets on type, source, domain and application, with counts frozen at 
             active: false,
             disabled: false,
             keyword: true,
-          },
-          {
-            value: "term",
-            label: "Term",
-            count: 1,
-            href: "?type=term",
-            active: false,
-            disabled: false,
           },
         ],
       },
@@ -1502,7 +1498,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       },
     ]);
     expect(results.html).toContain(
-      '<nav class="facets" aria-label="Filters"><details class="facets-fold"><summary class="facets-head">Filters</summary><div class="facet-groups"><details class="facet" open><summary><h2>Page type</h2></summary><ul class="facet-values"><li class="facet-value facet-keyword"><input type="checkbox" id="facet-type-keyword" name="type" value="keyword"/><label for="facet-type-keyword"><span class="facet-label">Keyword</span><span class="count">1</span></label></li>',
+      '<nav class="facets" aria-label="Filters"><details class="facets-fold"><summary class="facets-head">Filters</summary><div class="facet-groups"><details class="facet" open><summary><h2>Page type</h2></summary><ul class="facet-values"><li class="facet-value"><input type="checkbox" id="facet-type-term" name="type" value="term"/><label for="facet-type-term"><span class="facet-label">Term</span><span class="count">1</span></label></li><li class="facet-value facet-keyword"><input type="checkbox" id="facet-type-keyword" name="type" value="keyword"/><label for="facet-type-keyword"><span class="facet-label">Keyword</span><span class="count">1</span></label></li>',
     );
     expect(results.html).toContain(
       '<details class="facet"><summary><h2>Domain</h2></summary><ul class="facet-values">',
@@ -1529,7 +1525,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
           facet.values.map((value) => `${value.value}:${String(value.count)}`),
         ),
     ).toEqual([
-      ["keyword:1", "term:1"],
+      ["term:1", "keyword:1"],
       ["glossary:1", "specs:1"],
       ["publication:1"],
       ["concordance-cli:1"],
@@ -1664,6 +1660,8 @@ describe("Active filters are recalled above the results and removable one by one
     expect(
       resultsPropsOf(parseSearchState("?q=key&type=term"), { query: "key", hits: [] }, "", {
         onNavigate: () => undefined,
+        shown: 20,
+        onMore: () => undefined,
       }),
     ).toEqual({
       query: "key",
@@ -1696,7 +1694,6 @@ describe("The bar shows the query in the field with a clear button", () => {
       document: fakeDocument(),
       location,
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1746,7 +1743,6 @@ describe("The bar shows the query in the field with a clear button", () => {
       document: fakeDocument(),
       location,
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: timers.defer,
       inject,
       host,
@@ -1793,7 +1789,6 @@ describe("The bar shows the query in the field with a clear button", () => {
       document: fakeDocument(),
       location,
       scroll: fakeScroll(),
-      clipboard: undefined,
       defer: fakeDefer().defer,
       inject,
       host,
@@ -1888,63 +1883,6 @@ describe("Opening the URL restores the query, the filters and the scroll positio
     scroll.fire();
     expect(scroll.stored["?q=ke&type=term"]).toBe(10);
     expect(scroll.scrolledTo).toEqual([]);
-  });
-});
-
-describe("The current URL is visible in the interface, which makes the state explicit", () => {
-  it("shows the address of the search from the root of the site under the summary, and follows every change", async () => {
-    const { results, follow, input, view, answer } = await resultsPage("?q=key&type=term");
-    answer("ke", shards["ke"]);
-    await settled();
-    expect(results.html).toContain(
-      '<p class="search-address"><span class="visually-hidden">Address of this search</span><code class="search-url">search/index.html?q=key&amp;type=term</code></p>',
-    );
-    expect(results.html).not.toContain("copy-address");
-    await follow("?type=term");
-    expect(view.props().address).toBe("search/index.html?type=term");
-    input.value = "";
-    input.fire("input");
-    await follow("?");
-    expect(view.props().address).toBe("search/index.html");
-  });
-
-  it("offers a copy button when the page has a clipboard, and says so once the address is copied", async () => {
-    const written: string[] = [];
-    const { results, view, answer } = await resultsPage("?q=key", {
-      clipboard: {
-        writeText: (text) => {
-          written.push(text);
-          return Promise.resolve();
-        },
-      },
-    });
-    answer("ke", shards["ke"]);
-    await settled();
-    expect(results.html).toContain(
-      '<code class="search-url">search/index.html?q=key</code><button type="button" class="copy-address">Copy</button><output class="copied"></output></p>',
-    );
-    view.props().onCopy?.();
-    await settled();
-    expect(written).toEqual(["file:///dist/search/index.html?q=key"]);
-    expect(results.html).toContain('<output class="copied">Address copied</output>');
-    expect(view.props().copied).toBe(true);
-  });
-
-  it("stays quiet when the clipboard refuses, and forgets the copy on the next change", async () => {
-    const refusing = await resultsPage("", {
-      clipboard: { writeText: () => Promise.reject(new Error("denied")) },
-    });
-    refusing.view.props().onCopy?.();
-    await settled();
-    expect(refusing.view.props().copied).toBe(false);
-    expect(refusing.results.html).toContain('<output class="copied"></output>');
-    const accepting = await resultsPage("", { clipboard: { writeText: () => Promise.resolve() } });
-    accepting.view.props().onCopy?.();
-    await settled();
-    expect(accepting.view.props().copied).toBe(true);
-    await accepting.follow("?type=term");
-    expect(accepting.view.props().copied).toBe(false);
-    expect(accepting.results.html).toContain('<output class="copied"></output>');
   });
 });
 
@@ -2056,8 +1994,80 @@ describe("Recurring expressions without a note appear among the results, with a 
       '<li class="result result-keyword"><p class="result-head"><span class="badge">Keyword</span><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p><p class="result-detail">Used in 6 documents, never defined in the glossary</p></li>',
     );
     expect(results.html).toContain(
-      '<li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">',
+      '<li class="result result-lead"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">',
     );
+  });
+});
+
+describe("The first batch of rows is drawn, a button adds the next one in place", () => {
+  /** A table of many terms, each matching "term", so that the page holds more than one batch. */
+  function many(count: number): { table: SearchMeta; shard: ShardData } {
+    const table: SearchMeta = {
+      ...meta,
+      entities: Array.from({ length: count }, (_, at) => ({
+        id: `glossary/term-${String(at).padStart(2, "0")}`,
+        title: `Term ${String(at)}`,
+        type: "term",
+        url: `glossary/term-${String(at)}/index.html`,
+        status: "active",
+        source: "glossary",
+        cited: count - at,
+      })),
+      shards: ["te"],
+    };
+    return { table, shard: { term: table.entities.map((_, at) => [at, 5]) } };
+  }
+
+  it("draws twenty rows and the button worded with the size of the next batch, adds a batch per click, and drops the button once every row is drawn", async () => {
+    const { table, shard } = many(45);
+    const { results, view, answer } = await resultsPage("?q=term", { table });
+    answer("te", shard);
+    await settled();
+    expect(RESULTS_BATCH).toBe(20);
+    expect(view.props().total).toBe(45);
+    expect(view.props().results).toHaveLength(20);
+    expect(results.html).toContain(
+      '<button type="button" class="results-more">Show the next 20</button>',
+    );
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">45 results, most cited first</p>',
+    );
+    view.props().more?.onMore();
+    expect(view.props().results).toHaveLength(40);
+    expect(view.props().more?.label).toBe("Show the next 5");
+    view.props().more?.onMore();
+    expect(view.props().results).toHaveLength(45);
+    expect(view.props().more).toBeUndefined();
+    expect(results.html).not.toContain("results-more");
+  });
+
+  it("words the button for the last row alone, and starts again from the first batch when the state changes", async () => {
+    const { table, shard } = many(21);
+    const { results, view, answer, follow, input } = await resultsPage("?q=term", { table });
+    answer("te", shard);
+    await settled();
+    expect(view.props().more?.label).toBe("Show the next one");
+    view.props().more?.onMore();
+    expect(view.props().results).toHaveLength(21);
+    await follow("?q=term&source=glossary");
+    expect(view.props().results).toHaveLength(20);
+    expect(view.props().more?.label).toBe("Show the next one");
+    view.props().more?.onMore();
+    expect(view.props().more).toBeUndefined();
+    input.value = "term";
+    input.fire("input");
+    await settled();
+    expect(view.props().results).toHaveLength(20);
+    expect(results.html).toContain("results-more");
+  });
+
+  it("draws no button when the rows fit in one batch", async () => {
+    const { results, view, answer } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(view.props().results).toHaveLength(2);
+    expect(view.props().more).toBeUndefined();
+    expect(results.html).not.toContain("results-more");
   });
 });
 
@@ -2175,8 +2185,8 @@ describe("A no-note facet isolates or excludes them", () => {
       ["exclude", 1, false, false],
     ]);
     expect(view.props().facets[0]?.values.map((value) => [value.value, value.count])).toEqual([
-      ["keyword", 1],
       ["term", 0],
+      ["keyword", 1],
     ]);
     await follow("?q=key&nonote=exclude");
     expect(results.html).toContain(

@@ -14,7 +14,9 @@ export const resultsMessages = {
     "results.closestForm": {},
     "results.countersNote": {},
     "results.noResultFor": {},
+    "results.noteless": {},
     "results.notelessNote": {},
+    "results.showNext": { count: "plural" },
     "results.usedIn": { count: "plural" },
   },
 } as const satisfies Area<keyof typeof en>;
