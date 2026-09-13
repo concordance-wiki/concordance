@@ -91,7 +91,7 @@ people:
     pseudonym: Participant-2
 ```
 
-A dictionary that declares the same person twice, whatever the case and accents, or a name without a word, is refused with the path of the faulty entry. The dictionary is read at build time only: it is never copied into the output, and the publication tests walk the output for its real names. Keep it out of any public repository.
+A dictionary that declares the same person twice, whatever the case and accents, or a name without a word, is refused with the path of the faulty entry. The dictionary is read at build time only: it is never copied into the output, and the publication tests walk the output for its real names. Keep it out of any public repository. The page of a meeting says what applied: "Pseudonymised participants" under its title and, under its transcript, that the names are replaced by stable pseudonyms and the mapping never published.
 
 `publish_transcripts` is what makes transcripts part of the published site and of its search index; a build without it keeps them out, pseudonymised or not. `concordance validate-config` warns when it is `true` without `pseudonymize.enabled`, and reports an error when `pseudonymize.enabled` is `true` without a `dictionary`. Pseudonymisation is a technical mechanism, not an authorisation to publish: informing the participants, the legal basis and the retention period are governance decisions that the build cannot take. [Publishing transcripts](publishing-transcripts.md) sets out what to settle before the first build that publishes one.
 

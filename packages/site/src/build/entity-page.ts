@@ -29,6 +29,13 @@ import {
   typeLabel,
   type SiteContext,
 } from "./context.js";
+import {
+  datedBreadcrumbOf,
+  datedSpaceOf,
+  isDatedSpace,
+  MEETING_TYPE,
+  meetingOf,
+} from "./meeting.js";
 import { mentionsPanelOf } from "./mentions.js";
 import { breadcrumbOf, spaceOf } from "./space.js";
 import {
@@ -481,7 +488,11 @@ export function entityPageLabels(
   };
 }
 
-/** The view model of the page of a typed entity, its sections and documents read from its fragment. */
+/**
+ * The view model of the page of a typed entity, its sections and documents read from its
+ * fragment. A meeting carries what its own template lays out on top: when every note of its
+ * space is dated, the tree is drawn by year and month and the breadcrumb names the month.
+ */
 export function entityPageOf(
   context: SiteContext,
   entity: Entity,
@@ -495,6 +506,10 @@ export function entityPageOf(
   const changed = changedOf(context, entity);
   const neighbours = neighbourhoodOf(context, page, entity);
   const attributes = panelOf(context, page, entity);
+  const meeting =
+    entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
+  const dated = meeting !== undefined && isDatedSpace(context, entity.source.name);
+  const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);
   return {
     entity: {
       id: entity.id,
@@ -504,8 +519,8 @@ export function entityPageOf(
       locale: entity.locale,
     },
     ...(declaration === undefined ? {} : { declaration }),
-    space: spaceOf(context, page, entity),
-    breadcrumb: breadcrumbOf(page, entity),
+    space: dated ? datedSpaceOf(context, page, entity) : spaceOf(context, page, entity),
+    breadcrumb: dated ? datedBreadcrumbOf(context, page, entity) : breadcrumbOf(page, entity),
     ...(changed === undefined ? {} : { changed }),
     highlights: highlightsOf(context, page, entity),
     sections: sectionsOf(context, entity),
@@ -513,9 +528,16 @@ export function entityPageOf(
     ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
     labels: entityPageLabels(context, neighbourPages(neighbours), attributes.length),
     neighbours,
-    mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
+    mentions:
+      meeting === undefined
+        ? mentions
+        : {
+            ...mentions,
+            labels: { ...mentions.labels, orderNote: message(context, "meeting.relatedNote") },
+          },
     sources: sourcesOf(context, entity),
     ...(documents.length === 0 ? {} : { documents }),
     ...(contract === undefined ? {} : { contract }),
+    ...(meeting === undefined ? {} : { meeting }),
   };
 }

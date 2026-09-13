@@ -521,6 +521,66 @@ export interface ContractSectionProps {
   operations: ContractOperationItem[];
 }
 
+/** The headings and notes the page of a meeting adds itself, in the language of the site; the theme's own English when absent. */
+export interface MeetingLabels {
+  /** Accessible name of the row of tabs, one per representation of the meeting. */
+  representations: string;
+  /** The tabs: the transcript, the written notes, the slide deck, any other converted document. */
+  transcript: string;
+  notes: string;
+  slides: string;
+  document: string;
+  /** Next to the tabs: that the build grouped the files. */
+  grouped: string;
+  /** Lead of the callout linking the decisions the meeting produced. */
+  decision: string;
+  /** Under the transcript: that the names are replaced by stable pseudonyms and the mapping never published. */
+  pseudonymNote: string;
+  /** The rows of the properties block. */
+  date: string;
+  duration: string;
+  space: string;
+  files: string;
+  /** Under the related pages: that a meeting does not enter the model. */
+  relatedNote: string;
+}
+
+/** A property of the meeting as the panel shows it: an ISO 8601 date and how the site words it. */
+export interface MeetingDate {
+  date: string;
+  label: string;
+}
+
+/** The files the build merged into the page of the meeting, and why. */
+export interface MeetingGrouping {
+  count: number;
+  /** The value of the files row, "3 grouped", worded. */
+  label: string;
+  /** The reasons under the properties, worded: "3 files: same folder, same commit, high textual overlap."; absent when the model recorded none. */
+  note?: string;
+}
+
+/**
+ * What the page of a meeting lays out beyond the generic view model: its date and duration,
+ * whether its transcript was pseudonymised, the decisions it produced and the grouping of its
+ * files. The tabs come from the sections and the documents of the page.
+ */
+export interface MeetingProps {
+  /** The `date` attribute of the note, worded; absent without one. */
+  date?: MeetingDate;
+  /** "1 h 12": the `duration` attribute when the note sets one, else the timecode of the last cue of the transcript; absent without either. */
+  duration?: string;
+  /** Under the title: "Pseudonymised participants" when pseudonymisation applied, else the number of participants the note declares; absent without either. */
+  participants?: string;
+  /** Whether the transcripts were pseudonymised at build: the note under the transcript says so. */
+  pseudonymized: boolean;
+  /** The decisions the meeting produced, as the model links them, by identifier; empty when none is linked. */
+  decisions: Link[];
+  /** The files merged into the page, when the build grouped several. */
+  grouping?: MeetingGrouping;
+  labels?: Partial<MeetingLabels>;
+}
+
 export interface EntityPageProps {
   entity: EntityRef;
   /** The type as the profile declares it; absent for a type the profile does not declare. */
@@ -555,6 +615,8 @@ export interface EntityPageProps {
   contract?: ContractSectionProps;
   /** The neighbourhood map served unfolded, the panel replaced by it; folded behind its line when absent. */
   mapOpen?: boolean;
+  /** What the page of a `meeting` entity lays out beyond the generic template; absent for every other page. */
+  meeting?: MeetingProps;
 }
 
 export interface Passage {

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatDate,
   formatMonth,
+  formatMonthName,
   formatNumber,
   formatRelative,
   textDirection,
@@ -26,6 +27,20 @@ describe("formatDate", () => {
     expect(formatDate("en", built, "long", { timeZone: "Pacific/Kiritimati" })).toBe(
       "March 6, 2024",
     );
+  });
+});
+
+describe("formatMonthName", () => {
+  it("names the month of a date alone in the words of the project locale, in UTC by default", () => {
+    expect(formatMonthName("en", built)).toBe("March");
+    expect(formatMonthName("fr", built)).toBe("mars");
+    expect(formatMonthName("en", new Date("2024-03-31T23:30:00Z"))).toBe("March");
+  });
+
+  it("honours an explicit time zone", () => {
+    expect(
+      formatMonthName("en", new Date("2024-03-31T23:30:00Z"), { timeZone: "Europe/Paris" }),
+    ).toBe("April");
   });
 });
 

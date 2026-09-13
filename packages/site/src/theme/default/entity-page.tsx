@@ -99,7 +99,8 @@ function MappedSection({
   );
 }
 
-function NoteSection({
+/** A section of the note: plain, or through the component of its mapped key when there is one. */
+export function NoteSection({
   entity,
   section,
   imageNote,
@@ -203,7 +204,13 @@ function TableOfContents({
 }
 
 /** The path of the file in the monospace family, then the edit link when the forge is known. */
-function Source({ source, text }: { source: SourceRef; text: EntityPageLabels }): JSX.Element {
+export function Source({
+  source,
+  text,
+}: {
+  source: SourceRef;
+  text: EntityPageLabels;
+}): JSX.Element {
   return (
     <p class="entity-source">
       <code>
@@ -267,7 +274,8 @@ export function NeighbourhoodFold({
  * folded behind its line. An attribute value or a mapped section goes through the
  * `Attribute@<name>` or `Section@<key>` component of the theme or of the type module when one
  * exists; the rest of the page is the same for every type. `mapOpen` serves the neighbourhood
- * unfolded, as the reader sees it after opening its line.
+ * unfolded, as the reader sees it after opening its line. The default theme hands a meeting,
+ * whose view model carries what its files bring, to the meeting template on the same shell.
  */
 export function EntityPage({
   entity,

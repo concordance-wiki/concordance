@@ -1135,6 +1135,18 @@ As a reader, I want the page of a word nobody defined to look like every other p
 
 Depends on: L9-01, L2-04, L3-04.
 
+#### L9-05 Meeting page
+
+As a reader, I want a working session that exists as a note, a transcript and a deck to read as one page so that I find what was said and what was decided without opening three files.
+
+- The tree of the space groups the notes of a meeting space by year and month with their counts when every note of the space is dated (a `date` attribute or a file name starting with `YYYY-MM-DD`), newest first, the year and the month of the page open; a space with an undated note keeps its folder tree. The breadcrumb reads "Space › March 2026 › title"; the title; the line "Meeting · 1 h 12 · Pseudonymised participants", the duration from the `duration` attribute of the note, else the timecode of the last cue of the transcript, the mention when `privacy.pseudonymize.enabled` is set, else the number of declared participants.
+- The tabs "Transcript | Notes | Slides", one per representation and labelled by its kind (a `.vtt` or `.srt` transcript, the markdown notes, a converted deck or document), with the mention "Grouped automatically" when the twin-resource reconciliation merged the files; served as anchors to panels the stylesheet shows one at a time, so that they work without JavaScript and a browser without `:has()` shows the panels one under the other. The transcript as timestamped lines "12:04 Participant-1 — …", the speaker of every cue carried from the reader through the fragment and pseudonymised with it, each timecode an anchor at the position the mentions cite; the note "The names of the participants are replaced at publication by stable pseudonyms. The mapping is never published." under it when pseudonymisation applied.
+- The callout "Decision taken here" linking the decisions the model ties to the meeting at either end of a link (the `decisions` reference of the note, a written link, or a decision whose note names the meeting); absent when nothing links them.
+- Panel: "Properties" (Date, Duration, Space, "Files: 3 grouped" with, under the list, why the build grouped them, from the signals of the duplicates block of the model for the pairs naming the note, "same folder, same base name, same commit, high textual overlap", else the criterion recorded on the entity), "Related pages" with the note "A meeting does not enter the model: it brings passages, and sometimes a decision someone took the trouble to write elsewhere.", the neighbourhood map folded.
+- Gallery state `meeting-page-corporate` on a working session of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L4-05, L4-06, L4-07.
+
 #### L9-07 Neighbourhood map in the panel
 
 As a reader who opened the line of the panel, I want the map to take the panel and nothing else so that I explore the neighbourhood of the page without losing its text.
@@ -1181,6 +1193,8 @@ As a reader of a screen note, the most consulted type, I want its tables and its
 Depends on: L9-01, L2-15.
 
 ## 5. Working conditions
+## 5. Working conditions
+
 ### 5.1 Ready
 
 A story enters development only when its upstream batch is delivered, its acceptance criteria are testable without interpretation, the golden corpus contains a case that exercises it, and its effect on build time or published weight is estimated when it has one.
