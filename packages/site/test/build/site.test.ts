@@ -455,7 +455,7 @@ describe("The site works over file:// as well as behind a server, without URL re
     expect(html).toContain('<link rel="stylesheet" href="../../../assets/site.css"');
     expect(html).toContain('href="../../../index.html"');
     expect(html).toContain('href="../../../glossary/keyword-page/index.html"');
-    expect(html).toContain('<script type="module" defer src="../../../assets/mode-switch-');
+    expect(html).toContain('<script defer src="../../../assets/mode-switch-');
   });
 });
 
@@ -860,7 +860,7 @@ describe("siteDocuments", () => {
   const bundles: IslandBundle[] = [
     { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
-    { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
+    { name: "search", file: "search-0123ABCD.js", bytes: 1 },
     { name: "trail", file: "trail-789ABC.js", bytes: 1 },
   ];
 

@@ -16,7 +16,7 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the category list, document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
+  it("declares the category list, document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
       "category-list",
@@ -35,22 +35,15 @@ describe("defaultIslands", () => {
     expect(islands[5]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
     expect(islands[6]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
     expect(islands[6]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
-    expect(islands.map((island) => island.classic)).toEqual([
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      true,
-      undefined,
-      undefined,
-    ]);
+    expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 7 }));
   });
 
-  it("keeps the PDF viewer and its worker apart, built from the legacy build of pdf.js only for a site that shows a PDF", () => {
+  it("keeps the PDF viewer and its worker apart, the only modules, built from the legacy build of pdf.js only for a site that shows a PDF", () => {
     const islands = viewerIslands();
     expect(islands.map((island) => island.name)).toEqual(["viewer-pdf", "viewer-pdf-worker"]);
     expect(islands[0]?.entry.endsWith("/src/islands/viewer-pdf.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/pdfjs-dist/legacy/build/pdf.worker.mjs")).toBe(true);
+    expect(islands.map((island) => island.module)).toEqual([true, true]);
     expect(defaultIslands().map((island) => island.name)).not.toContain("viewer-pdf");
   });
 });
@@ -98,7 +91,7 @@ describe("contentHash", () => {
 });
 
 describe("bundleIslands", () => {
-  it("writes one minified module per island, named after its content, and reports its size", async () => {
+  it("writes one minified script per island, named after its content, and reports its size", async () => {
     const fileSystem = memoryFileSystem();
     const bundles = await bundleIslands({
       outDir: "/site/assets",
@@ -156,23 +149,52 @@ describe("bundleIslands", () => {
     expect(written).not.toContain("hydrate");
   });
 
-  it("bundles the search island as a classic script, without import or export, so that a file:// page loads it", async () => {
+  it("bundles every default island as a classic script, without import or export, so that a file:// page runs it in every browser", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    expect(bundles).toHaveLength(7);
+    for (const bundle of bundles) {
+      expect(bundle.module, bundle.name).toBeUndefined();
+      const written = fileSystem.readText(`/out/${bundle.file}`);
+      expect(written.startsWith("(()=>{"), bundle.name).toBe(true);
+      expect(written.trimEnd().endsWith("})();"), bundle.name).toBe(true);
+      expect(written, bundle.name).not.toMatch(/(^|[;{}\s])import[\s{"']/);
+      expect(written, bundle.name).not.toMatch(/(^|[;{}\s])export[\s{]/);
+    }
+  });
+
+  it("bundles the search island with its shard loader, without the slot machinery nor the framework", async () => {
     const fileSystem = memoryFileSystem();
     const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
     const bundle = bundles.find((candidate) => candidate.name === "search");
     expect(bundle?.file).toMatch(/^search-[A-Z0-9]{8}\.js$/);
-    expect(bundle?.classic).toBe(true);
     const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
-    expect(written.startsWith("(()=>{")).toBe(true);
-    expect(written).not.toContain("import ");
-    expect(written).not.toContain("export ");
     expect(written).toContain("__concordanceSearch");
     expect(written).toContain('"search"');
     expect(written).not.toContain("useSlot");
     expect(written).not.toContain("hydrate");
-    expect(
-      bundles.find((candidate) => candidate.name === "mentions-panel")?.classic,
-    ).toBeUndefined();
+  });
+
+  it("keeps the dynamic import of the viewer in the classic bundle of the document island, which no page loads before the reader asks", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    const bundle = bundles.find((candidate) => candidate.name === "document-viewer");
+    const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
+    expect(written.startsWith("(()=>{")).toBe(true);
+    expect(written).toContain("import(new URL(");
+    expect(bundle?.bytes).toBeLessThan(3_000);
+  });
+
+  it("bundles the viewer and its worker as modules, the viewer exporting its opener for the dynamic import", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: viewerIslands(), fileSystem });
+    expect(bundles.map((bundle) => [bundle.name, bundle.module])).toEqual([
+      ["viewer-pdf", true],
+      ["viewer-pdf-worker", true],
+    ]);
+    const viewer = fileSystem.readText(`/out/${bundles[0]?.file ?? ""}`);
+    expect(viewer.startsWith("(()=>{")).toBe(false);
+    expect(viewer.trimEnd()).toMatch(/export\{\w+ as openViewer\};$/);
   });
 
   it("bundles the trail without any framework, under four kilobytes", async () => {

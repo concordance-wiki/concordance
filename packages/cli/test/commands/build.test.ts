@@ -529,7 +529,7 @@ describe("concordance build", () => {
         '<concordance-island data-island="contract-viewer" data-props="{&quot;href&quot;:&quot;../../fragments/notes/model-query.contract.json&quot;}"><p class="contract-data"><a href="../../fragments/notes/model-query.contract.json">Contract data (JSON)</a></p></concordance-island>',
       );
       expect(page).toMatch(
-        /<script type="module" defer src="\.\.\/\.\.\/assets\/contract-viewer-[A-Z0-9]{8}\.js">/,
+        /<script defer src="\.\.\/\.\.\/assets\/contract-viewer-[A-Z0-9]{8}\.js">/,
       );
       const contract = page.slice(
         page.indexOf('<section class="api-operations"'),

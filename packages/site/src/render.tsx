@@ -94,7 +94,7 @@ export function renderDocument(body: JSX.Element, options: RenderOptions): strin
   const islands = islandsUsed(first);
   const bundles = bundlesFor(islands, options);
   const modules = hrefsOf(
-    bundles.filter((bundle) => bundle.classic !== true),
+    bundles.filter((bundle) => bundle.module === true),
     options,
   );
   // Components are pure: rendering again with the scripts known gives the same body.
@@ -106,7 +106,7 @@ export function renderDocument(body: JSX.Element, options: RenderOptions): strin
           modulePreloads: modules,
           scripts: modules,
           classicScripts: hrefsOf(
-            bundles.filter((bundle) => bundle.classic === true),
+            bundles.filter((bundle) => bundle.module !== true),
             options,
           ),
         });
