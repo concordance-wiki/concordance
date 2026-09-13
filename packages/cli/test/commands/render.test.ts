@@ -430,6 +430,26 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ).toEqual({ a: "About a." });
   });
 
+  it("passes privacy.pseudonymize.enabled to the page of a meeting, which says that its participants are pseudonyms", async () => {
+    const meeting =
+      "---\ntype: meeting\ndate: 2026-03-12\n---\n# Threshold review\n\nA session about the build summary.\n";
+    const plain = corpus();
+    plain.fs.writeText("/work/notes/2026-03-12-review.md", meeting);
+    expect(await buildCommand([], plain)).toBe(0);
+    expect(plain.fs.readText("/work/dist/notes/2026-03-12-review/index.html")).not.toContain(
+      "meeting-participants",
+    );
+    const pseudonymised = corpus(
+      `${validConfig}privacy: { pseudonymize: { enabled: true, dictionary: ./pseudonyms.yaml } }\n`,
+    );
+    pseudonymised.fs.writeText("/work/notes/2026-03-12-review.md", meeting);
+    pseudonymised.fs.writeText("/work/pseudonyms.yaml", "people: []\n");
+    expect(await buildCommand([], pseudonymised)).toBe(0);
+    expect(pseudonymised.fs.readText("/work/dist/notes/2026-03-12-review/index.html")).toContain(
+      '<span class="meeting-participants">Pseudonymised participants</span>',
+    );
+  });
+
   it("cuts the body indexed for the search at build.extracted_text_max_chars", async () => {
     const whole = corpus();
     expect(await buildCommand([], whole)).toBe(0);

@@ -32,6 +32,11 @@ export interface MessageArguments {
   "keyword.pageAt": { number: number };
   "keyword.slideAt": { number: number };
   "keyword.usedSince": { month: string };
+  "meeting.durationHours": { hours: string; minutes: string };
+  "meeting.durationMinutes": { minutes: string };
+  "meeting.filesGrouped": { count: number };
+  "meeting.groupingNote": { count: number; reasons: string };
+  "meeting.participants": { count: number };
   "mentions.atLine": { line: number };
   "mentions.inSection": { section: string };
   "results.cited": { count: number };
@@ -141,6 +146,31 @@ export const messageArguments = {
   "keyword.undefinedExpression": {},
   "keyword.usedSince": { month: "argument" },
   "keyword.whatWeKnow": {},
+  "meeting.date": {},
+  "meeting.decision": {},
+  "meeting.document": {},
+  "meeting.durationHours": { hours: "argument", minutes: "argument" },
+  "meeting.durationMinutes": { minutes: "argument" },
+  "meeting.files": {},
+  "meeting.filesGrouped": { count: "plural" },
+  "meeting.grouped": {},
+  "meeting.groupingNote": { count: "plural", reasons: "argument" },
+  "meeting.notes": {},
+  "meeting.participants": { count: "plural" },
+  "meeting.pseudonymNote": {},
+  "meeting.pseudonymised": {},
+  "meeting.relatedNote": {},
+  "meeting.representations": {},
+  "meeting.signal.commit": {},
+  "meeting.signal.content": {},
+  "meeting.signal.declared": {},
+  "meeting.signal.folder": {},
+  "meeting.signal.name": {},
+  "meeting.signal.similarName": {},
+  "meeting.signal.title": {},
+  "meeting.slides": {},
+  "meeting.space": {},
+  "meeting.transcript": {},
   "mentions.atLine": { line: "number" },
   "mentions.inSection": { section: "argument" },
   "nav.applications": {},

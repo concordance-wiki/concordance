@@ -35,6 +35,8 @@ export interface SiteContextInput {
   collate?: (a: string, b: string) => number;
   /** The names of the glossary sources, in declaration order; the first with a known forge receives new notes. */
   glossarySources?: string[];
+  /** `privacy.pseudonymize.enabled` of the configuration: the page of a meeting says that its speakers are pseudonyms. */
+  pseudonymized?: boolean;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */

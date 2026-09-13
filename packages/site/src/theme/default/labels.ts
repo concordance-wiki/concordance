@@ -188,4 +188,16 @@ export const labels = {
   wordsNote: "Counted in this space only, which gives its own vocabulary.",
   spaceFooter:
     "A space reads like a small wiki within the wiki: its own search, its own vocabulary, its own news.",
+  representations: "Representations",
+  transcript: "Transcript",
+  notes: "Notes",
+  groupedAutomatically: "Grouped automatically",
+  decisionTakenHere: "Decision taken here",
+  pseudonymNote:
+    "The names of the participants are replaced at publication by stable pseudonyms. The mapping is never published.",
+  date: "Date",
+  duration: "Duration",
+  space: "Space",
+  meetingRelatedNote:
+    "A meeting does not enter the model: it brings passages, and sometimes a decision someone took the trouble to write elsewhere.",
 } as const;

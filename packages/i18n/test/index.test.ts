@@ -12,6 +12,7 @@ describe("@concordance-wiki/i18n", () => {
       "formatDate",
       "formatMessage",
       "formatMonth",
+      "formatMonthName",
       "formatNumber",
       "formatRelative",
       "loadCatalogue",

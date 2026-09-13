@@ -3196,6 +3196,182 @@ main > concordance-island[data-island="search"] {
   appearance: none;
 }
 
+/* Meeting page: the representations as tabs, the transcript as timestamped lines, the decisions the meeting produced, the properties of the meeting. */
+
+.meeting-representations {
+  margin-block-start: var(--space-4);
+}
+
+/* The tabs: anchors to the panels, the build grouping named at the end of the row. */
+.meeting-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.meeting-tab {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  margin-block-end: -1px;
+  padding-inline: var(--space-3);
+  border-block-end: 2px solid transparent;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.meeting-tab:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+.meeting-grouped {
+  margin-inline-start: auto;
+  padding-inline-start: var(--space-3);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+/* One panel in view at a time, without any script: the targeted one, the one holding the targeted anchor, else the first; a browser without `:has()` shows them all, one under the other. */
+@supports selector(:has(a)) {
+  .meeting-panel {
+    display: none;
+  }
+
+  .meeting-panels:not(:has(.meeting-panel:target, .meeting-panel :target))
+    > .meeting-panel:first-child,
+  .meeting-panel:target,
+  .meeting-panel:has(:target) {
+    display: block;
+  }
+
+  /* The current tab, the one whose panel is shown: a rule under it and the bold weight, never the colour alone. */
+
+  .meeting-representations:not(:has(.meeting-panel:target, .meeting-panel :target))
+    .meeting-tab:nth-child(1),
+  .meeting-representations:has(
+      .meeting-panel:nth-child(1):target,
+      .meeting-panel:nth-child(1) :target
+    )
+    .meeting-tab:nth-child(1),
+  .meeting-representations:has(
+      .meeting-panel:nth-child(2):target,
+      .meeting-panel:nth-child(2) :target
+    )
+    .meeting-tab:nth-child(2),
+  .meeting-representations:has(
+      .meeting-panel:nth-child(3):target,
+      .meeting-panel:nth-child(3) :target
+    )
+    .meeting-tab:nth-child(3),
+  .meeting-representations:has(
+      .meeting-panel:nth-child(4):target,
+      .meeting-panel:nth-child(4) :target
+    )
+    .meeting-tab:nth-child(4) {
+    border-block-end-color: var(--color-accent);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+}
+
+.meeting-panel {
+  padding-block-start: var(--space-3);
+}
+
+.meeting-panel > .entity-body,
+.meeting-panel > .document {
+  margin-block-start: 0;
+  padding-block-start: 0;
+  border-block-start: 0;
+}
+
+/* The transcript: one row per speaker turn, the timecode in the accent and underlined, the speaker in bold, then what was said. */
+.transcript {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.cue {
+  display: flex;
+  gap: var(--space-3);
+  padding-block: var(--space-1) var(--space-2);
+}
+
+.cue:target {
+  background: var(--color-highlight);
+}
+
+.cue-time {
+  flex: none;
+  min-inline-size: 2.75rem;
+  padding-block-start: 0.15em;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.cue-text {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.cue-speaker {
+  font-weight: 600;
+}
+
+.meeting-panel > .document-files {
+  margin-block: var(--space-3) 0;
+  font-size: 0.875rem;
+}
+
+.meeting-pseudonyms {
+  margin: var(--space-3) 0 0;
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+/* The decisions the meeting produced: a card in the surface colour at the start of the column, the lead in words, the decisions as links. */
+.meeting-decisions {
+  margin-block-start: var(--space-3);
+}
+
+.meeting-decision {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: fit-content;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.meeting-decision-link {
+  color: var(--color-ink);
+}
+
+.meeting-properties time {
+  font-weight: 500;
+}
+
 /* Spaces page: every space in one table, the most cited first; a row leads to the page of the space. */
 
 .spaces {

@@ -235,6 +235,9 @@ export async function renderSite(
       ? {}
       : { mentionsInline: config.build.mentions_inline }),
     ...(config.staleness === undefined ? {} : { staleness: config.staleness }),
+    ...(config.privacy?.pseudonymize?.enabled === undefined
+      ? {}
+      : { pseudonymized: config.privacy.pseudonymize.enabled }),
     ...(config.build?.extracted_text_max_chars === undefined
       ? {}
       : { bodyMaxChars: config.build.extracted_text_max_chars }),

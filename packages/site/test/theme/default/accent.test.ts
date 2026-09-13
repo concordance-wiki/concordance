@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { baseStylesheet, componentsStylesheet } from "../../../src/css/stylesheet.js";
 import { buildGallery } from "../../../src/gallery/build.js";
+import { TABS_MARKED } from "../../../src/theme/default/meeting-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import { count } from "../../helpers/html.js";
 
@@ -46,6 +47,15 @@ const CONTRACT_BUTTONS = [
   ".contract-schema-list button",
 ].join(",\n");
 
+/** The tab whose panel is in view, by position, the first one until a tab or an anchor inside a panel is followed; laid out as the stylesheet formats it inside its `@supports` block. */
+const CURRENT_TAB = [
+  "  .meeting-representations:not(:has(.meeting-panel:target, .meeting-panel :target))\n    .meeting-tab:nth-child(1)",
+  ...Array.from({ length: TABS_MARKED }, (_, index) => index + 1).map(
+    (position) =>
+      `.meeting-representations:has(\n      .meeting-panel:nth-child(${String(position)}):target,\n      .meeting-panel:nth-child(${String(position)}) :target\n    )\n    .meeting-tab:nth-child(${String(position)})`,
+  ),
+].join(",\n  ");
+
 describe("The accent colour never carries information on its own", () => {
   const base = accentRules(baseStylesheet());
   const components = accentRules(componentsStylesheet());
@@ -74,6 +84,8 @@ describe("The accent colour never carries information on its own", () => {
       ".keyword-notice",
       ".passage-at",
       ".neighbourhood-graph .map-centre .map-shape",
+      CURRENT_TAB,
+      ".cue-time",
       ".spaces-row.stale .spaces-date",
     ]);
   });
@@ -134,6 +146,15 @@ describe("The accent colour never carries information on its own", () => {
     expect(spaces).toContain(
       '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">FR</span><a href="../framing/">framing</a></th><td class="spaces-content">Document</td><td class="spaces-count">4</td><td class="spaces-date"><time datetime="2026-03-03">194 days ago</time></td></tr>',
     );
+  });
+
+  it("marks the current tab of a meeting page by a rule and the bold weight, and underlines the timecode of a cue", () => {
+    const current = ruleFor(components, CURRENT_TAB).body;
+    expect(current).toContain("border-block-end-color: var(--color-accent);");
+    expect(current).toContain("font-weight: 600;");
+    expect(ruleFor(components, ".cue-time").body).toContain("text-decoration: underline;");
+    const meeting = pages.get("meeting-page-corporate.html") ?? "";
+    expect(meeting).toContain('<a class="cue-time" href="#L1-2">11:48</a>');
   });
 
   it("names the colour scheme in the mode switch instead of showing a coloured state alone", () => {

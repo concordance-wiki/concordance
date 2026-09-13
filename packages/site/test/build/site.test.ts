@@ -921,6 +921,33 @@ describe("siteDocuments", () => {
     expect(space?.content).not.toContain('class="drawer-space"');
   });
 
+  it("passes the pseudonymisation flag of the configuration to the page of a meeting, which says that its participants are pseudonyms", () => {
+    const meeting = {
+      ...term,
+      id: "meetings/2026-03-12-keyword-page-threshold-review",
+      type: "meeting",
+      title: "Keyword page threshold review",
+      attributes: {},
+      source: {
+        name: "specs",
+        path: "meetings/2026-03-12-keyword-page-threshold-review.md",
+        line: 1,
+      },
+    };
+    const render = (pseudonymized?: boolean): string =>
+      siteDocuments(
+        options({
+          ...(pseudonymized === undefined ? {} : { pseudonymized }),
+          model: model({ entities: [...model().entities, meeting] }),
+        }),
+        bundles,
+      ).documents.find((document) => document.path === pagePath(meeting.id))?.content ?? "";
+    expect(render(true)).toContain(
+      '<span class="badge">Meeting</span><span class="meeting-participants">Pseudonymised participants</span>',
+    );
+    expect(render()).toContain('<span class="badge">Meeting</span></p>');
+  });
+
   it("gives the trail of every page its labels in the site language, the way to the root and, on an entity page, the page itself", () => {
     const { documents } = siteDocuments(options({ locale: "fr" }), bundles);
     const trailOf = (path: string): unknown => {

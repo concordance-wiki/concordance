@@ -28,6 +28,14 @@ export function formatMonth(locale: Locale, date: Date, options: DateOptions = {
   }).format(date);
 }
 
+/** The month of a date alone, "March", in the words of the locale, for a tree that already names the year. */
+export function formatMonthName(locale: Locale, date: Date, options: DateOptions = {}): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "long",
+    timeZone: options.timeZone ?? "UTC",
+  }).format(date);
+}
+
 export function formatNumber(
   locale: Locale,
   value: number,

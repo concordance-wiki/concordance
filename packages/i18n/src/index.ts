@@ -20,6 +20,7 @@ export {
 export {
   formatDate,
   formatMonth,
+  formatMonthName,
   formatNumber,
   formatRelative,
   textDirection,

@@ -94,6 +94,8 @@ export interface SiteInput {
   tokenize: SearchTokenizer;
   /** `build.extracted_text_max_chars` of the configuration: characters of the body indexed per entity. */
   bodyMaxChars?: number;
+  /** `privacy.pseudonymize.enabled` of the configuration, which the page of a meeting states. */
+  pseudonymized?: boolean;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -297,6 +299,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     ...(input.staleness === undefined ? {} : { staleness: input.staleness }),
     ...(input.collate === undefined ? {} : { collate: input.collate }),
     ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
+    ...(input.pseudonymized === undefined ? {} : { pseudonymized: input.pseudonymized }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
