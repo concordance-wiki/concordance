@@ -1146,6 +1146,17 @@ As a reader, I want a working session that exists as a note, a transcript and a 
 - Gallery state `meeting-page-corporate` on a working session of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
 
 Depends on: L9-01, L4-05, L4-06, L4-07.
+#### L9-06 API page
+
+As a reader of an interface, I want its page to show its operations matched to the contract and the contract itself, so that I see what the API offers and what the notes have not caught up with, without reading a schema.
+
+- The tree of the space lists the APIs with their operations as children: the endpoint notes under their API, in model order, whatever folder they are filed in; the H1, the line "API · changed N days ago · space", then the summary, the note at full column width.
+- Section "Operations — Matched to the contract by operation name": a table with the method as a chip (POST/GET/DEL…), the path in the monospace family, the label (the title of the endpoint note, linked) and "N callers" (the notes citing the operation); then the gap rows in italics, "present in the contract, without a page" for an operation the import left without a note, and "described, absent from the contract — unknown path" for a note the contract does not declare, from the `W-OPERATION-UNMATCHED` findings and the `exposes` links of the model; the notes describing the operations cite the API, so that the operations stand among its related pages.
+- Block "Interface contract — openapi 3.1 · file · imported N days ago", the format recorded by the import (`format` on the contract record: `openapi 3.1`, `wsdl 1.1`), with the contract viewer in the page (the existing island, its button placed in this block) and the note "No schema is copied into the text: the page shows the contract, it does not duplicate it."
+- Panel: "Properties" limited to five keys (the highlighted properties first, then the declared ones, cut to five, with the note "Five keys, no more. The operations come from the contract, not from the header."), "Related pages" where the operations come first ("On an interface the operations rise to the top: that is the grain we work at."), the neighbourhood map folded.
+- Gallery state `api-page-corporate` on the API of the fixtures corpus; the accessibility checker and the contrast checker pass on it; the contract viewer island keeps its tests.
+
+Depends on: L9-01, L5-03, L5-04, L5-05.
 
 #### L9-07 Neighbourhood map in the panel
 

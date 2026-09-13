@@ -71,6 +71,23 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
     expectBalanced(html);
   });
 
+  it("hands the lead type to the island and lists its pages first in the served markup, the lead note before the order note", () => {
+    const html = render({
+      mentions: [mention(4), mention(5), mention(1)],
+      initial: 20,
+      leadType: "term",
+      labels: { leadNote: "The terms come first." },
+    });
+    expect(html.indexOf('href="../notes/note-1/"')).toBeLessThan(
+      html.indexOf('href="../notes/note-2/"'),
+    );
+    expect(html).toContain("&quot;leadType&quot;:&quot;term&quot;");
+    expect(html).toContain(
+      '<p class="related-note related-lead-note">The terms come first.</p><p class="related-note">From the surest to the weakest',
+    );
+    expect(render({ mentions: [mention(4), mention(1)], initial: 20 })).not.toContain("leadType");
+  });
+
   it("marks a page that writes a link to the entity as cited, quotes its written passage, and quotes the first passage of the others", () => {
     const html = render({ mentions: [mention(4), mention(2, "written"), mention(1)], initial: 20 });
     expect(html).toContain(
@@ -135,6 +152,11 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
       ),
     ).toEqual(["../notes/note-3/", "../notes/note-2/", "../notes/note-1/"]);
     expect(groupByPage([])).toEqual([]);
+    expect(
+      groupByPage([mention(4), mention(1), mention(2, "written"), mention(5)], "term").map(
+        (page) => page.key,
+      ),
+    ).toEqual(["../notes/note-1/", "../notes/note-2/"]);
     expect(typeCounts(pages)).toEqual([
       { type: "screen", label: "Screen", count: 1 },
       { type: "term", label: "Term", count: 1 },

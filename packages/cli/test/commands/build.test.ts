@@ -504,32 +504,26 @@ describe("concordance build", () => {
       );
     });
 
-    it("renders the contract section after the note with the plain list of operations, the download link and the viewer island loaded on demand", async () => {
+    it("renders the operations table and the contract block after the note, the download link and the viewer island loaded on demand", async () => {
       const io = contractCorpus();
       await buildCommand([], io, withOpenApi);
       const page = io.fs.readText("/work/dist/notes/model-query/index.html");
       const article = page.slice(
         page.indexOf('<article class="entity-body">'),
-        page.indexOf('<section class="contract"'),
+        page.indexOf('<section class="api-operations"'),
       );
       expect(article).toContain("Serves the canonical model over HTTP.");
       expect(article).not.toContain("listEntities");
       expect(article).not.toContain("/search");
       expect(page).toContain(
-        '<h2 id="contract-title">Contract <span class="contract-name">Model query API</span></h2>',
-      );
-      expect(page).toContain("version <code>0.1.0</code>");
-      expect(page).toContain(
-        '<a class="contract-download" href="model-query.openapi.json" download>Download the contract</a>',
+        '<tr class="api-row"><td class="api-cell-method"><span class="api-method">GET</span></td><td class="api-cell-path"><code>/entities</code></td><td class="api-cell-operation"><a class="api-operation" href="../list-entities/index.html">List the entities</a></td><td class="api-cell-callers">0 callers</td></tr>',
       );
       expect(page).toContain(
-        '<h3 id="contract-operations">Operations <span class="count">2</span><span class="contract-gap">1 without a note</span></h3>',
+        '<tr class="api-row api-gap api-gap-without-page"><td class="api-cell-method"><span class="api-method">GET</span></td><td class="api-cell-path"><code>/search</code></td><td class="api-cell-operation"><span class="api-operation">GET /search</span></td><td class="api-cell-callers"><em class="api-gap-note">present in the contract, without a page</em></td></tr>',
       );
+      expect(page).toContain('<h2 id="contract-title">Interface contract</h2>');
       expect(page).toContain(
-        '<li class="contract-documented"><a href="../list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
-      );
-      expect(page).toContain(
-        '<li class="contract-undocumented"><a href="searchmodel/index.html">GET /search</a><span class="contract-summary"> Search the model</span><span class="contract-flag">no note yet</span></li>',
+        '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-12T12:00:00.000Z">imported now</time><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p>',
       );
       expect(page).toContain(
         '<concordance-island data-island="contract-viewer" data-props="{&quot;href&quot;:&quot;../../fragments/notes/model-query.contract.json&quot;}"><p class="contract-data"><a href="../../fragments/notes/model-query.contract.json">Contract data (JSON)</a></p></concordance-island>',
@@ -538,11 +532,12 @@ describe("concordance build", () => {
         /<script type="module" defer src="\.\.\/\.\.\/assets\/contract-viewer-[A-Z0-9]{8}\.js">/,
       );
       const contract = page.slice(
-        page.indexOf('<section class="contract"'),
+        page.indexOf('<section class="api-operations"'),
         page.indexOf('<footer class="entity-footer">'),
       );
       expect(contract).not.toContain("<form");
       expect(page.match(/<form/g)).toEqual(["<form"]);
+      expect(page).toContain("Five keys, no more.");
       expect(io.fs.readText("/work/dist/notes/list-entities/index.html")).not.toContain(
         'class="contract"',
       );

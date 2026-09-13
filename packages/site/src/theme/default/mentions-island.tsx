@@ -38,6 +38,8 @@ export interface MentionsIslandProps {
   labels: RelatedLabels;
   fragmentHref?: string;
   rest?: MentionsRest;
+  /** A type slug whose pages come first, whatever their count. */
+  leadType?: string;
 }
 
 type Loading = "idle" | "loading" | "failed";
@@ -75,7 +77,7 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
   /** Every page the island holds, then those the filters keep. */
   pages(): { all: RelatedPage[]; shown: RelatedPage[] } {
     const { filter, hidden } = this.state;
-    const all = groupByPage(this.all());
+    const all = groupByPage(this.all(), this.props.leadType);
     const shown = all.filter(
       (page) =>
         matchesFilter(page, filter) && (page.type === undefined || !hidden.includes(page.type)),
@@ -227,6 +229,9 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
           <RelatedList pages={shown} labels={labels} />
         )}
         {this.more(all.length)}
+        {all.length > 0 && labels.leadNote !== undefined && (
+          <p class="related-note related-lead-note">{labels.leadNote}</p>
+        )}
         {all.length > 0 && <p class="related-note">{labels.orderNote}</p>}
       </div>
     );

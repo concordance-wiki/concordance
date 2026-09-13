@@ -13,7 +13,6 @@ import type {
 import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList, AttributeValues } from "./attributes.js";
-import { ContractSection } from "./contract-section.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
 import { fill } from "./mention-list.js";
@@ -100,6 +99,7 @@ function MappedSection({
 }
 
 /** A section of the note: plain, or through the component of its mapped key when there is one. */
+/** A section of the note: mapped through its `Section@<key>` component when the type has one, plain otherwise. */
 export function NoteSection({
   entity,
   section,
@@ -276,6 +276,15 @@ export function NeighbourhoodFold({
  * exists; the rest of the page is the same for every type. `mapOpen` serves the neighbourhood
  * unfolded, as the reader sees it after opening its line. The default theme hands a meeting,
  * whose view model carries what its files bring, to the meeting template on the same shell.
+ * with the highlights, the note at full column width, its documents under it, then the foot of
+ * the article, the legend of the two marks of the text with the path of the file and its edit
+ * link; on the right three stacked blocks, the declared attributes (and the attributes the type
+ * does not declare, when the note sets some), the table of contents of the note, the related
+ * pages, then the neighbourhood folded behind its line. An attribute value or a mapped section
+ * goes through the `Attribute@<name>` or `Section@<key>` component of the theme or of the type
+ * module when one exists; the rest of the page is the same for every type. `mapOpen` serves the
+ * neighbourhood unfolded, as the reader sees it after opening its line. An API whose contract
+ * was imported has a page of its own, `ApiPage`, which the theme serves in its place.
  */
 export function EntityPage({
   entity,
@@ -290,7 +299,6 @@ export function EntityPage({
   neighbours,
   mentions,
   sources,
-  contract,
   documents = [],
   mapOpen = false,
 }: EntityPageProps): JSX.Element {
@@ -343,7 +351,6 @@ export function EntityPage({
             <DocumentBlock key={document.file.href} document={document} index={index + 1} />
           ))}
         </article>
-        {contract !== undefined && <ContractSection {...contract} />}
         <footer class="entity-footer">
           {sections.length > 0 && (
             <p class="legend">

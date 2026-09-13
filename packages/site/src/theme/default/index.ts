@@ -3,7 +3,7 @@ import { h, type JSX } from "preact";
 import type { EntityPageProps } from "../../slots.js";
 import type { SlotComponents } from "../types.js";
 import { CategoryList } from "./category-list.js";
-import { EntityPage as GenericEntityPage } from "./entity-page.js";
+import { TypedEntityPage } from "./api-page.js";
 import { Footer } from "./footer.js";
 import { Header } from "./header.js";
 import { Home } from "./home.js";
@@ -18,11 +18,13 @@ import { Space } from "./space.js";
 import { Spaces } from "./spaces.js";
 import { Todo } from "./todo.js";
 
-/** The entity page of the default theme: the meeting template when the view model carries a meeting, the generic template otherwise. */
+/**
+ * The entity page of the default theme: the meeting template when the view model carries a
+ * meeting, the API template when it carries an imported contract, the generic template otherwise.
+ */
 export function EntityPage(props: EntityPageProps): JSX.Element {
-  return props.meeting === undefined
-    ? h(GenericEntityPage, props)
-    : h(MeetingPage, { ...props, meeting: props.meeting });
+  if (props.meeting !== undefined) return h(MeetingPage, { ...props, meeting: props.meeting });
+  return h(TypedEntityPage, props);
 }
 
 /** The default theme: one component per slot. */

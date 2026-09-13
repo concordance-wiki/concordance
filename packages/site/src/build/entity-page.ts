@@ -1,4 +1,4 @@
-import { CONTRACT_METHOD, CONTRACT_RELATION, pagePath, type Entity } from "@concordance-wiki/core";
+import { pagePath, type Entity } from "@concordance-wiki/core";
 import { formatMessage, formatRelative } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
@@ -6,6 +6,7 @@ import type {
   Attribute,
   AttributeValue,
   ChangeDate,
+  ContractLabels,
   ContractOperationItem,
   ContractSectionProps,
   DeclaredAttribute,
@@ -36,7 +37,13 @@ import {
   MEETING_TYPE,
   meetingOf,
 } from "./meeting.js";
-import { mentionsPanelOf } from "./mentions.js";
+import { citingPages, mentionsPanelOf } from "./mentions.js";
+import {
+  exposedOperations,
+  operationAttribute,
+  unmatchedOperations,
+  type ExposedOperation,
+} from "./operations.js";
 import { breadcrumbOf, spaceOf } from "./space.js";
 import {
   contractFileTarget,
@@ -353,27 +360,84 @@ export interface ViewerBundles {
   worker: string;
 }
 
-/** The operations the contract import attached to the API, in model order: the `exposes` links of a `contract_import` provenance. */
-function operationsOf(context: SiteContext, page: string, entity: Entity): ContractOperationItem[] {
-  const operations: ContractOperationItem[] = [];
-  for (const link of context.touching.get(entity.id) ?? []) {
-    if (link.from !== entity.id || link.relation !== CONTRACT_RELATION) continue;
-    const imported = link.provenance.find((provenance) => provenance.method === CONTRACT_METHOD);
-    const operation = context.entities.get(link.to);
-    if (imported === undefined || operation === undefined) continue;
-    operations.push({
-      name: imported.operation ?? operation.title,
-      title: operation.title,
-      ...(operation.summary === undefined ? {} : { summary: operation.summary }),
-      href: entityHref(page, operation.id),
-      // An operation left to the contract alone keeps the origin the import gave it; a note has its own.
-      documented: operation.type_origin !== "contract",
-    });
-  }
-  return operations;
+/** A row of the operations table: the page of the operation, its method and path when declared, how many pages cite it. */
+function operationItem(
+  context: SiteContext,
+  page: string,
+  { entity: operation, name, documented }: ExposedOperation,
+): ContractOperationItem {
+  const method = operationAttribute(operation, "method");
+  const path = operationAttribute(operation, "path");
+  return {
+    name,
+    title: operation.title,
+    ...(operation.summary === undefined ? {} : { summary: operation.summary }),
+    href: entityHref(page, operation.id),
+    documented,
+    ...(method === undefined ? {} : { method }),
+    ...(path === undefined ? {} : { path }),
+    callers: formatMessage(context.catalogue, "api.callers", {
+      count: citingPages(context, operation),
+    }),
+  };
 }
 
-/** The contract section of an `api` page, from the record the import left in the model; none without one. */
+/** The operations the contract import attached to the API, in model order, as the table lists them. */
+function operationsOf(context: SiteContext, page: string, entity: Entity): ContractOperationItem[] {
+  return exposedOperations(context, entity).map((operation) =>
+    operationItem(context, page, operation),
+  );
+}
+
+/** The operation notes the contract does not declare, as gap rows: named by the note, matched to nothing. */
+function unmatchedOf(context: SiteContext, page: string, entity: Entity): ContractOperationItem[] {
+  return unmatchedOperations(context, entity).map((note) => {
+    const id = note.attributes["operation_id"];
+    return operationItem(context, page, {
+      entity: note,
+      name: typeof id === "string" && id !== "" ? id : note.title,
+      documented: true,
+    });
+  });
+}
+
+/** When the contract was imported, relative to the build instant, worded in full and in short. */
+function importedOf(context: SiteContext, importedAt: string): ChangeDate {
+  const locale = context.locale ?? context.language;
+  const from = new Date(importedAt);
+  const to = new Date(context.model.build.at);
+  return {
+    date: importedAt.slice(0, 10),
+    label: formatMessage(context.catalogue, "api.imported", {
+      when: formatRelative(locale, from, to),
+    }),
+    short: formatRelative(locale, from, to, "short"),
+  };
+}
+
+/** The headings and notes of the contract side of the API page in the site language. */
+export function contractLabels(context: SiteContext): ContractLabels {
+  return {
+    operations: message(context, "api.operations"),
+    operationsLead: message(context, "api.operationsLead"),
+    gapsLead: message(context, "api.gapsLead"),
+    method: message(context, "api.colMethod"),
+    path: message(context, "api.colPath"),
+    operation: message(context, "api.colOperation"),
+    callersColumn: message(context, "api.colCallers"),
+    noOperation: message(context, "api.noOperation"),
+    withoutPage: message(context, "api.withoutPage"),
+    notInContract: message(context, "api.notInContract"),
+    unknownPath: message(context, "api.unknownPath"),
+    contract: message(context, "api.contract"),
+    download: message(context, "api.download"),
+    viewerNote: message(context, "api.viewerNote"),
+    fiveKeys: message(context, "api.fiveKeys"),
+    operationsFirst: message(context, "api.operationsFirst"),
+  };
+}
+
+/** The contract side of an `api` page, from the record the import left in the model; none without one. */
 export function contractOf(
   context: SiteContext,
   page: string,
@@ -382,16 +446,21 @@ export function contractOf(
   const record = context.model.build.contracts?.find((candidate) => candidate.api === entity.id);
   if (record === undefined) return undefined;
   const { location } = record;
+  const unmatched = unmatchedOf(context, page, entity);
   return {
     title: record.title,
     version: record.version,
+    format: record.format,
     importedAt: record.imported_at,
+    imported: importedOf(context, record.imported_at),
     location,
     downloadHref: isContractUrl(location)
       ? location
       : relativeHref(page, contractFileTarget(entity.id, location)),
     fragmentHref: relativeHref(page, contractFragmentPath(entity.id)),
     operations: operationsOf(context, page, entity),
+    ...(unmatched.length === 0 ? {} : { unmatched }),
+    labels: contractLabels(context),
   };
 }
 

@@ -1,4 +1,4 @@
-import type { Entity, Link } from "@concordance-wiki/core";
+import type { CanonicalModel, Entity, Link } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
 import type { Profile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
@@ -873,6 +873,12 @@ describe("contractOf", () => {
     title: "List the entities",
     summary: "Returns the entities of the last build.",
     type_origin: "rule#7",
+    attributes: {
+      api: "api/model-query",
+      method: "get",
+      path: "/entities",
+      operation_id: "listEntities",
+    },
     representations: [
       { path: "endpoints/list-entities.md", format: "markdown" },
       {
@@ -888,6 +894,40 @@ describe("contractOf", () => {
     type: "endpoint",
     title: "GET /search",
     type_origin: "contract",
+    attributes: { method: "GET", path: "/search", style: "http" },
+  });
+  const suggestLinks = entity({
+    id: "specs/endpoints/suggest-links",
+    type: "endpoint",
+    title: "Suggest links",
+    summary: "Proposes the links a note could write.",
+    type_origin: "rule#7",
+    attributes: { api: "api/model-query", operation_id: "suggestLinks" },
+  });
+  const notifyBuild = entity({
+    id: "specs/endpoints/notify-build",
+    type: "endpoint",
+    title: "Notify a build",
+    type_origin: "rule#7",
+    attributes: { api: "Forge bridge API", method: "POST", path: " " },
+  });
+  /** A finding of the check that names no entity: nothing to attach it to. */
+  const anonymous: CanonicalModel["findings"][number] = {
+    check: "W-OPERATION-UNMATCHED",
+    severity: "warning",
+    message: "operation note x matches no operation",
+    remediation: "Compare the note with the contract.",
+    source: "specs",
+    path: "endpoints/x.md",
+  };
+  const unmatched = (id: string): CanonicalModel["findings"][number] => ({
+    check: "W-OPERATION-UNMATCHED",
+    severity: "warning",
+    message: `operation note ${id} matches no operation`,
+    remediation: "Compare the note with the contract.",
+    source: "specs",
+    path: "endpoints/x.md",
+    entity: id,
   });
   const exposes = (to: string, operation?: string, provenance = "contract_import"): Link => ({
     from: "specs/api/model-query",
@@ -902,6 +942,16 @@ describe("contractOf", () => {
         path: "contracts/model-query.openapi.json",
         ...(operation === undefined ? {} : { operation }),
       },
+    ],
+  });
+  /** A screen whose note links to the operation: one page citing it. */
+  const cites = (to: string): Link => ({
+    from: "specs/screens/mentions-panel",
+    to,
+    relation: "displays",
+    confidence: 1,
+    provenance: [
+      { method: "explicit_link", confidence: 1, path: "screens/mentions-panel.md", line: 3 },
     ],
   });
   const contracts = [
@@ -924,25 +974,63 @@ describe("contractOf", () => {
       imported_at: "2026-09-12T10:00:00.000Z",
     },
   ];
-  const withContracts = (links: Link[]): SiteContext =>
+  const withContracts = (
+    links: Link[],
+    findings: CanonicalModel["findings"] = [],
+    entities: Entity[] = [],
+  ): SiteContext =>
     context({
       model: model({
         build: { ...model().build, contracts },
-        entities: [modelQuery, forgeBridge, listEntities, searchModel, term],
+        entities: [
+          modelQuery,
+          forgeBridge,
+          listEntities,
+          searchModel,
+          screen,
+          term,
+          page,
+          ...entities,
+        ],
         links,
+        findings,
       }),
     });
+  const labels = {
+    operations: "Operations",
+    operationsLead: "Matched to the contract by operation name.",
+    gapsLead:
+      "The rows in italics are gaps: present in the contract without a page, or described without existing in the contract.",
+    method: "Method",
+    path: "Path",
+    operation: "Operation",
+    callersColumn: "Callers",
+    noOperation: "The contract declares no operation.",
+    withoutPage: "present in the contract, without a page",
+    notInContract: "described, absent from the contract",
+    unknownPath: "unknown path",
+    contract: "Interface contract",
+    download: "Download the contract",
+    viewerNote:
+      "No schema is copied into the text: the page shows the contract, it does not duplicate it.",
+    fiveKeys: "Five keys, no more. The operations come from the contract, not from the header.",
+    operationsFirst:
+      "On an interface the operations rise to the top: that is the grain we work at.",
+  };
 
-  it("describes the contract of an api page from the record of the model: title, version, import date, the copy of a path contract next to the page and the view under fragments/", () => {
+  it("describes the contract of an api page from the record of the model: title, version, format, the import worded relative to the build, the copy of a path contract next to the page, the view under fragments/ and the labels of the site language", () => {
     const ctx = withContracts([
       exposes("specs/endpoints/list-entities", "listEntities"),
       exposes("specs/api/model-query/searchmodel", "searchModel"),
+      cites("specs/endpoints/list-entities"),
     ]);
     const props = entityPageOf(ctx, modelQuery);
     expect(props.contract).toEqual({
       title: "Model query API",
       version: "0.1.0",
+      format: "openapi 3.1",
       importedAt: "2026-09-12T10:00:00.000Z",
+      imported: { date: "2026-09-12", label: "imported 2 hours ago", short: "2 hr. ago" },
       location: "contracts/model-query.openapi.json",
       downloadHref: "model-query.openapi.json",
       fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
@@ -953,15 +1041,34 @@ describe("contractOf", () => {
           summary: "Returns the entities of the last build.",
           href: "../../endpoints/list-entities/index.html",
           documented: true,
+          method: "get",
+          path: "/entities",
+          callers: "1 caller",
         },
         {
           name: "searchModel",
           title: "GET /search",
           href: "searchmodel/index.html",
           documented: false,
+          method: "GET",
+          path: "/search",
+          callers: "0 callers",
         },
       ],
+      labels,
     });
+  });
+
+  it("words the import in the language of the site, in French as in English", () => {
+    const ctx = context({
+      model: model({ build: { ...model().build, contracts }, entities: [modelQuery], links: [] }),
+      catalogue: loadCatalogue("fr"),
+      locale: "fr",
+    });
+    const props = contractOf(ctx, "specs/api/model-query/index.html", modelQuery);
+    expect(props?.imported?.label).toBe("importé il y a 2 heures");
+    expect(props?.labels?.contract).toBe("Contrat d’interface");
+    expect(props?.labels?.withoutPage).toBe("présente au contrat, sans page");
   });
 
   it("keeps the declared URL of a remote contract as the download link", () => {
@@ -969,6 +1076,8 @@ describe("contractOf", () => {
     expect(props?.downloadHref).toBe("https://example.invalid/forge-bridge.wsdl");
     expect(props?.operations).toEqual([]);
     expect(props?.version).toBe("");
+    expect(props?.format).toBe("wsdl 1.1");
+    expect(props).not.toHaveProperty("unmatched");
   });
 
   it("lists the operations the contract import exposed only: a link of another provenance, towards the api or towards a lost entity is left out, and the title stands in for a missing operation name", () => {
@@ -991,8 +1100,221 @@ describe("contractOf", () => {
         summary: "Returns the entities of the last build.",
         href: "../../endpoints/list-entities/index.html",
         documented: true,
+        method: "get",
+        path: "/entities",
+        callers: "0 callers",
       },
     ]);
+  });
+
+  it("counts as callers the pages citing the operation, the api and the contract left out, as the related pages of its page count them", () => {
+    const ctx = withContracts([
+      exposes("specs/endpoints/list-entities", "listEntities"),
+      cites("specs/endpoints/list-entities"),
+      {
+        from: "glossary/page",
+        to: "specs/endpoints/list-entities",
+        relation: "related",
+        confidence: 0.6,
+        provenance: [
+          { method: "glossary_occurrence", confidence: 0.6, path: "page.md", line: 4 },
+          { method: "glossary_occurrence", confidence: 0.6, path: "page.md", line: 9 },
+        ],
+      },
+    ]);
+    const props = contractOf(ctx, "specs/api/model-query/index.html", modelQuery);
+    expect(props?.operations.map((operation) => operation.callers)).toEqual(["2 callers"]);
+    expect(
+      mentionsPanelOf(ctx, "specs/endpoints/list-entities/index.html", listEntities).pages,
+    ).toBe(2);
+  });
+
+  it("adds as unmatched the operation notes a W-OPERATION-UNMATCHED finding names that name the api, by identifier within the source or by title, in identifier order, with the name the note gives its operation", () => {
+    const ctx = withContracts(
+      [exposes("specs/endpoints/list-entities", "listEntities")],
+      [
+        unmatched("specs/endpoints/suggest-links"),
+        unmatched("specs/endpoints/notify-build"),
+        unmatched("specs/api/model-query/searchmodel"),
+        unmatched("specs/screens/mentions-panel"),
+        unmatched("specs/endpoints/lost"),
+        { ...unmatched("specs/endpoints/suggest-links"), check: "W-API-NOCONSUMER" },
+        anonymous,
+      ],
+      [suggestLinks, notifyBuild],
+    );
+    expect(contractOf(ctx, "specs/api/model-query/index.html", modelQuery)?.unmatched).toEqual([
+      {
+        name: "suggestLinks",
+        title: "Suggest links",
+        summary: "Proposes the links a note could write.",
+        href: "../../endpoints/suggest-links/index.html",
+        documented: true,
+        callers: "0 callers",
+      },
+    ]);
+    expect(contractOf(ctx, "specs/api/forge-bridge/index.html", forgeBridge)?.unmatched).toEqual([
+      {
+        name: "Notify a build",
+        title: "Notify a build",
+        href: "../../endpoints/notify-build/index.html",
+        documented: true,
+        method: "POST",
+        callers: "0 callers",
+      },
+    ]);
+  });
+
+  it("takes a note that names its api by full identifier, by path, through a list, or through a recorded link, and leaves out one that names another", () => {
+    const byPath = entity({
+      ...suggestLinks,
+      id: "specs/endpoints/a",
+      attributes: { api: "api/model-query.md" },
+    });
+    const byId = entity({
+      ...suggestLinks,
+      id: "specs/endpoints/b",
+      attributes: { api: ["specs/api/model-query"] },
+    });
+    const other = entity({
+      ...suggestLinks,
+      id: "specs/endpoints/c",
+      attributes: { api: "api/canonical-model" },
+    });
+    const linked = entity({ ...suggestLinks, id: "specs/endpoints/d", attributes: { api: 3 } });
+    const silent = entity({ ...suggestLinks, id: "specs/endpoints/e", attributes: {} });
+    const ctx = withContracts(
+      [
+        {
+          from: "specs/endpoints/d",
+          to: "specs/api/model-query",
+          relation: "related",
+          confidence: 0.5,
+          provenance: [
+            { method: "explicit_link", confidence: 0.5, path: "endpoints/d.md", line: 1 },
+          ],
+        },
+      ],
+      ["a", "b", "c", "d", "e"].map((slug) => unmatched(`specs/endpoints/${slug}`)),
+      [byPath, byId, other, linked, silent],
+    );
+    expect(
+      contractOf(ctx, "specs/api/model-query/index.html", modelQuery)?.unmatched?.map(
+        (operation) => operation.href,
+      ),
+    ).toEqual([
+      "../../endpoints/a/index.html",
+      "../../endpoints/b/index.html",
+      "../../endpoints/d/index.html",
+    ]);
+  });
+
+  it("reads no reference attribute when the profile declares none for the operation type, or none targeting an api", () => {
+    const bare: Profile = {
+      ...profile,
+      types: {
+        ...profile.types,
+        endpoint: {
+          ...(profile.types["endpoint"] ?? { label: { en: "Operation" }, group: "application" }),
+          attributes: {
+            path: { type: "string" },
+            screen: { type: "ref", target: ["screen"] },
+            owner: { type: "ref" },
+          },
+        },
+      },
+    };
+    const ctx = context({
+      profile: bare,
+      model: model({
+        build: { ...model().build, contracts },
+        entities: [modelQuery, suggestLinks],
+        links: [],
+        findings: [unmatched("specs/endpoints/suggest-links")],
+      }),
+    });
+    expect(
+      contractOf(ctx, "specs/api/model-query/index.html", modelQuery)?.unmatched,
+    ).toBeUndefined();
+    const untyped = context({
+      profile: { ...profile, types: {} },
+      model: model({
+        build: { ...model().build, contracts },
+        entities: [modelQuery, suggestLinks],
+        links: [],
+        findings: [unmatched("specs/endpoints/suggest-links")],
+      }),
+    });
+    expect(
+      contractOf(untyped, "specs/api/model-query/index.html", modelQuery)?.unmatched,
+    ).toBeUndefined();
+  });
+
+  it("hangs the operations of the api under its node in the tree of its space, in model order, whatever folder they are filed in", () => {
+    const ctx = withContracts([
+      exposes("specs/endpoints/list-entities", "listEntities"),
+      exposes("specs/api/model-query/searchmodel", "searchModel"),
+    ]);
+    const tree = spaceOf(ctx, "specs/api/model-query/index.html", modelQuery);
+    const api = tree.nodes.find((node) => node.label === "api");
+    expect(api?.children?.find((node) => node.current === true)).toEqual({
+      label: "Model query API",
+      current: true,
+      children: [
+        { label: "List the entities", href: "../../endpoints/list-entities/index.html" },
+        { label: "GET /search", href: "searchmodel/index.html" },
+      ],
+    });
+    const alone = spaceOf(withContracts([]), "specs/api/model-query/index.html", modelQuery);
+    expect(
+      alone.nodes.find((node) => node.label === "api")?.children?.find((node) => node.current),
+    ).toEqual({ label: "Model query API", current: true });
+  });
+
+  it("cites the api from the notes of its operations: one written mention per documented operation quoting its summary, or its title, the imported ones left out; nothing on the page of the operation", () => {
+    const ctx = withContracts(
+      [
+        exposes("specs/endpoints/list-entities", "listEntities"),
+        exposes("specs/api/model-query/searchmodel", "searchModel"),
+        exposes("specs/endpoints/suggest-links", "suggestLinks"),
+      ],
+      [],
+      [entity({ id: "specs/endpoints/suggest-links", type: "endpoint", title: "Suggest links" })],
+    );
+    const panel = mentionsPanelOf(ctx, "specs/api/model-query/index.html", modelQuery);
+    expect(panel.mentions).toEqual([
+      {
+        kind: "written",
+        file: {
+          label: "endpoints/list-entities.md",
+          href: "../../endpoints/list-entities/index.html",
+        },
+        title: "List the entities",
+        type: "endpoint",
+        typeLabel: "Operation",
+        context: "Returns the entities of the last build.",
+        line: 1,
+        href: "../../endpoints/list-entities/index.html#L1",
+      },
+      {
+        kind: "written",
+        file: {
+          label: "endpoints/suggest-links.md",
+          href: "../../endpoints/suggest-links/index.html",
+        },
+        title: "Suggest links",
+        type: "endpoint",
+        typeLabel: "Operation",
+        context: "Suggest links",
+        line: 1,
+        href: "../../endpoints/suggest-links/index.html#L1",
+      },
+    ]);
+    expect(panel.pages).toBe(2);
+    expect(panel.fragmentHref).toBe("../../../fragments/specs/api/model-query.mentions.json");
+    expect(
+      mentionsPanelOf(ctx, "specs/endpoints/list-entities/index.html", listEntities).mentions,
+    ).toEqual([]);
   });
 
   it("gives no contract section to a page without a record, and none when the model has no contracts block", () => {

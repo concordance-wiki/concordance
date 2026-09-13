@@ -4,6 +4,7 @@ import { formatMessage } from "@concordance-wiki/i18n";
 import { byCodeUnit } from "../order.js";
 import type { BreadcrumbItem, SpaceLink, SpaceNode, SpaceTree } from "../slots.js";
 import type { SiteContext } from "./context.js";
+import { exposedOperations } from "./operations.js";
 import { entityHref, relativeHref, spaceHref } from "./paths.js";
 
 /** The id of the latest changes entry of the home page. */
@@ -95,8 +96,21 @@ function treeOf(context: SiteContext, source: string): Folder {
 }
 
 /**
+ * The pages the tree hangs under the current one: the operations of an API, in model order,
+ * so that an interface reads with its operations as its children whatever folder they are
+ * filed in. Any other page has none.
+ */
+function underOf(context: SiteContext, page: string, entity: Entity): SpaceNode[] {
+  return exposedOperations(context, entity).map(({ entity: operation }): SpaceNode => ({
+    label: operation.title,
+    href: entityHref(page, operation.id),
+  }));
+}
+
+/**
  * The nodes of a folder: its folders first, sorted by name, then its pages sorted by file name;
- * a folder on the way to the current page lists its contents, the others show their count alone.
+ * a folder on the way to the current page lists its contents, the others show their count alone;
+ * the current page lists what hangs under it.
  */
 function nodesOf(
   context: SiteContext,
@@ -116,11 +130,15 @@ function nodesOf(
   // Two notes of a source never share a path: the file name alone orders a folder.
   const pages = [...folder.pages]
     .sort((a, b) => byCodeUnit(a.file, b.file))
-    .map(({ entity: note }): SpaceNode =>
-      note.id === entity.id
-        ? { label: note.title, current: true }
-        : { label: note.title, href: entityHref(page, note.id) },
-    );
+    .map(({ entity: note }): SpaceNode => {
+      if (note.id !== entity.id) return { label: note.title, href: entityHref(page, note.id) };
+      const under = underOf(context, page, entity);
+      return {
+        label: note.title,
+        current: true,
+        ...(under.length === 0 ? {} : { children: under }),
+      };
+    });
   return [...folders, ...windowOf(context, pages)];
 }
 

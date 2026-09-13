@@ -24,7 +24,9 @@ import { count, expectBalanced } from "../../helpers/html.js";
 const contract: ContractSectionProps = {
   title: "Model query API",
   version: "0.1.0",
+  format: "openapi 3.1",
   importedAt: "2026-09-12T10:00:00.000Z",
+  imported: { date: "2026-09-12", label: "imported 3 days ago", short: "3 days ago" },
   location: "contracts/model-query.openapi.json",
   downloadHref: "model-query.openapi.json",
   fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
@@ -35,12 +37,27 @@ const contract: ContractSectionProps = {
       summary: "Returns the entities of the last build.",
       href: "../../endpoints/list-entities/index.html",
       documented: true,
+      method: "get",
+      path: "/entities",
+      callers: "2 callers",
     },
     {
       name: "searchModel",
       title: "GET /search",
       href: "../model-query/searchmodel/index.html",
       documented: false,
+      method: "DELETE",
+      path: "/search",
+      callers: "0 callers",
+    },
+  ],
+  unmatched: [
+    {
+      name: "suggestLinks",
+      title: "Suggest links",
+      href: "../../endpoints/suggest-links/index.html",
+      documented: true,
+      callers: "1 caller",
     },
   ],
 };
@@ -124,66 +141,105 @@ function fetching(answer: "view" | "not-found" | "not-a-view" | "network"): {
   };
 }
 
-describe("the contract section of an api page", () => {
-  it("shows the contract in a section after the article, the markdown untouched: the note displays it, it does not duplicate it", () => {
+describe("the contract side of an api page", () => {
+  it("shows the operations and the contract in two sections after the article, the markdown untouched: the note displays the contract, it does not duplicate it", () => {
     const html = render({ contract });
     const article = html.indexOf('<article class="entity-body">');
+    const operations = html.indexOf(
+      '<section class="api-operations" aria-labelledby="api-operations-title">',
+    );
     const section = html.indexOf('<section class="contract" aria-labelledby="contract-title">');
     const panel = html.indexOf('<div class="entity-side">');
     expect(article).toBeGreaterThanOrEqual(0);
-    expect(section).toBeGreaterThan(article);
+    expect(operations).toBeGreaterThan(article);
+    expect(section).toBeGreaterThan(operations);
     expect(panel).toBeGreaterThan(section);
-    const markdown = html.slice(article, section);
+    const markdown = html.slice(article, operations);
     expect(markdown).not.toContain("Model query API");
     expect(markdown).not.toContain("listEntities");
+    expect(html).toContain('<h2 id="contract-title">Interface contract</h2>');
     expect(html).toContain(
-      '<h2 id="contract-title">Contract <span class="contract-name">Model query API</span></h2>',
+      '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-12T10:00:00.000Z">imported 3 days ago</time><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p>',
     );
-    expect(html).toContain("version <code>0.1.0</code>");
     expect(html).toContain(
-      'imported on <time datetime="2026-09-12T10:00:00.000Z">2026-09-12T10:00:00.000Z</time>',
+      '<p class="contract-note">No schema is copied into the text: the page shows the contract, it does not duplicate it.</p>',
     );
     expectBalanced(html);
   });
 
-  it("renders no contract section on a page without a contract", () => {
+  it("renders no contract side on a page without a contract", () => {
     const html = render();
     expect(html).not.toContain('class="contract"');
+    expect(html).not.toContain('class="api-operations"');
     expect(html).not.toContain(CONTRACT_VIEWER_ISLAND);
   });
 
-  it("lists the operations as plain text with their summaries, linked to their pages, so that nothing is lost without JavaScript", () => {
-    const html = render({ contract });
-    expect(html).toContain(
-      '<li class="contract-documented"><a href="../../endpoints/list-entities/index.html">List the entities</a><span class="contract-summary"> Returns the entities of the last build.</span></li>',
+  it("falls back to the import instant when the import is not worded", () => {
+    const { imported, ...bare } = contract;
+    expect(imported).toBeDefined();
+    expect(render({ contract: bare })).toContain(
+      '<time class="contract-imported" datetime="2026-09-12T10:00:00.000Z">2026-09-12T10:00:00.000Z</time>',
     );
-    expect(html).toContain(
-      '<li class="contract-undocumented"><a href="../model-query/searchmodel/index.html">GET /search</a>',
-    );
-    const empty = render({ contract: { ...contract, version: "", operations: [] } });
-    expect(empty).toContain('<p class="empty">The contract declares no operation.</p>');
-    expect(empty).not.toContain("version <code>");
   });
 
-  it("flags an operation present in the contract without a note and counts them in the heading", () => {
+  it("tables the operations matched to the contract: the method as a chip, the path in the monospace family, the title of the note linked, the callers; the headers for assistive technology only", () => {
     const html = render({ contract });
     expect(html).toContain(
-      '<h3 id="contract-operations">Operations <span class="count">2</span><span class="contract-gap">1 without a note</span></h3>',
+      '<h2 id="api-operations-title">Operations</h2><p class="api-lead">Matched to the contract by operation name. The rows in italics are gaps: present in the contract without a page, or described without existing in the contract.</p>',
     );
     expect(html).toContain(
-      '<li class="contract-undocumented"><a href="../model-query/searchmodel/index.html">GET /search</a><span class="contract-flag">no note yet</span></li>',
+      '<table class="api-table"><thead class="visually-hidden"><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Operation</th><th scope="col">Callers</th></tr></thead>',
     );
-    expect(count(html, '<span class="contract-flag">')).toBe(1);
-    const complete = render({
+    expect(html).toContain(
+      '<tr class="api-row"><td class="api-cell-method"><span class="api-method">GET</span></td><td class="api-cell-path"><code>/entities</code></td><td class="api-cell-operation"><a class="api-operation" href="../../endpoints/list-entities/index.html">List the entities</a></td><td class="api-cell-callers">2 callers</td></tr>',
+    );
+    const matched = render({
       contract: {
         ...contract,
-        operations: contract.operations.map((operation) => ({ ...operation, documented: true })),
+        operations: contract.operations.slice(0, 1),
+        unmatched: [],
       },
     });
-    expect(complete).toContain(
-      '<h3 id="contract-operations">Operations <span class="count">2</span></h3>',
+    expect(matched).toContain('<p class="api-lead">Matched to the contract by operation name.</p>');
+    expect(matched).not.toContain("api-gap");
+  });
+
+  it("lists the gaps in italics after the matched rows: an operation present in the contract without a page, unlinked, then a note described without existing in the contract, with a hollow chip and an unknown path when the note declares none", () => {
+    const html = render({ contract });
+    expect(html).toContain(
+      '<tr class="api-row api-gap api-gap-without-page"><td class="api-cell-method"><span class="api-method"><abbr title="DELETE">DEL</abbr></span></td><td class="api-cell-path"><code>/search</code></td><td class="api-cell-operation"><span class="api-operation">GET /search</span></td><td class="api-cell-callers"><em class="api-gap-note">present in the contract, without a page</em></td></tr>',
     );
-    expect(complete).not.toContain("no note yet");
+    expect(html).toContain(
+      '<tr class="api-row api-gap api-gap-not-in-contract"><td class="api-cell-method"><span class="api-method api-method-none" aria-hidden="true">—</span></td><td class="api-cell-path"><code>unknown path</code></td><td class="api-cell-operation"><a class="api-operation" href="../../endpoints/suggest-links/index.html">Suggest links</a></td><td class="api-cell-callers"><em class="api-gap-note">described, absent from the contract</em></td></tr>',
+    );
+    expect(html.indexOf("api-gap-without-page")).toBeLessThan(
+      html.indexOf("api-gap-not-in-contract"),
+    );
+    expect(html.indexOf('<tr class="api-row">')).toBeLessThan(html.indexOf("api-gap-without-page"));
+    expect(count(html, "api-gap-note")).toBe(2);
+  });
+
+  it("says that the contract declares no operation when the table would be empty", () => {
+    const empty = render({ contract: { ...contract, version: "", operations: [], unmatched: [] } });
+    expect(empty).toContain('<p class="empty">The contract declares no operation.</p>');
+    expect(empty).not.toContain("<table");
+    const { unmatched, ...noNotes } = contract;
+    expect(unmatched).toBeDefined();
+    expect(render({ contract: { ...noNotes, operations: [] } })).toContain(
+      '<p class="empty">The contract declares no operation.</p>',
+    );
+  });
+
+  it("takes the labels it is given and falls back to the English of the theme for the others", () => {
+    const html = render({
+      contract: {
+        ...contract,
+        labels: { operations: "Opérations", contract: "Contrat d’interface" },
+      },
+    });
+    expect(html).toContain('<h2 id="api-operations-title">Opérations</h2>');
+    expect(html).toContain('<h2 id="contract-title">Contrat d’interface</h2>');
+    expect(html).toContain("Matched to the contract by operation name.");
   });
 
   it("keeps the original contract downloadable at its declared URL, or at the copy placed next to the page", () => {
@@ -196,10 +252,10 @@ describe("the contract section of an api page", () => {
     );
   });
 
-  it("mounts the viewer as an island whose only prop is the fragment href, and serves a link to the JSON until it hydrates", () => {
+  it("mounts the viewer as an island whose only prop is the fragment href, in the contract block, and serves a link to the JSON until it hydrates", () => {
     const html = render({ contract });
     expect(html).toContain(
-      `<concordance-island data-island="${CONTRACT_VIEWER_ISLAND}" data-props="{&quot;href&quot;:&quot;../../../fragments/specs/api/model-query.contract.json&quot;}">`,
+      `<div class="contract-body"><concordance-island data-island="${CONTRACT_VIEWER_ISLAND}" data-props="{&quot;href&quot;:&quot;../../../fragments/specs/api/model-query.contract.json&quot;}">`,
     );
     expect(html).toContain(
       '<p class="contract-data"><a href="../../../fragments/specs/api/model-query.contract.json">Contract data (JSON)</a></p>',
@@ -208,16 +264,16 @@ describe("the contract section of an api page", () => {
     expect(renderToString(h(ContractSection, contract))).toContain("contract-viewer");
   });
 
-  it("makes no network call to the real API: no form, and no target other than the fragment, the download and the pages, whatever the state", () => {
+  it("makes no network call to the real API: no form, and no target other than the pages, the download and the fragment, whatever the state", () => {
     const page = render({ contract });
     const section = page.slice(
-      page.indexOf('<section class="contract"'),
+      page.indexOf('<section class="api-operations"'),
       page.indexOf('<footer class="entity-footer">'),
     );
     expect([...section.matchAll(/href="([^"]*)"/g)].map((match) => match[1])).toEqual([
-      "model-query.openapi.json",
       "../../endpoints/list-entities/index.html",
-      "../model-query/searchmodel/index.html",
+      "../../endpoints/suggest-links/index.html",
+      "model-query.openapi.json",
       "../../../fragments/specs/api/model-query.contract.json",
     ]);
     for (const html of [

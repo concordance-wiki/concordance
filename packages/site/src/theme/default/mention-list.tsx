@@ -21,9 +21,11 @@ export interface RelatedPage {
  * Groups mentions by the page they come from, in the order the pages first appear, then orders
  * the pages from the surest to the weakest: the pages that write a link to the entity first,
  * then by number of passages, written and recognised counted alike; the first appearance
- * breaks ties, so that the corpus order holds among equals.
+ * breaks ties, so that the corpus order holds among equals. The pages of the lead type, when
+ * one is given, come before every other whatever their count or their link: the operations on
+ * an API page.
  */
-export function groupByPage(mentions: readonly Mention[]): RelatedPage[] {
+export function groupByPage(mentions: readonly Mention[], leadType?: string): RelatedPage[] {
   const pages = new Map<string, RelatedPage>();
   for (const mention of mentions) {
     const key = mention.file.href;
@@ -47,8 +49,12 @@ export function groupByPage(mentions: readonly Mention[]): RelatedPage[] {
       }
     }
   }
+  const lead = (page: RelatedPage): number => (page.type === leadType ? 0 : 1);
   return [...pages.values()].sort(
-    (a, b) => Number(b.cited) - Number(a.cited) || b.mentions.length - a.mentions.length,
+    (a, b) =>
+      lead(a) - lead(b) ||
+      Number(b.cited) - Number(a.cited) ||
+      b.mentions.length - a.mentions.length,
   );
 }
 

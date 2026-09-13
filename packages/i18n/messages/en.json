@@ -1,4 +1,76 @@
 {
+  "api.callers": {
+    "defaultMessage": "{count, plural, one {# caller} other {# callers}}",
+    "description": "Number of pages citing an operation, in the operations table of the API page."
+  },
+  "api.colCallers": {
+    "defaultMessage": "Callers",
+    "description": "Header of the callers column of the operations table of the API page."
+  },
+  "api.colMethod": {
+    "defaultMessage": "Method",
+    "description": "Header of the method column of the operations table of the API page."
+  },
+  "api.colOperation": {
+    "defaultMessage": "Operation",
+    "description": "Header of the operation column of the operations table of the API page."
+  },
+  "api.colPath": {
+    "defaultMessage": "Path",
+    "description": "Header of the path column of the operations table of the API page."
+  },
+  "api.contract": {
+    "defaultMessage": "Interface contract",
+    "description": "Heading of the block of the API page that shows the imported contract."
+  },
+  "api.download": {
+    "defaultMessage": "Download the contract",
+    "description": "Link to the original contract file on the API page."
+  },
+  "api.fiveKeys": {
+    "defaultMessage": "Five keys, no more. The operations come from the contract, not from the header.",
+    "description": "Note under the properties of the API page, cut to five keys."
+  },
+  "api.gapsLead": {
+    "defaultMessage": "The rows in italics are gaps: present in the contract without a page, or described without existing in the contract.",
+    "description": "Sentence after the lead of the operations table when the contract and the notes disagree."
+  },
+  "api.imported": {
+    "defaultMessage": "imported {when}",
+    "description": "When the contract was imported, relative to the build, on the line of the contract block of the API page."
+  },
+  "api.noOperation": {
+    "defaultMessage": "The contract declares no operation.",
+    "description": "Notice of the operations table of the API page when the contract declares none."
+  },
+  "api.notInContract": {
+    "defaultMessage": "described, absent from the contract",
+    "description": "Gap row of the operations table for a note the contract does not declare."
+  },
+  "api.operations": {
+    "defaultMessage": "Operations",
+    "description": "Heading of the operations table of the API page."
+  },
+  "api.operationsFirst": {
+    "defaultMessage": "On an interface the operations rise to the top: that is the grain we work at.",
+    "description": "Note under the related pages of the API page, where the operations come first."
+  },
+  "api.operationsLead": {
+    "defaultMessage": "Matched to the contract by operation name.",
+    "description": "Sentence under the heading of the operations table of the API page."
+  },
+  "api.unknownPath": {
+    "defaultMessage": "unknown path",
+    "description": "Path cell of a gap row of the operations table when the note declares none."
+  },
+  "api.viewerNote": {
+    "defaultMessage": "No schema is copied into the text: the page shows the contract, it does not duplicate it.",
+    "description": "Note next to the contract viewer of the API page."
+  },
+  "api.withoutPage": {
+    "defaultMessage": "present in the contract, without a page",
+    "description": "Gap row of the operations table for an operation no note describes."
+  },
   "category.all": {
     "defaultMessage": "All",
     "description": "Entry of the attribute selector of a category list that lifts the filter."

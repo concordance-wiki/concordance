@@ -138,6 +138,8 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
       ".spaces-table .spaces-count",
       ".space-category-count",
       ".chip-count",
+      ".api-method",
+      ".contract-format",
       ".category-table tbody .category-links",
     ]);
   });

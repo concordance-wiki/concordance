@@ -54,11 +54,12 @@ export function MentionsPanel({
   pages,
   labels: given,
   fragmentHref,
+  leadType,
 }: MentionsPanelProps): JSX.Element {
   const inline = mentions.slice(0, initial);
   const rest = mentions.slice(initial);
   const embedded = rest.length > 0 && mentions.length < MENTIONS_EMBEDDED_MAX;
-  const total = pages ?? groupByPage(mentions).length;
+  const total = pages ?? groupByPage(mentions, leadType).length;
   // Nothing to filter or load without a mention: the empty block stands without the island.
   const Body = mentions.length === 0 ? MentionsIsland : MentionsBody;
   const text = { ...defaultRelatedLabels, ...given };
@@ -76,6 +77,7 @@ export function MentionsPanel({
           pages={total}
           labels={text}
           {...(fragmentHref === undefined ? {} : { fragmentHref })}
+          {...(leadType === undefined ? {} : { leadType })}
         />
       </details>
       {embedded && (
