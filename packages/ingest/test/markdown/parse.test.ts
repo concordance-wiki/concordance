@@ -144,6 +144,20 @@ describe("parseMarkdown", () => {
       ]);
     });
 
+    it("gives a bracketed URL, which the parser leaves without a position, the line of its paragraph", () => {
+      const document = parse(
+        "# Title\n\nSee the schema.\n\nThe schema is at [https://example.invalid/schema#readme] for now.\n",
+      );
+      expect(document.links).toEqual([
+        {
+          text: "https://example.invalid/schema#readme",
+          target: "https://example.invalid/schema#readme",
+          line: 5,
+          column: 1,
+        },
+      ]);
+    });
+
     it("records images with their alternative text and target, apart from links", () => {
       const document = parse(
         "# Title\n\n![Entry screen](../images/entry.png) and ![](blank.png)\n",

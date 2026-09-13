@@ -15,9 +15,12 @@ const processor = unified().use(remarkParse).use(remarkGfm).use(remarkFrontmatte
 
 type Position = NonNullable<Nodes["position"]>;
 
-function positionOf(node: Nodes): Position {
-  // remark-parse positions every node it produces; the field is optional only for synthetic trees.
-  return node.position as Position;
+/**
+ * The position of a node, or of the block holding it: remark positions what it parses, but a GFM
+ * autolink literal written between brackets (`[https://…]`) yields a link without one.
+ */
+function positionOf(node: Nodes, enclosing?: Position): Position {
+  return node.position ?? (enclosing as Position);
 }
 
 function invalidFrontmatter(path: string, detail: string): Finding {
@@ -74,8 +77,9 @@ function cells(row: { children: Nodes[] }): string[] {
 }
 
 function collect(block: RootContent, into: ParsedMarkdown, section?: string): void {
+  const enclosing = positionOf(block);
   visit(block, (node) => {
-    const { start, end } = positionOf(node);
+    const { start, end } = positionOf(node, enclosing);
     switch (node.type) {
       case "link":
         into.links.push({

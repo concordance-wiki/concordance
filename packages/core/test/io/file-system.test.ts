@@ -45,13 +45,15 @@ describe("nodeFileSystem", () => {
     expect(nodeFileSystem.exists(join(directory, "file.txt"))).toBe(false);
   });
 
-  it("lists files recursively as sorted forward-slash paths, skipping .git", () => {
+  it("lists files recursively as sorted forward-slash paths, skipping .git and node_modules", () => {
     nodeFileSystem.writeText(join(directory, "b.md"), "");
     nodeFileSystem.writeText(join(directory, "a/z.md"), "");
     nodeFileSystem.writeText(join(directory, "a/b/c.md"), "");
     nodeFileSystem.writeText(join(directory, "a.md"), "");
     nodeFileSystem.writeText(join(directory, ".git/HEAD"), "");
     nodeFileSystem.writeText(join(directory, "a/.git/config"), "");
+    nodeFileSystem.writeText(join(directory, "node_modules/dep/README.md"), "");
+    nodeFileSystem.writeText(join(directory, "a/node_modules/dep/README.md"), "");
     mkdirSync(join(directory, "empty"));
     expect(nodeFileSystem.listFiles(directory)).toEqual(["a.md", "a/b/c.md", "a/z.md", "b.md"]);
   });
@@ -124,7 +126,7 @@ describe("memoryFileSystem", () => {
     expect(fs.exists("/root/docs/a")).toBe(false);
   });
 
-  it("lists the files under a directory as sorted relative paths, skipping .git", () => {
+  it("lists the files under a directory as sorted relative paths, skipping .git and node_modules", () => {
     const fs = memoryFileSystem({
       "/root/b.md": "",
       "/root/a/z.md": "",
@@ -132,6 +134,8 @@ describe("memoryFileSystem", () => {
       "/root/a.md": "",
       "/root/.git/HEAD": "",
       "/root/a/.git/config": "",
+      "/root/node_modules/dep/README.md": "",
+      "/root/a/node_modules/dep/README.md": "",
       "/root.md": "",
       "/rooted/x.md": "",
       "/other/y.md": "",
