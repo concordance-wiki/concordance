@@ -478,6 +478,7 @@ describe("Sources contributions of plugins run after typing and add their endpoi
     location: "contracts/model-query.openapi.json",
     title: "Model query",
     version: "1.0.0",
+    format: "openapi 3.1",
     fingerprint: "a".repeat(64),
     imported_at: "2026-09-12T12:00:00.000Z",
   };

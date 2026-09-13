@@ -124,6 +124,7 @@ describe("@concordance-wiki/plugin-contract-wsdl", () => {
           location: "./wsdl.example.wsdl",
           title: "Forge bridge",
           version: "",
+          format: "wsdl 1.1",
           fingerprint: fingerprintOf(forgeBridge),
           imported_at: "2026-09-12T10:00:00.000Z",
         },

@@ -39,10 +39,16 @@ function operationOf(operation: OpenApiOperation): ContractOperation {
   };
 }
 
+/** `openapi 3.1` for a document declaring `3.1.0`: the specification version, without its patch level. */
+export function formatOf(contract: OpenApiContract): string {
+  return `${SOURCE_KIND} ${contract.openapi.split(".").slice(0, 2).join(".")}`;
+}
+
 /** The OpenAPI format for the shared contract loader: any text that is not an XML document is its business. */
 export const openApiReader: ContractReader<OpenApiContract> = {
   accepts: (text) => xmlRootOf(text) === undefined,
   read: readOpenApi,
+  format: formatOf,
   operations: (contract) => contract.operations.map(operationOf),
   schemas: (contract) => contract.schemas,
 };

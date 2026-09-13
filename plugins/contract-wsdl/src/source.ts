@@ -52,6 +52,7 @@ function operationOf(operation: WsdlOperation): ContractOperation {
 export const wsdlReader: ContractReader<WsdlContract> = {
   accepts: (text) => isWsdlRoot(xmlRootOf(text)),
   read: readWsdl,
+  format: (contract) => `${SOURCE_KIND} ${contract.wsdl}`,
   operations: (contract) => contract.operations.map(operationOf),
   schemas: (contract) => contract.types,
 };

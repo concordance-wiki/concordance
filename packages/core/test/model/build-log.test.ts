@@ -321,6 +321,7 @@ describe("serializeBuildLog", () => {
       location: "./openapi.json",
       title: "Model query API",
       version: "2.0.0",
+      format: "openapi 3.1",
       fingerprint: "a".repeat(64),
       imported_at: "2026-09-12T12:00:00.000Z",
     };

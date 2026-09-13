@@ -125,6 +125,7 @@ describe("@concordance-wiki/plugin-contract-openapi", () => {
           location: "./openapi.example.json",
           title: "Model query API",
           version: "1.0.0",
+          format: "openapi 3.1",
           fingerprint: fingerprintOf(example),
           imported_at: "2026-09-12T10:00:00.000Z",
         },

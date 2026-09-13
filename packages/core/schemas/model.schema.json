@@ -62,11 +62,19 @@
         },
         "contracts": {
           "type": "array",
-          "description": "The contracts imported by the build, with the version each one declares and its import date",
+          "description": "The contracts imported by the build, with the version and the format each one declares and its import date",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["api", "location", "title", "version", "fingerprint", "imported_at"],
+            "required": [
+              "api",
+              "location",
+              "title",
+              "version",
+              "format",
+              "fingerprint",
+              "imported_at"
+            ],
             "properties": {
               "api": {
                 "type": "string",
@@ -80,6 +88,10 @@
               },
               "version": {
                 "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "description": "The format of the contract with its version, as the reader names it: openapi 3.1, wsdl 1.1"
               },
               "fingerprint": {
                 "type": "string",
