@@ -66,11 +66,6 @@ export interface MentionsIslandState {
   phone: boolean;
 }
 
-/** Whether the phone layout applies, read from the stylesheet's own query once the island runs; never on the server. */
-function phoneLayout(): boolean {
-  return typeof window !== "undefined" && window.matchMedia(PHONE_QUERY).matches;
-}
-
 /**
  * The body of the related pages block: one entry per page that evokes the entity, most passages
  * first; a text filter, a type filter and the loading of the other pages once mounted.
@@ -88,9 +83,24 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
     };
   }
 
+  /** The phone layout query of the stylesheet, followed while the island is mounted, so that a turned or resized screen relists; none before it mounts. */
+  private layout: MediaQueryList | undefined;
+
   override componentDidMount(): void {
-    this.setState({ hydrated: true, phone: phoneLayout() });
+    // Mounting happens in a browser alone: the query is read there, never on the server.
+    const layout = window.matchMedia(PHONE_QUERY);
+    layout.addEventListener("change", this.followLayout);
+    this.layout = layout;
+    this.setState({ hydrated: true, phone: layout.matches });
   }
+
+  override componentWillUnmount(): void {
+    this.layout?.removeEventListener("change", this.followLayout);
+  }
+
+  followLayout = (event: MediaQueryListEvent): void => {
+    this.setState({ phone: event.matches });
+  };
 
   /** How many entries stand in view: two on a phone, six elsewhere, every one once the reader asked for the others. */
   limit(): number | undefined {
