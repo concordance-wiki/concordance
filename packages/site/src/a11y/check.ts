@@ -70,7 +70,7 @@ function parseAttributes(source: string): Record<string, string> {
 function parse(html: string): Element {
   const root: Element = { tag: "#root", attributes: {}, children: [] };
   const open: Element[] = [];
-  const current = (): Element => open[open.length - 1] ?? root;
+  const current = (): Element => open.at(-1) ?? root;
   let last = 0;
   for (const match of html.matchAll(TAG)) {
     const [whole, closing, name, attributes, selfClosing] = match;

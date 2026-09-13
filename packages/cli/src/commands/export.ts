@@ -12,7 +12,8 @@ const formats = ["cypher"] as const;
 type Format = (typeof formats)[number];
 
 function isFormat(value: string): value is Format {
-  return formats.some((format) => format === value);
+  // Widened to strings so that any input can be looked up; the guard narrows it back.
+  return (formats as readonly string[]).includes(value);
 }
 
 /** Turns `model.json` into another format; only Cypher exists, and it goes to stdout unless `--output` names a file. */

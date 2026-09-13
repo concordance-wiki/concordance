@@ -32,11 +32,13 @@ const severities: readonly Severity[] = ["error", "warning", "info"];
 const scopes: readonly ReportScope["name"][] = ["repo", "global"];
 
 function isScope(value: string): value is ReportScope["name"] {
-  return scopes.some((scope) => scope === value);
+  // Widened to strings so that any input can be looked up; the guard narrows it back.
+  return (scopes as readonly string[]).includes(value);
 }
 
 function isSeverity(value: string): value is Severity {
-  return severities.some((severity) => severity === value);
+  // Widened to strings so that any input can be looked up; the guard narrows it back.
+  return (severities as readonly string[]).includes(value);
 }
 
 /** Reads and validates the configuration without printing anything unless it is invalid. */

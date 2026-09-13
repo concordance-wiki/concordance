@@ -3,11 +3,10 @@ import {
   xmlRootOf,
   type ContractOperation,
   type ContractReader,
+  type ContractResponse,
   type SourceInput,
   type SourceOutput,
 } from "@concordance-wiki/core";
-
-import type { ContractResponse } from "@concordance-wiki/core";
 
 import { isWsdlRoot, readWsdl, type WsdlContract, type WsdlOperation } from "./contract.js";
 

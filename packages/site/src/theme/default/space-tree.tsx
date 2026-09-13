@@ -63,8 +63,8 @@ function Node({ node }: { node: SpaceNode }): JSX.Element {
 export function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
   return (
     <ul class="space-nodes">
-      {nodes.map((node, index) => (
-        <Node key={index} node={node} />
+      {nodes.map((node) => (
+        <Node key={node.href ?? node.label} node={node} />
       ))}
     </ul>
   );

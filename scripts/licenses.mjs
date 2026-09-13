@@ -121,14 +121,17 @@ for (const entry of listLicenses([])) {
   });
 }
 
-rows.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.version < b.version ? -1 : 1));
+// Code-unit order, not locale order: the page must not depend on the collation data of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+rows.sort((a, b) => byCodeUnit(a.name, b.name) || byCodeUnit(a.version, b.version));
 
 // An optional dependency that is not installed as a regular package is a
 // native binary, present for another platform or for this one.
 const listed = new Set(rows.map((row) => row.name));
 const binariesOf = (row) => row.optional.filter((name) => !listed.has(name)).sort();
 const parents = rows.filter((row) => binariesOf(row).length > 0);
-const escape = (text) => text.replace(/\|/g, "\\|");
+const escape = (text) => text.replaceAll("|", String.raw`\|`);
+const link = (url) => (url ? `<${url}>` : "");
 const lines = [
   "# Third-party licences",
   "",
@@ -140,7 +143,7 @@ const lines = [
   "|---|---|---|---|---|",
   ...rows.map(
     (row) =>
-      `| ${escape(row.name)} | ${row.version} | ${escape(row.license)} | ${row.scope} | ${row.repository ? `<${row.repository}>` : ""} |`,
+      `| ${escape(row.name)} | ${row.version} | ${escape(row.license)} | ${row.scope} | ${link(row.repository)} |`,
   ),
 ];
 if (parents.length > 0) {

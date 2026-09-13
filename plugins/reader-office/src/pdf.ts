@@ -87,7 +87,7 @@ function hexString(text: string, start: number): string {
 
 /** The value of a string-valued key of the dictionary; an indirect reference or a missing key yields nothing. */
 function stringProperty(dictionary: string, key: Property): string | undefined {
-  const match = new RegExp(`/${key}\\b\\s*([(<])`).exec(dictionary);
+  const match = new RegExp(String.raw`/${key}\b\s*([(<])`).exec(dictionary);
   if (match === null) return undefined;
   const start = match.index + match[0].length - 1;
   return match[1] === "(" ? literalString(dictionary, start) : hexString(dictionary, start);
@@ -111,12 +111,12 @@ export function isoDate(value: string): string {
 /** The body of the last Info object the file references: an update appends a new trailer at the end. */
 function infoDictionary(text: string): string {
   const references = [...text.matchAll(infoReference)];
-  const last = references[references.length - 1];
+  const last = references.at(-1);
   if (last === undefined) return "";
   const number = group(last, 1);
   const generation = group(last, 2);
   const object = new RegExp(
-    `(?:^|\\s)${number}\\s+${generation}\\s+obj\\b([\\s\\S]*?)(?:endobj|$)`,
+    String.raw`(?:^|\s)${number}\s+${generation}\s+obj\b([\s\S]*?)(?:endobj|$)`,
   );
   const match = object.exec(text);
   return match === null ? "" : group(match, 1);

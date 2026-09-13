@@ -85,12 +85,12 @@ function parseTiming(line: string, lineNumber: number): { start: number; end: nu
 /** `&amp;` last, so that `&amp;lt;` reads as the literal `&lt;`. */
 function decodeEntities(text: string): string {
   return text
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&");
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&amp;", "&");
 }
 
 /** The speaker named by a leading voice span or by a `Name: ` prefix, and the text without either. */
@@ -150,7 +150,7 @@ export function parseTranscript(text: string, format: TranscriptFormat): Transcr
       speakers.push(cue.speaker);
     }
   }
-  const last = cues[cues.length - 1];
+  const last = cues.at(-1);
   return {
     format,
     ...(language === undefined ? {} : { language }),

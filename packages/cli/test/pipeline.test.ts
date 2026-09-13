@@ -1118,7 +1118,7 @@ describe("model checks over the structural view", () => {
       sources: { name: string; files: string[] }[];
       profile: Profile;
     };
-    expect(payload.entities.length).toBe(result.entities.length);
+    expect(payload.entities).toHaveLength(result.entities.length);
     const methods = payload.links.flatMap((link) => link.provenance);
     expect(methods.some((p) => p.method === "explicit_link" && typeof p.path === "string")).toBe(
       true,

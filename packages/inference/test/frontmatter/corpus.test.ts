@@ -68,7 +68,7 @@ describe("the minimal corpus", () => {
     const expected = (parse(text) as ExpectedLink[]).filter(
       (link) => link.method === "frontmatter_ref",
     );
-    expect(expected.length).toBe(3);
+    expect(expected).toHaveLength(3);
     for (const { from, to, relation, attributes, min_confidence } of expected) {
       const matching = links.filter(
         (link) => link.from === from && link.to === to && link.relation === relation,

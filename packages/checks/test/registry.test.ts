@@ -63,14 +63,14 @@ describe("createRegistry", () => {
     const registry = createRegistry();
     const listed = registry.list().map((d) => d.id);
     expect(listed).toEqual([...catalogue.map((d) => d.id)].sort());
-    expect(listed.length).toBe(catalogue.length);
+    expect(listed).toHaveLength(catalogue.length);
   });
 
   it("returns a fresh list each time", () => {
     const registry = createRegistry();
     const first = registry.list();
     first.pop();
-    expect(registry.list().length).toBe(catalogue.length);
+    expect(registry.list()).toHaveLength(catalogue.length);
   });
 
   it("finds a registered check by identifier and nothing for an unknown one", () => {

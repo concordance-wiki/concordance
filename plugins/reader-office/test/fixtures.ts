@@ -78,7 +78,7 @@ export const xlsx = (): Uint8Array =>
 export function pdf(info?: string, update = ""): Uint8Array {
   const dictionary =
     info ??
-    "/Title (Quarterly review \\(final\\)) /Author (Alex Author) /Subject (Planning) /Keywords (budget, forecast; review) /CreationDate (D:20240102030405+02'00') /ModDate (D:20240203040506Z) /Producer (Example Writer)";
+    String.raw`/Title (Quarterly review \(final\)) /Author (Alex Author) /Subject (Planning) /Keywords (budget, forecast; review) /CreationDate (D:20240102030405+02'00') /ModDate (D:20240203040506Z) /Producer (Example Writer)`;
   return latin1(`%PDF-1.4
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
 2 0 obj << /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >> endobj

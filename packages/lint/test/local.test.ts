@@ -80,7 +80,7 @@ describe("lintRepository", () => {
         [`${root}/a.md`]: "# A\n",
         [`${root}/a.rule.md`]: "# A rule\n",
       });
-      expect(lintRepository({ root, fs }).length).toBe(0);
+      expect(lintRepository({ root, fs })).toHaveLength(0);
       const [finding] = lintRepository({ root, source: notes, fs });
       expect(finding?.check).toBe("E-ID-DUP");
       expect(finding?.entity).toBe("notes/a");

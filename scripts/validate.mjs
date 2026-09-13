@@ -391,7 +391,7 @@ for (const path of walk(join(root, "fixtures/corpora"), (p) =>
   for (const entity of readYaml(path) ?? []) {
     entities.add(entity.id);
     const found = ids.get(entity.id);
-    if (!found || !found.markdown)
+    if (!found?.markdown)
       fail(`${relative(root, path)}: entity ${entity.id} names no markdown file`);
   }
   const linksPath = join(corpus, "expected/links.yaml");

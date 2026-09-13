@@ -16,7 +16,7 @@ const MentionsBody = island(MENTIONS_ISLAND, MentionsIsland);
 
 /** JSON safe inside a script element: no `<` can close it early. */
 export function embedMentions(mentions: readonly Mention[]): string {
-  return JSON.stringify(mentions).replaceAll("<", "\\u003c");
+  return JSON.stringify(mentions).replaceAll("<", String.raw`\u003c`);
 }
 
 /** The labels of the default theme, used when the panel receives none. */

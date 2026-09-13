@@ -89,7 +89,7 @@ export interface LocaleInfo {
   maximize: () => { script?: string };
 }
 
-const rtlScripts: readonly string[] = [
+const rtlScripts: ReadonlySet<string> = new Set([
   "Adlm",
   "Arab",
   "Hebr",
@@ -100,7 +100,7 @@ const rtlScripts: readonly string[] = [
   "Syrc",
   "Thaa",
   "Yezi",
-];
+]);
 
 function platformLocale(tag: string): LocaleInfo {
   return new Intl.Locale(tag);
@@ -118,5 +118,5 @@ export function textDirection(
       : resolved.textInfo?.direction;
   if (reported !== undefined) return reported === "rtl" ? "rtl" : "ltr";
   const script = resolved.maximize().script;
-  return script !== undefined && rtlScripts.includes(script) ? "rtl" : "ltr";
+  return script !== undefined && rtlScripts.has(script) ? "rtl" : "ltr";
 }

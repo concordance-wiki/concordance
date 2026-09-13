@@ -118,7 +118,7 @@ describe("bundleIslands", () => {
     ]);
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/site/assets/${bundle?.file ?? ""}`);
-    expect(written.length).toBe(bundle?.bytes);
+    expect(bundle?.bytes).toBe(written.length);
     expect(written).toContain('"concordance-island"');
     expect(written).toContain('"mentions-panel"');
     expect(written).not.toContain("Island(");
@@ -170,9 +170,9 @@ describe("bundleIslands", () => {
     expect(written).toContain('"search"');
     expect(written).not.toContain("useSlot");
     expect(written).not.toContain("hydrate");
-    expect(bundles.find((candidate) => candidate.name === "mentions-panel")?.classic).toBe(
-      undefined,
-    );
+    expect(
+      bundles.find((candidate) => candidate.name === "mentions-panel")?.classic,
+    ).toBeUndefined();
   });
 
   it("bundles the trail without any framework, under four kilobytes", async () => {

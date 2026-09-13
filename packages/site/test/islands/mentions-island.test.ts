@@ -109,7 +109,7 @@ describe("The related pages offer a text filter and a type filter once the islan
       ["Term 2", true],
       ["Screen 1", true],
     ]);
-    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("3 of 3 pages");
+    expect(q(host, ".related-type-summary output").textContent).toBe("3 of 3 pages");
     expect(button(host, "Clear all").type).toBe("button");
     expect(host.querySelector("[tabindex]")).toBeNull();
     expect(entries(host)).toEqual(["Note 1 Term 3", "Note 2 Screen 3", "Note 3 Term 1"]);
@@ -157,7 +157,7 @@ describe("The related pages offer a text filter and a type filter once the islan
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
     expect(entries(host)).toEqual(["Note 2 Screen 2"]);
-    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("1 of 3 pages");
+    expect(q(host, ".related-type-summary output").textContent).toBe("1 of 3 pages");
     input.value = "build LOG";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
@@ -186,7 +186,7 @@ describe("The related pages offer a text filter and a type filter once the islan
     await settle();
     expect(entries(host)).toEqual(["Note 2 Screen 3"]);
     expect(q(host, ".related-types > summary").textContent).toBe("Types 1");
-    expect(q(host, '.related-type-summary [role="status"]').textContent).toBe("1 of 3 pages");
+    expect(q(host, ".related-type-summary output").textContent).toBe("1 of 3 pages");
     tick(screen, false);
     await settle();
     expect(entries(host)).toEqual([]);

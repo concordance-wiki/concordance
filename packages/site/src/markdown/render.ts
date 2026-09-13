@@ -400,8 +400,10 @@ interface OpenSection {
 
 function uniqueId(base: string, taken: Set<string>): string {
   let id = base;
-  for (let rank = 2; taken.has(id); rank += 1) {
+  let rank = 2;
+  while (taken.has(id)) {
     id = `${base}-${String(rank)}`;
+    rank += 1;
   }
   taken.add(id);
   return id;

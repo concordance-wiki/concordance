@@ -44,7 +44,7 @@ describe("W-API-NOCONSUMER", () => {
       link(entry.id, query.id, "serves"),
       link(entry.id, search.id, "serves"),
     ];
-    expect(apiWithoutConsumer(input({ entities: [query, entry], links })).length).toBe(1);
+    expect(apiWithoutConsumer(input({ entities: [query, entry], links }))).toHaveLength(1);
   });
 
   it("ignores entities that are not apis and non-string consumers", () => {
@@ -181,7 +181,7 @@ describe("W-API-CONSUMER-MISMATCH", () => {
 
   it("reports every cited consumer when the attribute is an empty list", () => {
     const api = filed(query.id, "api", { consumers: [] });
-    expect(apiConsumerMismatch(input({ entities: [api], links: [serves] })).length).toBe(1);
+    expect(apiConsumerMismatch(input({ entities: [api], links: [serves] }))).toHaveLength(1);
   });
 
   it("ignores entities that are not apis", () => {

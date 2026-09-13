@@ -129,7 +129,7 @@ export function writeTrail(storage: TrailStorage, entries: readonly TrailPage[] 
 
 /** The trail with the current page at its end, once, the oldest entries dropped beyond the limit. */
 export function appendPage(entries: readonly TrailPage[], current: TrailPage): TrailPage[] {
-  const last = entries[entries.length - 1];
+  const last = entries.at(-1);
   const kept = last?.id === current.id ? entries.slice(0, -1) : entries;
   return [...kept, current].slice(-TRAIL_KEPT_MAX);
 }
@@ -256,7 +256,7 @@ function list(
 function trailList(doc: Doc, props: TrailProps, entries: TrailPage[]): HTMLOListElement {
   const { earlier, shown } = condense(entries);
   // The current page is the last entry when the page is an entity's; the other pages record none.
-  const current = props.current === undefined ? undefined : entries[entries.length - 1];
+  const current = props.current === undefined ? undefined : entries.at(-1);
   const nodes = list(doc, props, shown, current);
   if (earlier.length > 0) {
     const summary = element(doc, "summary", {}, [

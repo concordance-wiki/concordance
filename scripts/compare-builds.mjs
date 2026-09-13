@@ -13,6 +13,11 @@ import { pathToFileURL } from "node:url";
 // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
 const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
+function whereOf(inFirst, inSecond) {
+  if (!inFirst) return "missing from the first build";
+  return inSecond ? "differs" : "missing from the second build";
+}
+
 /** Forward-slash relative path to content hash, for every file under the tree. */
 export function listTree(tree) {
   const entries = new Map();
@@ -22,7 +27,7 @@ export function listTree(tree) {
       if (entry.isDirectory()) {
         walk(absolute);
       } else {
-        const path = relative(tree, absolute).split("\\").join("/");
+        const path = relative(tree, absolute).replaceAll("\\", "/");
         entries.set(path, createHash("sha256").update(readFileSync(absolute)).digest("hex"));
       }
     }
@@ -40,14 +45,7 @@ export function compareTrees(firstTree, secondTree) {
   const paths = [...new Set([...first.keys(), ...second.keys()])].sort(byCodeUnit);
   const differences = paths
     .filter((path) => first.get(path) !== second.get(path))
-    .map((path) => {
-      const where = first.has(path)
-        ? second.has(path)
-          ? "differs"
-          : "missing from the second build"
-        : "missing from the first build";
-      return { path, where };
-    });
+    .map((path) => ({ path, where: whereOf(first.has(path), second.has(path)) }));
   return { paths, differences };
 }
 

@@ -11,7 +11,8 @@ export const OUTPUT_FORMATS = ["text", "json", "sarif", "junit"] as const;
 export type OutputFormat = (typeof OUTPUT_FORMATS)[number];
 
 export function isOutputFormat(value: string): value is OutputFormat {
-  return OUTPUT_FORMATS.some((format) => format === value);
+  // Widened to strings so that any input can be looked up; the guard narrows it back.
+  return (OUTPUT_FORMATS as readonly string[]).includes(value);
 }
 
 /** The whole report as one document ending with a newline, whatever the format. */
