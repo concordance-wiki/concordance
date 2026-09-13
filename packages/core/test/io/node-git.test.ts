@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { nodeGit, parseLog } from "../../src/io/node-git.js";
+import { nodeGit, parseLog, parseStatus } from "../../src/io/node-git.js";
 
 // Every test spawns several git processes; the default budget is meant for unit tests.
 vi.setConfig({ testTimeout: 60_000 });
@@ -45,13 +45,25 @@ interface Origin {
   second: string;
 }
 
-/** Two commits on `main`, the first one tagged `v1`; the second commit rewrites README.md and adds docs/b.md. */
+/** Objects reachable from `revision` that the clone does not hold: the blobs a promisor clone left on the server. */
+function missingObjects(directory: string, revision: string): string[] {
+  return git(directory, ["rev-list", "--objects", "--missing=print", revision])
+    .split("\n")
+    .filter((line) => line.startsWith("?"));
+}
+
+/**
+ * Two commits on `main`, the first one tagged `v1`; the second commit rewrites README.md and
+ * adds docs/b.md. The origin serves partial clones, as the hosted forges do.
+ */
 function createOrigin(name: string): Origin {
   const directory = join(root, name);
   mkdirSync(directory);
   git(directory, ["init", "--quiet", "--initial-branch=main"]);
   git(directory, ["config", "user.name", "Test"]);
   git(directory, ["config", "user.email", "test@example.com"]);
+  git(directory, ["config", "uploadpack.allowFilter", "true"]);
+  git(directory, ["config", "uploadpack.allowAnySHA1InWant", "true"]);
   const first = commit(directory, "first", "2024-01-01T00:00:00Z", {
     "README.md": "one\n",
     "docs/a.md": "a\n",
@@ -75,16 +87,20 @@ afterAll(() => {
 });
 
 describe("nodeGit.clone", () => {
-  it("clones a branch at depth 1 on its tip, creating the parent directories", async () => {
+  it("clones a branch on its tip with the whole history and only the blobs of the checkout, creating the parent directories", async () => {
     const directory = join(freshDirectory(), "nested", "repo");
     await nodeGit.clone(origin.url, "main", directory);
     expect(await nodeGit.head(directory)).toBe(origin.second);
-    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("1");
+    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("2");
+    expect(git(directory, ["rev-parse", "--is-shallow-repository"])).toBe("false");
     expect(git(directory, ["rev-parse", "--abbrev-ref", "HEAD"])).toBe("main");
     expect(readFileSync(join(directory, "README.md"), "utf8")).toBe("two\n");
+    // The checkout holds every blob of the tip; the first README is never read, so its blob stays on the server.
+    expect(missingObjects(directory, "HEAD^{tree}")).toHaveLength(0);
+    expect(missingObjects(directory, "HEAD")).toHaveLength(1);
   });
 
-  it("clones a tag at depth 1 on the tagged commit", async () => {
+  it("clones a tag on the tagged commit", async () => {
     const directory = freshDirectory();
     await nodeGit.clone(origin.url, "v1", directory);
     expect(await nodeGit.head(directory)).toBe(origin.first);
@@ -93,14 +109,23 @@ describe("nodeGit.clone", () => {
     expect(existsSync(join(directory, "docs/b.md"))).toBe(false);
   });
 
-  it("clones a commit sha at depth 1, detached, with origin set for later updates", async () => {
+  it("clones a commit sha with its history, detached, with origin set for later updates", async () => {
     const directory = join(freshDirectory(), "nested", "repo");
-    await nodeGit.clone(origin.url, origin.first, directory);
-    expect(await nodeGit.head(directory)).toBe(origin.first);
-    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("1");
+    await nodeGit.clone(origin.url, origin.second, directory);
+    expect(await nodeGit.head(directory)).toBe(origin.second);
+    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("2");
     expect(git(directory, ["rev-parse", "--abbrev-ref", "HEAD"])).toBe("HEAD");
     expect(git(directory, ["remote", "get-url", "origin"])).toBe(origin.url);
-    expect(readFileSync(join(directory, "README.md"), "utf8")).toBe("one\n");
+    expect(readFileSync(join(directory, "README.md"), "utf8")).toBe("two\n");
+  });
+
+  it("clones a repository whose server ignores the filter with its blobs, the history intact", async () => {
+    const plain = createOrigin("origin-plain");
+    git(plain.directory, ["config", "--unset", "uploadpack.allowFilter"]);
+    const directory = freshDirectory();
+    await nodeGit.clone(plain.url, "main", directory);
+    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("2");
+    expect(missingObjects(directory, "HEAD")).toHaveLength(0);
   });
 
   it("treats a branch whose name merely contains a commit sha as a branch", async () => {
@@ -140,7 +165,7 @@ describe("nodeGit.clone", () => {
 });
 
 describe("nodeGit.update", () => {
-  it("moves a branch clone to the new tip at depth 1 and is idempotent", async () => {
+  it("moves a branch clone to the new tip with its history and is idempotent", async () => {
     const own = createOrigin("origin-update");
     const directory = freshDirectory();
     await nodeGit.clone(own.url, "main", directory);
@@ -148,12 +173,26 @@ describe("nodeGit.update", () => {
 
     await nodeGit.update(directory, "main");
     expect(await nodeGit.head(directory)).toBe(third);
-    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("1");
+    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("3");
     expect(readFileSync(join(directory, "docs/c.md"), "utf8")).toBe("c\n");
 
     await nodeGit.update(directory, "main");
     expect(await nodeGit.head(directory)).toBe(third);
     expect(git(directory, ["status", "--porcelain"])).toBe("");
+  });
+
+  it("completes the history of a clone an earlier version made at depth 1", async () => {
+    const directory = freshDirectory();
+    git(root, ["clone", "--quiet", "--depth", "1", "--branch", "main", origin.url, directory]);
+    expect(git(directory, ["rev-parse", "--is-shallow-repository"])).toBe("true");
+    await nodeGit.update(directory, "main");
+    expect(git(directory, ["rev-parse", "--is-shallow-repository"])).toBe("false");
+    expect(git(directory, ["rev-list", "--count", "HEAD"])).toBe("2");
+    expect([...(await nodeGit.history(directory))]).toEqual([
+      ["README.md", { commit: origin.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+      ["docs/a.md", { commit: origin.first, modifiedAt: "2024-01-01T00:00:00Z" }],
+      ["docs/b.md", { commit: origin.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+    ]);
   });
 
   it("moves a clone to a tag or a commit sha", async () => {
@@ -220,16 +259,31 @@ describe("parseLog", () => {
 });
 
 describe("nodeGit.history", () => {
-  it("maps every file of a depth-1 clone to the head commit and its date, in path order", async () => {
+  it("maps every file of a clone to the last commit that touched it, in path order, without fetching a blob", async () => {
     const directory = freshDirectory();
     await nodeGit.clone(origin.url, "main", directory);
     const history = await nodeGit.history(directory);
-    const head = { commit: origin.second, modifiedAt: "2024-02-02T00:00:00Z" };
     expect([...history]).toEqual([
-      ["README.md", head],
-      ["docs/a.md", head],
-      ["docs/b.md", head],
+      ["README.md", { commit: origin.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+      ["docs/a.md", { commit: origin.first, modifiedAt: "2024-01-01T00:00:00Z" }],
+      ["docs/b.md", { commit: origin.second, modifiedAt: "2024-02-02T00:00:00Z" }],
     ]);
+    expect(missingObjects(directory, "HEAD")).toHaveLength(1);
+  });
+
+  it("dates a renamed file at the rename, the way a moved note is new at its path", async () => {
+    const own = createOrigin("origin-rename");
+    const moved = commit(own.directory, "move", "2024-03-03T00:00:00Z", { "docs/moved.md": "a\n" });
+    git(own.directory, ["rm", "--quiet", "docs/a.md"]);
+    git(own.directory, ["commit", "--quiet", "--amend", "--no-edit"], "2024-03-03T00:00:00Z");
+    const head = git(own.directory, ["rev-parse", "HEAD"]);
+    expect(head).not.toBe(moved);
+    const directory = freshDirectory();
+    await nodeGit.clone(own.url, "main", directory);
+    expect((await nodeGit.history(directory)).get("docs/moved.md")).toEqual({
+      commit: head,
+      modifiedAt: "2024-03-03T00:00:00Z",
+    });
   });
 
   it("maps each file of a full clone to the last commit that touched it", async () => {
@@ -259,9 +313,9 @@ describe("nodeGit.history", () => {
     const head = { commit: odd, modifiedAt: "2024-03-03T00:00:00Z" };
     expect([...history]).toEqual([
       [`${hex} not a header.md`, head],
-      ["README.md", head],
-      ["docs/a.md", head],
-      ["docs/b.md", head],
+      ["README.md", { commit: own.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+      ["docs/a.md", { commit: own.first, modifiedAt: "2024-01-01T00:00:00Z" }],
+      ["docs/b.md", { commit: own.second, modifiedAt: "2024-02-02T00:00:00Z" }],
       [`z${hex} 2024-03-03T00:00:00Z`, head],
       ["zz.md", head],
       ["\u{1F600}.md", head],
@@ -289,5 +343,39 @@ describe("nodeGit.history", () => {
       ["merged.md", { commit: merge, modifiedAt: "2024-05-05T00:00:00Z" }],
       ["side.md", { commit: side, modifiedAt: "2024-03-03T00:00:00Z" }],
     ]);
+  });
+});
+
+describe("parseStatus", () => {
+  it("lists the paths of every status entry, whatever the codes", () => {
+    expect(parseStatus(" M a.md\0?? new/b.md\0A  c d.md\0")).toEqual(
+      new Set(["a.md", "new/b.md", "c d.md"]),
+    );
+    expect(parseStatus("")).toEqual(new Set());
+  });
+});
+
+describe("nodeGit.localHistory", () => {
+  it("dates the files of a folder inside a repository by their last commit, relative to the folder, the changed ones left out", async () => {
+    const own = createOrigin("origin-local");
+    writeFileSync(join(own.directory, "docs/a.md"), "edited\n", "utf8");
+    writeFileSync(join(own.directory, "docs/new.md"), "new\n", "utf8");
+    expect([...((await nodeGit.localHistory?.(join(own.directory, "docs"))) ?? [])]).toEqual([
+      ["b.md", { commit: own.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+    ]);
+    expect([...((await nodeGit.localHistory?.(own.directory)) ?? [])]).toEqual([
+      ["README.md", { commit: own.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+      ["docs/b.md", { commit: own.second, modifiedAt: "2024-02-02T00:00:00Z" }],
+    ]);
+  });
+
+  it("knows nothing of a folder outside any repository, or of a repository without a commit", async () => {
+    const outside = freshDirectory();
+    mkdirSync(outside);
+    expect(await nodeGit.localHistory?.(outside)).toBeUndefined();
+    const empty = freshDirectory();
+    mkdirSync(empty);
+    git(empty, ["init", "--quiet"]);
+    expect(await nodeGit.localHistory?.(empty)).toBeUndefined();
   });
 });

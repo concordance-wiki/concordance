@@ -13,7 +13,7 @@ export interface FakeRepository {
   files: Record<string, FakeFile>;
 }
 
-export type GitOperation = "clone" | "update" | "head" | "history";
+export type GitOperation = "clone" | "update" | "head" | "history" | "localHistory";
 
 /** Git wrappers can reject with anything; ingestion must describe non-Error reasons too. */
 function rejected<T>(reason: unknown): Promise<T> {
@@ -29,6 +29,9 @@ export class FakeGit implements GitClient {
   readonly calls: string[] = [];
   private readonly failures = new Map<string, unknown>();
   private readonly checkouts = new Map<string, FakeRepository>();
+
+  /** The history of the local folders inside a repository, by folder; a folder absent here is outside any. */
+  readonly local = new Map<string, Map<string, FileHistory>>();
 
   constructor(
     private readonly fs: MemoryFileSystem,
@@ -73,6 +76,11 @@ export class FakeGit implements GitClient {
         file.history === undefined ? [] : [[path, file.history]],
     );
     return this.rejectOr("history", directory, new Map(entries));
+  }
+
+  localHistory(directory: string): Promise<Map<string, FileHistory> | undefined> {
+    this.calls.push(`localHistory ${directory}`);
+    return this.rejectOr("localHistory", directory, this.local.get(directory));
   }
 
   private materialise(directory: string, repository: FakeRepository): void {

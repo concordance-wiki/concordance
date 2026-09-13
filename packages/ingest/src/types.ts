@@ -4,9 +4,9 @@ export interface IngestedFile {
   /** Forward-slash path relative to the source root. */
   path: string;
   absolutePath: string;
-  /** Last commit that touched the file; absent for local sources. */
+  /** Last commit that touched the file; absent for a local file outside a repository, or changed since its commit. */
   commit?: string;
-  /** ISO 8601 date of the last change: committer date for git sources, file system date otherwise. */
+  /** ISO 8601 date of the last change: committer date when git knows the file, file system date otherwise. */
   modifiedAt: string;
 }
 

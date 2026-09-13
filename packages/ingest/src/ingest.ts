@@ -4,6 +4,7 @@ import {
   compareFindings,
   compileGlobs,
   type Config,
+  type FileHistory,
   type Finding,
   type Locale,
   type PathMatcher,
@@ -82,13 +83,18 @@ async function ingestGit(
   }
 }
 
-function ingestLocal(
+/**
+ * A local folder inside a repository dates its files by their last commit, like a clone; a file
+ * changed since, a folder outside any repository or a client that knows nothing of local
+ * folders leave the file system date.
+ */
+async function ingestLocal(
   source: SourceConfig,
   path: string,
   locale: Locale,
   excluded: PathMatcher,
   deps: IngestDependencies,
-): Outcome {
+): Promise<Outcome> {
   const root = posix.resolve(deps.configDirectory, path);
   if (!deps.fs.exists(root)) {
     return {
@@ -98,9 +104,13 @@ function ingestLocal(
       ),
     };
   }
+  const history = (await deps.git.localHistory?.(root)) ?? new Map<string, FileHistory>();
   const files = keptFiles(deps, root, excluded).map((relative): IngestedFile => {
     const absolutePath = posix.join(root, relative);
-    return { path: relative, absolutePath, modifiedAt: deps.fs.modifiedAt(absolutePath) };
+    const known = history.get(relative);
+    return known === undefined
+      ? { path: relative, absolutePath, modifiedAt: deps.fs.modifiedAt(absolutePath) }
+      : { path: relative, absolutePath, commit: known.commit, modifiedAt: known.modifiedAt };
   });
   return { source: { name: source.name, locale, root, files: files.toSorted(byPath) } };
 }
@@ -120,7 +130,7 @@ export async function ingestSources(
     } else if (source.git !== undefined) {
       outcome = await ingestGit(source, source.git, locale, excluded, deps);
     } else if (source.path !== undefined) {
-      outcome = ingestLocal(source, source.path, locale, excluded, deps);
+      outcome = await ingestLocal(source, source.path, locale, excluded, deps);
     } else {
       // Configuration validation rejects a source with neither git nor path; nothing can be read from it.
       continue;
