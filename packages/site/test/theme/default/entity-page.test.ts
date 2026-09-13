@@ -174,10 +174,10 @@ describe("EntityPage", () => {
     );
   });
 
-  it("folds the neighbourhood behind its line at the foot of the panel, the number of pages worded", () => {
+  it("folds the neighbourhood behind its line at the foot of the panel, the number of pages worded, the head of the map in the same summary", () => {
     const html = render();
     expect(html).toContain(
-      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span></summary><section class="neighbourhood"',
+      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"',
     );
     expect(html.indexOf('<aside class="mentions')).toBeLessThan(
       html.indexOf('<details class="neighbourhood-fold">'),
@@ -188,6 +188,21 @@ describe("EntityPage", () => {
     expect(
       render({ labels: { seeNeighbourhood: "Voir la carte", neighbourPages: "2 pages" } }),
     ).toContain('<span class="neighbourhood-lead">Voir la carte</span>');
+    expect(
+      render({ neighbours: { ...entityPage.neighbours, labels: { map: "Carte du voisinage" } } }),
+    ).toContain(
+      '<span class="neighbourhood-head">Carte du voisinage</span><span class="neighbourhood-page">Keyword page</span>',
+    );
+  });
+
+  it("serves the neighbourhood unfolded when the page asks, the blocks of the panel kept in the markup for the stylesheet to hide", () => {
+    expect(render()).not.toContain('<details class="neighbourhood-fold" open>');
+    const html = render({ mapOpen: true });
+    expect(html).toContain('<details class="neighbourhood-fold" open><summary>');
+    expect(html).toContain('<section class="panel-block entity-panel"');
+    expect(html).toContain('<aside class="mentions');
+    expect(html.indexOf('<div class="entity-side">')).toBeGreaterThan(html.indexOf("</article>"));
+    expectBalanced(html);
   });
 
   it("caps the highlighted properties at five, two with the badge and three under it; beyond that they stay in the panel", () => {

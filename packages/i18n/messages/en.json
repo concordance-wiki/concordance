@@ -311,6 +311,54 @@
     "defaultMessage": "Types",
     "description": "Navigation entry for the list of entity types."
   },
+  "neighbourhood.capNote": {
+    "defaultMessage": "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over.",
+    "description": "Note under the list of neighbours, saying why the map stops at six."
+  },
+  "neighbourhood.distance": {
+    "defaultMessage": "Distance",
+    "description": "Label before the distance control of the neighbourhood map."
+  },
+  "neighbourhood.existingPage": {
+    "defaultMessage": "existing page",
+    "description": "Legend of a plain edge of the map, leading to a neighbour that has a note."
+  },
+  "neighbourhood.hop": {
+    "defaultMessage": "{count, plural, one {# hop} other {# hops}}",
+    "description": "A distance of the neighbourhood map, in hops from the page."
+  },
+  "neighbourhood.list": {
+    "defaultMessage": "{count, plural, one {The neighbour} other {The # neighbours}}",
+    "description": "Heading of the textual list of the neighbours under the map."
+  },
+  "neighbourhood.map": {
+    "defaultMessage": "Neighbourhood map",
+    "description": "Heading of the unfolded map, before the title of the page at its centre."
+  },
+  "neighbourhood.mapCaption": {
+    "defaultMessage": "The list below carries the same information as the map.",
+    "description": "Caption of the map, for assistive technologies."
+  },
+  "neighbourhood.none": {
+    "defaultMessage": "No neighbour recorded.",
+    "description": "Shown when the page has no neighbour."
+  },
+  "neighbourhood.noteless": {
+    "defaultMessage": "word without a note",
+    "description": "Legend of a dotted edge of the map, leading to a word nobody defined."
+  },
+  "neighbourhood.seeMentions": {
+    "defaultMessage": "see the mentions panel",
+    "description": "Link replacing the map when the model holds more neighbours than it shows."
+  },
+  "neighbourhood.textualEquivalent": {
+    "defaultMessage": "textual equivalent",
+    "description": "After the heading of the list of neighbours, saying that it equals the map."
+  },
+  "neighbourhood.total": {
+    "defaultMessage": "{count, plural, one {# neighbour in total, more than the map shows} other {# neighbours in total, more than the map shows}}",
+    "description": "Sentence before the link to the mentions panel when the map is not drawn."
+  },
   "related.cited": {
     "defaultMessage": "Cited",
     "description": "Prefix of a related page that writes a link to the current one."

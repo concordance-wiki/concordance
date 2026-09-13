@@ -189,13 +189,22 @@ function Source({ source, text }: { source: SourceRef; text: EntityPageLabels })
   );
 }
 
-/** The neighbourhood folded behind its line at the foot of the panel, the number of pages worded. */
+/**
+ * The neighbourhood folded behind its line at the foot of the panel, the number of pages worded.
+ * Open, the summary turns into the head of the map, a back control before the title of the map
+ * and the name of the page: the stylesheet swaps the two wordings on the state of the
+ * disclosure, and where the panel has a column it hides the other blocks, so that the map takes
+ * the panel and never the page; without any script the map simply unfolds under the blocks.
+ */
 export function NeighbourhoodFold({
   neighbours,
   labels: given,
+  open = false,
 }: {
   neighbours: NeighbourhoodProps;
   labels: Partial<EntityPageLabels>;
+  /** Served unfolded; folded when absent. */
+  open?: boolean;
 }): JSX.Element {
   const Neighbourhood = useSlot("Neighbourhood");
   const text = {
@@ -203,10 +212,12 @@ export function NeighbourhoodFold({
     ...given,
   };
   return (
-    <details class="neighbourhood-fold">
+    <details class="neighbourhood-fold" open={open}>
       <summary>
         <span class="neighbourhood-lead">{text.seeNeighbourhood}</span>
         <span class="neighbourhood-count">{text.neighbourPages}</span>
+        <span class="neighbourhood-head">{neighbours.labels?.map ?? labels.neighbourhoodMap}</span>
+        <span class="neighbourhood-page">{neighbours.centre}</span>
       </summary>
       <Neighbourhood {...neighbours} />
     </details>
@@ -222,7 +233,8 @@ export function NeighbourhoodFold({
  * sets some), the table of contents of the note, the related pages, then the neighbourhood
  * folded behind its line. An attribute value or a mapped section goes through the
  * `Attribute@<name>` or `Section@<key>` component of the theme or of the type module when one
- * exists; the rest of the page is the same for every type.
+ * exists; the rest of the page is the same for every type. `mapOpen` serves the neighbourhood
+ * unfolded, as the reader sees it after opening its line.
  */
 export function EntityPage({
   entity,
@@ -239,6 +251,7 @@ export function EntityPage({
   sources,
   contract,
   documents = [],
+  mapOpen = false,
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
@@ -321,7 +334,7 @@ export function EntityPage({
         )}
         {headed.length > 0 && <TableOfContents sections={headed} heading={text.onThisPage} />}
         <MentionsPanel {...mentions} />
-        <NeighbourhoodFold neighbours={neighbours} labels={given} />
+        <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
       </div>
     </div>
   );

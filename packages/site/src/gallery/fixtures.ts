@@ -548,6 +548,48 @@ export const corporateEntityPage: SlotProps["EntityPage"] = {
   ],
 };
 
+/**
+ * The corporate page with its neighbourhood unfolded, a sixth neighbour being a word nobody
+ * defined, so that the map shows every kind of node with its legend, its controls and its list.
+ */
+export const corporateEntityPageMap: SlotProps["EntityPage"] = {
+  ...corporateEntityPage,
+  labels: { ...corporateEntityPage.labels, neighbourPages: "6 pages" },
+  neighbours: {
+    ...corporateEntityPage.neighbours,
+    neighbours: [
+      ...corporateEntityPage.neighbours.neighbours,
+      {
+        id: "keywords/build-summary",
+        label: "build summary",
+        href: "../../../keywords/build-summary/",
+        typeLabel: "Keyword",
+        kind: "keyword",
+        weight: 2,
+        rank: 5,
+      },
+    ],
+    total: 6,
+    labels: {
+      map: "Neighbourhood map",
+      mapCaption: "The list below carries the same information as the map.",
+      distance: "Distance",
+      hop: "1 hop",
+      types: "Types",
+      existingPage: "existing page",
+      noteless: "word without a note",
+      neighbours: "The 6 neighbours",
+      textualEquivalent: "textual equivalent",
+      capNote:
+        "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over.",
+      noNeighbour: "No neighbour recorded.",
+      total: "6 neighbours in total, more than the map shows",
+      seeMentions: "see the mentions panel",
+    },
+  },
+  mapOpen: true,
+};
+
 /** A workshop that exists as a note, a deck and a transcript: what the document blocks of a page show. */
 export const documentEntityPage: SlotProps["EntityPage"] = {
   ...entityPage,

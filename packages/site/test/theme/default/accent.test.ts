@@ -73,6 +73,7 @@ describe("The accent colour never carries information on its own", () => {
       CONTRACT_BUTTONS,
       ".keyword-notice",
       ".passage-at",
+      ".neighbourhood-graph .map-centre .map-shape",
     ]);
   });
 

@@ -8,17 +8,74 @@ import {
   type PlacedLabel,
   type PlacedNode,
 } from "../../neighbourhood/layout.js";
-import type { Neighbour, NeighbourhoodProps } from "../../slots.js";
+import type { Neighbour, NeighbourhoodLabels, NeighbourhoodProps } from "../../slots.js";
 import { GLYPH_SHAPES, initialOfGlyph, shapeOfGlyph, type GlyphShape } from "./glyphs.js";
 import { labels } from "./labels.js";
+import { fill } from "./mention-list.js";
 
 /** The id of the textual list; one neighbourhood per page, so one id. */
 export const NEIGHBOURHOOD_LIST = "neighbourhood-list";
 /** The heading of the mentions panel, where the reader is sent when the map is not drawn. */
 const MENTIONS_ANCHOR = "#mentions-title";
+/** The prefix of the id of a type checkbox; the stylesheet hides the nodes of an unticked type by its rank. */
+const TYPE_INPUT = "neighbourhood-type";
 const GLYPH_SIZE = 10;
 /** The dash of everything that stands for a noteless word: its square and the edge leading to it. */
 const KEYWORD_DASH = "4 3";
+
+/**
+ * The labels of the default theme, used for every label the map does not receive; the heading
+ * of the list is worded from the number listed, the pointer from the number the model holds.
+ */
+export function defaultNeighbourhoodLabels(listed: number, total: number): NeighbourhoodLabels {
+  return {
+    map: labels.neighbourhoodMap,
+    mapCaption: labels.neighbourhoodMapCaption,
+    distance: labels.distance,
+    hop: labels.oneHop,
+    types: labels.types,
+    existingPage: labels.existingPage,
+    noteless: labels.wordWithoutNote,
+    neighbours: fill(listed === 1 ? labels.theNeighbour : labels.theNeighbours, { count: listed }),
+    textualEquivalent: labels.textualEquivalent,
+    capNote: labels.neighbourhoodCap,
+    noNeighbour: labels.noNeighbour,
+    total: fill(labels.neighboursInTotal, { count: total }),
+    seeMentions: labels.seeMentions,
+  };
+}
+
+/** A type of the neighbourhood: its label, how many neighbours have it, and its rank in the filter, from one. */
+export interface NeighbourType {
+  label: string;
+  count: number;
+  rank: number;
+}
+
+/** The types of the neighbours, in the order they first appear, keyed by their label; a neighbour without a type belongs to none. */
+export function typesOf(neighbours: readonly Neighbour[]): NeighbourType[] {
+  const types = new Map<string, NeighbourType>();
+  for (const neighbour of neighbours) {
+    if (neighbour.typeLabel === undefined) continue;
+    const known = types.get(neighbour.typeLabel);
+    if (known === undefined) {
+      types.set(neighbour.typeLabel, {
+        label: neighbour.typeLabel,
+        count: 1,
+        rank: types.size + 1,
+      });
+    } else {
+      known.count += 1;
+    }
+  }
+  return [...types.values()];
+}
+
+/** The rank of the type of a neighbour in the filter, written on its node and its row; nothing for a neighbour without a type. */
+function typeAttribute(neighbour: Neighbour, types: NeighbourType[]): { "data-type"?: string } {
+  const type = types.find((candidate) => candidate.label === neighbour.typeLabel);
+  return type === undefined ? {} : { "data-type": String(type.rank) };
+}
 
 /** A label in plain text; the full title follows in a `<title>` when the text is cut. */
 function Label({ label }: { label: PlacedLabel }): JSX.Element {
@@ -53,13 +110,22 @@ function Glyph({ glyph, x, y }: { glyph: string; x: number; y: number }): JSX.El
 }
 
 /** A node: a circle for a typed entity, a dashed square for a noteless word, the type glyph inside, the label beside. */
-function Node({ neighbour, node }: { neighbour: Neighbour; node: PlacedNode }): JSX.Element {
+function Node({
+  neighbour,
+  node,
+  type,
+}: {
+  neighbour: Neighbour;
+  node: PlacedNode;
+  type: { "data-type"?: string };
+}): JSX.Element {
   const keyword = neighbour.kind === "keyword";
   return (
     <g
       class={keyword ? "map-node map-node-keyword" : "map-node map-node-entity"}
       data-weight={neighbour.weight}
       data-glyph={neighbour.typeGlyph}
+      {...type}
     >
       {keyword ? (
         <rect
@@ -81,6 +147,31 @@ function Node({ neighbour, node }: { neighbour: Neighbour; node: PlacedNode }): 
   );
 }
 
+/** The edge from the centre to a node, dashed when the node stands for a noteless word. */
+function Edge({
+  from,
+  node,
+  type,
+}: {
+  from: { x: number; y: number };
+  node: PlacedNode & { item: Neighbour };
+  type: { "data-type"?: string };
+}): JSX.Element {
+  return node.item.kind === "keyword" ? (
+    <line
+      class="map-edge map-edge-keyword"
+      x1={from.x}
+      y1={from.y}
+      x2={node.x}
+      y2={node.y}
+      stroke-dasharray={KEYWORD_DASH}
+      {...type}
+    />
+  ) : (
+    <line class="map-edge" x1={from.x} y1={from.y} x2={node.x} y2={node.y} {...type} />
+  );
+}
+
 /** The shapes the map uses, once each, in a stable order. */
 function spriteOf(neighbours: readonly Neighbour[]): GlyphShape[] {
   const shapes = new Set<GlyphShape>();
@@ -93,9 +184,19 @@ function spriteOf(neighbours: readonly Neighbour[]): GlyphShape[] {
 
 /**
  * The map of the neighbourhood, hidden from assistive technologies: the list next to it is
- * authoritative. Integer positions only, so that two builds give the same bytes.
+ * authoritative. Integer positions only, so that two builds give the same bytes. The edge and
+ * the node of one neighbour carry the rank of its type, so that the stylesheet hides both when
+ * the type is unticked.
  */
-function Map({ centre, neighbours }: NeighbourhoodProps): JSX.Element {
+function Graph({
+  centre,
+  neighbours,
+  types,
+}: {
+  centre: string;
+  neighbours: Neighbour[];
+  types: NeighbourType[];
+}): JSX.Element {
   const layout = layoutNeighbourhood(centre, neighbours, (neighbour) => neighbour.label);
   const sprite = spriteOf(neighbours);
   return (
@@ -115,30 +216,21 @@ function Map({ centre, neighbours }: NeighbourhoodProps): JSX.Element {
           ))}
         </defs>
       )}
-      {layout.nodes.map((node) =>
-        node.item.kind === "keyword" ? (
-          <line
-            key={node.item.id}
-            class="map-edge map-edge-keyword"
-            x1={layout.centre.x}
-            y1={layout.centre.y}
-            x2={node.x}
-            y2={node.y}
-            stroke-dasharray={KEYWORD_DASH}
-          />
-        ) : (
-          <line
-            key={node.item.id}
-            class="map-edge"
-            x1={layout.centre.x}
-            y1={layout.centre.y}
-            x2={node.x}
-            y2={node.y}
-          />
-        ),
-      )}
       {layout.nodes.map((node) => (
-        <Node key={node.item.id} neighbour={node.item} node={node} />
+        <Edge
+          key={node.item.id}
+          from={layout.centre}
+          node={node}
+          type={typeAttribute(node.item, types)}
+        />
+      ))}
+      {layout.nodes.map((node) => (
+        <Node
+          key={node.item.id}
+          neighbour={node.item}
+          node={node}
+          type={typeAttribute(node.item, types)}
+        />
       ))}
       <g class="map-centre">
         <circle class="map-shape" cx={layout.centre.x} cy={layout.centre.y} r={CENTRE_RADIUS} />
@@ -148,46 +240,119 @@ function Map({ centre, neighbours }: NeighbourhoodProps): JSX.Element {
   );
 }
 
+/**
+ * Above the map: the distance the model records, one hop, and the type filter, a disclosure of
+ * checkboxes served all ticked; the stylesheet hides the nodes and the rows of an unticked type
+ * by its rank, so that the filter works without any script and over `file://`.
+ */
+function Controls({
+  types,
+  text,
+}: {
+  types: NeighbourType[];
+  text: NeighbourhoodLabels;
+}): JSX.Element {
+  return (
+    <div class="neighbourhood-controls">
+      <p class="neighbourhood-distance">
+        <span class="neighbourhood-distance-label">{text.distance}</span>
+        <span class="neighbourhood-hop" aria-current="true">
+          {text.hop}
+        </span>
+      </p>
+      {types.length > 0 && (
+        <details class="related-types neighbourhood-types">
+          <summary>{text.types}</summary>
+          <div class="related-type-menu">
+            <ul class="related-type-list">
+              {types.map((type) => (
+                <li key={type.label} class="neighbourhood-type">
+                  <input type="checkbox" id={`${TYPE_INPUT}-${String(type.rank)}`} checked />
+                  <label for={`${TYPE_INPUT}-${String(type.rank)}`}>
+                    {type.label} <span class="count">{type.count}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      )}
+    </div>
+  );
+}
+
 /** A neighbour opens a new priority group when its rank differs from the previous one's. */
 function opensGroup(neighbours: Neighbour[], index: number): boolean {
   const previous = neighbours[index - 1];
   return previous !== undefined && previous.rank !== neighbours[index]?.rank;
 }
 
+function rowClass(neighbours: Neighbour[], index: number): string {
+  const classes = ["neighbour"];
+  if (opensGroup(neighbours, index)) classes.push("group-start");
+  if (neighbours[index]?.kind === "keyword") classes.push("neighbour-noteless");
+  return classes.join(" ");
+}
+
 /**
- * The neighbourhood: the map, or a pointer to the mentions panel when the model holds more
- * neighbours than the map may show, then the textual list every graphical view must keep. The
- * list is rendered in the order received; a separator marks each change of priority group.
+ * The neighbourhood: the map with its controls and its legend, or a pointer to the mentions
+ * panel when the model holds more neighbours than the map may show, then the textual list every
+ * graphical view must keep and the note saying why the map stops at six. The list is rendered
+ * in the order received; a separator marks each change of priority group.
  */
-export function Neighbourhood({ centre, neighbours, total }: NeighbourhoodProps): JSX.Element {
+export function Neighbourhood({
+  centre,
+  neighbours,
+  total,
+  labels: given = {},
+}: NeighbourhoodProps): JSX.Element {
   const overflow = total !== undefined && total > neighbours.length;
+  const text: NeighbourhoodLabels = {
+    ...defaultNeighbourhoodLabels(neighbours.length, total ?? neighbours.length),
+    ...given,
+  };
+  // Without the map there is no filter: the rows carry no type rank.
+  const types = overflow ? [] : typesOf(neighbours);
   return (
     <section class="neighbourhood" aria-labelledby="neighbourhood-title">
       <h2 id="neighbourhood-title">
-        {labels.neighbourhood} <span class="neighbourhood-centre">{centre}</span>
+        {text.map} <span class="neighbourhood-centre">{centre}</span>
       </h2>
       {neighbours.length === 0 ? (
-        <p class="empty">{labels.noNeighbour}</p>
+        <p class="empty">{text.noNeighbour}</p>
       ) : (
         <>
           {overflow ? (
             <p class="neighbourhood-overflow">
-              {String(total)} {labels.neighboursInTotal}:{" "}
-              <a href={MENTIONS_ANCHOR}>{labels.seeMentions}</a>.
+              {text.total}: <a href={MENTIONS_ANCHOR}>{text.seeMentions}</a>.
             </p>
           ) : (
-            <figure class="neighbourhood-map" aria-describedby={NEIGHBOURHOOD_LIST}>
-              <Map centre={centre} neighbours={neighbours} />
-              <figcaption>
-                {labels.neighbourhoodMap}. {labels.neighbourhoodMapCaption}
-              </figcaption>
-            </figure>
+            <>
+              <Controls types={types} text={text} />
+              <figure class="neighbourhood-map" aria-describedby={NEIGHBOURHOOD_LIST}>
+                <Graph centre={centre} neighbours={neighbours} types={types} />
+                <figcaption>
+                  <span class="visually-hidden">
+                    {text.map}. {text.mapCaption}
+                  </span>
+                  <span class="map-legend">
+                    <span class="map-legend-entity">{text.existingPage}</span>
+                    <span class="map-legend-keyword">{text.noteless}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            </>
           )}
+          <p class="neighbourhood-list-head">
+            <span class="section-label">{text.neighbours}</span>
+            <span class="neighbourhood-equivalent">{text.textualEquivalent}</span>
+          </p>
           <ul id={NEIGHBOURHOOD_LIST} class="neighbour-list">
             {neighbours.map((neighbour, index) => (
               <li
                 key={neighbour.id}
-                class={opensGroup(neighbours, index) ? "neighbour group-start" : "neighbour"}
+                class={rowClass(neighbours, index)}
+                {...typeAttribute(neighbour, types)}
               >
                 <a href={neighbour.href}>{neighbour.label}</a>
                 {neighbour.typeLabel !== undefined && (
@@ -200,6 +365,7 @@ export function Neighbourhood({ centre, neighbours, total }: NeighbourhoodProps)
               </li>
             ))}
           </ul>
+          <p class="neighbourhood-note">{text.capNote}</p>
         </>
       )}
     </section>

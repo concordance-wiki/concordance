@@ -85,7 +85,7 @@ describe("KeywordPage", () => {
       '<div class="entity-side"><section class="panel-block keyword-facts"',
       '<section class="panel-block keyword-panel"',
       '<aside class="mentions panel-block"',
-      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span></summary><section class="neighbourhood"',
+      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"',
     ]);
     expect(
       render({
