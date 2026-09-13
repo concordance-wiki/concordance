@@ -40,6 +40,8 @@ export interface ReadDocument {
   absolutePath: string;
   /** Lowercase extension without its dot. */
   format: string;
+  /** The size of the file in bytes, as read. */
+  size: number;
   metadata: Record<string, unknown>;
   unit: PositionUnit;
   pages: DocumentPage[];
@@ -186,6 +188,7 @@ async function readOne(
     path: file.path,
     absolutePath: file.absolutePath,
     format,
+    size: bytes.byteLength,
     metadata: output.metadata,
     unit: converted || output.units === undefined ? (format === "pptx" ? "slide" : "page") : "cue",
     pages: converted ? [] : pagesOfReader(output),

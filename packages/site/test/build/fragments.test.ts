@@ -99,6 +99,10 @@ describe("fragments", () => {
           format: "pptx",
           target: "glossary/keyword-page/threshold-review.pptx",
           preview: "glossary/keyword-page/threshold-review.pdf",
+          size: 4_200_000,
+          author: "Participant-2",
+          date: "2026-03-12T09:30:00Z",
+          pageCount: 24,
           unit: "slide",
           pages: [
             { number: 1, label: "slide 1", text: "Keyword page threshold" },
@@ -132,7 +136,7 @@ describe("fragments", () => {
     const documents = (value: string): string =>
       `{"id": "a/b", "sections": [], "documents": ${value}}`;
     const message =
-      "f.json: documents must be a list of { source, path, format, target, preview?, unit, pages }";
+      "f.json: documents must be a list of { source, path, format, target, preview?, size?, author?, date?, pageCount?, unit, pages }";
     expect(() => parseFragment(documents("{}"), "f.json")).toThrow(message);
     const valid = {
       source: "s",
@@ -149,6 +153,10 @@ describe("fragments", () => {
       { ...valid, format: 1 },
       { ...valid, target: 1 },
       { ...valid, preview: 1 },
+      { ...valid, size: "4 MB" },
+      { ...valid, author: 1 },
+      { ...valid, date: 2026 },
+      { ...valid, pageCount: "24" },
       { ...valid, unit: "line" },
       { ...valid, pages: {} },
       { ...valid, pages: [{ number: "1", label: "page 1", text: "" }] },

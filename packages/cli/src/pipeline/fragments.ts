@@ -98,10 +98,43 @@ export function truncatePages(pages: readonly FragmentPage[], maxChars: number):
   });
 }
 
+/** A string property of the reader's metadata, trimmed; none when absent or blank. */
+function metadataText(metadata: Record<string, unknown>, key: string): string | undefined {
+  const value = metadata[key];
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined;
+}
+
+/** An integer property of the reader's metadata; none when absent or not a positive integer. */
+function metadataCount(metadata: Record<string, unknown>, key: string): number | undefined {
+  const value = metadata[key];
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+/**
+ * What the page says of the file beyond its text, as the reader exposed it: the author, the date
+ * the document states (its last modification, else its creation) and its page or slide count;
+ * nothing for a property the reader did not give.
+ */
+export function propertiesOf(
+  document: ReadDocument,
+): Pick<FragmentDocument, "author" | "date" | "pageCount"> {
+  const author = metadataText(document.metadata, "author");
+  const date =
+    metadataText(document.metadata, "modified") ?? metadataText(document.metadata, "created");
+  const pageCount =
+    metadataCount(document.metadata, "pages") ?? metadataCount(document.metadata, "slides");
+  return {
+    ...(author === undefined ? {} : { author }),
+    ...(date === undefined ? {} : { date }),
+    ...(pageCount === undefined ? {} : { pageCount }),
+  };
+}
+
 /**
  * The documents of an entity: its own file when it is not a note, and the files among its
  * representations, in path order; each copied for download and, when previews are on for its
- * source and a PDF exists, its PDF copied as the preview.
+ * source and a PDF exists, its PDF copied as the preview; its size and the properties its
+ * reader exposed travel with it.
  */
 export function documentsOf(
   entity: Entity,
@@ -134,6 +167,8 @@ export function documentsOf(
       format: document.format,
       target,
       ...(preview === undefined ? {} : { preview }),
+      size: document.size,
+      ...propertiesOf(document),
       unit: document.unit,
       pages: truncatePages(
         document.pages.map(({ number, label, text, speaker }) => ({

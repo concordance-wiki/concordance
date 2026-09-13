@@ -14,6 +14,7 @@ export interface MessageArguments {
   "category.searchIn": { name: string };
   "category.shown": { shown: string; name: string; total: string };
   "document.pages": { count: number };
+  "document.sameDocument": { count: number };
   "entity.changed": { when: string };
   "entity.confidence": { value: number };
   "entity.declaredAtTop": { count: number };
@@ -92,9 +93,31 @@ export const messageArguments = {
   "category.sort": {},
   "category.sortLinks": {},
   "category.sortTitle": {},
+  "document.author": {},
+  "document.convertedNote": {},
+  "document.date": {},
+  "document.dateNote": {},
   "document.download": {},
+  "document.extractedText": {},
+  "document.groupedNote": {},
+  "document.kind.pdf": {},
+  "document.kind.presentation": {},
+  "document.kind.spreadsheet": {},
+  "document.kind.text": {},
+  "document.noNote": {},
+  "document.openPdf": {},
+  "document.originalNote": {},
+  "document.pageCount": {},
   "document.pages": { count: "plural" },
   "document.preview": {},
+  "document.relatedNotes": {},
+  "document.roleNotes": {},
+  "document.roleOriginal": {},
+  "document.rolePreview": {},
+  "document.sameDocument": { count: "plural" },
+  "document.type": {},
+  "document.view": {},
+  "document.views": {},
   "drawer.menu": {},
   "entity.application": {},
   "entity.attributes": {},

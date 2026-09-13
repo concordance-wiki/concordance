@@ -3,9 +3,11 @@ import type { IngestedSource } from "@concordance-wiki/ingest";
 import type { KeywordMention } from "@concordance-wiki/nlp";
 import { describe, expect, it } from "vitest";
 
+import type { ReadDocument } from "../src/pipeline/documents.js";
 import {
   fragmentsOf,
   imageTarget,
+  propertiesOf,
   writeFragments,
   type FragmentsInput,
 } from "../src/pipeline/fragments.js";
@@ -362,5 +364,43 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
       sections: [{ id: "section-lead", html: "<p>A page of the site.</p>" }],
       text: "A page of the site.",
     });
+  });
+});
+
+describe("The properties of a document travel from its reader to its fragment", () => {
+  const read = (metadata: Record<string, unknown>): ReadDocument => ({
+    source: "specs",
+    path: "decks/threshold.pptx",
+    absolutePath: "/work/specs/decks/threshold.pptx",
+    format: "pptx",
+    size: 4_200_000,
+    metadata,
+    unit: "slide",
+    pages: [],
+  });
+
+  it("keeps the author, the last modification else the creation, and the page else the slide count", () => {
+    expect(
+      propertiesOf(
+        read({
+          author: " Participant-2 ",
+          created: "2026-03-01T08:00:00Z",
+          modified: "2026-03-12T09:30:00Z",
+          slides: 24,
+        }),
+      ),
+    ).toEqual({ author: "Participant-2", date: "2026-03-12T09:30:00Z", pageCount: 24 });
+    expect(propertiesOf(read({ created: "2026-03-01", pages: 12, slides: 3 }))).toEqual({
+      date: "2026-03-01",
+      pageCount: 12,
+    });
+  });
+
+  it("leaves out a property the reader did not give, or gave blank or of another type", () => {
+    expect(propertiesOf(read({}))).toEqual({});
+    expect(
+      propertiesOf(read({ author: "  ", modified: 2026, created: "", pages: "12", slides: 0 })),
+    ).toEqual({});
+    expect(propertiesOf(read({ pages: 2.5, slides: -1 }))).toEqual({});
   });
 });

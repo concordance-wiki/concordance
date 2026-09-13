@@ -166,6 +166,7 @@ describe("readDocuments", () => {
     });
     const [deck] = output.documents;
     expect(deck?.metadata).toEqual({ title: "threshold.pptx", bytes: 4 });
+    expect(deck?.size).toBe(4);
     expect(deck?.pdf).toMatch(/^\/work\/\.concordance-cache\/convert\/[0-9a-f]{64}\.pdf$/);
     expect(deck?.pages).toEqual([
       { number: 1, label: "slide 1", text: "Keyword page threshold" },
@@ -516,6 +517,7 @@ const deck: ReadDocument = {
   path: "decks/threshold.pptx",
   absolutePath: "/work/specs/decks/threshold.pptx",
   format: "pptx",
+  size: 4_200_000,
   metadata: { title: "Threshold" },
   unit: "slide",
   pages: [
