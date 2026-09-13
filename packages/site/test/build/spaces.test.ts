@@ -171,8 +171,20 @@ describe("categoriesOf", () => {
       ["screens", 1, "specs/screens/mentions-panel"],
     ]);
     expect(categoriesOf(ctx, SPACE_PAGE, "specs")).toEqual([
-      { label: "a", href: "a/index.html", count: 3 },
-      { label: "screens", href: "screens/index.html", count: 1 },
+      {
+        label: "a",
+        href: "a/index.html",
+        description:
+          "A term is a word of the business with its definition, its aliases and the words it relates to.",
+        count: 3,
+      },
+      {
+        label: "screens",
+        href: "screens/index.html",
+        description:
+          "A screen is a page of the application, with what it shows and what it allows.",
+        count: 1,
+      },
     ]);
     // A note at the address of the list: the category leads to the first page of the folder instead,
     // two folders under one ordered by name, the first one leading.
@@ -191,6 +203,51 @@ describe("categoriesOf", () => {
       topFoldersOf(context({ model: model({ entities: [zed, twin] }) }), "specs")[0]?.first.id,
     ).toBe("specs/a/aaa");
     expect(categoriesOf(ctx, SPACE_PAGE, "framing")).toEqual([]);
+  });
+
+  it("names a folder by the title the configuration gives it, with its description, else the description of its type, else none", () => {
+    const titled = context({
+      folders: {
+        specs: {
+          screens: { title: "Screens", description: "What a reader sees, page by page." },
+        },
+      },
+    });
+    expect(categoriesOf(titled, SPACE_PAGE, "specs")).toEqual([
+      {
+        label: "rules",
+        href: "rules/index.html",
+        description:
+          "A business rule is a condition the business imposes, with what it constrains and what happens when it is broken.",
+        count: 1,
+      },
+      {
+        label: "Screens",
+        href: "screens/index.html",
+        description: "What a reader sees, page by page.",
+        count: 1,
+      },
+    ]);
+    // A folder of several types maps to none; a note at the address of the list leaves the folder without a type either.
+    const mixed = context({
+      model: model({
+        entities: [
+          screen,
+          entity({ id: "specs/screens/a-rule", type: "rule", title: "A rule" }),
+          entity({ id: "specs/notes/x", type: "rule", title: "X" }),
+          entity({
+            id: "specs/notes",
+            type: "document",
+            title: "Notes",
+            source: { name: "specs", path: "notes.md", line: 1 },
+          }),
+        ],
+      }),
+    });
+    expect(categoriesOf(mixed, SPACE_PAGE, "specs")).toEqual([
+      { label: "notes", href: "notes/x/index.html", count: 1 },
+      { label: "screens", href: "screens/index.html", count: 2 },
+    ]);
   });
 });
 
@@ -340,8 +397,20 @@ describe("spacePageOf", () => {
       count: 2,
       date: "2026-09-09",
       categories: [
-        { label: "rules", href: "rules/index.html", count: 1 },
-        { label: "screens", href: "screens/index.html", count: 1 },
+        {
+          label: "rules",
+          href: "rules/index.html",
+          description:
+            "A term is a word of the business with its definition, its aliases and the words it relates to.",
+          count: 1,
+        },
+        {
+          label: "screens",
+          href: "screens/index.html",
+          description:
+            "A screen is a page of the application, with what it shows and what it allows.",
+          count: 1,
+        },
       ],
       recent: [
         {

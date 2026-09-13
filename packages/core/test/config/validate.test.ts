@@ -279,6 +279,82 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
+  it("accepts an HTTPS contribute_url and rejects any other address", () => {
+    expect(
+      validateConfig({
+        ...minimal,
+        project: { name: "Wiki", contribute_url: "https://forge.example/notes/issues/new" },
+      }).ok,
+    ).toBe(true);
+    const result = validateConfig({
+      ...minimal,
+      project: { name: "Wiki", contribute_url: "http://forge.example/notes" },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual([
+      {
+        severity: "error",
+        path: "project.contribute_url",
+        message: "value does not match the expected format",
+        received: "http://forge.example/notes",
+        expected: "a value matching ^https://[^\\s]+$",
+      },
+    ]);
+  });
+
+  it("accepts a title and titled, described folders on a source, keyed by their path, and rejects an empty title, a stray key or a path with a slash at either end", () => {
+    const result = validateConfig({
+      ...minimal,
+      sources: [
+        {
+          name: "specs",
+          path: "./specs",
+          title: "Specifications",
+          folders: {
+            screens: { title: "Screens", description: "What a reader sees, page by page." },
+            "rules/links": { title: "Links" },
+            "rules/vocabulary": { description: "The words the checks agree on." },
+          },
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.config.sources[0]?.folders?.["rules/links"]).toEqual({ title: "Links" });
+    }
+    expect(
+      issuesOf({
+        ...minimal,
+        sources: [
+          {
+            name: "specs",
+            path: "./specs",
+            title: "",
+            folders: { "rules/": { title: "Rules" }, screens: { colour: "red" } },
+          },
+        ],
+      }),
+    ).toEqual([
+      {
+        path: "sources[0].title",
+        message: "must NOT have fewer than 1 characters",
+        severity: "error",
+      },
+      {
+        path: "sources[0].folders.rules/",
+        message: "key is not allowed",
+        severity: "error",
+        expected: "a value matching ^[^/\\s][^\\s]*[^/\\s]$|^[^/\\s]$",
+      },
+      {
+        path: "sources[0].folders.screens.colour",
+        message: "unknown key",
+        severity: "error",
+        expected: "one of the documented keys",
+      },
+    ]);
+  });
+
   it("accepts the lock key with a warning that it is ignored", () => {
     const result = validateConfig({ ...minimal, lock: "./concordance.lock.yaml" });
     expect(result.ok).toBe(true);

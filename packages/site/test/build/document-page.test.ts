@@ -104,21 +104,23 @@ describe("The space of a document page is folded by year and month when every pa
       {
         label: "2026",
         count: 3,
+        href: "../2026/index.html",
         children: [
           {
             label: "March",
             count: 1,
+            href: "../2026/03/index.html",
             children: [{ label: "Transcript publication framing", current: true }],
           },
-          { label: "February", count: 1 },
-          { label: "January", count: 1 },
+          { label: "February", count: 1, href: "../2026/02/index.html" },
+          { label: "January", count: 1, href: "../2026/01/index.html" },
         ],
       },
-      { label: "2025", count: 1 },
+      { label: "2025", count: 1, href: "../2025/index.html" },
     ]);
     expect(props.breadcrumb).toEqual([
       { label: "framing", href: "../index.html" },
-      { label: "March 2026" },
+      { label: "March 2026", href: "../2026/03/index.html" },
       { label: "Transcript publication framing" },
     ]);
     // One deck without a date: the folder tree stays.

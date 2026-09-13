@@ -12,6 +12,7 @@ import {
   renderCommand,
   siteNames,
   sourceDescriptions,
+  sourceFolders,
   sourceRefs,
 } from "../../src/commands/render.js";
 import type { ThemeDependencies } from "../../src/commands/theme.js";
@@ -617,10 +618,32 @@ describe("siteNames", () => {
         "inference/recognition": "recognition",
         quality: "quality",
       },
+      sources: {},
     });
     expect(siteNames({ version: 1, project: { name: "W" }, sources: [] })).toEqual({
       applications: {},
       domains: {},
+      sources: {},
+    });
+  });
+
+  it("names the sources that declare a title, and keeps the folders of those that describe some", () => {
+    const config = {
+      version: 1 as const,
+      project: { name: "W" },
+      sources: [
+        {
+          name: "specs",
+          path: "./specs",
+          title: "Specifications",
+          folders: { screens: { title: "Screens", description: "What a reader sees." } },
+        },
+        { name: "glossary", path: "./glossary" },
+      ],
+    };
+    expect(siteNames(config).sources).toEqual({ specs: "Specifications" });
+    expect(sourceFolders(config)).toEqual({
+      specs: { screens: { title: "Screens", description: "What a reader sees." } },
     });
   });
 });

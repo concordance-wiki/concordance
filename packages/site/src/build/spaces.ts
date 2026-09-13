@@ -12,7 +12,8 @@ import type {
   SpacesProps,
   SpaceWord,
 } from "../slots.js";
-import { message, typeLabel, type SiteContext } from "./context.js";
+import { listedCategoriesOf } from "./category.js";
+import { labelIn, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
 import {
   ago,
   daysSince,
@@ -24,7 +25,14 @@ import {
   rankedSourceNames,
 } from "./home.js";
 import { entityHref, relativeHref, SPACES_PAGE, spacePagePath } from "./paths.js";
-import { categoryOf, categoryPagePathOf, initialsOf, topFoldersOf } from "./space.js";
+import {
+  categoryOf,
+  categoryPagePathOf,
+  folderDescription,
+  folderLabel,
+  spaceInitials,
+  topFoldersOf,
+} from "./space.js";
 
 /** The latest changes a space page lists. */
 export const SPACE_RECENT = 4;
@@ -70,9 +78,9 @@ export function spaceRowsOf(context: SiteContext): SpaceRow[] {
     const changed = newest.get(name);
     const stale = changed !== undefined && isDormant(context, name, changed);
     const row: SpaceRow = {
-      name,
+      name: spaceTitle(context, name),
       href: relativeHref(SPACES_PAGE, spacePagePath(name)),
-      initials: initialsOf(name),
+      initials: spaceInitials(context, name),
       content: contentOf(context, name),
       count: ownNotes(context, name).length,
       stale,
@@ -106,17 +114,35 @@ export function spacesPageOf(context: SiteContext): SpacesProps {
   return { spaces, labels: spacesLabels(context, spaces.length) };
 }
 
+/** The sentence of a folder card: the one the configuration gives the folder, else the description of the type its list maps to; none without either. */
+function categoryDescriptionOf(
+  context: SiteContext,
+  source: string,
+  name: string,
+): string | undefined {
+  const declared = folderDescription(context, source, [name]);
+  if (declared !== undefined) return declared;
+  const type = listedCategoriesOf(context).find(
+    (category) => category.source === source && category.folders.join("/") === name,
+  )?.type;
+  const description = type === undefined ? undefined : context.profile.types[type]?.description;
+  return description === undefined ? undefined : labelIn(description, context.language);
+}
+
 /**
- * The categories of a space: its top-level folders, each linking to its list, or, for a folder
- * whose address a note takes, to the page the tree lists first under it, where the tree opens on
- * the folder.
+ * The categories of a space: its top-level folders by their titles, with the sentence the
+ * configuration gives them or the description of their type, each linking to its list, or,
+ * for a folder whose address a note takes, to the page the tree lists first under it, where
+ * the tree opens on the folder.
  */
 export function categoriesOf(context: SiteContext, page: string, source: string): SpaceCategory[] {
   return topFoldersOf(context, source).map(({ name, count, first }) => {
-    const list = categoryPagePathOf(context, source, name);
+    const list = categoryPagePathOf(context, source, [name]);
+    const description = categoryDescriptionOf(context, source, name);
     return {
-      label: name,
+      label: folderLabel(context, source, [name]),
       href: list === undefined ? entityHref(page, first.id) : relativeHref(page, list),
+      ...(description === undefined ? {} : { description }),
       count,
     };
   });
@@ -136,7 +162,7 @@ export function spaceRecentOf(context: SiteContext, page: string, source: string
       return {
         label: entity.title,
         href: entityHref(page, entity.id),
-        ...(category === undefined ? {} : { category }),
+        ...(category === undefined ? {} : { category: folderLabel(context, source, [category]) }),
         date: changed.slice(0, 10),
         dateLabel: ago(context, changed),
       };
@@ -217,8 +243,8 @@ export function spacePageOf(context: SiteContext, source: string): SpaceProps {
   const categories = categoriesOf(context, page, source);
   const count = ownNotes(context, source).length;
   return {
-    name: source,
-    initials: initialsOf(source),
+    name: spaceTitle(context, source),
+    initials: spaceInitials(context, source),
     ...(description === undefined ? {} : { description }),
     spacesHref: relativeHref(page, SPACES_PAGE),
     repository: repositoryOf(context, source),

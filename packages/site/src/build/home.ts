@@ -12,9 +12,9 @@ import type {
   Link,
   SuggestionLabels,
 } from "../slots.js";
-import { citations, message, type SiteContext } from "./context.js";
+import { citations, message, spaceTitle, type SiteContext } from "./context.js";
 import { entityHref, HOME_PAGE, spaceHref } from "./paths.js";
-import { initialsOf } from "./space.js";
+import { spaceInitials } from "./space.js";
 
 /** The most cited words offered as shortcuts next to the search field. */
 export const HOME_SHORTCUTS = 12;
@@ -140,9 +140,10 @@ export function spacesOf(context: SiteContext): HomeSpace[] {
     const changed = newest.get(name);
     const unit = documents * 2 > own.length ? "documents" : "pages";
     const space: HomeSpace = {
-      name,
+      name: spaceTitle(context, name),
+      source: name,
       href: spaceHref(HOME_PAGE, name),
-      initials: initialsOf(name),
+      initials: spaceInitials(context, name),
       count: own.length,
       unit,
       countLabel: formatMessage(context.catalogue, `home.${unit}`, { count: own.length }),
@@ -167,7 +168,7 @@ export function recentOf(context: SiteContext): HomeChange[] {
     .map(({ entity, changed }) => ({
       label: entity.title,
       href: entityHref(HOME_PAGE, entity.id),
-      space: entity.source.name,
+      space: spaceTitle(context, entity.source.name),
       date: changed.slice(0, 10),
       dateLabel: ago(context, changed),
     }));
@@ -177,8 +178,9 @@ export function recentOf(context: SiteContext): HomeChange[] {
 export function alertsOf(context: SiteContext, spaces: readonly HomeSpace[]): HomeAlert[] {
   const newest = newestChanges(context);
   return spaces.flatMap((space) => {
-    const changed = newest.get(space.name);
-    if (changed === undefined || !isDormant(context, space.name, changed)) return [];
+    const source = space.source ?? space.name;
+    const changed = newest.get(source);
+    if (changed === undefined || !isDormant(context, source, changed)) return [];
     const days = daysSince(context, changed);
     return [
       {
@@ -186,7 +188,7 @@ export function alertsOf(context: SiteContext, spaces: readonly HomeSpace[]): Ho
         space: space.name,
         text: formatMessage(context.catalogue, "home.staleThreshold", {
           space: space.name,
-          count: warnAfterDays(context, space.name),
+          count: warnAfterDays(context, source),
         }),
       },
     ];

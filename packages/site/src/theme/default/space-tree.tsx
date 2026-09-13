@@ -70,7 +70,19 @@ export function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
   );
 }
 
-/** The badge and the name of the space heading its tree, a disclosure: closed in the column, where the stylesheet keeps it in view, served open in the drawer. */
+/** The badge and the name of the space, as the head of its tree shows them. */
+function SpaceHead({ space }: { space: SpaceTreeModel }): JSX.Element {
+  return (
+    <>
+      <span class="space-initials" aria-hidden="true">
+        {space.initials}
+      </span>
+      <span class="space-name">{space.name}</span>
+    </>
+  );
+}
+
+/** The badge and the name of the space heading its tree, a disclosure: served open in the drawer, closed elsewhere. */
 export function SpaceTreeFold({
   space,
   open = false,
@@ -81,10 +93,7 @@ export function SpaceTreeFold({
   return (
     <details class="space-tree" open={open}>
       <summary class="space-head">
-        <span class="space-initials" aria-hidden="true">
-          {space.initials}
-        </span>
-        <span class="space-name">{space.name}</span>
+        <SpaceHead space={space} />
       </summary>
       <Nodes nodes={space.nodes} />
     </details>
@@ -92,12 +101,19 @@ export function SpaceTreeFold({
 }
 
 /**
- * The left column: the initials badge and the name of the space, then its tree, folded behind
- * that name where the layout has no column for it. The badge is decorative: the name follows it.
+ * The left column: the initials badge and the name of the space as the link to its page, then
+ * its tree, which the stylesheet keeps in view there, the summary of the disclosure hidden;
+ * without a page to link, the disclosure heads the column. The badge is decorative: the name
+ * follows it.
  */
 export function SpaceTree({ space, label }: { space: SpaceTreeModel; label: string }): JSX.Element {
   return (
     <nav class="space" aria-label={label}>
+      {space.href !== undefined && (
+        <a class="space-head space-head-link" href={space.href}>
+          <SpaceHead space={space} />
+        </a>
+      )}
       <SpaceTreeFold space={space} />
     </nav>
   );

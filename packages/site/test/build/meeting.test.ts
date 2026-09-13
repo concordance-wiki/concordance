@@ -7,6 +7,7 @@ import { entityPageOf } from "../../src/build/entity-page.js";
 import type { EntityFragment } from "../../src/build/fragments.js";
 import {
   datedBreadcrumbOf,
+  datedFolderTreeOf,
   datedSpaceOf,
   dateOf,
   decisionsOf,
@@ -192,18 +193,21 @@ describe("isDatedSpace", () => {
 });
 
 describe("datedSpaceOf", () => {
-  it("draws the years newest first with their counts, the year of the page open on its months, the month of the page open on its notes newest first, the page marked", () => {
+  it("draws the years newest first with their counts, the year of the page open on its months, the month of the page open on its notes newest first, the page marked, every year and month linked to its list", () => {
     expect(datedSpaceOf(context(), page, review)).toEqual({
       name: "meetings",
       initials: "ME",
+      href: "../index.html",
       nodes: [
         {
           label: "2026",
           count: 3,
+          href: "../2026/index.html",
           children: [
             {
               label: "March",
               count: 2,
+              href: "../2026/03/index.html",
               children: [
                 {
                   label: "Neighbourhood cap review",
@@ -212,12 +216,55 @@ describe("datedSpaceOf", () => {
                 { label: "Keyword page threshold review", current: true },
               ],
             },
-            { label: "February", count: 1 },
+            { label: "February", count: 1, href: "../2026/02/index.html" },
           ],
         },
-        { label: "2025", count: 1 },
+        { label: "2025", count: 1, href: "../2025/index.html" },
       ],
     });
+  });
+
+  it("leaves a year or a month whose address a note takes without a link", () => {
+    const yearNote = entity({
+      ...capReview,
+      id: "meetings/2026",
+      title: "The year",
+      source: { name: "meetings", path: "2026.md", line: 1 },
+    });
+    const monthNote = entity({
+      ...capReview,
+      id: "meetings/2026/03",
+      title: "The month",
+      source: { name: "meetings", path: "2026/03.md", line: 1 },
+    });
+    const nodes = datedSpaceOf(context({}, [review, yearNote, monthNote]), page, review).nodes;
+    expect(nodes[0]?.href).toBeUndefined();
+    expect(nodes[0]?.children?.[0]?.href).toBeUndefined();
+  });
+
+  it("marks a year or a month as the current page from its list, closed, the year of a month open", () => {
+    const year = datedFolderTreeOf(context(), "meetings/2026/index.html", "meetings", ["2026"]);
+    expect(year.nodes).toEqual([
+      { label: "2026", count: 3, current: true },
+      { label: "2025", count: 1, href: "../2025/index.html" },
+    ]);
+    const month = datedFolderTreeOf(context(), "meetings/2026/03/index.html", "meetings", [
+      "2026",
+      "03",
+    ]);
+    expect(month.href).toBe("../../index.html");
+    expect(month.nodes).toEqual([
+      {
+        label: "2026",
+        count: 3,
+        href: "../index.html",
+        children: [
+          { label: "March", count: 2, current: true },
+          { label: "February", count: 1, href: "../02/index.html" },
+        ],
+      },
+      { label: "2025", count: 1, href: "../../2025/index.html" },
+    ]);
   });
 
   it("names the months in the language of the site and orders the notes of a day by title, then by identifier", () => {
@@ -251,21 +298,21 @@ describe("datedSpaceOf", () => {
   it("opens no month for a page without a date, every year and month counted closed", () => {
     const undated = entity({ ...capReview, source: { ...capReview.source, path: "undated.md" } });
     expect(datedSpaceOf(context({}, [review, undated]), page, undated).nodes).toEqual([
-      { label: "2026", count: 1 },
+      { label: "2026", count: 1, href: "../2026/index.html" },
     ]);
   });
 });
 
 describe("datedBreadcrumbOf", () => {
-  it("names the space, the month of the page in the language of the site, then the page", () => {
+  it("names the space, the month of the page in the language of the site linked to its list, then the page", () => {
     expect(datedBreadcrumbOf(context(), page, review)).toEqual([
       { label: "meetings", href: "../index.html" },
-      { label: "March 2026" },
+      { label: "March 2026", href: "../2026/03/index.html" },
       { label: "Keyword page threshold review" },
     ]);
     expect(
       datedBreadcrumbOf(context({ catalogue: loadCatalogue("fr"), locale: "fr" }), page, review)[1],
-    ).toEqual({ label: "mars 2026" });
+    ).toEqual({ label: "mars 2026", href: "../2026/03/index.html" });
   });
 
   it("skips the month for a page without a date", () => {
@@ -471,7 +518,7 @@ describe("entityPageOf on a meeting", () => {
     const props = entityPageOf(context({ pseudonymized: true }), review);
     expect(props.meeting?.participants).toBe("Pseudonymised participants");
     expect(props.space?.nodes[0]?.label).toBe("2026");
-    expect(props.breadcrumb?.[1]).toEqual({ label: "March 2026" });
+    expect(props.breadcrumb?.[1]).toEqual({ label: "March 2026", href: "../2026/03/index.html" });
     expect(props.mentions.labels?.orderNote).toBe(
       "A meeting does not enter the model: it brings passages, and sometimes a decision someone took the trouble to write elsewhere.",
     );

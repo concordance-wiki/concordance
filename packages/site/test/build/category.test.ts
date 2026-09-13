@@ -12,6 +12,7 @@ import {
   categoryLabels,
   categoryLead,
   categoryName,
+  categoryNoun,
   categorySearchField,
   categoryTitle,
   categoryTreeOf,
@@ -152,7 +153,9 @@ function screensContext(extra: Entity[] = []): SiteContext {
 }
 
 const screens = (all: SiteContext): Category => {
-  const found = listedCategoriesOf(all).find((category) => category.folder === "screens");
+  const found = listedCategoriesOf(all).find(
+    (category) => category.folders.join("/") === "screens",
+  );
   if (found === undefined) throw new Error("screens: not found");
   return found;
 };
@@ -172,14 +175,18 @@ describe("listedCategoriesOf", () => {
     expect(listedCategoriesOf(context())).toEqual([
       {
         source: "specs",
-        folder: "rules",
+        folders: ["rules"],
+        labels: ["rules"],
+        heading: "Rules",
         type: "rule",
         notes: [rule],
         page: "specs/rules/index.html",
       },
       {
         source: "specs",
-        folder: "screens",
+        folders: ["screens"],
+        labels: ["screens"],
+        heading: "Screens",
         type: "screen",
         notes: [screen],
         page: "specs/screens/index.html",
@@ -192,7 +199,7 @@ describe("listedCategoriesOf", () => {
       screenNote("api-page", "API page", { type_origin: "frontmatter", type: "api" }),
     ]);
     const categories = listedCategoriesOf(all);
-    expect(categories.map((category) => [category.folder, category.type])).toEqual([
+    expect(categories.map((category) => [category.folders.join("/"), category.type])).toEqual([
       ["data", undefined],
       ["notes", undefined],
       ["roles", "role"],
@@ -211,7 +218,9 @@ describe("listedCategoriesOf", () => {
   it("orders the spaces by name, whatever the order of their notes", () => {
     const terms = entity({ id: "glossary/terms/alias", type: "term", title: "Alias" });
     const all = context({ model: model({ entities: [screen, terms, rule] }) });
-    expect(listedCategoriesOf(all).map((category) => [category.source, category.folder])).toEqual([
+    expect(
+      listedCategoriesOf(all).map((category) => [category.source, category.folders.join("/")]),
+    ).toEqual([
       ["glossary", "terms"],
       ["specs", "rules"],
       ["specs", "screens"],
@@ -219,7 +228,9 @@ describe("listedCategoriesOf", () => {
   });
 
   it("gives no list to a folder whose address a note takes", () => {
-    const folders = listedCategoriesOf(screensContext()).map((category) => category.folder);
+    const folders = listedCategoriesOf(screensContext()).map((category) =>
+      category.folders.join("/"),
+    );
     expect(folders).not.toContain("viewers");
   });
 
@@ -256,7 +267,9 @@ describe("categoryTitle and categoryName", () => {
 describe("highlightOf", () => {
   const category = (type?: string): Category => ({
     source: "specs",
-    folder: "screens",
+    folders: ["screens"],
+    labels: ["screens"],
+    heading: "Screens",
     ...(type === undefined ? {} : { type }),
     notes: [],
     page: "specs/screens/index.html",
@@ -361,7 +374,9 @@ describe("rowsOf", () => {
 
   it("leaves the values empty for a folder mapping to no type", () => {
     const all = screensContext();
-    const notes = listedCategoriesOf(all).find((category) => category.folder === "notes");
+    const notes = listedCategoriesOf(all).find(
+      (category) => category.folders.join("/") === "notes",
+    );
     expect(notes).toBeDefined();
     expect(rowsOf(all, notes as Category).map((row) => [row.values, row.keys])).toEqual([
       [[], []],
@@ -447,7 +462,9 @@ describe("variantFile and variantPath", () => {
   it("put the state under the output folder of the list", () => {
     const category: Category = {
       source: "specs",
-      folder: "screens",
+      folders: ["screens"],
+      labels: ["screens"],
+      heading: "Screens",
       notes: [],
       page: "specs/screens/index.html",
     };
@@ -490,7 +507,9 @@ describe("categoryLabels", () => {
 describe("categoryLead", () => {
   const category = (type: string | undefined, count: number): Category => ({
     source: "specs",
-    folder: "screens",
+    folders: ["screens"],
+    labels: ["screens"],
+    heading: "Screens",
     ...(type === undefined ? {} : { type }),
     notes: Array.from({ length: count }, (_, index) => screenNote(String(index), "Screen")),
     page: "specs/screens/index.html",
@@ -544,6 +563,7 @@ describe("categoryTreeOf", () => {
     expect(categoryTreeOf(all, category.page, category)).toEqual({
       name: "specs",
       initials: "SP",
+      href: "../index.html",
       nodes: [
         { label: "data", count: 1, href: "../data/index.html" },
         { label: "notes", count: 2, href: "../notes/index.html" },
@@ -606,7 +626,7 @@ describe("categoryBreadcrumb", () => {
     expect(categoryBreadcrumb(all, "specs/screens/index.html", screens(all))).toEqual([
       { label: "Spaces", href: "../../spaces/index.html" },
       { label: "specs", href: "../index.html" },
-      { label: "Screens" },
+      { label: "screens" },
     ]);
   });
 });
@@ -629,9 +649,276 @@ describe("categorySearchField", () => {
 
   it("submits with the space alone for a folder mapping to no type", () => {
     const all = screensContext();
-    const notes = listedCategoriesOf(all).find((category) => category.folder === "notes");
+    const notes = listedCategoriesOf(all).find(
+      (category) => category.folders.join("/") === "notes",
+    );
     expect(categorySearchField(all, field, notes as Category).filters).toEqual({
       source: "specs",
+    });
+  });
+});
+
+/** The specifications space with a folder two levels deep, `rules/links`, and a note taking the address of a third one. */
+function nestedContext(): SiteContext {
+  return context({
+    model: model({
+      entities: [
+        rule,
+        entity({ id: "specs/rules/links/broken-link", type: "rule", title: "Broken link" }),
+        entity({ id: "specs/rules/links/dead-end", type: "rule", title: "Dead end" }),
+        entity({ id: "specs/rules/vocabulary", type: "decision", title: "Vocabulary" }),
+        entity({ id: "specs/rules/vocabulary/stopword", type: "rule", title: "Stopword" }),
+      ],
+    }),
+    folders: {
+      specs: {
+        rules: { title: "Rules", description: "What the build checks." },
+        "rules/links": { title: "Links" },
+      },
+    },
+  });
+}
+
+/** A space whose every note is dated: two months of one year and a note of the year before. */
+function datedContext(): SiteContext {
+  const dated = (day: string, title: string): Entity =>
+    entity({
+      id: `meetings/${day}-${title.toLowerCase().replaceAll(" ", "-")}`,
+      type: "meeting",
+      title,
+      source: {
+        name: "meetings",
+        path: `${day}-${title.toLowerCase().replaceAll(" ", "-")}.md`,
+        line: 1,
+      },
+    });
+  return context({
+    model: model({
+      entities: [
+        dated("2026-03-12", "Threshold review"),
+        dated("2026-03-20", "Cap review"),
+        dated("2026-02-05", "Theme workshop"),
+        dated("2025-11-30", "Kick off"),
+        screen,
+      ],
+    }),
+  });
+}
+
+describe("listedCategoriesOf at every depth", () => {
+  it("lists a folder at every depth with the notes under it, sources then paths in code-unit order, and skips a folder whose address a note takes", () => {
+    const categories = listedCategoriesOf(nestedContext());
+    expect(categories.map((category) => [category.folders, category.type, category.page])).toEqual([
+      [["rules"], undefined, "specs/rules/index.html"],
+      [["rules", "links"], "rule", "specs/rules/links/index.html"],
+    ]);
+    expect(categories[0]?.notes.map((note) => note.title)).toEqual([
+      "Broken link",
+      "Dead end",
+      "Épreuve du seuil",
+      "Stopword",
+      "Vocabulary",
+    ]);
+    expect(categories[1]?.notes.map((note) => note.title)).toEqual(["Broken link", "Dead end"]);
+  });
+
+  it("lists the years and the months of a dated space, marked as dated, before its folders", () => {
+    const categories = listedCategoriesOf(datedContext());
+    expect(categories.map((category) => [category.folders, category.dated, category.page])).toEqual(
+      [
+        [["2025"], true, "meetings/2025/index.html"],
+        [["2025", "11"], true, "meetings/2025/11/index.html"],
+        [["2026"], true, "meetings/2026/index.html"],
+        [["2026", "02"], true, "meetings/2026/02/index.html"],
+        [["2026", "03"], true, "meetings/2026/03/index.html"],
+        [["screens"], undefined, "specs/screens/index.html"],
+      ],
+    );
+    expect(categories[2]?.notes.map((note) => note.title)).toEqual([
+      "Cap review",
+      "Theme workshop",
+      "Threshold review",
+    ]);
+    expect(categories[2]?.type).toBe("meeting");
+  });
+
+  it("gives the address of a year or a month to its list before a folder of the same name", () => {
+    const folder = entity({
+      id: "meetings/2026/notes/late-note",
+      type: "meeting",
+      title: "Late note",
+      attributes: { date: "2026-03-30" },
+      source: { name: "meetings", path: "2026/notes/late-note.md", line: 1 },
+    });
+    const all = context({
+      model: model({ entities: [...datedContext().model.entities, folder] }),
+    });
+    const listed = listedCategoriesOf(all).filter((category) => category.source === "meetings");
+    expect(
+      listed.map(
+        (category) => `${category.folders.join("/")}${category.dated === true ? "*" : ""}`,
+      ),
+    ).toEqual(["2025*", "2025/11*", "2026*", "2026/03*", "2026/02*", "2026/notes"].sort());
+    expect(listed.find((category) => category.folders.join("/") === "2026")?.dated).toBe(true);
+  });
+});
+
+describe("the labels, the heading and the noun of a category", () => {
+  it("label the folders on the way by their titles, else their names, capitalise the heading of an untitled folder and lower the noun", () => {
+    const all = nestedContext();
+    const [rules, links] = listedCategoriesOf(all);
+    expect(rules?.labels).toEqual(["Rules"]);
+    expect(links?.labels).toEqual(["Rules", "Links"]);
+    expect(links?.heading).toBe("Links");
+    expect(categoryNoun(all, links as Category)).toBe("links");
+    const plain = context();
+    const [, screens] = listedCategoriesOf(plain);
+    expect(screens?.labels).toEqual(["screens"]);
+    expect(screens?.heading).toBe("Screens");
+    expect(categoryNoun(plain, screens as Category)).toBe("screens");
+  });
+
+  it("name a year by itself, a month by its name and with its year in the heading, in the language of the site, and count in pages", () => {
+    const all = datedContext();
+    const [, november, year, , march] = listedCategoriesOf(all);
+    expect(year?.labels).toEqual(["2026"]);
+    expect(march?.labels).toEqual(["2026", "March"]);
+    expect(year?.heading).toBe("2026");
+    expect(march?.heading).toBe("March 2026");
+    expect(november?.heading).toBe("November 2025");
+    expect(categoryNoun(all, march as Category)).toBe("pages");
+    const fr = context({ ...datedContext(), catalogue: loadCatalogue("fr"), locale: "fr" });
+    const [, novembre] = listedCategoriesOf(fr);
+    expect(novembre?.labels).toEqual(["2025", "novembre"]);
+    expect(novembre?.heading).toBe("novembre 2025");
+  });
+});
+
+describe("categoryLead below the top", () => {
+  it("counts the pages filed under the path for a deeper folder, a year or a month, then describes the type", () => {
+    const nested = nestedContext();
+    const [, links] = listedCategoriesOf(nested);
+    expect(categoryLead(nested, links as Category)).toBe(
+      "2 pages filed under Rules › Links. A business rule is a condition the business imposes, with what it constrains and what happens when it is broken.",
+    );
+    const dated = datedContext();
+    const [, november, year] = listedCategoriesOf(dated);
+    expect(categoryLead(dated, year as Category)).toMatch(/^3 pages filed under 2026\. /);
+    expect(categoryLead(dated, november as Category)).toMatch(
+      /^1 page filed under 2025 › November\. /,
+    );
+    const fr = context({ ...datedContext(), catalogue: loadCatalogue("fr"), locale: "fr" });
+    const [, novembre] = listedCategoriesOf(fr);
+    expect(categoryLead(fr, novembre as Category)).toMatch(
+      /^1 page rangée sous 2025 › novembre\. /,
+    );
+  });
+});
+
+describe("categoryTreeOf below the top", () => {
+  it("opens the folders on the way to a deeper folder, marks it closed, and links the others to their lists", () => {
+    const all = nestedContext();
+    const [, links] = listedCategoriesOf(all);
+    expect(categoryTreeOf(all, "specs/rules/links/index.html", links as Category)).toEqual({
+      name: "specs",
+      initials: "SP",
+      href: "../../index.html",
+      nodes: [
+        {
+          label: "Rules",
+          count: 5,
+          href: "../index.html",
+          children: [
+            { label: "Links", count: 2, current: true },
+            { label: "vocabulary", count: 1 },
+            { label: "Épreuve du seuil", href: "../publication-threshold/index.html" },
+            { label: "Vocabulary", href: "../vocabulary/index.html" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("draws the tree of a dated space by year and month from the list of a month", () => {
+    const all = datedContext();
+    const [, , , , march] = listedCategoriesOf(all);
+    expect(categoryTreeOf(all, "meetings/2026/03/index.html", march as Category).nodes).toEqual([
+      {
+        label: "2026",
+        count: 3,
+        href: "../index.html",
+        children: [
+          { label: "March", count: 2, current: true },
+          { label: "February", count: 1, href: "../02/index.html" },
+        ],
+      },
+      { label: "2025", count: 1, href: "../../2025/index.html" },
+    ]);
+  });
+});
+
+describe("categoryBreadcrumb below the top", () => {
+  it("leads through every folder on the way, each to its list, and ends on the folder by its title", () => {
+    const all = nestedContext();
+    const [, links] = listedCategoriesOf(all);
+    expect(categoryBreadcrumb(all, "specs/rules/links/index.html", links as Category)).toEqual([
+      { label: "Spaces", href: "../../../spaces/index.html" },
+      { label: "specs", href: "../../index.html" },
+      { label: "Rules", href: "../index.html" },
+      { label: "Links" },
+    ]);
+  });
+
+  it("names the year then the month of a dated list, the year linked to its list, and a folder whose address a note takes without a link", () => {
+    const dated = datedContext();
+    const [, , , , march] = listedCategoriesOf(dated);
+    expect(categoryBreadcrumb(dated, "meetings/2026/03/index.html", march as Category)).toEqual([
+      { label: "Spaces", href: "../../../spaces/index.html" },
+      { label: "meetings", href: "../../index.html" },
+      { label: "2026", href: "../index.html" },
+      { label: "March" },
+    ]);
+    const shadowed = context({
+      model: model({
+        entities: [
+          screen,
+          entity({ id: "specs/screens/pages/home", type: "screen", title: "Home" }),
+          entity({
+            id: "specs/screens",
+            type: "document",
+            title: "Screens",
+            source: { name: "specs", path: "screens.md", line: 1 },
+          }),
+        ],
+      }),
+    });
+    const [pages] = listedCategoriesOf(shadowed);
+    expect(pages?.folders).toEqual(["screens", "pages"]);
+    expect(
+      categoryBreadcrumb(shadowed, "specs/screens/pages/index.html", pages as Category),
+    ).toEqual([
+      { label: "Spaces", href: "../../../spaces/index.html" },
+      { label: "specs", href: "../../index.html" },
+      { label: "screens" },
+      { label: "pages" },
+    ]);
+  });
+});
+
+describe("categorySearchField of a dated list", () => {
+  it("asks to search in the month with its year and submits with the space and the type", () => {
+    const all = datedContext();
+    const [, , , , march] = listedCategoriesOf(all);
+    expect(
+      categorySearchField(
+        all,
+        { action: "../../../search/index.html", placeholder: "" },
+        march as Category,
+      ),
+    ).toEqual({
+      action: "../../../search/index.html",
+      placeholder: "Search in March 2026",
+      filters: { source: "meetings", type: "meeting" },
     });
   });
 });
@@ -698,7 +985,7 @@ describe("categoryDocumentsOf", () => {
       count: 4,
       current: true,
     });
-    expect(whole?.props.breadcrumb.at(-1)).toEqual({ label: "Screens" });
+    expect(whole?.props.breadcrumb.at(-1)).toEqual({ label: "screens" });
     expect(whole?.props.labels?.shownOf).toBe("{shown} screens of {total} — pagination by twenty.");
   });
 
@@ -817,7 +1104,9 @@ describe("categoryDocumentsOf", () => {
 
   it("gives a folder mapping to no type the heading Page, no filter and the count of pages", () => {
     const all = screensContext();
-    const notes = listedCategoriesOf(all).find((category) => category.folder === "notes");
+    const notes = listedCategoriesOf(all).find(
+      (category) => category.folders.join("/") === "notes",
+    );
     const documents = categoryDocumentsOf(all, notes as Category);
     expect(documents.map((document) => document.path)).toEqual([
       "specs/notes/index.html",

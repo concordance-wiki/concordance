@@ -231,7 +231,10 @@ export interface FooterProps {
 
 /** A space of the home page: a source, how much it holds and when it last moved; its row leads to its page. */
 export interface HomeSpace {
+  /** The title of the space, as shown. */
   name: string;
+  /** The name of the source behind the space, its identifier in the addresses; the title when absent. */
+  source?: string;
   /** Where the page of the space stands. */
   href: string;
   /** Two letters standing for the space in its badge. */
@@ -401,16 +404,17 @@ export interface EntityPageLabels {
   imageNote: string;
 }
 
-/** A step of the breadcrumb: the space, a folder, the page; only the space has a page of its own. */
+/** A step of the breadcrumb: the space, a folder, the page; the space leads to its page, a folder to its list, the last step is where the reader stands. */
 export interface BreadcrumbItem {
   label: string;
+  /** Absent on the last step, and on a folder whose address a note takes. */
   href?: string;
 }
 
 /** A node of the tree of the current space: a folder with its page count, a page, or the pages a long folder leaves out. */
 export interface SpaceNode {
   label: string;
-  /** Where a page leads; where the list of a folder opens, for a folder at the top of the space; a deeper folder has none. */
+  /** Where a page leads; where the list of a folder opens; absent on the current page, and on a folder whose address a note takes. */
   href?: string;
   /** How many pages a folder holds: what tells a folder from a page. */
   count?: number;
@@ -424,9 +428,12 @@ export interface SpaceNode {
 
 /** The space of a page: the source it comes from, as the reader browses it in the left column. */
 export interface SpaceTree {
+  /** The title of the space, heading the tree. */
   name: string;
   /** Two letters standing for the space in the badge above the tree. */
   initials: string;
+  /** Where the page of the space stands; absent, the head of the tree is plain text. */
+  href?: string;
   nodes: SpaceNode[];
 }
 

@@ -1,7 +1,7 @@
 import { posix } from "node:path";
 
 import { slugify, type Entity } from "@concordance-wiki/core";
-import { formatMessage, formatText } from "@concordance-wiki/i18n";
+import { formatMessage, formatMonth, formatText } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type {
@@ -15,7 +15,6 @@ import type {
   CategoryRow,
   CategorySort,
   SearchField,
-  SpaceNode,
   SpaceTree,
 } from "../slots.js";
 import {
@@ -25,10 +24,20 @@ import {
   pageRows,
   sortChoices,
 } from "../theme/default/category-island.js";
-import { labelIn, message, typeLabel, type SiteContext } from "./context.js";
+import { labelIn, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
 import { attributeLabel, attributeOf, neighbourCount } from "./entity-page.js";
+import { sourceNames } from "./home.js";
+import {
+  datedFolderTreeOf,
+  datedFoldersOf,
+  datedNotesOf,
+  groupBy,
+  isDatedSpace,
+  monthOf,
+  type DatedNote,
+} from "./meeting.js";
 import { entityHref, relativeHref, spaceHref, SPACES_PAGE } from "./paths.js";
-import { categoryPagePathOf, initialsOf } from "./space.js";
+import { categoryPagePathOf, folderLabel, folderTreeOf, treeOf, type Folder } from "./space.js";
 
 /**
  * How many pre-rendered variants a list may have, the sorts times the attribute values and the
@@ -36,11 +45,26 @@ import { categoryPagePathOf, initialsOf } from "./space.js";
  */
 export const CATEGORY_VARIANTS_MAX = 12;
 
-/** A folder at the top of a space: its notes, and the type the folder maps to when it maps to one. */
+/** A folder of a space, at any depth, or a year or a month of a dated space: its notes, and the type the folder maps to when it maps to one. */
 export interface Category {
   source: string;
-  /** The folder name as written on the paths. */
-  folder: string;
+  /**
+   * The folders on the way to the list, as written on the paths, `["rules", "links"]`; the year
+   * and the month, `["2026", "08"]`, in a dated space.
+   */
+  folders: string[];
+  /**
+   * The label of every folder on the way, in order: the titles the configuration gives them,
+   * else their names as written; the year and the month name in a dated space.
+   */
+  labels: string[];
+  /**
+   * The heading of the list: the title the configuration gives the folder, else its name
+   * capitalised; the year, or the month with its year, in a dated space.
+   */
+  heading: string;
+  /** `true` when the folders are a year and a month of a dated space rather than folders of the repository. */
+  dated?: true;
   /**
    * The type the folder maps to: the one type of every note the typing gave it from the source,
    * a rule, a suffix or the default, a note typed by its own frontmatter filed there all the same;
@@ -49,7 +73,7 @@ export interface Category {
   type?: string;
   /** The notes of the folder and its sub-folders, in title order. */
   notes: Entity[];
-  /** The page of the whole list, `<source>/<folder slug>/index.html`. */
+  /** The page of the whole list, `<source>/<folder slugs>/index.html`. */
   page: string;
 }
 
@@ -59,23 +83,73 @@ export function topFolderOf(entity: Entity): string | undefined {
   return cut < 0 ? undefined : entity.source.path.slice(0, cut);
 }
 
-/** The notes of every space by their folder at the top, sources and folders in code-unit order, the notes by title, the type the folder maps to; a folder whose address a note takes has no list. */
+/** The notes of a folder and of its folders, in the order met. */
+function notesUnder(folder: Folder): Entity[] {
+  return [
+    ...folder.pages.map(({ entity }) => entity),
+    ...[...folder.folders.values()].flatMap(notesUnder),
+  ];
+}
+
+/** What names a category: the folders on its way, their labels and the heading of its list. */
+interface CategoryName {
+  folders: string[];
+  labels: string[];
+  heading: string;
+}
+
+/** The names of the year and the month lists of a dated space, from the notes of the year. */
+function datedNamesOf(
+  context: SiteContext,
+  year: string,
+  ofYear: readonly DatedNote[],
+): { name: CategoryName; notes: readonly DatedNote[] }[] {
+  const months = [...groupBy(ofYear, (note) => note.date.slice(0, 7)).entries()];
+  return [
+    { name: { folders: [year], labels: [year], heading: year }, notes: ofYear },
+    ...months.map(([month, ofMonth]) => {
+      const day = `${month}-01`;
+      return {
+        name: {
+          folders: datedFoldersOf(month),
+          labels: [year, monthOf(context, day)],
+          heading: formatMonth(context.locale ?? context.language, new Date(day)),
+        },
+        notes: ofMonth,
+      };
+    }),
+  ];
+}
+
+/** The name of the list of a folder, named by the folders on its way, the last being its own. */
+function folderNameOf(
+  context: SiteContext,
+  source: string,
+  folders: string[],
+  name: string,
+): CategoryName {
+  const configured = context.folders?.[source]?.[folders.join("/")]?.title;
+  return {
+    folders,
+    labels: folders.map((_, index) => folderLabel(context, source, folders.slice(0, index + 1))),
+    heading: configured ?? categoryTitle(name),
+  };
+}
+
+/**
+ * The notes of every space by folder, at every depth, and by year and month in a dated space,
+ * sources then folder paths in code-unit order, the notes by title, the type the folder maps to;
+ * a folder whose address a note takes, or another list, has no list.
+ */
 export function listedCategoriesOf(context: SiteContext): Category[] {
-  const groups = new Map<string, Map<string, Entity[]>>();
-  for (const entity of context.model.entities) {
-    if (entity.keyword === true) continue;
-    const folder = topFolderOf(entity);
-    if (folder === undefined) continue;
-    const source = entity.source.name;
-    const folders = groups.get(source) ?? new Map<string, Entity[]>();
-    groups.set(source, folders);
-    folders.set(folder, [...(folders.get(folder) ?? []), entity]);
-  }
   const categories: Category[] = [];
-  for (const [source, folders] of [...groups.entries()].sort(([a], [b]) => byCodeUnit(a, b))) {
-    for (const [folder, notes] of [...folders.entries()].sort(([a], [b]) => byCodeUnit(a, b))) {
-      const page = categoryPagePathOf(context, source, folder);
-      if (page === undefined) continue;
+  for (const source of sourceNames(context)) {
+    const listed: Category[] = [];
+    const taken = new Set<string>();
+    const add = (name: CategoryName, notes: readonly Entity[], dated: boolean): void => {
+      const page = categoryPagePathOf(context, source, name.folders);
+      if (page === undefined || taken.has(page)) return;
+      taken.add(page);
       const types = new Set(
         notes.filter((note) => note.type_origin !== "frontmatter").map((note) => note.type),
       );
@@ -83,14 +157,38 @@ export function listedCategoriesOf(context: SiteContext): Category[] {
       const sorted = [...notes].sort(
         (a, b) => context.collate(a.title, b.title) || byCodeUnit(a.id, b.id),
       );
-      categories.push({
+      listed.push({
         source,
-        folder,
+        ...name,
+        ...(dated ? { dated: true } : {}),
         ...(type === undefined ? {} : { type }),
         notes: sorted,
         page,
       });
+    };
+    if (isDatedSpace(context, source)) {
+      const years = groupBy(datedNotesOf(context, source), (note) => note.date.slice(0, 4));
+      for (const [year, ofYear] of years) {
+        for (const { name, notes } of datedNamesOf(context, year, ofYear)) {
+          add(
+            name,
+            notes.map(({ entity }) => entity),
+            true,
+          );
+        }
+      }
     }
+    const walk = (folder: Folder, prefix: readonly string[]): void => {
+      for (const [name, child] of [...folder.folders.entries()].sort(([a], [b]) =>
+        byCodeUnit(a, b),
+      )) {
+        const folders = [...prefix, name];
+        add(folderNameOf(context, source, folders, name), notesUnder(child), false);
+        walk(child, folders);
+      }
+    };
+    walk(treeOf(context, source), []);
+    categories.push(...listed.sort((a, b) => byCodeUnit(a.folders.join("/"), b.folders.join("/"))));
   }
   return categories;
 }
@@ -104,6 +202,13 @@ export function categoryTitle(folder: string): string {
 /** The folder name as a sentence names it: its separators as spaces, in lower case. */
 export function categoryName(folder: string): string {
   return folder.replaceAll(/[-_]+/g, " ").trim().toLowerCase();
+}
+
+/** The noun the sentences of a list count with: the folder label in lower case, "screens"; "pages" for a year or a month. */
+export function categoryNoun(context: SiteContext, category: Category): string {
+  return category.dated === true
+    ? message(context, "category.pagesName")
+    : categoryName(folderLabel(context, category.source, category.folders));
 }
 
 /** The type of a category and the first attribute it highlights: what the filter and the second column of the list show. */
@@ -284,15 +389,21 @@ export function categoryLabels(context: SiteContext, name: string): CategoryList
 }
 
 /**
- * The line under the title: the count worded by the type ("64 screens described") followed by
- * its description, or the count of pages for a folder mapping to no type or a type without a
- * count message.
+ * The line under the title: for a folder at the top of the space, the count worded by the type
+ * ("64 screens described"), or the count of pages for a folder mapping to no type or a type
+ * without a count message; for a deeper folder, a year or a month, the count of pages filed
+ * under the path ("12 pages filed under rules › links"); then the description of the type.
  */
 export function categoryLead(context: SiteContext, category: Category): string {
   const count = category.notes.length;
   const definition = category.type === undefined ? undefined : context.profile.types[category.type];
-  const counted =
-    definition?.counted === undefined
+  const nested = category.dated === true || category.folders.length > 1;
+  const counted = nested
+    ? formatMessage(context.catalogue, "category.filedUnder", {
+        count,
+        path: category.labels.join(" › "),
+      })
+    : definition?.counted === undefined
       ? formatMessage(context.catalogue, "category.pages", { count })
       : formatText(context.catalogue, labelIn(definition.counted, context.language), { count });
   const description =
@@ -302,48 +413,32 @@ export function categoryLead(context: SiteContext, category: Category): string {
   return description === undefined ? `${counted}.` : `${counted}. ${description}`;
 }
 
-/** The tree of the space from the page of a list: its folders at the top with their counts and their lists, this one marked, then the notes at the root of the space. */
+/** The tree of the space from the page of a list: the folders on the way open, this one marked as the current page; by year and month in a dated space. */
 export function categoryTreeOf(context: SiteContext, page: string, category: Category): SpaceTree {
-  const counts = new Map<string, number>();
-  const roots: Entity[] = [];
-  for (const entity of context.model.entities) {
-    if (entity.keyword === true || entity.source.name !== category.source) continue;
-    const folder = topFolderOf(entity);
-    if (folder === undefined) {
-      roots.push(entity);
-    } else {
-      counts.set(folder, (counts.get(folder) ?? 0) + 1);
-    }
-  }
-  const folders = [...counts.entries()]
-    .sort(([a], [b]) => byCodeUnit(a, b))
-    .map(([label, count]): SpaceNode => {
-      if (label === category.folder) return { label, count, current: true };
-      const target = categoryPagePathOf(context, category.source, label);
-      return target === undefined
-        ? { label, count }
-        : { label, count, href: relativeHref(page, target) };
-    });
-  const pages = roots
-    .sort((a, b) => byCodeUnit(a.source.path, b.source.path) || byCodeUnit(a.id, b.id))
-    .map((note): SpaceNode => ({ label: note.title, href: entityHref(page, note.id) }));
-  return {
-    name: category.source,
-    initials: initialsOf(category.source),
-    nodes: [...folders, ...pages],
-  };
+  return category.dated === true
+    ? datedFolderTreeOf(context, page, category.source, category.folders)
+    : folderTreeOf(context, page, category.source, category.folders);
 }
 
-/** Spaces › space › folder: the first step leads to the spaces page, the second to the page of the space, the folder is where the reader stands. */
+/** Spaces › space › folders: the first step leads to the spaces page, the second to the page of the space, every folder on the way to its list, the last is where the reader stands. */
 export function categoryBreadcrumb(
   context: SiteContext,
   page: string,
   category: Category,
 ): BreadcrumbItem[] {
+  const last = category.labels.length - 1;
   return [
     { label: message(context, "site.spaces"), href: relativeHref(page, SPACES_PAGE) },
-    { label: category.source, href: spaceHref(page, category.source) },
-    { label: categoryTitle(category.folder) },
+    { label: spaceTitle(context, category.source), href: spaceHref(page, category.source) },
+    ...category.labels.map((label, index): BreadcrumbItem => {
+      if (index === last) return { label };
+      const target = categoryPagePathOf(
+        context,
+        category.source,
+        category.folders.slice(0, index + 1),
+      );
+      return target === undefined ? { label } : { label, href: relativeHref(page, target) };
+    }),
   ];
 }
 
@@ -356,7 +451,7 @@ export function categorySearchField(
   return {
     ...field,
     placeholder: formatMessage(context.catalogue, "category.searchIn", {
-      name: categoryName(category.folder),
+      name: category.dated === true ? category.heading : categoryNoun(context, category),
     }),
     filters: {
       source: category.source,
@@ -440,10 +535,9 @@ export function categoryDocumentsOf(context: SiteContext, category: Category): C
   const attribute = highlight?.attribute;
   const values = highlight === undefined ? [] : filterValuesOf(context, rows);
   const addressed = preRendered(values.length);
-  const name = categoryName(category.folder);
-  const labels = categoryLabels(context, name);
+  const labels = categoryLabels(context, categoryNoun(context, category));
   const common = {
-    title: categoryTitle(category.folder),
+    title: category.heading,
     lead: categoryLead(context, category),
     unit:
       category.type === undefined

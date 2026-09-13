@@ -6,6 +6,8 @@ export interface ProjectConfig {
   locale?: Locale;
   theme?: string;
   edit_url?: string;
+  /** Where every call to action of the site leads when no forge link can be built for it. */
+  contribute_url?: string;
 }
 
 export type PluginConfig = string | { name: string; options?: Record<string, unknown> };
@@ -50,6 +52,14 @@ export interface TypingRule {
   set: Record<string, string | number | boolean>;
 }
 
+/** The title and the description of a folder of a source, as the site shows them. */
+export interface FolderConfig {
+  /** The title of the folder wherever the site names it; its name as written on the paths when absent. */
+  title?: string;
+  /** One sentence on what the folder holds, shown on its card on the page of the space. */
+  description?: string;
+}
+
 export interface SourceConfig {
   name: string;
   git?: string;
@@ -60,8 +70,12 @@ export interface SourceConfig {
   type?: string;
   default_type?: string;
   application?: string;
+  /** The title of the space wherever the site names it; the name when absent. */
+  title?: string;
   /** One sentence saying what the source holds, the content of its space on the spaces page. */
   description?: string;
+  /** The folders of the source titled and described, by path relative to the source root. */
+  folders?: Record<string, FolderConfig>;
   glossary?: boolean;
   convert?: boolean;
   previews?: boolean;
