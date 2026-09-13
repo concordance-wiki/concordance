@@ -19,6 +19,9 @@ export default defineConfig({
     ],
   },
   test: {
+    // The corpus builds of a few beforeAll hooks take more than the default ten seconds on a
+    // loaded runner; the tests themselves keep the default budget.
+    hookTimeout: 60_000,
     include: [
       "packages/*/test/**/*.test.ts",
       "plugins/*/test/**/*.test.ts",
