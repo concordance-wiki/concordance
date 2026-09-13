@@ -8,6 +8,7 @@
   "required": ["name", "light", "dark"],
   "properties": {
     "name": {
+      "description": "Name of the site, in the header and in the title of every page.",
       "type": "string",
       "minLength": 1
     },
@@ -25,104 +26,129 @@
       "additionalProperties": false,
       "properties": {
         "display": {
+          "description": "Family of the headings; the platform fonts when absent.",
           "type": "string"
         },
         "ui": {
+          "description": "Family of the interface text; the platform fonts when absent.",
           "type": "string"
         },
         "mono": {
+          "description": "Family of code and identifiers; the platform fonts when absent.",
           "type": "string"
         }
       }
     },
     "radius": {
+      "description": "Corner radius of surfaces and controls, in pixels.",
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "default": 8
     },
     "light": {
+      "description": "Palette of the light mode, six #RRGGBB colours. Text must reach a 4.5:1 contrast over bg and surface, headings 3:1; the build reports the pairs below.",
       "type": "object",
       "additionalProperties": false,
       "required": ["bg", "surface", "border", "ink", "muted", "accent"],
       "properties": {
         "bg": {
+          "description": "Background of the page.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "surface": {
+          "description": "Background of the header, the cards and the panels.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "border": {
+          "description": "Borders and separators.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "ink": {
+          "description": "Colour of the text.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "muted": {
+          "description": "Secondary text: labels, counts, metadata.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "accent": {
+          "description": "Accent of links, focus rings and active controls; never the only carrier of an information.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         }
       }
     },
     "dark": {
+      "description": "Palette of the dark mode, six #RRGGBB colours, with the same contrast requirements as light.",
       "type": "object",
       "additionalProperties": false,
       "required": ["bg", "surface", "border", "ink", "muted", "accent"],
       "properties": {
         "bg": {
+          "description": "Background of the page.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "surface": {
+          "description": "Background of the header, the cards and the panels.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "border": {
+          "description": "Borders and separators.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "ink": {
+          "description": "Colour of the text.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "muted": {
+          "description": "Secondary text: labels, counts, metadata.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "accent": {
+          "description": "Accent of links, focus rings and active controls; never the only carrier of an information.",
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         }
       }
     },
     "default_mode": {
+      "description": "Palette the site starts with; the reader's own choice, remembered by the mode switch, wins.",
       "type": "string",
       "enum": ["light", "dark", "system"],
       "default": "system"
     },
     "footer": {
+      "description": "The footer of every page.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "text": {
+          "description": "A paragraph shown in the footer.",
           "type": "string"
         },
         "links": {
+          "description": "Links shown in the footer, in order.",
           "type": "array",
           "items": {
             "type": "object",
             "required": ["label", "url"],
             "properties": {
               "label": {
+                "description": "Text of the link.",
                 "type": "string"
               },
               "url": {
+                "description": "Destination of the link.",
                 "type": "string"
               }
             }

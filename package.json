@@ -18,7 +18,10 @@
     "mutation": "stryker run",
     "licenses:update": "node scripts/licenses.mjs",
     "licenses:check": "node scripts/licenses.mjs --check",
-    "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/hygiene.mjs && pnpm licenses:check"
+    "reference:update": "node scripts/config-reference.mjs",
+    "measure": "node scripts/measure.mjs",
+    "walkthrough": "node scripts/walkthrough.mjs",
+    "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/walkthrough.mjs && node scripts/hygiene.mjs && pnpm licenses:check"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.2",

@@ -9,6 +9,6 @@ The unscoped package that integrators install: the `concordance` command (alias 
 | `@concordance-wiki/plugin-reader-office` | metadata reader for `.docx`, `.pptx`, `.xlsx` and `.pdf` |
 | `@concordance-wiki/plugin-convert-libreoffice` | conversion of office documents to PDF; needs LibreOffice on the machine |
 
-The package holds no code of its own: `bin/concordance.js` runs the executable of the command line. The container image `concordancewiki/concordance` is built from this package by the `Dockerfile` at the root of the repository; see the [getting started guide](../../docs/guides/getting-started.md#with-the-container-image).
+The package holds no code of its own: `bin/concordance.js` runs the executable of the command line. The container image `concordancewiki/concordance` is built from this package by the `Dockerfile` at the root of the repository; see the [operations guide](../../docs/guides/operations.md#container-image).
 
 Part of [Concordance](../../README.md).

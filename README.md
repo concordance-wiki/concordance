@@ -98,14 +98,20 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 
 ## Going further
 
-- [Getting started](docs/guides/getting-started.md): from an empty folder to a published site.
+- [Getting started](docs/guides/getting-started.md): from an empty folder to a published site, in seven steps.
 - [Writing notes](docs/guides/writing-notes.md): what a note is, what frontmatter adds, which sections mean something.
-- [Configuration](docs/guides/configuration.md): sources, typing rules, domains, thresholds, pipelines.
+- [Configuration](docs/guides/configuration.md) and the [configuration reference](docs/reference/configuration.md): sources, typing rules, domains, thresholds, checks; every key, generated from the schema.
+- [The command line](docs/guides/command-line.md): what each command reads, writes and returns.
+- [Pipelines](docs/guides/pipelines.md): build and publish on GitHub Pages and GitLab Pages, lint in a merge request, copyable.
+- [Operations](docs/guides/operations.md): build time and weight to expect, the cache, the container image, the human steps.
+- [What the tool does not do](docs/guides/limits.md): the limits, one line each.
 - [Publishing transcripts](docs/guides/publishing-transcripts.md): what the build hides, what it cannot decide, what to settle first.
 - [Theming](docs/guides/theming.md): the slots of the site, their view models, overriding one from a plugin, the stylesheet layers.
 - [Distributing the linter](docs/guides/lint-distribution.md): `npx`, binary, GitHub action, GitLab component, container image, pre-commit hook.
 - [Architecture](docs/guides/architecture.md): the decisions behind the tool, for contributors.
 - [MVP specification](docs/spec/mvp.md): every feature, with its acceptance criteria.
+
+The [documentation index](docs/README.md) lists every page.
 
 ## Contributing
 

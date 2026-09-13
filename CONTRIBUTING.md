@@ -29,7 +29,10 @@ pnpm check
 | `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85% |
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
 | `pnpm licenses:update` | regenerate the [licence inventory](docs/licenses.md) from the installed dependencies; `pnpm licenses:check` verifies that it is current and that every licence is in the allow-list of `scripts/licenses.mjs` |
-| `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte), the hygiene scan and the licence check |
+| `pnpm reference:update` | regenerate the [reference pages](docs/reference/) from the JSON schemas of `packages/core/schemas`; `pnpm lint` fails when a committed page differs from its schema or when a property of those schemas has no `description`, so a schema change is a schema edit, a description, and this command |
+| `pnpm walkthrough` | run every command of the [getting-started guide](docs/guides/getting-started.md) on a copy of the golden corpus through the built command line (after `pnpm build`), and check the files they write; under thirty seconds |
+| `pnpm measure` | build the golden corpus twice and print the durations and weights as the table of the [operations guide](docs/guides/operations.md), to paste there with its date |
+| `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte), the walkthrough, the hygiene scan and the licence check |
 
 A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests (`tsc -b`, so that referenced packages are built first) and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose. Under Vitest, `@concordance-wiki/*` imports resolve to the sources of the workspace, so cross-package tests count for coverage and mutation testing without a build.
 
@@ -49,7 +52,7 @@ The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict
 
 - Comment only when the "why" is not obvious. No docstring that repeats the signature. No file header summarising the file.
 - Names are explicit English. Check identifiers follow `E-`, `W-` or `I-` plus `AREA-SUBJECT`.
-- Documentation is short sentences in the active voice. A README says what the tool does, not how it was made.
+- Documentation is short sentences in the active voice. A README says what the tool does, not how it was made. A key of a schema is documented in the schema itself (`description`), from which `pnpm reference:update` generates the reference pages; the guides explain how the keys work together and link the reference for the tables.
 
 ## Commits and branches
 

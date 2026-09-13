@@ -30,6 +30,9 @@ jobs:
         run: pnpm lint
       - name: Build
         run: pnpm build
+      - name: Walkthrough
+        # Every command of the getting-started guide, on a copy of the golden corpus, through the built command line.
+        run: node scripts/walkthrough.mjs
       - name: Component gallery
         # Every slot rendered with fixture data; fails on a page over budget or an accessibility finding.
         run: node packages/cli/dist/bin.js gallery --output reports/gallery

@@ -2,7 +2,7 @@
 
 Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`config.schema.json`](../../packages/core/schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected, then a verdict line. Exit codes: 0 valid, 1 invalid, 2 file not found. Beyond the schema, it rejects a source name used twice, a malformed domain glob and pseudonymisation enabled without a dictionary, and it warns about keys that are accepted but ignored in this version (`lock`, tracker sources) and about transcripts published without pseudonymisation. `--config` (or `-c`) points at another file; the default is `concordance.yaml` in the current directory.
 
-The reference below follows the schema. Every key not marked required is optional.
+This guide follows the order of the file and says how the keys work together, with examples. The exhaustive tables, every key with its type, default, allowed values and description, are generated from the schemas and never diverge from them: [configuration reference](../reference/configuration.md), [theme reference](../reference/theme.md), [profile reference](../reference/profile.md), [lock file reference](../reference/lock.md). Every key not marked required is optional.
 
 ## `version`
 
@@ -10,12 +10,7 @@ Required. Schema version, currently `1`.
 
 ## `project`
 
-| Key | Type | Default | Meaning |
-|---|---|---|---|
-| `name` | string | required | displayed in the site |
-| `locale` | BCP 47 tag | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
-| `theme` | path | `./theme.yaml` | theme file, relative to this configuration; the default is used when the file exists |
-| `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders. Without it, a source whose `git` URL is an HTTPS URL of `github.com`, `gitlab.com` or a `gitlab.` host gets `<url>/edit/<ref>/<path>` or `<url>/-/edit/<ref>/<path>`, the `ref` being the source's or `main`; a local source gets no link |
+`name` is displayed in the site. `locale` (`en` by default) is the interface language and the default locale of the sources; see [`sources[].locale`](#sources) for what a locale selects. `theme` names the theme file, relative to this configuration; without it, `theme.yaml` next to the configuration is used when it exists. `edit_url` is the pattern of the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders; without it, a source whose `git` URL is an HTTPS URL of `github.com`, `gitlab.com` or a `gitlab.` host gets `<url>/edit/<ref>/<path>` or `<url>/-/edit/<ref>/<path>`, the `ref` being the source's or `main`, and a local source gets no link. [Reference](../reference/configuration.md#project).
 
 ## `profile`
 
@@ -61,14 +56,7 @@ domains:
 
 ## `privacy`
 
-| Key | Meaning |
-|---|---|
-| `exclude` | globs applied before any content is read |
-| `pseudonymize.enabled` | replaces speaker names and detected personal mentions by stable pseudonyms; `false` by default |
-| `pseudonymize.scope` | types concerned, `[meeting]` by default |
-| `pseudonymize.dictionary` | path to `pseudonyms.yaml`, real name → pseudonym; never published |
-| `pseudonymize.keep_roles` | keep the role instead of the pseudonym when known |
-| `publish_transcripts` | `false` by default; transcripts are indexed only when explicitly requested |
+`exclude` lists globs applied before any content is read. `pseudonymize` replaces speaker names and detected personal mentions by stable pseudonyms (`enabled`, `false` by default; `scope`, the types concerned, `[meeting]` by default; `dictionary`, the path of `pseudonyms.yaml`, real name to pseudonym, never published; `keep_roles`, the role instead of the pseudonym when known). `publish_transcripts` is `false` by default: transcripts are indexed only when explicitly requested. [Reference](../reference/configuration.md#privacy).
 
 ### Pseudonymisation
 
@@ -96,22 +84,7 @@ A dictionary that declares the same person twice, whatever the case and accents,
 
 ## `sources`
 
-One entry per repository or local folder. Names are unique.
-
-| Key | Meaning |
-|---|---|
-| `name` | required, unique; first segment of every identifier from this source |
-| `git` | repository URL; cloned at depth 1 |
-| `ref` | branch, tag or commit; `main` by default |
-| `path` | local folder, for development; exclusive with `git` |
-| `locale` | BCP 47 tag (`en`, `fr`, `fr-CA`…); defaults to `project.locale`. Selects the language pack of the source: text normalisation, default stopwords, plural rules, word segmentation and the collation of its indexes, plus the profile's type prefixes for that locale. The engine ships `en` and `fr`; a regional variant uses the pack of its language; other languages come from plugins, which register their pack. A tag with no pack is a build error |
-| `type` | forces the type of every markdown file |
-| `default_type` | type when nothing else applies; `document` by default |
-| `application` | default application for the source; a rule's `set: { application }` and the frontmatter override it |
-| `glossary` | `true` marks the source as a glossary: its titles and aliases take priority in the recognition dictionary |
-| `convert` | `true` enables office conversion for this source |
-| `previews` | `false` keeps previews out of the artefact for this source |
-| `rules` | typing rules, evaluated in order; the last match wins |
+One entry per repository or local folder ([reference](../reference/configuration.md#sources)). `name` is required and unique: it is the first segment of every identifier from the source. A source is either a `git` URL, cloned at depth 1 on `ref` (`main` by default), or a local `path`, for development. `locale` (`en`, `fr`, `fr-CA`…) defaults to `project.locale` and selects the language pack of the source: text normalisation, default stopwords, plural rules, word segmentation and the collation of its indexes, plus the profile's type prefixes for that locale; the engine ships `en` and `fr`, a regional variant uses the pack of its language, other languages come from plugins, which register their pack, and a tag with no pack is a build error. `type` forces the type of every markdown file, `default_type` (`document`) applies when nothing else does, `application` is the default application of the source, which a rule's `set: { application }` and the frontmatter override. `glossary: true` marks the source as a glossary: its titles and aliases take priority in the recognition dictionary. `convert: true` enables office conversion for the source and `previews: false` keeps its previews out of the artefact. `rules` are the typing rules, evaluated in order, the last match winning.
 
 A rule matches on `path` (glob), `suffix` (`.rule.md`), `ext` (`[".vtt"]`) or `frontmatter` (a key that must be present), and sets any attribute, most often `type`:
 
@@ -172,6 +145,8 @@ The home page reads the same thresholds: its freshness entry flags a source dorm
 
 ## `inference`
 
+The keys below decide what the dictionary holds, which links are produced and which expressions get a page; the [reference](../reference/configuration.md#inference) lists them with their types.
+
 | Key | Default | Meaning |
 |---|---|---|
 | `glossary_sources` | sources with `glossary: true` | names of the sources whose entities take priority in the recognition dictionary: when the same form names several entities, theirs come first. When the key is present, even empty, it replaces the `glossary: true` marks |
@@ -189,39 +164,20 @@ The home page reads the same thresholds: its freshness entry flags a source dorm
 
 Two resources are scored by adding their signals, capped at 1: an explicit frontmatter `source` declaration (1.0), the same base name in the same folder (0.7) or elsewhere (0.5), base names at Jaro-Winkler 0.9 or more (those weights times 0.8), the property title of one equal to the level-one heading of the other (0.6), similar extracted text (0.7 from an estimated Jaccard index of 0.8, 0.4 from 0.6), the same commit (0.3) and the folder proximity (up to 0.2). Above `merge_above` the resources become one entity with several representations; from `candidate_above` they stay separate and a [`W-DUP-CANDIDATE`](../checks/W-DUP-CANDIDATE.md) finding names the score and every signal. The commit and the folder only reinforce a pair found by a declaration, a base name, a title or its text. See the [architecture guide](architecture.md#twin-resources).
 
-| Key | Default | Meaning |
-|---|---|---|
-| `mode` | `auto` | `estimate` never recomputes the exact Jaccard index and reports the MinHash estimate; `exact` recomputes it on every pair the LSH banding brings together; `auto` recomputes it on the pairs estimated at `exact_above` or more |
-| `exact_above` | 0.5 | estimated index from which `auto` recomputes the exact one, on the full shingle sets, and adds the share of common lines to the finding |
-| `size_ratio_min` | 0.5 | word-count ratio (shorter over longer text) under which the content signal is capped at 0.4 and the finding says the pair looks like an inclusion rather than a duplicate |
-| `shingle_size` | 5 | words per shingle of the comparison form |
-| `minhash_functions` | 128 | hash functions of a signature, four per LSH band |
-| `merge_above` | 0.9 | score strictly above which resources merge |
-| `candidate_above` | 0.5 | score from which a finding is produced |
+The seven keys are in the [reference](../reference/configuration.md#inferenceduplicates): `mode` (`auto`; `estimate` never recomputes the exact Jaccard index and reports the MinHash estimate, `exact` recomputes it on every pair the LSH banding brings together, `auto` on the pairs estimated at `exact_above` or more), `exact_above` (0.5), `size_ratio_min` (0.5, the word-count ratio under which the content signal is capped at 0.4 and the finding says the pair looks like an inclusion), `shingle_size` (5 words), `minhash_functions` (128, four per LSH band), `merge_above` (0.9, strictly above which resources merge) and `candidate_above` (0.5, from which a finding is produced).
 
 Build time against precision: the estimate alone visits every candidate pair once through its 128-value signature, the exact index re-reads the two full shingle sets of a pair, and `auto` spends that only on the pairs that are already close. Lowering `exact_above` or choosing `exact` makes the index in the findings exact on more pairs at the cost of build time, `estimate` makes the build fastest with an index accurate to about one tenth. The build summary reports the pairs brought together by the banding, the pairs scored, the exact verifications and the time spent.
 
 
 ## `conversion`
 
-| Key | Default | Meaning |
-|---|---|---|
-| `timeout_s` | 120 | per document |
-| `max_size_mb` | 50 | larger files are not converted |
-| `cache` | `.concordance-cache` | cache folder, outside `dist/` |
-| `parallelism` | number of cores | concurrent conversions |
+`timeout_s` (120) bounds each document, `max_size_mb` (50) leaves larger files unconverted, `cache` (`.concordance-cache`) names the cache folder, outside `dist/`, and `parallelism` (the number of cores) the concurrent conversions ([reference](../reference/configuration.md#conversion)). No converter runs in this version; see [the limits](limits.md).
 
 The converted files are keyed by the SHA-256 of their source under `<cache>/convert/`, so that an unchanged document is never reconverted, even when it moves. The cache never enters `dist/`: keep it in the pipeline cache between builds, and delete it to force a full reconversion. A document above `max_size_mb` or past `timeout_s` yields a [`W-CONV-FAILED`](../checks/W-CONV-FAILED.md) finding and stays downloadable; `parallelism` changes the build time, never the output.
 
 ## `build`
 
-| Key | Default | Meaning |
-|---|---|---|
-| `output` | `./dist` | site folder |
-| `fail_on.errors` | `true` | fail when any error finding exists |
-| `fail_on.unconverted_max` | 10 | fail beyond this many unconverted documents |
-| `mentions_inline` | 20 | mentions of an entity served in its page; the rest comes from the `fragments/<id>.mentions.json` of the entity |
-| `extracted_text_max_chars` | 20000 | characters of the body of an entity that enter the search index: the plain text of its note today, the text extracted from its converted documents when conversion exists; the rest of the text is not searchable |
+`output` (`./dist`) is the site folder; `fail_on.errors` (`true`) fails the build when any error finding exists and `fail_on.unconverted_max` (10) beyond that many unconverted documents; `mentions_inline` (20) is the number of mentions of an entity served in its page, the rest coming from the `fragments/<id>.mentions.json` of the entity; `extracted_text_max_chars` (20000) is how many characters of the body of an entity enter the search index: the plain text of its note today, the text extracted from its converted documents when conversion exists; the rest is not searchable ([reference](../reference/configuration.md#build)).
 
 `fail_on` is the only thing that makes the build fail on content: an anomaly is always recorded as a finding and the build goes on. With the defaults, one error finding is enough to exit with code 1, and so is the eleventh unconverted document; the log and the summary are written either way. A project that wants a site whatever the state of its notes declares:
 
@@ -236,9 +192,7 @@ build:
 
 ## `site`
 
-| Key | Default | Meaning |
-|---|---|---|
-| `neighbourhood.size` | 6 | nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes; which nodes are kept follows the `display.neighbours_order` of the page's type in the profile (see the [architecture guide](architecture.md#displayed-neighbourhood)) |
+`neighbourhood.size` (6) is the number of nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes. Which nodes are kept follows the `display.neighbours_order` of the page's type in the profile (see the [architecture guide](architecture.md#displayed-neighbourhood)).
 
 ```yaml
 site:
@@ -261,7 +215,7 @@ The same block, in a `concordance-lint.yaml` at the root of a knowledge reposito
 
 ## `concordance-lint.yaml`
 
-Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries two blocks: `checks`, with the same shape and the same rules as above, and `global`, which says where the [global scope](getting-started.md#global-scope) finds the published model:
+Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries two blocks: `checks`, with the same shape and the same rules as above, and `global`, which says where the [global scope](command-line.md#global-scope) finds the published model:
 
 ```yaml
 checks:
@@ -286,27 +240,11 @@ Any other top-level key, a key that is not a check identifier, an unknown check,
 
 ## `lock`
 
-Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages/core/schemas/lock.schema.json). Only `rejected_terms` is read in the first version. Under `duplicates`, `merged` lists pairs of resource identifiers that merge whatever their score, and `separated` pairs that never merge and produce no finding; the reconciliation engine (`resolveDuplicateResources` of the inference package) applies both pairs it is given.
+Path to `concordance.lock.yaml`, the record of human decisions ([lock file reference](../reference/lock.md)): `rejected_terms`, the expressions the keyword discovery must not propose; under `duplicates`, `merged`, pairs of resource identifiers that merge whatever their score, and `separated`, pairs that never merge and produce no finding; under `links`, the promoted and rejected links. The engine applies the rejected terms and the duplicate pairs it is given (`resolveDuplicateResources` of the inference package); the build of this version accepts the key without reading the file, and `validate-config` says so.
 
 ## `theme.yaml`
 
-See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example; `fixtures/plugins/theme-white-label/theme/theme.yaml` shows a complete white-label one. Paths are relative to the file. A faulty key is reported by its path (`light.accent`, `footer.credit`), a named file that does not exist by its key; the [theming guide](theming.md#white-label) says what each key changes in the site. The accent colour never carries information on its own.
-
-| Key | Type | Default | Meaning |
-|---|---|---|---|
-| `name` | string | required | the name of the site, in the header and every page title |
-| `logo` | path | — | the logo before the name; an SVG is inlined, any other image copied under `assets/` |
-| `favicon` | path | — | copied under `assets/` and linked from every page |
-| `font.display`, `font.ui`, `font.mono` | string | platform fonts | the families of headings, interface and code; the files are shipped by the project through `assets` and `@font-face` rules in `stylesheet`, never fetched from another host |
-| `radius` | integer | `8` | corner radius in pixels |
-| `light`, `dark` | object | required | `bg`, `surface`, `border`, `ink`, `muted`, `accent`, each a `#RRGGBB` colour; text must reach 4.5:1 over `bg` and `surface`, headings 3:1 |
-| `default_mode` | `system`, `light`, `dark` | `system` | the palette the site starts with; the reader's own choice, remembered by the mode switch, wins |
-| `footer.text` | string | — | a paragraph in the footer |
-| `footer.links` | `{ label, url }[]` | — | links in the footer |
-| `footer.credit` | boolean | `false` | shows "Built with Concordance" as a link to the repository; nothing else in the interface names the tool |
-| `stylesheet` | path | — | a stylesheet loaded after the tool's own, in the `project` cascade layer |
-| `assets` | path | — | a folder copied as-is under `assets/` (fonts, icons) |
-| `labels` | object | — | message overrides, below |
+Every key is in the [theme reference](../reference/theme.md); the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) is an example, and `fixtures/plugins/theme-white-label/theme/theme.yaml` a complete white-label one. Paths are relative to the file. A faulty key is reported by its path (`light.accent`, `footer.credit`), a named file that does not exist by its key; the [theming guide](theming.md#white-label) says what each key changes in the site. In short: `name` is the name of the site, in the header and every page title; `logo` (an SVG is inlined, any other image copied under `assets/`) and `favicon` are paths; `font.display`, `font.ui` and `font.mono` name the families of headings, interface and code, whose files the project ships through `assets` and `@font-face` rules in `stylesheet`, never fetched from another host; `radius` is the corner radius in pixels; `light` and `dark` each give `bg`, `surface`, `border`, `ink`, `muted` and `accent` as `#RRGGBB` colours, text reaching 4.5:1 over `bg` and `surface` and headings 3:1, the accent never carrying information on its own; `default_mode` is the palette the site starts with, the reader's own choice winning; `footer.text`, `footer.links` and `footer.credit` (`false`: "Built with Concordance" as a link to the repository, the only mention of the tool) fill the footer; `stylesheet` is loaded after the tool's own, in the `project` cascade layer; `assets` is a folder copied as-is; `labels` holds the message overrides below.
 
 ### `labels`
 
@@ -325,126 +263,4 @@ An override is written in the same syntax as the message it replaces and must us
 
 ## Continuous integration
 
-Build and publish with GitHub Actions:
-
-```yaml
-name: wiki
-on:
-  push: { branches: [main] }
-  schedule: [{ cron: "0 5 * * *" }]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version-file: .nvmrc }
-      - run: npm install --global concordance
-      - run: concordance build
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
-  deploy:
-    needs: build
-    permissions: { pages: write, id-token: write }
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/deploy-pages@v4
-```
-
-The same with GitLab CI:
-
-```yaml
-pages:
-  image: node:lts
-  script:
-    - npm install --global concordance
-    - concordance build --output public
-  artifacts:
-    paths: [public]
-  cache:
-    paths: [.concordance-cache]
-```
-
-Add LibreOffice to the image when office conversion is wanted. Keep `.concordance-cache` in the pipeline cache so that unchanged documents are not reconverted.
-
-### With the container image
-
-The [container image](getting-started.md#with-the-container-image) removes the Node.js and LibreOffice setup from the pipeline: it carries both, and the pipeline only mounts the configuration repository on `/wiki`. On GitHub Actions the runner has Docker; mount the checkout and run the image directly:
-
-```yaml
-name: wiki
-on:
-  push: { branches: [main] }
-  schedule: [{ cron: "0 5 * * *" }]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with: { path: .concordance-cache, key: concordance-cache }
-      - run: docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
-  deploy:
-    needs: build
-    permissions: { pages: write, id-token: write }
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/deploy-pages@v4
-```
-
-On GitLab CI the job runs inside the image itself, whose entry point is the `concordance` command; the runner's checkout is the working directory, so no mount is needed:
-
-```yaml
-pages:
-  image:
-    name: concordancewiki/concordance
-    entrypoint: [""]
-  script:
-    - concordance build --output public
-  artifacts:
-    paths: [public]
-  cache:
-    paths: [.concordance-cache]
-```
-
-The image runs as uid 1000, so the working directory of the job must be writable by that user; when the runner prepares it as another user, the `user` setting of its executor runs the job as that user instead. Pin a version tag (`concordancewiki/concordance:1.2.0`) in a pipeline that must not change under your feet.
-
-### Lint a knowledge repository in its merge requests
-
-Each knowledge repository checks itself on every merge request with `concordance lint`; `--format` gives the forge a report it annotates the diff with. On GitHub, upload the SARIF log to code scanning: each finding then appears in the margin of the diff, on its file and line, and the pipeline still fails according to `--fail-on`.
-
-```yaml
-name: lint
-on: { pull_request: {} }
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    permissions: { contents: read, security-events: write }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: lts/* }
-      - run: npx concordance lint --format sarif --output concordance.sarif
-        continue-on-error: true
-      - uses: github/codeql-action/upload-sarif@v3
-        with: { sarif_file: concordance.sarif }
-```
-
-On GitLab, publish the JUnit report: the merge request lists each finding as a failed test, with its message, remediation and documentation URL.
-
-```yaml
-lint:
-  image: node:lts
-  script:
-    - npx concordance lint --format junit --output concordance-junit.xml
-  artifacts:
-    when: always
-    reports:
-      junit: concordance-junit.xml
-```
-
-Both examples run the linter at the root of the knowledge repository; pass `--config` and `--source` when the repository is declared in a `concordance.yaml` whose rules must apply. The exit code is the same whatever the format: 0 without a finding at the `--fail-on` severity, 1 with one, 2 when the lint could not run.
-
-The GitHub action `concordance-wiki/lint-action` and the GitLab CI/CD component `concordance-wiki/lint/lint` wrap these two examples in one line each, with the version of the linter pinned; [Distributing the linter](lint-distribution.md) shows them, with the standalone binary, the container image and the pre-commit hook.
+The pipelines that build and publish the wiki on GitHub Pages and GitLab Pages, with the published package or with the container image, and the ones that lint a knowledge repository in its merge requests with the SARIF log or the JUnit report the forge annotates the diff with, are gathered in [Pipelines](pipelines.md), complete and copyable. Keep `.concordance-cache` in the pipeline cache so that clones are refreshed rather than redone; the GitHub action `concordance-wiki/lint-action` and the GitLab CI/CD component `concordance-wiki/lint/lint` wrap the lint job in one line each, with the version of the linter pinned ([Distributing the linter](lint-distribution.md)).

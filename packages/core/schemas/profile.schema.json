@@ -8,12 +8,15 @@
   "required": ["version", "types", "relations", "confidence"],
   "properties": {
     "profile": {
+      "description": "Name of the profile.",
       "type": "string"
     },
     "version": {
+      "description": "Version of this schema; always 1.",
       "const": 1
     },
     "groups": {
+      "description": "Groups of types, by slug; every type belongs to one.",
       "type": "object",
       "propertyNames": {
         "type": "string",
@@ -25,84 +28,26 @@
         "required": ["label"],
         "properties": {
           "label": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["en"],
-            "properties": {
-              "en": {
-                "type": "string"
-              },
-              "fr": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/$defs/label",
+            "description": "Display label of the group, per interface language."
           }
         }
       }
     },
     "common_attributes": {
+      "description": "Attributes every entity carries whatever its type, by name; a type may refine one under its own attributes.",
       "type": "object",
       "propertyNames": {
         "type": "string",
         "pattern": "^[a-z][a-z0-9_]*$"
       },
       "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["type"],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "string",
-              "string[]",
-              "integer",
-              "number",
-              "boolean",
-              "date",
-              "enum",
-              "ref",
-              "ref[]",
-              "list"
-            ]
-          },
-          "values": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "default": {},
-          "target": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "relation": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
-          },
-          "inverse": {
-            "type": "boolean"
-          },
-          "attributes": {
-            "type": "object"
-          },
-          "schema": {
-            "type": "object"
-          }
-        }
+        "$ref": "#/$defs/attribute",
+        "description": "Definition of the attribute."
       }
     },
     "types": {
+      "description": "The types a note can have, by slug: the ones the cascade may yield and a frontmatter may declare.",
       "type": "object",
       "propertyNames": {
         "type": "string",
@@ -114,97 +59,44 @@
         "required": ["label", "group"],
         "properties": {
           "label": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["en"],
-            "properties": {
-              "en": {
-                "type": "string"
-              },
-              "fr": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/$defs/label",
+            "description": "Display label of the type, per interface language."
           },
           "group": {
+            "description": "Slug of the group the type belongs to.",
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$"
           },
           "status": {
+            "description": "active types are rendered; planned types belong to the meta-model but are not rendered by this version, and a project may activate them.",
             "type": "string",
             "enum": ["active", "planned"],
             "default": "active"
           },
           "glyph": {
+            "description": "Name of the glyph of the type; the site derives the one-letter mark of the type from its first letter.",
             "type": "string"
           },
           "graph": {
+            "description": "How the type enters the graph: full takes part in every relation; documents-only entities (documents, meetings) are only ever the source of a documents relation.",
             "type": "string",
-            "enum": ["full", "documents-only"]
+            "enum": ["full", "documents-only"],
+            "default": "full"
           },
           "attributes": {
+            "description": "Attributes specific to the type, by name, added to common_attributes.",
             "type": "object",
             "propertyNames": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             },
             "additionalProperties": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["type"],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "string",
-                    "string[]",
-                    "integer",
-                    "number",
-                    "boolean",
-                    "date",
-                    "enum",
-                    "ref",
-                    "ref[]",
-                    "list"
-                  ]
-                },
-                "values": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "default": {},
-                "target": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  ]
-                },
-                "relation": {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9_]*$"
-                },
-                "inverse": {
-                  "type": "boolean"
-                },
-                "attributes": {
-                  "type": "object"
-                },
-                "schema": {
-                  "type": "object"
-                }
-              }
+              "$ref": "#/$defs/attribute",
+              "description": "Definition of the attribute."
             }
           },
           "sections": {
+            "description": "H2 sections of a note of this type whose content produces relations, by section key.",
             "type": "object",
             "propertyNames": {
               "type": "string",
@@ -216,40 +108,38 @@
               "required": ["heading", "parse", "produces"],
               "properties": {
                 "heading": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["en"],
-                  "properties": {
-                    "en": {
-                      "type": "string"
-                    },
-                    "fr": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/$defs/label",
+                  "description": "Heading that opens the section, per language; matched without regard to case, accents or whitespace, and the section key itself matches too."
                 },
                 "parse": {
+                  "description": "Shape of the content of the section: an ordered list, a bullet list, paragraphs or a table.",
                   "type": "string",
                   "enum": ["ordered-list", "bullet-list", "paragraphs", "table"]
                 },
                 "produces": {
+                  "description": "Relation slug each recognised mention of the section produces, at the section_mention confidence.",
                   "type": "string",
                   "pattern": "^[a-z][a-z0-9_]*$"
                 },
                 "inverse": {
-                  "type": "boolean"
+                  "description": "Whether the relation goes from the mentioned entity to the note instead.",
+                  "type": "boolean",
+                  "default": false
                 },
                 "attributes": {
+                  "description": "Attributes set on the produced relation.",
                   "type": "object"
                 }
               }
             }
           },
           "display": {
+            "description": "What the page of an entity of this type highlights and how its neighbours are ordered.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
               "highlight": {
+                "description": "Attributes shown next to the type badge of the page, in order, five at most.",
                 "type": "array",
                 "maxItems": 5,
                 "items": {
@@ -257,6 +147,7 @@
                 }
               },
               "neighbours_order": {
+                "description": "Neighbour types the neighbourhood panel shows first, in priority order; the types not listed come after, by confidence. Each must be a declared type.",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -269,6 +160,7 @@
       }
     },
     "relations": {
+      "description": "The relations of the meta-model, by slug: their labels, their direction, their cap and the pairs of types they may join.",
       "type": "object",
       "propertyNames": {
         "type": "string",
@@ -280,110 +172,49 @@
         "required": ["label", "directed", "allowed"],
         "properties": {
           "label": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["en"],
-            "properties": {
-              "en": {
-                "type": "string"
-              },
-              "fr": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/$defs/label",
+            "description": "Label read from the source of the relation (accesses), per language."
           },
           "inverse_label": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["en"],
-            "properties": {
-              "en": {
-                "type": "string"
-              },
-              "fr": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/$defs/label",
+            "description": "Label read from the target of the relation (is accessed by), per language; an undirected relation has none."
           },
           "directed": {
+            "description": "Whether the relation has a direction; an undirected link is stored from the smaller identifier to the larger.",
             "type": "boolean"
           },
           "status": {
+            "description": "active relations are produced; planned ones belong to the meta-model and wait for a producer.",
             "type": "string",
-            "enum": ["active", "planned"]
+            "enum": ["active", "planned"],
+            "default": "active"
           },
           "cap": {
+            "description": "Highest confidence a link of this relation can reach, whatever its methods.",
             "type": "number",
             "minimum": 0,
             "maximum": 1
           },
           "target_kind": {
+            "description": "Whether the target of the relation is an entity or a type (applies_to of a standard).",
             "type": "string",
-            "enum": ["entity", "type"]
+            "enum": ["entity", "type"],
+            "default": "entity"
           },
           "attributes": {
+            "description": "Attributes a link of this relation may carry, by name.",
             "type": "object",
             "propertyNames": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             },
             "additionalProperties": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["type"],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "string",
-                    "string[]",
-                    "integer",
-                    "number",
-                    "boolean",
-                    "date",
-                    "enum",
-                    "ref",
-                    "ref[]",
-                    "list"
-                  ]
-                },
-                "values": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "default": {},
-                "target": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  ]
-                },
-                "relation": {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9_]*$"
-                },
-                "inverse": {
-                  "type": "boolean"
-                },
-                "attributes": {
-                  "type": "object"
-                },
-                "schema": {
-                  "type": "object"
-                }
-              }
+              "$ref": "#/$defs/attribute",
+              "description": "Definition of the attribute."
             }
           },
           "allowed": {
+            "description": "Pairs of types the relation may join, source then target. any matches every type, same requires both ends of one type, type marks a target that is a type rather than an entity. A project profile adds pairs to the default ones.",
             "type": "array",
             "minItems": 1,
             "items": {
@@ -400,65 +231,78 @@
       }
     },
     "confidence": {
+      "description": "Confidence of a link by the method that produced it, from 0 to 1; several methods on one link combine as 1 − Π(1 − cᵢ).",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "explicit_link": {
+          "description": "A markdown link written in a note.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "lock_promoted": {
+          "description": "A link promoted in the lock file; no producer in this version.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "contract_import": {
+          "description": "A link read from an imported interface contract (an API exposes an endpoint).",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "frontmatter_ref": {
+          "description": "A reference declared by a frontmatter attribute.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "folder_zone": {
+          "description": "A link deduced from where a note is filed; no producer in this version.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "section_mention": {
+          "description": "A mention under a section mapped in the profile.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "glossary_occurrence": {
+          "description": "A mention of a title or alias in prose: base, raised by per_occurrence for each further occurrence up to cap, multiplied by homonym_factor for a homonym, raised by type_prefix_bonus after a recognised type prefix.",
           "type": "object",
           "additionalProperties": false,
           "required": ["base", "per_occurrence", "cap"],
           "properties": {
             "base": {
+              "description": "Confidence of the first occurrence.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
             },
             "per_occurrence": {
+              "description": "Added for each further occurrence in the same note.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
             },
             "cap": {
+              "description": "Highest confidence occurrences alone can reach.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
             },
             "homonym_factor": {
+              "description": "Factor applied when the form names several entities.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
             },
             "type_prefix_bonus": {
+              "description": "Added when a type prefix announces the mention.",
               "type": "number",
               "minimum": 0,
               "maximum": 1
@@ -466,11 +310,13 @@
           }
         },
         "cooccurrence": {
+          "description": "Two entities mentioned in the same paragraph.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "embedding": {
+          "description": "Semantic similarity; no producer in this version.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
@@ -478,6 +324,7 @@
       }
     },
     "type_prefixes": {
+      "description": "Words that announce the type of the entity that follows in prose (screen Entity page), by locale then by type slug; a recognised prefix adds type_prefix_bonus and tells which type to expect.",
       "type": "object",
       "propertyNames": {
         "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
@@ -493,6 +340,90 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "label": {
+      "description": "A label per interface language; English is the source, French optional.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en"],
+      "properties": {
+        "en": {
+          "description": "Label in English, the source language of the interface.",
+          "type": "string"
+        },
+        "fr": {
+          "description": "Label in French; the English one is used when absent.",
+          "type": "string"
+        }
+      }
+    },
+    "attribute": {
+      "description": "An attribute a note may declare in its frontmatter, and what it produces.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "description": "Kind of value: a scalar, a list of strings (string[]), an enum among values, a reference to one or several entities (ref, ref[]) of the target types, or a list of structured items described by schema.",
+          "type": "string",
+          "enum": [
+            "string",
+            "string[]",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "enum",
+            "ref",
+            "ref[]",
+            "list"
+          ]
+        },
+        "values": {
+          "description": "Allowed values of an enum attribute.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {
+          "description": "Value of the attribute when the note does not set it."
+        },
+        "target": {
+          "description": "Types the referenced entities may have: a type slug, a list of slugs, any, or same for the type of the note itself.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "relation": {
+          "description": "Relation the reference produces, from the note to the referenced entity, at the frontmatter_ref confidence.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "inverse": {
+          "description": "Whether the relation goes from the referenced entity to the note instead.",
+          "type": "boolean",
+          "default": false
+        },
+        "attributes": {
+          "description": "Attributes set on the produced relation (mode: read on an accesses relation).",
+          "type": "object"
+        },
+        "schema": {
+          "description": "Shape of each item of a list attribute, by field name: string, ref or another attribute type.",
+          "type": "object"
         }
       }
     }

@@ -9,6 +9,7 @@ import addFormats from "ajv-formats";
 import { parse as parseYaml } from "yaml";
 
 import { checkDistribution } from "./check-distribution.mjs";
+import { generateReference } from "./config-reference.mjs";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
 const failures = [];
@@ -343,11 +344,44 @@ for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
 // 12. The distribution forms expose their documented inputs and pin the version of the command line.
 for (const message of checkDistribution(root)) fail(message);
 
+// 13. The reference pages under docs/reference are what the schemas give, and every
+//     property of those schemas carries a description (scripts/config-reference.mjs
+//     regenerates the pages).
+for (const page of generateReference(root)) {
+  for (const path of page.missing) {
+    fail(`packages/core/schemas/${page.schema}: ${path} has no description`);
+  }
+  const file = join(root, page.page);
+  if (!existsSync(file)) {
+    fail(`${page.page}: missing, run pnpm reference:update`);
+  } else if (readFileSync(file, "utf8") !== page.content) {
+    fail(`${page.page}: differs from ${page.schema}, run pnpm reference:update`);
+  }
+}
+
+// 14. Every YAML block of the pipeline examples parses: they are meant to be copied.
+const pipelines = readFileSync(join(root, "docs/guides/pipelines.md"), "utf8");
+let yamlBlocks = 0;
+for (const match of pipelines.matchAll(/```ya?ml\n([\s\S]*?)```/g)) {
+  yamlBlocks += 1;
+  try {
+    const document = parseYaml(match[1]);
+    if (typeof document !== "object" || document === null) {
+      fail(`docs/guides/pipelines.md: YAML block ${String(yamlBlocks)} is not a mapping`);
+    }
+  } catch (error) {
+    fail(
+      `docs/guides/pipelines.md: YAML block ${String(yamlBlocks)} does not parse: ${error.message}`,
+    );
+  }
+}
+if (yamlBlocks === 0) fail("docs/guides/pipelines.md: no YAML block found");
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, expected results, templates and their copy, links, message catalogues, check pages, home page, licences and distribution manifests are valid",
+  "schemas, profile, theme, fixtures, expected results, templates and their copy, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages and pipeline examples are valid",
 );

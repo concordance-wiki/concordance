@@ -8,34 +8,42 @@
   "required": ["version", "project", "sources"],
   "properties": {
     "version": {
+      "description": "Version of this schema; always 1.",
       "const": 1
     },
     "project": {
+      "description": "The project: its name, its interface language, its theme file and its edit link.",
       "type": "object",
       "additionalProperties": false,
       "required": ["name"],
       "properties": {
         "name": {
+          "description": "Name of the project, the title of the site.",
           "type": "string",
           "minLength": 1
         },
         "locale": {
+          "description": "Interface language and default locale of the sources, as a BCP 47 tag; the engine ships en and fr, plugins may add others.",
           "type": "string",
-          "description": "BCP 47 language tag; the engine ships en and fr, plugins may add others.",
-          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "default": "en"
         },
         "theme": {
+          "description": "Path of the theme file, relative to this configuration. Without it, theme.yaml next to the configuration is used when it exists, else a neutral default theme.",
           "type": "string"
         },
         "edit_url": {
+          "description": "Pattern of the edit link in the footer of every page, with {source}, {path} and {commit} placeholders. Without it, a source hosted on github.com or on a GitLab instance gets the edit URL of its forge, and a local source gets none.",
           "type": "string"
         }
       }
     },
     "profile": {
+      "description": "Path of the project profile, relative to this configuration, merged key by key over the default profile.",
       "type": "string"
     },
     "plugins": {
+      "description": "Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them.",
       "type": "array",
       "items": {
         "oneOf": [
@@ -49,10 +57,12 @@
             "required": ["name"],
             "properties": {
               "name": {
+                "description": "Package name or module path of the plugin.",
                 "type": "string",
                 "minLength": 1
               },
               "options": {
+                "description": "Options passed to the plugin, in the shape its manifest documents.",
                 "type": "object"
               }
             }
@@ -61,6 +71,7 @@
       }
     },
     "applications": {
+      "description": "First-level containers every entity is resolved to, through its source, a typing rule or its frontmatter. An identifier not declared here yields W-APP-UNKNOWN; an entity without one yields W-APP-MISSING.",
       "type": "array",
       "items": {
         "type": "object",
@@ -68,13 +79,16 @@
         "required": ["id"],
         "properties": {
           "id": {
+            "description": "Identifier of the application: lowercase letters, digits and hyphens.",
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           },
           "title": {
+            "description": "Display title of the application; the identifier when absent.",
             "type": "string"
           },
           "status": {
+            "description": "Lifecycle status of the application: active (in use), legacy (being retired) or target (not built yet).",
             "type": "string",
             "enum": ["active", "legacy", "target"]
           }
@@ -82,16 +96,19 @@
       }
     },
     "domains": {
+      "description": "Global business domains, orthogonal to the sources, resolved by globs on the path of every file relative to its source root. A frontmatter domain overrides the globs; a note no domain claims goes to unclassified.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/domain"
       }
     },
     "privacy": {
+      "description": "What is never read, whether transcripts are pseudonymised and whether they are published.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "exclude": {
+          "description": "Globs of the files excluded before any content is read, relative to the root of every source.",
           "type": "array",
           "items": {
             "type": "string",
@@ -99,34 +116,44 @@
           }
         },
         "publish_transcripts": {
+          "description": "Whether transcripts are part of the published site and of its search index; they are kept out unless this is true.",
           "type": "boolean",
           "default": false
         },
         "pseudonymize": {
+          "description": "Replacement of the speaker names and of the detected personal mentions by stable pseudonyms, before anything else reads a transcript.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "description": "Whether pseudonymisation runs; it requires a dictionary.",
+              "type": "boolean",
+              "default": false
             },
             "scope": {
+              "description": "Types whose notes are pseudonymised.",
               "type": "array",
               "items": {
                 "type": "string",
                 "pattern": "^[a-z][a-z0-9_]*$"
-              }
+              },
+              "default": ["meeting"]
             },
             "dictionary": {
+              "description": "Path of pseudonyms.yaml, the dictionary of real names to pseudonyms, relative to this configuration; read at build time, never published.",
               "type": "string"
             },
             "keep_roles": {
-              "type": "boolean"
+              "description": "Whether a speaker whose dictionary entry carries a role is shown by that role rather than by the pseudonym.",
+              "type": "boolean",
+              "default": false
             }
           }
         }
       }
     },
     "sources": {
+      "description": "The repositories and local folders the wiki is built from, one entry each. Names are unique and prefix every identifier.",
       "type": "array",
       "minItems": 1,
       "items": {
@@ -135,57 +162,75 @@
         "required": ["name"],
         "properties": {
           "name": {
+            "description": "Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens.",
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9-]*$"
           },
           "git": {
+            "description": "URL of the git repository, cloned at depth 1 on ref with the credentials of the git environment; exclusive with path.",
             "type": "string",
             "minLength": 1
           },
           "ref": {
-            "type": "string"
+            "description": "Branch, tag or commit of the git repository to read.",
+            "type": "string",
+            "default": "main"
           },
           "path": {
+            "description": "Local folder, relative to this configuration, read in place; exclusive with git.",
             "type": "string",
             "minLength": 1
           },
           "kind": {
+            "description": "Kind of the source, deduced from git or path; tracker declares an issue tracker source, accepted but not read in this version.",
             "type": "string",
             "enum": ["git", "path", "tracker"]
           },
           "locale": {
+            "description": "Locale of the source, as a BCP 47 tag; selects its language pack (normalisation, stopwords, plural rules, collation) and the type prefixes of the profile for that language. Defaults to project.locale; the engine ships en and fr, plugins may add others.",
             "type": "string",
-            "description": "BCP 47 language tag; the engine ships en and fr, plugins may add others.",
             "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
           },
           "type": {
+            "description": "Type given to every markdown file of the source, above default_type and below the rules and the frontmatter.",
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$"
           },
           "default_type": {
+            "description": "Type of a note when nothing else applies.",
             "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "default": "document"
           },
           "application": {
+            "description": "Application every entity of the source belongs to, unless a rule or the frontmatter says otherwise.",
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           },
           "glossary": {
-            "type": "boolean"
+            "description": "Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary.",
+            "type": "boolean",
+            "default": false
           },
           "convert": {
-            "type": "boolean"
+            "description": "Whether the office documents of the source are converted, for preview and text extraction.",
+            "type": "boolean",
+            "default": false
           },
           "previews": {
-            "type": "boolean"
+            "description": "Whether the previews of the converted documents of the source are published with the site; false keeps them out of the artefact.",
+            "type": "boolean",
+            "default": true
           },
           "defaults": {
+            "description": "Default attribute values for the entities of the source; accepted but not read in this version.",
             "type": "object",
             "additionalProperties": {
               "type": ["string", "number", "boolean"]
             }
           },
           "rules": {
+            "description": "Typing rules evaluated in order on every file of the source; the last matching rule wins, over type and under the frontmatter.",
             "type": "array",
             "items": {
               "type": "object",
@@ -193,17 +238,21 @@
               "required": ["match", "set"],
               "properties": {
                 "match": {
+                  "description": "What a file must satisfy for the rule to apply; every condition given must hold.",
                   "type": "object",
                   "additionalProperties": false,
                   "minProperties": 1,
                   "properties": {
                     "path": {
+                      "description": "Glob matched against the path of the file relative to the source root.",
                       "type": "string"
                     },
                     "suffix": {
+                      "description": "Suffix of the file name (.rule.md), stripped from the identifier of the note.",
                       "type": "string"
                     },
                     "ext": {
+                      "description": "Extensions, each starting with a dot, one of which the file must carry.",
                       "type": "array",
                       "items": {
                         "type": "string",
@@ -211,11 +260,13 @@
                       }
                     },
                     "frontmatter": {
+                      "description": "Name of a frontmatter key the note must carry.",
                       "type": "string"
                     }
                   }
                 },
                 "set": {
+                  "description": "Attributes given to the matching files, most often type; application and any entity attribute are accepted, the frontmatter still wins.",
                   "type": "object",
                   "additionalProperties": {
                     "type": ["string", "number", "boolean"]
@@ -226,9 +277,11 @@
             }
           },
           "provider": {
+            "description": "Provider of a tracker source; accepted but not read in this version.",
             "type": "string"
           },
           "project": {
+            "description": "Project identifier in the tracker of a tracker source; accepted but not read in this version.",
             "type": "string"
           }
         },
@@ -261,41 +314,52 @@
       }
     },
     "staleness": {
+      "description": "Days without a change after which a source or a note is flagged W-STALE and the home page marks the source dormant.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "warn_after_days": {
+          "description": "Thresholds in days: the default key applies to every source, a key named after a source overrides it for that source.",
           "type": "object",
           "additionalProperties": {
             "type": "integer",
             "minimum": 1
+          },
+          "default": {
+            "default": 180
           }
         }
       }
     },
     "inference": {
+      "description": "Thresholds and options of the recognition dictionary, the link producers, the keyword discovery and the twin-resource reconciliation.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "glossary_sources": {
+          "description": "Names of the sources whose entities take priority in the recognition dictionary when one form names several entities. When present, even empty, it replaces the glossary marks of the sources.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "stopwords": {
+          "description": "Extra stopword files, relative to this configuration, one word per line and # for a comment, added to the defaults of the language pack; a title or alias that is a stopword never enters the dictionary. A missing file fails the build.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "short_terms": {
+          "description": "Terms whose normalised form is shorter than three characters and that enter the dictionary anyway (FP, VL); every other such title or alias is left out. Compared without regard to case or accents.",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "default": []
         },
         "type_prefixes": {
+          "description": "Words that announce a type in prose and raise the confidence of the mention that follows, by locale then by type; each list replaces the profile's for that type.",
           "type": "object",
           "additionalProperties": {
             "type": "object",
@@ -308,40 +372,54 @@
           }
         },
         "cross_source_links": {
-          "type": "boolean"
+          "description": "Whether markdown links across sources, written with a source: prefix or as a relative path climbing into a sibling source, are resolved; otherwise they yield W-LINK-CROSS-SOURCE.",
+          "type": "boolean",
+          "default": false
         },
         "ngrams": {
+          "description": "Discovery of the recurring expressions without a note: the lengths of the n-grams read over the text of every note, and the thresholds a candidate must reach to be kept at all.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "min": {
+              "description": "Shortest n-gram, in words.",
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 1
             },
             "max": {
+              "description": "Longest n-gram, in words.",
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 4
             },
             "min_occurrences": {
+              "description": "Occurrences a candidate expression needs to be kept.",
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 3
             },
             "min_documents": {
+              "description": "Distinct files a candidate expression must appear in to be kept.",
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 2
             }
           }
         },
         "keyword_pages": {
+          "description": "Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files; below it, it stays in the search index without a page.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "min_occurrences": {
+              "description": "Occurrences from which a discovered expression gets a page.",
               "type": "integer",
               "minimum": 1,
               "default": 3
             },
             "min_files": {
+              "description": "Distinct files an expression must appear in to get a page.",
               "type": "integer",
               "minimum": 1,
               "default": 2
@@ -349,10 +427,12 @@
           }
         },
         "neighbours": {
+          "description": "Bound of the co-occurrence neighbourhood accumulated per node.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "k": {
+              "description": "Co-occurrence neighbours kept per node, ranked by shared paragraphs then by identifier; bounds the memory of the accumulation and the neighbours block of model.json.",
               "type": "integer",
               "minimum": 1,
               "default": 50
@@ -360,47 +440,57 @@
           }
         },
         "candidate_score": {
+          "description": "Score from which a candidate expression yields W-TERM-UNDEFINED: the C-value of the expression multiplied by its IDF.",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "default": 4
         },
         "duplicates": {
+          "description": "How the twin resources of one document (a deck, its notes, its transcript) are reconciled: the signals of a pair are added, capped at 1, and the total decides between a merge and a W-DUP-CANDIDATE finding.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "mode": {
+              "description": "estimate reports the MinHash estimate of the text similarity and never recomputes the exact index; exact recomputes it on every pair the banding brings together; auto recomputes it on the pairs estimated at exact_above or more.",
               "type": "string",
               "enum": ["estimate", "exact", "auto"],
               "default": "auto"
             },
             "exact_above": {
+              "description": "Estimated similarity from which auto recomputes the exact index on the full shingle sets.",
               "type": "number",
               "minimum": 0,
               "maximum": 1,
               "default": 0.5
             },
             "size_ratio_min": {
+              "description": "Word-count ratio (shorter text over longer) under which the content signal is capped at 0.4 and the pair is reported as a likely inclusion rather than a duplicate.",
               "type": "number",
               "minimum": 0,
               "maximum": 1,
               "default": 0.5
             },
             "shingle_size": {
+              "description": "Words per shingle of the comparison form.",
               "type": "integer",
               "minimum": 1,
               "default": 5
             },
             "minhash_functions": {
+              "description": "Hash functions of a MinHash signature, four per LSH band.",
               "type": "integer",
               "minimum": 4,
               "default": 128
             },
             "merge_above": {
+              "description": "Score strictly above which two resources merge into one entity with several representations.",
               "type": "number",
               "minimum": 0,
               "maximum": 1,
               "default": 0.9
             },
             "candidate_above": {
+              "description": "Score from which a pair that does not merge yields a W-DUP-CANDIDATE finding.",
               "type": "number",
               "minimum": 0,
               "maximum": 1,
@@ -411,62 +501,83 @@
       }
     },
     "conversion": {
+      "description": "Office document conversion: its limits, its cache and its parallelism.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "timeout_s": {
+          "description": "Seconds allowed per document; a document past it yields W-CONV-FAILED and stays downloadable.",
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "default": 120
         },
         "max_size_mb": {
+          "description": "Size in megabytes above which a document is not converted and yields W-CONV-FAILED.",
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "default": 50
         },
         "cache": {
-          "type": "string"
+          "description": "Cache folder, relative to this configuration and never published: the shallow clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source.",
+          "type": "string",
+          "default": ".concordance-cache"
         },
         "parallelism": {
+          "description": "Concurrent conversions, the number of processor cores by default; changes the build time, never the output.",
           "type": "integer",
           "minimum": 1
         }
       }
     },
     "build": {
+      "description": "Where the build writes, what its pages embed and when it fails.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "output": {
-          "type": "string"
+          "description": "Folder that receives the site, model.json, build.log.json and the fragments, relative to this configuration; --output on the command line overrides it.",
+          "type": "string",
+          "default": "./dist"
         },
         "fail_on": {
+          "description": "The only thing that makes the build fail on content: every anomaly is recorded as a finding and the build goes on, then the verdict is decided here.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "errors": {
-              "type": "boolean"
+              "description": "Whether any error finding makes the build exit with code 1.",
+              "type": "boolean",
+              "default": true
             },
             "unconverted_max": {
+              "description": "Number of unconverted documents above which the build fails.",
               "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "default": 10
             }
           }
         },
         "mentions_inline": {
+          "description": "Mentions of an entity served in the HTML of its page, readable without JavaScript; the rest is loaded from the fragments/<id>.mentions.json of the entity.",
           "type": "integer",
           "minimum": 0,
           "default": 20
         },
         "extracted_text_max_chars": {
+          "description": "Characters of the body of an entity that enter the search index: the plain text of its note today, the text extracted from its converted documents when conversion exists; the rest of the text is not searchable.",
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "default": 20000
         }
       }
     },
     "site": {
+      "description": "Options of the generated pages.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "neighbourhood": {
+          "description": "The neighbourhood mini-map of a page.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -482,6 +593,7 @@
       }
     },
     "checks": {
+      "description": "Overrides of the check registry, by check identifier: disable a check or change the severity of its findings. An identifier no loaded check registers is an execution error.",
       "type": "object",
       "propertyNames": {
         "type": "string",
@@ -492,16 +604,20 @@
         "additionalProperties": false,
         "properties": {
           "severity": {
+            "description": "Severity given to every finding of the check, replacing its default.",
             "type": "string",
             "enum": ["error", "warning", "info"]
           },
           "enabled": {
-            "type": "boolean"
+            "description": "Whether the check runs; false drops its findings from the build log and the model.",
+            "type": "boolean",
+            "default": true
           }
         }
       }
     },
     "lock": {
+      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; accepted but not read by the build in this version.",
       "type": "string"
     }
   },
@@ -512,13 +628,16 @@
       "required": ["id"],
       "properties": {
         "id": {
+          "description": "Identifier of the domain: lowercase letters, digits and hyphens. A subdomain is addressed by its identifier or by its identifier path (inference/recognition).",
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]*$"
         },
         "title": {
+          "description": "Display title of the domain; the identifier when absent.",
           "type": "string"
         },
         "match": {
+          "description": "Globs evaluated on the path of every file relative to its source root, whatever the source. The deepest matching domain wins, then the last declared.",
           "type": "array",
           "items": {
             "type": "string",
@@ -526,6 +645,7 @@
           }
         },
         "subdomains": {
+          "description": "Domains nested under this one, with the same shape; their globs are evaluated after their parent's.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/domain"
