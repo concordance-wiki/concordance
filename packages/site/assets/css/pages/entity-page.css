@@ -9,7 +9,7 @@
     "side";
 }
 
-/* Three widths: one column; the tree folded above the text with the panel beside it; three columns. */
+/* Three widths: one column; the tree folded above the text with the panel beside it; three columns. The centre column is padded 18 by 16 px on the phone, 20 px on the tablet, 30 by 40 px on the desktop. */
 
 @media (min-width: 43.75rem) {
   .entity {
@@ -17,6 +17,10 @@
     grid-template-areas:
       "space space"
       "main side";
+  }
+
+  .entity-main {
+    padding: 1.25rem 1.25rem var(--space-5);
   }
 
   .entity-side {
@@ -34,6 +38,10 @@
   .entity-with-space {
     grid-template-columns: 16rem minmax(0, 1fr) 21.5rem;
     grid-template-areas: "space main side";
+  }
+
+  .entity-main {
+    padding: 1.875rem 2.5rem var(--space-5);
   }
 
   .space-tree {
@@ -60,7 +68,7 @@
 .entity-main {
   grid-area: main;
   min-inline-size: 0;
-  padding: var(--space-4) var(--space-4) var(--space-5);
+  padding: 1.125rem 1rem var(--space-5);
 }
 
 .entity-side {
