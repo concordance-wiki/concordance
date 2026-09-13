@@ -197,5 +197,5 @@ export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
 
   const links = [...merged.values()].sort(compareLinks);
   for (const link of links) link.provenance.sort(compareProvenances);
-  return { links, findings: findings.sort(compareFindings) };
+  return { links, findings: findings.toSorted(compareFindings) };
 }

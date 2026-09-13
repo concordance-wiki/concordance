@@ -201,5 +201,5 @@ export async function loadPlugins(
     claim(manifest, claimed);
     registered.push({ name: manifest.name, manifest, options });
   }
-  return { registry: createRegistry(registered), findings: findings.sort(compareFindings) };
+  return { registry: createRegistry(registered), findings: findings.toSorted(compareFindings) };
 }

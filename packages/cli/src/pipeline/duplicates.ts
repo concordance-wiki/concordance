@@ -235,7 +235,7 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
   return {
     entities: mergeEntities(input.entities, groups),
     links: repointLinks(input.links, groups, input.profile),
-    findings: findings.sort(compareFindings),
+    findings: findings.toSorted(compareFindings),
     candidates,
     counts,
   };

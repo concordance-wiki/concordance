@@ -169,7 +169,7 @@ export function mentionsOf(context: SiteContext, page: string, entity: Entity): 
   }
   const rank = (item: LocatedMention): number => (item.mention.kind === "written" ? 0 : 1);
   return located
-    .sort(
+    .toSorted(
       (a, b) =>
         rank(a) - rank(b) ||
         byCodeUnit(a.source, b.source) ||

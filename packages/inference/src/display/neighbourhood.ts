@@ -109,7 +109,7 @@ export function displayedNeighbourhood(input: DisplayedNeighbourhoodInput): Disp
     const row = rows.get(id);
     const neighbours =
       row === undefined ? [] : [...row.values()].map((neighbour) => toDisplayed(neighbour, rank));
-    nodes.set(id, neighbours.sort(compareDisplayed).slice(0, size));
+    nodes.set(id, neighbours.toSorted(compareDisplayed).slice(0, size));
   }
   return nodes;
 }

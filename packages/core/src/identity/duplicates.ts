@@ -38,6 +38,6 @@ export function resolveDuplicates<T extends Identified>(
   }
   return {
     kept: [...kept.values()].sort((a, b) => compareCodeUnits(a.id, b.id)),
-    findings: findings.sort(compareFindings),
+    findings: findings.toSorted(compareFindings),
   };
 }

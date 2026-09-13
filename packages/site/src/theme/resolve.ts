@@ -209,7 +209,9 @@ export async function resolveTheme(
   if (loadFile !== undefined) {
     for (const module of modules) {
       const origin = { plugin: module.origin ?? "types_dir", theme: "type module" };
-      for (const [name, path] of Object.entries(module.components).sort()) {
+      for (const [name, path] of Object.entries(module.components).sort(([a], [b]) =>
+        byCodeUnit(a, b),
+      )) {
         const label = `type module ${module.slug}`;
         const component = await componentOf(() => loadFile(path), label, path);
         place(placement, moduleComponentName(name, module.slug), component, origin, module.slug);
@@ -226,7 +228,9 @@ export async function resolveTheme(
         config = configOf(root, theme, label, loader.fileSystem ?? nodeFileSystem);
       }
       const origin = { plugin: registration.name, theme: theme.name };
-      for (const [name, path] of Object.entries(theme.components ?? {}).sort()) {
+      for (const [name, path] of Object.entries(theme.components ?? {}).sort(([a], [b]) =>
+        byCodeUnit(a, b),
+      )) {
         const parsed = parseComponentName(name);
         if (parsed === undefined) {
           throw new ThemeResolutionError(

@@ -10,6 +10,11 @@ const shipped = ["en", "fr"].map((locale) =>
 );
 const packs = new Map<string, LanguagePack>(shipped.map((pack) => [pack.locale, pack]));
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /**
  * The pack of a locale: the exact tag first, then its language alone, so that `fr-CA`
  * reads the `fr` pack until a plugin registers a more specific one.
@@ -33,7 +38,7 @@ export function registerLanguagePack(pack: LanguagePack): void {
 }
 
 export function availableLocales(): Locale[] {
-  return [...packs.keys()].sort();
+  return [...packs.keys()].sort(byCodeUnit);
 }
 
 /** The locale of a source: its own, then the project's, then `en`; always canonical. */

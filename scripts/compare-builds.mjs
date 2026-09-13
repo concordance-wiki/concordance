@@ -10,6 +10,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 /** Forward-slash relative path to content hash, for every file under the tree. */
 export function listTree(tree) {
   const entries = new Map();
@@ -34,7 +37,7 @@ export function listTree(tree) {
  */
 export function compareTrees(firstTree, secondTree) {
   const [first, second] = [firstTree, secondTree].map(listTree);
-  const paths = [...new Set([...first.keys(), ...second.keys()])].sort();
+  const paths = [...new Set([...first.keys(), ...second.keys()])].sort(byCodeUnit);
   const differences = paths
     .filter((path) => first.get(path) !== second.get(path))
     .map((path) => {

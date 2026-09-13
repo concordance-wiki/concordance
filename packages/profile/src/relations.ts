@@ -1,5 +1,10 @@
 import type { AllowedPair, Profile } from "./types.js";
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** `type` ends designate a type rather than an entity, so no entity pair ever matches them. */
 function endMatches(end: string, type: string, other: string): boolean {
   if (end === "any") return true;
@@ -20,7 +25,7 @@ function relationsWhere(profile: Profile, matches: (pair: AllowedPair) => boolea
   return Object.entries(profile.relations)
     .filter(([, relation]) => relation.allowed.some(matches))
     .map(([slug]) => slug)
-    .sort();
+    .sort(byCodeUnit);
 }
 
 export function allowedRelations(profile: Profile, fromType: string, toType: string): string[] {

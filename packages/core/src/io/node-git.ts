@@ -26,6 +26,11 @@ function git(cwd: string, args: readonly string[]): Promise<string> {
   });
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function parseHeader(line: string): FileHistory {
   return { commit: line.slice(0, 40), modifiedAt: line.slice(41) };
 }
@@ -89,8 +94,11 @@ export const nodeGit: GitClient = {
     ]);
     const touched = parseLog(log);
     const history = new Map<string, FileHistory>();
-    const tracked = tree.split("\0").filter((entry) => entry !== "");
-    for (const path of tracked.sort()) {
+    const tracked = tree
+      .split("\0")
+      .filter((entry) => entry !== "")
+      .sort(byCodeUnit);
+    for (const path of tracked) {
       history.set(path, touched.get(path) ?? (await lastCommit(directory, path)));
     }
     return history;

@@ -281,7 +281,7 @@ function operationOf(
     ...(operationId === undefined ? {} : { operationId }),
     ...(summary === undefined ? {} : { summary }),
     tags,
-    schemas: [...names].sort(),
+    schemas: [...names].sort(byCodeUnit),
     parameters: parametersOf(document, item, operation),
     ...(request === undefined ? {} : { request }),
     responses: responsesOf(document, operation),

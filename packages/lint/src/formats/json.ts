@@ -38,10 +38,17 @@ export interface JsonReport {
   summary: Record<Severity, number>;
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** The checks that ran, sorted: the global ones join the local ones only when the model could be read. */
 export function checksOf(scope: ReportScope | undefined): CheckId[] {
   const global = scope?.name === "global" && scope.degraded === undefined;
-  return global ? [...new Set([...LOCAL_CHECKS, ...GLOBAL_CHECKS])].sort() : [...LOCAL_CHECKS];
+  return global
+    ? [...new Set([...LOCAL_CHECKS, ...GLOBAL_CHECKS])].sort(byCodeUnit)
+    : [...LOCAL_CHECKS];
 }
 
 function toJson(finding: Finding): JsonFinding {

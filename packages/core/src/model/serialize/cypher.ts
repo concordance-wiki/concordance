@@ -4,6 +4,11 @@ import type { CanonicalModel } from "./types.js";
 
 type Scalar = string | number | boolean;
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function isScalar(value: unknown): value is Scalar {
   return typeof value === "string" || typeof value === "number" || typeof value === "boolean";
 }
@@ -41,7 +46,7 @@ function entityProperties(entity: Entity): string[] {
     ["type_origin", entity.type_origin],
   ];
   const attributes = Object.keys(entity.attributes)
-    .sort()
+    .sort(byCodeUnit)
     .map((key): [string, unknown] => [`attr_${key}`, entity.attributes[key]]);
   const assignments: string[] = [];
   for (const [name, value] of [...scalars, ...attributes]) {
@@ -62,7 +67,7 @@ export function relationshipType(relation: string): string {
 
 function linkStatement(link: Link): string {
   const methods = [...new Set(link.provenance.map((provenance) => provenance.method))]
-    .sort()
+    .sort(byCodeUnit)
     .map(quote);
   return [
     `MERGE (a:Entity {id: ${quote(link.from)}})`,

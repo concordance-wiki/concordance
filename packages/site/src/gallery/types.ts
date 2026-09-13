@@ -6,6 +6,7 @@ import { siteContext } from "../build/context.js";
 import { entityPageOf } from "../build/entity-page.js";
 import type { EntityFragment } from "../build/fragments.js";
 import { renderMarkdown } from "../markdown/render.js";
+import { byCodeUnit } from "../order.js";
 import type { EntityPageProps } from "../slots.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 
@@ -63,7 +64,7 @@ function frontmatterOf(template: string): Record<string, unknown> {
 function entityOf(module: TypeModule, template: string, title: string | undefined): Entity {
   const frontmatter = frontmatterOf(template);
   const attributes: Record<string, unknown> = {};
-  for (const key of Object.keys(frontmatter).sort()) {
+  for (const key of Object.keys(frontmatter).sort(byCodeUnit)) {
     if (!COMMON_KEYS.has(key)) attributes[key] = frontmatter[key];
   }
   const { status } = frontmatter;

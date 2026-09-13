@@ -15,6 +15,11 @@ export interface KeywordNeighboursInput {
   options: NeighbourhoodOptions;
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function paragraphKey(occurrence: { source?: string; path: string; line: number }): string {
   return `${occurrence.source ?? ""}\n${occurrence.path}\n${String(occurrence.line)}`;
 }
@@ -44,7 +49,7 @@ export function keywordNeighbours(input: KeywordNeighboursInput): Neighbours {
   const neighbourhood = accumulateCooccurrences([...shared, ...keywordOccurrences], input.options);
   const block = neighbourhoodToModel(neighbourhood);
   const rows: Neighbours = {};
-  for (const id of [...input.keywordMentions.keys()].sort()) {
+  for (const id of [...input.keywordMentions.keys()].sort(byCodeUnit)) {
     const row = block[id];
     if (row !== undefined && row.length > 0) rows[id] = row;
   }

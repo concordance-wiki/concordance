@@ -76,6 +76,11 @@ export type TypeModuleReading =
 const SLUG_PATTERN = /^[a-z][a-z0-9_]*$/;
 const MESSAGES_FILE_PATTERN = /^messages\/([a-z]{2,3})\.json$/;
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -171,7 +176,7 @@ function messagesOf(
   const messages: Record<string, string> = {};
   const attributes = Object.keys(declaration.attributes ?? {});
   const sections = Object.keys(declaration.sections ?? {});
-  for (const key of Object.keys(parsed.document).sort()) {
+  for (const key of Object.keys(parsed.document).sort(byCodeUnit)) {
     const message = messageOf(parsed.document[key]);
     if (message === undefined) {
       issues.push(
@@ -226,7 +231,7 @@ function schemaOf(
     };
   }
   const issues: ConfigIssue[] = [];
-  for (const name of Object.keys(parsed.document).sort()) {
+  for (const name of Object.keys(parsed.document).sort(byCodeUnit)) {
     if (declaration.attributes?.[name]?.type !== "list") {
       issues.push(
         prefixed(
@@ -377,7 +382,7 @@ export function readTypeModules(fs: FileSystem, directory: string): TypeModulesR
   }
   const modules: TypeModule[] = [];
   const issues: ConfigIssue[] = [];
-  for (const slug of [...slugs].sort()) {
+  for (const slug of [...slugs].sort(byCodeUnit)) {
     const reading = readTypeModule(fs, `${root}/${slug}`);
     if (reading.ok) {
       modules.push(reading.module);

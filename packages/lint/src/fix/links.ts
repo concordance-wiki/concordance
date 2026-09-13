@@ -25,6 +25,11 @@ function offsetOf(text: string, link: MarkdownLink): number {
   return offset + link.column - 1;
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** Files carrying the same name and extension as the missing target, wherever they are filed. */
 function candidatesFor(missing: string, files: ReadonlySet<string>): string[] {
   const wanted = posix.parse(missing);
@@ -33,7 +38,7 @@ function candidatesFor(missing: string, files: ReadonlySet<string>): string[] {
       const parsed = posix.parse(file);
       return parsed.name === wanted.name && parsed.ext === wanted.ext;
     })
-    .sort();
+    .sort(byCodeUnit);
 }
 
 function destination(from: string, file: string, anchor: string | undefined): string {
@@ -111,7 +116,7 @@ export function rewriteRenamedLinks(
   });
   let fixed = text;
   // Edits come in document order; applying them from the end keeps every earlier offset valid.
-  for (const edit of edits.reverse()) {
+  for (const edit of edits.toReversed()) {
     fixed = fixed.slice(0, edit.offset) + edit.replacement + fixed.slice(edit.offset + edit.length);
   }
   return { text: fixed, changes, refused };

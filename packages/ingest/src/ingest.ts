@@ -71,7 +71,7 @@ async function ingestGit(
       const known = history.get(path) ?? { commit, modifiedAt: deps.fs.modifiedAt(absolutePath) };
       return { path, absolutePath, commit: known.commit, modifiedAt: known.modifiedAt };
     });
-    return { source: { name: source.name, locale, root, commit, files: files.sort(byPath) } };
+    return { source: { name: source.name, locale, root, commit, files: files.toSorted(byPath) } };
   } catch (error) {
     return {
       finding: unreachable(
@@ -102,7 +102,7 @@ function ingestLocal(
     const absolutePath = posix.join(root, relative);
     return { path: relative, absolutePath, modifiedAt: deps.fs.modifiedAt(absolutePath) };
   });
-  return { source: { name: source.name, locale, root, files: files.sort(byPath) } };
+  return { source: { name: source.name, locale, root, files: files.toSorted(byPath) } };
 }
 
 export async function ingestSources(
@@ -131,5 +131,5 @@ export async function ingestSources(
       findings.push(outcome.finding);
     }
   }
-  return { sources, findings: findings.sort(compareFindings) };
+  return { sources, findings: findings.toSorted(compareFindings) };
 }

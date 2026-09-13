@@ -57,7 +57,7 @@ function byCodeUnit(a: string, b: string): number {
 function canonical(attributes: Record<string, unknown>): string {
   return JSON.stringify(
     Object.keys(attributes)
-      .sort()
+      .sort(byCodeUnit)
       .map((key) => [key, attributes[key]]),
   );
 }
@@ -175,5 +175,5 @@ export function frontmatterLinks(input: FrontmatterLinksInput): FrontmatterLinks
   const links = [...merged.values()]
     .sort((a, b) => compareLinks(a.link, b.link) || byCodeUnit(a.attributes, b.attributes))
     .map((entry) => entry.link);
-  return { links, findings: findings.sort(compareFindings) };
+  return { links, findings: findings.toSorted(compareFindings) };
 }

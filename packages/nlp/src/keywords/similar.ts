@@ -58,7 +58,7 @@ export function similarExpressions<T extends KeyedExpression>(
   return (
     similar
       // Keys are distinct here, so the tie-break never meets two equal ones.
-      .sort((a, b) => b.overlap - a.overlap || (a.candidate.key < b.candidate.key ? -1 : 1))
+      .toSorted((a, b) => b.overlap - a.overlap || (a.candidate.key < b.candidate.key ? -1 : 1))
       .slice(0, limit)
       .map((item) => item.candidate)
   );

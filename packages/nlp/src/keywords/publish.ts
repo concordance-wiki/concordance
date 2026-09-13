@@ -96,7 +96,7 @@ export function publishKeywords(
       mentions: candidate.mentions,
     });
   }
-  return { published: published.sort((a, b) => byCodeUnit(a.id, b.id)), discarded };
+  return { published: published.toSorted((a, b) => byCodeUnit(a.id, b.id)), discarded };
 }
 
 function locationOf(page: KeywordPage): EntitySource {

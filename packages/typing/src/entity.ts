@@ -50,6 +50,11 @@ export function typeSuffixesOf(source: SourceConfig): string[] {
   );
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function fileTitle(path: string): string {
   const name = path.slice(path.lastIndexOf("/") + 1);
   return name.replace(/\.[^.]+$/, "");
@@ -97,7 +102,7 @@ function attributesOf(
     if (!COMMON_KEYS.has(key)) merged[key] = value;
   }
   const attributes: Record<string, unknown> = {};
-  for (const key of Object.keys(merged).sort()) {
+  for (const key of Object.keys(merged).sort(byCodeUnit)) {
     attributes[key] = merged[key];
   }
   return attributes;

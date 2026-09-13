@@ -13,9 +13,14 @@ function representationFormat(path: string): string {
   return extension === "md" ? "markdown" : extension;
 }
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function sortedAttributes(attributes: Record<string, unknown>): Record<string, unknown> {
   const sorted: Record<string, unknown> = {};
-  for (const key of Object.keys(attributes).sort()) sorted[key] = attributes[key];
+  for (const key of Object.keys(attributes).sort(byCodeUnit)) sorted[key] = attributes[key];
   return sorted;
 }
 
