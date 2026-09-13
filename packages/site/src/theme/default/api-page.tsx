@@ -20,6 +20,8 @@ import {
   NoteSection,
   PanelBlock,
   Source,
+  SpaceMark,
+  TypeBadge,
 } from "./entity-page.js";
 import { SpaceTree } from "./space-tree.js";
 
@@ -56,6 +58,7 @@ export function apiKeys(
  */
 export function ApiPage({
   entity,
+  typeHref,
   space,
   breadcrumb = [],
   changed,
@@ -72,7 +75,11 @@ export function ApiPage({
 }: ApiPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
-    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...defaultEntityPageLabels(
+      neighbours.total ?? neighbours.neighbours.length,
+      0,
+      space?.name ?? "",
+    ),
     ...given,
   };
   const contractText: ContractLabels = { ...defaultContractLabels, ...contract.labels };
@@ -85,14 +92,17 @@ export function ApiPage({
         <header class="entity-header">
           <h1>{entity.title}</h1>
           <p class="entity-badge">
-            <span class="badge">{entity.typeLabel}</span>
+            <TypeBadge
+              label={entity.typeLabel}
+              {...(typeHref === undefined ? {} : { href: typeHref })}
+            />
             {changed !== undefined && (
               <time class="entity-changed" dateTime={changed.date}>
                 <span class="entity-changed-long">{changed.label}</span>
                 <span class="entity-changed-short">{changed.short ?? changed.label}</span>
               </time>
             )}
-            {space !== undefined && <span class="entity-space">{space.name}</span>}
+            {space !== undefined && <SpaceMark space={space} label={text.inSpace} />}
           </p>
         </header>
         <article class="entity-body">

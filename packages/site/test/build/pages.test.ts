@@ -237,14 +237,25 @@ describe("entityPageOf", () => {
     expect(highlightsOf(englishOnly, pagePath, term)[0]?.label).toBe("Broader");
   });
 
-  it("fills the side panel with the common properties, the declared attributes of the type in declaration order, then the declared common ones", () => {
+  it("fills the side panel with the common properties, the application and the domain by their titles leading to the results filtered on them, the declared attributes of the type in declaration order, then the declared common ones", () => {
     const declaredCommon = entity({
       ...term,
       attributes: { ...term.attributes, superseded_by: "glossary/page", locale: "en" },
     });
-    expect(panelOf(context(), pagePath, declaredCommon)).toEqual([
-      { name: "application", label: "Application", values: [{ text: "concordance-cli" }] },
-      { name: "domain", label: "Domain", values: [{ text: "publication" }] },
+    const titled = context({ names: { applications: { "concordance-cli": "Command line" } } });
+    expect(panelOf(titled, pagePath, declaredCommon)).toEqual([
+      {
+        name: "application",
+        label: "Application",
+        values: [
+          { text: "Command line", href: "../../search/index.html?application=concordance-cli" },
+        ],
+      },
+      {
+        name: "domain",
+        label: "Domain",
+        values: [{ text: "publication", href: "../../search/index.html?domain=publication" }],
+      },
       { name: "status", label: "Status", values: [{ text: "active" }] },
       {
         name: "broader",
@@ -360,9 +371,20 @@ describe("entityPageOf", () => {
       legendRecognised: "recognised word, existing note",
       legendKeyword: "recognised word, no note",
       imageNote: "Image of the repository, shown in the flow of the text",
+      inSpace: "Space glossary",
     });
     expect(stranger.attributes).toHaveLength(3);
+    expect(
+      entityPageOf(
+        context({
+          names: { sources: { glossary: "Business glossary" } },
+          catalogue: loadCatalogue("fr"),
+        }),
+        term,
+      ).labels?.inSpace,
+    ).toBe("Espace Business glossary");
     expect(stranger.neighbours.total).toBe(3);
+    expect(stranger.typeHref).toBe("../../search/index.html?type=unknown_type");
     const declared = entityPageOf(context(), screen);
     expect(declared.declaration?.type).toBe("screen");
     expect(declared.otherAttributes).toBeUndefined();

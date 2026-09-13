@@ -49,7 +49,7 @@ describe("ApiPage", () => {
       '<nav class="space" aria-label="Tree of the space">',
       '<nav class="breadcrumbs" aria-label="You are here">',
       "<h1>Model query API</h1>",
-      '<p class="entity-badge"><span class="badge">API</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">specs</span></p></header>',
+      '<p class="entity-badge"><span class="badge">API</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><a class="entity-space" href="../../../#home-tree">Space specs</a></p></header>',
       '<article class="entity-body">',
       '<section class="api-operations"',
       '<section class="contract"',

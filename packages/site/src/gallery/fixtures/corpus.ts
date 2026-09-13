@@ -4,6 +4,7 @@ import type { Mention, SpaceTree } from "../../slots.js";
 export const corporateSpaceTree: SpaceTree = {
   name: "specs",
   initials: "SP",
+  href: "../../../#home-tree",
   nodes: [
     { label: "api", count: 3 },
     { label: "batches", count: 3 },

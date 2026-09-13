@@ -179,7 +179,9 @@ describe("the gallery with the registered types", () => {
     expect(runbook).toContain("<title>Type runbook</title>");
     expectBalanced(runbook);
     const screen = fileSystem.readText("/out/type-screen.html");
-    expect(screen).toContain('<span class="badge">Screen</span>');
+    expect(screen).toContain(
+      '<a class="badge" href="../../search/index.html?type=screen">Screen</a>',
+    );
     expect(screen).toContain("<h1>To-do page</h1>");
     expect(screen).toContain(
       '<h2 id="entity-properties">Properties<span class="count panel-count">3</span></h2>',

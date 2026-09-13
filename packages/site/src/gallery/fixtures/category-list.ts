@@ -5,6 +5,7 @@ import { corporateHeader } from "./chrome.js";
 const corporateCategoryTree: SpaceTree = {
   name: "specs",
   initials: "SP",
+  href: "../",
   nodes: [
     { label: "api", count: 3, href: "../api/" },
     { label: "batches", count: 3, href: "../batches/" },

@@ -33,6 +33,17 @@
   content: none;
 }
 
+/* The space on the line reads as the rest of the line, the underline on hover telling the link to its page. */
+
+a.entity-space {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.entity-space:hover {
+  text-decoration: underline;
+}
+
 .highlight-label {
   margin-inline-end: var(--space-1);
 }

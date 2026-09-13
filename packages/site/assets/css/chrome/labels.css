@@ -29,6 +29,15 @@ concordance-island {
   font-weight: 500;
 }
 
+/* The chip that leads to the pages of its type keeps the chip colours, the underline on hover telling the link. */
+a.badge {
+  text-decoration: none;
+}
+
+a.badge:hover {
+  text-decoration: underline;
+}
+
 .empty {
   color: var(--color-label);
 }

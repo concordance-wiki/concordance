@@ -17,6 +17,7 @@ export const entityMessages = {
     "entity.domain": {},
     "entity.edit": {},
     "entity.imageNote": {},
+    "entity.inSpace": { space: "argument" },
     "entity.legendKeyword": {},
     "entity.legendRecognised": {},
     "entity.legendWritten": {},
