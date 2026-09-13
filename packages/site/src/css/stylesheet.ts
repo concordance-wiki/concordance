@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { fontFacesStylesheet } from "./fonts.js";
 import type { ThemeConfig } from "./theme-config.js";
 import { tokensStylesheet } from "./tokens.js";
 
@@ -23,10 +24,15 @@ function layer(name: string, content: string): string {
   return `@layer ${name} {\n${content.trimEnd()}\n}\n`;
 }
 
-/** The tool's own stylesheet: the four layers declared, then the first three filled in order. */
+/**
+ * The tool's own stylesheet: the four layers declared, the faces of the shipped fonts bound to
+ * the files next to it (outside any layer, where a face belongs), then the first three layers
+ * filled in order.
+ */
 export function siteStylesheet({ theme }: StylesheetOptions): string {
   return [
     `@layer ${CSS_LAYERS.join(", ")};\n`,
+    `${fontFacesStylesheet()}\n`,
     layer("tokens", tokensStylesheet(theme)),
     layer("base", baseStylesheet()),
     layer("components", componentsStylesheet()),

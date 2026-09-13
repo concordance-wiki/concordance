@@ -153,7 +153,7 @@ export interface ConfigIssue {
 export type ConfigValidation =
   { ok: true; config: Config; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };
 
-/** The palette of one mode, six colours as `#RRGGBB`. */
+/** The palette of one mode, six colours as `#RRGGBB` and three optional ones the default theme derives when absent. */
 export interface ThemePalette {
   bg: string;
   surface: string;
@@ -161,6 +161,12 @@ export interface ThemePalette {
   ink: string;
   muted: string;
   accent: string;
+  /** The lightest text, labels and counts; `muted` when absent. */
+  label?: string;
+  /** The background of fields and chips, between `bg` and `surface`; `bg` when absent. */
+  soft?: string;
+  /** The background of a marked passage, read in `ink`; `border` when absent. */
+  highlight?: string;
 }
 
 export type ThemeMode = "light" | "dark" | "system";

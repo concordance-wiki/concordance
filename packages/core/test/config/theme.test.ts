@@ -129,7 +129,9 @@ describe("The project name, logo, accent colour, corner radius and font families
     if (result.ok) {
       expect(result.theme.name).toBe("Concordance");
       expect(result.theme.radius).toBe(8);
-      expect(result.theme.font?.display).toBe("Instrument Serif");
+      expect(result.theme.font?.display).toBe("Instrument Sans");
+      expect(result.theme.light.label).toBe("#676C74");
+      expect(result.theme.dark.highlight).toBe("#4A2A1B");
     }
   });
 

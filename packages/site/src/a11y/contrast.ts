@@ -1,15 +1,18 @@
-import type { ThemeConfig, ThemePalette } from "../css/theme-config.js";
+import type { ThemeConfig } from "../css/theme-config.js";
+import { paletteColours, type PaletteColour } from "../css/tokens.js";
+
+export type { PaletteColour } from "../css/tokens.js";
 
 export type ColourScheme = "light" | "dark";
 
 /** What a pair of tokens is used for; each use has its own minimum ratio. */
-export type ContrastUse = "body" | "muted" | "link" | "heading" | "focus";
+export type ContrastUse = "body" | "muted" | "label" | "link" | "mark" | "heading" | "focus";
 
 export interface ContrastPair {
   scheme: ColourScheme;
   use: ContrastUse;
-  foreground: keyof ThemePalette;
-  background: keyof ThemePalette;
+  foreground: PaletteColour;
+  background: PaletteColour;
   /** Rounded to two decimals. */
   ratio: number;
   minimum: number;
@@ -23,26 +26,34 @@ export interface ContrastFinding {
 const BODY_MINIMUM = 4.5;
 const LARGE_MINIMUM = 3;
 
-/** The minimum of each use: body, muted and link text are read at body size; headings and the focus ring are large or non-text. */
+/**
+ * The minimum of each use: body, muted, label and link text and a marked passage are read at
+ * body size; headings and the focus ring are large or non-text.
+ */
 export const CONTRAST_MINIMUMS: Readonly<Record<ContrastUse, number>> = {
   body: BODY_MINIMUM,
   muted: BODY_MINIMUM,
+  label: BODY_MINIMUM,
   link: BODY_MINIMUM,
+  mark: BODY_MINIMUM,
   heading: LARGE_MINIMUM,
   focus: LARGE_MINIMUM,
 };
 
-/** The text colour of each use; every one is read over the page background and over a surface. */
-const FOREGROUNDS: Readonly<Record<ContrastUse, keyof ThemePalette>> = {
-  body: "ink",
-  muted: "muted",
-  link: "accent",
-  heading: "ink",
-  focus: "accent",
+/** The text colour of each use and the backgrounds it is read over: the page, a surface and a soft surface, or the highlight of a mark. */
+const READ_OVER: Readonly<
+  Record<ContrastUse, { foreground: PaletteColour; backgrounds: readonly PaletteColour[] }>
+> = {
+  body: { foreground: "ink", backgrounds: ["bg", "surface", "soft"] },
+  muted: { foreground: "muted", backgrounds: ["bg", "surface", "soft"] },
+  label: { foreground: "label", backgrounds: ["bg", "surface", "soft"] },
+  link: { foreground: "accent", backgrounds: ["bg", "surface", "soft"] },
+  mark: { foreground: "ink", backgrounds: ["highlight"] },
+  heading: { foreground: "ink", backgrounds: ["bg", "surface", "soft"] },
+  focus: { foreground: "accent", backgrounds: ["bg", "surface", "soft"] },
 };
 
 const USES = Object.keys(CONTRAST_MINIMUMS) as ContrastUse[];
-const BACKGROUNDS = ["bg", "surface"] as const;
 const HEX = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i;
 
 function channel(hex: string): number {
@@ -76,10 +87,10 @@ export function contrastRatio(first: string, second: string): number {
 export function contrastPairs(theme: ThemeConfig): ContrastPair[] {
   const pairs: ContrastPair[] = [];
   for (const scheme of ["light", "dark"] as const) {
-    const palette = theme[scheme];
+    const palette = paletteColours(theme[scheme]);
     for (const use of USES) {
-      const foreground = FOREGROUNDS[use];
-      for (const background of BACKGROUNDS) {
+      const { foreground, backgrounds } = READ_OVER[use];
+      for (const background of backgrounds) {
         const ratio = contrastRatio(palette[foreground], palette[background]);
         pairs.push({
           scheme,

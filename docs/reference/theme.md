@@ -15,8 +15,8 @@ A key marked (required) must be present; every other key is optional and takes t
 | `favicon` | string | — | — | Path of the favicon, relative to this file; copied under assets/. |
 | `font` | object | — | — | Font families by role. A project ships the font files itself, under assets, with @font-face rules in its stylesheet: the site never loads a font from a third-party host. See [`font`](#font). |
 | `radius` | integer | `8` | at least 0 | Corner radius of surfaces and controls, in pixels. |
-| `light` (required) | object | — | — | Palette of the light mode, six #RRGGBB colours. Text must reach a 4.5:1 contrast over bg and surface, headings 3:1; the build reports the pairs below. See [`light`](#light). |
-| `dark` (required) | object | — | — | Palette of the dark mode, six #RRGGBB colours, with the same contrast requirements as light. See [`dark`](#dark). |
+| `light` (required) | object | — | — | Palette of the light mode, six required #RRGGBB colours and three optional ones. Text must reach a 4.5:1 contrast over bg, surface and soft, headings 3:1; the build reports the pairs below. See [`light`](#light). |
+| `dark` (required) | object | — | — | Palette of the dark mode, the same colours as light, with the same contrast requirements: a second palette, never an inversion of the first. See [`dark`](#dark). |
 | `default_mode` | enum | `"system"` | `light`, `dark`, `system` | Palette the site starts with; the reader's own choice, remembered by the mode switch, wins. |
 | `footer` | object | — | — | The footer of every page. See [`footer`](#footer). |
 | `stylesheet` | string | — | — | Path of a stylesheet loaded after the tool's own, in the project cascade layer, relative to this file. |
@@ -35,7 +35,7 @@ Font families by role. A project ships the font files itself, under assets, with
 
 ## `light`
 
-Palette of the light mode, six #RRGGBB colours. Text must reach a 4.5:1 contrast over bg and surface, headings 3:1; the build reports the pairs below.
+Palette of the light mode, six required #RRGGBB colours and three optional ones. Text must reach a 4.5:1 contrast over bg, surface and soft, headings 3:1; the build reports the pairs below.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -44,11 +44,14 @@ Palette of the light mode, six #RRGGBB colours. Text must reach a 4.5:1 contrast
 | `border` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Borders and separators. |
 | `ink` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Colour of the text. |
 | `muted` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Secondary text: labels, counts, metadata. |
-| `accent` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Accent of links, focus rings and active controls; never the only carrier of an information. |
+| `accent` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Accent of links, focus rings and the current position; never a status, a decoration or the only carrier of an information. |
+| `label` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | The lightest text: the labels of the panels, counts and notes; muted when absent. Must reach 4.5:1 over bg, surface and soft. |
+| `soft` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Background of the fields, the chips and the current entry of the tree, between bg and surface; bg when absent. |
+| `highlight` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Background of a marked passage, the searched word in a result for instance, read in ink; border when absent. |
 
 ## `dark`
 
-Palette of the dark mode, six #RRGGBB colours, with the same contrast requirements as light.
+Palette of the dark mode, the same colours as light, with the same contrast requirements: a second palette, never an inversion of the first.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -57,7 +60,10 @@ Palette of the dark mode, six #RRGGBB colours, with the same contrast requiremen
 | `border` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Borders and separators. |
 | `ink` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Colour of the text. |
 | `muted` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Secondary text: labels, counts, metadata. |
-| `accent` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Accent of links, focus rings and active controls; never the only carrier of an information. |
+| `accent` (required) | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Accent of links, focus rings and the current position; never a status, a decoration or the only carrier of an information. |
+| `label` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | The lightest text: the labels of the panels, counts and notes; muted when absent. Must reach 4.5:1 over bg, surface and soft. |
+| `soft` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Background of the fields, the chips and the current entry of the tree, between bg and surface; bg when absent. |
+| `highlight` | string | — | pattern `^#[0-9A-Fa-f]{6}$` | Background of a marked passage, the searched word in a result for instance, read in ink; border when absent. |
 
 ## `footer`
 

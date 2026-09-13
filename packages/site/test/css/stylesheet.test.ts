@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { FONT_FACES, fontFiles, readFontFile } from "../../src/css/fonts.js";
 import {
   CSS_LAYERS,
   baseStylesheet,
@@ -56,6 +57,34 @@ describe("siteStylesheet", () => {
     );
     const layers = siteStylesheet({ theme }).split("\n", 1)[0];
     expect(layers?.endsWith("project;")).toBe(true);
+  });
+
+  it("binds the shipped families with @font-face rules outside the layers, the files next to the stylesheet, and calls no font host", () => {
+    const css = siteStylesheet({ theme });
+    const faces = css.slice(css.indexOf("@font-face"), css.indexOf("@layer tokens {"));
+    expect(FONT_FACES).toHaveLength(8);
+    expect(FONT_FACES.map((face) => [face.family, face.style, face.weight])).toEqual([
+      ["Instrument Sans", "normal", "400 700"],
+      ["Instrument Sans", "normal", "400 700"],
+      ["Instrument Sans", "italic", "400 700"],
+      ["Instrument Sans", "italic", "400 700"],
+      ["IBM Plex Mono", "normal", "400"],
+      ["IBM Plex Mono", "normal", "400"],
+      ["IBM Plex Mono", "normal", "500"],
+      ["IBM Plex Mono", "normal", "500"],
+    ]);
+    expect(faces).toContain(
+      '@font-face {\n  font-family: "Instrument Sans";\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n  src: url("fonts/instrument-sans-normal-400-700-latin.woff2") format("woff2");\n  unicode-range: U+0000-00FF,',
+    );
+    expect(faces).toContain(
+      'src: url("fonts/ibm-plex-mono-normal-500-latin-ext.woff2") format("woff2");\n  unicode-range: U+0100-02BA,',
+    );
+    expect(faces.match(/@font-face/g)).toHaveLength(8);
+    expect(css).not.toMatch(/https?:/);
+    expect(fontFiles()).toEqual([...FONT_FACES.map((face) => face.file), "OFL.txt"]);
+    for (const file of fontFiles()) {
+      expect(readFontFile(file).byteLength, file).toBeGreaterThan(0);
+    }
   });
 
   it("reads the base and components layers from the package assets", () => {

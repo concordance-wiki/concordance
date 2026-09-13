@@ -1,5 +1,6 @@
 import type { FileSystem } from "@concordance-wiki/core";
 
+import { FONTS_DIRECTORY, fontFiles, readFontFile } from "../css/fonts.js";
 import { projectStylesheet, siteStylesheet } from "../css/stylesheet.js";
 import { byCodeUnit } from "../order.js";
 import type { HeaderLogo, Link } from "../slots.js";
@@ -58,7 +59,10 @@ export type ThemeAssetsSource = Pick<
   "config" | "stylesheet" | "assets" | "fileSystem"
 >;
 
-/** Writes the stylesheets and copies the assets of a theme under `directory`; returns the file names written, sorted. */
+/**
+ * Writes the stylesheets, the font files the default theme ships under `fonts/` and the assets
+ * of a theme under `directory`; returns the file names written, sorted.
+ */
 export function writeThemeAssets(
   theme: ThemeAssetsSource,
   fileSystem: FileSystem,
@@ -66,6 +70,10 @@ export function writeThemeAssets(
 ): string[] {
   const written = [SITE_STYLESHEET];
   fileSystem.writeText(`${directory}/${SITE_STYLESHEET}`, siteStylesheet({ theme: theme.config }));
+  for (const file of fontFiles()) {
+    fileSystem.writeBytes(`${directory}/${FONTS_DIRECTORY}/${file}`, readFontFile(file));
+    written.push(`${FONTS_DIRECTORY}/${file}`);
+  }
   if (theme.stylesheet !== undefined) {
     fileSystem.writeText(
       `${directory}/${PROJECT_STYLESHEET}`,

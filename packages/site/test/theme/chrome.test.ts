@@ -2,6 +2,7 @@ import { memoryFileSystem } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
 import { galleryTheme } from "../../src/gallery/fixtures.js";
+import { FONT_FACES, fontFiles } from "../../src/css/fonts.js";
 import { chromeOf, writeThemeAssets } from "../../src/theme/chrome.js";
 import type { ResolvedThemeConfig } from "../../src/theme/load.js";
 
@@ -68,22 +69,32 @@ describe("chromeOf", () => {
 });
 
 describe("writeThemeAssets", () => {
-  it("writes the tool's stylesheet alone for a theme without stylesheet or assets", () => {
+  const shipped = fontFiles().map((file) => `fonts/${file}`);
+
+  it("writes the tool's stylesheet and the shipped fonts for a theme without stylesheet or assets", () => {
     const fileSystem = memoryFileSystem();
-    expect(writeThemeAssets(bare, fileSystem, "/out/assets")).toEqual(["site.css"]);
+    expect(writeThemeAssets(bare, fileSystem, "/out/assets")).toEqual(
+      [...shipped, "site.css"].sort(),
+    );
     expect(fileSystem.readText("/out/assets/site.css")).toContain(
       "@layer tokens, base, components, project;",
     );
+    expect(shipped).toHaveLength(9);
+    expect(shipped).toContain("fonts/OFL.txt");
+    expect(fileSystem.readText("/out/assets/fonts/OFL.txt")).toContain("SIL Open Font License");
+    for (const face of FONT_FACES) {
+      // Every woff2 file starts with the `wOF2` signature.
+      expect([...fileSystem.readBytes(`/out/assets/fonts/${face.file}`).subarray(0, 4)]).toEqual([
+        0x77, 0x4f, 0x46, 0x32,
+      ]);
+    }
   });
 
   it("writes the project stylesheet in its layer, copies every asset from the theme's file system and lists the files sorted", () => {
     const fileSystem = memoryFileSystem();
-    expect(writeThemeAssets(full, fileSystem, "/out/assets")).toEqual([
-      "favicon.svg",
-      "fonts/a.woff2",
-      "project.css",
-      "site.css",
-    ]);
+    expect(writeThemeAssets(full, fileSystem, "/out/assets")).toEqual(
+      ["favicon.svg", "fonts/a.woff2", "project.css", "site.css", ...shipped].sort(),
+    );
     expect(fileSystem.readText("/out/assets/project.css")).toBe(
       "@layer project {\n.site-header { border: 0 }\n}\n",
     );
