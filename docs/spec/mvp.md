@@ -140,7 +140,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 
 ## 4. Batches and stories
 
-Sixty-nine stories in nine batches, ordered by dependency. L0 to L3 form the minimum demonstrable base; L4 to L7 are independent from each other and can run in parallel; L8 runs throughout.
+Seventy stories in ten batches, ordered by dependency. L0 to L3 form the minimum demonstrable base; L4 to L7 are independent from each other and can run in parallel; L8 runs throughout; L9 dresses the site once the pages exist.
 
 ### L0 — Foundation and ingestion
 
@@ -1079,6 +1079,24 @@ As a maintainer, I want the project wiki to be built from the tool's own glossar
 - A first loop is documented: the wiki built locally, real findings read from `build.log.json`, at least three of them fixed by writing or correcting notes, the counts before and after recorded in the changelog of `demo-wiki`.
 
 Depends on: L6-01, L8-01, L8-03.
+
+### L9 — Default theme
+
+The look of the site for a corporate reader: a wiki, familiar in thirty seconds, whose right panel shows what the tool computed. Exit criterion: the entity page of the fixtures corpus renders the chrome at three widths, and the measured contrasts of both palettes are pinned by a test.
+
+#### L9-01 Chrome of the default theme
+
+As a reader of a corporate documentation, I want the site to look like a wiki I already know so that I find a page in thirty seconds and trust what the right panel tells me.
+
+- Tokens of the default theme: one type family for the text, Instrument Sans, self-hosted under the assets of the site with its OFL licence and never fetched from a font host, and IBM Plex Mono reserved to file paths and identifiers; a warm light palette (`#EFEDE9` page, `#FFFFFF` surface, `#E3E0DA` rule, `#1F2124` text, `#3A3E44` secondary, `#676C74` labels, `#A8431C` accent for links and the current position only, `#FBE3D4` highlight, `#F7F6F3` soft surface) and a separate dark palette whose contrasts are measured on their own; radii from 4 to 14 px; the accent never carries a status or a decoration; `theme.yaml` stays the override point (colours, logo, fonts), the palette gaining the optional `label`, `soft` and `highlight` colours in `theme.schema.json`.
+- Top bar: mark and site name, the search field "Search the documentation" showing the `/` shortcut, the links "Spaces" (the sources), "A–Z index" and "Recent", the light/dark toggle; no build statistic in the bar, the to-do link and its count living in the footer.
+- Left column: the tree of the current space (the source of the page), an initials badge, the folders with their page counts, the current folder open, the current page marked by a rule and the bold weight, never by colour alone; a folder of more than forty pages lists a window around the current page and counts the others.
+- Centre: the breadcrumb "Space › folder › page", the title, the line "type · changed N days ago · space", the note rendered section by section, then the footer "path/of/file.md — Something to correct? Edit this page", the edit link as before.
+- Right panel in three stacked blocks, never tabs: "Properties" (the declared attributes, with the note "Declared at the top of the file."), "On this page" (the table of contents of the H2 sections), "Related pages (N)" with a type filter (checkboxes with counts, "19 of 35 pages", "Clear all"), each entry giving the title, the type, the passage count and an excerpt, prefixed "Cited ·" when a written link exists, "Show the N others", and the note "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text."; then the line "See the neighbourhood map · N pages" that unfolds the map and its textual equivalent.
+- Three widths: from 1180 px three columns; from 768 to 1179 px the tree folded behind its name, the panel on the right; under 768 px one column, the panel as three closed disclosure blocks; targets of 40 to 44 px; no text under 13 px. The tree and the blocks are `<details>`, so the site keeps working over `file://` and without JavaScript, and every existing island keeps working.
+- Gallery: a state named `entity-page-corporate` on a rule note of the fixtures corpus; the accessibility checker and the contrast checker pass on it; a test pins the measured contrasts of both palettes (body text at least 11:1, secondary text 6:1, the lightest labels 4.5:1, nothing under 4.5:1).
+
+Depends on: L2-02, L2-08, L2-10, L2-12, L2-15, L7-02.
 
 ## 5. Working conditions
 
