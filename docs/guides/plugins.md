@@ -11,7 +11,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | [`@concordance-wiki/plugin-convert-libreoffice`](../../plugins/convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache, and of `.pdf` sources kept as they are; both produce the text of every page of the PDF, the single extraction path of the tool; thumbnails later | LibreOffice | available |
 | [`@concordance-wiki/plugin-contract-openapi`](../../plugins/contract-openapi/README.md) | source of `endpoint` entities from the OpenAPI 3.x contract an API note declares, candidate objects from its schemas, cached by fingerprint | none | available |
 | [`@concordance-wiki/plugin-contract-wsdl`](../../plugins/contract-wsdl/README.md) | source of `endpoint` entities from the WSDL 1.1 or 2.0 contract an API note declares, candidate objects from its XSD types, cached by fingerprint | none | available |
-| `@concordance-wiki/plugin-viewer-pdf` | UI component: pdf.js viewer, thumbnail rail | none | planned |
+| `viewer-pdf` (shipped with the default theme of `@concordance-wiki/site`, not a separate package) | pdf.js viewer loaded on demand from the page of a document: page navigation, zoom, a find box over the extracted text, a rail of positions captioned by their first line; image thumbnails come with the converter's thumbnail output | none | available |
 | `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
 The `concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this. The core never imports a plugin; a test walks its sources and its `package.json` to verify it.

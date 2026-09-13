@@ -3,6 +3,7 @@ import type { JSX } from "preact";
 import type { Attribute, EntityPageProps } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { AttributeList, Value } from "./attributes.js";
+import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
 
 /** How many highlights sit on the badge line; the next ones go on a line of their own. */
@@ -23,8 +24,9 @@ function Highlight({ attribute }: { attribute: Attribute }): JSX.Element {
 
 /**
  * The page of every typed entity, whatever its type: the badge and the highlights, the title,
- * the note at full column width, then the side panel, the neighbourhood, the mentions and the
- * sources. What the profile does not name for the type is left to the panel.
+ * the note at full column width, its documents under it, then the side panel, the
+ * neighbourhood, the mentions and the sources. What the profile does not name for the type is
+ * left to the panel.
  */
 export function EntityPage({
   entity,
@@ -34,6 +36,7 @@ export function EntityPage({
   neighbours,
   mentions,
   sources,
+  documents = [],
 }: EntityPageProps): JSX.Element {
   const Neighbourhood = useSlot("Neighbourhood");
   const MentionsPanel = useSlot("MentionsPanel");
@@ -70,6 +73,9 @@ export function EntityPage({
             <span class="legend-recognised">{labels.legendRecognised}</span>
           </footer>
         )}
+        {documents.map((document, index) => (
+          <DocumentBlock key={document.file.href} document={document} index={index + 1} />
+        ))}
       </article>
       {attributes.length > 0 && (
         <aside class="entity-panel" aria-labelledby="entity-properties">

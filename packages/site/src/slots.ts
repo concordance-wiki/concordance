@@ -190,6 +190,43 @@ export interface SourceRef {
   editHref?: string;
 }
 
+/** One file of a document, offered for download. */
+export interface DocumentFile {
+  /** The file name, what the link says. */
+  label: string;
+  /** Href relative to the page. */
+  href: string;
+  /** Lowercase extension without its dot. */
+  format: string;
+}
+
+/** The PDF of a document and the scripts that leaf through it, all hrefs relative to the page. */
+export interface DocumentPreview {
+  /** The PDF itself, a link without JavaScript and what the viewer opens. */
+  href: string;
+  /** The viewer bundle, imported on demand when the reader asks for it; never loaded with the page. */
+  viewerHref?: string;
+  /** The worker of the viewer, loaded by the viewer bundle. */
+  workerHref?: string;
+}
+
+/** One position of a document with its extracted text: a page, a slide or a cue. */
+export interface DocumentPosition {
+  number: number;
+  /** `page 3`, `slide 3`, or a timecode. */
+  label: string;
+  text: string;
+}
+
+/** A document of the entity that is not its note: what the page offers, with or without JavaScript. */
+export interface DocumentView {
+  file: DocumentFile;
+  preview?: DocumentPreview;
+  /** How the positions are named: the pages of a PDF, the slides of a deck, the cues of a transcript. */
+  unit: "page" | "slide" | "cue";
+  positions: DocumentPosition[];
+}
+
 export interface EntityPageProps {
   entity: EntityRef;
   /**
@@ -204,6 +241,8 @@ export interface EntityPageProps {
   neighbours: NeighbourhoodProps;
   mentions: MentionsPanelProps;
   sources: SourceRef[];
+  /** The documents of the entity beyond its note, in path order; absent or empty for a note alone. */
+  documents?: DocumentView[];
 }
 
 export interface Passage {

@@ -92,6 +92,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       [HOME_PAGE, ...entities, INDEX_PAGE, SEARCH_PAGE, TODO_PAGE].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "document-viewer",
       "mentions-panel",
       "mode-switch",
       "search",
@@ -426,7 +427,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.summary[0]).toBe("site: 11 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(3);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(4);
     expect(
       report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);

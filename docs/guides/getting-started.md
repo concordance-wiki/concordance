@@ -7,7 +7,7 @@ Concordance is pre-alpha. The packages and the container image are not on a publ
 ## Requirements
 
 - Node.js 22 (see `.nvmrc`) and git, or a container engine with the [image](#with-the-container-image), which carries both.
-- Nothing else. LibreOffice will be needed for office conversion once a converter is wired; the [limits](limits.md) page says what is not there yet.
+- Nothing else for the notes. LibreOffice, for the office documents and the PDF sources the [conversion plugin](../../plugins/convert-libreoffice/README.md) turns into pages of text and previews; without it, those documents stay downloadable. The [limits](limits.md) page says what is not there yet.
 
 ## 1. Install
 

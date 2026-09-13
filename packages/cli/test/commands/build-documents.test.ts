@@ -128,7 +128,9 @@ describe("concordance build with documents", () => {
     const plugin = documentPlugin();
     expect(await buildCommand([], io, plugin.deps)).toBe(0);
     const again = corpus();
-    expect(await buildCommand([], again, { ...plugin.deps, parallelism: undefined })).toBe(0);
+    const { parallelism, ...withoutCores } = plugin.deps;
+    expect(parallelism).toBe(3);
+    expect(await buildCommand([], again, withoutCores)).toBe(0);
     expect(again.stderr.filter((line) => line.includes("W-CONV"))).toEqual([]);
   });
 });

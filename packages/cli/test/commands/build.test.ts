@@ -58,6 +58,7 @@ function expectSiteSummary(stdout: string[], pages: number, output: string, redi
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
+    expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island search: \d+\.\d kB$/) as string,

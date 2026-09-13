@@ -11,7 +11,13 @@ import { h, type JSX } from "preact";
 
 import type { ContrastFinding } from "../a11y/contrast.js";
 import { formatKilobytes, type BudgetReport } from "../budget.js";
-import type { IslandBundle } from "../islands/bundle.js";
+import {
+  defaultIslands,
+  VIEWER_ISLAND,
+  VIEWER_WORKER_ISLAND,
+  viewerIslands,
+  type IslandBundle,
+} from "../islands/bundle.js";
 import { renderDocument, type PageSlot, type RenderOptions } from "../render.js";
 import {
   buildSearchIndex,
@@ -31,13 +37,14 @@ import {
 } from "./assemble.js";
 import { message, siteContext, typeLabel, type SiteContext, type SiteNames } from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
-import { entityPageOf } from "./entity-page.js";
+import { entityPageOf, type ViewerBundles } from "./entity-page.js";
 import type { EntityFragment } from "./fragments.js";
 import { homeOf } from "./home.js";
 import { letterHref, planIndex } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
 import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
 import {
+  ASSETS_DIRECTORY,
   assetsBaseOf,
   HOME_PAGE,
   INDEX_PAGE,
@@ -197,6 +204,26 @@ function searchTypeLabel(context: SiteContext, type: string): string {
   return type === "keyword" ? message(context, "keyword.title") : typeLabel(context, type);
 }
 
+/** Whether any entity has a PDF to leaf through: the only case where the viewer bundles are worth building. */
+export function needsViewer(fragments: ReadonlyMap<string, EntityFragment>): boolean {
+  for (const fragment of fragments.values()) {
+    if ((fragment.documents ?? []).some((document) => document.preview !== undefined)) return true;
+  }
+  return false;
+}
+
+/** The viewer bundles among those built, as paths under the output folder; nothing when they were not built. */
+export function viewerBundlesOf(islands: readonly IslandBundle[]): ViewerBundles | undefined {
+  const viewer = islands.find((island) => island.name === VIEWER_ISLAND);
+  const worker = islands.find((island) => island.name === VIEWER_WORKER_ISLAND);
+  return viewer === undefined || worker === undefined
+    ? undefined
+    : {
+        viewer: `${ASSETS_DIRECTORY}/${viewer.file}`,
+        worker: `${ASSETS_DIRECTORY}/${worker.file}`,
+      };
+}
+
 /** Every document of the site, the pages and the search index, rendered against the given bundles. */
 export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDocuments {
   const catalogue = loadCatalogue(input.locale, {
@@ -251,6 +278,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   ): WrittenDocument => document(page, h(input.theme.components[slot], props), title, locale);
   const mentionsOptions =
     input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline };
+  const viewer = viewerBundlesOf(islands);
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
     return entity.keyword === true
@@ -264,7 +292,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       : render(
           page,
           "EntityPage",
-          entityPageOf(context, entity, mentionsOptions),
+          entityPageOf(context, entity, {
+            ...mentionsOptions,
+            ...(viewer === undefined ? {} : { viewer }),
+          }),
           entity.title,
           entity.locale,
         );
@@ -371,6 +402,8 @@ export async function buildSite(options: SiteOptions): Promise<SiteReport> {
     fileSystem,
     fallback: defaultThemeConfig(options.projectName),
     maxPageBytes: options.maxPageBytes ?? SITE_PAGE_BUDGET,
+    // The viewer weighs what pdf.js weighs: it is only built for a site with a PDF to show.
+    islands: [...defaultIslands(), ...(needsViewer(options.fragments) ? viewerIslands() : [])],
     documents: (islands) => {
       const site = siteDocuments(options, islands);
       search = site.search;

@@ -1,13 +1,20 @@
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
 import { build } from "esbuild";
 
 import { byCodeUnit } from "../order.js";
+import { DOCUMENT_VIEWER_ISLAND } from "../theme/default/document-viewer.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
+
+/** The bundle of the PDF viewer, imported on demand by the document island, never by a page. */
+export const VIEWER_ISLAND = "viewer-pdf";
+/** The worker of pdf.js, a second bundle the viewer points its `workerSrc` at. */
+export const VIEWER_WORKER_ISLAND = "viewer-pdf-worker";
 
 export interface IslandEntry {
   name: string;
@@ -40,6 +47,10 @@ export function defaultIslands(): IslandEntry[] {
   // No extension: the bundler picks the compiled module in a build and the source under test.
   return [
     {
+      name: DOCUMENT_VIEWER_ISLAND,
+      entry: fileURLToPath(new URL("./document-viewer.client", import.meta.url)),
+    },
+    {
       name: MENTIONS_ISLAND,
       entry: fileURLToPath(new URL("./mentions-panel.client", import.meta.url)),
     },
@@ -51,6 +62,24 @@ export function defaultIslands(): IslandEntry[] {
       name: SEARCH_ISLAND,
       entry: fileURLToPath(new URL("./search.client", import.meta.url)),
       classic: true,
+    },
+  ];
+}
+
+/**
+ * The viewer and its worker, built from the legacy build of pdf.js: heavy, so only a site with a
+ * PDF to show bundles them, and no page loads them before the reader asks.
+ */
+export function viewerIslands(): IslandEntry[] {
+  const require = createRequire(import.meta.url);
+  return [
+    {
+      name: VIEWER_ISLAND,
+      entry: fileURLToPath(new URL("./viewer-pdf.client", import.meta.url)),
+    },
+    {
+      name: VIEWER_WORKER_ISLAND,
+      entry: require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs"),
     },
   ];
 }

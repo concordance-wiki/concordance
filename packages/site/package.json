@@ -22,6 +22,7 @@
     "@concordance-wiki/i18n": "workspace:*",
     "@concordance-wiki/profile": "workspace:*",
     "esbuild": "0.28.2",
+    "pdfjs-dist": "6.3.289",
     "preact": "10.29.8",
     "preact-render-to-string": "6.7.0",
     "rehype-sanitize": "6.0.0",
