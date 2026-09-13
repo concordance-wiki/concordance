@@ -18,7 +18,7 @@
     <meta name="twitter:card" content="summary" />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='7' y='11' width='27' height='6' rx='3' fill='%2316181B'/%3E%3Crect x='5' y='21' width='31' height='6' rx='3' fill='%2316181B'/%3E%3Crect x='11' y='31' width='26' height='6' rx='3' fill='%2316181B'/%3E%3Crect x='20' y='5' width='8' height='38' rx='4' fill='%23C24E24'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='7' y='11' width='27' height='6' rx='3' fill='%231F2124'/%3E%3Crect x='5' y='21' width='31' height='6' rx='3' fill='%231F2124'/%3E%3Crect x='11' y='31' width='26' height='6' rx='3' fill='%231F2124'/%3E%3Crect x='20' y='5' width='8' height='38' rx='4' fill='%23A8431C'/%3E%3C/svg%3E"
     />
     <style>
       @font-face {
@@ -101,54 +101,22 @@
         src: url("fonts/instrument-sans-normal-400-700-latin.woff2") format("woff2");
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
       }
-      @font-face {
-        font-family: "Instrument Serif";
-        font-style: italic;
-        font-weight: 400;
-        font-display: swap;
-        src: url("fonts/instrument-serif-italic-400-latin-ext.woff2") format("woff2");
-        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-      }
-      @font-face {
-        font-family: "Instrument Serif";
-        font-style: italic;
-        font-weight: 400;
-        font-display: swap;
-        src: url("fonts/instrument-serif-italic-400-latin.woff2") format("woff2");
-        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-      }
-      @font-face {
-        font-family: "Instrument Serif";
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-        src: url("fonts/instrument-serif-normal-400-latin-ext.woff2") format("woff2");
-        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-      }
-      @font-face {
-        font-family: "Instrument Serif";
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-        src: url("fonts/instrument-serif-normal-400-latin.woff2") format("woff2");
-        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-      }
       :root {
-        --bg: #f6f5f2;
+        --bg: #f7f6f3;
         --surface: #ffffff;
-        --border: #e4e1da;
-        --border-strong: #dcd9d2;
-        --ink: #16181b;
+        --sunk: #f2f0eb;
+        --border: #e3e0da;
+        --border-strong: #dbd7d0;
+        --hair: #f0ede8;
+        --ink: #1f2124;
         --body: #24272c;
-        --muted: #4e5259;
-        --faint: #646971;
-        --accent: #c24e24;
-        --link: #a83f1b;
-        --link-hover: #7a2f13;
-        --wash: #f3d9cb;
-        --radius: 8px;
-        --measure: 1200px;
-        --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+        --muted: #3a3e44;
+        --faint: #676c74;
+        --accent: #a8431c;
+        --accent-hover: #7e2f11;
+        --wash: #fbe3d4;
+        --r: 10px;
+        --measure: 960px;
         --sans:
           "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial,
           sans-serif;
@@ -157,17 +125,18 @@
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #0e0f11;
-          --surface: #16181b;
-          --border: #26292e;
-          --border-strong: #31353b;
-          --ink: #e8e6e1;
-          --body: #dcdad5;
-          --muted: #9aa0a8;
-          --faint: #8b9199;
+          --bg: #0f1113;
+          --surface: #181b1e;
+          --sunk: #202428;
+          --border: #282c31;
+          --border-strong: #333840;
+          --hair: #22262a;
+          --ink: #eceae6;
+          --body: #dedcd8;
+          --muted: #a8aeb6;
+          --faint: #8d939b;
           --accent: #e8703a;
-          --link: #ffa277;
-          --link-hover: #ffb894;
+          --accent-hover: #ffa277;
           --wash: #3a2419;
         }
       }
@@ -182,78 +151,89 @@
         margin: 0;
         font-family: var(--sans);
         font-size: 16px;
-        line-height: 1.7;
+        line-height: 1.75;
         color: var(--body);
         background: var(--bg);
         text-wrap: pretty;
         -webkit-font-smoothing: antialiased;
       }
       a {
-        color: var(--link);
-        text-decoration: underline;
-        text-underline-offset: 0.15em;
+        color: var(--accent);
+        text-decoration: none;
       }
       a:hover {
-        color: var(--link-hover);
+        color: var(--accent-hover);
+        text-decoration: underline;
       }
-      a:focus-visible {
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 3px;
-        border-radius: 3px;
+        border-radius: 4px;
       }
       code {
         font-family: var(--mono);
-        font-size: 0.9em;
+        font-size: 0.875em;
         color: var(--ink);
       }
       pre {
         margin: 0;
-        padding: 16px 18px;
+        padding: 18px 20px;
         overflow-x: auto;
         font-family: var(--mono);
         font-size: 13.5px;
-        line-height: 1.75;
+        line-height: 1.8;
         color: var(--ink);
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-radius: var(--r);
       }
       pre .c {
         color: var(--faint);
+      }
+      mark {
+        background: var(--wash);
+        color: var(--ink);
+        border-radius: 2px;
       }
       hr {
         border: 0;
         border-top: 1px solid var(--border);
         margin: 0;
       }
-
       .in {
         width: 100%;
         max-width: var(--measure);
         margin: 0 auto;
-        padding: 0 20px;
+        padding: 0 24px;
       }
       @media (min-width: 768px) {
         .in {
-          padding: 0 32px;
+          padding: 0 40px;
         }
+      }
+      .read {
+        max-width: 100%;
       }
 
       /* ---------- bar ---------- */
       .bar {
         background: var(--surface);
         border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 20;
       }
       .bar .in {
-        max-width: 1200px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        min-height: 56px;
+        gap: 12px;
+        min-height: 60px;
       }
       .mark {
-        width: 21px;
-        height: 21px;
+        width: 22px;
+        height: 22px;
         flex: none;
       }
       .mark .i {
@@ -266,18 +246,20 @@
         font-weight: 600;
         font-size: 15px;
         color: var(--ink);
+        letter-spacing: -0.01em;
       }
       .bar nav {
         display: flex;
         margin-left: auto;
         gap: 2px;
+        align-items: center;
       }
       .bar nav a {
         display: flex;
         align-items: center;
-        min-height: 44px;
-        padding: 0 11px;
-        border-radius: 6px;
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 8px;
         font-size: 13.5px;
         font-weight: 500;
         color: var(--muted);
@@ -287,11 +269,16 @@
       .bar nav a:hover {
         color: var(--ink);
         background: var(--bg);
+        text-decoration: none;
+      }
+      .bar nav .cta {
+        border: 1px solid var(--border-strong);
+        margin-left: 6px;
       }
       .bar nav .sm {
         display: none;
       }
-      @media (min-width: 700px) {
+      @media (min-width: 760px) {
         .bar nav .sm {
           display: flex;
         }
@@ -299,27 +286,35 @@
 
       /* ---------- hero ---------- */
       .hero {
-        padding: 52px 0 36px;
+        padding: 56px 0 40px;
       }
       @media (min-width: 768px) {
         .hero {
-          padding: 76px 0 44px;
+          padding: 84px 0 52px;
         }
       }
-      h1 {
+      .eyebrow {
         margin: 0 0 20px;
-        font-family: var(--serif);
-        font-weight: 400;
-        font-size: clamp(34px, 8vw, 54px);
-        line-height: 1.08;
-        letter-spacing: -0.01em;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 0 0 22px;
+        font-size: clamp(34px, 6.2vw, 54px);
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -0.028em;
         color: var(--ink);
       }
       .lead {
-        margin: 0 0 30px;
-        font-size: clamp(17px, 3.6vw, 19px);
-        line-height: 1.65;
-        color: var(--body);
+        margin: 0 0 32px;
+        font-size: clamp(17px, 2.4vw, 19px);
+        line-height: 1.7;
+        color: var(--muted);
       }
       .lead strong {
         color: var(--ink);
@@ -329,24 +324,26 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        align-items: center;
       }
       .button {
         display: inline-flex;
         align-items: center;
-        min-height: 44px;
-        padding: 0 18px;
-        border: 1px solid var(--ink);
-        border-radius: var(--radius);
+        min-height: 46px;
+        padding: 0 20px;
+        border-radius: var(--r);
         font-weight: 600;
-        font-size: 14px;
+        font-size: 14.5px;
         text-decoration: none;
-        color: var(--bg);
+        color: var(--surface);
         background: var(--ink);
+        border: 1px solid var(--ink);
       }
       .button:hover {
-        color: var(--bg);
+        color: var(--surface);
         background: var(--accent);
         border-color: var(--accent);
+        text-decoration: none;
       }
       .button.quiet {
         color: var(--ink);
@@ -361,161 +358,483 @@
 
       /* ---------- sections ---------- */
       section {
-        padding: 38px 0;
+        padding: 44px 0;
       }
       @media (min-width: 768px) {
         section {
-          padding: 48px 0;
+          padding: 56px 0;
         }
       }
       h2 {
         margin: 0 0 10px;
-        padding-bottom: 9px;
-        border-bottom: 1px solid var(--border);
-        font-size: 20px;
+        font-size: 24px;
         font-weight: 600;
         line-height: 1.3;
+        letter-spacing: -0.018em;
         color: var(--ink);
       }
       .sub {
-        margin: 0 0 20px;
-        font-size: 14px;
+        margin: 0 0 24px;
+        font-size: 15px;
         line-height: 1.7;
-        color: var(--muted);
+        color: var(--faint);
       }
-      section > p {
+      section > .in > p {
         margin: 0 0 18px;
       }
 
-      /* ---------- showcase ---------- */
-      .showcase { max-width: var(--measure); margin: 0 auto; padding: 0 20px; }
-      @media (min-width: 768px) { .showcase { padding: 0 32px; } }
-      .sc-head { max-width: var(--measure); margin: 0 auto 20px; }
-      .cmp { position: relative; width: 100%; min-width: 1020px; height: 560px; user-select: none; touch-action: pan-y; }
-      .cmp .side { position: absolute; inset: 0; overflow: hidden; }
-      .cmp .side.b { clip-path: inset(0 0 0 var(--x, 20.2%)); }
-      .cmp .rule { position: absolute; top: 0; bottom: 0; left: var(--x, 20.2%); width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; z-index: 2; }
-      .cmp .knob {
-        position: absolute; top: 50%; left: var(--x, 20.2%); transform: translate(-50%, -50%);
-        width: 40px; height: 40px; border-radius: 50%; background: var(--surface);
-        border: 2px solid var(--accent); color: var(--accent);
-        display: flex; align-items: center; justify-content: center; gap: 3px;
-        font: 600 11px/1 var(--mono); pointer-events: none; z-index: 3;
-        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
-      }
-      .cmp input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: col-resize; z-index: 4; }
-      .cmp input:focus-visible + .rule { box-shadow: 0 0 0 3px var(--wash); }
-      .cmp .tag { position: absolute; top: 12px; z-index: 2; padding: 6px 10px; border: 1px solid var(--accent); border-radius: 6px; background: var(--surface); font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
-      .cmp .tag.l { left: 12px; }
-      .cmp .tag.r { right: 12px; }
-
-      /* ---- raw markdown pane ---- */
+      /* ---------- comparator ---------- */
       .frame {
-        border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden;
+        border: 1px solid var(--border-strong);
+        border-radius: 12px;
+        overflow: hidden;
         background: var(--surface);
       }
       .frame-bar {
-        display: flex; align-items: center; gap: 10px; padding: 9px 14px;
-        border-bottom: 1px solid var(--border); background: var(--bg);
-        font: 400 11.5px/1 var(--mono); color: var(--faint);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--faint);
       }
-      .dots { display: flex; gap: 5px; flex: none; }
-      .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); }
-      .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-      .raw { width: 100%; min-width: 1020px; height: 560px; display: flex; background: var(--surface); }
-      .raw .gutter {
-        flex: none; width: 46px; padding: 18px 0; text-align: right; background: var(--bg);
-        border-right: 1px solid var(--border); font: 400 12.5px/1.9 var(--mono); color: var(--faint);
+      .dots {
+        display: flex;
+        gap: 5px;
+        flex: none;
       }
-      .raw .gutter span { display: block; padding-right: 12px; }
-      .raw .code { flex: 1; padding: 18px 20px; overflow: hidden; margin: 0; font: 400 13px/1.9 var(--mono); color: var(--ink); white-space: pre; }
-      .raw .code .c { color: var(--faint); }
-
-      /* ---- interface pane ---- */
-      .ui { width: 100%; min-width: 1020px; height: 560px; display: flex; }
-      .ui-nav {
-        flex: none; width: 206px; border-right: 1px solid var(--border); background: var(--surface);
-        padding: 14px 10px; display: flex; flex-direction: column; gap: 1px; overflow: hidden;
+      .dots i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--border-strong);
       }
-      .ui-nav .grp { padding: 8px 8px 5px; font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-      .ui-nav a { display: flex; align-items: center; gap: 7px; padding: 7px 8px; border-radius: 6px; font: 400 13px/1.3 var(--sans); color: var(--muted); text-decoration: none; }
-      .ui-nav a:hover { background: var(--bg); color: var(--ink); }
-      .ui-nav a.cur { background: var(--bg); color: var(--ink); font-weight: 600; }
-      .ui-nav a.cur::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex: none; }
-      .ui-nav a em { margin-left: auto; font: 400 11px/1 var(--mono); font-style: normal; color: var(--faint); }
-
-      .ui-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
-      .ui-top { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
-      .ui-search { flex: 1; max-width: 320px; display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); font: 400 12.5px/1 var(--sans); color: var(--faint); }
-      .ui-search kbd { margin-left: auto; padding: 3px 5px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); font: 500 10px/1 var(--mono); }
-      .ui-crumb { font: 400 11.5px/1 var(--mono); color: var(--faint); }
-      .ui-body { flex: 1; min-height: 0; display: flex; }
-      .ui-doc { flex: 1; min-width: 0; padding: 28px 30px; overflow: hidden; }
-      .ui-doc .kind { display: inline-flex; gap: 7px; margin: 0 0 12px; }
-      .ui-doc .kind span { padding: 5px 9px; border-radius: 5px; font: 500 11px/1 var(--sans); border: 1px solid var(--border); color: var(--muted); background: var(--surface); }
-      .ui-doc h3 { margin: 0 0 16px; font: 400 34px/1.1 var(--serif); color: var(--ink); }
-      .ui-doc p { margin: 0 0 16px; font: 400 15px/1.75 var(--sans); color: var(--body); }
-      .ui-doc h4 { margin: 22px 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); font: 600 15px/1.3 var(--sans); color: var(--ink); }
-      .ui-doc ul.d { margin: 0 0 16px; padding-left: 20px; font: 400 15px/1.8 var(--sans); }
-      .ui-doc blockquote { margin: 0; padding: 12px 16px; border-left: 3px solid var(--border-strong); border-radius: 0 8px 8px 0; background: var(--surface); font: italic 400 14px/1.7 var(--sans); color: var(--muted); }
-      .ui-doc .foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; gap: 16px; flex-wrap: wrap; font: 400 11px/1.4 var(--sans); color: var(--faint); }
-      .ui-doc .foot i { width: 22px; display: inline-block; vertical-align: middle; font-style: normal; }
-      .lw { border-bottom: 1.5px solid var(--link); color: var(--link); }
-      .iw { border-bottom: 1.5px dotted var(--accent); }
-
-      .ui-rail { flex: none; width: 330px; border-left: 1px solid var(--border); background: var(--surface); padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
-      .rail-lbl { font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-      .map { position: relative; height: 140px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); overflow: hidden; }
-      .map svg { position: absolute; inset: 0; }
-      .map b { position: absolute; padding: 1px 3px; background: var(--bg); font: 500 10px/1.2 var(--sans); color: var(--ink); }
-      .map b.q { font-weight: 400; color: var(--muted); }
-      .cites { display: grid; gap: 9px; }
-      .cite { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-      .cite .ch { display: flex; align-items: center; gap: 8px; padding: 9px 11px; background: var(--bg); border-bottom: 1px solid var(--border); }
-      .cite .ch .g { flex: none; padding: 3px 6px; border: 1px solid var(--border); border-radius: 4px; font: 500 10px/1 var(--sans); color: var(--muted); background: var(--surface); }
-      .cite .ch a { font: 500 12.5px/1.3 var(--sans); color: var(--ink); text-decoration: none; flex: 1; }
-      .cite .ch em { font: 400 10.5px/1 var(--mono); font-style: normal; color: var(--faint); }
-      .cite q { display: block; padding: 8px 11px; font: 400 12px/1.6 var(--sans); color: var(--muted); quotes: none; }
-      .cite q + q { border-top: 1px solid var(--border); }
-      .cite mark { background: var(--wash); color: var(--ink); border-radius: 2px; }
-      .rail-more { padding: 9px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); text-align: center; font: 500 12px/1 var(--sans); color: var(--muted); }
-      .sc-legend { max-width: var(--measure); margin: 16px auto 0; font: 400 12.5px/1.7 var(--sans); color: var(--muted); }
-
-      /* ---------- ordered prose ---------- */
-      ol.steps {
+      .fit {
+        overflow: hidden;
+      }
+      .fit > .cmp {
+        transform-origin: top left;
+      }
+      .cmp {
+        position: relative;
+        width: 100%;
+        min-width: 1020px;
+        height: 580px;
+        user-select: none;
+      }
+      .cmp .side {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .cmp .side.b {
+        clip-path: inset(0 0 0 var(--x, 20.2%));
+      }
+      .cmp .rule {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--x, 20.2%);
+        width: 2px;
+        margin-left: -1px;
+        background: var(--accent);
+        pointer-events: none;
+        z-index: 5;
+      }
+      .cmp .knob {
+        position: absolute;
+        top: 50%;
+        left: var(--x, 20.2%);
+        transform: translate(-50%, -50%);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        font: 600 11px/1 var(--mono);
+        pointer-events: none;
+        z-index: 6;
+      }
+      .cmp .grab {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--x, 20.2%);
+        width: 32px;
+        margin-left: -16px;
+        z-index: 7;
+        cursor: col-resize;
+        touch-action: pan-y;
+      }
+      .cmp .tag {
+        position: absolute;
+        top: 14px;
+        z-index: 4;
+        padding: 6px 10px;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        background: var(--surface);
+        font: 500 11px/1 var(--mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .cmp .tag.l {
+        left: 14px;
+      }
+      .cmp .tag.r {
+        right: 14px;
+      }
+      .cmp-ctrl {
+        display: flex;
+        align-items: center;
+        margin: 14px 0 0;
+      }
+      .cmp-ctrl input {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
         margin: 0;
-        padding: 0 0 0 22px;
+        accent-color: var(--accent);
+        cursor: col-resize;
       }
-      ol.steps li {
-        margin-bottom: 14px;
-        font-size: 15.5px;
-        line-height: 1.75;
+
+      /* raw file pane */
+      .raw {
+        width: 1020px;
+        height: 580px;
+        display: flex;
+        background: var(--surface);
       }
-      ol.steps li:last-child {
-        margin-bottom: 0;
+      .raw .gutter {
+        flex: none;
+        width: 48px;
+        padding: 20px 0;
+        text-align: right;
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+        font: 400 12.5px/1.9 var(--mono);
+        color: var(--faint);
       }
-      ol.steps b {
+      .raw .gutter span {
+        display: block;
+        padding-right: 14px;
+      }
+      .raw .code {
+        flex: 1;
+        padding: 20px 22px;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        font: 400 13px/1.9 var(--mono);
+        color: var(--ink);
+        white-space: pre;
+        overflow: hidden;
+      }
+
+      /* published page pane */
+      .ui {
+        width: 1020px;
+        height: 580px;
+        display: flex;
+        background: var(--bg);
+      }
+      .ui-nav {
+        flex: none;
+        width: 206px;
+        border-right: 1px solid var(--border);
+        background: var(--surface);
+        padding: 14px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        overflow: hidden;
+      }
+      .ui-nav .grp {
+        padding: 8px 10px 5px;
+        font: 600 10px/1 var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .ui-nav a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        border-radius: 7px;
+        font: 400 13px/1.4 var(--sans);
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .ui-nav a.cur {
+        background: var(--bg);
         color: var(--ink);
         font-weight: 600;
+        border-left: 3px solid var(--accent);
+        padding-left: 7px;
+      }
+      .ui-nav a em {
+        margin-left: auto;
+        font: 400 11px/1 var(--mono);
+        font-style: normal;
+        color: var(--faint);
+      }
+      .ui-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .ui-top {
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .ui-search {
+        flex: 1;
+        max-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        height: 36px;
+        padding: 0 11px;
+        border-radius: 9px;
+        background: var(--sunk);
+        font: 400 12.5px/1 var(--sans);
+        color: var(--faint);
+      }
+      .ui-search kbd {
+        margin-left: auto;
+        padding: 3px 5px;
+        border-radius: 4px;
+        background: var(--surface);
+        font: 500 10.5px/1 var(--mono);
+      }
+      .ui-crumb {
+        font: 400 11.5px/1 var(--mono);
+        color: var(--faint);
+      }
+      .ui-body {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+      }
+      .ui-doc {
+        flex: 1;
+        min-width: 0;
+        padding: 26px 30px;
+        overflow: hidden;
+      }
+      .ui-doc .kind {
+        display: inline-flex;
+        gap: 8px;
+        margin: 0 0 12px;
+      }
+      .ui-doc .kind span {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font: 500 11.5px/1 var(--sans);
+        color: var(--muted);
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .ui-doc h3 {
+        margin: 0 0 14px;
+        font: 600 30px/1.2 var(--sans);
+        letter-spacing: -0.024em;
+        color: var(--ink);
+      }
+      .ui-doc p {
+        margin: 0 0 16px;
+        font: 400 15px/1.75 var(--sans);
+        color: var(--body);
+      }
+      .ui-doc h4 {
+        margin: 22px 0 9px;
+        font: 600 16px/1.35 var(--sans);
+        color: var(--ink);
+      }
+      .ui-doc ul {
+        margin: 0 0 16px;
+        padding-left: 20px;
+        font: 400 15px/1.8 var(--sans);
+      }
+      .ui-doc blockquote {
+        margin: 0;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--r) var(--r) 0;
+        background: var(--surface);
+        font: 400 14px/1.7 var(--sans);
+        color: var(--muted);
+      }
+      .ui-doc .foot {
+        margin-top: 20px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font: 400 11px/1.4 var(--sans);
+        color: var(--faint);
+      }
+      .ui-doc .foot i {
+        width: 22px;
+        display: inline-block;
+        vertical-align: middle;
+        font-style: normal;
+      }
+      .lw {
+        color: var(--accent);
+        border-bottom: 1.5px solid var(--accent);
+      }
+      .iw {
+        border-bottom: 1.5px dotted var(--accent);
+      }
+      .ui-rail {
+        flex: none;
+        width: 300px;
+        border-left: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .rail-b {
+        flex: none;
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--hair);
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .rail-lbl {
+        font: 600 10.5px/1 var(--sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .prop {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--hair);
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      .prop:last-child {
+        border-bottom: 0;
+      }
+      .prop span:first-child {
+        width: 94px;
+        flex: none;
+        color: var(--faint);
+      }
+      .prop span:last-child {
+        flex: 1;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .rel {
+        flex: 1;
+        min-height: 0;
+        padding: 13px 18px 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .rel-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--hair);
+        text-decoration: none;
+      }
+      .rel-row:last-of-type {
+        border-bottom: 0;
+      }
+      .rel-row .t {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+      .rel-row .t b {
+        flex: 1;
+        min-width: 0;
+        font: 600 12.5px/1.35 var(--sans);
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .rel-row .t em {
+        font: 400 11px/1.4 var(--sans);
+        font-style: normal;
+        color: var(--faint);
+        flex: none;
+      }
+      .rel-row .t i {
+        font: 400 11px/1.4 var(--mono);
+        font-style: normal;
+        color: var(--faint);
+        flex: none;
+      }
+      .rel-row q {
+        font: 400 11.5px/1.5 var(--sans);
+        color: var(--faint);
+        quotes: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .legend {
+        margin: 18px 0 0;
+        max-width: 100%;
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--faint);
       }
 
-      /* ---------- lists of links ---------- */
+      /* ---------- rows of links ---------- */
       .rows {
         margin: 0;
         padding: 0;
         list-style: none;
-        border-top: 1px solid var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        background: var(--surface);
       }
-      .rows > li {
-        border-bottom: 1px solid var(--border);
+      .rows > li + li {
+        border-top: 1px solid var(--hair);
       }
-      .rows a {
+      .rows a,
+      .rows .row {
         display: flex;
         align-items: baseline;
-        gap: 8px 14px;
-        padding: 15px 2px;
+        gap: 8px 16px;
+        padding: 16px 20px;
         color: var(--ink);
+        text-decoration: none;
+      }
+      .rows a:hover {
+        background: var(--bg);
         text-decoration: none;
       }
       .rows .t {
@@ -524,25 +843,29 @@
         font-size: 14px;
         font-weight: 500;
       }
+      .rows.plain .t {
+        font-family: var(--sans);
+        font-size: 15px;
+        font-weight: 600;
+      }
       .rows a:hover .t {
-        color: var(--link);
-        text-decoration: underline;
+        color: var(--accent);
       }
       .rows .role {
         flex: none;
-        padding: 3px 7px;
+        padding: 3px 8px;
         border: 1px solid var(--border);
-        border-radius: 4px;
+        border-radius: 5px;
         font-size: 10px;
         font-weight: 500;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: var(--muted);
+        color: var(--faint);
       }
       .rows .d {
         font-size: 13.5px;
         line-height: 1.6;
-        color: var(--muted);
+        color: var(--faint);
       }
       .rows .x {
         margin-left: auto;
@@ -551,13 +874,15 @@
         font-size: 13px;
         color: var(--faint);
       }
-      .rows.plain .t {
-        font-family: var(--sans);
-        font-size: 15px;
-        font-weight: 600;
+      .rows li.soon .role {
+        border-style: dashed;
       }
-      @media (max-width: 640px) {
-        .rows a {
+      .rows li.soon .t {
+        color: var(--faint);
+      }
+      @media (max-width: 680px) {
+        .rows a,
+        .rows .row {
           flex-wrap: wrap;
         }
         .rows .d {
@@ -568,22 +893,70 @@
         }
       }
 
-      .rows li.soon .row { display: flex; align-items: baseline; gap: 8px 14px; padding: 15px 2px; }
-      .rows li.soon .t { color: var(--muted); }
-      .rows li.soon .role { border-style: dashed; }
-      @media (max-width: 640px) {
-        .rows li.soon .row { flex-wrap: wrap; }
+      /* ---------- steps ---------- */
+      ol.steps {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: s;
+        display: grid;
+        gap: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+        background: var(--surface);
+      }
+      ol.steps li {
+        counter-increment: s;
+        display: flex;
+        gap: 16px;
+        padding: 18px 20px;
+        font-size: 15px;
+        line-height: 1.75;
+      }
+      ol.steps li + li {
+        border-top: 1px solid var(--hair);
+      }
+      ol.steps li::before {
+        content: counter(s);
+        flex: none;
+        width: 24px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--faint);
+        padding-top: 3px;
+      }
+      ol.steps b {
+        color: var(--ink);
+        font-weight: 600;
       }
 
       /* ---------- levels ---------- */
-      dl.levels { margin: 0; }
-      dl.levels dt {
-        margin: 0 0 5px; padding-top: 16px; border-top: 1px solid var(--border);
-        font: 600 15px/1.4 var(--sans); color: var(--ink);
+      dl.levels {
+        margin: 0;
       }
-      dl.levels dt:first-child { padding-top: 0; border-top: 0; }
-      dl.levels dd { margin: 0 0 18px; font: 400 14.5px/1.75 var(--sans); color: var(--body); }
-      dl.levels dd:last-child { margin-bottom: 0; }
+      dl.levels dt {
+        margin: 0 0 6px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        font-size: 15.5px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--ink);
+      }
+      dl.levels dt:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+      dl.levels dd {
+        margin: 0 0 20px;
+        font-size: 15px;
+        line-height: 1.75;
+        color: var(--body);
+      }
+      dl.levels dd:last-child {
+        margin-bottom: 0;
+      }
 
       /* ---------- limits ---------- */
       .limits {
@@ -591,44 +964,32 @@
         padding: 0;
         list-style: none;
         display: grid;
-        gap: 13px;
+        gap: 14px;
       }
       .limits li {
         display: flex;
-        gap: 11px;
-        font-size: 14.5px;
-        line-height: 1.7;
+        gap: 12px;
+        font-size: 15px;
+        line-height: 1.75;
       }
       .limits li span:first-child {
         flex: none;
         font-family: var(--mono);
         font-size: 13px;
         color: var(--faint);
+        padding-top: 3px;
       }
 
       /* ---------- footer ---------- */
       footer {
         border-top: 1px solid var(--border);
         background: var(--surface);
-        padding: 26px 0 44px;
-      }
-      footer .in {
-        max-width: 1200px;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
-      @media (min-width: 768px) {
-        footer .in {
-          flex-direction: row;
-          align-items: flex-start;
-          gap: 36px;
-        }
+        padding: 30px 0 48px;
       }
       .foot-links {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px 20px;
+        gap: 8px 22px;
         font-size: 13.5px;
       }
       .foot-links a {
@@ -640,10 +1001,11 @@
         text-decoration: underline;
       }
       .foot-note {
-        margin: 12px 0 0;
-        font-size: 12.5px;
+        margin: 14px 0 0;
+        max-width: 100%;
+        font-size: 13px;
         line-height: 1.7;
-        color: var(--muted);
+        color: var(--faint);
       }
     </style>
   </head>
@@ -660,16 +1022,17 @@
         <nav aria-label="Sections">
           <a class="sm" href="#start">Getting started</a>
           <a class="sm" href="#repositories">Repositories</a>
-          <a href="https://concordance-wiki.github.io/demo-wiki/">Demo</a>
           <a href="https://github.com/concordance-wiki/concordance">GitHub</a>
+          <a class="cta" href="https://concordance-wiki.github.io/demo-wiki/">See the demo</a>
         </nav>
       </div>
     </header>
 
     <div class="hero">
       <div class="in">
-        <h1>What your files already know about each other.</h1>
-        <p class="lead">
+        <p class="eyebrow">Documentation you already wrote</p>
+        <h1 class="read">What your files already know about each other.</h1>
+        <p class="lead read">
           Your team writes markdown for the AI. Concordance turns it into a wiki for the humans.
           Point it at your git repositories and get a site where
           <strong>every word of your business has a page</strong>: the note someone wrote, if any,
@@ -689,32 +1052,30 @@
     <hr />
 
     <section>
-      <div class="showcase">
-        <div class="sc-head">
-          <h2>What it produces</h2>
-          <p class="sub">
-            One file of your repository, and the page Concordance publishes for it. Nothing was
-            added to the markdown — everything on the right was found by reading the other files.
-          </p>
-          <p class="sub" style="margin:0">
-            Drag the handle. Left, the file in your repository. Right, the page Concordance
-            publishes for it.
-          </p>
-        </div>
+      <div class="in">
+        <h2 class="read">What it produces</h2>
+        <p class="sub read">
+          Drag the handle. Left, one file of your repository, exactly as it is. Right, the page
+          Concordance publishes for it — nothing was added to the markdown.
+        </p>
 
         <div class="frame">
           <div class="frame-bar">
             <span class="dots"><i></i><i></i><i></i></span>
             <span>docs/concepts/keyword-page.md &nbsp;→&nbsp; example.wiki/concepts/keyword-page</span>
           </div>
-          <div class="scroller">
-
-            <div class="cmp" id="cmp" style="--x:20.2%">
+          <div class="fit" id="fit">
+            <div class="cmp" id="cmp" style="--x: 20.2%">
               <span class="tag l">before</span>
               <span class="tag r">after</span>
+
               <div class="side a">
-              <div class="raw">
-                <div class="gutter"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span></div>
+                <div class="raw">
+                  <div class="gutter">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span
+                    ><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span
+                    ><span>11</span><span>12</span><span>13</span><span>14</span>
+                  </div>
 <pre class="code"><span class="c">---
 type: concept
 status: stable
@@ -730,114 +1091,153 @@ The note itself, if one exists, then every passage that mentions
 the word, grouped by file.
 
 &gt; A keyword page is never empty: the corpus fills it.</pre>
-              </div>
+                </div>
               </div>
 
               <div class="side b">
-              <div class="ui">
-                <div class="ui-nav">
-                  <span class="grp">Concepts</span>
-                  <a href="#" tabindex="-1">Build pipeline<em>12</em></a>
-                  <a href="#" tabindex="-1">Confidence<em>9</em></a>
-                  <a class="cur" href="#" tabindex="-1">Keyword page<em>31</em></a>
-                  <a href="#" tabindex="-1">Occurrence<em>27</em></a>
-                  <a href="#" tabindex="-1">Publication threshold<em>18</em></a>
-                  <span class="grp">Reference</span>
-                  <a href="#" tabindex="-1">Configuration<em>44</em></a>
-                  <a href="#" tabindex="-1">Checks<em>41</em></a>
-                  <span class="grp">Decisions</span>
-                  <a href="#" tabindex="-1">ADR-016<em>4</em></a>
-                </div>
-
-                <div class="ui-main">
-                  <div class="ui-top">
-                    <span class="ui-search">⌕ Search the corpus <kbd>/</kbd></span>
-                    <span class="ui-crumb">concepts / keyword-page</span>
+                <div class="ui">
+                  <div class="ui-nav">
+                    <span class="grp">Concepts</span>
+                    <a href="#" tabindex="-1">Build pipeline<em>12</em></a>
+                    <a href="#" tabindex="-1">Confidence<em>9</em></a>
+                    <a class="cur" href="#" tabindex="-1">Keyword page<em>31</em></a>
+                    <a href="#" tabindex="-1">Occurrence<em>27</em></a>
+                    <a href="#" tabindex="-1">Publication threshold<em>18</em></a>
+                    <span class="grp">Reference</span>
+                    <a href="#" tabindex="-1">Configuration<em>44</em></a>
+                    <a href="#" tabindex="-1">Checks<em>41</em></a>
+                    <span class="grp">Decisions</span>
+                    <a href="#" tabindex="-1">ADR-016<em>4</em></a>
                   </div>
-                  <div class="ui-body">
-                    <div class="ui-doc">
-                      <span class="kind"><span>◈ Concept</span><span>stable</span></span>
-                      <h3>Keyword page</h3>
-                      <p>
-                        Every word that crosses the <a class="lw" href="#" tabindex="-1">publication threshold</a>
-                        gets a page, whether or not anyone wrote a <span class="iw">note</span> for it.
-                      </p>
-                      <h4>Contents</h4>
-                      <p>
-                        The <span class="iw">note</span> itself, if one exists, then every
-                        <span class="iw">occurrence</span> that mentions the word, grouped by file.
-                      </p>
-                      <ul class="d">
-                        <li>Written links come from the markdown</li>
-                        <li>Mentions come from the <span class="iw">index</span></li>
-                      </ul>
-                      <blockquote>A keyword page is never empty: the corpus fills it.</blockquote>
-                      <div class="foot">
-                        <span><i>——</i> written link</span>
-                        <span><i>· · ·</i> recognised while indexing</span>
-                        <span style="margin-left:auto">docs/concepts/keyword-page.md</span>
-                      </div>
+
+                  <div class="ui-main">
+                    <div class="ui-top">
+                      <span class="ui-search">⌕ Search the corpus <kbd>/</kbd></span>
+                      <span class="ui-crumb">concepts / keyword-page</span>
                     </div>
-
-                    <div class="ui-rail">
-                      <div>
-                        <span class="rail-lbl">Neighbourhood</span>
-                        <div class="map" style="margin-top:9px">
-                          <svg viewBox="0 0 298 150" aria-hidden="true">
-                            <line x1="149" y1="75" x2="66" y2="32" stroke="var(--border-strong)" stroke-width="1.5"/>
-                            <line x1="149" y1="75" x2="232" y2="30" stroke="var(--border-strong)" stroke-width="1.5"/>
-                            <line x1="149" y1="75" x2="48" y2="106" stroke="var(--border-strong)" stroke-width="1.5"/>
-                            <line x1="149" y1="75" x2="246" y2="96" stroke="var(--border-strong)" stroke-width="1.5"/>
-                            <line x1="149" y1="75" x2="112" y2="130" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 3"/>
-                            <circle cx="66" cy="32" r="4.5" fill="var(--muted)"/>
-                            <circle cx="232" cy="30" r="4.5" fill="var(--muted)"/>
-                            <circle cx="48" cy="106" r="4.5" fill="var(--muted)"/>
-                            <circle cx="246" cy="96" r="4.5" fill="var(--muted)"/>
-                            <circle cx="112" cy="130" r="3.5" fill="var(--faint)"/>
-                            <circle cx="149" cy="75" r="8" fill="var(--accent)" stroke="var(--surface)" stroke-width="2.5"/>
-                          </svg>
-                          <b style="left:74px;top:20px">Threshold</b>
-                          <b style="left:160px;top:18px">Build pipeline</b>
-                          <b style="left:6px;top:116px">Occurrence</b>
-                          <b style="left:196px;top:106px">ADR-016</b>
-                          <b class="q" style="left:60px;top:136px">empty page</b>
-                          <b style="left:100px;top:83px">Keyword page</b>
+                    <div class="ui-body">
+                      <div class="ui-doc">
+                        <span class="kind"><span>Concept</span><span>stable</span></span>
+                        <h3>Keyword page</h3>
+                        <p>
+                          Every word that crosses the
+                          <a class="lw" href="#" tabindex="-1">publication threshold</a> gets a
+                          page, whether or not anyone wrote a <span class="iw">note</span> for it.
+                        </p>
+                        <h4>Contents</h4>
+                        <p>
+                          The <span class="iw">note</span> itself, if one exists, then every
+                          <span class="iw">occurrence</span> that mentions the word, grouped by
+                          file.
+                        </p>
+                        <ul>
+                          <li>Written links come from the markdown</li>
+                          <li>Mentions come from the <span class="iw">index</span></li>
+                        </ul>
+                        <blockquote>A keyword page is never empty: the corpus fills it.</blockquote>
+                        <div class="foot">
+                          <span><i>——</i> written link</span>
+                          <span><i>· · ·</i> recognised while indexing</span>
+                          <span style="margin-left: auto">docs/concepts/keyword-page.md</span>
                         </div>
                       </div>
 
-                      <div>
-                        <span class="rail-lbl">Simply cited — 31 files</span>
-                        <div class="cites" style="margin-top:9px">
-                          <div class="cite">
-                            <div class="ch"><span class="g">◐</span><a href="#" tabindex="-1">ADR-016, thresholds</a><em>4</em></div>
-                            <q>…below three occurrences we do not publish a <mark>keyword page</mark>, or the site grows past what a forge will host.</q>
-                          </div>
-                          <div class="cite">
-                            <div class="ch"><span class="g">§</span><a href="#" tabindex="-1">Publication threshold</a><em>6</em></div>
-                            <q>…the threshold decides how many <mark>keyword pages</mark> a build produces.</q>
+                      <div class="ui-rail">
+                        <div class="rail-b">
+                          <span class="rail-lbl">Properties</span>
+                          <div>
+                            <div class="prop"><span>Type</span><span>Concept</span></div>
+                            <div class="prop"><span>Status</span><span>Stable</span></div>
+                            <div class="prop"><span>Space</span><span>Reference</span></div>
                           </div>
                         </div>
-                        <div class="rail-more" style="margin-top:8px">29 more files</div>
+                        <div class="rail-b">
+                          <span class="rail-lbl">On this page</span>
+                          <a
+                            href="#"
+                            tabindex="-1"
+                            style="
+                              font: 500 12.5px/1.4 var(--sans);
+                              color: var(--ink);
+                              border-left: 2px solid var(--accent);
+                              padding-left: 10px;
+                              text-decoration: none;
+                            "
+                            >Contents</a
+                          >
+                        </div>
+                        <div class="rel">
+                          <div
+                            style="
+                              display: flex;
+                              align-items: baseline;
+                              gap: 8px;
+                              padding-bottom: 4px;
+                            "
+                          >
+                            <span class="rail-lbl" style="flex: 1">Related pages</span>
+                            <span
+                              style="font: 400 11px/1 var(--mono); color: var(--faint)"
+                              >35</span
+                            >
+                          </div>
+                          <a class="rel-row" href="#" tabindex="-1">
+                            <span class="t"><b>ADR-016, thresholds</b><em>decision</em><i>4</i></span>
+                            <q>Below three occurrences we do not publish a page.</q>
+                          </a>
+                          <a class="rel-row" href="#" tabindex="-1">
+                            <span class="t"
+                              ><b>Publication threshold</b><em>concept</em><i>6</i></span
+                            >
+                            <q><span style="color: var(--accent)">Cited · </span>How many pages a build produces.</q>
+                          </a>
+                          <a class="rel-row" href="#" tabindex="-1">
+                            <span class="t"><b>Build pipeline</b><em>concept</em><i>3</i></span>
+                            <q>Keyword pages are written in the render step.</q>
+                          </a>
+                          <a class="rel-row" href="#" tabindex="-1">
+                            <span class="t"><b>Occurrence</b><em>concept</em><i>2</i></span>
+                            <q><span style="color: var(--accent)">Cited · </span>One line, one phrase, one file.</q>
+                          </a>
+                          <span
+                            style="
+                              margin-top: 12px;
+                              font: 400 11px/1.55 var(--sans);
+                              color: var(--faint);
+                            "
+                            >Ordered by number of passages. “Cited” marks a link written in the
+                            page.</span
+                          >
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              </div>
 
-              <input type="range" id="cmp-range" min="0" max="100" step="0.01" value="20.2"
-                     aria-label="Reveal the published page" />
               <span class="rule"></span>
               <span class="knob">‹ ›</span>
+              <span class="grab" id="cmp-grab" aria-hidden="true"></span>
             </div>
-
           </div>
         </div>
+        <div class="cmp-ctrl">
+          <input
+            type="range"
+            id="cmp-range"
+            min="0"
+            max="100"
+            step="0.01"
+            value="20.2"
+            aria-label="Reveal the published page"
+          />
+        </div>
 
-        <p class="sc-legend">
-          The rail is calculated, not written: the neighbourhood map, the quoted passages and their
-          line counts all come from reading the corpus. Written links and recognised words stay
-          visually distinct, so you always know which of the two you are looking at.
+        <p class="legend read">
+          The rail is calculated, not written: the properties come from the file's own header, the
+          related pages and their passage counts come from reading the corpus. Written links and
+          recognised words stay visually distinct, so you always know which of the two you are
+          looking at.
         </p>
       </div>
     </section>
@@ -846,17 +1246,22 @@ the word, grouped by file.
 
     <section id="start">
       <div class="in">
-        <h2>One command</h2>
-        <p>
-          No rewriting, no wikilinks, no frontmatter required, no server to run. The build reads
-          your repositories exactly as they are and writes a static folder you can publish anywhere.
+        <h2 class="read">Lint first, then build</h2>
+        <p class="sub read">
+          Start with the linter: it checks one repository on its own, before any site exists. The
+          build comes next, and reads your repositories exactly as they are — no rewriting, no
+          wikilinks, no frontmatter required, no server to run.
         </p>
-<pre><span class="c"># turnkey, with the container image</span>
-docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
+        <div class="read">
+<pre><span class="c"># 1 — check one repository, before you push. No site needed.</span>
+npx concordance lint
 
-<span class="c"># or in a pipeline, with the command line</span>
-npx concordance build      <span class="c"># clones the sources, builds dist/</span>
-npx concordance lint       <span class="c"># checks one repository before you push</span></pre>
+<span class="c"># 2 — build the wiki from every source in concordance.yaml</span>
+npx concordance build
+
+<span class="c"># or turnkey, with the container image</span>
+docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build</pre>
+        </div>
       </div>
     </section>
 
@@ -864,19 +1269,27 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <section>
       <div class="in">
-        <h2>How it works</h2>
+        <h2 class="read">How it works</h2>
+        <p class="sub read">Three steps, and nothing kept between two builds.</p>
         <ol class="steps">
           <li>
-            <b>Declare your repositories.</b> One <code>concordance.yaml</code> lists the git
-            sources. Nothing else is required.
+            <span
+              ><b>Declare your repositories.</b> One <code>concordance.yaml</code> lists the git
+              sources. Nothing else is required — and <code>concordance lint</code> already works
+              on a single repository without it.</span
+            >
           </li>
           <li>
-            <b>Build.</b> Every word people actually use gets a page, every file that mentions it
-            gets a link, office documents and transcripts get a preview.
+            <span
+              ><b>Build.</b> Every word people actually use gets a page, every file that mentions
+              it gets a link, office documents and transcripts get a preview.</span
+            >
           </li>
           <li>
-            <b>Publish the folder.</b> <code>dist/</code> is static: GitHub Pages, GitLab Pages, a
-            bucket, or a file on disk. Search works without a server.
+            <span
+              ><b>Publish the folder.</b> <code>dist/</code> is static: GitHub Pages, GitLab Pages,
+              a bucket, or a file on disk. Search works without a server.</span
+            >
           </li>
         </ol>
       </div>
@@ -886,11 +1299,12 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <section id="repositories">
       <div class="in">
-        <h2>Repositories</h2>
-        <p class="sub">
+        <h2 class="read">Repositories</h2>
+        <p class="sub read">
           The engine lives in one repository. The project's own wiki is built with Concordance from
-          two content repositories and one configuration repository: copy the configuration to start
-          yours.
+          two content repositories and one configuration repository: copy the configuration to
+          start yours. The split is a convenience, not a rule — one repository can hold several
+          kinds of content, and a single kind can be spread across several repositories.
         </p>
         <ul class="rows">
           <li>
@@ -898,7 +1312,8 @@ npx concordance lint       <span class="c"># checks one repository before you pu
               <span class="t">concordance</span>
               <span class="role">engine</span>
               <span class="d"
-                >The command line, the packages, the plugins, the specification and the guides.</span
+                >The command line, the packages, the plugins, the specification and the
+                guides.</span
               >
               <span class="x">↗</span>
             </a>
@@ -907,7 +1322,9 @@ npx concordance lint       <span class="c"># checks one repository before you pu
             <a href="https://github.com/concordance-wiki/demo-wiki">
               <span class="t">demo-wiki</span>
               <span class="role">configuration</span>
-              <span class="d">The configuration, theme and pipeline that publish the demo site.</span>
+              <span class="d"
+                >The configuration, theme and pipeline that publish the demo site.</span
+              >
               <span class="x">↗</span>
             </a>
           </li>
@@ -915,7 +1332,9 @@ npx concordance lint       <span class="c"># checks one repository before you pu
             <a href="https://github.com/concordance-wiki/demo-glossary">
               <span class="t">demo-glossary</span>
               <span class="role">content</span>
-              <span class="d">Terms and rules of a fictional organisation, one note per word.</span>
+              <span class="d"
+                >The vocabulary of Concordance itself, one note per term, filed by domain.</span
+              >
               <span class="x">↗</span>
             </a>
           </li>
@@ -923,17 +1342,21 @@ npx concordance lint       <span class="c"># checks one repository before you pu
             <a href="https://github.com/concordance-wiki/demo-specs">
               <span class="t">demo-specs</span>
               <span class="role">content</span>
-              <span class="d">Functional and technical specifications — screens, processes, rules — citing the glossary.</span>
+              <span class="d"
+                >The specifications of Concordance itself — screens, processes, rules, decisions —
+                citing the glossary.</span
+              >
               <span class="x">↗</span>
             </a>
           </li>
           <li class="soon">
             <span class="row">
               <span class="t">demo-*</span>
-              <span class="role">planned</span>
+              <span class="role">no sample yet</span>
               <span class="d"
-                >Meeting transcripts, office documents, decision records. Each kind of content is
-                handled on its own terms, and each adds links the others did not have.</span
+                >Meeting transcripts and office documents are already supported — there is simply
+                no sample repository for them yet. Each kind of content is handled on its own
+                terms, and each adds links the others did not have.</span
               >
             </span>
           </li>
@@ -945,15 +1368,16 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <section>
       <div class="in">
-        <h2>It fits repositories you already have</h2>
-        <p class="sub">
+        <h2 class="read">It fits repositories you already have</h2>
+        <p class="sub read">
           Nothing to migrate, nothing to rename. Three levels, and you stop wherever it is enough.
         </p>
         <dl class="levels">
           <dt>Recognised on its own</dt>
           <dd>
             Markdown, office documents, transcripts and interface contracts are picked up by
-            extension. A first build works on an untouched corpus.
+            extension — notes, specifications, glossaries, meeting transcripts, decision records.
+            A first build works on an untouched corpus, and one repository may mix all of them.
           </dd>
           <dt>Declared once, in the configuration</dt>
           <dd>
@@ -963,8 +1387,8 @@ npx concordance lint       <span class="c"># checks one repository before you pu
           </dd>
           <dt>Refined in frontmatter, when you want more</dt>
           <dd>
-            A few keys per note override the rules and declare relations by hand. It is the advanced
-            level, not the entry ticket — a corpus without any frontmatter still builds.
+            A few keys per note override the rules and declare relations by hand. It is the
+            advanced level, not the entry ticket — a corpus without any frontmatter still builds.
           </dd>
           <dt>Published under your own name</dt>
           <dd>
@@ -981,7 +1405,7 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <section>
       <div class="in">
-        <h2>Read on</h2>
+        <h2 class="read">Read on</h2>
         <ul class="rows plain">
           <li>
             <a
@@ -1027,8 +1451,8 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <section>
       <div class="in">
-        <h2>What it does not do</h2>
-        <p class="sub">Worth knowing before you install, rather than after.</p>
+        <h2 class="read">What it does not do</h2>
+        <p class="sub read">Worth knowing before you install, rather than after.</p>
         <ul class="limits">
           <li>
             <span>—</span
@@ -1040,8 +1464,8 @@ npx concordance lint       <span class="c"># checks one repository before you pu
           <li>
             <span>—</span
             ><span
-              >It is not a modelling tool. No derived diagrams, no matrices, no global graph in this
-              version.</span
+              >It is not a modelling tool. No derived diagrams, no matrices, no global graph in
+              this version.</span
             >
           </li>
           <li>
@@ -1054,8 +1478,8 @@ npx concordance lint       <span class="c"># checks one repository before you pu
           <li>
             <span>—</span
             ><span
-              >The first build is slow, because it converts every office document. Later builds take
-              seconds.</span
+              >The first build is slow, because it converts every office document. Later builds
+              take seconds.</span
             >
           </li>
         </ul>
@@ -1064,41 +1488,58 @@ npx concordance lint       <span class="c"># checks one repository before you pu
 
     <footer>
       <div class="in">
-        <div>
-          <div class="foot-links">
-            <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE">Licence</a>
-            <a href="https://github.com/concordance-wiki/concordance/blob/main/SECURITY.md"
-              >Security policy</a
-            >
-            <a href="https://github.com/concordance-wiki/concordance/blob/main/CODE_OF_CONDUCT.md"
-              >Code of conduct</a
-            >
-            <a href="https://github.com/concordance-wiki/concordance/releases">Releases</a>
-          </div>
-          <p class="foot-note">
-            Free software under the GNU General Public License, version 3 or later. Your generated
-            sites carry your own branding; the licence applies to Concordance itself and to any
-            modified version you distribute.
-          </p>
+        <div class="foot-links">
+          <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE">Licence</a>
+          <a href="https://github.com/concordance-wiki/concordance/blob/main/SECURITY.md"
+            >Security policy</a
+          >
+          <a href="https://github.com/concordance-wiki/concordance/blob/main/CODE_OF_CONDUCT.md"
+            >Code of conduct</a
+          >
+          <a href="https://github.com/concordance-wiki/concordance/releases">Releases</a>
         </div>
+        <p class="foot-note">
+          Free software under the GNU General Public License, version 3 or later. Your generated
+          sites carry your own branding; the licence applies to Concordance itself and to any
+          modified version you distribute.
+        </p>
       </div>
     </footer>
+
     <script>
       (function () {
         var box = document.getElementById("cmp");
         var range = document.getElementById("cmp-range");
+        var grab = document.getElementById("cmp-grab");
         if (!box || !range) return;
-        var NAV = 206, touched = false;
-        function apply() { box.style.setProperty("--x", range.value + "%"); }
-        function snapToNav() {
-          var w = box.clientWidth;
-          if (!w) return;
-          range.value = Math.max(0, Math.min(100, (NAV / w) * 100)).toFixed(2);
-          apply();
+        var fit = document.getElementById("fit");
+        function resize() {
+          if (!fit) return;
+          var avail = fit.clientWidth;
+          var k = Math.min(1, avail / 1020);
+          box.style.transform = k < 1 ? "scale(" + k + ")" : "none";
+          fit.style.height = Math.round(580 * k) + "px";
         }
-        range.addEventListener("input", function () { touched = true; apply(); });
-        window.addEventListener("resize", function () { if (!touched) snapToNav(); });
-        snapToNav();
+        function apply() {
+          box.style.setProperty("--x", range.value + "%");
+        }
+        window.addEventListener("resize", resize);
+        resize();
+        range.addEventListener("input", apply);
+        if (grab) {
+          grab.addEventListener("pointerdown", function (e) {
+            grab.setPointerCapture(e.pointerId);
+          });
+          grab.addEventListener("pointermove", function (e) {
+            if (!grab.hasPointerCapture(e.pointerId)) return;
+            var r = box.getBoundingClientRect();
+            if (!r.width) return;
+            var pct = ((e.clientX - r.left) / r.width) * 100;
+            range.value = Math.max(0, Math.min(100, pct)).toFixed(2);
+            apply();
+          });
+        }
+        apply();
       })();
     </script>
   </body>
