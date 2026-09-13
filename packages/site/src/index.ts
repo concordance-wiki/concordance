@@ -125,6 +125,7 @@ export type {
   FetchView,
 } from "./theme/default/contract-viewer.js";
 export { ContractSection } from "./theme/default/contract-section.js";
+export { DocumentPage, defaultDocumentPageLabels } from "./theme/default/document-page.js";
 export {
   DEFAULT_THEME_PLUGIN,
   defaultThemeManifest,

@@ -13,11 +13,11 @@ export interface ViewerLabels {
   loadingViewer: string;
   viewerUnavailable: string;
   openPdf: string;
-  previousPage: string;
-  nextPage: string;
   zoomIn: string;
   zoomOut: string;
   findInDocument: string;
+  /** The placeholder of the find field, after the search glyph: "in the document". */
+  inTheDocument: string;
   noMatch: string;
   matchesOn: string;
   /** The singular name of a position, `page` or `slide`, for the counter of the viewer. */
@@ -30,6 +30,8 @@ export interface DocumentViewerProps {
   viewerHref: string;
   workerHref: string;
   labels: ViewerLabels;
+  /** Open the viewer as soon as the script runs, without a button, as the document page does. */
+  open?: boolean;
 }
 
 export const viewerLabels = (unit: DocumentView["unit"]): ViewerLabels => ({
@@ -38,11 +40,10 @@ export const viewerLabels = (unit: DocumentView["unit"]): ViewerLabels => ({
   loadingViewer: labels.loadingViewer,
   viewerUnavailable: labels.viewerUnavailable,
   openPdf: labels.openPdf,
-  previousPage: labels.previousPage,
-  nextPage: labels.nextPage,
   zoomIn: labels.zoomIn,
   zoomOut: labels.zoomOut,
   findInDocument: labels.findInDocument,
+  inTheDocument: labels.inTheDocument,
   noMatch: labels.noMatch,
   matchesOn: labels.matchesOn,
   unit: unit === "slide" ? "slide" : "page",
@@ -65,6 +66,19 @@ export function positionCaption(text: string, max = 60): string {
       .find((candidate) => candidate.trim() !== "")
       ?.trim() ?? "";
   return line.length > max ? `${line.slice(0, max - 1).trimEnd()}…` : line;
+}
+
+/** The props of the viewer island for a document, when the build produced the viewer and the document has a PDF. */
+export function viewerPropsOf(document: DocumentView): DocumentViewerProps | undefined {
+  const { preview } = document;
+  return preview?.viewerHref !== undefined && preview.workerHref !== undefined
+    ? {
+        pdfHref: preview.href,
+        viewerHref: preview.viewerHref,
+        workerHref: preview.workerHref,
+        labels: viewerLabels(document.unit),
+      }
+    : undefined;
 }
 
 function railHeading(unit: DocumentView["unit"]): string {
@@ -93,7 +107,36 @@ function ViewerOpener(props: DocumentViewerProps): JSX.Element {
   );
 }
 
-const ViewerIsland = island(DOCUMENT_VIEWER_ISLAND, ViewerOpener);
+export const ViewerIsland = island(DOCUMENT_VIEWER_ISLAND, ViewerOpener);
+
+/**
+ * The extracted text position by position in disclosure blocks anchored as the mentions cite
+ * them, the first one open; a document without any says so. Readable without JavaScript.
+ */
+export function DocumentText({
+  positions,
+  index,
+}: {
+  positions: DocumentView["positions"];
+  index: number;
+}): JSX.Element {
+  return positions.length === 0 ? (
+    <p class="empty">{labels.noExtractedText}</p>
+  ) : (
+    <>
+      {positions.map((position) => (
+        <details
+          key={position.number}
+          id={positionAnchor(position.number, index)}
+          open={position.number === 1}
+        >
+          <summary>{position.label}</summary>
+          <p>{position.text}</p>
+        </details>
+      ))}
+    </>
+  );
+}
 
 /**
  * One document of the page: the download link, the PDF link and, when the build produced the
@@ -110,15 +153,7 @@ export function DocumentBlock({
 }): JSX.Element {
   const id = `document-${String(index)}`;
   const { file, preview, positions } = document;
-  const viewer =
-    preview?.viewerHref !== undefined && preview.workerHref !== undefined
-      ? {
-          pdfHref: preview.href,
-          viewerHref: preview.viewerHref,
-          workerHref: preview.workerHref,
-          labels: viewerLabels(document.unit),
-        }
-      : undefined;
+  const viewer = viewerPropsOf(document);
   return (
     <section class={`document document-${document.unit}`} aria-labelledby={id}>
       <h2 id={id}>
@@ -156,20 +191,7 @@ export function DocumentBlock({
       )}
       <div class="document-text">
         <h3>{labels.extractedText}</h3>
-        {positions.length === 0 ? (
-          <p class="empty">{labels.noExtractedText}</p>
-        ) : (
-          positions.map((position) => (
-            <details
-              key={position.number}
-              id={positionAnchor(position.number, index)}
-              open={position.number === 1}
-            >
-              <summary>{position.label}</summary>
-              <p>{position.text}</p>
-            </details>
-          ))
-        )}
+        <DocumentText positions={positions} index={index} />
       </div>
     </section>
   );

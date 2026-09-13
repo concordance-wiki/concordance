@@ -285,6 +285,9 @@ export function NeighbourhoodFold({
  * module when one exists; the rest of the page is the same for every type. `mapOpen` serves the
  * neighbourhood unfolded, as the reader sees it after opening its line. An API whose contract
  * was imported has a page of its own, `ApiPage`, which the theme serves in its place.
+ * whose view model carries what its files bring, to the meeting template on the same shell, and
+ * an entity the build laid out as a document page, an office document with what the page says
+ * of it, to the document template.
  */
 export function EntityPage({
   entity,

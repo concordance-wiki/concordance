@@ -56,6 +56,14 @@ const CURRENT_TAB = [
   ),
 ].join(",\n  ");
 
+/** The tab of the document page whose view is shown: the first one until a view is targeted. */
+const DOCUMENT_TAB_CURRENT = [
+  ".document-page:not(:has(.document-panel:target, .document-panel :target)) .document-tab-view",
+  ".document-page:has(#document-view:target) .document-tab-view",
+  ".document-page:has(#document-text:target, #document-text :target) .document-tab-text",
+  ".document-page:has(#document-notes:target, #document-notes :target) .document-tab-notes",
+].join(",\n");
+
 describe("The accent colour never carries information on its own", () => {
   const base = accentRules(baseStylesheet());
   const components = accentRules(componentsStylesheet());
@@ -87,6 +95,8 @@ describe("The accent colour never carries information on its own", () => {
       CURRENT_TAB,
       ".cue-time",
       ".spaces-row.stale .spaces-date",
+      DOCUMENT_TAB_CURRENT,
+      ".document-page .document-rail a.current",
     ]);
   });
 

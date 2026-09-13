@@ -4413,3 +4413,303 @@ a.api-operation:hover {
     padding: 1.875rem 2.25rem var(--space-5);
   }
 }
+
+/* Document page: the tab bar and the three views of an office document, the strip of pages beside the rendering of the current page and its notes, the files that make the document in the panel. */
+
+.document-page .entity-main {
+  padding: 1.625rem 2.125rem var(--space-5);
+}
+
+.document-page .entity-main > * {
+  max-inline-size: none;
+}
+
+.document-line {
+  padding-block-end: 0;
+  border-block-end: 0;
+}
+
+/* The tab bar: three links ruled underneath and the download of the original at the end; the stylesheet marks the tab whose view is shown, the first one until a view is targeted. */
+
+.document-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.document-tab {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  margin-block-end: -1px;
+  padding: 0 0.875rem;
+  border-block-end: 2px solid transparent;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.document-tab:hover {
+  color: var(--color-ink);
+}
+
+.document-page:not(:has(.document-panel:target, .document-panel :target)) .document-tab-view,
+.document-page:has(#document-view:target) .document-tab-view,
+.document-page:has(#document-text:target, #document-text :target) .document-tab-text,
+.document-page:has(#document-notes:target, #document-notes :target) .document-tab-notes {
+  border-block-end-color: var(--color-accent);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.document-tabs .document-download {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  margin-inline-start: auto;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.document-tabs .document-download:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* One view at a time: the targeted one, or the one holding the target, the document until then; every view stays reachable by its anchor without any script. */
+
+.document-panels:not(:has(.document-panel:target, .document-panel :target))
+  > .document-panel:not(:first-child),
+.document-panels:has(.document-panel:target, .document-panel :target)
+  > .document-panel:not(:target):not(:has(:target)) {
+  display: none;
+}
+
+.document-panel {
+  padding-block-start: 1.125rem;
+}
+
+/* The strip of pages beside the rendering: numbered thumbnails, the current one ruled in the accent; a row on a narrow page, a column from the tablet. */
+
+.document-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.document-page .document-rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.document-page .document-rail ol {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.document-page .document-rail a {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  inline-size: 7.375rem;
+  min-inline-size: 0;
+  max-inline-size: none;
+  block-size: 4.125rem;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-bg);
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.document-page .document-rail a.current {
+  border: 2px solid var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+@media (min-width: 48rem) {
+  .document-stage {
+    flex-direction: row;
+  }
+
+  .document-page .document-rail {
+    inline-size: 7.375rem;
+  }
+
+  .document-page .document-rail ol {
+    flex-direction: column;
+    max-block-size: 40rem;
+  }
+}
+
+/* The rendering of the current page: the toolbar of the viewer as a line, the page on its stage; without the viewer, the PDF as the browser shows it; then the two notes. */
+
+.document-render {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.document-render .document-viewer {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+
+.document-render .viewer-toolbar {
+  padding: 0 0 var(--space-2);
+  border-block-end: 0;
+}
+
+.viewer-stage,
+.document-embed {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-bg);
+}
+
+.document-embed {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 40rem;
+}
+
+.viewer-stage .viewer-page {
+  margin: 0;
+  border: 1px solid var(--color-border);
+}
+
+.document-render-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* The toolbar of the viewer as the board draws it: the counter, the zoom between its two signs, the find field after its glyph, all on one line. */
+
+.viewer-toolbar {
+  gap: 0.875rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.viewer-counter {
+  font-family: var(--font-mono);
+}
+
+.viewer-separator {
+  color: var(--color-border);
+}
+
+.viewer-toolbar .viewer-zoom-out,
+.viewer-toolbar .viewer-zoom-in {
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1rem;
+}
+
+.viewer-toolbar button[disabled] {
+  color: var(--color-label);
+}
+
+.viewer-find {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: 2.5rem;
+}
+
+.viewer-find input {
+  inline-size: 10rem;
+  min-block-size: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.viewer-find input::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+/* The files that make the document: one row per file, its extension or name in the monospace family, then what it is. */
+
+.document-twins {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  list-style: none;
+  overflow: hidden;
+}
+
+.document-twins li {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  min-block-size: 2.5rem;
+  padding: 0 0.6875rem;
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.document-twins li:last-child {
+  border-block-end: 0;
+}
+
+.document-twin-name {
+  flex: 1;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+a.document-twin-name:hover {
+  text-decoration: underline;
+}
+
+.document-twin-role {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}

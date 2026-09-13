@@ -1,5 +1,5 @@
 import { pagePath, type Entity } from "@concordance-wiki/core";
-import { formatMessage, formatRelative } from "@concordance-wiki/i18n";
+import { formatDate, formatMessage, formatNumber, formatRelative } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type {
@@ -11,6 +11,9 @@ import type {
   ContractSectionProps,
   DeclaredAttribute,
   DeclaredSection,
+  DocumentPageLabels,
+  DocumentPageView,
+  DocumentTwinFile,
   DocumentView,
   EntityPageLabels,
   EntityPageProps,
@@ -506,7 +509,157 @@ export function documentsOf(
       text,
       ...(speaker === undefined ? {} : { speaker }),
     })),
+    ...(document.size === undefined ? {} : { size: document.size }),
+    ...(document.author === undefined ? {} : { author: document.author }),
+    ...(document.date === undefined ? {} : { date: document.date }),
+    ...(document.pageCount === undefined ? {} : { pageCount: document.pageCount }),
   }));
+}
+
+/** The kinds of office documents the page names from the extension; any other format is named by its extension. */
+const DOCUMENT_KINDS: Readonly<Record<string, "presentation" | "text" | "spreadsheet" | "pdf">> = {
+  pptx: "presentation",
+  ppt: "presentation",
+  odp: "presentation",
+  docx: "text",
+  doc: "text",
+  odt: "text",
+  xlsx: "spreadsheet",
+  xls: "spreadsheet",
+  ods: "spreadsheet",
+  pdf: "pdf",
+};
+
+function kindOf(context: SiteContext, format: string): string {
+  const kind = DOCUMENT_KINDS[format];
+  return kind === undefined ? format.toUpperCase() : message(context, `document.kind.${kind}`);
+}
+
+/**
+ * The document a page centres on: the first one with pages or slides, when no transcript
+ * accompanies it; a page with a transcript, or with notes alone, is not a document page.
+ */
+export function centralDocument(documents: readonly DocumentView[]): DocumentView | undefined {
+  return documents.some((document) => document.unit === "cue")
+    ? undefined
+    : documents.find((document) => document.unit !== "cue");
+}
+
+/** A size in the unit that reads best, one decimal at most: "312 kB", "4.2 MB". */
+export function formatSize(locale: string, bytes: number): string {
+  const [unit, divisor]: [Intl.NumberFormatOptions["unit"], number] =
+    bytes >= 1_000_000_000
+      ? ["gigabyte", 1_000_000_000]
+      : bytes >= 1_000_000
+        ? ["megabyte", 1_000_000]
+        : ["kilobyte", 1_000];
+  return formatNumber(locale, bytes / divisor, {
+    style: "unit",
+    unit,
+    unitDisplay: "short",
+    maximumFractionDigits: 1,
+  });
+}
+
+/** The headings, notes and names of the document page in the site language. */
+export function documentPageLabels(context: SiteContext, files: number): DocumentPageLabels {
+  return {
+    document: message(context, "document.view"),
+    extractedText: message(context, "document.extractedText"),
+    relatedNotes: message(context, "document.relatedNotes"),
+    views: message(context, "document.views"),
+    downloadOriginal: message(context, "document.download"),
+    pages: message(context, "document.pageCount"),
+    preview: message(context, "document.preview"),
+    openPdf: message(context, "document.openPdf"),
+    convertedNote: message(context, "document.convertedNote"),
+    originalNote: message(context, "document.originalNote"),
+    properties: message(context, "entity.attributes"),
+    type: message(context, "document.type"),
+    author: message(context, "document.author"),
+    pageCount: message(context, "document.pageCount"),
+    date: message(context, "document.date"),
+    dateNote: message(context, "document.dateNote"),
+    sameDocument: formatMessage(context.catalogue, "document.sameDocument", { count: files }),
+    groupedNote: message(context, "document.groupedNote"),
+    noNote: message(context, "document.noNote"),
+  };
+}
+
+/** The files that make the document: the original, its PDF when the build kept one, the note when one is merged with it. */
+function twinFilesOf(
+  context: SiteContext,
+  entity: Entity,
+  document: DocumentView,
+): DocumentTwinFile[] {
+  const files: DocumentTwinFile[] = [
+    {
+      label: `.${document.file.format}`,
+      role: message(context, "document.roleOriginal"),
+      href: document.file.href,
+    },
+  ];
+  if (document.preview !== undefined) {
+    files.push({
+      label: ".pdf",
+      role: message(context, "document.rolePreview"),
+      href: document.preview.href,
+    });
+  }
+  const note = (entity.representations ?? []).find(
+    (representation) => representation.format === "markdown",
+  );
+  if (note !== undefined) {
+    files.push({
+      label: note.path.slice(note.path.lastIndexOf("/") + 1),
+      role: message(context, "document.roleNotes"),
+      href: "#document-notes",
+    });
+  }
+  return files;
+}
+
+/**
+ * What lays the page of an office document out: the kind of the file from its extension, its
+ * page count (what the conversion found, else what the file states), its size, its date (the
+ * one the file states, else the last change in the repository) and its author, then the files
+ * that make the document; none for an entity that is not a document page.
+ */
+export function documentPageOf(
+  context: SiteContext,
+  entity: Entity,
+  documents: readonly DocumentView[],
+): DocumentPageView | undefined {
+  const document = centralDocument(documents);
+  if (document === undefined) return undefined;
+  const locale = context.locale ?? context.language;
+  const pages =
+    document.positions.length > 0 ? document.positions.length : (document.pageCount ?? 0);
+  const fromFile = document.date !== undefined;
+  const iso = document.date ?? entity.source.last_modified;
+  const files = twinFilesOf(context, entity, document);
+  return {
+    kind: kindOf(context, document.file.format),
+    ...(pages === 0
+      ? {}
+      : {
+          pages,
+          pagesLabel: formatMessage(context.catalogue, "document.pages", { count: pages }),
+        }),
+    ...(document.size === undefined ? {} : { size: formatSize(locale, document.size) }),
+    ...(iso === undefined
+      ? {}
+      : {
+          date: {
+            date: iso.slice(0, 10),
+            label: formatDate(locale, new Date(iso), "long"),
+            fromFile,
+          },
+        }),
+    ...(document.author === undefined ? {} : { author: document.author }),
+    files,
+    labels: documentPageLabels(context, files.length),
+  };
 }
 
 /**
@@ -560,8 +713,9 @@ export function entityPageLabels(
 
 /**
  * The view model of the page of a typed entity, its sections and documents read from its
- * fragment. A meeting carries what its own template lays out on top: when every note of its
- * space is dated, the tree is drawn by year and month and the breadcrumb names the month.
+ * fragment. A meeting or a document carries what its own template lays out on top: when every
+ * note of its space is dated, the tree is drawn by year and month and the breadcrumb names the
+ * month.
  */
 export function entityPageOf(
   context: SiteContext,
@@ -570,6 +724,7 @@ export function entityPageOf(
 ): EntityPageProps {
   const page = pagePath(entity.id);
   const documents = documentsOf(context, page, entity, options.viewer);
+  const document = documentPageOf(context, entity, documents);
   const contract = contractOf(context, page, entity);
   const declaration = declarationOf(context, entity.type);
   const otherAttributes = othersOf(context, entity);
@@ -578,7 +733,8 @@ export function entityPageOf(
   const attributes = panelOf(context, page, entity);
   const meeting =
     entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
-  const dated = meeting !== undefined && isDatedSpace(context, entity.source.name);
+  const dated =
+    (meeting !== undefined || document !== undefined) && isDatedSpace(context, entity.source.name);
   const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);
   return {
     entity: {
@@ -611,5 +767,6 @@ export function entityPageOf(
     ...(documents.length === 0 ? {} : { documents }),
     ...(contract === undefined ? {} : { contract }),
     ...(meeting === undefined ? {} : { meeting }),
+    ...(document === undefined ? {} : { document }),
   };
 }

@@ -73,12 +73,15 @@ function fallback(container: HTMLElement, props: DocumentViewerProps): void {
 /**
  * Reveals the button of one document island and makes it import the viewer bundle on the first
  * click, then open the viewer on the PDF; the button toggles the viewer afterwards, and the rail
- * follows the page shown. When the bundle cannot be imported, the reader gets a link to the PDF.
+ * follows the page shown, its entries showing their page in the viewer rather than leading to
+ * their text once it is open. An island served `open` imports the viewer at once and never
+ * shows the button, as the document page does. When the bundle cannot be imported, the reader
+ * gets a link to the PDF.
  */
 export function wireDocumentViewer(element: HTMLElement, deps: OpenerDependencies): boolean {
   const button = element.querySelector<HTMLButtonElement>("button.document-open");
   const container = element.querySelector<HTMLElement>(".document-viewer");
-  const section = element.closest<HTMLElement>("section.document");
+  const section = element.closest<HTMLElement>("section.document, .document-page");
   const serialised = element.getAttribute("data-props");
   if (button === null || container === null || section === null || serialised === null) {
     return false;
@@ -125,11 +128,17 @@ export function wireDocumentViewer(element: HTMLElement, deps: OpenerDependencie
     }
   });
   for (const entry of section.querySelectorAll<HTMLElement>(".document-rail a[data-position]")) {
-    entry.addEventListener("click", () => {
-      handle?.goTo(Number(entry.dataset["position"]));
+    entry.addEventListener("click", (event) => {
+      if (handle === undefined) return;
+      event.preventDefault();
+      handle.goTo(Number(entry.dataset["position"]));
     });
   }
-  show(false);
-  button.hidden = false;
+  if (props.open === true) {
+    void open();
+  } else {
+    show(false);
+    button.hidden = false;
+  }
   return true;
 }

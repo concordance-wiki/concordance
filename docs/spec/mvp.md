@@ -1215,7 +1215,18 @@ As a reader of a screen note, the most consulted type, I want its tables and its
 
 Depends on: L9-01, L2-15.
 
-## 5. Working conditions
+#### L9-13 Document page
+
+As a reader, I want the page of a deck or a report to open on the document itself so that I check a slide in three seconds and still find the text, the notes and the original.
+
+- The page of an office document (a deck, a report, a spreadsheet or a PDF, alone or merged with its note; a page with a transcript keeps the generic layout) is laid out as a document page: the tree of its space on the left, folded by year and month rather than by folder when every page of the space is dated, as the tree of a meeting space is, the newest year and the newest page first, the folder tree kept otherwise; the breadcrumb "Space › March 2026 › title"; the title; the line "Presentation · 24 pages · 4.2 MB · 12 March 2026" (the kind from the extension, the page count the conversion found, else the one the file states, the size, and the date read from the file's metadata when its reader gave one, else the git date), each datum omitted when the corpus has none.
+- Three views behind the tabs "Document | Extracted text | Related notes", a tab bar of anchors that works without any script, the stylesheet showing the targeted view alone, the document until one is targeted; "Download the original" at the end of the bar, the original file placed next to the page as the previews are. The document view: the strip of pages "PAGES 01 … 24", numbered thumbnails leading to the text of the page, the first one current, then the rendering of the current page by the viewer, opened as soon as its script runs, with its toolbar "7 / 24 | − 100 % + | ⌕ in the document" (the counter, the zoom between its two signs, the find field over the extracted text that positions the current page), the strip following the page shown and driving the viewer; under it the notes "Converted at publication, cached by fingerprint" and "The original stays downloadable". The extracted text view: the text of every page in disclosure blocks anchored as the mentions cite them. The notes view: the note merged with the document, or the sentence saying that none describes it yet.
+- Panel: "Properties" (Type, Author as the file states it, Pages, Date, with the note "Read from the file, distinct from the repository date." when the date comes from the file), "Same document, three files" (`.pptx` original · `.pdf` preview · `notes.md` session notes, with the note "Grouped by folder, date and textual overlap — a single entry in the index."), "Related pages", then the neighbourhood map folded behind its line.
+- Without JavaScript: the first page rendered by the browser's own PDF viewer through an `<object>`, the extracted text and the notes reachable by their anchors, the original downloadable. The size of the original and the author, date and page count its reader exposed travel in the `documents` of the fragment; the model gains nothing else.
+- Gallery state `document-page-corporate` on a deck of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L4-05, L4-06, L4-07.
+
 ## 5. Working conditions
 
 ### 5.1 Ready
