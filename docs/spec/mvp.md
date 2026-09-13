@@ -488,7 +488,7 @@ As a reader, I want to read what someone wrote on the subject so that I understa
 - Declared metadata sits in the side panel, never between the title and the text.
 - Highlighted properties are capped at five; beyond that they stay in the panel.
 - A single template serves every type; only the displayed properties and the neighbour order change, both defined by the profile.
-- Written links and recognised words are visually distinguished in the text, with a legend.
+- Written links, recognised words with a note and recognised expressions without one, those that have a keyword page, are visually distinguished in the text, with a legend of the three marks; a page is marked once per note, on its first occurrence, and every mark tells in words what it leads to.
 - The footer shows the source file path and an edit link to the forge.
 
 Depends on: L2-02.
