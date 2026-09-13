@@ -63,6 +63,7 @@ function expectSiteSummary(stdout: string[], pages: number, output: string, redi
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
+    expect.stringMatching(/^island trail: \d+\.\d kB$/) as string,
     expect.stringMatching(
       new RegExp(`^pages: ${String(total)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`),
     ) as string,

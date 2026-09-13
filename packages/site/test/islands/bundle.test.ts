@@ -16,26 +16,29 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the document viewer, mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
+  it("declares the document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
       "document-viewer",
       "mentions-panel",
       "mode-switch",
       "search",
+      "trail",
       "contract-viewer",
     ]);
     expect(islands[0]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[2]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
     expect(islands[3]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands[4]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
-    expect(islands[4]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
+    expect(islands[4]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
+    expect(islands[5]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
+    expect(islands[5]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
     expect(islands.map((island) => island.classic)).toEqual([
       undefined,
       undefined,
       undefined,
       true,
+      undefined,
       undefined,
     ]);
   });
@@ -99,7 +102,7 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(5);
+    expect(bundles).toHaveLength(6);
     const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
     expect(bundles.map((candidate) => candidate.name)).toEqual([
       "contract-viewer",
@@ -107,6 +110,7 @@ describe("bundleIslands", () => {
       "mentions-panel",
       "mode-switch",
       "search",
+      "trail",
     ]);
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/site/assets/${bundle?.file ?? ""}`);
@@ -165,6 +169,23 @@ describe("bundleIslands", () => {
     expect(bundles.find((candidate) => candidate.name === "mentions-panel")?.classic).toBe(
       undefined,
     );
+  });
+
+  it("bundles the trail without any framework, under four kilobytes", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    const bundle = bundles.find((candidate) => candidate.name === "trail");
+    expect(bundle?.file).toMatch(/^trail-[A-Z0-9]{8}\.js$/);
+    const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
+    expect(bundle?.bytes).toBeLessThan(4_000);
+    expect(written).toContain('"concordance-trail"');
+    expect(written).toContain('[data-island="trail"]');
+    expect(written).toContain('"trail"');
+    expect(written).toContain("encodeURIComponent");
+    expect(written).toContain("replaceState");
+    expect(written).toContain("aria-pressed");
+    expect(written).not.toContain("preact");
+    expect(written).not.toContain("fetch(");
   });
 
   it("gives byte-identical bundles from one run to the next, whatever the output folder", async () => {

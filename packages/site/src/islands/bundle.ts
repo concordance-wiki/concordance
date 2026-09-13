@@ -11,6 +11,7 @@ import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
 import { defaultUiComponents } from "../theme/default/plugin.js";
+import { TRAIL_ISLAND } from "../theme/default/trail.js";
 
 /** The bundle of the PDF viewer, imported on demand by the document island, never by a page. */
 export const VIEWER_ISLAND = "viewer-pdf";
@@ -68,6 +69,10 @@ export function defaultIslands(): IslandEntry[] {
       name: SEARCH_ISLAND,
       entry: fileURLToPath(new URL("./search.client", import.meta.url)),
       classic: true,
+    },
+    {
+      name: TRAIL_ISLAND,
+      entry: fileURLToPath(new URL("./trail.client", import.meta.url)),
     },
     ...defaultUiComponents().map(islandOf),
   ];

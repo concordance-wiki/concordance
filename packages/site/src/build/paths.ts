@@ -61,3 +61,9 @@ export function entityHref(from: string, id: string): string {
 export function assetsBaseOf(from: string): string {
   return `${relativeHref(from, ASSETS_DIRECTORY)}/`;
 }
+
+/** The prefix of the hrefs from a page to the site root, `../../` for instance; empty at the root. */
+export function siteRootOf(from: string): string {
+  const up = relativeHref(from, ".");
+  return up === "" ? "" : `${up}/`;
+}

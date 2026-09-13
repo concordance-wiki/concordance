@@ -198,6 +198,7 @@ describe("resolveTheme", () => {
       islands: [
         { name: "mode-switch", file: "mode-switch.js", bytes: 1 },
         { name: "search", file: "search.js", bytes: 1, classic: true },
+        { name: "trail", file: "trail.js", bytes: 1 },
       ],
       header,
       footer,

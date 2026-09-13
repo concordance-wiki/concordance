@@ -271,6 +271,10 @@
     "defaultMessage": "To do",
     "description": "Heading of the page listing the findings of the build."
   },
+  "trail.earlier": {
+    "defaultMessage": "earlier pages",
+    "description": "Follows the number of oldest trail entries folded into one expandable entry."
+  },
   "trail.empty": {
     "defaultMessage": "No page pinned yet",
     "description": "Notice shown when the trail holds no page."

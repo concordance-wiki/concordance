@@ -4,6 +4,7 @@ import type { HeaderLogo, HeaderProps } from "../../slots.js";
 import { labels } from "./labels.js";
 import { ModeSwitch } from "./mode-switch.js";
 import { SearchIsland } from "./search-island.js";
+import { Trail } from "./trail.js";
 
 /** The logo is decorative: the site title follows it as text, so an inline SVG is hidden from assistive technology. */
 function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
@@ -20,6 +21,7 @@ export function Header({
   logo,
   navigation,
   search,
+  trail,
 }: HeaderProps): JSX.Element {
   return (
     <header class="site-header">
@@ -46,6 +48,7 @@ export function Header({
         </ul>
         <ModeSwitch />
       </nav>
+      <Trail {...(trail === undefined ? {} : { trail })} />
     </header>
   );
 }

@@ -18,6 +18,7 @@ const searchBundle: IslandBundle = {
   bytes: 1,
   classic: true,
 };
+const trailBundle: IslandBundle = { name: "trail", file: "trail-789ABC.js", bytes: 1 };
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   return {
@@ -25,7 +26,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     locale: "en",
     title: "Keyword page",
     stylesheets: ["../assets/site.css"],
-    islands: [bundle, modeBundle, searchBundle],
+    islands: [bundle, modeBundle, searchBundle, trailBundle],
     assetsBase: "../assets/",
     header,
     footer,
@@ -59,12 +60,13 @@ describe("renderPage", () => {
   /** An entity nobody cites: its panel carries no island. */
   const uncited = { ...entityPage, mentions: { mentions: [], initial: 20 } };
 
-  it("loads no bundle but the mode switch and the search field of the header for a page without another island", () => {
+  it("loads no bundle but the mode switch, the search field and the trail of the header for a page without another island", () => {
     const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
-    expect(count(html, "<concordance-island")).toBe(2);
-    expect(count(html, '<script type="module"')).toBe(1);
+    expect(count(html, "<concordance-island")).toBe(3);
+    expect(count(html, '<script type="module"')).toBe(2);
     expect(html).toContain('<script type="module" defer src="../assets/mode-switch-DEF456.js">');
+    expect(html).toContain('<script type="module" defer src="../assets/trail-789ABC.js">');
   });
 
   it("loads the bundle of a classic island with a deferred classic script tag, never as a module nor preloaded", () => {
@@ -109,7 +111,7 @@ describe("renderPage", () => {
     expect(html).toContain(
       '<script type="module" defer src="../assets/mentions-panel-ABC123.js"></script>',
     );
-    expect(count(html, '<script type="module"')).toBe(2);
+    expect(count(html, '<script type="module"')).toBe(3);
     expect(html).toContain('<concordance-island data-island="mentions-panel"');
     expectBalanced(html);
   });
@@ -125,7 +127,7 @@ describe("renderPage", () => {
   it("fails when a page uses an island that was not bundled", () => {
     const page = { ...entityPage, mentions: { mentions: mentions(21), initial: 20 } };
     expect(() =>
-      renderPage("EntityPage", page, options({ islands: [modeBundle, searchBundle] })),
+      renderPage("EntityPage", page, options({ islands: [modeBundle, searchBundle, trailBundle] })),
     ).toThrow("renderPage: island mentions-panel has no bundle");
   });
 
@@ -141,7 +143,7 @@ describe("renderPage", () => {
     );
     expect(html).not.toContain("</script><script>");
     expect(html).toContain("&lt;/script>&lt;script>alert(&quot;x&quot;)&lt;/script>");
-    expect(count(html, '<script type="module"')).toBe(2);
+    expect(count(html, '<script type="module"')).toBe(3);
   });
 
   it("writes dir=rtl for a right-to-left locale", () => {

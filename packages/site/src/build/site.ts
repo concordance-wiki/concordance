@@ -25,7 +25,7 @@ import {
   searchLabels,
   type SearchTokenizer,
 } from "../search/build.js";
-import type { SearchField, SlotProps } from "../slots.js";
+import type { SearchField, SlotProps, TrailPage } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
 import { SearchIsland } from "../theme/default/search-island.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
@@ -51,6 +51,7 @@ import {
   mentionsFragmentPath,
   relativeHref,
   SEARCH_PAGE,
+  siteRootOf,
   TODO_PAGE,
 } from "./paths.js";
 import { redirectBody, redirectHref, redirectsOf } from "./redirect.js";
@@ -147,6 +148,7 @@ function chromeFor(
   context: SiteContext,
   page: string,
   todoCount: number,
+  current?: TrailPage,
 ): SiteChrome {
   const chrome = themeChrome(input, assetsBaseOf(page));
   const header: SlotProps["Header"] = {
@@ -165,6 +167,17 @@ function chromeFor(
   if (chrome.logo !== undefined) {
     header.logo = chrome.logo;
   }
+  header.trail = {
+    base: siteRootOf(page),
+    labels: {
+      title: message(context, "trail.title"),
+      pin: message(context, "trail.pin"),
+      unpin: message(context, "trail.unpin"),
+      empty: message(context, "trail.empty"),
+      earlier: message(context, "trail.earlier"),
+    },
+    ...(current === undefined ? {} : { current }),
+  };
   const footer: SlotProps["Footer"] = {
     version: input.model.build.tool,
     generatedAt: input.model.build.at,
@@ -191,12 +204,6 @@ function searchFieldOf(context: SiteContext, page: string): SearchField {
     label: message(context, "site.search"),
     root: siteRootOf(page),
   };
-}
-
-/** The href of the root of the site from a page: `../` per folder, empty at the root. */
-export function siteRootOf(page: string): string {
-  const relative = relativeHref(page, ".");
-  return relative === "" ? "" : `${relative}/`;
 }
 
 /** The label of the type stored in the index: the keyword marker for a keyword page, the profile label otherwise. */
@@ -246,8 +253,13 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
-  const optionsFor = (page: string, title: string, locale: string): RenderOptions => {
-    const chrome = chromeFor(input, context, page, todoCount);
+  const optionsFor = (
+    page: string,
+    title: string,
+    locale: string,
+    current?: TrailPage,
+  ): RenderOptions => {
+    const chrome = chromeFor(input, context, page, todoCount, current);
     return {
       theme: input.theme,
       locale,
@@ -265,9 +277,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     body: JSX.Element,
     title: string,
     locale: string,
+    current?: TrailPage,
   ): WrittenDocument => ({
     path: page,
-    content: renderDocument(body, optionsFor(page, title, locale)),
+    content: renderDocument(body, optionsFor(page, title, locale, current)),
   });
   const render = <S extends PageSlot>(
     page: string,
@@ -275,12 +288,15 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     props: SlotProps[S],
     title: string,
     locale: string,
-  ): WrittenDocument => document(page, h(input.theme.components[slot], props), title, locale);
+    current?: TrailPage,
+  ): WrittenDocument =>
+    document(page, h(input.theme.components[slot], props), title, locale, current);
   const mentionsOptions =
     input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline };
   const viewer = viewerBundlesOf(islands);
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
+    const current: TrailPage = { id: entity.id, title: entity.title };
     return entity.keyword === true
       ? render(
           page,
@@ -288,6 +304,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
           keywordPageOf(context, entity, mentionsOptions),
           entity.title,
           entity.locale,
+          current,
         )
       : render(
           page,
@@ -298,6 +315,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
           }),
           entity.title,
           entity.locale,
+          current,
         );
   };
   // An entity without a mention gets no fragment.

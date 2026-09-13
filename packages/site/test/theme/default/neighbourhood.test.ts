@@ -305,6 +305,7 @@ describe("The list of neighbours is indexed by search", () => {
         { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
         { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
         { name: "search", file: "search-00000000.js", bytes: 0, classic: true },
+        { name: "trail", file: "trail-00000000.js", bytes: 0 },
       ],
     );
     const page = documents.find((document) => document.path === "glossary/keyword-page/index.html");

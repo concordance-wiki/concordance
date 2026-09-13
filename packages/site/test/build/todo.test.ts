@@ -24,6 +24,7 @@ const bundles: IslandBundle[] = [
   { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
   { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
   { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
+  { name: "trail", file: "trail-789ABC.js", bytes: 1 },
 ];
 
 /** Findings of every other kind, which the page must ignore. */

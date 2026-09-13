@@ -74,12 +74,39 @@ export interface NavigationItem extends Link {
 /** The logo of the header: an image by href, or the markup of an SVG inlined so that it can follow the current colour. */
 export type HeaderLogo = { src: string; alt: string } | { svg: string };
 
+export interface TrailLabels {
+  /** Accessible name of the trail region. */
+  title: string;
+  pin: string;
+  unpin: string;
+  /** Shown when the trail holds no page. */
+  empty: string;
+  /** Follows the number of condensed entries: "… 5 earlier pages". */
+  earlier: string;
+}
+
+export interface TrailPage {
+  id: string;
+  title: string;
+}
+
+/** The navigation trail under the header: the pages the reader visited, carried in the URL fragment. */
+export interface TrailProps {
+  /** Prefix of the hrefs from the page to the site root, `../../` for instance; empty at the root. */
+  base: string;
+  /** The entity of the page, appended to the trail; absent on the home, index and to-do pages, which carry the trail without entering it. */
+  current?: TrailPage;
+  labels: TrailLabels;
+}
+
 export interface HeaderProps {
   siteTitle: string;
   homeHref: string;
   logo?: HeaderLogo;
   navigation: NavigationItem[];
   search?: SearchField;
+  /** Absent, the default theme renders the trail with its own English labels and records no page. */
+  trail?: TrailProps;
 }
 
 export interface FooterProps {
