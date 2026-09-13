@@ -1033,7 +1033,7 @@ As an integrator without Node.js on my machine or my pipeline, I want a turnkey 
 - The entry point is the `concordance` command: `docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build` builds the configuration repository mounted on `/wiki` and writes `dist/` into it; `lint`, `init` and `validate-config` work the same way.
 - The conversion cache can be mounted (`-v cache:/wiki/.concordance-cache`) and survives from one run to the next.
 - The image runs unprivileged, as a non-root user, and writes only under `/wiki/dist` and the cache.
-- A GitHub Actions pipeline builds the image, runs `build` on the golden corpus inside the container, compares the result with the build outside the container, then publishes; a GitLab and a GitHub pipeline example using the image is in `docs/guides/configuration.md`.
+- A GitHub Actions pipeline builds the image, runs `build` on the golden corpus inside the container, compares the result with the build outside the container, then publishes; a GitLab and a GitHub pipeline example using the image is in `docs/guides/pipelines.md`.
 - The image size is measured at every build and announced in the release summary.
 
 Depends on: L4-01, L8-03.

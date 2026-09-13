@@ -2,19 +2,22 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concordance-wiki.github.io/concordance/schemas/lock.schema.json",
   "title": "Concordance lock",
-  "description": "Schema of concordance.lock.yaml, the record of human decisions. Only rejected_terms is read by the first version.",
+  "description": "Schema of concordance.lock.yaml, the record of the human decisions the build applies over its inferences: promoted and rejected links, twin resources merged or kept apart, expressions the keyword discovery must not propose.",
   "type": "object",
   "additionalProperties": false,
   "required": ["version"],
   "properties": {
     "version": {
+      "description": "Version of this schema; always 1.",
       "const": 1
     },
     "links": {
+      "description": "Human decisions about inferred links: the promoted and the rejected ones. Recorded for the later versions; not read by this one.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "accepted": {
+          "description": "Inferred links promoted by a human; each becomes a lock_promoted link at the confidence the profile gives that method.",
           "type": "array",
           "items": {
             "type": "object",
@@ -22,19 +25,24 @@
             "required": ["from", "to", "rel"],
             "properties": {
               "from": {
+                "description": "Identifier of the source entity.",
                 "type": "string"
               },
               "to": {
+                "description": "Identifier of the target entity.",
                 "type": "string"
               },
               "rel": {
+                "description": "Relation slug of the profile.",
                 "type": "string",
                 "pattern": "^[a-z][a-z0-9_]*$"
               },
               "by": {
+                "description": "Who took the decision: a role or a pseudonym, never a real name.",
                 "type": "string"
               },
               "at": {
+                "description": "Date of the decision, ISO 8601 (YYYY-MM-DD).",
                 "type": "string",
                 "format": "date"
               }
@@ -42,6 +50,7 @@
           }
         },
         "rejected": {
+          "description": "Inferred links a human rejected; the build never produces them again.",
           "type": "array",
           "items": {
             "type": "object",
@@ -49,16 +58,20 @@
             "required": ["from", "to", "rel"],
             "properties": {
               "from": {
+                "description": "Identifier of the source entity.",
                 "type": "string"
               },
               "to": {
+                "description": "Identifier of the target entity.",
                 "type": "string"
               },
               "rel": {
+                "description": "Relation slug of the profile.",
                 "type": "string",
                 "pattern": "^[a-z][a-z0-9_]*$"
               },
               "reason": {
+                "description": "Why the link was rejected.",
                 "type": "string"
               }
             }
@@ -67,10 +80,12 @@
       }
     },
     "duplicates": {
+      "description": "Human decisions about twin resources, applied whatever the score of the pair.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "merged": {
+          "description": "Pairs of resource identifiers that merge into one entity whatever their score.",
           "type": "array",
           "items": {
             "type": "array",
@@ -82,6 +97,7 @@
           }
         },
         "separated": {
+          "description": "Pairs of resource identifiers that never merge and produce no W-DUP-CANDIDATE finding.",
           "type": "array",
           "items": {
             "type": "array",
@@ -95,6 +111,7 @@
       }
     },
     "rejected_terms": {
+      "description": "Expressions the keyword discovery never proposes again: no candidate, no W-TERM-UNDEFINED, no keyword page. Compared on the normalised form.",
       "type": "array",
       "items": {
         "type": "string",
