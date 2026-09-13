@@ -64,16 +64,16 @@ export const footer: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
   links: [{ label: "Forge", href: "https://forge.example/wiki" }],
-  mentionTool: true,
+  credit: true,
 };
 
-/** The footer with a project text and no links, the tool left unmentioned. */
+/** The footer with a project text and no links, the tool left uncredited. */
 export const footerWithText: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
   text: "Documentation of the build pipeline, kept by its maintainers.",
   links: [],
-  mentionTool: false,
+  credit: false,
 };
 
 export const neighbourhood: SlotProps["Neighbourhood"] = {

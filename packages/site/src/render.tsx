@@ -3,6 +3,7 @@ import { renderToString } from "preact-render-to-string";
 
 import type { IslandBundle } from "./islands/bundle.js";
 import { islandsUsed } from "./islands/island.js";
+import { MODE_SCRIPT } from "./mode.js";
 import type { HeadAssets, SlotName, SlotProps, TextDirection } from "./slots.js";
 import { ThemeContext } from "./theme/context.js";
 import type { ResolvedTheme } from "./theme/types.js";
@@ -14,8 +15,10 @@ export interface RenderOptions {
   /** BCP 47 tag of the page. */
   locale: string;
   title: string;
-  /** Stylesheet hrefs relative to the page. */
+  /** Stylesheet hrefs relative to the page, in loading order. */
   stylesheets: string[];
+  /** Href of the favicon relative to the page. */
+  favicon?: string;
   /** Every bundle the build produced; only those the page uses are loaded. */
   islands: IslandBundle[];
   /** Prefix of the bundle hrefs relative to the page, `../assets/` for instance. */
@@ -73,7 +76,13 @@ function scriptsFor(names: string[], options: RenderOptions): string[] {
 
 /** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
 export function renderDocument(body: JSX.Element, options: RenderOptions): string {
-  const head: HeadAssets = { stylesheets: options.stylesheets, modulePreloads: [], scripts: [] };
+  const head: HeadAssets = {
+    inlineScripts: [MODE_SCRIPT],
+    stylesheets: options.stylesheets,
+    modulePreloads: [],
+    scripts: [],
+    ...(options.favicon === undefined ? {} : { favicon: options.favicon }),
+  };
   const first = document(body, options, head);
   const islands = islandsUsed(first);
   // Components are pure: rendering again with the scripts known gives the same body.

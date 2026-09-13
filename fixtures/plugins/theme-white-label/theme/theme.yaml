@@ -1,0 +1,32 @@
+# The wiki of a team documenting its build pipeline: nothing in the interface names the tool.
+name: Pipeline notes
+logo: mark.svg
+favicon: favicon.svg
+font:
+  display: Pipeline Serif
+  ui: Pipeline Sans
+  mono: Pipeline Mono
+radius: 2
+default_mode: system
+light:
+  bg: "#F4F7FB"
+  surface: "#FFFFFF"
+  border: "#D5DCE6"
+  ink: "#101820"
+  muted: "#4A5566"
+  accent: "#1F5FA8"
+dark:
+  bg: "#0F1419"
+  surface: "#171E26"
+  border: "#2A3441"
+  ink: "#E6EBF2"
+  muted: "#9AA7B8"
+  accent: "#8FB8F0"
+footer:
+  text: Notes on the build pipeline, kept by the maintainers of the wiki.
+  links:
+    - label: Pipeline repository
+      url: https://forge.example/pipeline
+  credit: false
+stylesheet: site.css
+assets: assets

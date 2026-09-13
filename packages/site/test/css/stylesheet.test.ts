@@ -4,6 +4,7 @@ import {
   CSS_LAYERS,
   baseStylesheet,
   componentsStylesheet,
+  projectStylesheet,
   siteStylesheet,
 } from "../../src/css/stylesheet.js";
 import type { ThemeConfig } from "../../src/css/theme-config.js";
@@ -29,19 +30,15 @@ const theme: ThemeConfig = {
 };
 
 describe("siteStylesheet", () => {
-  it("declares the four cascade layers first, then fills them in that order", () => {
-    const css = siteStylesheet({ theme, project: ".site-header { background: red; }" });
+  it("declares the four cascade layers first, then fills the tool's three in that order", () => {
+    const css = siteStylesheet({ theme });
     expect(CSS_LAYERS).toEqual(["tokens", "base", "components", "project"]);
     expect(css.startsWith("@layer tokens, base, components, project;\n")).toBe(true);
-    const positions = CSS_LAYERS.map((layer) => css.indexOf(`@layer ${layer} {`));
+    const own = CSS_LAYERS.slice(0, 3);
+    const positions = own.map((layer) => css.indexOf(`@layer ${layer} {`));
     expect(positions.every((position) => position > 0)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
-  });
-
-  it("puts the project stylesheet in the project layer, and leaves the layer empty without one", () => {
-    const css = siteStylesheet({ theme, project: ".site-header { background: red; }\n" });
-    expect(css).toContain("@layer project {\n.site-header { background: red; }\n}\n");
-    expect(siteStylesheet({ theme })).not.toContain("@layer project {");
+    expect(css).not.toContain("@layer project {");
   });
 
   it("carries the colour scheme, the reduced-motion query and the island element rule", () => {
@@ -51,6 +48,14 @@ describe("siteStylesheet", () => {
     expect(css).toContain("concordance-island {\n  display: block;\n}");
     expect(css).toContain(".skip-link");
     expect(css).toContain(":focus-visible");
+  });
+
+  it("wraps the project stylesheet in the project layer, declared last so that it wins every cascade", () => {
+    expect(projectStylesheet(".site-header { background: red; }\n")).toBe(
+      "@layer project {\n.site-header { background: red; }\n}\n",
+    );
+    const layers = siteStylesheet({ theme }).split("\n", 1)[0];
+    expect(layers?.endsWith("project;")).toBe(true);
   });
 
   it("reads the base and components layers from the package assets", () => {

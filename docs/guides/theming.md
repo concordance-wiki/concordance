@@ -6,9 +6,9 @@ The generated site is a set of named slots rendered at build by Preact component
 
 | Slot | Renders | Composes |
 |---|---|---|
-| `Shell` | the document: `<html lang dir>`, the head assets, the skip link, the body | everything |
-| `Header` | the site title linking home, the logo, the search field, the navigation with counts | — |
-| `Footer` | the version, the build instant, the project text and links, the optional mention of the tool | — |
+| `Shell` | the document: `<html lang dir>`, the head assets (favicon, the mode script, stylesheets, bundles), the skip link, the body | everything |
+| `Header` | the site title linking home, the logo, the search field, the navigation with counts, the mode switch | — |
+| `Footer` | the version, the build instant, the project text and links, the optional credit of the tool | — |
 | `Home` | the title, the statistics, the search field with shortcuts, the three entry points | — |
 | `EntityPage` | badge and highlights, title, rendered markdown, side panel, sources | `Neighbourhood`, `MentionsPanel` |
 | `KeywordPage` | the banner, the three counts, passages by file, companions, similar forms | — |
@@ -26,9 +26,9 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 
 | Slot | Props |
 |---|---|
-| `Shell` | `locale`, `direction` (`ltr` or `rtl`), `title`, `head: { stylesheets, modulePreloads, scripts }`, `children` |
-| `Header` | `siteTitle`, `homeHref`, `logo?: { src, alt }`, `navigation: { label, href, count? }[]`, `search?: { action, placeholder }` |
-| `Footer` | `version`, `generatedAt`, `text?`, `links: { label, href }[]`, `mentionTool` |
+| `Shell` | `locale`, `direction` (`ltr` or `rtl`), `title`, `head: { inlineScripts?, stylesheets, modulePreloads, scripts, favicon? }`, `children` |
+| `Header` | `siteTitle`, `homeHref`, `logo?: { src, alt } \| { svg }`, `navigation: { label, href, count? }[]`, `search?: { action, placeholder }` |
+| `Footer` | `version`, `generatedAt`, `text?`, `links: { label, href }[]`, `credit` |
 | `Home` | `title`, `search?`, `shortcuts: { label, href }[]`, `stats: { sources, files, builtAt }`, `entries: { kind: "tree" \| "index" \| "recent", title, href, items: { label, href, count?, date?, stale? }[] }[]` |
 | `EntityPage` | `entity: { id, type, typeLabel, title, locale }`, `highlights: Attribute[]` (at most five shown), `sections: { id, heading?, html }[]`, `attributes: Attribute[]`, `neighbours` (the `Neighbourhood` props), `mentions` (the `MentionsPanel` props), `sources: { path, editHref? }[]` |
 | `KeywordPage` | `entity: { id, title, locale }`, `counts: { occurrences, files, sources }`, `passages: { file: { label, href }, passages: { context, line, href }[] }[]`, `companions: { label, href?, weight }[]` (weight from 1 to 5), `similar: { label, href }[]` |
@@ -39,6 +39,37 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count }[]` (occurrences) |
 
 An `Attribute` is `{ name, label, values: { text, href? }[] }`. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.
+
+## White label
+
+Everything a reader sees of the organisation comes from `theme.yaml`, validated against [`theme.schema.json`](../../packages/core/schemas/theme.schema.json); `loadTheme(fileSystem, path)` in `@concordance-wiki/site` reads it, reports a faulty key by its path the way `validate-config` does (`light.accent: value does not match the expected format`), resolves every path against the file and returns a `ResolvedThemeConfig` that the renderer consumes through `chromeOf` and `writeThemeAssets`. The build reads the file `project.theme` names in `concordance.yaml`, or `theme.yaml` next to it; a plugin theme ships one as its `tokens`. The [configuration guide](configuration.md#themeyaml) lists every key; this is what each one changes in the site.
+
+| Key | In the site |
+|---|---|
+| `name` | the site title in the header, linking home, and the suffix of every `<title>` |
+| `logo` | before the name in the header. An SVG is inlined, so that `currentColor` and `var(--color-accent)` inside it follow the theme; it is marked `aria-hidden` because the name follows it as text. Any other image is copied under `assets/` and linked with an empty `alt`, for the same reason |
+| `favicon` | copied under `assets/` and linked with `<link rel="icon">`, the type inferred from the extension |
+| `font` | the families of `--font-display`, `--font-ui` and `--font-mono`, each followed by the platform fallbacks. A name is not a download: the project ships its font files itself under `assets` and binds them with `@font-face` rules in its `stylesheet`; the default theme emits no request to any other host, and a test checks that no page or stylesheet references one |
+| `radius` | `--radius`, in pixels; corners of panels, fields and badges derive from it |
+| `light`, `dark` | the six colours of each scheme, `--color-bg`, `--color-surface`, `--color-border`, `--color-ink`, `--color-muted`, `--color-accent`; body text must reach 4.5:1 over `bg` and `surface`, headings 3:1 |
+| `default_mode` | which palette the root carries: `system` (default) follows `prefers-color-scheme`, `light` or `dark` starts there; the reader's own choice wins in every case |
+| `footer.text`, `footer.links` | a paragraph and a list of links above the build line |
+| `footer.credit` | `true` shows "Built with Concordance" as a plain link to the repository, in the footer; `false`, the default, shows nothing. Nothing else in the interface names the tool: a project whose name is its own carries no visible mention of it, and a test renders the gallery with the white-label fixture and asserts it. Technical identifiers stay (the `concordance-island` element, the storage key of the mode switch): a reader never sees them |
+| `stylesheet` | copied under `assets/project.css`, wrapped in the `project` layer, and linked after the tool's own stylesheet on every page |
+| `assets` | a folder copied as-is under `assets/`, for fonts and icons the stylesheet references by relative URL |
+| `labels` | the message overrides of the [configuration guide](configuration.md#labels) |
+
+The fixture under `fixtures/plugins/theme-white-label` is a complete example: another name, an inline SVG logo, a blue palette, a radius of 2, a stylesheet with `@font-face` rules bound to local fonts and an icons folder, `credit: false`. `concordance gallery --theme ./fixtures/plugins/theme-white-label/index.mjs` renders every slot with it.
+
+### Modes
+
+`color-scheme: light dark` and the `prefers-color-scheme` query follow the system preference. The header carries a mode switch, a button cycling automatic, light and dark, which names the current scheme in words and is pressed (`aria-pressed="true"`) when the reader forced one. The choice is stored in `localStorage` under `concordance-mode` and applied as `data-mode="light"` or `data-mode="dark"` on the root element; the `tokens` layer answers that attribute with the matching palette and `color-scheme`, so that form controls and scrollbars follow. Removing the choice returns to automatic, where `default_mode` and the system preference apply.
+
+To apply a remembered choice before the first paint, every page carries one inline script in its head, before the stylesheets: `MODE_SCRIPT` in `@concordance-wiki/site`, a constant under 300 bytes that reads the key and sets the attribute inside a `try`. It is the only inline script the site emits and never changes from one build to the next, so a content security policy can allow it by hash. The switch itself is the `mode-switch` island: served hidden, it is revealed and wired by a bundle of a few hundred bytes without any framework; without JavaScript, no dead control shows and the theme's default and the system preference apply.
+
+### The accent carries no information on its own
+
+`--color-accent` is used in a known set of places, and each of them carries a cue that is not a colour: links and the disclosure of the remaining mentions are underlined; the focus ring is an offset outline; a link written in a note is an underlined anchor while a recognised word is bold, and the legend says so in words; the banner of a keyword page and the headings of the mentions panel are text; the mode switch names the current scheme. A test lists the rules of the default stylesheets that use the accent and checks the cue of each one, so that a new use has to be added to the list with its cue. A theme author keeps the rule: whatever the accent means in a component, the same meaning is readable without it.
 
 ## Overriding a slot from a plugin
 
@@ -66,11 +97,13 @@ export default function Footer({ version, generatedAt }) {
 
 A component may be written in TSX and compiled by the plugin; the site only needs a function. The default components are semantic HTML without inline styles: landmarks (`header`, `nav`, `main`, `aside`, `footer`), one `h1` per page and headings in order, a skip link to `#main`, `lang` and `dir` on the document. An override keeps those properties so that the accessibility audit still passes. The fixture under `fixtures/plugins/theme-example` overrides the footer and is rendered by the site tests; the [plugins guide](plugins.md) shows the manifest.
 
+The `tokens` of a theme contribution is a `theme.yaml` like the project's; `resolveTheme` loads the one of the last theme when its loader can locate the packages (`rootOf`), and its stylesheet and assets come with it: `stylesheet` and `assets` of the contribution are read relative to the package, the `stylesheet` and `assets` the file itself names relative to the file, the file's stylesheet winning when both name one and both asset folders being copied. The project's own `theme.yaml` wins over any plugin's.
+
 ## Islands
 
-Only interactive components are hydrated. An island is created with `island(name, Component)`: the server renders the component's markup inside `<concordance-island data-island="name" data-props="…">`, the props serialised as JSON and escaped like any attribute. A hydration entry per island reads the props back and mounts the same component with `hydrate`; `bundleIslands` produces one minified ES module per entry with esbuild, named `<name>-<hash>.js` after its content, so that two builds give the same bytes. A page loads only the bundles of the islands it contains, through `<link rel="modulepreload">` and `<script type="module" defer>`; a page without an island carries no script at all.
+Only interactive components are hydrated. An island is created with `island(name, Component)`: the server renders the component's markup inside `<concordance-island data-island="name" data-props="…">`, the props serialised as JSON and escaped like any attribute. A hydration entry per island reads the props back and mounts the same component with `hydrate`; `bundleIslands` produces one minified ES module per entry with esbuild, named `<name>-<hash>.js` after its content, so that two builds give the same bytes. A page loads only the bundles of the islands it contains, through `<link rel="modulepreload">` and `<script type="module" defer>`; apart from the mode script of the head, a page carries no other script.
 
-The mentions panel is the only island of the default theme: the first `initial` mentions are static, and the remaining ones are rendered inside a `<details>` element that the island replaces once it mounts with a disclosure button carrying `aria-expanded` and `aria-controls` towards the list it shows and hides. Without JavaScript, everything stays readable and every link works.
+The default theme has two islands. The mentions panel: the first `initial` mentions are static, and the remaining ones are rendered inside a `<details>` element that the island replaces once it mounts with a disclosure button carrying `aria-expanded` and `aria-controls` towards the list it shows and hides. The mode switch of the header, described under [Modes](#modes), whose entry is plain JavaScript and loads no framework. Without JavaScript, everything stays readable and every link works.
 
 ## Stylesheet
 
@@ -87,13 +120,13 @@ The site ships one stylesheet in four cascade layers, declared first so that the
 | `components` | one block per slot of the default theme, selected by class names |
 | `project` | the content of the project's `stylesheet:`, which wins every cascade by construction |
 
-`color-scheme: light dark` follows the system preference; the dark palette also applies under `data-mode="dark"` on the root, which the mode switch sets and remembers, and a `default_mode` of `light` or `dark` in `theme.yaml` starts with that palette. Properties are logical (`margin-inline`, `inset-block-start`), so a right-to-left locale needs no second stylesheet. A project overrides anything by writing plain CSS in its stylesheet; a theme plugin's `stylesheet` enters the same layer.
+`siteStylesheet` writes the first three layers to `assets/site.css`; `projectStylesheet` wraps the project's file in the fourth and writes it to `assets/project.css`, linked after the first on every page. The layer order is declared at the top of the first file, so the project's rules win whatever their specificity and whichever file loads first. `color-scheme: light dark` follows the system preference; the dark palette also applies under `data-mode="dark"` on the root, which the mode switch sets and remembers, and a `default_mode` of `light` or `dark` in `theme.yaml` starts with that palette. Properties are logical (`margin-inline`, `inset-block-start`), so a right-to-left locale needs no second stylesheet. A project overrides anything by writing plain CSS in its stylesheet; a theme plugin's `stylesheet` enters the same layer.
 
 ## Gallery
 
-`concordance gallery [--output dir] [--theme plugin] [--config file]` renders every slot with fixture view models into a static page set, so that a theme is styled and checked without building a corpus. The output folder (`./gallery` by default) receives `index.html`, one page per slot and state, the stylesheet under `assets/site.css` and the island bundles next to it; open `index.html` in a browser. The index lists the eleven slots in order and, for each, who renders it (the default theme, or the plugin and theme that override it) and one link per state: the default state and, where meaningful, an empty one (no mention, no neighbour, no result, nothing to do), the mentions panel with more than twenty mentions so that the island is served, the home page in a right-to-left locale, the header with a logo, the footer with a project text. The chrome slots are seen on every page; the two panels are framed under a heading of their own. The pages use a neutral palette and the labels of the default theme; the stylesheet follows the system colour scheme, and setting `data-mode="dark"` on the root element of a page previews the dark palette.
+`concordance gallery [--output dir] [--theme plugin] [--config file]` renders every slot with fixture view models into a static page set, so that a theme is styled and checked without building a corpus. The output folder (`./gallery` by default) receives `index.html`, one page per slot and state, the stylesheet under `assets/site.css` and the island bundles next to it; open `index.html` in a browser. The index lists the eleven slots in order and, for each, who renders it (the default theme, or the plugin and theme that override it) and one link per state: the default state and, where meaningful, an empty one (no mention, no neighbour, no result, nothing to do), the mentions panel with more than twenty mentions so that the island is served, the home page in a right-to-left locale, the header with a logo, the footer with a project text. The chrome slots are seen on every page; the two panels are framed under a heading of their own. The pages use a neutral palette and the labels of the default theme; the stylesheet follows the system colour scheme, the switch in the header forces one, and setting `data-mode="dark"` on the root element of a page previews the dark palette without JavaScript.
 
-The theme comes from the registry the build uses: `--theme` names a plugin package, or the path of its module when it starts with `.` or `/`, and may be repeated, the last one winning a slot; without it, the `plugins:` of `concordance.yaml` (`--config`, or the file in the current directory when it exists) apply, and without any the default theme renders alone. A plugin loaded from a path still needs its package resolvable by name, as in a build. The fixtures are exported by `@concordance-wiki/site` as `galleryFixtures` and the page set as `galleryPages`; `buildGallery` writes the pages through any file system and returns a report with every page, its size and its accessibility findings.
+The theme comes from the registry the build uses: `--theme` names a plugin package, or the path of its module when it starts with `.` or `/`, and may be repeated, the last one winning a slot; without it, the `plugins:` of `concordance.yaml` (`--config`, or the file in the current directory when it exists) apply, and without any the default theme renders alone. The `theme.yaml` of the project, named by `project.theme` or found next to the configuration, replaces the neutral palette and the fixture chrome with the project's name, logo, favicon, palette, stylesheet, footer and credit; without one, the `tokens` of the last plugin theme do the same, and the summary names the file in use. An invalid theme file stops the command with exit code 1 and one line per faulty key; a named file that does not exist, with exit code 2. A plugin loaded from a path still needs its package resolvable by name, as in a build. The fixtures are exported by `@concordance-wiki/site` as `galleryFixtures` and the page set as `galleryPages`; `buildGallery` writes the pages through any file system and returns a report with every page, its size and its accessibility findings.
 
 The command measures every page against the budget and runs a static accessibility checker on each one, `checkAccessibility` in the site package, with no dependency: the document carries `lang`; exactly one `h1`, heading levels never skipping; every image an `alt`; every form control a label, an `aria-label`, an `aria-labelledby` or a text; a `main` landmark, once, with a `nav`, a `header` and a `footer`; every link a name; unique `id`s; the first focusable element a skip link to an existing fragment; and the four ARIA rules listed under [Accessibility](#accessibility). A page over budget or a finding fails the command with exit code 1 and one line per problem on stderr. The command also runs `checkContrast` on the palette of the stylesheet and prints one `warning: contrast:` line per pair of colours under its minimum ratio; a warning does not fail the command. The site tests run the checker on every gallery page of the default theme, and continuous integration builds the gallery into `reports/gallery` and publishes it as the `gallery` artifact of every run.
 

@@ -1,0 +1,12 @@
+{
+  "name": "@concordance-wiki/fixture-plugin-theme-white-label",
+  "version": "0.0.0",
+  "description": "White-label theme plugin: another name, logo, palette, radius and stylesheet, no credit; used by the site and gallery tests.",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "exports": "./index.mjs",
+  "dependencies": {
+    "@concordance-wiki/core": "workspace:*"
+  }
+}

@@ -30,9 +30,13 @@ export type TextDirection = "ltr" | "rtl";
 
 /** What the document head loads: hrefs relative to the page. */
 export interface HeadAssets {
+  /** Inline scripts written before the stylesheets; the renderer emits one, which applies the remembered colour scheme. */
+  inlineScripts?: string[];
   stylesheets: string[];
   modulePreloads: string[];
   scripts: string[];
+  /** Href of the favicon; `type` is inferred from the extension. */
+  favicon?: string;
 }
 
 export interface ShellProps {
@@ -55,10 +59,13 @@ export interface NavigationItem extends Link {
   count?: number;
 }
 
+/** The logo of the header: an image by href, or the markup of an SVG inlined so that it can follow the current colour. */
+export type HeaderLogo = { src: string; alt: string } | { svg: string };
+
 export interface HeaderProps {
   siteTitle: string;
   homeHref: string;
-  logo?: { src: string; alt: string };
+  logo?: HeaderLogo;
   navigation: NavigationItem[];
   search?: SearchField;
 }
@@ -70,8 +77,8 @@ export interface FooterProps {
   generatedAt: string;
   text?: string;
   links: Link[];
-  /** Whether the discreet mention of the tool is shown. */
-  mentionTool: boolean;
+  /** Whether the discreet credit of the tool, a link to its repository, is shown; nothing else names it. */
+  credit: boolean;
 }
 
 export interface HomeStats {

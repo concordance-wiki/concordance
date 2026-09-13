@@ -43,6 +43,17 @@ describe("validateConfig against the published schema", () => {
     ).toEqual(["project.colour"]);
   });
 
+  it("names a check key that is not an identifier, at the key rather than at the checks block", () => {
+    expect(issuesOf({ ...minimal, checks: { stale: { enabled: false } } })).toEqual([
+      {
+        path: "checks.stale",
+        message: "key is not allowed",
+        severity: "error",
+        expected: "a value matching ^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$",
+      },
+    ]);
+  });
+
   it("reports the path of a missing required key", () => {
     expect(issuesOf({ version: 1, project: {}, sources: [{ name: "a", path: "." }] })).toEqual([
       { path: "project.name", message: "required key is missing", severity: "error" },

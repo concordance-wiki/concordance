@@ -43,7 +43,10 @@ describe("A concordance gallery command renders every slot with fixture view mod
         ...report.budget.islands.map((island) => `assets/${island.file}`),
       ].sort(),
     );
-    expect(report.budget.islands.map((island) => island.name)).toEqual(["mentions-panel"]);
+    expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "mentions-panel",
+      "mode-switch",
+    ]);
     expect(fileSystem.readText("/out/assets/site.css")).toContain(
       "@layer tokens, base, components, project;",
     );
@@ -79,7 +82,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
   it("shows the states: an empty mentions list, more than twenty mentions behind the island, a right-to-left page", () => {
     const empty = fileSystem.readText("/out/mentions-panel-empty.html");
     expect(empty).toContain('<p class="empty">No note links here.</p>');
-    expect(empty).not.toContain("<script");
+    expect(empty).not.toContain("mentions-panel-");
     const island = fileSystem.readText("/out/mentions-panel-island.html");
     expect(count(island, '<li class="mention')).toBe(25);
     expect(island).toContain('<concordance-island data-island="mentions-panel"');
@@ -112,6 +115,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(report.summary).toEqual([
       `gallery: ${String(galleryPages.length + 1)} pages written to /out`,
       expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
+      expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
       expect.stringMatching(
         new RegExp(
           `^pages: ${String(galleryPages.length + 1)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`,
@@ -189,12 +193,16 @@ describe("The gallery is built in CI and its pages pass the accessibility checks
     const fileSystem = memoryFileSystem();
     const report = await buildGallery({
       output: "/out",
-      theme: defaultTheme,
-      fileSystem,
-      tokens: {
-        ...galleryTheme,
-        light: { ...galleryTheme.light, muted: "#9A9A9A" },
+      theme: {
+        ...defaultTheme,
+        config: {
+          config: { ...galleryTheme, light: { ...galleryTheme.light, muted: "#9A9A9A" } },
+          file: "/theme.yaml",
+          fileSystem,
+          assets: [],
+        },
       },
+      fileSystem,
     });
     expect(report.contrast.map((finding) => finding.message)).toEqual([
       "light muted text: muted on bg is 2.58:1, below 4.5:1",

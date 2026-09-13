@@ -111,7 +111,7 @@ A reader receives a `ReaderInput`: the `path` of the file relative to its source
 
 #### Themes
 
-A theme names a `theme.yaml`, an optional stylesheet and assets folder, and `components`: a map from slot name to the path of a module, relative to the plugin package, whose default export is a Preact component receiving the view model of that slot. Slots the theme does not name keep the default component; when several plugins override the same slot, the last one declared wins. Slot names and view models are in the [theming guide](theming.md).
+A theme names a `theme.yaml` as `tokens`, an optional stylesheet and assets folder, and `components`: a map from slot name to the path of a module, relative to the plugin package, whose default export is a Preact component receiving the view model of that slot. Slots the theme does not name keep the default component; when several plugins override the same slot, the last one declared wins, and the `tokens` of the last theme apply unless the project has a `theme.yaml` of its own. Slot names, view models and every key of `theme.yaml` are in the [theming guide](theming.md).
 
 ```js
 import { definePlugin } from "@concordance-wiki/core";

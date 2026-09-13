@@ -58,8 +58,9 @@ export function GalleryIndex({ pages, overrides }: GalleryIndexProps): JSX.Eleme
         default theme.
       </p>
       <p>
-        Dark scheme: the stylesheet follows the system preference; to preview the dark palette on a
-        page, set <code>data-mode="dark"</code> on its root element.
+        Dark scheme: the stylesheet follows the system preference, and the switch in the header
+        forces a scheme and remembers it; without JavaScript, set <code>data-mode="dark"</code> on
+        the root element of a page to preview the dark palette.
       </p>
       {SLOT_NAMES.map((name) => (
         <Slot

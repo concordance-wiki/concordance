@@ -24,7 +24,10 @@ const BLOCKING: ReadonlySet<ImpactValue> = new Set(["serious", "critical"]);
  */
 const NEEDS_LAYOUT = ["color-contrast", "color-contrast-enhanced", "link-in-text-block"];
 
-const islands = [{ name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 }];
+const islands = [
+  { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
+  { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+];
 
 /** Loads a rendered page into the test document, root attributes included, so that axe sees the page as served. */
 function load(html: string): void {

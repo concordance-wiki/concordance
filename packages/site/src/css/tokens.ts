@@ -1,4 +1,4 @@
-import type { ThemeConfig, ThemePalette } from "./theme-config.js";
+import type { ThemeConfig, ThemeMode, ThemePalette } from "./theme-config.js";
 
 const DEFAULT_RADIUS = 8;
 
@@ -29,6 +29,14 @@ function block(selector: string, lines: string[]): string {
   return [`${selector} {`, ...lines, "}"].join("\n");
 }
 
+/** The palette of a mode forced through `data-mode`, with the matching `color-scheme` for form controls. */
+function forced(mode: Exclude<ThemeMode, "system">, palette: ThemePalette): string {
+  return block(`:root[data-mode="${mode}"]`, [
+    `  color-scheme: ${mode};`,
+    ...paletteLines(palette),
+  ]);
+}
+
 /**
  * Custom properties of a theme: fonts, radius, spacing and the two palettes.
  * The default mode decides which palette the root carries; the other answers the system preference
@@ -55,10 +63,11 @@ export function tokensStylesheet(theme: ThemeConfig): string {
       ]),
     );
   }
-  if (mode === "dark") {
-    blocks.push(block(':root[data-mode="light"]', paletteLines(theme.light)));
-  } else {
-    blocks.push(block(':root[data-mode="dark"]', paletteLines(theme.dark)));
+  if (mode !== "light") {
+    blocks.push(forced("light", theme.light));
+  }
+  if (mode !== "dark") {
+    blocks.push(forced("dark", theme.dark));
   }
   return `${blocks.join("\n")}\n`;
 }

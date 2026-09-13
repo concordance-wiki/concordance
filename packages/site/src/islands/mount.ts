@@ -1,6 +1,6 @@
 import { h, type ComponentType, type JSX } from "preact";
 
-import { ISLAND_ELEMENT } from "./island.js";
+import { ISLAND_ELEMENT } from "./element.js";
 
 /** What a hydration entry needs from an island element: the serialised props. */
 export interface IslandElement {

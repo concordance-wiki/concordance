@@ -13,7 +13,7 @@ The mark reproduces a printed concordance: lines of context of unequal length, a
 | `favicon.svg` | favicon, switches between light and dark automatically |
 | `avatar-github.svg` | organisation avatar, 460 px, margin for the circular crop |
 | `concordance-header.svg` | five-line variant, README and documentation headers only |
-| `theme.yaml` | brand tokens, in the format of `schemas/theme.schema.json` |
+| `theme.yaml` | brand tokens, in the format of `schemas/theme.schema.json`; its `logo` and `favicon` paths are relative to this folder, and the site inlines the mark |
 
 ## Rules
 

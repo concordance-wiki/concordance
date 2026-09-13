@@ -3,21 +3,31 @@ import { describe, expect, it } from "vitest";
 import * as entry from "../src/index.js";
 
 describe("@concordance-wiki/site", () => {
-  it("exposes the slots, the default theme, the islands, the renderer, the stylesheet, the budget, the gallery, the accessibility checker and the contrast check", () => {
+  it("exposes the slots, the default theme, the islands, the renderer, the stylesheet, the theme loader, the budget, the gallery, the accessibility checker and the contrast check", () => {
     expect(Object.keys(entry).sort()).toEqual([
       "A11Y_RULES",
       "CONTRAST_MINIMUMS",
       "CSS_LAYERS",
       "GALLERY_PAGE_BUDGET",
       "ISLAND_ELEMENT",
+      "MODES",
+      "MODE_SCRIPT",
+      "MODE_STORAGE_KEY",
+      "MODE_SWITCH_ISLAND",
+      "ModeSwitch",
+      "PROJECT_STYLESHEET",
+      "REPOSITORY_URL",
+      "SITE_STYLESHEET",
       "SLOT_NAMES",
       "ThemeContext",
       "ThemeResolutionError",
+      "applyChoice",
       "baseStylesheet",
       "buildGallery",
       "bundleIslands",
       "checkAccessibility",
       "checkContrast",
+      "chromeOf",
       "componentsStylesheet",
       "contrastPairs",
       "contrastRatio",
@@ -33,9 +43,14 @@ describe("@concordance-wiki/site", () => {
       "isSlotName",
       "island",
       "islandsUsed",
+      "loadTheme",
       "measureBudget",
       "mountIslands",
+      "nextChoice",
+      "packageDirectoryOf",
       "packageRootOf",
+      "projectStylesheet",
+      "readChoice",
       "relativeLuminance",
       "renderDocument",
       "renderPage",
@@ -44,6 +59,8 @@ describe("@concordance-wiki/site", () => {
       "siteStylesheet",
       "tokensStylesheet",
       "useSlot",
+      "wireModeSwitch",
+      "writeThemeAssets",
     ]);
   });
 });

@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
 
 /** URL of the folder holding the nearest `package.json` above a module, with a trailing slash. */
@@ -26,4 +28,14 @@ export async function importThemeModule(
   const module: unknown = await import(/* @vite-ignore */ new URL(path, root).href);
   // A module namespace is always an object; a missing default export reads as undefined.
   return (module as { default?: unknown }).default;
+}
+
+/** Absolute folder of a plugin package resolvable by name, for the files a theme contribution names. */
+export function packageDirectoryOf(
+  plugin: string,
+  fileSystem: FileSystem = nodeFileSystem,
+): string {
+  return fileURLToPath(
+    packageRootOf(import.meta.resolve(plugin), (path) => fileSystem.exists(path)),
+  );
 }

@@ -69,6 +69,12 @@ importers:
         specifier: 10.29.8
         version: 10.29.8(preact-render-to-string@6.7.0)
 
+  fixtures/plugins/theme-white-label:
+    dependencies:
+      '@concordance-wiki/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
+
   packages/checks:
     dependencies:
       '@concordance-wiki/core':
@@ -245,6 +251,9 @@ importers:
       '@concordance-wiki/core':
         specifier: workspace:*
         version: link:../core
+      '@concordance-wiki/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@concordance-wiki/profile':
         specifier: workspace:*
         version: link:../profile
@@ -261,6 +270,9 @@ importers:
       '@concordance-wiki/fixture-plugin-theme-example':
         specifier: workspace:*
         version: link:../../fixtures/plugins/theme-example
+      '@concordance-wiki/fixture-plugin-theme-white-label':
+        specifier: workspace:*
+        version: link:../../fixtures/plugins/theme-white-label
       axe-core:
         specifier: 4.13.0
         version: 4.13.0

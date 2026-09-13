@@ -12,12 +12,15 @@
       "minLength": 1
     },
     "logo": {
+      "description": "Path of the logo shown before the name in the header, relative to this file; an SVG is inlined so that it can follow the current colour.",
       "type": "string"
     },
     "favicon": {
+      "description": "Path of the favicon, relative to this file; copied under assets/.",
       "type": "string"
     },
     "font": {
+      "description": "Font families by role. A project ships the font files itself, under assets, with @font-face rules in its stylesheet: the site never loads a font from a third-party host.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -125,13 +128,19 @@
             }
           }
         },
-        "mention_tool": {
+        "credit": {
+          "description": "Whether the footer credits the tool with a discreet link to its repository; nothing else in the interface names it.",
           "type": "boolean",
           "default": false
         }
       }
     },
     "stylesheet": {
+      "description": "Path of a stylesheet loaded after the tool's own, in the project cascade layer, relative to this file.",
+      "type": "string"
+    },
+    "assets": {
+      "description": "Path of a folder copied as-is under assets/ of the site (fonts, icons), relative to this file.",
       "type": "string"
     },
     "labels": {

@@ -1,19 +1,26 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 
 import {
   commandExists,
+  formatIssue,
   importPlugin,
   loadPlugins,
+  nodeFileSystem,
+  type Config,
+  type FileSystem,
   type PluginConfig,
   type PluginLoaderDependencies,
 } from "@concordance-wiki/core";
 import {
   buildGallery,
   importThemeModule,
+  loadTheme,
+  packageDirectoryOf,
   resolveTheme,
   type ResolvedTheme,
+  type ResolvedThemeConfig,
   type ThemeLoader,
 } from "@concordance-wiki/site";
 
@@ -22,16 +29,23 @@ import { formatFinding } from "./build.js";
 import { defaultConfigFile, loadConfigFile } from "./validate-config.js";
 
 export const defaultGalleryDirectory = "./gallery";
+export const defaultThemeFile = "theme.yaml";
 
 /** Module loading, injected so that tests resolve themes without touching the package graph. */
 export interface GalleryDependencies extends PluginLoaderDependencies {
   loadTheme: ThemeLoader["load"];
+  /** Absolute folder of a plugin package, for the `tokens` of its themes; absent, plugin tokens are left aside. */
+  rootOf?: ThemeLoader["rootOf"];
+  /** Reads the files of plugin packages, which live where their modules are imported from. */
+  pluginFiles?: FileSystem;
 }
 
 const nodeDependencies: GalleryDependencies = {
   load: importPlugin,
   commandAvailable: commandExists,
   loadTheme: importThemeModule,
+  rootOf: (plugin) => packageDirectoryOf(plugin),
+  pluginFiles: nodeFileSystem,
 };
 
 /** A `--theme` value is a package name, or a path to the plugin module when it starts with `.` or `/`. */
@@ -41,11 +55,40 @@ function specifier(theme: string, cwd: string): string {
     : theme;
 }
 
-/** The plugins of the configuration; none when no configuration was asked for and none is found. */
-function pluginsFromConfig(
+interface ConfiguredGallery {
+  plugins: PluginConfig[];
+  /** The project's `theme.yaml`, when the configuration names one or one sits next to it. */
+  theme?: ResolvedThemeConfig;
+}
+
+/** The project's theme file: `project.theme` resolved against the configuration, else `theme.yaml` next to it when present. */
+function projectTheme(
+  io: CommandIo,
+  file: string,
+  config: Config,
+): { theme?: ResolvedThemeConfig } | { exit: ExitCode } {
+  const named = config.project.theme;
+  const path = resolve(dirname(file), named ?? defaultThemeFile);
+  if (named === undefined && !io.fs.exists(path)) {
+    return {};
+  }
+  const loaded = loadTheme(io.fs, path);
+  if (loaded.ok) {
+    return { theme: loaded.theme };
+  }
+  for (const issue of loaded.issues) {
+    io.err(formatIssue(issue, path));
+  }
+  const missing = loaded.issues.some((issue) => issue.message === "theme file not found");
+  io.err(`gallery stopped: fix ${path} first`);
+  return { exit: missing ? exitCodes.failure : exitCodes.invalid };
+}
+
+/** The plugins and theme of the configuration; none when no configuration was asked for and none is found. */
+function fromConfig(
   io: CommandIo,
   configOption: string | undefined,
-): { plugins: PluginConfig[] } | { exit: ExitCode } {
+): ConfiguredGallery | { exit: ExitCode } {
   if (configOption === undefined && !io.fs.exists(resolve(io.cwd, defaultConfigFile))) {
     return { plugins: [] };
   }
@@ -57,7 +100,11 @@ function pluginsFromConfig(
     io.err("gallery stopped: fix the configuration first");
     return { exit: exitCodes.invalid };
   }
-  return { plugins: loaded.validation.config.plugins ?? [] };
+  const theme = projectTheme(io, loaded.file, loaded.validation.config);
+  if ("exit" in theme) {
+    return theme;
+  }
+  return { plugins: loaded.validation.config.plugins ?? [], ...theme };
 }
 
 async function themeOf(
@@ -72,10 +119,17 @@ async function themeOf(
   for (const finding of findings) {
     io.err(formatFinding(finding));
   }
-  return resolveTheme(registry, { load: deps.loadTheme });
+  return resolveTheme(registry, {
+    load: deps.loadTheme,
+    ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
+    ...(deps.pluginFiles === undefined ? {} : { fileSystem: deps.pluginFiles }),
+  });
 }
 
-/** Renders every slot with fixture data through the theme of `--theme` or of the configuration. */
+/**
+ * Renders every slot with fixture data through the theme of `--theme` or of the configuration:
+ * the components of the plugins, and the `theme.yaml` of the project when there is one, else of the last plugin theme.
+ */
 export async function galleryCommand(
   argv: string[],
   io: CommandIo,
@@ -90,19 +144,22 @@ export async function galleryCommand(
     },
   });
   const output = resolve(io.cwd, values.output ?? defaultGalleryDirectory);
-  let declarations: PluginConfig[];
+  let configured: ConfiguredGallery;
   if (values.theme === undefined) {
-    const found = pluginsFromConfig(io, values.config);
+    const found = fromConfig(io, values.config);
     if ("exit" in found) {
       return found.exit;
     }
-    declarations = found.plugins;
+    configured = found;
   } else {
-    declarations = values.theme;
+    configured = { plugins: values.theme };
   }
   let theme: ResolvedTheme;
   try {
-    theme = await themeOf(declarations, io, deps);
+    theme = await themeOf(configured.plugins, io, deps);
+    if (configured.theme !== undefined) {
+      theme = { ...theme, config: configured.theme };
+    }
   } catch (error) {
     io.err(
       `gallery: cannot resolve the theme: ${error instanceof Error ? error.message : String(error)}`,

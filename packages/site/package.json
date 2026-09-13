@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
+    "@concordance-wiki/i18n": "workspace:*",
     "@concordance-wiki/profile": "workspace:*",
     "esbuild": "0.28.2",
     "preact": "10.29.8",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@concordance-wiki/fixture-plugin-theme-example": "workspace:*",
+    "@concordance-wiki/fixture-plugin-theme-white-label": "workspace:*",
     "axe-core": "4.13.0",
     "happy-dom": "20.14.5"
   }
