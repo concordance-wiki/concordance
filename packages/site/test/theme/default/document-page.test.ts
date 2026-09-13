@@ -94,6 +94,9 @@ describe("The document page: the tree by year, the line under the title, the tab
       '<section id="document-view" class="document-panel document-view" aria-label="Document"></section>',
     );
     expect(without).toContain('<p class="empty">No text was extracted from this document.</p>');
+    const { documents, ...none } = documentPageCorporate;
+    expect(documents).toHaveLength(1);
+    expect(renderSlot("EntityPage", none, defaultTheme)).toBe(without);
   });
 });
 
