@@ -56,7 +56,9 @@ Accessibility is checked at three levels, none of which needs a browser. The pal
 
 ## Declarative profile, generic engine
 
-The meta-model is a YAML profile validated by a schema: types, attributes, relations with their allowed pairs, mapped sections, confidence scale, display rules. The engine only knows "type, attributes, relations, score". Adding a type, an attribute or a relation pair is a profile change, never a code change, and a test enforces it. Relation labels shown in the site come from the profile.
+The meta-model is a YAML profile validated by a schema: types, attributes, relations with their allowed pairs, mapped sections, confidence scale, display rules. The engine only knows "type, attributes, relations, score". Adding a type, an attribute or a relation pair is a profile change, never a code change, and a test enforces it. Relation labels shown in the site come from the profile, and so do the labels of the attributes.
+
+A type is written as a module, a folder `types/<slug>/` holding its declaration (`type.yaml`), its labels per language (`messages/`), its note template and, when the generic page is not enough, its components; the core types are such modules under `packages/profile/types/`, and the default profile the package loads is assembled from them and from `base.yaml` by a script, with a validation step that fails when the two drift. The same format travels: a plugin contributes modules through the `types` contribution point, a project keeps modules in the folder its `profile.yaml` names under `types_dir`, and the build merges them, plugins first, then the project folder, then the keys of `profile.yaml`, refusing a module of a core type. The site never learns a type slug either way: the entity page exposes the declaration of the type and every attribute of the note, declared and not, and a dedicated `EntityPage@<type>`, `Attribute@<name>` or `Section@<key>` component, from a theme or from the module, is resolved by name with the generic page as the fallback. The [adding a type guide](adding-a-type.md) has the format.
 
 ## Confidence and provenance on every link
 
