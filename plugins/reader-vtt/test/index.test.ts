@@ -7,6 +7,7 @@ import plugin, {
   parseTranscript,
   readTranscript,
   renderTranscript,
+  rewriteTranscript,
   transcriptText,
 } from "../src/index.js";
 
@@ -103,5 +104,40 @@ describe("the reader-vtt plugin", () => {
       cues: 2,
       speakers: ["ALICE", "BOB"],
     });
+    expect(reader?.rewrite).toBe(rewriteTranscript);
+  });
+
+  it("rewrites a transcript with its speakers and texts substituted, in the format of its path", () => {
+    const substitution = {
+      speaker: (name: string) => `S-${name}`,
+      text: (text: string) => text.toUpperCase(),
+    };
+    const rewritten = rewriteTranscript(
+      { path: "meetings/review.vtt", payload: { bytes: bytes(vtt) } },
+      substitution,
+    );
+    expect(new TextDecoder().decode(rewritten)).toBe(
+      [
+        "WEBVTT",
+        "Language: fr",
+        "",
+        "00:00:01.000 --> 00:00:02.000",
+        "<v S-Alice>BONJOUR.",
+        "",
+        "00:00:02.000 --> 00:00:03.500",
+        "<v S-Alice>COMMENÇONS.",
+        "",
+        "00:00:03.500 --> 00:00:05.000",
+        "<v S-Bob>D'ACCORD.",
+        "",
+      ].join("\n"),
+    );
+    expect(
+      new TextDecoder().decode(
+        rewriteTranscript({ path: "x.SRT", payload: { bytes: bytes(srt) } }, substitution),
+      ),
+    ).toBe(
+      "1\n00:00:00,000 --> 00:00:02,000\nS-ALICE: HI\n\n2\n00:00:02,000 --> 00:00:04,000\nS-BOB: HEY\n",
+    );
   });
 });

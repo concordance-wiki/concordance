@@ -35,6 +35,7 @@ import { discoverKeywords, type KeywordLead } from "./keywords.js";
 import { produceLinks } from "./links.js";
 import { attachOperationNotes } from "./operations.js";
 import { indexDocuments, parseSources } from "./parse.js";
+import { loadPseudonymization, pseudonymizeScope, pseudonymizeTranscripts } from "./privacy.js";
 import { recognisedWords, type RecognisedWord } from "./recognised.js";
 import { refineRelations } from "./relations.js";
 import { scanNotes } from "./scan.js";
@@ -85,44 +86,71 @@ export interface PipelineResult {
   documents: ReadDocument[];
   /** Documents a converter could not convert, which `build.fail_on.unconverted_max` counts. */
   unconverted: number;
+  /** The text of every note pseudonymisation rewrote, by `<source>/<path>`, which the fragments render in place of the file. */
+  notes: Map<string, string>;
 }
 
 /**
  * The inference chain, from the ingested sources to the blocks of the model, each step a pure
- * function of the previous ones: parse, documents, type, plugin sources, operation notes,
- * dictionary, scan, links, combination, relation typing, keywords, twin resources, documents
- * without a note, model checks, displayed neighbourhood.
+ * function of the previous ones: parse, documents, transcripts pseudonymised, type, notes and
+ * documents of the scope pseudonymised, plugin sources, operation notes, dictionary, scan,
+ * links, combination, relation typing, keywords, twin resources, documents without a note,
+ * model checks, displayed neighbourhood.
  */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
   const { config, profile, sources, fs, clock } = input;
   const parsed = parseSources(sources, fs);
-  const documents = indexDocuments(parsed.documents);
+  const readers = input.plugins.readers();
   const read = await readDocuments({
     sources,
-    readers: input.plugins.readers(),
+    readers,
     converters: input.plugins.converters(),
     config,
     cacheDirectory: input.cacheDirectory,
     parallelism: input.parallelism ?? 1,
     fs,
   });
+  const pseudonymization = loadPseudonymization({
+    config,
+    configDirectory: input.configDirectory,
+    fs,
+  });
+  const transcripts = pseudonymizeTranscripts({
+    documents: read.documents,
+    readers,
+    config,
+    pseudonymization,
+    titles: parsed.documents.flatMap((note) =>
+      note.document.title === undefined ? [] : [note.document.title],
+    ),
+    fs,
+  });
   const typed = typeNotes({
     sources,
-    documents,
-    resources: resourcesOf(read.documents),
+    documents: indexDocuments(parsed.documents),
+    resources: resourcesOf(transcripts.documents),
     config,
     profile,
   });
+  const scoped = pseudonymizeScope({
+    entities: typed.entities,
+    documents: parsed.documents,
+    resources: transcripts.documents,
+    sources,
+    pseudonymization,
+    fs,
+  });
+  const documents = indexDocuments(scoped.documents);
   const contributed = await loadPluginSources({
     providers: input.plugins.sources(),
-    entities: typed.entities,
+    entities: scoped.entities,
     roots: Object.fromEntries(sources.map((source) => [source.name, source.root])),
     cacheDirectory: input.cacheDirectory,
     profile,
     context: { fs, clock, ...(input.fetch === undefined ? {} : { fetch: input.fetch }) },
   });
   const attached = attachOperationNotes({
-    entities: [...typed.entities, ...contributed.entities],
+    entities: [...scoped.entities, ...contributed.entities],
     links: contributed.links,
     profile,
     // The same default as the ingest step gives a source without a locale of its own.
@@ -137,8 +165,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     fs,
   });
   const occurrences = scanNotes({
-    documents: parsed.documents,
-    resources: read.documents,
+    documents: scoped.documents,
+    resources: scoped.resources,
     sources,
     dictionaries: dictionaries.byLocale,
     profile,
@@ -148,19 +176,20 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   const combined = combineProducedLinks([...produced.links, ...attached.links], profile);
   const refined = refineRelations(combined, { profile, entities });
   const keywords = discoverKeywords({
-    documents: parsed.documents,
-    resources: read.documents,
+    documents: scoped.documents,
+    resources: scoped.resources,
     sources,
     dictionaries: dictionaries.byLocale,
     config,
     profile,
+    rejected: pseudonymization.names,
   });
   entities = [...entities, ...keywords.entities];
   const twins = reconcileTwins({
     entities,
     links: refined.links,
     documents,
-    resources: read.documents,
+    resources: scoped.resources,
     sources,
     dictionaries: dictionaries.byLocale,
     config,
@@ -181,6 +210,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...input.findings,
       ...parsed.findings,
       ...read.findings,
+      ...pseudonymization.findings,
+      ...transcripts.findings,
       ...typed.findings,
       ...contributed.findings,
       ...attached.findings,
@@ -189,7 +220,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...refined.findings,
       ...keywords.findings,
       ...twins.findings,
-      ...documentsWithoutMarkdown(twins.entities, read.documents),
+      ...documentsWithoutMarkdown(twins.entities, scoped.resources),
       ...checked,
     ],
     config.checks,
@@ -224,9 +255,10 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     keywordMentions: keywords.mentions,
     keywordLeads: keywords.leads,
     takenOver: keywords.takenOver,
-    recognised: recognisedWords({ occurrences, documents: parsed.documents, sources }),
+    recognised: recognisedWords({ occurrences, documents: scoped.documents, sources }),
     duplicates: twins.counts,
-    documents: read.documents,
+    documents: scoped.resources,
     unconverted: read.unconverted,
+    notes: scoped.notes,
   };
 }

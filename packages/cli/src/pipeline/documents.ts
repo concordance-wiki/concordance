@@ -32,6 +32,12 @@ export interface DocumentPage {
   speaker?: string;
 }
 
+/**
+ * What the site offers for download in place of the file itself: the bytes of a transcript
+ * rewritten with the pseudonyms, or nothing when the transcript must not be published.
+ */
+export type DocumentDownload = { kind: "rewritten"; bytes: Uint8Array } | { kind: "withheld" };
+
 /** A file of a source that a reader or a converter knows, once read: the last time the pipeline opens it. */
 export interface ReadDocument {
   source: string;
@@ -47,6 +53,8 @@ export interface ReadDocument {
   pages: DocumentPage[];
   /** Absolute path, under the cache, of the PDF representation a converter produced. */
   pdf?: string;
+  /** Set when the file itself is not what the site offers; absent for a file copied as it is. */
+  download?: DocumentDownload;
 }
 
 export interface ReadDocumentsInput {

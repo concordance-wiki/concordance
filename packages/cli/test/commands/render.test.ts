@@ -454,7 +454,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       `${validConfig}privacy: { pseudonymize: { enabled: true, dictionary: ./pseudonyms.yaml } }\n`,
     );
     pseudonymised.fs.writeText("/work/notes/2026-03-12-review.md", meeting);
-    pseudonymised.fs.writeText("/work/pseudonyms.yaml", "people: []\n");
+    pseudonymised.fs.writeText("/work/pseudonyms.yaml", "version: 1\npeople: {}\n");
     expect(await buildCommand([], pseudonymised)).toBe(0);
     expect(pseudonymised.fs.readText("/work/dist/notes/2026-03-12-review/index.html")).toContain(
       '<span class="meeting-participants">Pseudonymised participants</span>',

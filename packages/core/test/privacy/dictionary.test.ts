@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { loadPseudonymDictionary, nameKey } from "../../src/privacy/dictionary.js";
+import {
+  loadPseudonymDictionary,
+  nameKey,
+  parsePseudonymDictionary,
+} from "../../src/privacy/dictionary.js";
 
 const dictionary = `
 version: 1
@@ -40,18 +44,40 @@ describe("loadPseudonymDictionary", () => {
     expect(loaded.people.map((person) => person.name)).toEqual(["Ab Cd", "Éa Bé"]);
   });
 
-  it("rejects text that is not valid YAML with the configuration wording and the cause attached", () => {
-    let caught: unknown;
-    try {
-      loadPseudonymDictionary("version: [\n");
-    } catch (error) {
-      caught = error;
-    }
-    const thrown = caught as Error;
-    expect(thrown.message).toBe(
+  it("rejects text that is not valid YAML with the configuration wording", () => {
+    expect(() => loadPseudonymDictionary("version: [\n")).toThrow(
       "error: pseudonyms.yaml: not valid YAML: Flow sequence in block collection must be sufficiently indented and end with a ] at line 2, column 1:",
     );
-    expect(thrown.cause).toBeInstanceOf(Error);
+  });
+
+  it("parses without throwing: the dictionary of a valid file, the issues of an invalid one", () => {
+    expect(parsePseudonymDictionary("version: 1\npeople: { Ab Cd: { pseudonym: P } }\n")).toEqual({
+      ok: true,
+      dictionary: { people: [{ name: "Ab Cd", pseudonym: "P" }] },
+    });
+    expect(parsePseudonymDictionary("version: [\n")).toEqual({
+      ok: false,
+      issues: [
+        {
+          severity: "error",
+          path: "",
+          message:
+            "not valid YAML: Flow sequence in block collection must be sufficiently indented and end with a ] at line 2, column 1:",
+        },
+      ],
+    });
+    expect(parsePseudonymDictionary("version: 2\npeople: {}\n")).toMatchObject({
+      ok: false,
+      issues: [{ severity: "error", path: "version" }],
+    });
+    expect(
+      parsePseudonymDictionary(
+        "version: 1\npeople: { A B: { pseudonym: P }, a b: { pseudonym: Q } }\n",
+      ),
+    ).toMatchObject({
+      ok: false,
+      issues: [{ severity: "error", path: 'people["a b"]' }],
+    });
   });
 
   it("lists every schema issue, formatted like the configuration ones", () => {

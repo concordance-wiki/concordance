@@ -11,6 +11,7 @@ Every check listed here is registered once, with its default severity, descripti
 | Check | Severity | Meaning |
 |---|---|---|
 | [`W-SOURCE-UNREACHABLE`](W-SOURCE-UNREACHABLE.md) | warning | A declared source could not be fetched or read, so the build went on without it. |
+| [`W-PRIVACY-DICTIONARY`](W-PRIVACY-DICTIONARY.md) | warning | The pseudonymisation dictionary could not be read or does not match its schema; an error, and the build fails, when pseudonymisation is enabled. |
 
 ## Links
 
@@ -41,6 +42,7 @@ Every check listed here is registered once, with its default severity, descripti
 | [`W-CONV-SUSPECT`](W-CONV-SUSPECT.md) | warning | A converted PDF contains no extractable text although the document is large. |
 | [`W-DOC-NOMD`](W-DOC-NOMD.md) | info | A document has no markdown representation. |
 | [`W-DUP-CANDIDATE`](W-DUP-CANDIDATE.md) | info | Two resources look like representations of the same document, but not enough to merge them. |
+| [`W-PRIVACY-WITHHELD`](W-PRIVACY-WITHHELD.md) | warning | A transcript was kept out of the site because its reader cannot rewrite it with the pseudonyms; the raw file is never published. |
 
 ## Vocabulary and filing
 

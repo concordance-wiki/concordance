@@ -48,9 +48,22 @@ export interface ReaderUnit {
   anchor?: string;
 }
 
+/** The substitutions a rewrite applies: one to every spoken or written text, one to the name of a speaker. */
+export interface TextSubstitution {
+  text: (text: string) => string;
+  speaker: (name: string) => string;
+}
+
 export interface Reader {
   extensions: string[];
   read: (input: ReaderInput) => ReaderOutput;
+  /**
+   * The file again, every text and every speaker passed through the substitution, its timecodes
+   * and structure kept: what the site offers for download in place of a transcript it must not
+   * publish as written. A reader without it never sees its transcripts published under
+   * pseudonymisation: the pipeline copies no file it could not rewrite.
+   */
+  rewrite?: (input: ReaderInput, substitution: TextSubstitution) => Uint8Array;
 }
 
 /**
