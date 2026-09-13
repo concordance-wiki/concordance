@@ -9,6 +9,7 @@ const SKETCH_SVG =
 const screenSpaceTree: SpaceTree = {
   name: "specs",
   initials: "SP",
+  href: "../../../#home-tree",
   nodes: [
     { label: "api", count: 3 },
     { label: "batches", count: 3 },

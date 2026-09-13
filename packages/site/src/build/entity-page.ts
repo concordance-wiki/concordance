@@ -31,6 +31,7 @@ import {
   labelIn,
   message,
   relationLabel,
+  spaceTitle,
   typeLabel,
   type SiteContext,
 } from "./context.js";
@@ -55,6 +56,7 @@ import {
   entityHref,
   isContractUrl,
   relativeHref,
+  searchFilterHref,
 } from "./paths.js";
 
 /** The properties every entity carries outside `attributes`, and the message that labels each. */
@@ -108,6 +110,17 @@ function valuesOf(context: SiteContext, page: string, value: unknown): Attribute
   return [];
 }
 
+/** The application or the domain of an entity as the page shows it: by the title the configuration gives it, leading to the results filtered on it. */
+function scopeValue(
+  context: SiteContext,
+  page: string,
+  facet: "application" | "domain",
+  id: string,
+): AttributeValue {
+  const titles = facet === "application" ? context.names?.applications : context.names?.domains;
+  return { text: titles?.[id] ?? id, href: searchFilterHref(page, facet, id) };
+}
+
 /** One attribute of an entity as the page shows it, common or declared, labelled by the profile; none when the entity sets no value for it. */
 export function attributeOf(
   context: SiteContext,
@@ -119,7 +132,10 @@ export function attributeOf(
   const label =
     common === undefined ? attributeLabel(context, entity.type, key) : commonLabel(context, common);
   const raw: unknown = common === undefined ? ownValue(entity, key) : commonValue(entity, common);
-  const values = valuesOf(context, page, raw);
+  const values =
+    (common === "application" || common === "domain") && typeof raw === "string"
+      ? [scopeValue(context, page, common, raw)]
+      : valuesOf(context, page, raw);
   return values.length === 0 ? undefined : { name: key, label, values };
 }
 
@@ -698,6 +714,7 @@ export function entityPageLabels(
   context: SiteContext,
   neighbours: number,
   declared: number,
+  source: string,
 ): EntityPageLabels {
   return {
     properties: message(context, "entity.attributes"),
@@ -716,6 +733,9 @@ export function entityPageLabels(
     legendRecognised: message(context, "entity.legendRecognised"),
     legendKeyword: message(context, "entity.legendKeyword"),
     imageNote: message(context, "entity.imageNote"),
+    inSpace: formatMessage(context.catalogue, "entity.inSpace", {
+      space: spaceTitle(context, source),
+    }),
   };
 }
 
@@ -759,6 +779,7 @@ export function entityPageOf(
       title: entity.title,
       locale: entity.locale,
     },
+    typeHref: searchFilterHref(page, "type", entity.type),
     ...(declaration === undefined ? {} : { declaration }),
     space: dated ? datedSpaceOf(context, page, entity) : spaceOf(context, page, entity),
     breadcrumb: dated
@@ -769,7 +790,12 @@ export function entityPageOf(
     sections: sectionsOf(context, entity),
     attributes,
     ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
-    labels: entityPageLabels(context, neighbourPages(neighbours), attributes.length),
+    labels: entityPageLabels(
+      context,
+      neighbourPages(neighbours),
+      attributes.length,
+      entity.source.name,
+    ),
     neighbours,
     mentions,
     sources: sourcesOf(context, entity),

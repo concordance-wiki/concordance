@@ -64,6 +64,11 @@ export function spaceHref(from: string, source: string): string {
   return relativeHref(from, spacePagePath(source));
 }
 
+/** The results page filtered on one value of a facet, from a page: `search/index.html?type=rule`. */
+export function searchFilterHref(from: string, facet: string, value: string): string {
+  return `${relativeHref(from, SEARCH_PAGE)}?${facet}=${encodeURIComponent(value)}`;
+}
+
 /** The href of an entity page from another page. */
 export function entityHref(from: string, id: string): string {
   return relativeHref(from, pagePath(id));

@@ -9,6 +9,7 @@
   "entity.domain": "Domaine",
   "entity.edit": "Modifier cette page",
   "entity.imageNote": "Image du dépôt, affichée dans le flux du texte",
+  "entity.inSpace": "Espace {space}",
   "entity.legendKeyword": "mot reconnu, sans fiche",
   "entity.legendRecognised": "mot reconnu, fiche existante",
   "entity.legendWritten": "lien écrit",

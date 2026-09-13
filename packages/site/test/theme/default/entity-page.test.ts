@@ -74,13 +74,23 @@ describe("EntityPage", () => {
     expect(html).not.toContain("entity-highlights");
   });
 
-  it("names the last change and the space on the line under the title when the page has them, the change in full and in short for the narrow line", () => {
+  it("names the last change and the space on the line under the title when the page has them, the change in full and in short for the narrow line, the space linked to its page when the tree knows it", () => {
     const html = render({
       changed: { date: "2026-09-04", label: "Changed 9 days ago", short: "9 days ago" },
       space: { name: "glossary", initials: "GL", nodes: [] },
     });
     expect(html).toContain(
-      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">glossary</span><span class="highlight">',
+      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">Space glossary</span><span class="highlight">',
+    );
+    expect(
+      render({
+        space: { name: "glossary", initials: "GL", href: "../index.html", nodes: [] },
+        labels: { inSpace: "Espace Glossaire" },
+      }),
+    ).toContain('<a class="entity-space" href="../index.html">Espace Glossaire</a>');
+    // The type chip leads to the results filtered on the type when the page says where.
+    expect(render({ typeHref: "../../search/index.html?type=term" })).toContain(
+      '<p class="entity-badge"><a class="badge" href="../../search/index.html?type=term">term</a>',
     );
     // Without a short form, the narrow line reads the label.
     expect(render({ changed: { date: "2026-09-04", label: "Changed 9 days ago" } })).toContain(

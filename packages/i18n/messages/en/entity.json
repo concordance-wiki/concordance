@@ -39,6 +39,10 @@
     "defaultMessage": "Image of the repository, shown in the flow of the text",
     "description": "Note under an image of the sources embedded in a note, before the path of the file."
   },
+  "entity.inSpace": {
+    "defaultMessage": "Space {space}",
+    "description": "On the line under the title of an entity page, the space of the page by its title, linked to the page of the space."
+  },
   "entity.legendKeyword": {
     "defaultMessage": "recognised word, no note",
     "description": "Legend of the dashed grey underline of a recognised expression that has a keyword page and no note."

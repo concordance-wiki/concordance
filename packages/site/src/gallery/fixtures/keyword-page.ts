@@ -316,6 +316,7 @@ export const corporateKeywordPage: SlotProps["KeywordPage"] = {
   space: {
     name: "glossary",
     initials: "GL",
+    href: "../../#home-tree",
     nodes: [
       { label: "Alias", href: "../../glossary/alias/" },
       { label: "Build log", href: "../../glossary/build-log/" },

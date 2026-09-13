@@ -7,6 +7,7 @@ import { corporateHeader } from "./chrome.js";
 const meetingSpaceTree: SpaceTree = {
   name: "meetings",
   initials: "ME",
+  href: "../../#home-tree",
   nodes: [
     {
       label: "2026",

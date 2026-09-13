@@ -9,6 +9,7 @@ import type {
   NeighbourhoodProps,
   Section,
   SourceRef,
+  SpaceTree as SpaceTreeModel,
 } from "../../slots.js";
 import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
@@ -24,8 +25,12 @@ export const HIGHLIGHTS_WITH_BADGE = 2;
 /** How many highlights the header shows in all; the rest stays in the panel. */
 export const HIGHLIGHTS_MAX = 5;
 
-/** The labels of the default theme, used for every label the page does not receive; the neighbour and key counts are worded from the page. */
-export function defaultEntityPageLabels(neighbours: number, declared = 0): EntityPageLabels {
+/** The labels of the default theme, used for every label the page does not receive; the neighbour and key counts and the name of the space are worded from the page. */
+export function defaultEntityPageLabels(
+  neighbours: number,
+  declared = 0,
+  space = "",
+): EntityPageLabels {
   return {
     properties: labels.properties,
     declaredAtTop: fill(declared === 1 ? labels.declaredKey : labels.declaredKeys, {
@@ -43,7 +48,30 @@ export function defaultEntityPageLabels(neighbours: number, declared = 0): Entit
     legendRecognised: labels.legendRecognised,
     legendKeyword: labels.legendKeyword,
     imageNote: labels.imageNote,
+    inSpace: fill(labels.inSpace, { space }),
   };
+}
+
+/** The space of the page on the line under the title, "Space Specifications", leading to the page of the space when the tree knows it. */
+/** The type of the page as a chip, leading to the results filtered on that type when the page knows where. */
+export function TypeBadge({ label, href }: { label: string; href?: string }): JSX.Element {
+  return href === undefined ? (
+    <span class="badge">{label}</span>
+  ) : (
+    <a class="badge" href={href}>
+      {label}
+    </a>
+  );
+}
+
+export function SpaceMark({ space, label }: { space: SpaceTreeModel; label: string }): JSX.Element {
+  return space.href === undefined ? (
+    <span class="entity-space">{label}</span>
+  ) : (
+    <a class="entity-space" href={space.href}>
+      {label}
+    </a>
+  );
 }
 
 function Highlight({
@@ -305,6 +333,7 @@ export function NeighbourhoodFold({
  */
 export function EntityPage({
   entity,
+  typeHref,
   space,
   breadcrumb = [],
   changed,
@@ -321,7 +350,11 @@ export function EntityPage({
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
-    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length, attributes.length),
+    ...defaultEntityPageLabels(
+      neighbours.total ?? neighbours.neighbours.length,
+      attributes.length,
+      space?.name ?? "",
+    ),
     ...given,
   };
   const withBadge = highlights.slice(0, HIGHLIGHTS_WITH_BADGE);
@@ -335,14 +368,17 @@ export function EntityPage({
         <header class="entity-header">
           <h1>{entity.title}</h1>
           <p class="entity-badge">
-            <span class="badge">{entity.typeLabel}</span>
+            <TypeBadge
+              label={entity.typeLabel}
+              {...(typeHref === undefined ? {} : { href: typeHref })}
+            />
             {changed !== undefined && (
               <time class="entity-changed" dateTime={changed.date}>
                 <span class="entity-changed-long">{changed.label}</span>
                 <span class="entity-changed-short">{changed.short ?? changed.label}</span>
               </time>
             )}
-            {space !== undefined && <span class="entity-space">{space.name}</span>}
+            {space !== undefined && <SpaceMark space={space} label={text.inSpace} />}
             {withBadge.map((attribute) => (
               <Highlight key={attribute.name} entity={entity} attribute={attribute} />
             ))}

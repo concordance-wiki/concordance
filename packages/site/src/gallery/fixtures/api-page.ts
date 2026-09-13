@@ -94,6 +94,7 @@ export const apiPage: SlotProps["EntityPage"] = {
 const corporateApiSpaceTree: SpaceTree = {
   name: "specs",
   initials: "SP",
+  href: "../../../#home-tree",
   nodes: [
     {
       label: "api",

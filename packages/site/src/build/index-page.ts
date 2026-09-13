@@ -13,7 +13,7 @@ import type {
 } from "../slots.js";
 import { fileKey, glyphOf, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
 import type { FragmentPassage } from "./fragments.js";
-import { entityHref, INDEX_PAGE, relativeHref, SEARCH_PAGE } from "./paths.js";
+import { entityHref, INDEX_PAGE, relativeHref, searchFilterHref } from "./paths.js";
 
 /** The letters of the navigation; titles opening otherwise gather under the last one. */
 export const INDEX_LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(/(?=.)/u), "#"];
@@ -162,11 +162,6 @@ function entryOf(context: SiteContext, from: string, filed: Filed, anchor?: stri
   };
 }
 
-/** The results page filtered by one facet value, from a page of the index. */
-function filterHref(from: string, facet: string, value: string): string {
-  return `${relativeHref(from, SEARCH_PAGE)}?${facet}=${encodeURIComponent(value)}`;
-}
-
 function valuesOf(
   from: string,
   facet: string,
@@ -176,7 +171,7 @@ function valuesOf(
   return [...counts]
     .map(([value, count]) => ({
       label: labelOf(value),
-      href: filterHref(from, facet, value),
+      href: searchFilterHref(from, facet, value),
       count,
     }))
     .sort((a, b) => byCodeUnit(a.label, b.label) || byCodeUnit(a.href, b.href));
@@ -208,7 +203,7 @@ export function filtersOf(context: SiteContext, from: string, filed: Filed[]): I
     spaces: valuesOf(from, "source", spaces, (space) => spaceTitle(context, space)),
     withoutDefinition: {
       label: message(context, "index.withoutDefinition"),
-      href: filterHref(from, NOTELESS_FACET, "only"),
+      href: searchFilterHref(from, NOTELESS_FACET, "only"),
       count: noteless,
     },
   };

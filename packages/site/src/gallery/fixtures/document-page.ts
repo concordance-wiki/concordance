@@ -31,6 +31,7 @@ const corporateEntityLabels: Partial<EntityPageLabels> = {
 const framingSpaceTree: SpaceTree = {
   name: "framing",
   initials: "FR",
+  href: "../../../#home-tree",
   nodes: [
     {
       label: "2026",

@@ -235,4 +235,5 @@ export const labels = {
   groupedNote: "Grouped by folder, date and textual overlap \u2014 a single entry in the index.",
   noNote: "No note describes this document yet.",
   inTheDocument: "in the document",
+  inSpace: "Space {space}",
 } as const;

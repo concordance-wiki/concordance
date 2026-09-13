@@ -402,6 +402,8 @@ export interface EntityPageLabels {
   legendKeyword: string;
   /** Under an image of the sources, before the path of its file. */
   imageNote: string;
+  /** The space of the page on the line under the title, already worded with its title: "Space Specifications"; the theme words it from the name of the tree when absent. */
+  inSpace: string;
 }
 
 /** A step of the breadcrumb: the space, a folder, the page; the space leads to its page, a folder to its list, the last step is where the reader stands. */
@@ -736,6 +738,8 @@ export interface MeetingProps {
 
 export interface EntityPageProps {
   entity: EntityRef;
+  /** The results page filtered on the type of the page, where the type chip leads; absent, the chip is plain text. */
+  typeHref?: string;
   /** The type as the profile declares it; absent for a type the profile does not declare. */
   declaration?: TypeDeclaration;
   /** The space of the page and its tree, for the left column; absent, the page has no left column. */

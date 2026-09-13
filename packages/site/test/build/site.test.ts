@@ -324,7 +324,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(entity).toContain('<div class="entity entity-with-space">');
     expect(entity).toContain("<h1>Keyword page</h1>");
     expect(entity).toContain('<article class="entity-body">');
-    expect(entity).toContain('<span class="badge">Term</span>');
+    expect(entity).toContain('<a class="badge" href="../../search/index.html?type=term">Term</a>');
     expect(entity).toContain("<p>An entity page.</p>");
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
     expect(keyword).toContain('<div class="entity entity-with-space keyword">');
@@ -782,7 +782,7 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(home).toContain("&quot;enter&quot;:&quot;Entrée&quot;");
     expect(home).toContain('<html lang="fr"');
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
-    expect(entity).toContain('<span class="badge">Terme</span>');
+    expect(entity).toContain('<a class="badge" href="../../search/index.html?type=term">Terme</a>');
     expect(entity).toContain('<html lang="en"');
     expect(entity).toContain('<nav class="space" aria-label="Arborescence de l’espace">');
     expect(entity).toContain('<nav class="breadcrumbs" aria-label="Vous êtes ici">');
