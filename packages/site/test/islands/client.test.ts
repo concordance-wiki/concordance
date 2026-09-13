@@ -49,7 +49,10 @@ describe("the mode-switch entry", () => {
       buttons.push(button);
       return {
         getAttribute: () =>
-          JSON.stringify({ labels: { system: "auto", light: "clair", dark: "sombre" } }),
+          JSON.stringify({
+            name: "Couleurs",
+            labels: { system: "auto", light: "clair", dark: "sombre" },
+          }),
         querySelector: () => ({
           get hidden() {
             return button.hidden;
@@ -86,9 +89,14 @@ describe("the mode-switch entry", () => {
     });
     await import("../../src/islands/mode-switch.client.js");
     expect(selectors).toEqual(['concordance-island[data-island="mode-switch"]']);
+    const named = {
+      "aria-pressed": "true",
+      "aria-label": "Couleurs: sombre",
+      title: "Couleurs: sombre",
+    };
     expect(buttons).toEqual([
-      { hidden: false, attributes: { "aria-pressed": "true" }, text: "sombre" },
-      { hidden: false, attributes: { "aria-pressed": "true" }, text: "sombre" },
+      { hidden: false, attributes: named, text: "sombre" },
+      { hidden: false, attributes: named, text: "sombre" },
     ]);
   });
 });

@@ -1,20 +1,26 @@
-/* Mode switch: served hidden, revealed by its script; the label names the current scheme. */
+/* Mode switch: a square button drawing the glyph of the current scheme, served hidden and revealed by its script; its name and the scheme are written for assistive technology alone. */
 
 .mode-switch {
-  min-block-size: 2.5rem;
-  padding: var(--space-1) var(--space-2);
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--color-soft);
-  color: var(--color-muted);
-  font-size: 0.8125rem;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  line-height: 1;
   cursor: pointer;
 }
 
-.mode-switch[aria-pressed="true"] {
-  color: var(--color-ink);
+.mode-switch:hover {
+  background: var(--color-soft);
 }
 
-.mode-switch-value {
-  font-weight: 600;
+.mode-switch-glyph {
+  display: block;
 }
