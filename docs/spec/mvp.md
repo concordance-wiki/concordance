@@ -629,6 +629,21 @@ As a French- or English-speaking reader, I want a site entirely in my language, 
 
 Depends on: L2-03, L2-08.
 
+#### L2-15 Types as modules
+
+As the architect of a team, I want to declare my own resource types in a distributable module format and give them a dedicated rendering in my theme, so that I extend Concordance to my domain without touching the engine, while a correct generic rendering remains when I have nothing specific to say.
+
+- A type is a folder `types/<slug>/`: `type.yaml` (what the default profile declares for the type today, without its labels), `template.md` (the note template), `messages/<locale>.json` (the labels of the type, its attributes and its sections, in the ICU/FormatJS format of the interface catalogues), optionally `schema.json` (the JSON Schema of the items of its `list` attributes) and `components/` (rendering overrides). The format is published by `packages/core/schemas/type-module.schema.json` and documented.
+- The core types are rewritten in that format under `packages/profile/types/`; the default profile is assembled from those folders when the package is built, and a test verifies the assembly equals the published profile: same identifiers, relations and templates; `docs/templates` and the templates of the command line stay synchronised from the modules, and `scripts/validate.mjs` checks all of it.
+- A new contribution point `types` in the plugin API: a plugin ships one or more modules, registered at load in declared order and merged into the profile as the project's `profile.yaml` is; a type declared by two plugins is a configuration error, a type that extends a core type goes through `profile.yaml`. A project's `profile.yaml` may also point at a local folder of modules (`types_dir`).
+- The `EntityPage` view model exposes the type declaration (attributes, sections, `display`) and every attribute of the note, declared and unknown, the unknown ones in an "other attributes" section kept as written; the generic template therefore displays any note of any type without specific code.
+- Component resolution per type with fallback: a theme (`components`) or a type module (`components/`) may provide `EntityPage@<slug>`, resolved before `EntityPage`; likewise `Attribute@<attribute>` for an attribute value and `Section@<section>` for a mapped section. Priority: project theme, type module, default theme; documented and tested with the example plugin of the fixtures, which contributes a `runbook` type with its dedicated page.
+- The gallery shows every registered type, core and plugins, with the generic template and, when it exists, its dedicated component; the accessibility checker passes on each.
+- `concordance init --templates` also copies the templates of the types contributed by the plugins declared in `concordance.yaml`.
+- Documentation: a guide "Adding a type" (module format, complete example, publication as a plugin), a "Rendering per type" section of the theming guide, the plugins guide updated, the architecture guide touched where it describes the profile.
+
+Depends on: L2-02, L2-12, L2-13, L0-11.
+
 ### L3 — Search
 
 Exit criterion: a search on the golden corpus returns results in under 100 ms after typing, without a server, and facet counts match the number of filtered results exactly.
