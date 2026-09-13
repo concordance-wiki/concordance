@@ -1159,8 +1159,18 @@ As a glossary owner, I want the index to list every word the documentation uses,
 
 Depends on: L9-01, L2-06, L3-04.
 
-## 5. Working conditions
+#### L9-12 Screen page
 
+As a reader of a screen note, the most consulted type, I want its tables and its original sketch rendered as the author placed them so that the page reads like the file, with what the tool computed beside it.
+
+- Tree: the screens folder unfolded on the neighbouring screens; the breadcrumb "Specifications › Screens › title"; the H1, the line "Screen · changed N days ago · space".
+- The note section by section, on the same template as the rule page: a markdown table rendered as a card, its header row in uppercase small labels ("RULE · SEVERITY · EFFECT ON VALIDATION") on the soft surface, the first column in the ink and the other cells, the severity words among them, in the secondary colour as plain text; an image of the repository that stands on a line of its own shown in the flow as a figure with its caption (the alternative text) and, under it, "Image of the repository, shown in the flow of the text" and the path of the file in its repository in the monospace family, the note worded from the catalogue at render time so that the fragment stays neutral; an image among text or an external image kept as an `<img>`; the foot of the article carrying the legend "written link / recognised word" and the path of the file, with the edit link when the forge is known.
+- Panel: "Properties" with the note "N declared keys. The rest of the file is free text.", "On this page", "Related pages" with the note "From the surest to the weakest: written links first, then recognised mentions." and the list ordered so, the pages that write a link first, then by number of passages, the corpus order breaking ties, then the neighbourhood map folded. The ordering and both notes are those of every entity page, since the panel is the same: the L9-01 note "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text." and "Declared at the top of the file." are replaced by them.
+- Gallery: a state named `screen-page-corporate` on the entity page screen of the fixtures corpus, which gains a table of the checks it applies and the sketch it was drawn from, an SVG of the page under `specs/assets/`, in both languages; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L2-15.
+
+## 5. Working conditions
 ### 5.1 Ready
 
 A story enters development only when its upstream batch is delivered, its acceptance criteria are testable without interpretation, the golden corpus contains a case that exercises it, and its effect on build time or published weight is estimated when it has one.

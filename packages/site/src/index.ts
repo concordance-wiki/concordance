@@ -179,6 +179,13 @@ export type { GalleryPage } from "./gallery/pages.js";
 export { typePages } from "./gallery/types.js";
 export type { GalleryTypes, TypePage } from "./gallery/types.js";
 export {
+  FIGURE_CAPTION_CLASS,
+  FIGURE_CLASS,
+  FIGURE_NOTE_CLASS,
+  FIGURE_PATH_CLASS,
+  withImageNotes,
+} from "./markdown/figures.js";
+export {
   LEAD_SECTION_ID,
   RECOGNISED_CLASS,
   WRITTEN_CLASS,
