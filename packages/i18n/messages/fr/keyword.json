@@ -1,12 +1,10 @@
 {
-  "keyword.companions": "Mots qui l’accompagnent",
   "keyword.createNote": "Proposer une définition",
   "keyword.factFiles": "Fichiers",
   "keyword.factOccurrences": "Occurrences",
   "keyword.factSpaces": "Espaces",
   "keyword.filesSummary": "{count, plural, one {# fichier.} other {# fichiers.}}",
   "keyword.maybeSame": "Peut-être la même chose",
-  "keyword.noCompanion": "Aucun mot d’accompagnement relevé.",
   "keyword.noDefinition": "Sans définition",
   "keyword.noProperty": "Aucune propriété déclarée : il n’existe pas de fichier pour ce mot.",
   "keyword.noteWritten": "Une note définit désormais cette expression :",

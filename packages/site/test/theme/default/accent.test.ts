@@ -89,10 +89,12 @@ describe("The accent colour never carries information on its own", () => {
       ".legend-written::before,\n.legend-recognised::before,\n.legend-keyword::before",
       ".related-clear",
       ".related-mark",
+      ".neighbourhood-icon-centre",
       CONTRACT_BUTTONS,
+      ".neighbourhood-graph .map-centre .map-shape",
       ".keyword-notice",
       ".passage-at",
-      ".neighbourhood-graph .map-centre .map-shape",
+      ".neighbour::before",
       CURRENT_TAB,
       ".cue-time",
       ".spaces-row.stale .spaces-date",
@@ -154,6 +156,25 @@ describe("The accent colour never carries information on its own", () => {
     );
     expect(ruleFor(components, ".passage-at").body).toContain("text-decoration: underline;");
     expect(keyword).toContain('<a class="passage-at" href="../build-pipeline/#L12">line 12</a>');
+  });
+
+  it("draws the current position in the accent on the map and in the mark of the fold line, and the mark of every neighbour row, the words of the line and of the list saying what they are", () => {
+    expect(ruleFor(components, ".neighbourhood-graph .map-centre .map-shape").body).toContain(
+      "fill: var(--color-accent);",
+    );
+    expect(ruleFor(components, ".neighbourhood-icon-centre").body).toBe(
+      "\n  fill: var(--color-accent);\n",
+    );
+    expect(ruleFor(components, ".neighbour::before").body).toContain('content: "●" / "";');
+    const page = pages.get("entity-page-map.html") ?? "";
+    expect(page).toContain(
+      '<svg class="neighbourhood-icon" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" focusable="false">',
+    );
+    expect(page).toContain('<span class="neighbourhood-lead">See the neighbourhood map</span>');
+    expect(page).toMatch(
+      /<g class="map-centre"><circle class="map-shape" cx="\d+" cy="\d+" r="10"><\/circle><text class="map-label" [^>]+>Publication threshold<\/text>/,
+    );
+    expect(page).toContain('<span class="neighbour-type">Keyword</span>');
   });
 
   it("doubles the accent of a dormant space on the spaces page by its age in days, the one place where the colour carries an alert", () => {

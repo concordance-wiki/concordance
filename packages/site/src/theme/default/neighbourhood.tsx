@@ -16,17 +16,18 @@ import { fill } from "./mention-list.js";
 
 /** The id of the textual list; one neighbourhood per page, so one id. */
 export const NEIGHBOURHOOD_LIST = "neighbourhood-list";
-/** The heading of the mentions panel, where the reader is sent when the map is not drawn. */
+/** The heading of the mentions panel, where the reader is sent when the page has no neighbour. */
 const MENTIONS_ANCHOR = "#mentions-title";
 /** The prefix of the id of a type checkbox; the stylesheet hides the nodes of an unticked type by its rank. */
 const TYPE_INPUT = "neighbourhood-type";
-const GLYPH_SIZE = 10;
+const GLYPH_SIZE = 8;
 /** The dash of everything that stands for a noteless word: its square and the edge leading to it. */
 const KEYWORD_DASH = "4 3";
 
 /**
  * The labels of the default theme, used for every label the map does not receive; the heading
- * of the list is worded from the number listed, the pointer from the number the model holds.
+ * of the list is worded from the number listed, the sentence under the map from the number the
+ * model holds.
  */
 export function defaultNeighbourhoodLabels(listed: number, total: number): NeighbourhoodLabels {
   return {
@@ -44,6 +45,27 @@ export function defaultNeighbourhoodLabels(listed: number, total: number): Neigh
     total: fill(labels.neighboursInTotal, { count: total }),
     seeMentions: labels.seeMentions,
   };
+}
+
+/** The mark of the fold line: a centre linked to four neighbours, decorative. */
+export function NeighbourhoodIcon(): JSX.Element {
+  return (
+    <svg
+      class="neighbourhood-icon"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path class="neighbourhood-icon-edges" d="M12 12 4 5m8 7 8-7m-8 7-8 7m8-7 8 7" />
+      <circle class="neighbourhood-icon-centre" cx="12" cy="12" r="3" />
+      <circle cx="4" cy="5" r="2" />
+      <circle cx="20" cy="5" r="2" />
+      <circle cx="4" cy="19" r="2" />
+      <circle cx="20" cy="19" r="2" />
+    </svg>
+  );
 }
 
 /** A type of the neighbourhood: its label, how many neighbours have it, and its rank in the filter, from one. */
@@ -296,10 +318,11 @@ function rowClass(neighbours: Neighbour[], index: number): string {
 }
 
 /**
- * The neighbourhood: the map with its controls and its legend, or a pointer to the mentions
- * panel when the model holds more neighbours than the map may show, then the textual list every
- * graphical view must keep and the note saying why the map stops at six. The list is rendered
- * in the order received; a separator marks each change of priority group.
+ * The neighbourhood: the map with its controls and its legend as soon as one neighbour is
+ * shown, under it the total the model holds when it exceeds the nodes drawn, then the textual
+ * list every graphical view must keep and the note saying why the map stops at six; without any
+ * neighbour, a pointer to the mentions panel. The list is rendered in the order received; a
+ * separator marks each change of priority group.
  */
 export function Neighbourhood({
   centre,
@@ -312,38 +335,32 @@ export function Neighbourhood({
     ...defaultNeighbourhoodLabels(neighbours.length, total ?? neighbours.length),
     ...given,
   };
-  // Without the map there is no filter: the rows carry no type rank.
-  const types = overflow ? [] : typesOf(neighbours);
+  const types = typesOf(neighbours);
   return (
     <section class="neighbourhood" aria-labelledby="neighbourhood-title">
       <h2 id="neighbourhood-title">
         {text.map} <span class="neighbourhood-centre">{centre}</span>
       </h2>
       {neighbours.length === 0 ? (
-        <p class="empty">{text.noNeighbour}</p>
+        <p class="empty">
+          {text.noNeighbour} <a href={MENTIONS_ANCHOR}>{text.seeMentions}</a>.
+        </p>
       ) : (
         <>
-          {overflow ? (
-            <p class="neighbourhood-overflow">
-              {text.total}: <a href={MENTIONS_ANCHOR}>{text.seeMentions}</a>.
-            </p>
-          ) : (
-            <>
-              <Controls types={types} text={text} />
-              <figure class="neighbourhood-map" aria-describedby={NEIGHBOURHOOD_LIST}>
-                <Graph centre={centre} neighbours={neighbours} types={types} />
-                <figcaption>
-                  <span class="visually-hidden">
-                    {text.map}. {text.mapCaption}
-                  </span>
-                  <span class="map-legend">
-                    <span class="map-legend-entity">{text.existingPage}</span>
-                    <span class="map-legend-keyword">{text.noteless}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            </>
-          )}
+          <Controls types={types} text={text} />
+          <figure class="neighbourhood-map" aria-describedby={NEIGHBOURHOOD_LIST}>
+            <Graph centre={centre} neighbours={neighbours} types={types} />
+            <figcaption>
+              <span class="visually-hidden">
+                {text.map}. {text.mapCaption}
+              </span>
+              <span class="map-legend">
+                <span class="map-legend-entity">{text.existingPage}</span>
+                <span class="map-legend-keyword">{text.noteless}</span>
+              </span>
+            </figcaption>
+          </figure>
+          {overflow && <p class="neighbourhood-total">{text.total}.</p>}
           <p class="neighbourhood-list-head">
             <span class="section-label">{text.neighbours}</span>
             <span class="neighbourhood-equivalent">{text.textualEquivalent}</span>
@@ -357,7 +374,7 @@ export function Neighbourhood({
               >
                 <a href={neighbour.href}>{neighbour.label}</a>
                 {neighbour.typeLabel !== undefined && (
-                  <span class="badge">{neighbour.typeLabel}</span>
+                  <span class="neighbour-type">{neighbour.typeLabel}</span>
                 )}
                 {neighbour.relation !== undefined && (
                   <span class="relation">{neighbour.relation}</span>

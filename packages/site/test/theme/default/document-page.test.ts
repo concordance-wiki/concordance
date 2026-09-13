@@ -242,7 +242,7 @@ describe("The panel: the properties read from the file, the files that make the 
     expect(files).toBeGreaterThan(0);
     expect(related).toBeGreaterThan(files);
     expect(map).toBeGreaterThan(related);
-    expect(html).toContain('<span class="neighbourhood-count">5 pages</span>');
+    expect(html).toContain('<span class="neighbourhood-count">4 pages</span>');
     expect(count(html, '<li class="related-page')).toBe(5);
   });
 

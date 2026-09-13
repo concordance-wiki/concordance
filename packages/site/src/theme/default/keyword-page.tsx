@@ -19,8 +19,6 @@ export function defaultKeywordPageLabels(neighbours: number): KeywordPageLabels 
     spaces: labels.spaces,
     noProperty: labels.noProperty,
     maybeSame: labels.maybeSame,
-    companions: labels.companions,
-    noCompanion: labels.noCompanion,
     seeNeighbourhood: labels.seeNeighbourhood,
     neighbourPages: `${String(neighbours)} ${labels.neighbourPages}`,
   };
@@ -73,9 +71,9 @@ function PassageFile({ group }: { group: PassageGroup }): JSX.Element {
  * the lead to propose a definition, and the passages grouped by file, each file with its type,
  * its title and its count, each passage with where it stands and its text; on the right the
  * counts under "what we know" with the note that the word has no property, the expressions of a
- * similar form as a lead, the accompanying words, the related pages, and the neighbourhood folded
- * behind its line, through the slots of the theme. No article, no properties, no source footer:
- * a keyword page has no file of its own.
+ * similar form as a lead, the related pages, and the neighbourhood folded behind its line,
+ * drawn from the words that accompany the word, through the slots of the theme. No article, no
+ * properties, no source footer: a keyword page has no file of its own.
  */
 export function KeywordPage({
   entity,
@@ -87,7 +85,6 @@ export function KeywordPage({
   spaces,
   summary,
   passages,
-  companions,
   similar,
   similarLead,
   neighbours,
@@ -96,7 +93,7 @@ export function KeywordPage({
 }: KeywordPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: KeywordPageLabels = {
-    ...defaultKeywordPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...defaultKeywordPageLabels(neighbours.neighbours.length),
     ...given,
   };
   return (
@@ -167,24 +164,6 @@ export function KeywordPage({
             <p class="panel-note">{similarLead}</p>
           </PanelBlock>
         )}
-        <PanelBlock id="keyword-companions" className="keyword-panel" heading={text.companions}>
-          {companions.length === 0 ? (
-            <p class="empty panel-note">{text.noCompanion}</p>
-          ) : (
-            <ul class="companions">
-              {companions.map((companion) => (
-                <li key={companion.label} class="companion" data-weight={companion.weight}>
-                  {companion.href === undefined ? (
-                    <span>{companion.label}</span>
-                  ) : (
-                    <a href={companion.href}>{companion.label}</a>
-                  )}{" "}
-                  <span class="count">{companion.count}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </PanelBlock>
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} />
       </div>

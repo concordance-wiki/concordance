@@ -133,26 +133,17 @@
   display: none;
 }
 
-/* The map in a frame on the soft surface, no wider than the panel wherever the fold spans the page; the page at its centre drawn in the accent: it is the current position. */
+/* The framed map, no wider than the panel wherever the fold spans the page. */
 .neighbourhood-map {
   max-inline-size: 28rem;
   margin: 0 0 var(--space-2);
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-soft);
-}
-
-.neighbourhood-graph .map-centre .map-shape {
-  fill: var(--color-accent);
-  stroke: var(--color-soft);
-  stroke-width: 3;
 }
 
 /* The legend under the map: a plain rule for a page that has a note, a dashed one for a word without one. */
 .neighbourhood-map figcaption {
   margin-block-start: var(--space-2);
   color: var(--color-label);
+  font-size: 0.8125rem;
 }
 
 .map-legend {
@@ -168,7 +159,7 @@
   inline-size: 1rem;
   margin-inline-end: var(--space-1);
   vertical-align: middle;
-  border-block-end: 2px solid var(--color-border);
+  border-block-end: 1.6px solid var(--color-border);
 }
 
 .map-legend-keyword::before {
@@ -198,6 +189,7 @@
   margin: 0;
 }
 
+/* A row per neighbour, opening on the accent mark: one step from the current position, the type saying what the node is. */
 .neighbour {
   flex-wrap: nowrap;
   min-block-size: 2.5rem;
@@ -208,12 +200,8 @@
 .neighbour::before {
   content: "●" / "";
   flex: none;
-  color: var(--color-ink);
+  color: var(--color-accent);
   font-size: 0.8125rem;
-}
-
-.neighbour-noteless::before {
-  content: "◌" / "";
 }
 
 .neighbour > a {
@@ -232,11 +220,10 @@
   text-decoration: underline;
 }
 
-.neighbour > .badge,
+/* The type as plain text, then the relation, both in the label tone: the lightest that stays readable at the smallest size of the theme. */
+.neighbour > .neighbour-type,
 .neighbour > .relation {
   flex: none;
-  padding: 0;
-  background: none;
   color: var(--color-label);
   font-size: 0.8125rem;
   font-weight: 400;
@@ -259,9 +246,17 @@
   line-height: 1.55;
 }
 
-/* Where the panel has a column, the open map takes it: the blocks of the panel go until the fold closes. */
+/* Where the panel has a column, the open map takes it: the blocks of the panel go until the fold closes, and the column widens to hold the map, the text keeping its column. */
 @media (min-width: 73.75rem) {
   .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {
     display: none;
+  }
+
+  .entity:has(> .entity-side > .neighbourhood-fold[open]) {
+    grid-template-columns: minmax(0, 1fr) 26.875rem;
+  }
+
+  .entity-with-space:has(> .entity-side > .neighbourhood-fold[open]) {
+    grid-template-columns: 16rem minmax(0, 1fr) 26.875rem;
   }
 }

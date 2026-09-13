@@ -16,6 +16,7 @@ import { AttributeList, AttributeValues } from "./attributes.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
 import { fill } from "./mention-list.js";
+import { NeighbourhoodIcon } from "./neighbourhood.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** How many highlights sit on the badge line; the next ones go on a line of their own. */
@@ -231,11 +232,12 @@ export function Source({
 }
 
 /**
- * The neighbourhood folded behind its line at the foot of the panel, the number of pages worded.
- * Open, the summary turns into the head of the map, a back control before the title of the map
- * and the name of the page: the stylesheet swaps the two wordings on the state of the
- * disclosure, and where the panel has a column it hides the other blocks, so that the map takes
- * the panel and never the page; without any script the map simply unfolds under the blocks.
+ * The neighbourhood folded behind its line at the foot of the panel, a decorative mark before
+ * the lead and the number of pages the map draws worded after it. Open, the summary turns into
+ * the head of the map, a back control before the title of the map and the name of the page: the
+ * stylesheet swaps the two wordings on the state of the disclosure, and where the panel has a
+ * column it hides the other blocks, so that the map takes the panel and never the page; without
+ * any script the map simply unfolds under the blocks.
  */
 export function NeighbourhoodFold({
   neighbours,
@@ -249,12 +251,13 @@ export function NeighbourhoodFold({
 }): JSX.Element {
   const Neighbourhood = useSlot("Neighbourhood");
   const text = {
-    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...defaultEntityPageLabels(neighbours.neighbours.length),
     ...given,
   };
   return (
     <details class="neighbourhood-fold" open={open}>
       <summary>
+        <NeighbourhoodIcon />
         <span class="neighbourhood-lead">{text.seeNeighbourhood}</span>
         <span class="neighbourhood-count">{text.neighbourPages}</span>
         <span class="neighbourhood-head">{neighbours.labels?.map ?? labels.neighbourhoodMap}</span>

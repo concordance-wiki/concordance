@@ -116,7 +116,7 @@ describe("siteStylesheet", () => {
       "02b6181b31f87e19640a5b919866208bec9577581c89f25d32c3dcdf80df773b",
     );
     expect(digest(componentsStylesheet())).toBe(
-      "8d1be168bd493c21d82ddd13a181bbbd6923078496c6f1d1fe434863f9edf8c2",
+      "d66c6e9fee0e15619d4cbf83e5659ca678004a435fbbd4b7baae9625b0b24556",
     );
   });
 });

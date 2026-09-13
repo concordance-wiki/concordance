@@ -193,7 +193,3 @@
   color: var(--color-label);
   font-family: var(--font-mono);
 }
-
-.keyword-panel .companions {
-  margin: 0 0 var(--space-3);
-}

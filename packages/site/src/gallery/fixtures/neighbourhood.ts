@@ -92,7 +92,7 @@ export const neighbourhoodFull: SlotProps["Neighbourhood"] = {
   total: 6,
 };
 
-/** The same note when the model holds more neighbours than the map may show: the pointer replaces the map. */
+/** The same note when the model holds more neighbours than the map may show: the total reads under the map. */
 export const neighbourhoodOverflow: SlotProps["Neighbourhood"] = {
   ...neighbourhoodFull,
   total: 14,

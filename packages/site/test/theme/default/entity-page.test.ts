@@ -19,6 +19,7 @@ import { defaultTheme } from "../../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../../src/theme/types.js";
 import { entityPage } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
+import { NEIGHBOURHOOD_ICON } from "../../helpers/neighbourhood-icon.js";
 
 function render(overrides: Partial<EntityPageProps> = {}): string {
   return renderSlot("EntityPage", { ...entityPage, ...overrides }, defaultTheme);
@@ -184,13 +185,17 @@ describe("EntityPage", () => {
   it("folds the neighbourhood behind its line at the foot of the panel, the number of pages worded, the head of the map in the same summary", () => {
     const html = render();
     expect(html).toContain(
-      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"',
+      `<details class="neighbourhood-fold"><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"`,
     );
     expect(html.indexOf('<aside class="mentions')).toBeLessThan(
       html.indexOf('<details class="neighbourhood-fold">'),
     );
+    // The line counts the pages the map draws, not the total the model holds beyond them.
+    expect(render({ neighbours: { ...entityPage.neighbours, total: 7 } })).toContain(
+      '<span class="neighbourhood-count">2 pages</span>',
+    );
     expect(render({ neighbours: { centre: "Keyword page", neighbours: [], total: 7 } })).toContain(
-      '<span class="neighbourhood-count">7 pages</span>',
+      '<span class="neighbourhood-count">0 pages</span>',
     );
     expect(
       render({ labels: { seeNeighbourhood: "Voir la carte", neighbourPages: "2 pages" } }),
@@ -250,7 +255,7 @@ describe("EntityPage", () => {
         .replace(/<p class="entity-highlights">[\s\S]*?<\/p>/, "")
         .replace(/<figure[\s\S]*?<\/figure>/, "<map/>")
         .replace(/<ul id="neighbourhood-list"[\s\S]*?<\/ul>/, "<neighbours/>")
-        .replace(/<summary><span class="neighbourhood-lead">[\s\S]*?<\/summary>/, "<lead/>");
+        .replace(/<summary><svg class="neighbourhood-icon"[\s\S]*?<\/summary>/, "<lead/>");
     expect(skeleton(screen)).toBe(skeleton(term));
     expect(screen).not.toBe(term);
     expect(screen).toContain('<p class="entity-badge"><span class="badge">screen</span>');

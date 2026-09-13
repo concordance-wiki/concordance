@@ -24,7 +24,7 @@ const corporateEntityLabels: Partial<EntityPageLabels> = {
   correction: "Something to correct?",
   edit: "Edit this page",
   seeNeighbourhood: "See the neighbourhood map",
-  neighbourPages: "5 pages",
+  neighbourPages: "4 pages",
 };
 
 /** The tree of a space of dated documents, the framing decks, folded by year and month: the current year and month open, the newest first, the current deck ruled. */

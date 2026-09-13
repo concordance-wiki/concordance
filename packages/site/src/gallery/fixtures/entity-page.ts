@@ -291,7 +291,7 @@ export const corporateEntityPageMap: SlotProps["EntityPage"] = {
         "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over.",
       noNeighbour: "No neighbour recorded.",
       total: "6 neighbours in total, more than the map shows",
-      seeMentions: "see the mentions panel",
+      seeMentions: "See the mentions panel",
     },
   },
   mapOpen: true,

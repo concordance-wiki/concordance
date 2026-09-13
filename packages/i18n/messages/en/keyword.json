@@ -1,8 +1,4 @@
 {
-  "keyword.companions": {
-    "defaultMessage": "Accompanying words",
-    "description": "Heading of the panel block listing the words that accompany a keyword."
-  },
   "keyword.createNote": {
     "defaultMessage": "Propose a definition",
     "description": "Call to action that opens the note template of the glossary for a keyword."
@@ -26,10 +22,6 @@
   "keyword.maybeSame": {
     "defaultMessage": "Maybe the same thing",
     "description": "Heading of the panel block listing the expressions of a similar form."
-  },
-  "keyword.noCompanion": {
-    "defaultMessage": "No accompanying word recorded.",
-    "description": "Notice shown when a keyword shares no paragraph with another page."
   },
   "keyword.noDefinition": {
     "defaultMessage": "No definition",

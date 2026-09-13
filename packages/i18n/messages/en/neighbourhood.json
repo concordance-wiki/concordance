@@ -36,8 +36,8 @@
     "description": "Legend of a dotted edge of the map, leading to a word nobody defined."
   },
   "neighbourhood.seeMentions": {
-    "defaultMessage": "see the mentions panel",
-    "description": "Link replacing the map when the model holds more neighbours than it shows."
+    "defaultMessage": "See the mentions panel",
+    "description": "Link to the mentions panel after the notice that the page has no neighbour."
   },
   "neighbourhood.textualEquivalent": {
     "defaultMessage": "textual equivalent",
@@ -45,6 +45,6 @@
   },
   "neighbourhood.total": {
     "defaultMessage": "{count, plural, one {# neighbour in total, more than the map shows} other {# neighbours in total, more than the map shows}}",
-    "description": "Sentence before the link to the mentions panel when the map is not drawn."
+    "description": "Sentence under the map when the model holds more neighbours than the map draws."
   }
 }

@@ -82,31 +82,3 @@
   color: var(--color-ink);
   text-decoration: underline;
 }
-
-.companions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: 0;
-  list-style: none;
-}
-
-.companion[data-weight="1"] {
-  font-size: 0.8125rem;
-}
-
-.companion[data-weight="2"] {
-  font-size: 0.875rem;
-}
-
-.companion[data-weight="3"] {
-  font-size: 0.9375rem;
-}
-
-.companion[data-weight="4"] {
-  font-size: 1.0625rem;
-}
-
-.companion[data-weight="5"] {
-  font-size: 1.1875rem;
-}

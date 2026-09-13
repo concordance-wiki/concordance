@@ -681,9 +681,9 @@ export function changedOf(context: SiteContext, entity: Entity): ChangeDate | un
   };
 }
 
-/** How many pages the neighbourhood holds: every neighbour of the model when the build counted them, the listed ones otherwise. */
+/** How many pages the map draws: the neighbours listed, never the total the model holds beyond them. */
 export function neighbourPages(neighbourhood: NeighbourhoodProps): number {
-  return neighbourhood.total ?? neighbourhood.neighbours.length;
+  return neighbourhood.neighbours.length;
 }
 
 /** The headings and notes of the page in the site language, the counts of neighbours and of declared keys worded. */

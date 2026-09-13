@@ -8,6 +8,7 @@ import { KeywordPage, markedContext } from "../../../src/theme/default/keyword-p
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import { corporateKeywordPage, entityPage, keywordPage } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
+import { NEIGHBOURHOOD_ICON } from "../../helpers/neighbourhood-icon.js";
 
 function render(overrides: Partial<KeywordPageProps> = {}): string {
   return renderSlot("KeywordPage", { ...keywordPage, ...overrides }, defaultTheme);
@@ -51,7 +52,7 @@ describe("KeywordPage", () => {
       sources: [],
     };
     const entityHtml = renderSlot("EntityPage", entity, defaultTheme);
-    const keywordHtml = render({ ...shared, passages: [], companions: [], similar: [] });
+    const keywordHtml = render({ ...shared, passages: [], similar: [] });
     // What the entity page has and the keyword page lacks: the empty article and the source footer.
     const entityShell = entityHtml
       .replace('<article class="entity-body"></article>', "")
@@ -60,8 +61,7 @@ describe("KeywordPage", () => {
     const keywordShell = keywordHtml
       .replace(/<aside class="keyword-notice"[\s\S]*?<\/aside>/, "")
       .replace(/<section class="keyword-body"[\s\S]*?<\/section>/, "")
-      .replace(/<section class="panel-block keyword-facts"[\s\S]*?<\/section>/, "")
-      .replace(/<section class="panel-block keyword-panel"[\s\S]*?<\/section>/, "");
+      .replace(/<section class="panel-block keyword-facts"[\s\S]*?<\/section>/, "");
     const skeleton = (html: string): string =>
       html
         .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge/>")
@@ -83,9 +83,8 @@ describe("KeywordPage", () => {
       '<aside class="keyword-notice" role="note">',
       '<section class="keyword-body"',
       '<div class="entity-side"><section class="panel-block keyword-facts"',
-      '<section class="panel-block keyword-panel"',
       '<aside class="mentions panel-block"',
-      '<details class="neighbourhood-fold"><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"',
+      `<details class="neighbourhood-fold"><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"`,
     ]);
     expect(
       render({
@@ -210,23 +209,22 @@ describe("KeywordPage", () => {
       '<section class="panel-block keyword-similar" aria-labelledby="keyword-similar"><details class="panel-fold"><summary><h2 id="keyword-similar">Maybe the same thing</h2></summary><ul class="similar-list"><li><a class="similar-lead" href="../build-report/"><span class="similar-label">build report</span><span class="similar-count">4</span></a></li><li><a class="similar-lead" href="../../glossary/build-log/"><span class="similar-label">Build log</span></a></li></ul><p class="panel-note">Expressions close in form and context. A lead, not a claim.</p></details></section>',
     );
     expect(render({ similar: [] })).not.toContain("keyword-similar");
-    expectInOrder(html, ['id="keyword-facts"', 'id="keyword-similar"', 'id="keyword-companions"']);
+    expectInOrder(html, ['id="keyword-facts"', 'id="keyword-similar"', 'id="mentions-title"']);
   });
 
-  it("shows the accompanying words sized by co-occurrence frequency, each a link with its count in text", () => {
+  it("has no block of accompanying words: the neighbourhood map carries the co-occurrences of the word, a noteless one as a dashed node", () => {
     const html = render();
+    expect(html).not.toContain("companion");
+    expect(html).not.toContain("Accompanying words");
+    expect(html).toContain('<span class="neighbourhood-count">3 pages</span>');
     expect(html).toContain(
-      '<h2 id="keyword-companions">Accompanying words</h2></summary><ul class="companions"><li class="companion" data-weight="5"><a href="../build-log/">build log</a> <span class="count">12</span></li>',
+      '<li class="neighbour" data-type="1"><a href="../build-log/">build log</a><span class="neighbour-type">Term</span><span class="weight">12</span></li>',
     );
     expect(html).toContain(
-      '<li class="companion" data-weight="3"><a href="../finding/">finding</a> <span class="count">5</span></li>',
+      '<li class="neighbour neighbour-noteless" data-type="2"><a href="../counts/">counts</a><span class="neighbour-type">Keyword</span><span class="weight">2</span></li>',
     );
-    expect(html).toContain(
-      '<li class="companion" data-weight="1"><span>counts</span> <span class="count">2</span></li>',
-    );
-    expect(render({ companions: [] })).toContain(
-      '<h2 id="keyword-companions">Accompanying words</h2></summary><p class="empty panel-note">No accompanying word recorded.</p>',
-    );
+    expect(count(html, '<g class="map-node')).toBe(3);
+    expect(count(html, '<g class="map-node map-node-keyword"')).toBe(1);
   });
 
   it("gives the related pages the note that none is cited, through the mentions slot", () => {
