@@ -1,28 +1,53 @@
+import { MONO_FAMILY, TEXT_FAMILY } from "./fonts.js";
 import type { ThemeConfig, ThemeMode, ThemePalette } from "./theme-config.js";
 
 const DEFAULT_RADIUS = 8;
 
+/** The stacks behind the families the default theme ships, then the platform fonts. */
 const FALLBACKS = {
-  display: "Georgia, 'Times New Roman', serif",
-  ui: "system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
-  mono: "ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace",
+  ui: `${JSON.stringify(TEXT_FAMILY)}, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif`,
+  mono: `${JSON.stringify(MONO_FAMILY)}, ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace`,
 } as const;
 
 const SPACING = ["0.25rem", "0.5rem", "1rem", "1.5rem", "2.5rem", "4rem"] as const;
 
 function fontStack(family: string | undefined, fallback: string): string {
-  return family === undefined ? fallback : `${JSON.stringify(family)}, ${fallback}`;
+  return family === undefined || JSON.stringify(family) === fallback.split(", ")[0]
+    ? fallback
+    : `${JSON.stringify(family)}, ${fallback}`;
+}
+
+/** A colour of a palette as the stylesheet names it, `--color-<name>`. */
+export type PaletteColour =
+  | "bg"
+  | "surface"
+  | "soft"
+  | "border"
+  | "ink"
+  | "muted"
+  | "label"
+  | "accent"
+  | "highlight";
+
+/** The nine colours of a palette, the three optional ones derived from the six required when absent. */
+export function paletteColours(palette: ThemePalette): Record<PaletteColour, string> {
+  return {
+    bg: palette.bg,
+    surface: palette.surface,
+    soft: palette.soft ?? palette.bg,
+    border: palette.border,
+    ink: palette.ink,
+    muted: palette.muted,
+    label: palette.label ?? palette.muted,
+    accent: palette.accent,
+    highlight: palette.highlight ?? palette.border,
+  };
 }
 
 function paletteLines(palette: ThemePalette): string[] {
-  return [
-    `  --color-bg: ${palette.bg};`,
-    `  --color-surface: ${palette.surface};`,
-    `  --color-border: ${palette.border};`,
-    `  --color-ink: ${palette.ink};`,
-    `  --color-muted: ${palette.muted};`,
-    `  --color-accent: ${palette.accent};`,
-  ];
+  return Object.entries(paletteColours(palette)).map(
+    ([name, colour]) => `  --color-${name}: ${colour};`,
+  );
 }
 
 function block(selector: string, lines: string[]): string {
@@ -38,19 +63,25 @@ function forced(mode: Exclude<ThemeMode, "system">, palette: ThemePalette): stri
 }
 
 /**
- * Custom properties of a theme: fonts, radius, spacing and the two palettes.
- * The default mode decides which palette the root carries; the other answers the system preference
- * and a `data-mode` attribute on the root, which the mode switch sets and remembers.
+ * Custom properties of a theme: fonts, radii, spacing and the two palettes. One family serves
+ * the text, headings included, unless the theme names a display family; the monospace family is
+ * reserved to file paths and identifiers. The default mode decides which palette the root
+ * carries; the other answers the system preference and a `data-mode` attribute on the root,
+ * which the mode switch sets and remembers.
  */
 export function tokensStylesheet(theme: ThemeConfig): string {
   const mode = theme.default_mode ?? "system";
   const initial = mode === "dark" ? theme.dark : theme.light;
+  const ui = fontStack(theme.font?.ui, FALLBACKS.ui);
+  const radius = theme.radius ?? DEFAULT_RADIUS;
   const root = block(":root", [
     `  color-scheme: ${mode === "system" ? "light dark" : mode};`,
-    `  --font-display: ${fontStack(theme.font?.display, FALLBACKS.display)};`,
-    `  --font-ui: ${fontStack(theme.font?.ui, FALLBACKS.ui)};`,
+    `  --font-display: ${theme.font?.display === undefined ? ui : fontStack(theme.font.display, ui)};`,
+    `  --font-ui: ${ui};`,
     `  --font-mono: ${fontStack(theme.font?.mono, FALLBACKS.mono)};`,
-    `  --radius: ${String(theme.radius ?? DEFAULT_RADIUS)}px;`,
+    `  --radius: ${String(radius)}px;`,
+    `  --radius-small: ${String(radius / 2)}px;`,
+    `  --radius-large: ${String(radius * 1.5)}px;`,
     ...SPACING.map((value, index) => `  --space-${String(index + 1)}: ${value};`),
     "  --measure: 70ch;",
     ...paletteLines(initial),

@@ -13,6 +13,7 @@ import {
   siteRootOf,
   TODO_PAGE,
 } from "../../src/build/paths.js";
+import { fontFiles } from "../../src/css/fonts.js";
 import {
   buildSite,
   SITE_PAGE_BUDGET,
@@ -86,6 +87,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         ...index,
         ...cited.map(mentionsFragmentPath),
         "assets/site.css",
+        ...fontFiles().map((file) => `assets/fonts/${file}`),
         ...report.budget.islands.map((island) => `assets/${island.file}`),
       ].sort(),
     );

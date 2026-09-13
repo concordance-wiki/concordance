@@ -14,7 +14,18 @@ export type {
   ThemeMode,
   ThemePalette,
 } from "./css/theme-config.js";
-export { tokensStylesheet } from "./css/tokens.js";
+export { paletteColours, tokensStylesheet } from "./css/tokens.js";
+export type { PaletteColour } from "./css/tokens.js";
+export {
+  FONT_FACES,
+  FONTS_DIRECTORY,
+  FONTS_LICENCE,
+  MONO_FAMILY,
+  TEXT_FAMILY,
+  fontFacesStylesheet,
+  fontFiles,
+} from "./css/fonts.js";
+export type { FontFace } from "./css/fonts.js";
 export {
   bundleIslands,
   contentHash,

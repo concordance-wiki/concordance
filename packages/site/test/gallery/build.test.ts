@@ -6,6 +6,7 @@ import { importPlugin, loadPlugins, memoryFileSystem } from "@concordance-wiki/c
 import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { fontFiles } from "../../src/css/fonts.js";
 import { buildGallery, GALLERY_PAGE_BUDGET, type GalleryReport } from "../../src/gallery/build.js";
 import { galleryTheme } from "../../src/gallery/fixtures.js";
 import { galleryPages } from "../../src/gallery/pages.js";
@@ -40,6 +41,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
         ...galleryPages.map((page) => page.file),
         "index.html",
         "assets/site.css",
+        ...fontFiles().map((file) => `assets/fonts/${file}`),
         ...report.budget.islands.map((island) => `assets/${island.file}`),
       ].sort(),
     );
@@ -215,13 +217,15 @@ describe("The gallery is built in CI and its pages pass the accessibility checks
       fileSystem,
     });
     expect(report.contrast.map((finding) => finding.message)).toEqual([
-      "light muted text: muted on bg is 2.58:1, below 4.5:1",
+      "light muted text: muted on bg is 2.41:1, below 4.5:1",
       "light muted text: muted on surface is 2.81:1, below 4.5:1",
+      "light muted text: muted on soft is 2.60:1, below 4.5:1",
     ]);
-    expect(report.summary.slice(-3)).toEqual([
-      "contrast: 2 pairs below the minimum",
-      "warning: contrast: light muted text: muted on bg is 2.58:1, below 4.5:1",
+    expect(report.summary.slice(-4)).toEqual([
+      "contrast: 3 pairs below the minimum",
+      "warning: contrast: light muted text: muted on bg is 2.41:1, below 4.5:1",
       "warning: contrast: light muted text: muted on surface is 2.81:1, below 4.5:1",
+      "warning: contrast: light muted text: muted on soft is 2.60:1, below 4.5:1",
     ]);
     expect(report.problems).toEqual([]);
     expect(fileSystem.readText("/out/assets/site.css")).toContain("--color-muted: #9A9A9A;");
