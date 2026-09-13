@@ -535,7 +535,7 @@ describe("The main content of every page is present in the served HTML, without 
     expect(keyword).toContain('<q class="passage-text">the build summary is printed</q>');
     expect(keyword).toContain('<q class="passage-text">after the <mark>Build summaries</mark></q>');
     const index = withoutJavaScript(fileSystem.readText(`/dist/${INDEX_PAGE}`));
-    expect(count(index, '<li class="index-entry"')).toBe(7);
+    expect(count(index, '<tr class="index-entry')).toBe(7);
     const todo = withoutJavaScript(fileSystem.readText(`/dist/${TODO_PAGE}`));
     expect(todo).toContain(">build summary</a>");
   });
