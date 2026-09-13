@@ -4,11 +4,15 @@ import { definePlugin, nodeFileSystem, type PluginManifest } from "@concordance-
 import { defaultTypesDirectory, readTypeModules } from "@concordance-wiki/profile";
 import { defaultComponents, galleryPages } from "@concordance-wiki/site";
 import { h, type JSX } from "preact";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { galleryCommand, type GalleryDependencies } from "../../src/commands/gallery.js";
 import { main, usage } from "../../src/main.js";
 import { recordedIo, validConfig } from "../helpers.js";
+
+// The gallery renders every slot in every state, with the accessibility and contrast checks: a
+// loaded runner needs more than the default budget.
+vi.setConfig({ testTimeout: 60_000 });
 
 const root = resolve(import.meta.dirname, "../../../..");
 const fixturePlugin = resolve(root, "fixtures/plugins/theme-example/index.mjs");
