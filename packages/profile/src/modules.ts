@@ -273,6 +273,22 @@ function componentsOf(files: readonly string[]): {
   return { components, issues };
 }
 
+/** The source catalogue must exist and carry the label and one message per declared section. */
+function sourceMessageIssues(
+  source: TypeMessages | undefined,
+  declaration: TypeModuleDeclaration,
+): ConfigIssue[] {
+  const file = `${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json`;
+  if (source === undefined) return [problem(file, "file not found")];
+  const required = [
+    "label",
+    ...Object.keys(declaration.sections ?? {}).map((key) => `sections.${key}`),
+  ];
+  return required
+    .filter((key) => source[key] === undefined)
+    .map((key) => problem(`${file}: ${key}`, "required message is missing"));
+}
+
 /**
  * Reads one module folder: `type.yaml` against the published schema, every message file, the
  * template, the schema and the components. Every problem is reported at once, with the file it
@@ -311,31 +327,7 @@ export function readTypeModule(fs: FileSystem, directory: string): TypeModuleRea
     issues.push(...read.issues);
     messages[language] = read.messages;
   }
-  const source = messages[MODULE_SOURCE_LANGUAGE];
-  if (source === undefined) {
-    issues.push(
-      problem(`${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json`, "file not found"),
-    );
-  } else {
-    if (source["label"] === undefined) {
-      issues.push(
-        problem(
-          `${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json: label`,
-          "required message is missing",
-        ),
-      );
-    }
-    for (const key of Object.keys(declaration.sections ?? {})) {
-      if (source[`sections.${key}`] === undefined) {
-        issues.push(
-          problem(
-            `${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json: sections.${key}`,
-            "required message is missing",
-          ),
-        );
-      }
-    }
-  }
+  issues.push(...sourceMessageIssues(messages[MODULE_SOURCE_LANGUAGE], declaration));
   let schema: Record<string, unknown> | undefined;
   if (files.includes(MODULE_SCHEMA_FILE)) {
     const read = schemaOf(fs.readText(at(MODULE_SCHEMA_FILE)), declaration);
@@ -450,9 +442,7 @@ export function typeDefinitionOf(module: TypeModule): TypeDefinition {
 /** The `types` block a list of modules assembles into, by slug order. */
 export function typesOf(modules: readonly TypeModule[]): Record<string, TypeDefinition> {
   const types: Record<string, TypeDefinition> = {};
-  for (const module of [...modules].sort((a, b) =>
-    a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0,
-  )) {
+  for (const module of [...modules].sort((a, b) => byCodeUnit(a.slug, b.slug))) {
     types[module.slug] = typeDefinitionOf(module);
   }
   return types;

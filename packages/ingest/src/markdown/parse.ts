@@ -121,6 +121,17 @@ function collect(block: RootContent, into: ParsedMarkdown, section?: string): vo
   });
 }
 
+/** A block under a level-two heading joins the text of its section; a list also gives its items. */
+function extend(section: MarkdownSection, block: RootContent): void {
+  const blockText = plainText(block);
+  if (blockText !== "") {
+    section.text = section.text === "" ? blockText : `${section.text}\n${blockText}`;
+  }
+  if (block.type === "list") {
+    section.items.push(...listItems(block));
+  }
+}
+
 export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdown {
   const root = processor.parse(text);
   const document: ParsedMarkdown = {
@@ -154,13 +165,7 @@ export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdo
       };
       document.sections.push(section);
     } else if (section !== undefined) {
-      const blockText = plainText(block);
-      if (blockText !== "") {
-        section.text = section.text === "" ? blockText : `${section.text}\n${blockText}`;
-      }
-      if (block.type === "list") {
-        section.items.push(...listItems(block));
-      }
+      extend(section, block);
     }
     collect(block, document, section?.heading);
   }

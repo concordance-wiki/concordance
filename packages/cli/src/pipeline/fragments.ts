@@ -77,7 +77,19 @@ function passagesOf(mentions: readonly KeywordMention[]): FragmentPassage[] {
  */
 export function imageTarget(entity: Entity, located: { source: string; path: string }): string {
   const own = located.source === entity.source.name;
-  return `${entity.id}/${own ? "" : `${located.source}/`}${located.path}`;
+  const folder = own ? entity.id : `${entity.id}/${located.source}`;
+  return `${folder}/${located.path}`;
+}
+
+/** Where the PDF preview of a document is copied: the document itself when it is a PDF, next to it otherwise. */
+function previewTarget(
+  entity: Entity,
+  path: string,
+  document: ReadDocument,
+  target: string,
+): string | undefined {
+  if (document.pdf === undefined) return undefined;
+  return document.format === "pdf" ? target : fileTarget(entity, path.replace(/\.[^./]+$/, ".pdf"));
 }
 
 /** Where a file of an entity is copied: under the folder of the page, at its path in the source. */
@@ -155,12 +167,7 @@ export function documentsOf(
     const document = documents.get(documentKey(entity.source.name, path));
     if (document === undefined) continue;
     const target = fileTarget(entity, path);
-    const preview =
-      document.pdf === undefined || !previews
-        ? undefined
-        : document.format === "pdf"
-          ? target
-          : fileTarget(entity, path.replace(/\.[^./]+$/, ".pdf"));
+    const preview = previews ? previewTarget(entity, path, document, target) : undefined;
     found.push({
       source: entity.source.name,
       path,

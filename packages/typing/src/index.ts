@@ -2,16 +2,17 @@ import {
   compareEntities,
   compareFindings,
   resolveDuplicates,
+  type ApplicationConfig,
   type Config,
   type Entity,
   type Finding,
   type SourceConfig,
 } from "@concordance-wiki/core";
-import type { IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
+import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
 
-import { compileDomains } from "./domains.js";
-import { buildEntity } from "./entity.js";
+import { compileDomains, type DomainMatcher } from "./domains.js";
+import { buildEntity, type BuiltEntity } from "./entity.js";
 import { buildResourceEntity, type Resource } from "./resource.js";
 
 export {
@@ -76,37 +77,50 @@ function configOf(config: Config, name: string): SourceConfig {
   return found;
 }
 
+/** What every entity of a source is built with, whatever its kind. */
+interface Filing {
+  source: IngestedSource;
+  sourceConfig: SourceConfig;
+  profile: Profile;
+  applications: readonly ApplicationConfig[];
+  domains: DomainMatcher;
+}
+
+/** The entity of a file: from its parsed note, or from its resource; nothing when the file has neither. */
+function buildOne(
+  input: TypeSourcesInput,
+  filing: Filing,
+  file: IngestedFile,
+): BuiltEntity | undefined {
+  const key = `${filing.source.name}/${file.path}`;
+  if (file.path.endsWith(".md")) {
+    const document = input.documents.get(key);
+    return document === undefined ? undefined : buildEntity({ ...filing, file, document });
+  }
+  const resource = input.resources?.get(key);
+  return resource === undefined ? undefined : buildResourceEntity({ ...filing, file, resource });
+}
+
 /**
  * Builds one entity per parsed markdown file and per known resource, files it under its
  * application and domain, resolves duplicate identifiers and sorts everything canonically.
  */
 export function typeSources(input: TypeSourcesInput): TypedSources {
-  const { sources, documents, config, profile } = input;
+  const { sources, config, profile } = input;
   const applications = config.applications ?? [];
   const domains = compileDomains(config.domains ?? []);
   const candidates: Candidate[] = [];
   const findings: Finding[] = [];
   for (const source of sources) {
-    const sourceConfig = configOf(config, source.name);
+    const filing = {
+      source,
+      sourceConfig: configOf(config, source.name),
+      profile,
+      applications,
+      domains,
+    };
     for (const file of source.files) {
-      const key = `${source.name}/${file.path}`;
-      const document = documents.get(key);
-      const resource = input.resources?.get(key);
-      const built = file.path.endsWith(".md")
-        ? document === undefined
-          ? undefined
-          : buildEntity({ file, source, sourceConfig, document, profile, applications, domains })
-        : resource === undefined
-          ? undefined
-          : buildResourceEntity({
-              file,
-              source,
-              sourceConfig,
-              resource,
-              profile,
-              applications,
-              domains,
-            });
+      const built = buildOne(input, filing, file);
       if (built === undefined) continue;
       candidates.push({
         id: built.entity.id,

@@ -6,5 +6,6 @@ export function formatFinding(finding: Finding): string {
     .filter((part) => part !== undefined)
     .map(String)
     .join(":");
-  return `${finding.severity}: ${finding.check}${where === "" ? "" : ` (${where})`}: ${finding.message}`;
+  const location = where === "" ? "" : ` (${where})`;
+  return `${finding.severity}: ${finding.check}${location}: ${finding.message}`;
 }

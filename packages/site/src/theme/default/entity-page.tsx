@@ -121,6 +121,13 @@ export function NoteSection({
   );
 }
 
+/** One step of the breadcrumb: the current page is marked, a folder without a page is plain text. */
+function Crumb({ item, current }: { item: BreadcrumbItem; current: boolean }): JSX.Element {
+  if (current) return <span aria-current="page">{item.label}</span>;
+  if (item.href === undefined) return <span>{item.label}</span>;
+  return <a href={item.href}>{item.label}</a>;
+}
+
 /** Space › folder › page: the space links to its place on the home page, the page is where the reader stands. */
 export function Breadcrumb({
   items,
@@ -135,13 +142,7 @@ export function Breadcrumb({
       <ol class="breadcrumbs-list">
         {items.map((item, index) => (
           <li key={item.href ?? item.label}>
-            {index === last ? (
-              <span aria-current="page">{item.label}</span>
-            ) : item.href === undefined ? (
-              <span>{item.label}</span>
-            ) : (
-              <a href={item.href}>{item.label}</a>
-            )}
+            <Crumb item={item} current={index === last} />
           </li>
         ))}
       </ol>

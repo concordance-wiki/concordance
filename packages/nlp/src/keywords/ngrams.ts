@@ -1,5 +1,5 @@
 import type { LanguagePack } from "../locale/pack.js";
-import { tokenize } from "../scan/tokens.js";
+import { tokenize, type Token } from "../scan/tokens.js";
 import { contextAround } from "../text/context.js";
 
 /** A text unit the discovery reads: a scannable unit of a document, with the file it comes from. */
@@ -51,6 +51,49 @@ export function keywordForms(forms: Iterable<string>, pack: LanguagePack): Set<s
   return new Set([...forms].map((form) => keywordForm(form, pack)));
 }
 
+/** What every n-gram of a run is filtered and cut with. */
+interface NgramRules {
+  minWords: number;
+  maxWords: number;
+  minLength: number;
+  stopwords: ReadonlySet<string>;
+}
+
+/** Whether the words so far form a candidate: enough of them, the last not a stopword, not digits alone, long enough. */
+function isCandidate(words: readonly string[], last: string, rules: NgramRules): boolean {
+  if (words.length < rules.minWords || rules.stopwords.has(last)) return false;
+  if (words.every((word) => digitsOnly.test(word))) return false;
+  return words.join(" ").length >= rules.minLength;
+}
+
+/** The n-grams of one unit starting at each token that is not a stopword, in text order. */
+function ngramsOf(
+  unit: KeywordUnit,
+  tokens: readonly Token[],
+  rules: NgramRules,
+): NgramOccurrence[] {
+  const occurrences: NgramOccurrence[] = [];
+  for (const [start, first] of tokens.entries()) {
+    // A candidate never starts with a stopword, whatever its length.
+    if (rules.stopwords.has(first.word)) continue;
+    const words: string[] = [];
+    for (const last of tokens.slice(start, start + rules.maxWords)) {
+      words.push(last.word);
+      if (!isCandidate(words, last.word, rules)) continue;
+      occurrences.push({
+        key: words.join(" "),
+        surface: unit.text.slice(first.start, last.end),
+        ...(unit.source === undefined ? {} : { source: unit.source }),
+        path: unit.path,
+        line: unit.line,
+        position: first.start,
+        context: contextAround(unit.text, first.start, last.end, contextWidth),
+      });
+    }
+  }
+  return occurrences;
+}
+
 /**
  * Every n-gram of `minWords` to `maxWords` words in the units, in unit then text order,
  * except those starting or ending with a stopword, those made only of digits and those
@@ -63,33 +106,11 @@ export function extractNgrams(
   pack: LanguagePack,
   options: ExtractNgramsOptions,
 ): NgramOccurrence[] {
-  const minWords = options.minWords ?? 1;
-  const stopwords = keywordForms(options.stopwords ?? pack.stopwords, pack);
-  const occurrences: NgramOccurrence[] = [];
-
-  for (const unit of units) {
-    const tokens = tokenize(unit.text, pack);
-    for (const [start, first] of tokens.entries()) {
-      // A candidate never starts with a stopword, whatever its length.
-      if (stopwords.has(first.word)) continue;
-      const words: string[] = [];
-      for (const [offset, last] of tokens.slice(start, start + options.maxWords).entries()) {
-        words.push(last.word);
-        if (offset + 1 < minWords || stopwords.has(last.word)) continue;
-        if (words.every((word) => digitsOnly.test(word))) continue;
-        const key = words.join(" ");
-        if (key.length < options.minLength) continue;
-        occurrences.push({
-          key,
-          surface: unit.text.slice(first.start, last.end),
-          ...(unit.source === undefined ? {} : { source: unit.source }),
-          path: unit.path,
-          line: unit.line,
-          position: first.start,
-          context: contextAround(unit.text, first.start, last.end, contextWidth),
-        });
-      }
-    }
-  }
-  return occurrences;
+  const rules: NgramRules = {
+    minWords: options.minWords ?? 1,
+    maxWords: options.maxWords,
+    minLength: options.minLength,
+    stopwords: keywordForms(options.stopwords ?? pack.stopwords, pack),
+  };
+  return units.flatMap((unit) => ngramsOf(unit, tokenize(unit.text, pack), rules));
 }

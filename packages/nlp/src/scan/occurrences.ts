@@ -132,6 +132,41 @@ export function compareOccurrences(a: Occurrence, b: Occurrence): number {
   );
 }
 
+/** What every occurrence of one paragraph shares once its match is located. */
+interface ParagraphScan {
+  input: ScanDocumentInput;
+  paragraph: ScannedParagraph;
+  tokens: readonly Token[];
+  prefixes: ReadonlyMap<string, string | undefined>;
+}
+
+/** The occurrences of one match: one per target of the entry, at the same confidence. */
+function occurrencesOf(scan: ParagraphScan, match: RawMatch<DictionaryEntry>): Occurrence[] {
+  const { input, paragraph, tokens, prefixes } = scan;
+  const { scale } = input;
+  const span = spanOf(tokens, match);
+  const before = tokens[match.start - 1];
+  const expectedType = before === undefined ? undefined : prefixes.get(before.word);
+  const announced = expectedType === undefined ? 0 : scale.type_prefix_bonus;
+  const factor = match.key.homonym ? scale.homonym_factor : 1;
+  const base: Omit<Occurrence, "target"> = {
+    key: match.key.key,
+    source: input.source,
+    path: input.document.path,
+    line: paragraph.line,
+    position: span.start,
+    text: paragraph.text.slice(span.start, span.end),
+    ...(paragraph.section === undefined ? {} : { section: paragraph.section }),
+    context: contextAround(paragraph.text, span.start, span.end, contextWidth),
+    ...(expectedType === undefined ? {} : { expectedType }),
+    confidence: (scale.base + announced) * factor,
+  };
+  return match.key.targets.map((target) => ({
+    ...base,
+    target: { id: target.id, kind: target.kind },
+  }));
+}
+
 /**
  * Every mention of a dictionary entry in the paragraphs of a document, one per target of the
  * entry, in canonical order. Confidence is the base of the scale, plus
@@ -139,34 +174,15 @@ export function compareOccurrences(a: Occurrence, b: Occurrence): number {
  * says) for a homonym; the increment per further occurrence belongs to the combination step.
  */
 export function scanDocument(input: ScanDocumentInput): Occurrence[] {
-  const { document, source, dictionary, pack, scale } = input;
+  const { document, dictionary, pack } = input;
   const automaton = automatonOf(dictionary, pack);
   const prefixes = prefixTypes(input.typePrefixes, pack);
   const occurrences: Occurrence[] = [];
-
   for (const paragraph of document.paragraphs) {
     const tokens = tokenize(paragraph.text, pack);
+    const scanned: ParagraphScan = { input, paragraph, tokens, prefixes };
     for (const match of longestMatches(scan(automaton, tokens))) {
-      const span = spanOf(tokens, match);
-      const before = tokens[match.start - 1];
-      const expectedType = before === undefined ? undefined : prefixes.get(before.word);
-      const announced = expectedType === undefined ? 0 : scale.type_prefix_bonus;
-      const factor = match.key.homonym ? scale.homonym_factor : 1;
-      const base: Omit<Occurrence, "target"> = {
-        key: match.key.key,
-        source,
-        path: document.path,
-        line: paragraph.line,
-        position: span.start,
-        text: paragraph.text.slice(span.start, span.end),
-        ...(paragraph.section === undefined ? {} : { section: paragraph.section }),
-        context: contextAround(paragraph.text, span.start, span.end, contextWidth),
-        ...(expectedType === undefined ? {} : { expectedType }),
-        confidence: (scale.base + announced) * factor,
-      };
-      for (const target of match.key.targets) {
-        occurrences.push({ ...base, target: { id: target.id, kind: target.kind } });
-      }
+      occurrences.push(...occurrencesOf(scanned, match));
     }
   }
   return occurrences.sort(compareOccurrences);

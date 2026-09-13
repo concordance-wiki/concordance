@@ -174,6 +174,22 @@ function isDocument(value: unknown): value is FragmentDocument {
   );
 }
 
+/** An optional list of the fragment, every item of the shape expected; absent when the key is. */
+function optionalList<T>(
+  document: Record<string, unknown>,
+  key: string,
+  isItem: (value: unknown) => value is T,
+  expected: string,
+  file: string,
+): T[] | undefined {
+  const value = document[key];
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || !value.every(isItem)) {
+    throw new FragmentError(file, `${key} must be a list of ${expected}`);
+  }
+  return value;
+}
+
 /** Reads a fragment back, refusing anything but the shape the build writes. */
 export function parseFragment(text: string, file: string): EntityFragment {
   let document: unknown;
@@ -190,45 +206,33 @@ export function parseFragment(text: string, file: string): EntityFragment {
     throw new FragmentError(file, "sections must be a list of { id, heading?, html }");
   }
   const fragment: EntityFragment = { id: document["id"], sections: document["sections"] };
-  if (document["passages"] !== undefined) {
-    if (!Array.isArray(document["passages"]) || !document["passages"].every(isPassage)) {
-      throw new FragmentError(file, "passages must be a list of { source, path, line, context }");
-    }
-    fragment.passages = document["passages"];
-  }
-  if (document["leads"] !== undefined) {
-    if (!Array.isArray(document["leads"]) || !document["leads"].every(isLead)) {
-      throw new FragmentError(file, "leads must be a list of { id, title }");
-    }
-    fragment.leads = document["leads"];
-  }
-  if (document["keywords"] !== undefined) {
-    const keywords: unknown = document["keywords"];
-    if (!Array.isArray(keywords) || !keywords.every(isString)) {
-      throw new FragmentError(file, "keywords must be a list of identifiers");
-    }
-    fragment.keywords = keywords;
-  }
-  if (document["images"] !== undefined) {
-    if (!Array.isArray(document["images"]) || !document["images"].every(isImage)) {
-      throw new FragmentError(file, "images must be a list of { source, path, target }");
-    }
-    fragment.images = document["images"];
-  }
+  const passages = optionalList(
+    document,
+    "passages",
+    isPassage,
+    "{ source, path, line, context }",
+    file,
+  );
+  if (passages !== undefined) fragment.passages = passages;
+  const leads = optionalList(document, "leads", isLead, "{ id, title }", file);
+  if (leads !== undefined) fragment.leads = leads;
+  const keywords = optionalList(document, "keywords", isString, "identifiers", file);
+  if (keywords !== undefined) fragment.keywords = keywords;
+  const images = optionalList(document, "images", isImage, "{ source, path, target }", file);
+  if (images !== undefined) fragment.images = images;
   if (document["text"] !== undefined) {
     if (typeof document["text"] !== "string") {
       throw new FragmentError(file, "text must be a string");
     }
     fragment.text = document["text"];
   }
-  if (document["documents"] !== undefined) {
-    if (!Array.isArray(document["documents"]) || !document["documents"].every(isDocument)) {
-      throw new FragmentError(
-        file,
-        "documents must be a list of { source, path, format, target, preview?, size?, author?, date?, pageCount?, unit, pages }",
-      );
-    }
-    fragment.documents = document["documents"];
-  }
+  const documents = optionalList(
+    document,
+    "documents",
+    isDocument,
+    "{ source, path, format, target, preview?, size?, author?, date?, pageCount?, unit, pages }",
+    file,
+  );
+  if (documents !== undefined) fragment.documents = documents;
   return fragment;
 }

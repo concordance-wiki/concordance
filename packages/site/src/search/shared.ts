@@ -239,6 +239,19 @@ export interface RankOrder {
  * never comes before an entity of the same score. The shards given are those of the words; a
  * word without a shard matches nothing.
  */
+/** The heaviest token of every entity that the word prefixes, from the shard of the word. */
+function bestWeights(word: string, shards: ReadonlyMap<string, ShardData>): Map<number, number> {
+  const best = new Map<number, number>();
+  const shard = shards.get(shardOf(word)) ?? {};
+  for (const [token, pairs] of Object.entries(shard)) {
+    if (!token.startsWith(word)) continue;
+    for (const [entity, weight] of pairs) {
+      best.set(entity, Math.max(best.get(entity) ?? 0, weight));
+    }
+  }
+  return best;
+}
+
 export function rank(
   words: readonly string[],
   shards: ReadonlyMap<string, ShardData>,
@@ -248,14 +261,7 @@ export function rank(
   const cited = order.cited ?? ((): number => 0);
   let scores: Map<number, number> | undefined;
   for (const word of words) {
-    const best = new Map<number, number>();
-    const shard = shards.get(shardOf(word)) ?? {};
-    for (const [token, pairs] of Object.entries(shard)) {
-      if (!token.startsWith(word)) continue;
-      for (const [entity, weight] of pairs) {
-        best.set(entity, Math.max(best.get(entity) ?? 0, weight));
-      }
-    }
+    const best = bestWeights(word, shards);
     if (scores === undefined) {
       scores = best;
       continue;

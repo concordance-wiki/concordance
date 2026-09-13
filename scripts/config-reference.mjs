@@ -144,41 +144,56 @@ function typeOf(schema, raw) {
 
 const plural = (count) => (count === 1 ? "" : "s");
 
-/** The constraints of a node, item and map constraints prefixed, as one cell. */
-function allowedOf(schema, raw, prefix = "") {
-  const { node } = deref(schema, raw);
-  if (!isObject(node)) return [];
-  const parts = [];
-  if (node.const !== undefined) parts.push(code(JSON.stringify(node.const)));
-  if (node.enum !== undefined) parts.push(node.enum.map((value) => code(value)).join(", "));
-  if (node.pattern !== undefined) parts.push(`pattern ${code(node.pattern)}`);
-  if (node.format !== undefined) parts.push(`format ${code(node.format)}`);
+/** The range a node bounds, as words. */
+function rangeOf(node) {
   if (node.minimum !== undefined && node.maximum !== undefined) {
-    parts.push(`${String(node.minimum)} to ${String(node.maximum)}`);
-  } else if (node.minimum !== undefined) {
-    parts.push(`at least ${String(node.minimum)}`);
-  } else if (node.maximum !== undefined) {
-    parts.push(`at most ${String(node.maximum)}`);
+    return [`${String(node.minimum)} to ${String(node.maximum)}`];
   }
-  if (node.minLength !== undefined)
-    parts.push(
-      node.minLength === 1 ? "non-empty" : `at least ${String(node.minLength)} characters`,
-    );
+  if (node.minimum !== undefined) return [`at least ${String(node.minimum)}`];
+  if (node.maximum !== undefined) return [`at most ${String(node.maximum)}`];
+  return [];
+}
+
+/** The item count a node bounds, as words. */
+function itemCountOf(node) {
   if (
     node.minItems !== undefined &&
     node.maxItems !== undefined &&
     node.minItems === node.maxItems
   ) {
-    parts.push(`exactly ${String(node.minItems)} items`);
-  } else {
-    if (node.minItems !== undefined)
-      parts.push(`at least ${String(node.minItems)} item${plural(node.minItems)}`);
-    if (node.maxItems !== undefined)
-      parts.push(`at most ${String(node.maxItems)} item${plural(node.maxItems)}`);
+    return [`exactly ${String(node.minItems)} items`];
   }
+  const parts = [];
+  if (node.minItems !== undefined)
+    parts.push(`at least ${String(node.minItems)} item${plural(node.minItems)}`);
+  if (node.maxItems !== undefined)
+    parts.push(`at most ${String(node.maxItems)} item${plural(node.maxItems)}`);
+  return parts;
+}
+
+/** The constraints of the node itself, before those of its items, keys and values. */
+function ownConstraintsOf(node) {
+  const parts = [];
+  if (node.const !== undefined) parts.push(code(JSON.stringify(node.const)));
+  if (node.enum !== undefined) parts.push(node.enum.map((value) => code(value)).join(", "));
+  if (node.pattern !== undefined) parts.push(`pattern ${code(node.pattern)}`);
+  if (node.format !== undefined) parts.push(`format ${code(node.format)}`);
+  parts.push(...rangeOf(node));
+  if (node.minLength !== undefined)
+    parts.push(
+      node.minLength === 1 ? "non-empty" : `at least ${String(node.minLength)} characters`,
+    );
+  parts.push(...itemCountOf(node));
   if (node.minProperties !== undefined)
     parts.push(`at least ${String(node.minProperties)} key${plural(node.minProperties)}`);
-  const prefixed = parts.map((part) => `${prefix}${part}`);
+  return parts;
+}
+
+/** The constraints of a node, item and map constraints prefixed, as one cell. */
+function allowedOf(schema, raw, prefix = "") {
+  const { node } = deref(schema, raw);
+  if (!isObject(node)) return [];
+  const prefixed = ownConstraintsOf(node).map((part) => `${prefix}${part}`);
   if (node.type === "array" && node.items !== undefined) {
     prefixed.push(...allowedOf(schema, node.items, `${prefix}each: `));
   }
@@ -295,13 +310,9 @@ export function renderReference(schema, entry) {
     return [text, ...links].filter((part) => part !== "").join(" ");
   };
 
-  const section = (node, path, ref, level) => {
-    const key = ref ?? path;
-    if (rendered.has(key)) return;
-    rendered.set(key, path);
-    const required = new Set(node.required ?? []);
-    const body = [];
-    body.push(`${"#".repeat(level)} ${code(path)}`, "");
+  /** The lines above the table of a section: its heading, description, alternatives and key constraints. */
+  const preamble = (node, path, level) => {
+    const body = [`${"#".repeat(level)} ${code(path)}`, ""];
     if (typeof node.description === "string" && path !== "") body.push(node.description, "");
     const alternatives = alternativesOf(node);
     if (alternatives.length > 0) {
@@ -311,21 +322,33 @@ export function renderReference(schema, entry) {
       const constraints = allowedOf(schema, node.propertyNames);
       if (constraints.length > 0) body.push(`Keys: ${constraints.join(", ")}.`, "");
     }
+    return body;
+  };
+
+  /** One row of the table: the key, its type, default, constraints and description. */
+  const row = (name, value, path, required) => {
+    const resolved = deref(schema, value).node;
+    const defaultValue =
+      isObject(resolved) && resolved.default !== undefined
+        ? code(JSON.stringify(resolved.default))
+        : "—";
+    const allowed = allowedOf(schema, value);
+    const allowedValues = allowed.length > 0 ? allowed.join("; ") : "—";
+    const label = `${code(name)}${required.has(name) ? " (required)" : ""}`;
+    return `| ${label} | ${typeOf(schema, value)} | ${defaultValue} | ${allowedValues} | ${cell(describe(value, path))} |`;
+  };
+
+  const section = (node, path, ref, level) => {
+    const key = ref ?? path;
+    if (rendered.has(key)) return;
+    rendered.set(key, path);
+    const required = new Set(node.required ?? []);
+    const body = preamble(node, path, level);
     body.push("| Key | Type | Default | Allowed values | Description |", "|---|---|---|---|---|");
     const children = [];
     for (const [name, value] of Object.entries(node.properties ?? {})) {
-      const resolved = deref(schema, value).node;
-      const defaultValue =
-        isObject(resolved) && resolved.default !== undefined
-          ? code(JSON.stringify(resolved.default))
-          : "—";
-      const allowed = allowedOf(schema, value);
-      const allowedValues = allowed.length > 0 ? allowed.join("; ") : "—";
-      const label = `${code(name)}${required.has(name) ? " (required)" : ""}`;
       const childPath = path === "" ? name : `${path}.${name}`;
-      body.push(
-        `| ${label} | ${typeOf(schema, value)} | ${defaultValue} | ${allowedValues} | ${cell(describe(value, childPath))} |`,
-      );
+      body.push(row(name, value, childPath, required));
       children.push(...nestedObjects(schema, value, childPath));
     }
     const values = mapValues(node);

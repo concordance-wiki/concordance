@@ -182,10 +182,11 @@ export async function createViewer<V extends PdfViewport>(
       controls.status.textContent = "";
       return;
     }
+    const positions = matches.map((match) => `${options.labels.unit} ${String(match)}`).join(", ");
     controls.status.textContent =
       matches.length === 0
         ? options.labels.noMatch
-        : `${String(matches.length)} ${options.labels.matchesOn} ${matches.map((match) => `${options.labels.unit} ${String(match)}`).join(", ")}`;
+        : `${String(matches.length)} ${options.labels.matchesOn} ${positions}`;
   };
 
   controls.zoomOut.addEventListener("click", () => {

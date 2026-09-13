@@ -64,6 +64,11 @@ function commonValue(entity: Entity, key: Common): string | undefined {
   return entity[key];
 }
 
+/** The aliases are a field of the entity; every other key is one of its attributes. */
+function ownValue(entity: Entity, key: string): unknown {
+  return key === "aliases" ? entity.aliases : entity.attributes[key];
+}
+
 function commonLabel(context: SiteContext, key: Common): string {
   switch (key) {
     case "application":
@@ -112,12 +117,7 @@ export function attributeOf(
   const common = COMMON.find((candidate) => candidate === key);
   const label =
     common === undefined ? attributeLabel(context, entity.type, key) : commonLabel(context, common);
-  const raw: unknown =
-    common !== undefined
-      ? commonValue(entity, common)
-      : key === "aliases"
-        ? entity.aliases
-        : entity.attributes[key];
+  const raw: unknown = common === undefined ? ownValue(entity, key) : commonValue(entity, common);
   const values = valuesOf(context, page, raw);
   return values.length === 0 ? undefined : { name: key, label, values };
 }

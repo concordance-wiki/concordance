@@ -104,6 +104,65 @@ function targetOf(
   return { target: resolution.entity };
 }
 
+/** Where the links and the findings of every reference accumulate. */
+interface Collector {
+  index: EntityIndex;
+  confidence: number;
+  merged: Map<string, Merged>;
+  findings: Finding[];
+}
+
+function record(collector: Collector, reference: Reference, target: LinkableEntity): void {
+  const { entity, attribute, definition } = reference;
+  const { relation } = definition;
+  const [from, to] = definition.inverse === true ? [target.id, entity.id] : [entity.id, target.id];
+  const attributes = { ...definition.attributes };
+  const serialised = canonical(attributes);
+  const provenance: Provenance = {
+    method: "frontmatter_ref",
+    confidence: collector.confidence,
+    path: entity.source.path,
+    line: 1,
+    attribute,
+  };
+  const key = `${from} ${to} ${relation} ${serialised}`;
+  const existing = collector.merged.get(key);
+  if (existing === undefined) {
+    collector.merged.set(key, {
+      link: {
+        from,
+        to,
+        relation,
+        attributes,
+        confidence: collector.confidence,
+        provenance: [provenance],
+      },
+      attributes: serialised,
+    });
+  } else {
+    // Several references to one target keep every provenance; combining their confidences is a later step.
+    existing.link.provenance.push(provenance);
+  }
+}
+
+/** Every value of one reference attribute: a string names a note, anything else is reported. */
+function collect(collector: Collector, reference: Reference, raw: unknown): void {
+  const values = Array.isArray(raw) ? raw : [raw];
+  for (const value of values) {
+    if (typeof value !== "string") {
+      const detail = `value ${JSON.stringify(value)} is neither a string nor a list of strings`;
+      collector.findings.push(unresolved(reference, detail));
+      continue;
+    }
+    const resolved = targetOf(value, reference, collector.index);
+    if ("finding" in resolved) {
+      collector.findings.push(resolved.finding);
+    } else if (resolved.target.id !== reference.entity.id) {
+      record(collector, reference, resolved.target);
+    }
+  }
+}
+
 /**
  * A reference-typed attribute with a relation in the profile turns each of its values into a link of
  * that relation, carrying the attributes the profile declares, such as `accesses` in `read` mode for
@@ -112,68 +171,24 @@ function targetOf(
  */
 export function frontmatterLinks(input: FrontmatterLinksInput): FrontmatterLinksResult {
   const { entities, profile } = input;
-  const confidence = input.confidence ?? profile.confidence.frontmatter_ref ?? DEFAULT_CONFIDENCE;
-  const index = indexEntities(entities);
-  const merged = new Map<string, Merged>();
-  const findings: Finding[] = [];
-
-  const record = (reference: Reference, target: LinkableEntity): void => {
-    const { entity, attribute, definition } = reference;
-    const { relation } = definition;
-    const [from, to] =
-      definition.inverse === true ? [target.id, entity.id] : [entity.id, target.id];
-    const attributes = { ...definition.attributes };
-    const serialised = canonical(attributes);
-    const provenance: Provenance = {
-      method: "frontmatter_ref",
-      confidence,
-      path: entity.source.path,
-      line: 1,
-      attribute,
-    };
-    const key = `${from} ${to} ${relation} ${serialised}`;
-    const existing = merged.get(key);
-    if (existing === undefined) {
-      merged.set(key, {
-        link: { from, to, relation, attributes, confidence, provenance: [provenance] },
-        attributes: serialised,
-      });
-    } else {
-      // Several references to one target keep every provenance; combining their confidences is a later step.
-      existing.link.provenance.push(provenance);
-    }
+  const collector: Collector = {
+    index: indexEntities(entities),
+    confidence: input.confidence ?? profile.confidence.frontmatter_ref ?? DEFAULT_CONFIDENCE,
+    merged: new Map<string, Merged>(),
+    findings: [],
   };
-
   for (const entity of entities) {
     const declared = profile.types[entity.type]?.attributes ?? {};
     for (const [attribute, definition] of Object.entries(declared)) {
       const raw = entity.attributes[attribute];
       if (!isReference(definition) || raw === undefined) continue;
-      const reference: Reference = { entity, attribute, definition };
-      const values = Array.isArray(raw) ? raw : [raw];
-      for (const value of values) {
-        if (typeof value !== "string") {
-          findings.push(
-            unresolved(
-              reference,
-              `value ${JSON.stringify(value)} is neither a string nor a list of strings`,
-            ),
-          );
-          continue;
-        }
-        const resolved = targetOf(value, reference, index);
-        if ("finding" in resolved) {
-          findings.push(resolved.finding);
-        } else if (resolved.target.id !== entity.id) {
-          record(reference, resolved.target);
-        }
-      }
+      collect(collector, { entity, attribute, definition }, raw);
     }
   }
 
   // The provenances of one link all come from one note, at line 1: they are already in canonical order.
-  const links = [...merged.values()]
+  const links = [...collector.merged.values()]
     .sort((a, b) => compareLinks(a.link, b.link) || byCodeUnit(a.attributes, b.attributes))
     .map((entry) => entry.link);
-  return { links, findings: findings.toSorted(compareFindings) };
+  return { links, findings: collector.findings.toSorted(compareFindings) };
 }

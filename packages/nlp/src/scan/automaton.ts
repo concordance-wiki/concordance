@@ -39,6 +39,20 @@ class State<K> implements AutomatonState<K> {
   }
 }
 
+/** The state the words lead to from the root, created along the way when missing. */
+function stateOf<K>(root: State<K>, words: readonly string[]): State<K> {
+  let state = root;
+  for (const word of words) {
+    let child = state.next.get(word);
+    if (child === undefined) {
+      child = new State<K>(root);
+      state.next.set(word, child);
+    }
+    state = child;
+  }
+  return state;
+}
+
 /**
  * Aho-Corasick over words: the trie of the patterns with failure links, so that a text is read
  * once whatever the number of patterns. A pattern without words is ignored, and a key given
@@ -48,15 +62,7 @@ export function buildAutomaton<K = string>(patterns: readonly Pattern<K>[]): Aut
   const root = new State<K>();
   for (const { key, words } of patterns) {
     if (words.length === 0) continue;
-    let state = root;
-    for (const word of words) {
-      let child = state.next.get(word);
-      if (child === undefined) {
-        child = new State<K>(root);
-        state.next.set(word, child);
-      }
-      state = child;
-    }
+    const state = stateOf(root, words);
     if (!state.output.some((output) => output.key === key)) {
       state.output.push({ key, length: words.length });
     }

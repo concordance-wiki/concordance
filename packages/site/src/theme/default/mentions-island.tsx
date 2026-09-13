@@ -178,6 +178,20 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
     );
   }
 
+  /** The related pages, or the reason none is listed: nothing related, or nothing left by the filter. */
+  private list(all: RelatedPage[], shown: RelatedPage[]): JSX.Element {
+    const { labels } = this.props;
+    if (all.length === 0) return <p class="empty">{labels.noRelated}</p>;
+    if (shown.length === 0) {
+      return (
+        <p class="empty" role="status">
+          {labels.noMatch}
+        </p>
+      );
+    }
+    return <RelatedList pages={shown} labels={labels} />;
+  }
+
   /** The way to the pages beyond the inline mentions: a link to the fragment until the island runs, a button once it can load them. */
   private more(shownPages: number): JSX.Element | null {
     const { total, mentions, pages, fragmentHref, rest, labels } = this.props;
@@ -217,15 +231,7 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
     return (
       <div class="mentions-body">
         {hydrated && this.controls(all, shown)}
-        {all.length === 0 ? (
-          <p class="empty">{labels.noRelated}</p>
-        ) : shown.length === 0 ? (
-          <p class="empty" role="status">
-            {labels.noMatch}
-          </p>
-        ) : (
-          <RelatedList pages={shown} labels={labels} />
-        )}
+        {this.list(all, shown)}
         {this.more(all.length)}
         {all.length > 0 && labels.leadNote !== undefined && (
           <p class="related-note related-lead-note">{labels.leadNote}</p>
