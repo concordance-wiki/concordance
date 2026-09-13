@@ -4,7 +4,13 @@ import { h, type JSX } from "preact";
 import { describe, expect, it } from "vitest";
 
 import { buildCommand } from "../../src/commands/build.js";
-import { readFragments, renderCommand, siteNames } from "../../src/commands/render.js";
+import {
+  placeImages,
+  readFragments,
+  renderCommand,
+  siteNames,
+  sourceRefs,
+} from "../../src/commands/render.js";
 import type { ThemeDependencies } from "../../src/commands/theme.js";
 import { main } from "../../src/main.js";
 import { recordedIo, validConfig, type RecordedIo } from "../helpers.js";
@@ -19,7 +25,8 @@ function corpus(config = validConfig): RecordedIo {
   return recordedIo({
     "/work/concordance.yaml": config,
     "/work/notes/a.md":
-      "---\ntype: screen\nowner: team-a\n---\n# Screen A\n\nShows [B](b.md) and the build summary.\n\n## Steps\n\n1. The build summary is printed.\n",
+      "---\ntype: screen\nowner: team-a\n---\n# Screen A\n\nShows [B](b.md) and the build summary; Term B is recognised.\n\n![the screen](figures/a.svg)\n\n## Steps\n\n1. The build summary is printed.\n",
+    "/work/notes/figures/a.svg": "<svg/>",
     "/work/notes/b.md":
       "---\ntype: term\n---\n# Term B\n\nUsed by [A](a.md); the build summary names it.\n",
     "/work/notes/c.md": "# Note C\n\nA third note about the build summary, next to [B](b.md).\n",
@@ -105,12 +112,20 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "keywords/build.json",
       "keywords/summary.json",
       "notes/a.json",
+      "notes/a/figures/a.svg",
       "notes/b.json",
       "notes/c.json",
     ]);
     const page = io.fs.readText("/work/dist/notes/a/index.html");
     expect(page).toContain("<h1>Screen A</h1>");
-    expect(page).toContain('<a href="../b/index.html">B</a>');
+    expect(page).toContain('<a href="../b/index.html" class="written">B</a>');
+    expect(page).toContain('<a href="../b/index.html" class="recognised">Term B</a>');
+    expect(page).toContain('<img src="figures/a.svg" alt="the screen">');
+    expect(io.fs.readText("/work/dist/notes/a/figures/a.svg")).toBe("<svg/>");
+    expect(page).toContain(
+      '<footer class="legend"><span class="legend-written">link written in the note</span><span class="legend-recognised">word recognised at indexing</span></footer>',
+    );
+    expect(page).toContain('<p class="entity-source">source: <code>notes/a.md</code></p>');
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");
     const keyword = io.fs.readText("/work/dist/keywords/build-summary/index.html");
@@ -145,6 +160,28 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(io.stdout[1]).toMatch(/^site: \d+ pages written to \/work\/site$/);
     expect(io.fs.readText("/work/site/notes/a/index.html")).toContain("<h2>Steps</h2>");
     expect(io.fs.exists("/work/site/model.json")).toBe(false);
+    expect(io.fs.readText("/work/site/notes/a/figures/a.svg")).toBe("<svg/>");
+  });
+
+  it("places the images the build kept under fragments/ next to their pages, skipping one the build did not keep", () => {
+    const io = corpus();
+    io.fs.writeText("/work/dist/fragments/notes/a/figures/a.svg", "<svg/>");
+    const fragments = new Map([
+      [
+        "notes/a",
+        {
+          id: "notes/a",
+          sections: [],
+          images: [
+            { source: "notes", path: "figures/a.svg", target: "notes/a/figures/a.svg" },
+            { source: "notes", path: "figures/gone.svg", target: "notes/a/figures/gone.svg" },
+          ],
+        },
+      ],
+      ["notes/b", { id: "notes/b", sections: [] }],
+    ]);
+    expect(placeImages(io.fs, fragments, "/work/dist", "/work/site")).toBe(1);
+    expect(io.fs.listFiles("/work/site")).toEqual(["notes/a/figures/a.svg"]);
   });
 
   it("renders the pages without their note text and warns when the fragments are missing", async () => {
@@ -173,6 +210,27 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const page = io.fs.readText("/work/dist/notes/b/index.html");
     expect(page).toContain('<a class="entity-edit" href="https://forge.example/notes/edit/b.md">');
     expect(page).toContain("<details");
+  });
+
+  it("links the edit page of the forge from a git source URL on its declared ref when no edit_url is configured", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml":
+        "version: 1\nproject: { name: W }\nsources: [{ name: specs, git: https://github.com/concordance-wiki/demo-specs.git, ref: develop }]\n",
+    });
+    expect(await buildCommand([], io)).toBe(0);
+    expect(io.fs.readText("/work/dist/specs/readme/index.html")).toContain(
+      '<a class="entity-edit" href="https://github.com/concordance-wiki/demo-specs/edit/develop/README.md">Edit in the forge</a>',
+    );
+    expect(
+      sourceRefs({
+        version: 1,
+        project: { name: "W" },
+        sources: [
+          { name: "a", git: "https://github.com/o/a.git", ref: "v2" },
+          { name: "b", path: "./b" },
+        ],
+      }),
+    ).toEqual({ a: "v2" });
   });
 
   it("takes the output folder from build.output, resolved against the configuration", async () => {

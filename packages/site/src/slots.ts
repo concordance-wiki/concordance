@@ -141,14 +141,22 @@ export interface Section {
 }
 
 export interface SourceRef {
+  /** Name of the declared source the file belongs to. */
+  source: string;
+  /** Forward-slash path relative to the source root. */
   path: string;
+  /** Where the file is edited on its forge; absent for a local source without a known forge. */
   editHref?: string;
 }
 
 export interface EntityPageProps {
   entity: EntityRef;
-  /** Qualifying properties shown next to the badge; the template shows at most five. */
+  /**
+   * Qualifying properties, in the order of `display.highlight` of the type: the first two sit
+   * next to the badge, the next three on a line under it, the template shows at most five.
+   */
   highlights: Attribute[];
+  /** The note rendered by the build; the text marks written links and recognised words. */
   sections: Section[];
   /** Declared metadata of the side panel. */
   attributes: Attribute[];

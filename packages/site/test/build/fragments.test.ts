@@ -6,7 +6,13 @@ import {
   serializeFragment,
   type EntityFragment,
 } from "../../src/build/fragments.js";
-import { assetsBaseOf, entityHref, fragmentPath, relativeHref } from "../../src/build/paths.js";
+import {
+  assetsBaseOf,
+  entityHref,
+  fragmentImagePath,
+  fragmentPath,
+  relativeHref,
+} from "../../src/build/paths.js";
 
 const fragment: EntityFragment = {
   id: "glossary/keyword-page",
@@ -50,7 +56,21 @@ describe("fragments", () => {
     expect(parseFragment(serializeFragment(keyword), "f.json")).toEqual(keyword);
   });
 
-  it("refuses text that is not JSON, not an object with an id, or whose sections or passages have another shape, naming the file", () => {
+  it("keeps the images of a note that the build copied next to the page", () => {
+    const note: EntityFragment = {
+      ...fragment,
+      images: [
+        {
+          source: "glossary",
+          path: "figures/pipeline.svg",
+          target: "glossary/keyword-page/figures/pipeline.svg",
+        },
+      ],
+    };
+    expect(parseFragment(serializeFragment(note), "f.json")).toEqual(note);
+  });
+
+  it("refuses text that is not JSON, not an object with an id, or whose sections, passages or images have another shape, naming the file", () => {
     expect(() => parseFragment("{", "f.json")).toThrow(FragmentError);
     expect(() => parseFragment("{", "f.json")).toThrow(/^f\.json: not valid JSON: /);
     expect(() => parseFragment("[]", "f.json")).toThrow(
@@ -72,6 +92,15 @@ describe("fragments", () => {
     expect(() =>
       parseFragment('{"id": "a/b", "sections": [], "passages": [{"source": "s"}]}', "f.json"),
     ).toThrow("passages must be a list");
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "images": {}}', "f.json")).toThrow(
+      "f.json: images must be a list of { source, path, target }",
+    );
+    expect(() =>
+      parseFragment(
+        '{"id": "a/b", "sections": [], "images": [{"source": "s", "path": "p"}]}',
+        "f.json",
+      ),
+    ).toThrow("images must be a list");
     const error = (() => {
       try {
         parseFragment("null", "f.json");
@@ -87,6 +116,12 @@ describe("fragments", () => {
 });
 
 describe("paths", () => {
+  it("keeps the image of a note under fragments/ at its target path", () => {
+    expect(fragmentImagePath("glossary/keyword-page/figures/pipeline.svg")).toBe(
+      "fragments/glossary/keyword-page/figures/pipeline.svg",
+    );
+  });
+
   it("places the fragment of an entity under fragments/ by identifier", () => {
     expect(fragmentPath("glossary/keyword-page")).toBe("fragments/glossary/keyword-page.json");
   });

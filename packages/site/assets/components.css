@@ -259,6 +259,15 @@ concordance-island {
   font-size: 0.875rem;
 }
 
+.entity-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: calc(-1 * var(--space-2));
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
 .highlight-label {
   margin-inline-end: var(--space-1);
 }
@@ -273,13 +282,20 @@ concordance-island {
 
 .markdown .recognised {
   color: var(--color-ink);
-  font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.markdown img {
+  max-inline-size: 100%;
+  block-size: auto;
 }
 
 .legend {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-4);
+  margin-block-start: var(--space-4);
   color: var(--color-muted);
   font-size: 0.8125rem;
 }
@@ -295,6 +311,7 @@ concordance-island {
 }
 
 .legend-recognised::before {
+  border-block-end-style: dotted;
   border-color: var(--color-ink);
 }
 

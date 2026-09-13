@@ -13,6 +13,7 @@ import {
 import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
+  fragmentImagePath,
   fragmentPath,
   parseFragment,
   type EntityFragment,
@@ -76,6 +77,39 @@ export function readFragments(
   return { fragments, missing };
 }
 
+/** The `ref` of every git source that declares one, for the edit links of the pages. */
+export function sourceRefs(config: Config): Record<string, string> {
+  const refs: Record<string, string> = {};
+  for (const source of config.sources) {
+    if (source.ref !== undefined) {
+      refs[source.name] = source.ref;
+    }
+  }
+  return refs;
+}
+
+/**
+ * Places the images of the notes next to their pages, from the copies the build kept under
+ * `fragments/`; an image the build did not keep is skipped. Returns how many were placed.
+ */
+export function placeImages(
+  fs: FileSystem,
+  fragments: ReadonlyMap<string, EntityFragment>,
+  modelDirectory: string,
+  output: string,
+): number {
+  let placed = 0;
+  for (const fragment of fragments.values()) {
+    for (const image of fragment.images ?? []) {
+      const from = join(modelDirectory, fragmentImagePath(image.target));
+      if (!fs.exists(from)) continue;
+      fs.writeBytes(join(output, image.target), fs.readBytes(from));
+      placed += 1;
+    }
+  }
+  return placed;
+}
+
 /**
  * Renders the site from a model and its fragments through the theme of the configuration, prints
  * the summary on stdout and every warning on stderr; a page over budget or with an accessibility
@@ -112,11 +146,13 @@ export async function renderSite(
     locale: config.project.locale ?? "en",
     projectName: config.project.name,
     names: siteNames(config),
+    sourceRefs: sourceRefs(config),
     ...(config.project.edit_url === undefined ? {} : { editUrl: config.project.edit_url }),
     ...(config.build?.mentions_inline === undefined
       ? {}
       : { mentionsInline: config.build.mentions_inline }),
   });
+  placeImages(io.fs, fragments, input.modelDirectory, input.output);
   for (const line of report.summary) {
     io.out(line);
   }

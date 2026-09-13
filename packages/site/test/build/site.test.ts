@@ -100,8 +100,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
     expect(entity.startsWith('<!doctype html>\n<html lang="en" dir="ltr">')).toBe(true);
     expect(entity).toContain("<title>Keyword page – Concordance notes</title>");
-    expect(entity).toContain('<article class="entity">');
+    expect(entity).toContain('<div class="entity">');
     expect(entity).toContain("<h1>Keyword page</h1>");
+    expect(entity).toContain('<article class="entity-body">');
     expect(entity).toContain('<span class="badge">Term</span>');
     expect(entity).toContain("<p>An entity page.</p>");
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
@@ -353,5 +354,24 @@ describe("siteDocuments", () => {
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );
     expect(home?.content).toContain(">Publication</a>");
+  });
+
+  it("links the edit page of the forge from the source URL of the model and the declared refs when no pattern is configured", () => {
+    const withForge = model();
+    withForge.build.sources = [
+      { name: "glossary", url: "https://github.com/concordance-wiki/demo-glossary.git" },
+      { name: "specs", url: "https://gitlab.com/concordance-wiki/demo-specs" },
+      { name: "framing" },
+    ];
+    const [, , , , entity, , , , , screen] = siteDocuments(
+      options({ model: withForge, sourceRefs: { specs: "develop" } }),
+      bundles,
+    );
+    expect(entity?.content).toContain(
+      '<p class="entity-source">source: <code>glossary/keyword-page.md</code><a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit in the forge</a></p>',
+    );
+    expect(screen?.content).toContain(
+      '<a class="entity-edit" href="https://gitlab.com/concordance-wiki/demo-specs/-/edit/develop/screens/mentions-panel.md">',
+    );
   });
 });

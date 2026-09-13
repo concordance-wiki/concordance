@@ -19,6 +19,7 @@ export const labels = {
   properties: "Properties",
   legendWritten: "link written in the note",
   legendRecognised: "word recognised at indexing",
+  source: "source:",
   editInForge: "Edit in the forge",
   keyword: "keyword",
   noNote: "No note defines this word yet",

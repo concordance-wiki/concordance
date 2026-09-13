@@ -54,6 +54,8 @@ export interface SiteInput {
   names?: SiteNames;
   /** `project.edit_url` of the configuration. */
   editUrl?: string;
+  /** The `ref` of every source that declares one, for the edit links when `edit_url` is unset. */
+  sourceRefs?: Record<string, string>;
   /** `build.mentions_inline` of the configuration. */
   mentionsInline?: number;
 }
@@ -163,6 +165,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
     fragments: input.fragments,
     ...(input.names === undefined ? {} : { names: input.names }),
     ...(input.editUrl === undefined ? {} : { editUrl: input.editUrl }),
+    ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;

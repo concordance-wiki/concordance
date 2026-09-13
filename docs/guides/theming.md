@@ -10,7 +10,7 @@ The generated site is a set of named slots rendered at build by Preact component
 | `Header` | the site title linking home, the logo, the search field, the navigation with counts, the mode switch | — |
 | `Footer` | the version, the build instant, the project text and links, the optional credit of the tool | — |
 | `Home` | the title, the statistics, the search field with shortcuts, the three entry points | — |
-| `EntityPage` | badge and highlights, title, rendered markdown, side panel, sources | `Neighbourhood`, `MentionsPanel` |
+| `EntityPage` | badge and highlights, title, the note as an article with its legend, side panel, sources | `Neighbourhood`, `MentionsPanel` |
 | `KeywordPage` | the banner, the three counts, passages by file, companions, similar forms | — |
 | `MentionsPanel` | written links and recognised mentions, the first `initial` inline, the rest in an island | — |
 | `Neighbourhood` | the map of the neighbourhood and its textual equivalent, the list of neighbours | — |
@@ -30,7 +30,7 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Header` | `siteTitle`, `homeHref`, `logo?: { src, alt } \| { svg }`, `navigation: { label, href, count? }[]`, `search?: { action, placeholder }` |
 | `Footer` | `version`, `generatedAt`, `text?`, `links: { label, href }[]`, `credit` |
 | `Home` | `title`, `search?`, `shortcuts: { label, href }[]`, `stats: { sources, files, builtAt }`, `entries: { kind: "tree" \| "index" \| "recent", title, href, items: { label, href, count?, date?, stale? }[] }[]` |
-| `EntityPage` | `entity: { id, type, typeLabel, title, locale }`, `highlights: Attribute[]` (at most five shown), `sections: { id, heading?, html }[]`, `attributes: Attribute[]`, `neighbours` (the `Neighbourhood` props), `mentions` (the `MentionsPanel` props), `sources: { path, editHref? }[]` |
+| `EntityPage` | `entity: { id, type, typeLabel, title, locale }`, `highlights: Attribute[]` (at most five shown), `sections: { id, heading?, html }[]`, `attributes: Attribute[]`, `neighbours` (the `Neighbourhood` props), `mentions` (the `MentionsPanel` props), `sources: { source, path, editHref? }[]` |
 | `KeywordPage` | `entity: { id, title, locale }`, `counts: { occurrences, files, sources }`, `passages: { file: { label, href }, passages: { context, line, href }[] }[]`, `companions: { label, href?, weight }[]` (weight from 1 to 5), `similar: { label, href }[]` |
 | `MentionsPanel` | `mentions: { kind: "written" \| "recognised", file: { label, href }, context, line, href }[]`, `initial` (20 by default, `build.mentions_inline`) |
 | `Neighbourhood` | `centre`, `neighbours: { id, label, href, typeLabel?, relation?, weight }[]` |
@@ -39,6 +39,14 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count }[]` (occurrences) |
 
 An `Attribute` is `{ name, label, values: { text, href? }[] }`. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.
+
+### The entity page
+
+One template serves every type. Its order is imposed, and the default component keeps it in the markup so that a reader, a screen reader and the search index meet the same page: inside `<main>`, a `<header>` with the type badge and the first two highlighted properties on one line (`.entity-badge`), the next three on a second line (`.entity-highlights`) when the profile names that many, then the `<h1>`; right after it, the note as an `<article class="entity-body">` at full column width, one `<section id="section-…">` per heading with the rendered HTML in a `.markdown` block, closed by a `<footer class="legend">` naming the two marks of the text; then the side panel, an `<aside class="entity-panel">` holding the declared metadata as a description list, the neighbourhood, the mentions, and a `<footer class="entity-footer">` with `source: <name>/<path>` for the note and its other representations and, on the note, the "Edit in the forge" link. The stylesheet lays the article and the panels side by side on a wide screen; the DOM order never puts metadata between the title and the text.
+
+What changes from one type to another comes from the profile only: the label of the badge, the properties `display.highlight` names (capped at five, the rest staying in the panel with every other declared attribute) and the order of the neighbours (`display.neighbours_order`, applied by the model). A test renders two entities of different types and checks that the markup differs nowhere else; another checks that no type slug appears in the default theme.
+
+In the text, an anchor the author wrote whose target is a page of the site carries `class="written"`; an anchor the build added around a word the occurrence scan recognised carries `class="recognised"`, links to the page of the entity it names, and is drawn with a dotted underline. Both classes are exported as `WRITTEN_CLASS` and `RECOGNISED_CLASS`. The marks come from the fragment, so an override of the slot inherits them by inserting the section HTML as is; the legend is the component's, and an override that drops it leaves the two styles unexplained. A recognised word inside a written link, split by inline markup (`*entity* page`) or read in a heading that the template renders as text is left unmarked; a word several entities share, a homonym, links to the first of them in identifier order; the page's own name is never linked to itself. Images are `<img>` elements whose `src` is relative to the page for a file of the sources, copied by the build, and the URL as written for an external image, never fetched.
 
 ## White label
 
@@ -69,7 +77,7 @@ To apply a remembered choice before the first paint, every page carries one inli
 
 ### The accent carries no information on its own
 
-`--color-accent` is used in a known set of places, and each of them carries a cue that is not a colour: links and the disclosure of the remaining mentions are underlined; the focus ring is an offset outline; a link written in a note is an underlined anchor while a recognised word is bold, and the legend says so in words; the banner of a keyword page and the headings of the mentions panel are text; the mode switch names the current scheme. A test lists the rules of the default stylesheets that use the accent and checks the cue of each one, so that a new use has to be added to the list with its cue. A theme author keeps the rule: whatever the accent means in a component, the same meaning is readable without it.
+`--color-accent` is used in a known set of places, and each of them carries a cue that is not a colour: links and the disclosure of the remaining mentions are underlined; the focus ring is an offset outline; a link written in a note is an underlined anchor in the accent while a recognised word is underlined with dots in the ink colour, and the legend says so in words; the banner of a keyword page and the headings of the mentions panel are text; the mode switch names the current scheme. A test lists the rules of the default stylesheets that use the accent and checks the cue of each one, so that a new use has to be added to the list with its cue. A theme author keeps the rule: whatever the accent means in a component, the same meaning is readable without it.
 
 ## Overriding a slot from a plugin
 

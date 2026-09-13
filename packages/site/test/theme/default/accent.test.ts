@@ -80,13 +80,13 @@ describe("The accent colour never carries information on its own", () => {
     expect(body).toContain("outline-offset: 2px;");
   });
 
-  it("marks a written link by its underline and a recognised word by its weight, the legend saying so in words", () => {
+  it("marks a written link by its underline and a recognised word by a dotted one, the legend saying so in words", () => {
     const written = ruleFor(components, ".markdown .written").body;
     expect(written).not.toContain("text-decoration: none");
     expect(
       rulesOf(componentsStylesheet()).find((rule) => rule.selector === ".markdown .recognised")
         ?.body,
-    ).toContain("font-weight: 600;");
+    ).toContain("text-decoration: underline dotted;");
     const page = pages.get("entity-page.html") ?? "";
     for (const match of page.matchAll(/<(\w+)[^>]*class="written"/g)) {
       expect(match[1]).toBe("a");

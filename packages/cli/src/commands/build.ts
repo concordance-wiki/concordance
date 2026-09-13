@@ -223,6 +223,7 @@ export async function buildCommand(
       entities: result.entities,
       sources: ingested.sources,
       keywordMentions: result.keywordMentions,
+      recognised: result.recognised,
       config,
       fs: io.fs,
     },

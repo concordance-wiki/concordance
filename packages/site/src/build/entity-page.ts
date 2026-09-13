@@ -231,7 +231,8 @@ export function mentionsOf(context: SiteContext, page: string, entity: Entity): 
     .map((item) => item.mention);
 }
 
-function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
+/** The files of an entity in its source, the note first with its edit link when the forge is known. */
+export function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
   const paths = [
     entity.source.path,
     ...(entity.representations ?? [])
@@ -239,9 +240,11 @@ function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
       .map((representation) => representation.path),
   ];
   const edit = editHref(context, entity);
-  return [...new Set(paths)].map((path) =>
-    path === entity.source.path && edit !== undefined ? { path, editHref: edit } : { path },
-  );
+  return [...new Set(paths)].map((path) => ({
+    source: entity.source.name,
+    path,
+    ...(path === entity.source.path && edit !== undefined ? { editHref: edit } : {}),
+  }));
 }
 
 export interface EntityPageOptions {

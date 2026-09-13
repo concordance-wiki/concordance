@@ -95,7 +95,7 @@ export const entityPage: SlotProps["EntityPage"] = {
   sections: [
     {
       id: "definition",
-      html: '<p>A <a class="written" href="../page/">page</a> built for every word above the threshold.</p>',
+      html: '<p>A <a href="../page/" class="written">page</a> built for every <a href="../occurrence/" class="recognised">occurrence</a> above the threshold.</p>',
     },
     {
       id: "not-to-be-confused-with",
@@ -111,8 +111,9 @@ export const entityPage: SlotProps["EntityPage"] = {
   mentions: { mentions: mentions(3), initial: 20 },
   sources: [
     {
-      path: "glossary/keyword-page.md",
-      editHref: "https://forge.example/edit/glossary/keyword-page.md",
+      source: "glossary",
+      path: "keyword-page.md",
+      editHref: "https://forge.example/glossary/edit/main/keyword-page.md",
     },
   ],
 };
