@@ -392,7 +392,7 @@ Depends on: L1-05, L1-06, L1-07.
 As the engine, I want to name the relation between two entities so that the site can say "is entered on" rather than "is related to".
 
 - Order of application: mapped section, then typed frontmatter attribute, then a type pair admitting a single relation in the profile, then `related`.
-- A `related` relation is capped at 0.6 and yields an `I-REL-AMBIGUOUS` finding.
+- A `related` relation is capped at 0.6 and yields an `I-REL-AMBIGUOUS` finding, unless co-occurrence alone knows the link.
 - A relation declared outside the profile matrix yields an `E-META-REL` finding and does not enter the model.
 - Displayed relation labels come from the profile, never from the code.
 

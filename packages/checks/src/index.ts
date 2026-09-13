@@ -15,6 +15,7 @@ export type {
   CheckEntitySource,
   CheckInput,
   CheckLink,
+  CheckProvenance,
   CheckSource,
 } from "./model.js";
 export {

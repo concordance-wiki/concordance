@@ -26,7 +26,7 @@ export interface FrontmatterLinksResult {
 const DEFAULT_CONFIDENCE = 0.9;
 
 const REMEDIATION =
-  "Write the identifier, the path relative to the source root or the exact title of an existing note of a type the attribute accepts, or remove the reference.";
+  "Write the identifier, the path relative to the source root or the exact title of an existing note, or remove the reference.";
 
 /** An attribute that declares references and the relation they produce. */
 type ReferenceDefinition = AttributeDefinition & { relation: string };
@@ -54,14 +54,6 @@ function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
 }
 
-/** `any` accepts every type; `same` the type of the referring note; a slug or a list names the types. */
-function acceptedTypes(reference: Reference): readonly string[] | "any" {
-  const { target } = reference.definition;
-  if (target === undefined || target === "any") return "any";
-  const listed = typeof target === "string" ? [target] : target;
-  return listed.map((type) => (type === "same" ? reference.entity.type : type));
-}
-
 function canonical(attributes: Record<string, unknown>): string {
   return JSON.stringify(
     Object.keys(attributes)
@@ -84,6 +76,11 @@ function unresolved(reference: Reference, message: string): Finding {
   };
 }
 
+/**
+ * The note a value names, whatever its type: a reference to an existing note of a type the relation
+ * does not admit is a link outside the profile matrix, which the relation typing step drops with
+ * `E-META-REL`, not an unresolved reference.
+ */
 function targetOf(
   value: string,
   reference: Reference,
@@ -104,24 +101,14 @@ function targetOf(
       ),
     };
   }
-  const accepted = acceptedTypes(reference);
-  const target = resolution.entity;
-  if (accepted !== "any" && !accepted.includes(target.type)) {
-    return {
-      finding: unresolved(
-        reference,
-        `reference "${value}" names ${target.id} of type ${target.type} where ${accepted.join(" or ")} is expected`,
-      ),
-    };
-  }
-  return { target };
+  return { target: resolution.entity };
 }
 
 /**
  * A reference-typed attribute with a relation in the profile turns each of its values into a link of
  * that relation, carrying the attributes the profile declares, such as `accesses` in `read` mode for
- * `reads`. A value that resolves to nothing, to several titles or to a note of another type than the
- * attribute accepts is reported and gives no link.
+ * `reads`. A value that resolves to nothing or to several titles is reported and gives no link; a
+ * note of a type the attribute does not accept gives its link, for the relation typing step to judge.
  */
 export function frontmatterLinks(input: FrontmatterLinksInput): FrontmatterLinksResult {
   const { entities, profile } = input;

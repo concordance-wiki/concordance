@@ -1,5 +1,6 @@
 # Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
-# further I-REL-AMBIGUOUS findings on other prose mentions are allowed.
+# further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
+# A W-DUP-CANDIDATE names its pair under `entities`: the homonym pairs share a base name across two sources (score 0.5).
 - { check: I-REL-AMBIGUOUS, path: specs/screens/mentions-panel.md, note: "explicit link (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: build, entities: [glossary/build, specs/objects/build] }
 - { check: I-TERM-HOMONYM, form: entity, entities: [glossary/entity, specs/objects/entity] }
@@ -8,4 +9,7 @@
 - { check: W-DOMAIN-UNCLASSIFIED, path: glossary/build.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: specs/objects/build.md }
 - { check: W-DOMAIN-UNCLASSIFIED, path: specs/roles/maintainer.md }
+- { check: W-DUP-CANDIDATE, path: glossary/build.md, entities: [glossary/build, specs/objects/build] }
+- { check: W-DUP-CANDIDATE, path: glossary/entity.md, entities: [glossary/entity, specs/objects/entity] }
+- { check: W-DUP-CANDIDATE, path: glossary/link.md, entities: [glossary/link, specs/objects/link] }
 - { check: W-TERM-UNDEFINED, text: build summary, min_occurrences: 5, min_files: 3 }

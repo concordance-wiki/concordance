@@ -29,7 +29,7 @@ describe("A Cypher export is provided for those who want to load the graph elsew
       "// One MERGE per entity, then one per link; nested attributes are not exported.",
       "MERGE (n:Entity {id: 'notes/a'}) SET n.type = 'screen', n.title = 'Screen A', n.locale = 'en', n.application = 'wiki', n.domain = 'notes', n.type_origin = 'frontmatter';",
       "MERGE (n:Entity {id: 'notes/b'}) SET n.type = 'term', n.title = 'Term B', n.locale = 'en', n.application = 'wiki', n.domain = 'notes', n.type_origin = 'frontmatter';",
-      "MERGE (a:Entity {id: 'notes/a'}) MERGE (b:Entity {id: 'notes/b'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 1, r.methods = ['explicit_link'];",
+      "MERGE (a:Entity {id: 'notes/a'}) MERGE (b:Entity {id: 'notes/b'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 0.6, r.methods = ['explicit_link'];",
     ]);
     expect(io.stderr).toEqual([]);
   });

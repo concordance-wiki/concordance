@@ -25,6 +25,91 @@ describe("model.json contains the build, entities, links, findings and candidate
     expect(assembleModel({ ...sampleInput(), neighbours: {} })).toHaveProperty("neighbours", {});
     expect(assembleModel(sampleInput())).not.toHaveProperty("neighbours");
   });
+
+  it("adds the displayed neighbourhood only when it is given, keys sorted and each list best first", () => {
+    const neighbour = (id: string, confidence: number) => ({
+      id,
+      title: id,
+      type: "term",
+      kind: "entity" as const,
+      relation: "related",
+      direction: "out" as const,
+      confidence,
+    });
+    const model = assembleModel({
+      ...sampleInput(),
+      displayedNeighbourhood: {
+        "specs/b": [],
+        "specs/a": [
+          neighbour("specs/d", 0.4),
+          neighbour("specs/c", 0.9),
+          neighbour("specs/b", 0.4),
+        ],
+      },
+    });
+    expect(Object.keys(model.displayed_neighbourhood ?? {})).toEqual(["specs/a", "specs/b"]);
+    expect(model.displayed_neighbourhood?.["specs/a"]?.map((item) => item.id)).toEqual([
+      "specs/c",
+      "specs/b",
+      "specs/d",
+    ]);
+    expect(assembleModel(sampleInput())).not.toHaveProperty("displayed_neighbourhood");
+  });
+
+  it("records the imported contracts under build in canonical order, and no key when none was imported", () => {
+    const record = (api: string, location: string) => ({
+      api,
+      location,
+      title: "Model query",
+      version: "1.0.0",
+      fingerprint: "f".repeat(64),
+      imported_at: "2026-09-12T12:00:00.000Z",
+    });
+    const model = assembleModel({
+      ...sampleInput(),
+      contracts: [
+        record("specs/api/b", "b.json"),
+        record("specs/api/a", "z.json"),
+        record("specs/api/a", "a.json"),
+      ],
+    });
+    expect(model.build.contracts?.map((item) => `${item.api} ${item.location}`)).toEqual([
+      "specs/api/a a.json",
+      "specs/api/a z.json",
+      "specs/api/b b.json",
+    ]);
+    expect(assembleModel(sampleInput()).build).not.toHaveProperty("contracts");
+  });
+
+  it("sorts the candidate objects by API, name and contract, and omits the key when none is given", () => {
+    const object = (from: string, name: string, contract = "c.json") => ({
+      kind: "object" as const,
+      name,
+      from,
+      contract,
+    });
+    const model = assembleModel({
+      ...sampleInput(),
+      candidates: {
+        terms: [],
+        objects: [
+          object("specs/api/b", "Entity"),
+          object("specs/api/a", "Link", "z.json"),
+          object("specs/api/a", "Link", "a.json"),
+          object("specs/api/a", "Entity"),
+        ],
+        duplicates: [],
+      },
+    });
+    expect(model.candidates.objects).toEqual([
+      object("specs/api/a", "Entity"),
+      object("specs/api/a", "Link", "a.json"),
+      object("specs/api/a", "Link", "z.json"),
+      object("specs/api/b", "Entity"),
+    ]);
+    expect(Object.keys(model.candidates)).toEqual(["terms", "objects", "duplicates"]);
+    expect(assembleModel(sampleInput()).candidates).not.toHaveProperty("objects");
+  });
 });
 
 describe("The build block carries the tool version, the timestamp, the profile fingerprint and, per source, its name and commit", () => {

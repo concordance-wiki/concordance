@@ -1,3 +1,4 @@
+import type { CandidateObject, ContractRecord } from "../contract.js";
 import type { Entity } from "../entity.js";
 import type { Finding } from "../finding.js";
 import type { Link } from "../link.js";
@@ -21,6 +22,8 @@ export interface ModelBuild {
   profile_hash: string;
   sources: ModelSource[];
   counts?: Record<string, unknown>;
+  /** The contracts imported by the build; absent when no source plugin read one. */
+  contracts?: ContractRecord[];
   /** Whether links across sources were resolved (`inference.cross_source_links`); absent in older models. */
   cross_source_links?: boolean;
 }
@@ -51,6 +54,8 @@ export interface DuplicateCandidate {
 
 export interface Candidates {
   terms: TermCandidate[];
+  /** Objects named by an imported contract that have no note; absent when no contract was read. */
+  objects?: CandidateObject[];
   duplicates: DuplicateCandidate[];
 }
 
@@ -62,6 +67,22 @@ export interface Neighbour {
 /** The K best co-occurrence neighbours of every entity, keyed by identifier. */
 export type Neighbours = Record<string, Neighbour[]>;
 
+/** One node of the mini-map of a page, as serialised under `displayed_neighbourhood`. */
+export interface DisplayedNeighbour {
+  id: string;
+  title: string;
+  type: string;
+  /** `keyword` for a noteless word, `entity` for a typed entity. */
+  kind: "entity" | "keyword";
+  relation: string;
+  /** Where the links between the page and the neighbour point, seen from the page. */
+  direction: "out" | "in" | "both";
+  confidence: number;
+}
+
+/** The one-hop neighbours shown on the page of every entity, keyed by identifier, best first. */
+export type DisplayedNeighbourhood = Record<string, DisplayedNeighbour[]>;
+
 /** What `dist/model.json` holds, as described by `schemas/model.schema.json`. */
 export interface CanonicalModel {
   version: 1;
@@ -71,4 +92,5 @@ export interface CanonicalModel {
   findings: Finding[];
   candidates: Candidates;
   neighbours?: Neighbours;
+  displayed_neighbourhood?: DisplayedNeighbourhood;
 }

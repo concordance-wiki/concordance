@@ -1,11 +1,11 @@
 import type { Finding } from "@concordance-wiki/core";
 
-import type { CheckEntity, CheckInput } from "../model.js";
+import type { CheckEntity, CheckInput, CheckLink } from "../model.js";
 
 const API_TYPE = "api";
 const SERVES = "serves";
 
-/** The `consumers` attribute as a list of identifiers; `undefined` when the note declares none. */
+/** The `consumers` attribute as written; `undefined` when the note declares none. */
 function declaredConsumers(entity: CheckEntity): string[] | undefined {
   const value = entity.attributes["consumers"];
   return Array.isArray(value)
@@ -13,10 +13,53 @@ function declaredConsumers(entity: CheckEntity): string[] | undefined {
     : undefined;
 }
 
-/** Targets of the `serves` links leaving the entity, that is, the consumers the model knows. */
-function servedConsumers(entity: CheckEntity, input: CheckInput): string[] {
+/**
+ * A declared consumer as the identifier it names: written in full, or relative to the source of
+ * the API note; a value that names no entity is kept as written and reported as stale.
+ */
+function resolveConsumer(value: string, api: CheckEntity, input: CheckInput): string {
+  const relative = `${api.source.name}/${value}`;
+  const known = new Set(input.entities.map((entity) => entity.id));
+  return !known.has(value) && known.has(relative) ? relative : value;
+}
+
+/** Whether any `serves` link leaves the entity: a consumer the model knows, declared or cited. */
+function serves(entity: CheckEntity, input: CheckInput): boolean {
+  return input.links.some((link) => link.from === entity.id && link.relation === SERVES);
+}
+
+/**
+ * Whether a `serves` link was written in the note of the consumer: at least one provenance read
+ * in another file than the API note, so that the API's own `consumers` attribute and
+ * `## Consumers` section do not count as citations of itself.
+ */
+function cites(link: CheckLink, api: CheckEntity): boolean {
+  return (
+    link.provenance === undefined ||
+    link.provenance.some(
+      (provenance) => provenance.path !== undefined && provenance.path !== api.source.path,
+    )
+  );
+}
+
+/** Targets of the `serves` links that another note wrote, the consumers that cite the API. */
+function citingConsumers(entity: CheckEntity, input: CheckInput): string[] {
   return input.links
-    .filter((link) => link.from === entity.id && link.relation === SERVES)
+    .filter((link) => link.from === entity.id && link.relation === SERVES && cites(link, entity))
+    .map((link) => link.to);
+}
+
+/** Whether the API note lists the consumer under its `## Consumers` section: a declaration, like the attribute. */
+function declares(link: CheckLink, api: CheckEntity): boolean {
+  return (link.provenance ?? []).some(
+    (provenance) => provenance.method === "section_mention" && provenance.path === api.source.path,
+  );
+}
+
+/** Targets of the `serves` links the API's own mapped section produced. */
+function sectionConsumers(entity: CheckEntity, input: CheckInput): string[] {
+  return input.links
+    .filter((link) => link.from === entity.id && link.relation === SERVES && declares(link, entity))
     .map((link) => link.to);
 }
 
@@ -43,10 +86,7 @@ function finding(
 
 export function apiWithoutConsumer(input: CheckInput): Finding[] {
   return apis(input)
-    .filter(
-      (api) =>
-        servedConsumers(api, input).length === 0 && (declaredConsumers(api) ?? []).length === 0,
-    )
+    .filter((api) => !serves(api, input) && (declaredConsumers(api) ?? []).length === 0)
     .map((api) =>
       finding(
         "W-API-NOCONSUMER",
@@ -61,11 +101,18 @@ export function apiConsumerMismatch(input: CheckInput): Finding[] {
   const remediation =
     "Reconcile the two notes: remove the stale consumer or add the missing mention.";
   return apis(input).flatMap((api) => {
-    const declared = declaredConsumers(api);
-    if (declared === undefined) {
+    const written = declaredConsumers(api);
+    if (written === undefined) {
       return [];
     }
-    const served = servedConsumers(api, input);
+    // The attribute asks for the reconciliation; the section adds to what the note declares.
+    const declared = [
+      ...new Set([
+        ...written.map((value) => resolveConsumer(value, api, input)),
+        ...sectionConsumers(api, input),
+      ]),
+    ];
+    const served = citingConsumers(api, input);
     const stale = declared
       .filter((consumer) => !served.includes(consumer))
       .map((consumer) =>

@@ -42,7 +42,7 @@ Reference keys (`reads`, `writes`, `rules`, `roles`, `consumers`, `affects`, `br
 2. by path relative to the source root, extension included (`roles/reader.md`, `rules/publication-threshold.rule.md`); a path written differently from the file name resolves through the identifier it derives (`Roles/Reader.md`);
 3. by exact title, after trimming, case-sensitively (`Publication threshold`).
 
-A value that matches nothing, a title shared by several notes, or a note of a type the key does not accept (a rule under `reads`) is reported (`W-REF-UNRESOLVED`) and gives no link. Several values naming the same note give one link with one provenance per value.
+A value that matches nothing or a title shared by several notes is reported (`W-REF-UNRESOLVED`) and gives no link; a note of a type the key does not accept (a rule under `reads`) gives a link that the relation typing step drops with `E-META-REL`. Several values naming the same note give one link with one provenance per value.
 
 ## Links are authoritative
 

@@ -1,36 +1,34 @@
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import { catalogue, createRegistry } from "@concordance-wiki/checks";
 import {
   assembleModel,
-  compareFindings,
+  commandExists,
   formatIssue,
+  importPlugin,
+  loadPlugins,
   serializeBuildLog,
   serializeModel,
   shouldFail,
   summarize,
   type BuildLog,
   type Config,
-  type FileSystem,
   type Finding,
   type ModelSource,
+  type PluginLoaderDependencies,
 } from "@concordance-wiki/core";
-import { explicitLinks } from "@concordance-wiki/inference";
-import {
-  ingestSources,
-  readMarkdown,
-  type IngestedSource,
-  type ParsedMarkdown,
-} from "@concordance-wiki/ingest";
+import { formatDuplicateStats } from "@concordance-wiki/inference";
+import { ingestSources, type IngestedSource } from "@concordance-wiki/ingest";
 import {
   fingerprintProfile,
   loadDefaultProfile,
   resolveProfile,
   type Profile,
 } from "@concordance-wiki/profile";
-import { typeSources } from "@concordance-wiki/typing";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
+import { runPipeline } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
 import { loadConfigFile } from "./validate-config.js";
 
@@ -39,12 +37,20 @@ export const defaultOutputDirectory = "./dist";
 export const buildLogFile = "build.log.json";
 export const modelFile = "model.json";
 
-export interface ParsedDocument {
-  source: string;
-  /** Forward-slash path relative to the source root. */
-  path: string;
-  document: ParsedMarkdown;
+/** What the site generation will print until it exists: the model is complete, the pages are not. */
+export const renderUnavailable = "render: not available in this version";
+
+/** Module loading and network access, injected so that tests run plugins and contracts against doubles. */
+export interface BuildDependencies extends PluginLoaderDependencies {
+  /** Absent when the build must not touch the network. */
+  fetch?: typeof fetch;
 }
+
+const nodeDependencies: BuildDependencies = {
+  load: importPlugin,
+  commandAvailable: commandExists,
+  fetch: globalThis.fetch,
+};
 
 export function formatFinding(finding: Finding): string {
   const where = [finding.source, finding.path, finding.line]
@@ -54,37 +60,13 @@ export function formatFinding(finding: Finding): string {
   return `${finding.severity}: ${finding.check}${where === "" ? "" : ` (${where})`}: ${finding.message}`;
 }
 
-/** Parses every markdown file of the ingested sources; an unreadable file is a finding, never a failure. */
-export function parseSources(
-  sources: readonly IngestedSource[],
-  fs: FileSystem,
-): { documents: ParsedDocument[]; findings: Finding[] } {
-  const documents: ParsedDocument[] = [];
-  const findings: Finding[] = [];
-  for (const source of sources) {
-    for (const file of source.files) {
-      if (!file.path.endsWith(".md")) continue;
-      const read = readMarkdown({ fs }, file.absolutePath, file.path);
-      if (read.ok) {
-        documents.push({ source: source.name, path: file.path, document: read.document });
-        for (const finding of read.document.findings) {
-          findings.push({ ...finding, source: source.name });
-        }
-      } else {
-        findings.push({ ...read.finding, source: source.name });
-      }
-    }
-  }
-  return { documents, findings };
-}
-
 function countLines(counts: Record<string, number>): string[] {
   return Object.entries(counts).map(([key, count]) => `  ${key}: ${String(count)}`);
 }
 
 export function formatSummary(summary: BuildLog["summary"]): string[] {
   const { bySeverity, byCheck } = summary.findings;
-  const { keywords } = summary;
+  const { keywords, duplicates } = summary;
   const total = (counts: Record<string, number>): number =>
     Object.values(counts).reduce((sum, count) => sum + count, 0);
   return [
@@ -100,6 +82,7 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
           `keyword pages: ${String(keywords.published)}`,
           `expressions under the threshold: ${String(keywords.discarded)}`,
         ]),
+    ...(duplicates === undefined ? [] : formatDuplicateStats(duplicates)),
     `findings: error ${String(bySeverity.error)}, warning ${String(bySeverity.warning)}, info ${String(bySeverity.info)}`,
     ...countLines(byCheck),
   ];
@@ -139,7 +122,11 @@ export function modelSources(config: Config, ingested: readonly IngestedSource[]
   });
 }
 
-export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
+export async function buildCommand(
+  argv: string[],
+  io: CommandIo,
+  deps: BuildDependencies = nodeDependencies,
+): Promise<ExitCode> {
   const { values } = parseArgs({
     args: argv,
     options: { config: { type: "string", short: "c" }, output: { type: "string", short: "o" } },
@@ -163,40 +150,34 @@ export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitC
     values.output === undefined
       ? resolve(configDirectory, config.build?.output ?? defaultOutputDirectory)
       : resolve(io.cwd, values.output);
+  const cacheDirectory = resolve(
+    configDirectory,
+    config.conversion?.cache ?? defaultCacheDirectory,
+  );
 
+  // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
+  const plugins = await loadPlugins(config.plugins ?? [], deps);
+  const checks = createRegistry(catalogue, plugins.registry.checks());
   const ingested = await ingestSources(config, {
     fs: io.fs,
     git: io.git,
     configDirectory,
-    cacheDirectory: resolve(configDirectory, config.conversion?.cache ?? defaultCacheDirectory),
+    cacheDirectory,
   });
-  const parsed = parseSources(ingested.sources, io.fs);
-  const documents = new Map(
-    parsed.documents.map((item) => [`${item.source}/${item.path}`, item.document]),
-  );
-  const typed = typeSources({
-    sources: ingested.sources,
-    documents,
+  const result = await runPipeline({
     config,
     profile: resolved.profile,
+    configDirectory,
+    cacheDirectory,
+    sources: ingested.sources,
+    findings: [...plugins.findings, ...ingested.findings],
+    plugins: plugins.registry,
+    checks,
+    fs: io.fs,
+    clock: io.clock,
+    ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
   });
-  const linked = explicitLinks({
-    entities: typed.entities,
-    resources: ingested.sources.flatMap((source) =>
-      source.files.map((file) => ({ source: source.name, path: file.path })),
-    ),
-    documents,
-    profile: resolved.profile,
-    ...(config.inference === undefined ? {} : { inference: config.inference }),
-  });
-  const findings = [
-    ...ingested.findings,
-    ...parsed.findings,
-    ...typed.findings,
-    ...linked.findings,
-  ].sort(compareFindings);
 
-  const files = ingested.sources.reduce((count, source) => count + source.files.length, 0);
   const at = io.clock.now().toISOString();
   const log: BuildLog = {
     version: 1,
@@ -204,12 +185,15 @@ export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitC
     at,
     summary: summarize({
       sources: ingested.sources.length,
-      files,
-      findings,
-      entities: typed.entities,
-      links: linked.links,
+      files: result.files,
+      findings: result.findings,
+      entities: result.entities,
+      links: result.links,
+      keywords: result.keywords,
+      duplicates: result.duplicates,
     }),
-    findings,
+    ...(result.contracts.length === 0 ? {} : { contracts: result.contracts }),
+    findings: result.findings,
   };
   io.fs.writeText(join(output, buildLogFile), serializeBuildLog(log));
   const model = assembleModel({
@@ -218,9 +202,13 @@ export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitC
     profileFingerprint: resolved.fingerprint,
     crossSourceLinks: config.inference?.cross_source_links ?? false,
     sources: modelSources(config, ingested.sources),
-    entities: typed.entities,
-    links: linked.links,
-    findings,
+    entities: result.entities,
+    links: result.links,
+    findings: result.findings,
+    candidates: result.candidates,
+    neighbours: result.neighbours,
+    displayedNeighbourhood: result.displayedNeighbourhood,
+    ...(result.contracts.length === 0 ? {} : { contracts: result.contracts }),
   });
   io.fs.writeText(join(output, modelFile), serializeModel(model));
 
@@ -230,14 +218,12 @@ export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitC
   for (const line of formatSummary(log.summary)) {
     io.out(line);
   }
+  io.out(renderUnavailable);
   // Conversion does not exist yet, so no document is left unconverted.
-  const verdict = shouldFail(findings, config.build?.fail_on, 0);
+  const verdict = shouldFail(result.findings, config.build?.fail_on, 0);
   if (verdict.fail) {
     io.err(`build failed: ${verdict.reasons.join("; ")}`);
     return exitCodes.invalid;
   }
-  io.err(
-    `build stopped: ${modelFile} is written; the steps after inference are not implemented in this version`,
-  );
-  return exitCodes.failure;
+  return exitCodes.ok;
 }

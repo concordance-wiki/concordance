@@ -22,6 +22,8 @@ export interface MentionOccurrence {
   line: number;
   /** Heading of the enclosing H2 section, when any. */
   section?: string;
+  /** The confidence the scan gave this mention (type prefix bonus, homonym factor); the base of the profile when absent. */
+  confidence?: number;
 }
 
 export interface MentionLinksInput {
@@ -134,7 +136,7 @@ export function mentionLinks(input: MentionLinksInput): MentionLinksResult {
       {},
       {
         method: "glossary_occurrence",
-        confidence: occurrenceConfidence,
+        confidence: occurrence.confidence ?? occurrenceConfidence,
         path: occurrence.path,
         line: occurrence.line,
       },

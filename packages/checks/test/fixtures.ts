@@ -26,8 +26,13 @@ export function filed(
   });
 }
 
-export function link(from: string, to: string, relation: string): CheckLink {
-  return { from, to, relation };
+export function link(
+  from: string,
+  to: string,
+  relation: string,
+  provenance?: CheckLink["provenance"],
+): CheckLink {
+  return { from, to, relation, ...(provenance === undefined ? {} : { provenance }) };
 }
 
 export function input(

@@ -112,12 +112,16 @@ describe("the combination of links", () => {
     ).toBe(0.75);
   });
 
-  it("grows the glossary confidence from the base of the first provenance in canonical order", () => {
+  it("grows the glossary confidence from the base of the strongest provenance, whatever its position", () => {
     const later = glossary(30, { confidence: 0.3 });
     const first = glossary(2, { confidence: 0.5 });
     const [combined] = combineLinks([link("uses", [later]), link("uses", [first])], options);
     expect(combined?.confidence).toBe(0.55);
     expect(combined?.provenance).toEqual([first, later]);
+    // A later mention announced by a type prefix lifts the whole group.
+    const announced = glossary(30, { confidence: 0.7 });
+    const [lifted] = combineLinks([link("uses", [first]), link("uses", [announced])], options);
+    expect(lifted?.confidence).toBe(0.75);
   });
 
   it("treats the glossary occurrences as one method beside the others", () => {

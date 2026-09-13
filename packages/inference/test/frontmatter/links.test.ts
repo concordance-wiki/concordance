@@ -31,7 +31,7 @@ const table = note("tables/links.table.md", "data_object", "LINKS table", {
 const cap = note("rules/related-cap.rule.md", "rule", "Related cap");
 
 const REMEDIATION =
-  "Write the identifier, the path relative to the source root or the exact title of an existing note of a type the attribute accepts, or remove the reference.";
+  "Write the identifier, the path relative to the source root or the exact title of an existing note, or remove the reference.";
 
 function unresolved(entity: LinkableEntity, attribute: string, message: string) {
   return {
@@ -56,17 +56,12 @@ describe("frontmatterLinks", () => {
       entities: [screen, object, build, cap],
       profile,
     });
-    expect(findings).toEqual([
-      unresolved(
-        screen,
-        "reads",
-        'reference "Related cap" names specs/rules/related-cap of type rule where business_object or data_object is expected',
-      ),
-    ]);
+    expect(findings).toEqual([]);
     expect(links.map((link) => [link.from, link.to, link.relation])).toEqual([
       ["specs/rules/related-cap", "specs/screens/entry", "constrains"],
       ["specs/screens/entry", "specs/objects/build", "accesses"],
       ["specs/screens/entry", "specs/objects/link", "accesses"],
+      ["specs/screens/entry", "specs/rules/related-cap", "accesses"],
     ]);
   });
 
@@ -137,20 +132,29 @@ describe("frontmatterLinks", () => {
     ]);
   });
 
-  it("reports a reference to a note of a type the attribute does not accept, naming the expected types", () => {
+  it("gives a reference to a note of a type the attribute does not accept its link, for the relation typing step to judge against the matrix", () => {
     const screen = note("screens/entry.md", "screen", "Entry", { roles: ["objects/link"] });
     const { links, findings } = frontmatterLinks({ entities: [screen, object], profile });
-    expect(links).toEqual([]);
-    expect(findings).toEqual([
-      unresolved(
-        screen,
-        "roles",
-        'reference "objects/link" names specs/objects/link of type business_object where role is expected',
-      ),
+    expect(findings).toEqual([]);
+    expect(links.map((link) => [link.from, link.to, link.relation, link.provenance])).toEqual([
+      [
+        "specs/objects/link",
+        "specs/screens/entry",
+        "assigned_to",
+        [
+          {
+            method: "frontmatter_ref",
+            confidence: 0.9,
+            path: "screens/entry.md",
+            line: 1,
+            attribute: "roles",
+          },
+        ],
+      ],
     ]);
   });
 
-  it("accepts any type for a target of any and the type of the note for a target of same", () => {
+  it("resolves a target of any, of same and of a list alike: the target types of the attribute never refuse a note", () => {
     const custom: Profile = {
       ...profile,
       types: {
@@ -185,14 +189,12 @@ describe("frontmatterLinks", () => {
       entities: [decision, older, object, cap],
       profile: custom,
     });
-    expect(findings.map((finding) => finding.message)).toEqual([
-      'reference "specs/objects/link" names specs/objects/link of type business_object where decision is expected in attribute supersedes of newer.md',
-      'reference "specs/objects/link" names specs/objects/link of type business_object where decision or rule is expected in attribute near of newer.md',
-    ]);
+    expect(findings).toEqual([]);
     expect(links.map((link) => [link.to, link.relation, link.provenance.length])).toEqual([
       ["decisions/older", "affects", 1],
       ["decisions/older", "supersedes", 1],
-      ["specs/objects/link", "affects", 1],
+      ["specs/objects/link", "affects", 2],
+      ["specs/objects/link", "supersedes", 1],
       ["specs/rules/related-cap", "affects", 2],
     ]);
   });

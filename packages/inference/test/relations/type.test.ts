@@ -282,8 +282,8 @@ describe("the order of application", () => {
       [resource, SCREEN, "related", 0.6],
       [SCREEN, resource, "accesses", 0.9],
     ]);
-    expect(findings.map((f) => [f.check, f.entity, f.source, f.path])).toEqual([
-      ["I-REL-AMBIGUOUS", SCREEN, "specs", "screens/entity-page.md"],
+    expect(findings.map((f) => [f.check, f.entity, f.source, f.path, f.line])).toEqual([
+      ["I-REL-AMBIGUOUS", SCREEN, "specs", "screens/entity-page.md", 6],
     ]);
   });
 
@@ -357,17 +357,34 @@ describe("the related relation", () => {
   });
 
   it("locates a link without any file in its provenance on its source end", () => {
+    const unlocated: Provenance = { method: "glossary_occurrence", confidence: 0.6, line: 3 };
     const { findings } = run([
-      link(TERM, SCREEN, FALLBACK_RELATION, []),
+      link(TERM, SCREEN, FALLBACK_RELATION, [unlocated]),
       link(SCREEN, TERM, "accesses", [], { mode: "read" }),
     ]);
     expect(findings.map((f) => [f.check, f.source, f.path, f.line, f.entity])).toEqual([
       ["E-META-REL", "specs", undefined, undefined, SCREEN],
-      ["I-REL-AMBIGUOUS", "glossary", undefined, undefined, TERM],
+      ["I-REL-AMBIGUOUS", "glossary", undefined, 3, TERM],
     ]);
     expect(findings[0]?.message).toBe(
       `relation accesses from screen ${SCREEN} to term ${TERM} is not allowed between these types`,
     );
+  });
+
+  it("raises nothing for a related link that co-occurrence alone knows, and keeps the link capped", () => {
+    const { links, findings } = run([
+      link(TERM, SCREEN, FALLBACK_RELATION, [cooccurrence]),
+      link(TERM, "specs/roles/maintainer", FALLBACK_RELATION, [cooccurrence, mention(4)]),
+    ]);
+    expect(links.map((l) => [l.from, l.to, l.relation, l.confidence, l.provenance.length])).toEqual(
+      [
+        [TERM, "specs/roles/maintainer", "related", 0.6, 2],
+        [TERM, SCREEN, "related", 0.4, 1],
+      ],
+    );
+    expect(findings.map((f) => [f.check, f.entity, f.line])).toEqual([
+      ["I-REL-AMBIGUOUS", TERM, 4],
+    ]);
   });
 
   it("sorts the findings canonically, by source and path rather than by link", () => {

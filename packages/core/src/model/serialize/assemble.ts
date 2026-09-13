@@ -1,3 +1,4 @@
+import { compareContracts, type CandidateObject, type ContractRecord } from "../contract.js";
 import { compareEntities, type Entity } from "../entity.js";
 import { compareFindings, type Finding } from "../finding.js";
 import type { Link, Provenance, ProvenanceOccurrence } from "../link.js";
@@ -5,6 +6,8 @@ import { compareLinks, compareProvenances, sortCanonically } from "../order.js";
 import type {
   Candidates,
   CanonicalModel,
+  DisplayedNeighbour,
+  DisplayedNeighbourhood,
   DuplicateCandidate,
   ModelSource,
   Neighbour,
@@ -27,6 +30,9 @@ export interface AssembleModelInput {
   findings: readonly Finding[];
   candidates?: Candidates;
   neighbours?: Neighbours;
+  displayedNeighbourhood?: DisplayedNeighbourhood;
+  /** The contracts the source plugins imported; recorded under `build.contracts` when any. */
+  contracts?: readonly ContractRecord[];
 }
 
 // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
@@ -89,6 +95,26 @@ function compareNeighbours(a: Neighbour, b: Neighbour): number {
   return b.count - a.count || byCodeUnit(a.id, b.id);
 }
 
+/** By the API that declares the contract, then by name, then by contract location. */
+function compareObjects(a: CandidateObject, b: CandidateObject): number {
+  return (
+    byCodeUnit(a.from, b.from) || byCodeUnit(a.name, b.name) || byCodeUnit(a.contract, b.contract)
+  );
+}
+
+/** Best first: the larger confidence, then the identifier, as the display step ranks them. */
+function compareDisplayed(a: DisplayedNeighbour, b: DisplayedNeighbour): number {
+  return b.confidence - a.confidence || byCodeUnit(a.id, b.id);
+}
+
+function sortDisplayed(neighbourhood: DisplayedNeighbourhood): DisplayedNeighbourhood {
+  const sorted: DisplayedNeighbourhood = {};
+  for (const [id, ranked] of Object.entries(neighbourhood).sort(([a], [b]) => byCodeUnit(a, b))) {
+    sorted[id] = sortCanonically(ranked, compareDisplayed);
+  }
+  return sorted;
+}
+
 function sortNeighbours(neighbours: Neighbours): Neighbours {
   const sorted: Neighbours = {};
   for (const [id, ranked] of Object.entries(neighbours).sort(([a], [b]) => byCodeUnit(a, b))) {
@@ -100,13 +126,16 @@ function sortNeighbours(neighbours: Neighbours): Neighbours {
 /** Puts every block in canonical order; the input is never mutated, so producers keep their own order. */
 export function assembleModel(input: AssembleModelInput): CanonicalModel {
   const candidates = input.candidates ?? { terms: [], duplicates: [] };
-  const model: CanonicalModel = {
+  return {
     version: 1,
     build: {
       tool: input.version,
       at: input.timestamp,
       profile_hash: input.profileFingerprint,
       sources: sortCanonically(input.sources, compareSources),
+      ...(input.contracts === undefined
+        ? {}
+        : { contracts: sortCanonically(input.contracts, compareContracts) }),
       ...(input.crossSourceLinks === undefined
         ? {}
         : { cross_source_links: input.crossSourceLinks }),
@@ -116,10 +145,14 @@ export function assembleModel(input: AssembleModelInput): CanonicalModel {
     findings: sortCanonically(input.findings, compareFindings),
     candidates: {
       terms: sortCanonically(candidates.terms, compareTerms).map(sortTerm),
+      ...(candidates.objects === undefined
+        ? {}
+        : { objects: sortCanonically(candidates.objects, compareObjects) }),
       duplicates: sortCanonically(candidates.duplicates, compareDuplicates).map(sortDuplicate),
     },
+    ...(input.neighbours === undefined ? {} : { neighbours: sortNeighbours(input.neighbours) }),
+    ...(input.displayedNeighbourhood === undefined
+      ? {}
+      : { displayed_neighbourhood: sortDisplayed(input.displayedNeighbourhood) }),
   };
-  return input.neighbours === undefined
-    ? model
-    : { ...model, neighbours: sortNeighbours(input.neighbours) };
 }

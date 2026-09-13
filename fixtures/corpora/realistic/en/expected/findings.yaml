@@ -1,7 +1,20 @@
 # Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
+# An I-TERM-HOMONYM names the entities sharing a title or alias; a W-DUP-CANDIDATE names its pair under `entities`,
+# notes sharing a base name across sources (0.5) or close base names in one folder (0.76).
 - { check: I-REL-AMBIGUOUS, path: specs/screens/keyword-page.md, note: "keyword page (term) mentioned in prose falls back to related" }
+- { check: I-TERM-HOMONYM, form: alphabetical index, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
+- { check: I-TERM-HOMONYM, form: candidate, entities: [glossary/candidate-expression, specs/objects/candidate] }
+- { check: I-TERM-HOMONYM, form: entity, entities: [glossary/entity, specs/objects/entity] }
+- { check: I-TERM-HOMONYM, form: finding, entities: [glossary/finding, specs/objects/finding] }
+- { check: I-TERM-HOMONYM, form: index, entities: [glossary/alphabetical-index, glossary/search-index] }
+- { check: I-TERM-HOMONYM, form: keyword page, entities: [glossary/keyword-page, specs/objects/keyword-page, specs/screens/keyword-page] }
+- { check: I-TERM-HOMONYM, form: link, entities: [glossary/explicit-link, glossary/link, specs/objects/link] }
+- { check: I-TERM-HOMONYM, form: neighbourhood, entities: [glossary/neighbourhood, specs/objects/neighbourhood] }
+- { check: I-TERM-HOMONYM, form: occurrence, entities: [glossary/occurrence, specs/objects/occurrence] }
+- { check: I-TERM-HOMONYM, form: publication threshold, entities: [glossary/publication-threshold, specs/rules/publication-threshold] }
+- { check: I-TERM-HOMONYM, form: source, entities: [glossary/source, specs/objects/source] }
 - { check: W-API-CONSUMER-MISMATCH, path: specs/api/model-query.md, note: "declares screens/service/suggestion-review as a consumer, which never cites it" }
 - { check: W-API-NOCONSUMER, path: specs/api/forge-bridge.md }
 - { check: W-APP-MISSING, source: framing, path: vision.md }
@@ -12,6 +25,18 @@
 - { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: white-label.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/author.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/maintainer.md }
+- { check: W-DUP-CANDIDATE, path: decisions/suggestions-in-service-deferred.md, entities: [decisions/suggestions-in-service-deferred, decisions/suggestions-in-service-planned], note: "close base names in one folder: the planned decision supersedes the deferred one" }
+- { check: W-DUP-CANDIDATE, path: glossary/alphabetical-index.md, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
+- { check: W-DUP-CANDIDATE, path: glossary/canonical-model.md, entities: [glossary/canonical-model, specs/api/canonical-model] }
+- { check: W-DUP-CANDIDATE, path: glossary/entity.md, entities: [glossary/entity, specs/objects/entity] }
+- { check: W-DUP-CANDIDATE, path: glossary/finding.md, entities: [glossary/finding, specs/objects/finding] }
+- { check: W-DUP-CANDIDATE, path: glossary/keyword-page.md, entities: [glossary/keyword-page, specs/objects/keyword-page] }
+- { check: W-DUP-CANDIDATE, path: glossary/keyword-page.md, entities: [glossary/keyword-page, specs/screens/keyword-page] }
+- { check: W-DUP-CANDIDATE, path: glossary/link.md, entities: [glossary/link, specs/objects/link] }
+- { check: W-DUP-CANDIDATE, path: glossary/neighbourhood.md, entities: [glossary/neighbourhood, specs/objects/neighbourhood] }
+- { check: W-DUP-CANDIDATE, path: glossary/occurrence.md, entities: [glossary/occurrence, specs/objects/occurrence] }
+- { check: W-DUP-CANDIDATE, path: glossary/source.md, entities: [glossary/source, specs/objects/source] }
+- { check: W-DUP-CANDIDATE, path: specs/objects/keyword-page.md, entities: [specs/objects/keyword-page, specs/screens/keyword-page] }
 - { check: W-TERM-UNDEFINED, text: build summary, min_occurrences: 7, min_files: 3 }
 - { check: W-TERM-UNUSED, path: glossary/comparison-form.md }
 - { check: W-TERM-UNUSED, path: glossary/cue.md }

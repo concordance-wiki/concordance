@@ -75,8 +75,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Build the golden corpus inside and outside the container
-        # The build still stops after parsing with exit code 2 once its log is
-        # written, as the determinism check accepts; any other failure fails here.
+        # The build exits 0 once its log and its model are written; any other
+        # status fails here, as it does in the determinism check.
         run: |
           accept() {
             set +e
@@ -84,7 +84,7 @@ jobs:
             local status=$?
             set -e
             cat build.stderr >&2
-            if [ "$status" -eq 0 ] || { [ "$status" -eq 2 ] && grep -q "not implemented in this version" build.stderr; }; then
+            if [ "$status" -eq 0 ]; then
               return 0
             fi
             echo "the build exited with $status"
