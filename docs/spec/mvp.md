@@ -1124,8 +1124,6 @@ As a reader of a corporate documentation, I want the results of a search laid ou
 
 Depends on: L9-01, L3-02, L3-03, L3-04.
 
-## 5. Working conditions
-
 #### L9-04 Keyword page
 
 As a reader, I want the page of a word nobody defined to look like every other page so that I understand at once what is known of the word and what is missing.
@@ -1148,6 +1146,21 @@ As a reader who opened the line of the panel, I want the map to take the panel a
 - Gallery state `entity-page-map`, the corporate entity page with the fold open; the accessibility checker and the contrast checker pass on it, the SVG keeping its caption and the textual equivalent.
 
 Depends on: L9-01, L7-01, L7-02, L7-03.
+
+#### L9-09 A–Z index
+
+As a glossary owner, I want the index to list every word the documentation uses, defined or not, with what is known of each, so that the words without a definition stand out as my working list without being set apart.
+
+- The page is titled "A–Z index" and opens on the sentence "N words used in the documentation. N have a written page, the others exist through their uses alone." (the entities with a note against the keyword pages); beside it the folded button "Filters ▾", a `<details>` whose menu lists "By type" (the types of the notes with their counts), "By space" (the sources) and "without a definition", every value a link to the results page filtered by it (`search/?type=…`, `?source=…`, `?nonote=only`, which lists the whole site under its facets when it receives no query), so that the filters work without JavaScript.
+- The letter bar A–Z then `#`, in the monospace family, the current letter on the ink, a letter without an entry kept in view, struck through and inert, and after the bar "N letters without an entry"; then, for every letter of the page, the heading "A — 94 words".
+- The table under the heading, its column labels in small capitals: WORD · TYPE · FIRST LINE OF THE PAGE, OR MOST CITED PASSAGE · PAGES. The word links to its page; the type is its label from the profile; the first line is the summary of the note (its `summary` or its first paragraph, cut at a word before 200 characters); the pages column counts the distinct pages citing the word (the pages linking to a note, the files an expression is read in). A word without a definition sits among the others in the collation order, its title dotted, the label "no definition" dashed in the type column and, in place of a first line, the passage of the file that uses it most ("“…” — title of the file", the earliest passage of that file); the note under the table reads "Words without a definition sit in the index like the others, dotted, with the passage that uses them most in place of a definition. That is the working list of a glossary owner."
+- The pagination per letter stays (the whole index as one page under 100 kB, one page per letter with entries past it, `index/index.html` showing the first); no JavaScript is needed anywhere on the page; the type glyphs of the former list are no longer shown, the table naming the type instead.
+- Gallery: a state named `index-corporate` on the letter S of the fixtures corpus, two homonyms and a word without a definition among its rows; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L2-06, L3-04.
+
+## 5. Working conditions
+
 ### 5.1 Ready
 
 A story enters development only when its upstream batch is delivered, its acceptance criteria are testable without interpretation, the golden corpus contains a case that exercises it, and its effect on build time or published weight is estimated when it has one.
