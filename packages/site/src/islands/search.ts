@@ -243,14 +243,93 @@ export interface SearchIslandElement<P extends SearchPanel> {
 export interface SearchLocation {
   /** The query string of the address, `?q=…` or empty. */
   search(): string;
+  /** The whole address, what the copy button puts in the clipboard. */
+  href(): string;
   /** Adds an entry to the history with this query string, the page staying. */
   push(search: string): void;
+  /** Rewrites the current entry of the history with this query string, as the reader types. */
+  replace(search: string): void;
+  /** Called when the reader goes back or forward: the address changed under the page. */
+  onPop(listener: () => void): void;
 }
+
+/** What the page remembers and restores of its scroll, by address, so that a link opens where it was left. */
+export interface ScrollMemory {
+  /** The position remembered for an address, none the first time. */
+  remembered(search: string): number | undefined;
+  remember(search: string, position: number): void;
+  position(): number;
+  scrollTo(position: number): void;
+  onScroll(listener: () => void): void;
+}
+
+/** The part of a web storage the scroll memory uses; `sessionStorage` in the browser. */
+export interface KeyValueStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
+/** The part of the window the scroll memory reads and drives. */
+export interface ScrollView {
+  scrollY: number;
+  scrollTo(x: number, y: number): void;
+  addEventListener(type: "scroll", listener: () => void): void;
+}
+
+/** The storage a getter gives, or none when the page cannot reach it, as some browsers refuse it over `file://`. */
+export function storageOf(get: () => KeyValueStorage): KeyValueStorage | undefined {
+  try {
+    return get();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Prefix of the keys the scroll memory writes, one per query string. */
+export const SCROLL_KEY = "concordance-search-scroll:";
+
+/** The scroll memory of a page over a web storage; without one, nothing is remembered and the page opens at the top. */
+export function scrollMemory(storage: KeyValueStorage | undefined, view: ScrollView): ScrollMemory {
+  return {
+    remembered: (search) => {
+      const value = Number(storage?.getItem(`${SCROLL_KEY}${search}`) ?? "x");
+      return Number.isFinite(value) ? value : undefined;
+    },
+    remember: (search, position) => {
+      try {
+        storage?.setItem(`${SCROLL_KEY}${search}`, String(position));
+      } catch {
+        // A full or refused storage loses the position and nothing else.
+      }
+    },
+    position: () => view.scrollY,
+    scrollTo: (position) => {
+      view.scrollTo(0, position);
+    },
+    onScroll: (listener) => {
+      view.addEventListener("scroll", listener);
+    },
+  };
+}
+
+/** The clipboard, when the page has one: secure contexts only, so not over `file://` in every browser. */
+export interface SearchClipboard {
+  writeText(text: string): Promise<void>;
+}
+
+/** Runs a callback after a delay in milliseconds and gives back what cancels it: `setTimeout` in the browser. */
+export type Defer = (callback: () => void, delay: number) => () => void;
+
+/** How long the address waits for the reader to stop typing before it is rewritten. */
+export const REPLACE_DELAY = 300;
 
 export interface SearchIslands<P extends SearchPanel> {
   islands: Iterable<SearchIslandElement<P>>;
   document: SearchDocument;
   location: SearchLocation;
+  scroll: ScrollMemory;
+  clipboard: SearchClipboard | undefined;
+  defer: Defer;
   inject: ScriptInjector;
   host: ShardHost;
   render(vnode: JSX.Element, container: P): void;
@@ -262,12 +341,24 @@ export function resultsHref(state: SearchState): string {
   return search === "" ? "?" : search;
 }
 
+/** The address of a state from the root of the site, as the results page shows it. */
+export function resultsAddress(state: SearchState): string {
+  return `${SEARCH_DIRECTORY}/index.html${searchQueryString(state)}`;
+}
+
+/** What the results page does beyond showing: follows an address in place, copies the current one. */
+export interface ResultsActions {
+  onNavigate: (href: string) => void;
+  onCopy?: () => void;
+  copied?: boolean;
+}
+
 /** The view model of the results page for a state and the hits of its query, facets counted over those hits. */
 export function resultsPropsOf(
   state: SearchState,
   outcome: SearchOutcome,
   root: string,
-  onNavigate: (href: string) => void,
+  actions: ResultsActions,
 ): SearchResultsProps {
   const { meta } = outcome;
   if (meta === undefined) {
@@ -292,8 +383,12 @@ export function resultsPropsOf(
       activeFilters: meta.labels.activeFilters,
       removeFilter: meta.labels.removeFilter,
       clear: meta.labels.clear,
+      address: meta.labels.address,
+      copyAddress: meta.labels.copyAddress,
+      copied: meta.labels.copied,
     },
-    onNavigate,
+    address: resultsAddress(state),
+    ...actions,
   };
 }
 
@@ -301,7 +396,9 @@ export function resultsPropsOf(
  * Wires every search island of a page: the field of the header gets the shortcuts and, when the
  * site has an index, suggestions as the reader types; the results island, when the page has
  * one, shows the list for the state of the address, filtered by its facets, and follows the
- * field and the facets, every change of state going through the address.
+ * field and the facets. Every change of state goes through the address: a facet followed
+ * pushes an entry to the history, typing rewrites the current one once the reader pauses, and
+ * going back replays the state of the address, the scroll position included.
  */
 export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): number {
   let root: string | undefined;
@@ -337,26 +434,54 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
   const site = root;
   const run = searchRunner(site, options.inject, options.host);
   let state = parseSearchState(options.location.search());
+  let copied = false;
   let latest = 0;
-  const show = async (): Promise<void> => {
+  let cancelReplace: (() => void) | undefined;
+  const draw = (target: P, answer: SearchOutcome): void => {
+    const clipboard = options.clipboard;
+    const actions: ResultsActions =
+      clipboard === undefined
+        ? { onNavigate: navigate }
+        : {
+            onNavigate: navigate,
+            copied,
+            onCopy: () => {
+              clipboard.writeText(options.location.href()).then(
+                () => {
+                  copied = true;
+                  draw(target, answer);
+                },
+                () => undefined,
+              );
+            },
+          };
+    options.render(h(SearchResults, resultsPropsOf(state, answer, site, actions)), target);
+  };
+  const show = async (restoreScroll = false): Promise<void> => {
     const ticket = (latest += 1);
-    const outcome = await run(state.query);
+    const answer = await run(state.query);
     if (ticket !== latest) {
       return;
     }
+    copied = false;
     if (results !== null) {
-      options.render(h(SearchResults, resultsPropsOf(state, outcome, site, navigate)), results);
+      draw(results, answer);
+      const position = restoreScroll
+        ? options.scroll.remembered(searchQueryString(state))
+        : undefined;
+      if (position !== undefined) options.scroll.scrollTo(position);
     } else if (suggestions !== null) {
-      const meta = outcome.meta;
+      const meta = answer.meta;
       const shown =
         meta === undefined || queryWords(state.query).length === 0
           ? []
-          : outcome.hits.slice(0, SUGGESTIONS).map((hit) => resultOf(hit.entry, meta, site));
+          : answer.hits.slice(0, SUGGESTIONS).map((hit) => resultOf(hit.entry, meta, site));
       options.render(h(ResultList, { results: shown }), suggestions);
       suggestions.hidden = shown.length === 0;
     }
   };
   const navigate = (href: string): void => {
+    cancelReplace?.();
     state = parseSearchState(href);
     field.value = state.query;
     options.location.push(searchQueryString(state));
@@ -367,11 +492,26 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
   });
   field.addEventListener("input", () => {
     state = withQuery(state, field.value);
+    if (results !== null) {
+      cancelReplace?.();
+      cancelReplace = options.defer(() => {
+        options.location.replace(searchQueryString(state));
+      }, REPLACE_DELAY);
+    }
     void show();
   });
   if (results !== null) {
     field.value = state.query;
-    void show();
+    options.location.onPop(() => {
+      cancelReplace?.();
+      state = parseSearchState(options.location.search());
+      field.value = state.query;
+      void show(true);
+    });
+    options.scroll.onScroll(() => {
+      options.scroll.remember(searchQueryString(state), options.scroll.position());
+    });
+    void show(true);
   }
   return mounted;
 }

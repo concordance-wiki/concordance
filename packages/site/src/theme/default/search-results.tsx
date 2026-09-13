@@ -75,6 +75,36 @@ function ActiveFilters({
   );
 }
 
+/** The address of the search, shown so that the state is explicit, with a copy button once the island runs on a page with a clipboard. */
+function Address({
+  address,
+  copied,
+  onCopy,
+  wording,
+}: {
+  address: string;
+  copied: boolean | undefined;
+  onCopy: (() => void) | undefined;
+  wording: SearchResultsLabels;
+}): JSX.Element {
+  return (
+    <p class="search-address">
+      <span class="visually-hidden">{wording.address}</span>
+      <code class="search-url">{address}</code>
+      {onCopy !== undefined && (
+        <>
+          <button type="button" class="copy-address" onClick={onCopy}>
+            {wording.copyAddress}
+          </button>
+          <span class="copied" role="status">
+            {copied === true ? wording.copied : ""}
+          </span>
+        </>
+      )}
+    </p>
+  );
+}
+
 export function SearchResults(props: SearchResultsProps): JSX.Element {
   const { query, total, results, facets, active, summary, clearHref, onNavigate } = props;
   const wording: SearchResultsLabels = {
@@ -82,6 +112,9 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
     activeFilters: theme.activeFilters,
     removeFilter: theme.removeFilter,
     clear: theme.clearFilters,
+    address: theme.searchAddress,
+    copyAddress: theme.copyAddress,
+    copied: theme.addressCopied,
     ...props.labels,
   };
   return (
@@ -94,6 +127,14 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
           </>
         )}
       </p>
+      {props.address !== undefined && (
+        <Address
+          address={props.address}
+          copied={props.copied}
+          onCopy={props.onCopy}
+          wording={wording}
+        />
+      )}
       {active !== undefined && active.length > 0 && (
         <ActiveFilters
           active={active}

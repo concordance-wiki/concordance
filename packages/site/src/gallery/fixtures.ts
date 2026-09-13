@@ -329,6 +329,7 @@ export const searchResults: SlotProps["SearchResults"] = {
   query: "threshold",
   total: 2,
   summary: "2 results",
+  address: "search/index.html?q=threshold&source=glossary",
   results: [
     {
       title: "Publication threshold",

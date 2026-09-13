@@ -180,6 +180,9 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     clear: plain(catalogue, "search.clear"),
     noResult: plain(catalogue, "search.noResult"),
     results: pluralForms(catalogue, "search.results"),
+    address: plain(catalogue, "search.address"),
+    copyAddress: plain(catalogue, "search.copyAddress"),
+    copied: plain(catalogue, "search.copied"),
   };
 }
 

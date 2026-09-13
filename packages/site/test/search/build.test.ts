@@ -279,6 +279,9 @@ describe("searchLabels and pluralForms", () => {
       clear: "Clear filters",
       noResult: "No result",
       results: { one: "# result", other: "# results" },
+      address: "Address of this search",
+      copyAddress: "Copy",
+      copied: "Address copied",
     });
     const fr = searchLabels(loadCatalogue("fr"));
     expect(fr.facets).toBe("Filtres");

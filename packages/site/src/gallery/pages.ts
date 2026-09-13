@@ -202,7 +202,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "SearchResults",
     state: "default",
     description:
-      "two results, one with a type and a snippet, an active filter recalled above them, and two facets with a selected value and a disabled one",
+      "two results, one with a type and a snippet, the address of the search, an active filter recalled above them, and two facets with a selected value and a disabled one",
     ...chrome,
     props: searchResults,
   },
