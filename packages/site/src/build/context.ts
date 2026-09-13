@@ -116,10 +116,27 @@ export function typeLabel(context: SiteContext, type: string): string {
   return definition === undefined ? type : labelIn(definition.label, context.language);
 }
 
+export interface RelationLabelOptions {
+  /**
+   * Read the relation from its target, the way the page of an object names the screen that
+   * accesses it: the `inverse_label` of the relation, or its plain label when it has none.
+   */
+  inverse?: boolean;
+}
+
 /** The label of a relation in the site language; the slug when the profile does not declare it. */
-export function relationLabel(context: SiteContext, relation: string): string {
+export function relationLabel(
+  context: SiteContext,
+  relation: string,
+  options: RelationLabelOptions = {},
+): string {
   const definition = context.profile.relations[relation];
-  return definition === undefined ? relation : labelIn(definition.label, context.language);
+  if (definition === undefined) return relation;
+  const label =
+    options.inverse === true && definition.inverse_label !== undefined
+      ? definition.inverse_label
+      : definition.label;
+  return labelIn(label, context.language);
 }
 
 /** The glyph name the profile gives a type, as declared (`screen`, `api`…); none for a type without one. */

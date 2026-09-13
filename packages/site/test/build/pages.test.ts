@@ -49,6 +49,17 @@ function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
 
 const pagePath = "glossary/keyword-page/index.html";
 
+/** A displayed neighbour reached through `accesses`, a relation the profile declares with an inverse label. */
+const accessed = {
+  id: "specs/screens/mentions-panel",
+  title: "Mentions panel",
+  type: "screen",
+  kind: "entity",
+  relation: "accesses",
+  confidence: 1,
+  rank: 0,
+} as const;
+
 describe("siteContext", () => {
   it("indexes the entities by identifier and by file, the representations of a note included, and the links by target", () => {
     const ctx = context();
@@ -269,6 +280,35 @@ describe("entityPageOf", () => {
     expect(neighbourhoodOf(context({ model: looped }), pagePath, term).total).toBe(4);
     const unlinked = model({ links: [] });
     expect(neighbourhoodOf(context({ model: unlinked }), pagePath, term).total).toBe(3);
+  });
+
+  it("names the relation from the page: the inverse label for a link pointing at the page, the plain one otherwise or when the relation has no inverse", () => {
+    const [page, screen, keyword] = neighbourhoodOf(context(), pagePath, term).neighbours;
+    // `broader` and `displays` are not declared by the profile: their slugs stand in both directions.
+    expect(page?.relation).toBe("broader");
+    expect(screen?.relation).toBe("displays");
+    expect(keyword?.relation).toBe("unknown_relation");
+    const declared = model({
+      displayed_neighbourhood: {
+        [term.id]: [
+          { ...accessed, direction: "in" },
+          { ...accessed, id: "glossary/page", direction: "out" },
+          { ...accessed, id: "framing/vision", direction: "both" },
+          { ...accessed, id: "keywords/build-summary", relation: "related", direction: "in" },
+        ],
+      },
+    });
+    const relations = neighbourhoodOf(context({ model: declared }), pagePath, term).neighbours.map(
+      (neighbour) => neighbour.relation,
+    );
+    expect(relations).toEqual(["is accessed by", "accesses", "accesses", "is related to"]);
+    const fr = context({ model: declared, catalogue: loadCatalogue("fr") });
+    expect(neighbourhoodOf(fr, pagePath, term).neighbours[0]?.relation).toBe("est accédé par");
+    expect(relationLabel(context(), "accesses", { inverse: true })).toBe("is accessed by");
+    expect(relationLabel(context(), "accesses", { inverse: false })).toBe("accesses");
+    expect(relationLabel(context(), "unknown_relation", { inverse: true })).toBe(
+      "unknown_relation",
+    );
   });
 
   it("passes no type glyph for a type the profile gives none, nor for a noteless word", () => {

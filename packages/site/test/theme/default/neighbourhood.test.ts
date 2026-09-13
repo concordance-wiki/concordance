@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { siteDocuments } from "../../../src/build/site.js";
 import {
   neighbourhood,
   neighbourhoodFull,
@@ -8,8 +9,10 @@ import {
 import { LABEL_MAX } from "../../../src/neighbourhood/layout.js";
 import { renderSlot } from "../../../src/render.js";
 import { GLYPH_SHAPES, initialOfGlyph, shapeOfGlyph } from "../../../src/theme/default/glyphs.js";
+import { NEIGHBOURHOOD_LIST } from "../../../src/theme/default/neighbourhood.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import type { Neighbour } from "../../../src/slots.js";
+import { fragments, model, profile, tokenize } from "../../build/fixture.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 function render(props: Parameters<typeof renderSlot<"Neighbourhood">>[1]): string {
@@ -225,5 +228,104 @@ describe("Readable rendering of the neighbourhood map", () => {
       expect(count(html, '<g class="map-node')).toBe(size);
       expect(count(html, '<line class="map-edge"')).toBe(size);
     }
+  });
+});
+
+describe("The textual equivalent of the neighbourhood map", () => {
+  it("is right after the figure inside the same section, not hidden, the figure hidden from assistive technologies and described by it", () => {
+    expect(NEIGHBOURHOOD_LIST).toBe("neighbourhood-list");
+    const html = render(neighbourhoodFull);
+    const figure = html.indexOf(
+      '<figure class="neighbourhood-map" aria-describedby="neighbourhood-list">',
+    );
+    const svg = html.indexOf('aria-hidden="true" focusable="false">');
+    const end = html.indexOf("</figure>");
+    const list = html.indexOf('<ul id="neighbourhood-list" class="neighbour-list">');
+    expect(figure).toBeGreaterThan(html.indexOf("</h2>"));
+    expect(svg).toBeGreaterThan(figure);
+    expect(end).toBeGreaterThan(svg);
+    expect(html.slice(end + "</figure>".length, list)).toBe("");
+    expect(html.slice(list)).not.toContain("hidden");
+    expect(html.endsWith("</ul></section>")).toBe(true);
+    expect(count(html, "aria-hidden")).toBe(1);
+    expect(html).toContain(
+      "<figcaption>Map of the neighbourhood. The list below carries the same information as the map.</figcaption></figure>",
+    );
+  });
+
+  it("names in each entry the entity, its type and the nature of the link, with the wording of the view model only", () => {
+    const neighbours: Neighbour[] = [
+      neighbour(0, {
+        label: "Mentions panel",
+        typeLabel: "Écran",
+        relation: "est accédé par",
+        kind: "entity",
+        typeGlyph: "screen",
+      }),
+      neighbour(1, { label: "build summary", typeLabel: "Mot-clé", kind: "keyword" }),
+      neighbour(2, { label: "Page", relation: "broader" }),
+    ];
+    const html = render({ centre: "Page mot-clé", neighbours });
+    expect(html).toContain(
+      '<li class="neighbour"><a href="../term-0/">Mentions panel</a><span class="badge">Écran</span><span class="relation">est accédé par</span><span class="weight">1</span></li>',
+    );
+    expect(html).toContain(
+      '<li class="neighbour"><a href="../term-1/">build summary</a><span class="badge">Mot-clé</span><span class="weight">2</span></li>',
+    );
+    expect(html).toContain(
+      '<li class="neighbour"><a href="../term-2/">Page</a><span class="relation">broader</span><span class="weight">3</span></li>',
+    );
+    const list = html.slice(html.indexOf('<ul id="neighbourhood-list"'));
+    const text = list
+      .replaceAll(/<[^>]+>/g, " ")
+      .replaceAll(/\s+/g, " ")
+      .trim();
+    expect(text).toBe(
+      "Mentions panel Écran est accédé par 1 build summary Mot-clé 2 Page broader 3",
+    );
+    expect(list).not.toContain("keyword");
+    expect(list).not.toContain("screen");
+    expect(list).not.toContain("entity");
+  });
+});
+
+describe("The list of neighbours is indexed by search", () => {
+  it("stays in the text content of the served page, every entry with its entity, type and relation, where the search index of the page body reads it", () => {
+    const { documents } = siteDocuments(
+      {
+        model: model(),
+        fragments,
+        profile,
+        theme: defaultTheme,
+        locale: "en",
+        projectName: "Concordance notes",
+        tokenize,
+      },
+      [
+        { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
+        { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+        { name: "search", file: "search-00000000.js", bytes: 0, classic: true },
+      ],
+    );
+    const page = documents.find((document) => document.path === "glossary/keyword-page/index.html");
+    const html = page?.content ?? "";
+    const list = html.slice(
+      html.indexOf('<ul id="neighbourhood-list"'),
+      html.indexOf("</ul>", html.indexOf('<ul id="neighbourhood-list"')),
+    );
+    const text = list
+      .replaceAll(/<[^>]+>/g, " ")
+      .replaceAll(/\s+/g, " ")
+      .trim();
+    expect(text).toBe(
+      "Page Term broader 2 Mentions panel Screen displays 4 build summary Keyword unknown_relation 1",
+    );
+    const body = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+    for (const entry of ["Page", "Term", "Mentions panel", "Screen", "build summary", "Keyword"]) {
+      expect(body).toContain(entry);
+    }
+    expect(html).toContain(
+      '<figure class="neighbourhood-map" aria-describedby="neighbourhood-list">',
+    );
   });
 });
