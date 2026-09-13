@@ -478,7 +478,7 @@ types:
     attributes:
       date: { type: date }
       participants: { type: "string[]" }
-      decisions: { type: "ref[]", target: decision }
+      decisions: { type: "ref[]", target: decision, relation: documents }
       duration: { type: string }
     display:
       highlight: [date, duration, participants]

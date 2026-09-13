@@ -5,6 +5,8 @@ export { ModelError, parseModel, serializeModel, validateModel } from "./seriali
 export type {
   Candidates,
   CanonicalModel,
+  DisplayedNeighbour,
+  DisplayedNeighbourhood,
   DuplicateCandidate,
   ModelBuild,
   ModelSource,

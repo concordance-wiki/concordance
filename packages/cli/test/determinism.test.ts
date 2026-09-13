@@ -17,8 +17,11 @@ import { main } from "../src/main.js";
 import { FakeGit } from "./helpers.js";
 
 const root = resolve(import.meta.dirname, "../../..");
-const config = join(root, "fixtures/corpora/minimal/en/concordance.yaml");
 const executable = join(root, "packages/cli/dist/bin.js");
+/** The golden corpora: the small one the scripts build, and the realistic one that runs every step. */
+const corpora = ["minimal/en", "realistic/en"] as const;
+const configOf = (corpus: string): string =>
+  join(root, "fixtures/corpora", corpus, "concordance.yaml");
 
 /** Every file under a tree: forward-slash path relative to the root, in code-unit order, with its content hash. */
 function listTree(tree: string): [path: string, digest: string][] {
@@ -52,8 +55,8 @@ function readLog(tree: string): BuildLog {
   return JSON.parse(readFileSync(join(tree, "build.log.json"), "utf8")) as BuildLog;
 }
 
-// Two full builds and possibly a compilation of the command line; the machine may be loaded.
-vi.setConfig({ testTimeout: 60_000, hookTimeout: 180_000 });
+// Four full builds and possibly a compilation of the command line; the machine may be loaded.
+vi.setConfig({ testTimeout: 120_000, hookTimeout: 180_000 });
 
 describe("An integration test builds the golden corpus twice and compares the fingerprints of model.json and of the dist/ tree", () => {
   const outputs: string[] = [];
@@ -69,8 +72,8 @@ describe("An integration test builds the golden corpus twice and compares the fi
     }
   });
 
-  async function buildInProcess(output: string): Promise<number> {
-    return main(["build", "--config", config, "--output", output], {
+  async function buildInProcess(corpus: string, output: string): Promise<number> {
+    return main(["build", "--config", configOf(corpus), "--output", output], {
       fs: nodeFileSystem,
       git: new FakeGit(memoryFileSystem()),
       clock: fixedClock("2026-09-12T12:00:00Z"),
@@ -81,20 +84,23 @@ describe("An integration test builds the golden corpus twice and compares the fi
   }
 
   // Parallel steps (conversion, once it exists) must sort their outputs before writing; this is the test that catches an unsorted one.
-  it("produces byte-identical output trees from two builds in the same process with a fixed clock", async () => {
-    const first = temporaryOutput();
-    const second = temporaryOutput();
-    expect(await buildInProcess(first)).toBe(2);
-    expect(await buildInProcess(second)).toBe(2);
-    // No site yet: every file the build writes is compared, today the log and the model.
-    expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
-    expect(listTree(second)).toEqual(listTree(first));
-    expect(fingerprint(second)).toBe(fingerprint(first));
-    expect(readLog(first).at).toBe("2026-09-12T12:00:00.000Z");
-    expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
-      "2026-09-12T12:00:00.000Z",
-    );
-  });
+  it.each(corpora)(
+    "produces byte-identical output trees from two builds of %s in the same process with a fixed clock",
+    async (corpus) => {
+      const first = temporaryOutput();
+      const second = temporaryOutput();
+      expect(await buildInProcess(corpus, first)).toBe(0);
+      expect(await buildInProcess(corpus, second)).toBe(0);
+      // No site yet: every file the build writes is compared, today the log and the model.
+      expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
+      expect(listTree(second)).toEqual(listTree(first));
+      expect(fingerprint(second)).toBe(fingerprint(first));
+      expect(readLog(first).at).toBe("2026-09-12T12:00:00.000Z");
+      expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
+        "2026-09-12T12:00:00.000Z",
+      );
+    },
+  );
 
   describe("through the real executable", () => {
     beforeAll(() => {
@@ -107,30 +113,37 @@ describe("An integration test builds the golden corpus twice and compares the fi
       }
     });
 
-    function buildWithExecutable(output: string): { status: number | null; stderr: string } {
+    function buildWithExecutable(
+      corpus: string,
+      output: string,
+    ): { status: number | null; stdout: string; stderr: string } {
       const run = spawnSync(
         process.execPath,
-        [executable, "build", "--config", config, "--output", output],
+        [executable, "build", "--config", configOf(corpus), "--output", output],
         { cwd: root, encoding: "utf8", env: { ...process.env, SOURCE_DATE_EPOCH: "0" } },
       );
-      return { status: run.status, stderr: run.stderr };
+      return { status: run.status, stdout: run.stdout, stderr: run.stderr };
     }
 
-    it("pins the only timestamp with SOURCE_DATE_EPOCH and yields byte-identical trees from two runs", () => {
-      const first = temporaryOutput();
-      const second = temporaryOutput();
-      const runs = [buildWithExecutable(first), buildWithExecutable(second)];
-      for (const run of runs) {
-        expect(run.status).toBe(2);
-        expect(run.stderr).toContain("not implemented in this version");
-      }
-      expect(readLog(first).at).toBe("1970-01-01T00:00:00.000Z");
-      expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
-        "1970-01-01T00:00:00.000Z",
-      );
-      expect(listTree(second)).toEqual(listTree(first));
-      expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
-      expect(fingerprint(second)).toBe(fingerprint(first));
-    });
+    it.each(corpora)(
+      "pins the only timestamp with SOURCE_DATE_EPOCH and yields byte-identical trees from two runs of %s",
+      (corpus) => {
+        const first = temporaryOutput();
+        const second = temporaryOutput();
+        const runs = [buildWithExecutable(corpus, first), buildWithExecutable(corpus, second)];
+        for (const run of runs) {
+          expect(run.status).toBe(0);
+          expect(run.stdout).toContain("render: not available in this version\n");
+          expect(run.stderr).not.toContain("not implemented");
+        }
+        expect(readLog(first).at).toBe("1970-01-01T00:00:00.000Z");
+        expect(parseModel(readFileSync(join(first, "model.json"), "utf8")).build.at).toBe(
+          "1970-01-01T00:00:00.000Z",
+        );
+        expect(listTree(second)).toEqual(listTree(first));
+        expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
+        expect(fingerprint(second)).toBe(fingerprint(first));
+      },
+    );
   });
 });

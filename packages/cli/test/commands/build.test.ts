@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 import {
+  definePlugin,
   fixedClock,
   nodeFileSystem,
   parseModel,
@@ -10,9 +11,11 @@ import {
   type BuildLog,
   type CanonicalModel,
   type Finding,
+  type SourceOutput,
 } from "@concordance-wiki/core";
+import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
 import {
@@ -21,6 +24,7 @@ import {
   formatSummary,
   modelSources,
 } from "../../src/commands/build.js";
+import { sectionLabels } from "../../src/pipeline/keywords.js";
 import { toolVersion } from "../../src/version.js";
 import { FakeGit, recordedIo, validConfig, type RecordedIo } from "../helpers.js";
 
@@ -75,7 +79,7 @@ describe("concordance build", () => {
       "/work/concordance.yaml":
         "version: 1\nproject: { name: W }\nsources: [{ name: specs, git: https://forge.example/specs.git }]\n",
     });
-    expect(await buildCommand([], io)).toBe(2);
+    expect(await buildCommand([], io)).toBe(0);
     expect(io.git.calls).toEqual([
       "clone https://forge.example/specs.git main /work/.concordance-cache/sources/specs",
     ]);
@@ -87,14 +91,20 @@ describe("concordance build", () => {
       "entities: 1",
       "  document: 1",
       "links: 0",
+      "keyword pages: 0",
+      "expressions under the threshold: 0",
+      "duplicate candidate pairs: 0 by content, 0 scored, of 1 resources",
+      "duplicate exact verifications: 0",
+      "duplicates merged: 0, candidates: 0",
+      "duplicate detection time: 0 ms",
       "findings: error 0, warning 1, info 1",
       "  W-APP-MISSING: 1",
       "  W-DOMAIN-UNCLASSIFIED: 1",
+      "render: not available in this version",
     ]);
     expect(io.stderr).toEqual([
       "warning: W-APP-MISSING (specs:README.md): specs/readme resolves to no application",
       "info: W-DOMAIN-UNCLASSIFIED (specs:README.md): specs/readme matches no declared domain",
-      "build stopped: model.json is written; the steps after inference are not implemented in this version",
     ]);
   });
 
@@ -113,23 +123,23 @@ describe("concordance build", () => {
         "version: 1\nproject: { name: W }\nsources: [{ name: gone, git: https://forge.example/gone.git }]\n",
     });
     io.git.failing.add("https://forge.example/gone.git");
-    expect(await buildCommand([], io)).toBe(2);
-    expect(io.stderr[0]).toMatch(
-      /^warning: W-SOURCE-UNREACHABLE \(gone\): source "gone" could not be fetched: fatal: repository/,
-    );
-    expect(io.stdout.slice(1)).toEqual([
-      "sources: 0",
-      "files: 0",
-      "entities: 0",
-      "links: 0",
+    expect(await buildCommand([], io)).toBe(0);
+    expect(io.stderr).toEqual([
+      expect.stringMatching(
+        /^warning: W-SOURCE-UNREACHABLE \(gone\): source "gone" could not be fetched: fatal: repository/,
+      ) as string,
+    ]);
+    expect(io.stdout.slice(1, 5)).toEqual(["sources: 0", "files: 0", "entities: 0", "links: 0"]);
+    expect(io.stdout.slice(-3)).toEqual([
       "findings: error 0, warning 1, info 0",
       "  W-SOURCE-UNREACHABLE: 1",
+      "render: not available in this version",
     ]);
   });
 
   it("reads a local source without touching git", async () => {
     const io = recordedIo({ "/work/concordance.yaml": validConfig, "/work/notes/a.md": "# A\n" });
-    expect(await buildCommand([], io)).toBe(2);
+    expect(await buildCommand([], io)).toBe(0);
     expect(io.git.calls).toEqual([]);
     expect(io.stdout.slice(1, 3)).toEqual(["sources: 1", "files: 1"]);
   });
@@ -173,9 +183,16 @@ describe("concordance build", () => {
         "entities: 2",
         "  document: 2",
         "links: 0",
+        "keyword pages: 0",
+        "expressions under the threshold: 0",
+        "duplicate candidate pairs: 0 by content, 0 scored, of 2 resources",
+        "duplicate exact verifications: 0",
+        "duplicates merged: 0, candidates: 0",
+        "duplicate detection time: 0 ms",
         "findings: error 2, warning 0, info 0",
         "  E-ENCODING: 1",
         "  E-FM-INVALID: 1",
+        "render: not available in this version",
       ]);
     });
 
@@ -185,7 +202,7 @@ describe("concordance build", () => {
         "/work/notes/a.md": "# A\n",
         "/work/notes/diagram.png": "not markdown at all",
       });
-      expect(await buildCommand([], io)).toBe(2);
+      expect(await buildCommand([], io)).toBe(0);
       expect(readLog(io).summary).toMatchObject({ files: 2, findings: { byCheck: {} } });
     });
   });
@@ -198,12 +215,10 @@ describe("concordance build", () => {
       expect(io.fs.exists("/work/dist/build.log.json")).toBe(true);
     });
 
-    it("exits 2 (not implemented) on the same corpus when fail_on.errors is false", async () => {
+    it("exits 0 on the same corpus when fail_on.errors is false", async () => {
       const io = faultyCorpus(`${validConfig}build: { fail_on: { errors: false } }\n`);
-      expect(await buildCommand([], io)).toBe(2);
-      expect(io.stderr.at(-1)).toBe(
-        "build stopped: model.json is written; the steps after inference are not implemented in this version",
-      );
+      expect(await buildCommand([], io)).toBe(0);
+      expect(io.stderr.at(-1)).toMatch(/^error: E-FM-INVALID/);
       expect(readLog(io).summary.findings.bySeverity).toEqual({ error: 2, warning: 0, info: 0 });
     });
 
@@ -280,7 +295,14 @@ describe("concordance build", () => {
         "  term: 1",
         "links: 2",
         "  explicit_link: 2",
+        "keyword pages: 0",
+        "expressions under the threshold: 0",
+        "duplicate candidate pairs: 0 by content, 0 scored, of 3 resources",
+        "duplicate exact verifications: 0",
+        "duplicates merged: 0, candidates: 0",
+        "duplicate detection time: 0 ms",
         "findings: error 0, warning 0, info 0",
+        "render: not available in this version",
       ]);
     });
 
@@ -296,33 +318,47 @@ describe("concordance build", () => {
           bySeverity: { error: 2, warning: 0, info: 0 },
           byCheck: { "E-ENCODING": 1, "E-FM-INVALID": 1 },
         },
+        keywords: { published: 0, discarded: 0 },
+        duplicates: {
+          resources: 2,
+          candidatePairs: 0,
+          scoredPairs: 0,
+          exactVerifications: 0,
+          merged: 0,
+          candidates: 0,
+          timeMs: 0,
+        },
       });
     });
   });
 
   describe("model.json contains the build, entities, links, findings and candidates blocks", () => {
-    it("writes the model next to the log with the five blocks and empty candidates", async () => {
+    it("writes the model next to the log with the five blocks, the neighbourhoods and empty candidates", async () => {
       const io = linkedCorpus();
-      expect(await buildCommand([], io)).toBe(2);
+      expect(await buildCommand([], io)).toBe(0);
       const model = readModel(io);
       expect(Object.keys(model)).toEqual([
         "build",
         "candidates",
+        "displayed_neighbourhood",
         "entities",
         "findings",
         "links",
+        "neighbours",
         "version",
       ]);
       expect(model.candidates).toEqual({ terms: [], duplicates: [] });
+      expect(model.neighbours).toEqual({});
+      expect(Object.keys(model.displayed_neighbourhood ?? {})).toEqual(["notes/a", "notes/b"]);
       expect(model.findings).toEqual(readLog(io).findings);
     });
 
     it("records in the build block whether links across sources were resolved", async () => {
       const off = linkedCorpus();
-      expect(await buildCommand([], off)).toBe(2);
+      expect(await buildCommand([], off)).toBe(0);
       expect(readModel(off).build.cross_source_links).toBe(false);
       const on = linkedCorpus(`${validConfig}inference: { cross_source_links: true }\n`);
-      expect(await buildCommand([], on)).toBe(2);
+      expect(await buildCommand([], on)).toBe(0);
       expect(readModel(on).build.cross_source_links).toBe(true);
     });
 
@@ -341,6 +377,158 @@ describe("concordance build", () => {
       const io = faultyCorpus(`${validConfig}build: { output: ../site }\n`);
       expect(await buildCommand([], io)).toBe(1);
       expect(io.fs.exists("/site/model.json")).toBe(true);
+    });
+  });
+
+  describe("Sources contributions of plugins run after typing and add their endpoint entities, exposes links, candidates and contracts records", () => {
+    const record = {
+      api: "notes/model-query",
+      location: "contracts/model-query.openapi.json",
+      title: "Model query",
+      version: "1.0.0",
+      fingerprint: "b".repeat(64),
+      imported_at: "2026-09-12T12:00:00.000Z",
+    };
+
+    /** A plugin whose source imports one endpoint for the api note and whose check flags every api. */
+    const manifest = definePlugin({
+      name: "example-contracts",
+      version: "1.0.0",
+      apiVersion: "1",
+      contributes: {
+        sources: [
+          {
+            kind: "openapi",
+            load: (input) => {
+              const api = input.payload.entities.find((entity) => entity.type === "api");
+              if (api === undefined) throw new Error("the provider runs after typing");
+              const id = `${api.id}/list-entities`;
+              const output: SourceOutput = {
+                entities: [
+                  {
+                    ...api,
+                    id,
+                    type: "endpoint",
+                    title: "GET /entities",
+                    aliases: ["listEntities"],
+                    type_origin: "contract",
+                    attributes: { method: "GET", path: "/entities", style: "http" },
+                    source: { name: api.source.name, path: record.location, line: 1 },
+                  },
+                ],
+                links: [
+                  {
+                    from: api.id,
+                    to: id,
+                    relation: "exposes",
+                    confidence: 0.95,
+                    provenance: [
+                      {
+                        method: "contract_import",
+                        confidence: 0.95,
+                        path: record.location,
+                        operation: "listEntities",
+                      },
+                    ],
+                  },
+                ],
+                candidates: [
+                  { kind: "object", name: "Entity", from: api.id, contract: record.location },
+                ],
+                contracts: [record],
+                findings: [],
+              };
+              return Promise.resolve(output);
+            },
+          },
+        ],
+        checks: [
+          {
+            id: "W-EXAMPLE-API",
+            severity: "warning",
+            description: "flags every api",
+            remediation: "none",
+            documentation: "https://example.invalid/W-EXAMPLE-API",
+            run: () => [
+              {
+                check: "W-EXAMPLE-API",
+                severity: "warning",
+                message: "an api was seen",
+                remediation: "none",
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    /** No network: a contract URL would be reported as unreachable instead of fetched. */
+    const offline = {
+      load: (name: string) => {
+        expect(name).toBe("example-contracts");
+        return Promise.resolve(manifest);
+      },
+      commandAvailable: () => Promise.resolve(true),
+    };
+
+    function pluginCorpus(): RecordedIo {
+      return recordedIo({
+        "/work/concordance.yaml": `${validConfig}plugins: [example-contracts]\n`,
+        "/work/notes/model-query.md":
+          "---\ntype: api\ncontract: contracts/model-query.openapi.json\n---\n# Model query API\n",
+        "/work/notes/search.md": "---\ntype: screen\n---\n# Search\n\nCalls listEntities.\n",
+      });
+    }
+
+    it("records the endpoint, the exposes link, the candidate object and the contract in the model and the log", async () => {
+      const io = pluginCorpus();
+      expect(await buildCommand([], io, offline)).toBe(0);
+      const model = readModel(io);
+      expect(model.entities.map((entity) => `${entity.id}:${entity.type}`)).toEqual([
+        "notes/model-query:api",
+        "notes/model-query/list-entities:endpoint",
+        "notes/search:screen",
+      ]);
+      expect(model.links.find((link) => link.relation === "exposes")?.provenance[0]?.method).toBe(
+        "contract_import",
+      );
+      expect(model.candidates.objects).toEqual([
+        { kind: "object", name: "Entity", from: "notes/model-query", contract: record.location },
+      ]);
+      expect(model.build.contracts).toEqual([record]);
+      expect(readLog(io).contracts).toEqual([record]);
+      expect(Object.keys(readLog(io))).toEqual([
+        "version",
+        "tool",
+        "at",
+        "summary",
+        "contracts",
+        "findings",
+      ]);
+    });
+
+    it("recognises the imported operation in the notes and runs the checks the plugin contributes", async () => {
+      const io = pluginCorpus();
+      await buildCommand([], io, offline);
+      const model = readModel(io);
+      const mention = model.links.find(
+        (link) =>
+          link.from === "notes/model-query/list-entities" &&
+          link.to === "notes/search" &&
+          link.provenance.some((provenance) => provenance.method === "glossary_occurrence"),
+      );
+      expect(mention).toBeDefined();
+      expect(model.findings.map((finding) => finding.check)).toContain("W-EXAMPLE-API");
+      expect(io.stdout).toContain("  contract_import: 1");
+      expect(io.stdout).toContain("  W-EXAMPLE-API: 1");
+    });
+
+    it("reports a plugin that cannot be loaded as an execution error before touching the sources", async () => {
+      const io = pluginCorpus();
+      await expect(
+        buildCommand([], io, { ...offline, load: () => Promise.resolve({ not: "a manifest" }) }),
+      ).rejects.toThrow("plugin example-contracts: the default export is not a manifest");
+      expect(io.fs.exists("/work/dist")).toBe(false);
     });
   });
 
@@ -378,7 +566,7 @@ describe("concordance build", () => {
         "/work/profile.yaml",
         "types:\n  gadget: { label: { en: Gadget }, group: business }\n",
       );
-      expect(await buildCommand([], io)).toBe(2);
+      expect(await buildCommand([], io)).toBe(0);
       expect(io.stderr).not.toContain("build stopped: fix the profile first");
       const model = readModel(io);
       expect(model.build.profile_hash).not.toBe(fingerprintProfile(loadDefaultProfile()));
@@ -450,24 +638,17 @@ describe("concordance build", () => {
     it("writes the explicit links with their provenance, sorted by source, target and relation", async () => {
       const io = linkedCorpus();
       await buildCommand([], io);
+      // A screen and a term admit no relation: both written links stay `related`, undirected,
+      // merged from the lower identifier and capped by the relation typing step.
       expect(readModel(io).links).toEqual([
         {
           from: "notes/a",
           to: "notes/b",
           relation: "related",
           attributes: {},
-          confidence: 1,
+          confidence: 0.6,
           provenance: [
             { method: "explicit_link", confidence: 1, path: "a.md", line: 7, text: "B" },
-          ],
-        },
-        {
-          from: "notes/b",
-          to: "notes/a",
-          relation: "related",
-          attributes: {},
-          confidence: 1,
-          provenance: [
             { method: "explicit_link", confidence: 1, path: "b.md", line: 6, text: "A" },
           ],
         },
@@ -496,138 +677,277 @@ describe("concordance build", () => {
     });
   });
 
-  describe("on the minimal corpus with the real file system", () => {
-    let output: string;
-    const config = resolve(import.meta.dirname, "../../../../fixtures/corpora/minimal/en");
+  describe("on the golden corpora with the real file system", () => {
+    const corpora = resolve(import.meta.dirname, "../../../../fixtures/corpora");
 
-    /** The entries of expected/findings.yaml for one check; the other checks come from steps the build does not run yet. */
-    function expectedFindings(check: string): { check: string; path: string }[] {
-      const listed = parse(readFileSync(join(config, "expected/findings.yaml"), "utf8")) as {
-        check: string;
-        path?: string;
-      }[];
-      return listed.flatMap((entry) =>
-        entry.check === check && entry.path !== undefined ? [{ check, path: entry.path }] : [],
-      );
+    interface ExpectedEntity {
+      id: string;
+      type: string;
+      type_origin: string;
+      application: string | null;
+      domain: string;
+    }
+    interface ExpectedLink {
+      /** The note that carries the link; with `inverse`, the relation reads from `to` to `from`. */
+      from: string;
+      to: string;
+      relation: string;
+      inverse?: boolean;
+      method: string;
+      min_confidence: number;
+    }
+    interface ExpectedFinding {
+      check: string;
+      source?: string;
+      path?: string;
+      entities?: string[];
+      text?: string;
+    }
+    interface ExpectedKeyword {
+      text: string;
+      min_occurrences?: number;
+      min_files?: number;
+    }
+    interface Built {
+      exit: number;
+      model: CanonicalModel;
+      log: BuildLog;
+      stdout: string[];
+      stderr: string[];
     }
 
-    const unclassified = (path: string, entity: string): Finding => ({
-      check: "W-DOMAIN-UNCLASSIFIED",
-      severity: "info",
-      source: entity.slice(0, entity.indexOf("/")),
-      path,
-      entity,
-      message: `${entity} matches no declared domain`,
-      remediation:
-        "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
-    });
+    /** The checks the build computes today; the others are reported by steps that do not exist yet. */
+    const computedChecks = new Set([
+      "E-ENCODING",
+      "E-FM-INVALID",
+      "E-ID-DUP",
+      "E-ID-INVALID",
+      "E-LINK-BROKEN",
+      "E-TYPE-CONFLICT",
+      "I-REL-AMBIGUOUS",
+      "I-TERM-HOMONYM",
+      "W-API-CONSUMER-MISMATCH",
+      "W-API-NOCONSUMER",
+      "W-APP-MISSING",
+      "W-APP-UNKNOWN",
+      "W-ATTRIBUTE-UNKNOWN",
+      "W-CONTRACT-UNREACHABLE",
+      "W-DOMAIN-UNCLASSIFIED",
+      "W-DOMAIN-UNKNOWN",
+      "W-DUP-CANDIDATE",
+      "W-LINK-CROSS-SOURCE",
+      "W-PLUGIN-DISABLED",
+      "W-REF-UNRESOLVED",
+      "W-SOURCE-UNREACHABLE",
+      "W-TERM-UNDEFINED",
+      "W-TYPE-UNKNOWN",
+    ]);
+    /** The fixtures list a minimum for these two checks: prose mentions and everyday expressions vary. */
+    const openEnded = new Set(["I-REL-AMBIGUOUS", "W-TERM-UNDEFINED"]);
+    /** The methods the build produces without a plugin; `contract_import` needs a declared plugin and `folder_zone` does not exist yet. */
+    const producedMethods = new Set([
+      "explicit_link",
+      "frontmatter_ref",
+      "section_mention",
+      "glossary_occurrence",
+      "cooccurrence",
+    ]);
+    /** The methods that name their relation themselves; the others keep `related` until the relation typing step. */
+    const typedMethods = new Set(["frontmatter_ref", "section_mention"]);
 
-    beforeEach(() => {
-      output = mkdtempSync(join(tmpdir(), "concordance-build-"));
-    });
+    // The fixtures are reviewed by hand and validated by the repository scripts.
+    const expected = (corpus: string, file: string): unknown =>
+      parse(readFileSync(join(corpora, corpus, "expected", file), "utf8"));
 
-    afterEach(() => {
-      rmSync(output, { recursive: true, force: true });
-    });
-
-    it("types and links every note, files the four notes no domain covers as unclassified and stops after inference with exit code 2", async () => {
+    async function build(corpus: string): Promise<Built> {
+      const output = mkdtempSync(join(tmpdir(), "concordance-build-"));
       const stdout: string[] = [];
       const stderr: string[] = [];
       const io = {
         fs: nodeFileSystem,
         git: new FakeGit(recordedIo().fs),
         clock: fixedClock("2026-09-12T12:00:00Z"),
-        cwd: config,
+        cwd: join(corpora, corpus),
         out: (line: string) => stdout.push(line),
         err: (line: string) => stderr.push(line),
       };
-      expect(await buildCommand(["--output", output], io)).toBe(2);
-      expect(io.git.calls).toEqual([]);
-      const log = JSON.parse(readFileSync(join(output, "build.log.json"), "utf8")) as BuildLog;
-      expect(log.findings).toEqual([
-        unclassified("cap-checked-upstream.md", "decisions/cap-checked-upstream"),
-        unclassified("build.md", "glossary/build"),
-        unclassified("objects/build.md", "specs/objects/build"),
-        unclassified("roles/maintainer.md", "specs/roles/maintainer"),
-      ]);
-      expect(log.summary).toEqual({
-        sources: 4,
-        files: 19,
-        entities: {
-          api: 1,
-          batch: 1,
-          business_object: 3,
-          data_object: 1,
-          decision: 1,
-          meeting: 1,
-          process: 1,
-          role: 1,
-          rule: 1,
-          screen: 3,
-          term: 5,
-        },
-        links: { explicit_link: 31 },
-        findings: {
-          bySeverity: { error: 0, warning: 0, info: 4 },
-          byCheck: { "W-DOMAIN-UNCLASSIFIED": 4 },
-        },
+      try {
+        const exit = await buildCommand(["--output", output], io);
+        expect(io.git.calls).toEqual([]);
+        return {
+          exit,
+          model: parseModel(readFileSync(join(output, "model.json"), "utf8")),
+          log: JSON.parse(readFileSync(join(output, "build.log.json"), "utf8")) as BuildLog,
+          stdout,
+          stderr,
+        };
+      } finally {
+        rmSync(output, { recursive: true, force: true });
+      }
+    }
+
+    /** Whether a finding of the model is the one an expected entry describes. */
+    function matches(finding: Finding, entry: ExpectedFinding): boolean {
+      if (finding.check !== entry.check) return false;
+      if (entry.entities !== undefined) {
+        return entry.entities.every((id) => finding.message.includes(id));
+      }
+      if (entry.text !== undefined) {
+        return finding.message.includes(`"${entry.text}"`);
+      }
+      const location =
+        entry.source === undefined ? `${finding.source ?? ""}/${finding.path ?? ""}` : finding.path;
+      return (
+        location === entry.path && (entry.source === undefined || finding.source === entry.source)
+      );
+    }
+
+    describe.each(["minimal/en", "minimal/fr", "realistic/en"])("%s", (corpus) => {
+      let built: Built;
+      beforeAll(async () => {
+        built = await build(corpus);
       });
-      expect(stderr).toEqual([
-        "info: W-DOMAIN-UNCLASSIFIED (decisions:cap-checked-upstream.md): decisions/cap-checked-upstream matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (glossary:build.md): glossary/build matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (specs:objects/build.md): specs/objects/build matches no declared domain",
-        "info: W-DOMAIN-UNCLASSIFIED (specs:roles/maintainer.md): specs/roles/maintainer matches no declared domain",
-        "build stopped: model.json is written; the steps after inference are not implemented in this version",
-      ]);
+
+      it("exits 0 after writing the model and says that the rendering is not available", () => {
+        expect(built.exit).toBe(0);
+        expect(built.stdout.at(-1)).toBe("render: not available in this version");
+        expect(built.stderr.some((line) => line.includes("build stopped"))).toBe(false);
+      });
+
+      it("writes the entities of expected/entities.yaml with their type, origin, application and domain", () => {
+        const notes = built.model.entities.filter((entity) => entity.keyword !== true);
+        expect(
+          notes.map(({ id, type, type_origin, application, domain }) => ({
+            id,
+            type,
+            type_origin,
+            application: application ?? null,
+            domain: domain ?? "unclassified",
+          })),
+        ).toEqual(expected(corpus, "entities.yaml") as ExpectedEntity[]);
+      });
+
+      it("produces every link of expected/links.yaml with its method at its minimum confidence", () => {
+        const listed = (expected(corpus, "links.yaml") as ExpectedLink[]).filter((link) =>
+          producedMethods.has(link.method),
+        );
+        expect(listed.length).toBeGreaterThan(10);
+        for (const { from, to, relation, inverse, method, min_confidence } of listed) {
+          const joins = (link: { from: string; to: string }): boolean =>
+            (link.from === from && link.to === to) ||
+            // Mapped sections and frontmatter attributes already orient an inverse relation.
+            (inverse === true && link.from === to && link.to === from);
+          const matching = built.model.links.filter(
+            (link) =>
+              joins(link) &&
+              link.provenance.some((provenance) => provenance.method === method) &&
+              (!typedMethods.has(method) || link.relation === relation),
+          );
+          expect(matching.length, `${from} -> ${to} (${relation}, ${method})`).toBeGreaterThan(0);
+          expect(matching[0]?.confidence, `${from} -> ${to}`).toBeGreaterThanOrEqual(
+            min_confidence,
+          );
+        }
+      });
+
+      it("embeds every finding of expected/findings.yaml the build computes, and no other of those checks", () => {
+        const listed = (expected(corpus, "findings.yaml") as ExpectedFinding[]).filter((entry) =>
+          computedChecks.has(entry.check),
+        );
+        for (const entry of listed) {
+          const count = built.model.findings.filter((finding) => matches(finding, entry)).length;
+          if (openEnded.has(entry.check)) {
+            expect(count, JSON.stringify(entry)).toBeGreaterThan(0);
+          } else {
+            expect(count, JSON.stringify(entry)).toBe(1);
+          }
+        }
+        const exact = built.model.findings.filter(
+          (finding) => computedChecks.has(finding.check) && !openEnded.has(finding.check),
+        );
+        for (const finding of exact) {
+          expect(
+            listed.some((entry) => matches(finding, entry)),
+            `${finding.check} ${finding.source ?? ""}/${finding.path ?? ""}: ${finding.message}`,
+          ).toBe(true);
+        }
+        expect(built.log.findings).toEqual(built.model.findings);
+      });
+
+      it("publishes the keyword pages of expected/keywords.yaml and none of the unpublished expressions", () => {
+        const { published, unpublished } = expected(corpus, "keywords.yaml") as {
+          published: ExpectedKeyword[];
+          unpublished: ExpectedKeyword[];
+        };
+        const pages = built.model.candidates.terms.filter((term) => term.page === true);
+        const pageOf = (text: string) =>
+          pages.find((term) => term.text.toLowerCase() === text.toLowerCase());
+        for (const keyword of published) {
+          const page = pageOf(keyword.text);
+          expect(page, keyword.text).toBeDefined();
+          expect(page?.occurrences).toBeGreaterThanOrEqual(keyword.min_occurrences ?? 3);
+          expect(page?.documents).toBeGreaterThanOrEqual(keyword.min_files ?? 2);
+          expect(
+            built.model.entities.some(
+              (entity) => entity.keyword === true && entity.title.toLowerCase() === keyword.text,
+            ),
+          ).toBe(true);
+        }
+        for (const keyword of unpublished) {
+          expect(pageOf(keyword.text), keyword.text).toBeUndefined();
+        }
+        expect(built.log.summary.keywords?.published).toBe(pages.length);
+      });
+
+      it("publishes no keyword page named after a mapped section heading: headings and list labels are titles, not usage", () => {
+        const labels = sectionLabels(loadDefaultProfile());
+        const pages = built.model.entities.filter((entity) => entity.keyword === true);
+        expect(pages.length).toBeGreaterThan(0);
+        // The realistic corpus also uses "writes" as an everyday verb in its prose: that is usage.
+        const prose = corpus === "realistic/en" ? ["writes"] : [];
+        expect(
+          pages.map((page) => page.title).filter((title) => labels.has(foldHeading(title))),
+        ).toEqual(prose);
+      });
+
+      it("counts entities per type, links per method, keywords, duplicates and findings alike in the log and on stdout", () => {
+        const summary = built.log.summary;
+        expect(built.stdout.slice(1)).toEqual([
+          ...formatSummary(summary),
+          "render: not available in this version",
+        ]);
+        expect(Object.values(summary.entities).reduce((a, b) => a + b, 0)).toBe(
+          built.model.entities.length,
+        );
+        expect(Object.keys(summary.links)).toEqual([...producedMethods].sort());
+        expect(summary.duplicates?.resources).toBe(
+          built.model.entities.filter((entity) => entity.keyword !== true).length,
+        );
+        expect(built.model.neighbours).toBeDefined();
+        expect(Object.keys(built.model.displayed_neighbourhood ?? {})).toEqual(
+          built.model.entities.map((entity) => entity.id),
+        );
+      });
     });
 
-    it("writes the entities of expected/entities.yaml with their type and origin into a valid model", async () => {
-      const io = {
-        fs: nodeFileSystem,
-        git: new FakeGit(recordedIo().fs),
-        clock: fixedClock("2026-09-12T12:00:00Z"),
-        cwd: config,
-        out: () => undefined,
-        err: () => undefined,
-      };
-      await buildCommand(["--output", output], io);
-      const model = parseModel(readFileSync(join(output, "model.json"), "utf8"));
-      // The fixture is reviewed by hand and validated by the repository scripts. Application and
-      // domain are compared once their resolution exists.
-      const expected = parse(readFileSync(join(config, "expected/entities.yaml"), "utf8")) as {
-        id: string;
-        type: string;
-        type_origin: string;
-      }[];
+    it("files the four notes of the minimal corpus that no domain covers as unclassified", async () => {
+      const { model } = await build("minimal/en");
       expect(
-        model.entities.map(({ id, type, type_origin }) => ({ id, type, type_origin })),
-      ).toEqual(expected.map(({ id, type, type_origin }) => ({ id, type, type_origin })));
+        model.findings
+          .filter((finding) => finding.check === "W-DOMAIN-UNCLASSIFIED")
+          .map((finding) => finding.entity),
+      ).toEqual([
+        "decisions/cap-checked-upstream",
+        "glossary/build",
+        "specs/objects/build",
+        "specs/roles/maintainer",
+      ]);
       expect(model.build.sources.map((source) => source.name)).toEqual([
         "decisions",
         "glossary",
         "meetings",
         "specs",
       ]);
-      expect(model.links.length).toBe(31);
-    });
-
-    it("embeds the filing findings of expected/findings.yaml, source and path joined the way the fixture lists them", async () => {
-      const io = {
-        fs: nodeFileSystem,
-        git: new FakeGit(recordedIo().fs),
-        clock: fixedClock("2026-09-12T12:00:00Z"),
-        cwd: config,
-        out: () => undefined,
-        err: () => undefined,
-      };
-      await buildCommand(["--output", output], io);
-      const model = parseModel(readFileSync(join(output, "model.json"), "utf8"));
-      expect(
-        model.findings.map(({ check, source, path }) => ({
-          check,
-          path: [source, path].join("/"),
-        })),
-      ).toEqual(expectedFindings("W-DOMAIN-UNCLASSIFIED"));
     });
   });
 });

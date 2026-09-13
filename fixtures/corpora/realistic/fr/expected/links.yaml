@@ -70,10 +70,10 @@
 # Occurrences of glossary titles and aliases in prose; the type prefix "screen" adds 0.1.
 - { from: glossaire/page-mot-cle, to: specs/ecrans/page-mot-cle, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
 - { from: glossaire/constat, to: specs/ecrans/page-a-faire, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossaire/seuil-de-publication, to: reunions/2026-03-12-revue-du-seuil-de-page-mot-cle, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: reunions/2026-03-12-revue-du-seuil-de-page-mot-cle, to: glossaire/seuil-de-publication, relation: documents, method: glossary_occurrence, min_confidence: 0.3, note: "seuil de publication is also the title of the rule: a homonym, mentioned at half confidence; a meeting documents what it names, the only relation the pair admits" }
 - { from: glossaire/occurrence, to: specs/objets/occurrence, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
 - { from: reunions/2026-04-23-revue-du-plafond-de-voisinage, to: specs/ecrans/carte-du-voisinage, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "écran Carte du voisinage: recognised type prefix" }
 
 # Entities named in the same paragraph.
 - { from: glossaire/seuil-de-publication, to: specs/api/modele-canonique, relation: related, method: cooccurrence, min_confidence: 0.4 }
-- { from: glossaire/mention-de-section, to: glossaire/lien-explicite, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossaire/lien-explicite, to: glossaire/mention-de-section, relation: related, method: cooccurrence, min_confidence: 0.4, note: "undirected: emitted from the lower identifier" }

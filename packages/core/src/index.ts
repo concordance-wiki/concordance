@@ -35,6 +35,7 @@ export {
   summarize,
   type BuildLog,
   type BuildSummary,
+  type DuplicateCounts,
   type KeywordCounts,
 } from "./model/build-log.js";
 export { compareContracts, type CandidateObject, type ContractRecord } from "./model/contract.js";
@@ -74,6 +75,8 @@ export {
   type AssembleModelInput,
   type Candidates,
   type CanonicalModel,
+  type DisplayedNeighbour,
+  type DisplayedNeighbourhood,
   type DuplicateCandidate,
   type ModelBuild,
   type ModelSource,

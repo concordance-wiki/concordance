@@ -10,6 +10,30 @@ Concordance reads CommonMark, GFM (tables, task lists) and optional YAML frontma
 
 `concordance build` is a pipeline command that produces `dist/` and `model.json`. The site is static: the main content of every page is in the served HTML, JavaScript is progressive, and the site works over `file://`. Fragments that load on demand (mentions beyond the first twenty, search) are JSON files generated at build. An optional HTTP and MCP service will consume the same `model.json` later; nothing in the site depends on it.
 
+## The build pipeline
+
+`concordance build` chains the steps below in this order; `packages/cli/src/pipeline/` holds one module per step, each a pure function of the outputs of the previous ones, and the command only orchestrates them, writes the two files and prints the summary. Every step reports its anomalies as findings; nothing stops the chain.
+
+| # | Step | What it does |
+|---|---|---|
+| 1 | Configuration | validates `concordance.yaml`, loads and merges the profile, loads the plugins declared under `plugins:` (a plugin that cannot be loaded is an execution error; one whose system dependency is missing disables itself with `W-PLUGIN-DISABLED`) |
+| 2 | Ingestion | clones or updates every git source at depth 1, reads local folders, lists the files with their commit and last-modified date |
+| 3 | Parsing | parses every markdown file: frontmatter, sections, links, the scannable text units |
+| 4 | Typing | one entity per note, with its identifier, type, application and domain |
+| 5 | Plugin sources | the `source` contributions of the plugins run on the typed entities: the contract importers read the contract each `api` note declares and add the endpoint entities, the `exposes` links, the candidate objects and one contract record per contract |
+| 6 | Dictionary | one recognition dictionary per locale of the corpus: the titles and aliases of its entities, the stopwords of its language pack and of `inference.stopwords`, the glossary sources first; homonyms yield `I-TERM-HOMONYM` |
+| 7 | Scan | every note is read once with the dictionary of its locale: one occurrence per mention, with its line, position, section, context and the type announced by a recognised prefix |
+| 8 | Links | four producers in the order of the specification: written links, frontmatter references, mentions (in a mapped section or in prose), co-occurrence per paragraph, which also gives the bounded neighbourhood |
+| 9 | Combination | one link per source, target, relation and attributes, at `1 − Π(1 − cᵢ)` over its methods, every provenance kept |
+| 10 | Relation typing | `typeRelations` of the inference package: a relation a producer named stands if the profile matrix allows it between the two types and is dropped with `E-META-REL` otherwise; a `related` link takes the single relation its type pair admits, or stays `related`, capped at 0.6, with `I-REL-AMBIGUOUS` on its first located provenance unless co-occurrence alone knows it |
+| 11 | Keywords | n-grams over the scannable units, headings and the section labels a list item opens with (`- Reads:`) left out as titles rather than usage, scored against the dictionary of the locale, `W-TERM-UNDEFINED` above the score threshold, keyword pages above the publication threshold appended to the entities |
+| 12 | Twin resources | the markdown notes reconciled locale by locale (declared `source`, base names, headings, text); merged groups become one entity carrying every representation, the others yield `W-DUP-CANDIDATE` |
+| 13 | Model checks | every enabled check of the registry, plugin checks included, over the structural view of the model; the findings of every step are then enriched by the same registry (`checks:` overrides, missing remediations), sorted once and written once |
+| 14 | Model | `assembleModel` and `serializeModel` write `dist/model.json`; `dist/build.log.json` carries the same findings and the summary |
+| 15 | Rendering | `concordance render`, which does not exist yet: the build prints `render: not available in this version` and exits 0 |
+
+Office conversion (step 5 of the specification's numbering) is not wired: no converter runs, so no document is left unconverted and `build.fail_on.unconverted_max` never triggers.
+
 ## Rendering: slots, islands, layers
 
 Pages are rendered at build by Preact components through `preact-render-to-string`; the published HTML carries the full content of every page. The site is a set of named slots (`Shell`, `Header`, `Footer`, `Home`, `EntityPage`, `KeywordPage`, `MentionsPanel`, `Neighbourhood`, `SearchResults`, `Index`, `Todo`), each with a typed view model that is the contract between the generator and a theme. The default theme implements every slot; a plugin's `theme` contribution replaces any of them with a component receiving the same props, and the slots it does not provide stay default.
@@ -30,7 +54,7 @@ Every link carries a confidence in [0, 1] and at least one provenance (method, f
 
 ### Combining confidences
 
-Every producer (explicit links, frontmatter references, section mentions, glossary occurrences, co-occurrence) emits its own links; a combination step then folds them into one link per source, target, relation and attributes, so that a `reads` and a `writes` link between the same notes stay apart. Within a group, every provenance is a method whose confidence is the probability that it is right on its own, and the group keeps the probability that at least one of them is: `1 − Π(1 − cᵢ)`, which two methods at 0.90 and 0.60 bring to 0.96 and three at 1.00, 0.70 and 0.40 to 1. The glossary occurrences of a group are the same term mentioned again and again rather than independent methods: they count as one method whose confidence starts at the base of the first and gains `confidence.glossary_occurrence.per_occurrence` (0.05) per additional occurrence up to `cap` (0.80), so a term found once is at 0.60 and five times at 0.80. Confidences are rounded to four decimals because `model.json` serialises them and a build must not differ by a floating-point tail.
+Every producer (explicit links, frontmatter references, section mentions, glossary occurrences, co-occurrence) emits its own links; a combination step then folds them into one link per source, target, relation and attributes, so that a `reads` and a `writes` link between the same notes stay apart. Within a group, every provenance is a method whose confidence is the probability that it is right on its own, and the group keeps the probability that at least one of them is: `1 − Π(1 − cᵢ)`, which two methods at 0.90 and 0.60 bring to 0.96 and three at 1.00, 0.70 and 0.40 to 1. The glossary occurrences of a group are the same term mentioned again and again rather than independent methods: they count as one method whose confidence starts at the strongest of them (a mention announced by a recognised type prefix carries the base plus 0.10, a homonym half the base) and gains `confidence.glossary_occurrence.per_occurrence` (0.05) per additional occurrence up to `cap` (0.80), so a term found once is at 0.60 and five times at 0.80. Confidences are rounded to four decimals because `model.json` serialises them and a build must not differ by a floating-point tail.
 
 Every provenance of the group is kept in canonical order (method, path, line, section); only an exact duplicate, the same method at the same path, line and section, is listed once. The function is pure and idempotent: combining an already combined model changes nothing, and the output does not depend on the order the producers ran in.
 
@@ -48,7 +72,7 @@ Office documents are converted to PDF by headless LibreOffice, rendered by pdf.j
 
 ## Lock file for human decisions
 
-`concordance.lock.yaml`, in the configuration repository, records accepted and rejected links, merged and separated duplicates, and rejected term candidates. The first version reads `rejected_terms` only; the other keys are accepted by the schema and ignored with a warning, except that the [twin resources](#twin-resources) reconciliation applies the `merged` and `separated` pairs it is given. Nothing is ever written into a knowledge repository.
+`concordance.lock.yaml`, in the configuration repository, records accepted and rejected links, merged and separated duplicates, and rejected term candidates. The keyword discovery accepts `rejected_terms` and the [twin resources](#twin-resources) reconciliation the `merged` and `separated` pairs it is given, but the build does not read the file yet: the configuration validator warns that `lock` is accepted and ignored. Nothing is ever written into a knowledge repository.
 
 ## TypeScript monorepo
 
@@ -60,18 +84,19 @@ The graph is built in memory and serialised to `model.json`, canonically sorted 
 
 ## Canonical model
 
-`dist/model.json` is the single file that describes the whole model; every later step reads it and none re-reads the sources. It is described by [`model.schema.json`](../../packages/core/schemas/model.schema.json), published with `@concordance-wiki/core`, and holds five blocks plus one optional:
+`dist/model.json` is the single file that describes the whole model; every later step reads it and none re-reads the sources. It is described by [`model.schema.json`](../../packages/core/schemas/model.schema.json), published with `@concordance-wiki/core`, and holds five blocks plus the two neighbourhoods:
 
 | Block | Content |
 |---|---|
-| `build` | the only dated block: `tool` (version of the command line), `at` (timestamp from the injected clock), `profile_hash` (fingerprint of the merged profile), `sources`, one entry per source with its `name` and, for a git repository, its `commit` and `url`, and `cross_source_links`, whether links across sources were resolved, which the global lint reads |
+| `build` | the only dated block: `tool` (version of the command line), `at` (timestamp from the injected clock), `profile_hash` (fingerprint of the merged profile), `sources`, one entry per source with its `name` and, for a git repository, its `commit` and `url`, `cross_source_links`, whether links across sources were resolved, which the global lint reads, and `contracts` when a source plugin imported one: the API, the location, the title and version the contract declares, its fingerprint and the import date |
 | `entities` | one object per note: `id`, `type`, `title`, `locale`, `application` and `domain` when known, `type_origin`, `attributes` (the frontmatter keys that are not common attributes) and `source` with the `name`, `path` and `line` of the note, plus `aliases`, `status`, `summary` and `graph` |
 | `links` | one object per source-target-relation triple: `from`, `to`, `relation`, `attributes`, the combined `confidence` and `provenance`, the complete list of what every method recorded |
 | `findings` | the same array as `build.log.json` |
-| `candidates` | `terms` (recurring expressions without a note) and `duplicates` (resources that look alike); empty until the corresponding steps exist |
-| `neighbours` | optional: the K best co-occurrence neighbours per entity |
+| `candidates` | `terms` (every recurring expression the keyword discovery kept, with its score, counts, contexts and whether it has a page), `objects` (the schemas an imported contract names, when any) and `duplicates` (every pair of resources scored at or above the candidate threshold, with its signals) |
+| `neighbours` | the K best co-occurrence neighbours per entity |
+| `displayed_neighbourhood` | the one-hop neighbours shown on the page of every entity, best first |
 
-`assembleModel` in core puts every block in canonical order (sources by name, entities by identifier, links by triple, provenances by method, path and line, findings by check, source, path, line and message, candidates by score) and `serializeModel` writes it as canonical JSON: keys sorted at every depth, two-space indentation, a trailing newline. `parseModel` reads a model back and refuses anything the schema does not describe, with the same error wording as the configuration validator: parsing a serialised model gives back the assembled one.
+`assembleModel` in core puts every block in canonical order (sources by name, contracts by API and location, entities by identifier, links by triple, provenances by method, path and line, findings by check, source, path, line and message, candidates by score, objects by API, name and contract, both neighbourhoods by identifier then best first) and `serializeModel` writes it as canonical JSON: keys sorted at every depth, two-space indentation, a trailing newline. `parseModel` reads a model back and refuses anything the schema does not describe, with the same error wording as the configuration validator: parsing a serialised model gives back the assembled one.
 
 `concordance export --format cypher` turns the model into a Cypher script (`toCypher` in core): a header comment with the tool version and the timestamp, then one `MERGE (n:Entity {id})` per entity with `SET` of its scalar properties (`type`, `title`, `locale`, `application`, `domain`, `type_origin`, and every scalar or list-of-scalars attribute as `attr_<key>`), then one `MERGE (a)-[r:RELATION]->(b)` per link with `r.confidence` and `r.methods`, the distinct provenance methods. The relationship type is the relation slug in upper case. Strings are quoted with backslashes and single quotes escaped; nested attribute values have no property form and are left out. The script follows the order of the model, so two exports of one model are identical.
 

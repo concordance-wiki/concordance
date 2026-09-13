@@ -66,7 +66,13 @@ interface ExpectedMinimalFinding {
 }
 
 /** The checks of later stories: relations, vocabulary. */
-const LATER_CHECKS = new Set(["I-REL-AMBIGUOUS", "W-TERM-UNDEFINED", "I-TERM-HOMONYM"]);
+/** Findings the fixture lists for the steps after typing: relations, keywords, dictionary, twin resources. */
+const LATER_CHECKS = new Set([
+  "I-REL-AMBIGUOUS",
+  "W-TERM-UNDEFINED",
+  "I-TERM-HOMONYM",
+  "W-DUP-CANDIDATE",
+]);
 
 function expectedEntities(corpus: string): ExpectedEntity[] {
   const text = nodeFileSystem.readText(posix.join(corpora, corpus, "expected/entities.yaml"));

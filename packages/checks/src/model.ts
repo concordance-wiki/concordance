@@ -14,10 +14,20 @@ export interface CheckEntity {
   attributes: Record<string, unknown>;
 }
 
+/** Where a link was read: the method, and the path and line in the note that carries it. */
+export interface CheckProvenance {
+  method: string;
+  /** Forward-slash path relative to the source root of the note the link was read in. */
+  path?: string;
+  line?: number;
+}
+
 export interface CheckLink {
   from: string;
   to: string;
   relation: string;
+  /** Absent when the caller has no provenance to give; every provenance then counts as a citation. */
+  provenance?: readonly CheckProvenance[];
 }
 
 export interface CheckSource {

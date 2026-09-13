@@ -70,10 +70,10 @@
 # Occurrences of glossary titles and aliases in prose; the type prefix "screen" adds 0.1.
 - { from: glossary/keyword-page, to: specs/screens/keyword-page, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
 - { from: glossary/finding, to: specs/screens/to-do-page, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossary/publication-threshold, to: meetings/2026-03-12-keyword-page-threshold-review, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: meetings/2026-03-12-keyword-page-threshold-review, to: glossary/publication-threshold, relation: documents, method: glossary_occurrence, min_confidence: 0.3, note: "publication threshold is also the title of the rule: a homonym, mentioned at half confidence; a meeting documents what it names, the only relation the pair admits" }
 - { from: glossary/occurrence, to: specs/objects/occurrence, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
 - { from: meetings/2026-04-23-neighbourhood-cap-review, to: specs/screens/neighbourhood-map, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "screen Neighbourhood map: recognised type prefix" }
 
 # Entities named in the same paragraph.
 - { from: glossary/publication-threshold, to: specs/api/canonical-model, relation: related, method: cooccurrence, min_confidence: 0.4 }
-- { from: glossary/section-mention, to: glossary/explicit-link, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossary/explicit-link, to: glossary/section-mention, relation: related, method: cooccurrence, min_confidence: 0.4, note: "undirected: emitted from the lower identifier" }

@@ -8,7 +8,6 @@
 - { check: E-TYPE-CONFLICT, source: notes, path: type-conflict.rule.md }
 - { check: I-REL-AMBIGUOUS, source: notes, path: screens/prose-mention.md, line: 3 }
 - { check: W-API-CONSUMER-MISMATCH, source: notes, path: api/mismatch.md }
-- { check: W-API-NOCONSUMER, source: notes, path: api/mismatch.md }
 - { check: W-API-NOCONSUMER, source: notes, path: api/no-consumer.md }
 - { check: W-APP-MISSING, source: orphan, path: no-application.md, entity: orphan/no-application }
 - { check: W-ATTRIBUTE-UNKNOWN, source: notes, path: screens/unknown-attribute.md, entity: notes/screens/unknown-attribute }

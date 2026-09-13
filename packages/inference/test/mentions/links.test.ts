@@ -111,6 +111,16 @@ describe("mentionLinks", () => {
     ]);
   });
 
+  it("a mention carries the confidence the scan gave it: a type prefix bonus or a halved homonym", () => {
+    const announced = { ...mention(screen, summary, 3), confidence: 0.7 };
+    const homonym = { ...mention(screen, term, 20), confidence: 0.3 };
+    const { links } = run([announced, homonym]);
+    expect(links.map((link) => [link.to, link.provenance[0]?.confidence])).toEqual([
+      ["specs/screens/entry", 0.3],
+      ["specs/screens/summary", 0.7],
+    ]);
+  });
+
   it("a section of another type's vocabulary does not map: Applies to under a screen is a plain mention", () => {
     const { links } = run([mention(screen, object, 8, "Applies to")]);
     expect(links.map((link) => [link.relation, link.provenance[0]?.method])).toEqual([

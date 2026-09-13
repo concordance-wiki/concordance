@@ -81,6 +81,42 @@ describe("summarize", () => {
     expect("keywords" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
   });
 
+  it("carries the duplicate counts in a fixed key order only when the reconciliation ran", () => {
+    const summary = summarize({
+      sources: 1,
+      files: 4,
+      findings: [],
+      duplicates: {
+        timeMs: 3,
+        candidates: 1,
+        merged: 2,
+        exactVerifications: 4,
+        scoredPairs: 5,
+        candidatePairs: 6,
+        resources: 7,
+      },
+    });
+    expect(Object.keys(summary.duplicates ?? {})).toEqual([
+      "resources",
+      "candidatePairs",
+      "scoredPairs",
+      "exactVerifications",
+      "merged",
+      "candidates",
+      "timeMs",
+    ]);
+    expect(summary.duplicates).toEqual({
+      resources: 7,
+      candidatePairs: 6,
+      scoredPairs: 5,
+      exactVerifications: 4,
+      merged: 2,
+      candidates: 1,
+      timeMs: 3,
+    });
+    expect("duplicates" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
+  });
+
   it("counts entities per type and links per method, keys sorted, a method once per link", () => {
     const summary = summarize({
       sources: 1,
@@ -232,6 +268,24 @@ describe("serializeBuildLog", () => {
     );
     expect(parse(text).summary.keywords).toEqual({ published: 2, discarded: 7 });
     expect(serializeBuildLog(log)).not.toContain("keywords");
+  });
+
+  it("writes the duplicate counts after the keyword counts only when the summary holds them", () => {
+    const duplicates = {
+      resources: 7,
+      candidatePairs: 6,
+      scoredPairs: 5,
+      exactVerifications: 4,
+      merged: 2,
+      candidates: 1,
+      timeMs: 0,
+    };
+    const text = serializeBuildLog({ ...log, summary: { ...log.summary, duplicates } });
+    expect(text).toContain(
+      '    "duplicates": {\n      "resources": 7,\n      "candidatePairs": 6,\n      "scoredPairs": 5,\n      "exactVerifications": 4,\n      "merged": 2,\n      "candidates": 1,\n      "timeMs": 0\n    }\n  },\n',
+    );
+    expect(parse(text).summary.duplicates).toEqual(duplicates);
+    expect(serializeBuildLog(log)).not.toContain("duplicates");
   });
 
   it("writes the summary and severity keys in a fixed order whatever the input order", () => {

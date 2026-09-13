@@ -105,6 +105,14 @@ function ambiguous(link: Link, ends: Ends): Finding {
   };
 }
 
+/**
+ * A link known from co-occurrences alone: nobody wrote it, so nobody can be asked to name it. The
+ * ambiguity finding is for a written link or a located mention that fell back to `related`.
+ */
+function unnamedByNature(link: Link): boolean {
+  return link.provenance.every((provenance) => provenance.method === "cooccurrence");
+}
+
 /** An undirected relation joins its pair in either order. */
 function allowedBetween(
   profile: Profile,
@@ -167,8 +175,8 @@ function oriented(link: Link, undirected: ReadonlySet<string>): Link {
  * several. Links that now say the same thing are combined again, a pair-named link joining a
  * declared link of the same triple and attributes and losing its marker; then the cap of the
  * relation applies and every `related` link yields `I-REL-AMBIGUOUS`, located on the first
- * provenance that names a file. A link with an endpoint the entity list does not type is kept as
- * produced, since nothing can check it. Pure and idempotent.
+ * provenance that names a file, unless co-occurrence alone knows it. A link with an endpoint the
+ * entity list does not type is kept as produced, since nothing can check it. Pure and idempotent.
  */
 export function typeRelations(input: TypeRelationsInput): TypeRelationsResult {
   const { profile } = input;
@@ -224,7 +232,7 @@ export function typeRelations(input: TypeRelationsInput): TypeRelationsResult {
     };
   });
   for (const link of links) {
-    if (link.relation === FALLBACK_RELATION) {
+    if (link.relation === FALLBACK_RELATION && !unnamedByNature(link)) {
       findings.push(ambiguous(link, { from: entities.get(link.from), to: entities.get(link.to) }));
     }
   }

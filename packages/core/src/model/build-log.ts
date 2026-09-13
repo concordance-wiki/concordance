@@ -12,11 +12,26 @@ export interface BuildSummary {
   findings: { bySeverity: Record<Severity, number>; byCheck: Record<string, number> };
   /** Keyword pages published and expressions under the threshold; absent while the build computes none. */
   keywords?: KeywordCounts;
+  /** What the twin-resource reconciliation did; absent while the build computes none. */
+  duplicates?: DuplicateCounts;
 }
 
 export interface KeywordCounts {
   published: number;
   discarded: number;
+}
+
+/** The statistics of the twin-resource reconciliation, as the inference step reports them. */
+export interface DuplicateCounts {
+  resources: number;
+  /** Pairs brought together by the content banding. */
+  candidatePairs: number;
+  /** Pairs whose signals were scored. */
+  scoredPairs: number;
+  exactVerifications: number;
+  merged: number;
+  candidates: number;
+  timeMs: number;
 }
 
 /** What `dist/build.log.json` holds; the same `findings` array goes into `model.json`. */
@@ -55,6 +70,7 @@ export function summarize(input: {
   files: number;
   findings: readonly Finding[];
   keywords?: KeywordCounts;
+  duplicates?: DuplicateCounts;
   entities?: readonly { type: string }[];
   links?: readonly { provenance: readonly { method: string }[] }[];
 }): BuildSummary {
@@ -75,6 +91,20 @@ export function summarize(input: {
     ...(input.keywords === undefined
       ? {}
       : { keywords: { published: input.keywords.published, discarded: input.keywords.discarded } }),
+    ...(input.duplicates === undefined ? {} : { duplicates: duplicateCounts(input.duplicates) }),
+  };
+}
+
+/** The counts in a fixed key order, so that the log never depends on the producer's. */
+function duplicateCounts(counts: DuplicateCounts): DuplicateCounts {
+  return {
+    resources: counts.resources,
+    candidatePairs: counts.candidatePairs,
+    scoredPairs: counts.scoredPairs,
+    exactVerifications: counts.exactVerifications,
+    merged: counts.merged,
+    candidates: counts.candidates,
+    timeMs: counts.timeMs,
   };
 }
 
@@ -146,6 +176,9 @@ export function serializeBuildLog(log: BuildLog): string {
               discarded: log.summary.keywords.discarded,
             },
           }),
+      ...(log.summary.duplicates === undefined
+        ? {}
+        : { duplicates: duplicateCounts(log.summary.duplicates) }),
     },
     contracts: log.contracts === undefined ? undefined : [...log.contracts].sort(compareContracts),
     // Absent keys stay absent: JSON.stringify drops undefined values.

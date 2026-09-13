@@ -244,11 +244,13 @@ describe("the expected results of the realistic corpus have the same structure i
     expect(checks("fr")).toEqual(english);
     expect([...new Set(english)]).toEqual([
       "I-REL-AMBIGUOUS",
+      "I-TERM-HOMONYM",
       "W-API-CONSUMER-MISMATCH",
       "W-API-NOCONSUMER",
       "W-APP-MISSING",
       "W-ATTRIBUTE-UNKNOWN",
       "W-DOMAIN-UNCLASSIFIED",
+      "W-DUP-CANDIDATE",
       "W-TERM-UNDEFINED",
       "W-TERM-UNUSED",
     ]);
