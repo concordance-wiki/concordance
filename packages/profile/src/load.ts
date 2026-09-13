@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { describeSchemaError, readSchema } from "@concordance-wiki/core";
+import { readSchema } from "@concordance-wiki/core";
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
+import { describeErrors } from "./issues.js";
+import { typesOf, type TypeModule } from "./modules.js";
 import type {
   PartialProfile,
   Profile,
@@ -91,24 +93,6 @@ function validator(): ValidateFunction<Profile> {
   return ajv.compile<Profile>(readSchema("profile"));
 }
 
-/**
- * Errors raised inside a oneOf branch describe the branch, not the document; the propertyNames
- * error only repeats the error raised on the key itself.
- */
-function isRedundant(error: ErrorObject): boolean {
-  return /\/oneOf\/\d+\//.test(error.schemaPath) || error.keyword === "propertyNames";
-}
-
-function describeError(error: ErrorObject, document: unknown): ProfileIssue {
-  const issue = describeSchemaError(error, document);
-  if (error.propertyName === undefined) {
-    return issue;
-  }
-  // The validator reports a faulty key at its object, never at the root; name the key instead.
-  const path = `${issue.path}.${error.propertyName}`;
-  return { ...issue, path, message: "key is not allowed", received: error.propertyName };
-}
-
 function listOf(values: string[]): string {
   return `one of ${values.map((value) => JSON.stringify(value)).join(", ")}`;
 }
@@ -185,8 +169,7 @@ export function validateProfile(document: unknown): ProfileValidation {
   const validate = validator();
   if (!validate(document)) {
     // The validator fills `errors` whenever it returns false.
-    const errors = (validate.errors as ErrorObject[]).filter((error) => !isRedundant(error));
-    return { ok: false, issues: errors.map((error) => describeError(error, document)) };
+    return { ok: false, issues: describeErrors(validate.errors as ErrorObject[], document) };
   }
   const issues = referenceIssues(document);
   return issues.length > 0 ? { ok: false, issues } : { ok: true, profile: document, issues: [] };
@@ -232,30 +215,95 @@ export function loadDefaultProfile(): Profile {
   return deepFreeze(expectValid(validateProfile(document)));
 }
 
-export function resolveProfile(projectProfileText?: string): ProfileResolution {
+export interface ResolveProfileOptions {
+  /**
+   * Type modules merged over the default profile before the keys of the project profile: the
+   * modules of the plugins in declaration order, then those of `types_dir`. A module of a type
+   * the default profile declares is an error: such a type is extended through the profile itself.
+   */
+  modules?: readonly TypeModule[];
+}
+
+/** The key of a project profile that names a folder of modules; read by the caller, never merged. */
+export const TYPES_DIRECTORY_KEY = "types_dir";
+
+/** The `types_dir` a project profile names, when its text parses and carries one. */
+export function typesDirectoryOf(projectProfileText: string): string | undefined {
+  const parsed = parseYaml(projectProfileText);
+  if (!parsed.ok || !isPlainObject(parsed.document)) return undefined;
+  const directory = parsed.document[TYPES_DIRECTORY_KEY];
+  return typeof directory === "string" ? directory : undefined;
+}
+
+/** A module of a type the base declares, or two modules of one type, cannot be merged. */
+function moduleConflicts(base: Profile, modules: readonly TypeModule[]): ProfileIssue[] {
+  const issues: ProfileIssue[] = [];
+  const seen = new Map<string, string>();
+  for (const module of modules) {
+    const path = `types.${module.slug}`;
+    const earlier = seen.get(module.slug);
+    if (Object.hasOwn(base.types, module.slug)) {
+      issues.push({
+        severity: "error",
+        path,
+        message: "type is declared by the default profile; extend it through the project profile",
+        received: module.directory,
+      });
+    } else if (earlier !== undefined) {
+      issues.push({
+        severity: "error",
+        path,
+        message: "type is declared by two modules",
+        received: [earlier, module.directory],
+      });
+    }
+    seen.set(module.slug, module.directory);
+  }
+  return issues;
+}
+
+export function resolveProfile(
+  projectProfileText?: string,
+  options: ResolveProfileOptions = {},
+): ProfileResolution {
   const base = loadDefaultProfile();
-  if (projectProfileText === undefined) {
+  const modules = options.modules ?? [];
+  const conflicts = moduleConflicts(base, modules);
+  if (conflicts.length > 0) {
+    return { ok: false, issues: conflicts };
+  }
+  let document: unknown = base;
+  if (modules.length > 0) {
+    document = mergeValues(document, { types: typesOf(modules) }, []);
+  }
+  if (projectProfileText !== undefined) {
+    const parsed = parseYaml(projectProfileText);
+    if (!parsed.ok) {
+      return parsed;
+    }
+    if (!isPlainObject(parsed.document)) {
+      return {
+        ok: false,
+        issues: [
+          {
+            severity: "error",
+            path: "",
+            message: "wrong type",
+            received: parsed.document,
+            expected: "object",
+          },
+        ],
+      };
+    }
+    const own = Object.fromEntries(
+      Object.entries(parsed.document).filter(([key]) => key !== TYPES_DIRECTORY_KEY),
+    );
+    document = mergeValues(document, own, []);
+  }
+  if (document === base) {
     return { ok: true, profile: base, fingerprint: fingerprintProfile(base), issues: [] };
   }
-  const parsed = parseYaml(projectProfileText);
-  if (!parsed.ok) {
-    return parsed;
-  }
-  if (!isPlainObject(parsed.document)) {
-    return {
-      ok: false,
-      issues: [
-        {
-          severity: "error",
-          path: "",
-          message: "wrong type",
-          received: parsed.document,
-          expected: "object",
-        },
-      ],
-    };
-  }
-  const validation = validateProfile(mergeValues(base, parsed.document, []));
+  const validation = validateProfile(document);
   if (!validation.ok) {
     return validation;
   }

@@ -1,0 +1,10 @@
+{
+  "attributes.origin": {
+    "defaultMessage": "Origin",
+    "description": "Label of the origin attribute."
+  },
+  "label": {
+    "defaultMessage": "Constraint",
+    "description": "Label of the constraint type."
+  }
+}

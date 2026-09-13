@@ -1,0 +1,9 @@
+# Type module of channel; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: planned
+glyph: channel
+attributes:
+  technology: { type: string }
+  guarantee: { type: string }
+  owner: { type: string }

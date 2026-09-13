@@ -1,0 +1,9 @@
+{
+  "attributes.affects": "Affecte",
+  "attributes.date": "Date",
+  "attributes.nature": "Nature",
+  "attributes.status": "Statut",
+  "attributes.supersedes": "Remplace",
+  "label": "Décision",
+  "sections.affects": "Affecte"
+}

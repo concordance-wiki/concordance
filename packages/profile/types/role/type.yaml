@@ -1,0 +1,10 @@
+# Type module of role; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: active
+glyph: role
+attributes:
+  actors: { type: "ref[]", target: actor }
+display:
+  highlight: [ actors ]
+  neighbours_order: [ process, screen ]

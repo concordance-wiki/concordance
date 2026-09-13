@@ -1,0 +1,30 @@
+{
+  "attributes.affects": {
+    "defaultMessage": "Affects",
+    "description": "Label of the affects attribute."
+  },
+  "attributes.ref": {
+    "defaultMessage": "Reference",
+    "description": "Label of the ref attribute."
+  },
+  "attributes.requirement": {
+    "defaultMessage": "Requirement",
+    "description": "Label of the requirement attribute."
+  },
+  "attributes.status": {
+    "defaultMessage": "Status",
+    "description": "Label of the status attribute."
+  },
+  "attributes.tool": {
+    "defaultMessage": "Tool",
+    "description": "Label of the tool attribute."
+  },
+  "attributes.work_package": {
+    "defaultMessage": "Work package",
+    "description": "Label of the work_package attribute."
+  },
+  "label": {
+    "defaultMessage": "Backlog item",
+    "description": "Label of the backlog_item type."
+  }
+}

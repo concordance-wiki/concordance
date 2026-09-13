@@ -1,0 +1,11 @@
+{
+  "attributes.author": "Auteur",
+  "attributes.date": "Date",
+  "attributes.duration": "Durée",
+  "attributes.format": "Format",
+  "attributes.pages": "Pages",
+  "attributes.preview_available": "Aperçu disponible",
+  "attributes.representations": "Représentations",
+  "attributes.source": "Source",
+  "label": "Document"
+}

@@ -11,6 +11,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `profile` | string | — | — | Name of the profile. |
+| `types_dir` | string | — | — | Folder of type modules a project profile adds, relative to the profile file: one folder per type, read before the keys of the profile itself. Meaningless in the default profile. |
 | `version` (required) | constant | — | `1` | Version of this schema; always 1. |
 | `groups` | map of object | — | keys: pattern `^[a-z][a-z0-9_]*$` | Groups of types, by slug; every type belongs to one. See [`groups.*`](#groups). |
 | `common_attributes` | map of object | — | keys: pattern `^[a-z][a-z0-9_]*$` | Attributes every entity carries whatever its type, by name; a type may refine one under its own attributes. See [`common_attributes.*`](#common_attributes). |
@@ -50,6 +51,7 @@ An attribute a note may declare in its frontmatter, and what it produces.
 | `inverse` | boolean | `false` | — | Whether the relation goes from the referenced entity to the note instead. |
 | `attributes` | object | — | — | Attributes set on the produced relation (mode: read on an accesses relation). |
 | `schema` | object | — | — | Shape of each item of a list attribute, by field name: string, ref or another attribute type. |
+| `label` | object | — | — | Display label of the attribute, per interface language; the attribute name is shown when absent. Same shape as [`groups.*.label`](#groupslabel). |
 
 ## `types.*`
 
@@ -68,7 +70,7 @@ The types a note can have, by slug: the ones the cascade may yield and a frontma
 
 ### `types.*.sections.*`
 
-H2 sections of a note of this type whose content produces relations, by section key.
+An H2 section of a note whose content produces relations.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -80,7 +82,7 @@ H2 sections of a note of this type whose content produces relations, by section 
 
 ### `types.*.display`
 
-What the page of an entity of this type highlights and how its neighbours are ordered.
+The display rules of a type: the attributes its page highlights and the order of its neighbours.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|

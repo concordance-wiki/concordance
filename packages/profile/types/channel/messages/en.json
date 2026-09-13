@@ -1,0 +1,18 @@
+{
+  "attributes.guarantee": {
+    "defaultMessage": "Guarantee",
+    "description": "Label of the guarantee attribute."
+  },
+  "attributes.owner": {
+    "defaultMessage": "Owner",
+    "description": "Label of the owner attribute."
+  },
+  "attributes.technology": {
+    "defaultMessage": "Technology",
+    "description": "Label of the technology attribute."
+  },
+  "label": {
+    "defaultMessage": "Channel",
+    "description": "Label of the channel type."
+  }
+}

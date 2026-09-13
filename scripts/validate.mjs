@@ -8,6 +8,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { parse as parseYaml } from "yaml";
 
+import { assembleProfileText, profileFile, typesDirectory } from "./assemble-profile.mjs";
 import { checkDistribution } from "./check-distribution.mjs";
 import { generateReference } from "./config-reference.mjs";
 
@@ -79,9 +80,69 @@ for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("concordance.y
   }
 }
 
-// 4. Every profile type that is active in the first version has a template,
-//    and every template declares a type known to the profile.
+// 4. The default profile is the assembly of base.yaml and the type modules
+//    (scripts/assemble-profile.mjs refreshes it), every module validates
+//    against its schema with the messages it needs, every profile type that is
+//    active in the first version has a template, and every template declares
+//    a type known to the profile.
+if (readFileSync(profileFile, "utf8") !== assembleProfileText()) {
+  fail(
+    "packages/profile/default.yaml: differs from the type modules, run node scripts/assemble-profile.mjs",
+  );
+}
 const profile = readYaml(join(root, "packages/profile/default.yaml"));
+const modules = readdirSync(typesDirectory).sort();
+for (const slug of modules) {
+  const folder = join(typesDirectory, slug);
+  const declaration = readYaml(join(folder, "type.yaml"));
+  validateAgainst("type-module.schema.json", join(folder, "type.yaml"), declaration);
+  const messagesFile = join(folder, "messages/en.json");
+  if (!existsSync(messagesFile)) {
+    fail(`packages/profile/types/${slug}: messages/en.json is missing`);
+    continue;
+  }
+  const messages = JSON.parse(readFileSync(messagesFile, "utf8"));
+  const keys = Object.keys(messages);
+  if (keys.join() !== [...keys].sort().join()) {
+    fail(`packages/profile/types/${slug}/messages/en.json: keys are not sorted`);
+  }
+  for (const key of [
+    "label",
+    ...Object.keys(declaration.sections ?? {}).map((k) => `sections.${k}`),
+  ]) {
+    if (messages[key] === undefined)
+      fail(`packages/profile/types/${slug}/messages/en.json: ${key} is missing`);
+  }
+  for (const key of keys) {
+    const [kind, name] = key.split(".");
+    const known =
+      key === "label" ||
+      (kind === "attributes" && declaration.attributes?.[name] !== undefined) ||
+      (kind === "sections" && declaration.sections?.[name] !== undefined);
+    if (!known)
+      fail(
+        `packages/profile/types/${slug}/messages/en.json: ${key} names nothing the module declares`,
+      );
+    if (
+      typeof messages[key]?.defaultMessage !== "string" ||
+      typeof messages[key]?.description !== "string"
+    ) {
+      fail(
+        `packages/profile/types/${slug}/messages/en.json: ${key} needs defaultMessage and description`,
+      );
+    }
+  }
+  const frenchFile = join(folder, "messages/fr.json");
+  const french = existsSync(frenchFile) ? JSON.parse(readFileSync(frenchFile, "utf8")) : {};
+  for (const key of keys) {
+    if (typeof french[key] !== "string")
+      fail(`packages/profile/types/${slug}/messages/fr.json: ${key} is missing`);
+  }
+  for (const key of Object.keys(french)) {
+    if (messages[key] === undefined)
+      fail(`packages/profile/types/${slug}/messages/fr.json: ${key} is not in en.json`);
+  }
+}
 const templateDir = join(root, "docs/templates");
 const templates = readdirSync(templateDir).filter((n) => n.endsWith(".md") && n !== "README.md");
 const frontmatter = (text) => {
@@ -95,6 +156,23 @@ for (const name of templates) {
     fail(`docs/templates/${name}: frontmatter type ${fm.type} does not match the file name`);
   if (!profile.types[type])
     fail(`docs/templates/${name}: type ${type} is not in the default profile`);
+  const module = join(typesDirectory, type, "template.md");
+  if (!existsSync(module)) {
+    fail(
+      `docs/templates/${name}: no template.md in the type module, run node scripts/sync-templates.mjs`,
+    );
+  } else if (readFileSync(module, "utf8") !== readFileSync(join(templateDir, name), "utf8")) {
+    fail(
+      `docs/templates/${name}: differs from the type module, run node scripts/sync-templates.mjs`,
+    );
+  }
+}
+for (const slug of modules) {
+  if (existsSync(join(typesDirectory, slug, "template.md")) && !templates.includes(`${slug}.md`)) {
+    fail(
+      `packages/profile/types/${slug}/template.md: not in docs/templates, run node scripts/sync-templates.mjs`,
+    );
+  }
 }
 for (const [type, definition] of Object.entries(profile.types)) {
   if (definition.status !== "planned" && !templates.includes(`${type}.md`)) {
@@ -126,11 +204,16 @@ for (const name of shipped) {
   }
 }
 
-// 6. Relative markdown links resolve, except in the faulty corpus, which breaks one on purpose.
+// 6. Relative markdown links resolve, except in the faulty corpus, which breaks
+//    one on purpose, and in the templates of the type modules, whose links
+//    resolve in their docs/templates copy, checked above to be identical.
 const linkPattern = /\[[^\]]*\]\(([^)\s]+)\)/g;
 for (const path of walk(
   root,
-  (p) => p.endsWith(".md") && !p.includes("/fixtures/corpora/faulty/"),
+  (p) =>
+    p.endsWith(".md") &&
+    !p.includes("/fixtures/corpora/faulty/") &&
+    !/\/packages\/profile\/types\/[^/]+\/template\.md$/.test(p),
 )) {
   const text = readFileSync(path, "utf8").replace(/```[\s\S]*?```/g, "");
   for (const match of text.matchAll(linkPattern)) {
@@ -383,5 +466,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "schemas, profile, theme, fixtures, expected results, templates and their copy, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages and pipeline examples are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages and pipeline examples are valid",
 );

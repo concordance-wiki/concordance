@@ -1,0 +1,8 @@
+# Type module of function; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: planned
+glyph: function
+attributes:
+  execution: { type: string }
+  triggers: { type: "string[]" }

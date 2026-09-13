@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/type-module.schema.json",
+  "title": "Concordance type module",
+  "description": "Schema of type.yaml, the declaration of a type module. A module is a folder types/<slug>/ holding type.yaml, template.md (the note template), messages/<locale>.json (the labels of the type, its attributes and its sections, in the format of the interface catalogues), optionally schema.json (a JSON Schema of the items of its list attributes, by attribute name) and components/ (rendering overrides: EntityPage, Attribute@<name>, Section@<key>). The slug is the folder name; the labels live in the messages, never here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["group"],
+  "properties": {
+    "group": {
+      "description": "Slug of the group the type belongs to; a group of the profile the module is merged into.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "status": {
+      "description": "active types are rendered; planned types belong to the meta-model but are not rendered by this version, and a project may activate them.",
+      "type": "string",
+      "enum": ["active", "planned"],
+      "default": "active"
+    },
+    "glyph": {
+      "description": "Name of the glyph of the type; the site derives the one-letter mark of the type from its first letter.",
+      "type": "string"
+    },
+    "graph": {
+      "description": "How the type enters the graph: full takes part in every relation; documents-only entities are only ever the source of a documents relation.",
+      "type": "string",
+      "enum": ["full", "documents-only"],
+      "default": "full"
+    },
+    "attributes": {
+      "description": "Attributes specific to the type, by name, added to the common attributes of the profile; their labels are the attributes.<name> messages.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "https://concordance-wiki.github.io/concordance/schemas/profile.schema.json#/$defs/attribute",
+        "description": "Definition of the attribute, as in the profile."
+      }
+    },
+    "sections": {
+      "description": "H2 sections of a note of this type whose content produces relations, by section key; their headings are the sections.<key> messages.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["parse", "produces"],
+        "properties": {
+          "parse": {
+            "description": "Shape of the content of the section: an ordered list, a bullet list, paragraphs or a table.",
+            "type": "string",
+            "enum": ["ordered-list", "bullet-list", "paragraphs", "table"]
+          },
+          "produces": {
+            "description": "Relation slug each recognised mention of the section produces, at the section_mention confidence.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "inverse": {
+            "description": "Whether the relation goes from the mentioned entity to the note instead.",
+            "type": "boolean",
+            "default": false
+          },
+          "attributes": {
+            "description": "Attributes set on the produced relation.",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "display": {
+      "$ref": "https://concordance-wiki.github.io/concordance/schemas/profile.schema.json#/$defs/display",
+      "description": "What the page of an entity of this type highlights and how its neighbours are ordered."
+    }
+  }
+}

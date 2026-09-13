@@ -1,0 +1,22 @@
+# Type module of api; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: application
+status: active
+glyph: api
+attributes:
+  protocol: { type: enum, values: [ rest, soap, graphql, grpc ] }
+  exposure: { type: enum, values: [ apim, direct, internal ] }
+  contract: { type: string }
+  consumers: { type: "ref[]", target: [ screen, process, batch ], relation: serves }
+  objects: { type: "ref[]", target: [ business_object, data_object ], relation: accesses }
+  version: { type: string }
+sections:
+  consumers:
+    parse: bullet-list
+    produces: serves
+  objects:
+    parse: bullet-list
+    produces: accesses
+display:
+  highlight: [ protocol, exposure, version, status, contract ]
+  neighbours_order: [ endpoint, screen, business_object, rule, decision ]

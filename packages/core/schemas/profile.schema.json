@@ -11,6 +11,10 @@
       "description": "Name of the profile.",
       "type": "string"
     },
+    "types_dir": {
+      "description": "Folder of type modules a project profile adds, relative to the profile file: one folder per type, read before the keys of the profile itself. Meaningless in the default profile.",
+      "type": "string"
+    },
     "version": {
       "description": "Version of this schema; always 1.",
       "const": 1
@@ -103,58 +107,13 @@
               "pattern": "^[a-z][a-z0-9_]*$"
             },
             "additionalProperties": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["heading", "parse", "produces"],
-              "properties": {
-                "heading": {
-                  "$ref": "#/$defs/label",
-                  "description": "Heading that opens the section, per language; matched without regard to case, accents or whitespace, and the section key itself matches too."
-                },
-                "parse": {
-                  "description": "Shape of the content of the section: an ordered list, a bullet list, paragraphs or a table.",
-                  "type": "string",
-                  "enum": ["ordered-list", "bullet-list", "paragraphs", "table"]
-                },
-                "produces": {
-                  "description": "Relation slug each recognised mention of the section produces, at the section_mention confidence.",
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9_]*$"
-                },
-                "inverse": {
-                  "description": "Whether the relation goes from the mentioned entity to the note instead.",
-                  "type": "boolean",
-                  "default": false
-                },
-                "attributes": {
-                  "description": "Attributes set on the produced relation.",
-                  "type": "object"
-                }
-              }
+              "$ref": "#/$defs/section",
+              "description": "Definition of the section."
             }
           },
           "display": {
-            "description": "What the page of an entity of this type highlights and how its neighbours are ordered.",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "highlight": {
-                "description": "Attributes shown next to the type badge of the page, in order, five at most.",
-                "type": "array",
-                "maxItems": 5,
-                "items": {
-                  "type": "string"
-                }
-              },
-              "neighbours_order": {
-                "description": "Neighbour types the neighbourhood panel shows first, in priority order; the types not listed come after, by confidence. Each must be a declared type.",
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9_]*$"
-                }
-              }
-            }
+            "$ref": "#/$defs/display",
+            "description": "What the page of an entity of this type highlights and how its neighbours are ordered."
           }
         }
       }
@@ -424,8 +383,66 @@
         "schema": {
           "description": "Shape of each item of a list attribute, by field name: string, ref or another attribute type.",
           "type": "object"
+        },
+        "label": {
+          "$ref": "#/$defs/label",
+          "description": "Display label of the attribute, per interface language; the attribute name is shown when absent."
         }
       }
+    },
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "highlight": {
+          "description": "Attributes shown next to the type badge of the page, in order, five at most.",
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "neighbours_order": {
+          "description": "Neighbour types the neighbourhood panel shows first, in priority order; the types not listed come after, by confidence. Each must be a declared type.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        }
+      },
+      "description": "The display rules of a type: the attributes its page highlights and the order of its neighbours."
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["heading", "parse", "produces"],
+      "properties": {
+        "heading": {
+          "$ref": "#/$defs/label",
+          "description": "Heading that opens the section, per language; matched without regard to case, accents or whitespace, and the section key itself matches too."
+        },
+        "parse": {
+          "description": "Shape of the content of the section: an ordered list, a bullet list, paragraphs or a table.",
+          "type": "string",
+          "enum": ["ordered-list", "bullet-list", "paragraphs", "table"]
+        },
+        "produces": {
+          "description": "Relation slug each recognised mention of the section produces, at the section_mention confidence.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "inverse": {
+          "description": "Whether the relation goes from the mentioned entity to the note instead.",
+          "type": "boolean",
+          "default": false
+        },
+        "attributes": {
+          "description": "Attributes set on the produced relation.",
+          "type": "object"
+        }
+      },
+      "description": "An H2 section of a note whose content produces relations."
     }
   }
 }

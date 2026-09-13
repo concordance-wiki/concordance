@@ -1,0 +1,14 @@
+{
+  "attributes.execution": {
+    "defaultMessage": "Execution",
+    "description": "Label of the execution attribute."
+  },
+  "attributes.triggers": {
+    "defaultMessage": "Triggers",
+    "description": "Label of the triggers attribute."
+  },
+  "label": {
+    "defaultMessage": "Application function",
+    "description": "Label of the function type."
+  }
+}

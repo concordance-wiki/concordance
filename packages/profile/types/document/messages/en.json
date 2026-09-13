@@ -1,0 +1,38 @@
+{
+  "attributes.author": {
+    "defaultMessage": "Author",
+    "description": "Label of the author attribute."
+  },
+  "attributes.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date attribute."
+  },
+  "attributes.duration": {
+    "defaultMessage": "Duration",
+    "description": "Label of the duration attribute."
+  },
+  "attributes.format": {
+    "defaultMessage": "Format",
+    "description": "Label of the format attribute."
+  },
+  "attributes.pages": {
+    "defaultMessage": "Pages",
+    "description": "Label of the pages attribute."
+  },
+  "attributes.preview_available": {
+    "defaultMessage": "Preview available",
+    "description": "Label of the preview_available attribute."
+  },
+  "attributes.representations": {
+    "defaultMessage": "Representations",
+    "description": "Label of the representations attribute."
+  },
+  "attributes.source": {
+    "defaultMessage": "Source",
+    "description": "Label of the source attribute."
+  },
+  "label": {
+    "defaultMessage": "Document",
+    "description": "Label of the document type."
+  }
+}

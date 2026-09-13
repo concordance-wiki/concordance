@@ -1,0 +1,7 @@
+# Type module of business_event; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: planned
+glyph: event
+attributes:
+  nature: { type: enum, values: [ business, technical, temporal ] }

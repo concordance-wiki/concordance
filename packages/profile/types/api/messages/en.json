@@ -1,0 +1,38 @@
+{
+  "attributes.consumers": {
+    "defaultMessage": "Consumers",
+    "description": "Label of the consumers attribute."
+  },
+  "attributes.contract": {
+    "defaultMessage": "Contract",
+    "description": "Label of the contract attribute."
+  },
+  "attributes.exposure": {
+    "defaultMessage": "Exposure",
+    "description": "Label of the exposure attribute."
+  },
+  "attributes.objects": {
+    "defaultMessage": "Objects",
+    "description": "Label of the objects attribute."
+  },
+  "attributes.protocol": {
+    "defaultMessage": "Protocol",
+    "description": "Label of the protocol attribute."
+  },
+  "attributes.version": {
+    "defaultMessage": "Version",
+    "description": "Label of the version attribute."
+  },
+  "label": {
+    "defaultMessage": "API",
+    "description": "Label of the api type."
+  },
+  "sections.consumers": {
+    "defaultMessage": "Consumers",
+    "description": "Heading of the consumers section."
+  },
+  "sections.objects": {
+    "defaultMessage": "Objects",
+    "description": "Heading of the objects section."
+  }
+}

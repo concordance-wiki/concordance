@@ -1,0 +1,22 @@
+{
+  "attributes.code": {
+    "defaultMessage": "Code",
+    "description": "Label of the code attribute."
+  },
+  "attributes.owner": {
+    "defaultMessage": "Owner",
+    "description": "Label of the owner attribute."
+  },
+  "attributes.plateau": {
+    "defaultMessage": "Plateau",
+    "description": "Label of the plateau attribute."
+  },
+  "attributes.status": {
+    "defaultMessage": "Status",
+    "description": "Label of the status attribute."
+  },
+  "label": {
+    "defaultMessage": "Application",
+    "description": "Label of the application type."
+  }
+}

@@ -1,0 +1,17 @@
+# Type module of document; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: raw
+status: active
+glyph: document
+graph: documents-only
+attributes:
+  format: { type: string }
+  author: { type: string }
+  date: { type: date }
+  pages: { type: integer }
+  duration: { type: string }
+  representations: { type: "string[]" }
+  preview_available: { type: boolean }
+  source: { type: string }
+display:
+  highlight: [ format, date, author ]

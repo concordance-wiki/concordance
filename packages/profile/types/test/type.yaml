@@ -1,0 +1,10 @@
+# Type module of test; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: quality
+status: planned
+glyph: test
+attributes:
+  level: { type: string }
+  automated: { type: boolean }
+  covers: { type: "ref[]", target: [ process, screen, api, rule, requirement ], relation: covers }
+  ref: { type: string }

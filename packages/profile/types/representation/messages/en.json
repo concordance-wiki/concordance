@@ -1,0 +1,14 @@
+{
+  "attributes.channel": {
+    "defaultMessage": "Channel",
+    "description": "Label of the channel attribute."
+  },
+  "attributes.format": {
+    "defaultMessage": "Format",
+    "description": "Label of the format attribute."
+  },
+  "label": {
+    "defaultMessage": "Representation",
+    "description": "Label of the representation type."
+  }
+}

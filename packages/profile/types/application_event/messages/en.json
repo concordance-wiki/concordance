@@ -1,0 +1,10 @@
+{
+  "attributes.channel": {
+    "defaultMessage": "Channel",
+    "description": "Label of the channel attribute."
+  },
+  "label": {
+    "defaultMessage": "Application event",
+    "description": "Label of the application_event type."
+  }
+}

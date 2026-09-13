@@ -1,0 +1,8 @@
+# Type module of representation; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: planned
+glyph: document
+attributes:
+  format: { type: string }
+  channel: { type: string }

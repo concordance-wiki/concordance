@@ -1,0 +1,9 @@
+# Type module of work_package; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: implementation
+status: planned
+glyph: package
+attributes:
+  start: { type: date }
+  end: { type: date }
+  deliverables: { type: "string[]" }

@@ -1,0 +1,9 @@
+{
+  "attributes.affects": "Affecte",
+  "attributes.ref": "Référence",
+  "attributes.requirement": "Exigence",
+  "attributes.status": "Statut",
+  "attributes.tool": "Outil",
+  "attributes.work_package": "Lot",
+  "label": "Item de backlog"
+}

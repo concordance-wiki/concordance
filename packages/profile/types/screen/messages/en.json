@@ -1,0 +1,42 @@
+{
+  "attributes.actions": {
+    "defaultMessage": "Actions",
+    "description": "Label of the actions attribute."
+  },
+  "attributes.reads": {
+    "defaultMessage": "Reads",
+    "description": "Label of the reads attribute."
+  },
+  "attributes.roles": {
+    "defaultMessage": "Roles",
+    "description": "Label of the roles attribute."
+  },
+  "attributes.rules": {
+    "defaultMessage": "Rules",
+    "description": "Label of the rules attribute."
+  },
+  "attributes.url_pattern": {
+    "defaultMessage": "URL pattern",
+    "description": "Label of the url_pattern attribute."
+  },
+  "attributes.writes": {
+    "defaultMessage": "Writes",
+    "description": "Label of the writes attribute."
+  },
+  "label": {
+    "defaultMessage": "Screen",
+    "description": "Label of the screen type."
+  },
+  "sections.actions": {
+    "defaultMessage": "Actions",
+    "description": "Heading of the actions section."
+  },
+  "sections.objects": {
+    "defaultMessage": "Objects",
+    "description": "Heading of the objects section."
+  },
+  "sections.rules": {
+    "defaultMessage": "Rules",
+    "description": "Heading of the rules section."
+  }
+}

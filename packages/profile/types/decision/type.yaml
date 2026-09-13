@@ -1,0 +1,18 @@
+# Type module of decision; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: motivation
+status: active
+glyph: decision
+attributes:
+  date: { type: date }
+  nature: { type: enum, values: [ functional, technical ] }
+  status: { type: enum, values: [ proposed, accepted, superseded ] }
+  affects: { type: "ref[]", target: any, relation: affects }
+  supersedes: { type: ref, target: decision, relation: supersedes }
+sections:
+  affects:
+    parse: bullet-list
+    produces: affects
+display:
+  highlight: [ date, nature, status ]
+  neighbours_order: [ screen, api, rule, process, business_object, meeting ]

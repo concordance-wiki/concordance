@@ -1,0 +1,11 @@
+{
+  "attributes.consumers": "Consommateurs",
+  "attributes.contract": "Contrat",
+  "attributes.exposure": "Exposition",
+  "attributes.objects": "Objets",
+  "attributes.protocol": "Protocole",
+  "attributes.version": "Version",
+  "label": "API",
+  "sections.consumers": "Consommateurs",
+  "sections.objects": "Objets"
+}

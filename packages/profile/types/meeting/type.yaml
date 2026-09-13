@@ -1,0 +1,14 @@
+# Type module of meeting; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: raw
+status: active
+glyph: meeting
+graph: documents-only
+attributes:
+  date: { type: date }
+  participants: { type: "string[]" }
+  decisions: { type: "ref[]", target: decision, relation: documents }
+  duration: { type: string }
+display:
+  highlight: [ date, duration, participants ]
+  neighbours_order: [ decision, term, screen, api ]

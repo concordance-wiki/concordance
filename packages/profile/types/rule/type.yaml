@@ -1,0 +1,16 @@
+# Type module of rule; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: active
+glyph: rule
+attributes:
+  severity: { type: string }
+  condition: { type: string }
+  applies_to: { type: "ref[]", target: [ screen, process, business_object, api ], relation: constrains }
+sections:
+  applies_to:
+    parse: bullet-list
+    produces: constrains
+display:
+  highlight: [ severity, condition ]
+  neighbours_order: [ screen, process, api, business_object, decision ]

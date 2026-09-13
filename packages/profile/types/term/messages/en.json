@@ -1,0 +1,22 @@
+{
+  "attributes.broader": {
+    "defaultMessage": "Broader term",
+    "description": "Label of the broader attribute."
+  },
+  "attributes.definition": {
+    "defaultMessage": "Definition",
+    "description": "Label of the definition attribute."
+  },
+  "attributes.narrower": {
+    "defaultMessage": "Narrower terms",
+    "description": "Label of the narrower attribute."
+  },
+  "attributes.synonyms": {
+    "defaultMessage": "Synonyms",
+    "description": "Label of the synonyms attribute."
+  },
+  "label": {
+    "defaultMessage": "Term",
+    "description": "Label of the term type."
+  }
+}

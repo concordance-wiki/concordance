@@ -1,0 +1,13 @@
+# Type module of term; labels live in messages/, the note template in template.md.
+# Validated by packages/core/schemas/type-module.schema.json.
+group: business
+status: active
+glyph: term
+attributes:
+  broader: { type: ref, target: term, relation: specializes }
+  narrower: { type: "ref[]", target: term }
+  synonyms: { type: "string[]" }
+  definition: { type: string }
+display:
+  highlight: [ aliases, broader ]
+  neighbours_order: [ term, business_object, screen, rule ]

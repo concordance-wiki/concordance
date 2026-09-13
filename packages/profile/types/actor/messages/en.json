@@ -1,0 +1,10 @@
+{
+  "attributes.external": {
+    "defaultMessage": "External",
+    "description": "Label of the external attribute."
+  },
+  "label": {
+    "defaultMessage": "Actor",
+    "description": "Label of the actor type."
+  }
+}

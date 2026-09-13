@@ -1,0 +1,22 @@
+{
+  "attributes.execution": {
+    "defaultMessage": "Execution",
+    "description": "Label of the execution attribute."
+  },
+  "attributes.steps": {
+    "defaultMessage": "Steps",
+    "description": "Label of the steps attribute."
+  },
+  "attributes.triggers": {
+    "defaultMessage": "Triggers",
+    "description": "Label of the triggers attribute."
+  },
+  "label": {
+    "defaultMessage": "Process",
+    "description": "Label of the process type."
+  },
+  "sections.steps": {
+    "defaultMessage": "Steps",
+    "description": "Heading of the steps section."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "attributes.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date attribute."
+  },
+  "label": {
+    "defaultMessage": "Milestone",
+    "description": "Label of the milestone type."
+  }
+}

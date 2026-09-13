@@ -1,0 +1,30 @@
+{
+  "attributes.affects": {
+    "defaultMessage": "Affects",
+    "description": "Label of the affects attribute."
+  },
+  "attributes.date": {
+    "defaultMessage": "Date",
+    "description": "Label of the date attribute."
+  },
+  "attributes.nature": {
+    "defaultMessage": "Nature",
+    "description": "Label of the nature attribute."
+  },
+  "attributes.status": {
+    "defaultMessage": "Status",
+    "description": "Label of the status attribute."
+  },
+  "attributes.supersedes": {
+    "defaultMessage": "Supersedes",
+    "description": "Label of the supersedes attribute."
+  },
+  "label": {
+    "defaultMessage": "Decision",
+    "description": "Label of the decision type."
+  },
+  "sections.affects": {
+    "defaultMessage": "Affects",
+    "description": "Heading of the affects section."
+  }
+}

@@ -41,7 +41,44 @@ export const referencePages = [
     file: "concordance.lock.yaml",
     guide: "../guides/configuration.md#lock",
   },
+  {
+    schema: "type-module.schema.json",
+    page: "docs/reference/type-module.md",
+    title: "Type module reference",
+    file: "type.yaml",
+    guide: "../guides/adding-a-type.md",
+  },
 ];
+
+const SCHEMA_BASE = "https://concordance-wiki.github.io/concordance/schemas/";
+
+/**
+ * A schema with the definitions it references in a sibling schema copied under its own `$defs`
+ * and the references made local, so that one page renders it: `type-module` refers to the
+ * attribute and display definitions of the profile.
+ */
+export function inlineExternalRefs(schema, readSchema) {
+  const defs = { ...(schema.$defs ?? {}) };
+  const visit = (node) => {
+    if (Array.isArray(node)) return node.map(visit);
+    if (!isObject(node)) return node;
+    const copy = {};
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "$ref" && typeof value === "string" && value.startsWith(SCHEMA_BASE)) {
+        const [file, fragment] = value.slice(SCHEMA_BASE.length).split("#");
+        Object.assign(defs, readSchema(file).$defs);
+        copy[key] = `#${fragment}`;
+      } else {
+        copy[key] = visit(value);
+      }
+    }
+    return copy;
+  };
+  const inlined = visit(
+    Object.fromEntries(Object.entries(schema).filter(([key]) => key !== "$defs")),
+  );
+  return Object.keys(defs).length === 0 ? inlined : { ...inlined, $defs: visit(defs) };
+}
 
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -317,10 +354,10 @@ export function renderReference(schema, entry) {
 
 /** Every page with its content, from the schemas under `root`. */
 export function generateReference(root) {
+  const readSchema = (name) =>
+    JSON.parse(readFileSync(join(root, "packages/core/schemas", name), "utf8"));
   return referencePages.map((entry) => {
-    const schema = JSON.parse(
-      readFileSync(join(root, "packages/core/schemas", entry.schema), "utf8"),
-    );
+    const schema = inlineExternalRefs(readSchema(entry.schema), readSchema);
     return {
       ...entry,
       content: renderReference(schema, entry),

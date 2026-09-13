@@ -1,0 +1,10 @@
+{
+  "attributes.nature": {
+    "defaultMessage": "Nature",
+    "description": "Label of the nature attribute."
+  },
+  "label": {
+    "defaultMessage": "Business event",
+    "description": "Label of the business_event type."
+  }
+}
