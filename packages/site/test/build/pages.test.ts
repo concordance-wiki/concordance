@@ -6,6 +6,7 @@ import {
   citations,
   editHref,
   forgeEditHref,
+  glyphNameOf,
   glyphOf,
   relationLabel,
   siteContext,
@@ -26,12 +27,14 @@ import {
   entity,
   fragments,
   keyword,
+  links,
   model,
   orphanKeyword,
   page,
   profile,
   screen,
   term,
+  untyped,
 } from "./fixture.js";
 
 function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
@@ -204,7 +207,7 @@ describe("entityPageOf", () => {
     ]);
   });
 
-  it("keeps the neighbours in the order of the model with their rank, labels the type and the relation, and weighs them by co-occurrence", () => {
+  it("keeps the neighbours in the order of the model with their rank, kind and type glyph, labels the type and the relation, and weighs them by co-occurrence", () => {
     const neighbourhood = neighbourhoodOf(context(), pagePath, term);
     expect(neighbourhood.centre).toBe("Keyword page");
     expect(neighbourhood.neighbours).toEqual([
@@ -213,6 +216,8 @@ describe("entityPageOf", () => {
         label: "Page",
         href: "../page/index.html",
         typeLabel: "Term",
+        typeGlyph: "term",
+        kind: "entity",
         relation: "broader",
         weight: 2,
         rank: 0,
@@ -222,6 +227,8 @@ describe("entityPageOf", () => {
         label: "Mentions panel",
         href: "../../specs/screens/mentions-panel/index.html",
         typeLabel: "Screen",
+        typeGlyph: "screen",
+        kind: "entity",
         relation: "displays",
         weight: 4,
         rank: 2,
@@ -231,6 +238,7 @@ describe("entityPageOf", () => {
         label: "build summary",
         href: "../../keywords/build-summary/index.html",
         typeLabel: "Keyword",
+        kind: "keyword",
         relation: "unknown_relation",
         weight: 1,
         rank: 4,
@@ -239,12 +247,42 @@ describe("entityPageOf", () => {
     expect(neighbourhoodOf(context(), "glossary/page/index.html", page)).toEqual({
       centre: "Page",
       neighbours: [],
+      total: 2,
     });
     const bare = model();
     delete bare.neighbours;
     delete bare.displayed_neighbourhood;
     const bareContext = context({ model: bare });
     expect(neighbourhoodOf(bareContext, pagePath, term).neighbours).toEqual([]);
+  });
+
+  it("counts every one-hop neighbour of the model as the total, a lost end or a loop counting for none, never under the number shown", () => {
+    // Three links touch the page: the panel, the page and the rule; the ghost is no entity of the model.
+    expect(neighbourhoodOf(context(), pagePath, term).total).toBe(3);
+    const looped = model({
+      links: [
+        ...links,
+        { from: term.id, to: term.id, relation: "related", confidence: 0.5, provenance: [] },
+        { from: untyped.id, to: term.id, relation: "related", confidence: 0.5, provenance: [] },
+      ],
+    });
+    expect(neighbourhoodOf(context({ model: looped }), pagePath, term).total).toBe(4);
+    const unlinked = model({ links: [] });
+    expect(neighbourhoodOf(context({ model: unlinked }), pagePath, term).total).toBe(3);
+  });
+
+  it("passes no type glyph for a type the profile gives none, nor for a noteless word", () => {
+    const ctx = context({
+      profile: {
+        ...profile,
+        types: { ...profile.types, term: { label: { en: "Term" }, group: "business" } },
+      },
+    });
+    const [first] = neighbourhoodOf(ctx, pagePath, term).neighbours;
+    expect(first).not.toHaveProperty("typeGlyph");
+    expect(first?.kind).toBe("entity");
+    expect(glyphNameOf(ctx, "term")).toBeUndefined();
+    expect(glyphNameOf(context(), "term")).toBe("term");
   });
 
   it("names the source file and its other representations, the edit link on the note, and takes the sections from the fragment", () => {
