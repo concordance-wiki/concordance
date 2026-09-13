@@ -50,8 +50,11 @@ describe("renderPage", () => {
     expect(count(html, "<h1>")).toBe(1);
   });
 
+  /** An entity nobody cites: its panel carries no island. */
+  const uncited = { ...entityPage, mentions: { mentions: [], initial: 20 } };
+
   it("loads no bundle but the mode switch of the header for a page without another island", () => {
-    const html = renderPage("EntityPage", entityPage, options());
+    const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
     expect(count(html, "<concordance-island")).toBe(1);
     expect(count(html, '<script type="module"')).toBe(1);
@@ -64,7 +67,7 @@ describe("renderPage", () => {
       components: { ...defaultComponents, Header },
       overrides: [{ slot: "Header", plugin: "@example/plain", theme: "plain" }],
     };
-    const html = renderPage("EntityPage", entityPage, options({ theme }));
+    const html = renderPage("EntityPage", uncited, options({ theme }));
     expect(html).not.toContain('<script type="module"');
     expect(html).not.toContain("modulepreload");
     expect(html).not.toContain("<concordance-island");

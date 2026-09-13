@@ -14,14 +14,13 @@ import {
   type SiteContextInput,
 } from "../../src/build/context.js";
 import {
-  DEFAULT_MENTIONS_INLINE,
   entityPageOf,
   highlightsOf,
-  mentionsOf,
   neighbourhoodOf,
   panelOf,
   sourcesOf,
 } from "../../src/build/entity-page.js";
+import { DEFAULT_MENTIONS_INLINE } from "../../src/build/mentions.js";
 import { entriesOf, homeOf, shortcutsOf } from "../../src/build/home.js";
 import { foldTitle, indexOf, letterOf } from "../../src/build/index-page.js";
 import { companionsOf, keywordPageOf } from "../../src/build/keyword-page.js";
@@ -251,92 +250,6 @@ describe("entityPageOf", () => {
     expect(neighbourhoodOf(bareContext, pagePath, term).neighbours).toEqual([]);
   });
 
-  it("turns the located provenances of the links into mentions, written links first, then by file and line, a lost source left out", () => {
-    expect(mentionsOf(context(), pagePath, term)).toEqual([
-      {
-        kind: "written",
-        file: {
-          label: "rules/publication-threshold.md",
-          href: "../../specs/rules/publication-threshold/index.html",
-        },
-        context: "applies_to",
-        line: 1,
-        href: "../../specs/rules/publication-threshold/index.html#L1",
-      },
-      {
-        kind: "written",
-        file: {
-          label: "screens/mentions-panel.md",
-          href: "../../specs/screens/mentions-panel/index.html",
-        },
-        context: "keyword pages",
-        line: 7,
-        href: "../../specs/screens/mentions-panel/index.html#L7",
-      },
-      {
-        kind: "recognised",
-        file: { label: "page.md", href: "../page/index.html" },
-        context: "in section See also",
-        line: 5,
-        href: "../page/index.html#L5",
-      },
-      {
-        kind: "recognised",
-        file: {
-          label: "screens/mentions-panel.md",
-          href: "../../specs/screens/mentions-panel/index.html",
-        },
-        context: "Keyword page",
-        line: 9,
-        href: "../../specs/screens/mentions-panel/index.html#L9",
-      },
-      {
-        kind: "recognised",
-        file: {
-          label: "screens/mentions-panel.md",
-          href: "../../specs/screens/mentions-panel/index.html",
-        },
-        context: "Keyword page",
-        line: 15,
-        href: "../../specs/screens/mentions-panel/index.html#L15",
-      },
-    ]);
-    expect(mentionsOf(context(), "keywords/zzz/index.html", orphanKeyword)).toEqual([]);
-  });
-
-  it("locates the citing note by the provenance path whichever end relation typing put first, and never cites a page from its own note", () => {
-    // The frontmatter of keyword-page.md names Page: a mention of Page, listed nowhere on Keyword page.
-    expect(mentionsOf(context(), "glossary/page/index.html", page)).toEqual([
-      {
-        kind: "written",
-        file: { label: "keyword-page.md", href: "../keyword-page/index.html" },
-        context: "broader",
-        line: 2,
-        href: "../keyword-page/index.html#L2",
-      },
-    ]);
-    const own = mentionsOf(context(), pagePath, term);
-    expect(own.some((mention) => mention.file.label === "keyword-page.md")).toBe(false);
-    // A co-occurrence has no file; a provenance without a path locates nothing.
-    const pathless = context({
-      model: model({
-        links: [
-          {
-            from: "glossary/page",
-            to: "glossary/keyword-page",
-            relation: "related",
-            confidence: 0.5,
-            provenance: [
-              { method: "cooccurrence", confidence: 0.5, count: 1 },
-              { method: "glossary_occurrence", confidence: 0.5, line: 4 },
-            ],
-          },
-        ],
-      }),
-    });
-    expect(mentionsOf(pathless, pagePath, term)).toEqual([]);
-  });
-
   it("names the source file and its other representations, the edit link on the note, and takes the sections from the fragment", () => {
     const props = entityPageOf(
       context({ editUrl: "https://forge.example/{source}/{path}" }),
@@ -355,7 +268,11 @@ describe("entityPageOf", () => {
       { source: "specs", path: "screens/mentions-panel.pptx" },
     ]);
     expect(props.sections).toEqual([]);
-    expect(props.mentions).toEqual({ mentions: [], initial: DEFAULT_MENTIONS_INLINE });
+    expect(props.mentions).toEqual({
+      mentions: [],
+      initial: DEFAULT_MENTIONS_INLINE,
+      headings: { written: "Explicit mentions", recognised: "Inferred mentions" },
+    });
     const withNote = entityPageOf(context(), term, { mentionsInline: 3 });
     expect(withNote.entity).toEqual({
       id: "glossary/keyword-page",
@@ -369,6 +286,9 @@ describe("entityPageOf", () => {
       "section-not-to-be-confused-with",
     ]);
     expect(withNote.mentions.initial).toBe(3);
+    expect(withNote.mentions.fragmentHref).toBe(
+      "../../fragments/glossary/keyword-page.mentions.json",
+    );
     expect(withNote.sources).toEqual([{ source: "glossary", path: "keyword-page.md" }]);
   });
 });

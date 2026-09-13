@@ -124,6 +124,13 @@ export const links: Link[] = [
         confidence: 0.6,
         path: "screens/mentions-panel.md",
         line: 15,
+        occurrences: [
+          {
+            line: 15,
+            position: 8,
+            context: "…lists the keyword pages that cite the entity, grouped by file…",
+          },
+        ],
       },
       {
         method: "glossary_occurrence",

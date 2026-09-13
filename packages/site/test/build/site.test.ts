@@ -5,6 +5,7 @@ import {
   fragmentPath,
   HOME_PAGE,
   INDEX_PAGE,
+  mentionsFragmentPath,
   SEARCH_INDEX,
   TODO_PAGE,
 } from "../../src/build/paths.js";
@@ -51,6 +52,9 @@ function withoutJavaScript(html: string): string {
     .replace(/<[a-z-]+[^>]*\sdata-island="[^"]*"[^>]*>[\s\S]*?<\/[a-z-]+>/g, "");
 }
 
+/** The entities of the fixture model that another note cites: those whose mentions fragment the build writes. */
+const cited = ["framing/vision", "glossary/keyword-page", "glossary/page"];
+
 describe("concordance render reads model.json and writes dist/: one HTML page per entity and per keyword, the JSON fragments, the search index, the previews and the static assets", () => {
   let fileSystem: ReturnType<typeof memoryFileSystem>;
   let report: SiteReport;
@@ -68,10 +72,12 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         TODO_PAGE,
         SEARCH_INDEX,
         ...entities,
+        ...cited.map(mentionsFragmentPath),
         "assets/site.css",
         ...report.budget.islands.map((island) => `assets/${island.file}`),
       ].sort(),
     );
+
     expect(report.files).toEqual(fileSystem.listFiles("/dist"));
     expect(report.pages.map((page) => page.path)).toEqual(
       [HOME_PAGE, ...entities, INDEX_PAGE, TODO_PAGE].sort(),
@@ -242,6 +248,120 @@ describe("A page weighs under 150 KB excluding previews", () => {
   });
 });
 
+describe("One mentions fragment per entity, never a global index", () => {
+  it("writes fragments/<id>.mentions.json for every entity another note cites, holding all its mentions with hrefs relative to its page", async () => {
+    const { fileSystem } = await build();
+    const written = fileSystem.listFiles("/dist").filter((file) => file.endsWith(".mentions.json"));
+    expect(written).toEqual(cited.map(mentionsFragmentPath));
+    const fragment = JSON.parse(
+      fileSystem.readText(`/dist/${mentionsFragmentPath("glossary/keyword-page")}`),
+    ) as { id: string; mentions: unknown[] };
+    expect(fragment.id).toBe("glossary/keyword-page");
+    expect(fragment.mentions).toHaveLength(5);
+    const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    for (const mention of fragment.mentions as { href: string; context: string }[]) {
+      expect(page).toContain(`href="${mention.href}"`);
+    }
+    expect(page).toContain(
+      "lists the <mark>keyword page</mark>s that cite the entity, grouped by file",
+    );
+  });
+
+  it("writes no global mentions file and keeps every fragment far under two hundred kilobytes, even with many mentions", async () => {
+    const many = Array.from({ length: 300 }, (_, index) => ({
+      from: `glossary/page`,
+      to: "glossary/keyword-page",
+      relation: "related",
+      confidence: 0.6,
+      provenance: [
+        {
+          method: "glossary_occurrence" as const,
+          confidence: 0.6,
+          path: "page.md",
+          line: index + 1,
+          occurrences: [{ line: index + 1, context: `passage ${String(index + 1)} of the note` }],
+        },
+      ],
+    }));
+    const { fileSystem, report } = await build({
+      model: model({ links: [...model().links, ...many] }),
+    });
+    const files = fileSystem.listFiles("/dist");
+    expect(
+      files.filter((file) => file.endsWith("mentions.json") && !file.startsWith("fragments/")),
+    ).toEqual([]);
+    expect(files.filter((file) => /^fragments\/[^/]*mentions[^/]*$/.test(file))).toEqual([]);
+    for (const file of files.filter((file) => file.endsWith(".mentions.json"))) {
+      expect(Buffer.byteLength(fileSystem.readText(`/dist/${file}`)), file).toBeLessThan(200_000);
+    }
+    const fragment = JSON.parse(
+      fileSystem.readText(`/dist/${mentionsFragmentPath("glossary/keyword-page")}`),
+    ) as { mentions: unknown[] };
+    expect(fragment.mentions).toHaveLength(305);
+    // From two hundred mentions on, the page embeds nothing: it stays small and the island fetches the fragment.
+    const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    expect(count(page, '<li class="mention')).toBe(20);
+    expect(page).not.toContain('id="mentions-embedded"');
+    expect(page).toContain('href="../../fragments/glossary/keyword-page.mentions.json"');
+    expect(report.warnings).toEqual([]);
+  });
+});
+
+describe("Without JavaScript, the first twenty mentions remain readable and the links work", () => {
+  it("keeps the inline mentions, their file and passage links and the link to the fragment once scripts are removed, every target written", async () => {
+    const { fileSystem } = await build({ mentionsInline: 3 });
+    const path = "glossary/keyword-page/index.html";
+    const html = fileSystem.readText(`/dist/${path}`).replace(/<script[\s\S]*?<\/script>/g, "");
+    expect(html).not.toContain("<script");
+    expect(count(html, '<li class="mention')).toBe(3);
+    expect(html).toContain('<span class="mention-file">rules/publication-threshold.md</span>');
+    expect(html).toContain(
+      '<a class="mention-passage" href="../../specs/rules/publication-threshold/index.html#L1">line 1</a>',
+    );
+    expect(html).toContain('<a href="../../fragments/glossary/keyword-page.mentions.json">');
+    // The header carries the mode switch button on every page: only the main landmark is inspected.
+    expect(html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"))).not.toContain(
+      "<button",
+    );
+    const written = new Set(fileSystem.listFiles("/dist"));
+    for (const { reference, target } of localTargets(path, html)) {
+      expect(written.has(target), `${reference} resolves to ${target}`).toBe(true);
+    }
+  });
+});
+
+describe("The threshold of twenty is configurable (build.mentions_inline)", () => {
+  it("serves as many mentions inline as the configuration says, twenty without it", async () => {
+    const many = Array.from({ length: 30 }, (_, index) => ({
+      from: `glossary/page`,
+      to: "glossary/keyword-page",
+      relation: "related",
+      confidence: 0.6,
+      provenance: [
+        {
+          method: "glossary_occurrence" as const,
+          confidence: 0.6,
+          path: "page.md",
+          line: index + 1,
+        },
+      ],
+    }));
+    const grown = model({ links: [...model().links, ...many] });
+    const page = "glossary/keyword-page/index.html";
+    const inline = async (mentionsInline?: number): Promise<number> => {
+      const { fileSystem } = await build({
+        model: grown,
+        ...(mentionsInline === undefined ? {} : { mentionsInline }),
+      });
+      return count(fileSystem.readText(`/dist/${page}`), '<li class="mention');
+    };
+    expect(await inline()).toBe(20);
+    expect(await inline(5)).toBe(5);
+    expect(await inline(0)).toBe(0);
+    expect(await inline(100)).toBe(35);
+  });
+});
+
 describe("The labels of the site come from the message catalogue of the project locale", () => {
   it("writes the French labels of the chrome and the pages for a French project, the theme overriding a message", async () => {
     const { fileSystem } = await build({ locale: "fr" });
@@ -337,6 +457,7 @@ describe("siteDocuments", () => {
       TODO_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),
       SEARCH_INDEX,
+      ...cited.map(mentionsFragmentPath),
     ]);
   });
 
@@ -349,7 +470,7 @@ describe("siteDocuments", () => {
       }),
       bundles,
     );
-    expect(entity?.content).toContain("<details");
+    expect(count(entity?.content ?? "", '<li class="mention')).toBe(1);
     expect(entity?.content).toContain(
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );

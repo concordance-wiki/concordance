@@ -102,6 +102,7 @@ describe("the occurrence scan on the minimal en corpus", () => {
         path: "screens/mentions-panel.md",
         line: 7,
         position: 29,
+        text: "explicit link",
         context:
           "Lets a maintainer confirm an explicit link on a finished build for a typed entit…",
         confidence: 0.6,

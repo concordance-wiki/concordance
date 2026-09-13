@@ -415,6 +415,19 @@ concordance-island {
   list-style: none;
 }
 
+.mention-list {
+  margin-block: var(--space-2) 0;
+  padding-inline-start: var(--space-3);
+}
+
+.mention-group {
+  margin-block-end: var(--space-2);
+}
+
+.mention-group summary {
+  cursor: pointer;
+}
+
 .mention {
   margin-block-end: var(--space-2);
 }
@@ -425,7 +438,45 @@ concordance-island {
   font-size: 0.875rem;
 }
 
-.mentions-more summary,
+/* The words naming the entity: the same weight as a recognised word in the note, no colour of their own. */
+.mention-context mark {
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+}
+
+.mentions-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-block-end: var(--space-3);
+  font-size: 0.875rem;
+}
+
+.mentions-controls select,
+.mentions-controls input {
+  font: inherit;
+  color: inherit;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+}
+
+.mentions-controls button {
+  cursor: pointer;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+}
+
+.mentions-status {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
 .mentions-more button {
   cursor: pointer;
   color: var(--color-accent);

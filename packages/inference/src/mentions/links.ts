@@ -24,6 +24,12 @@ export interface MentionOccurrence {
   section?: string;
   /** The confidence the scan gave this mention (type prefix bonus, homonym factor); the base of the profile when absent. */
   confidence?: number;
+  /** Code unit offset of the match in its paragraph. */
+  position?: number;
+  /** The match as written in the note. */
+  text?: string;
+  /** The text around the match as the scan cut it; the mentions panel of the target shows it. */
+  context?: string;
 }
 
 export interface MentionLinksInput {
@@ -48,6 +54,22 @@ function byCodeUnit(a: string, b: string): number {
 
 function fileKey(source: string, path: string): string {
   return `${source}/${path}`;
+}
+
+/** The passage of a mention and the words matched, kept on its provenance when the scan reported them. */
+function passageOf(occurrence: MentionOccurrence): Pick<Provenance, "text" | "occurrences"> {
+  if (occurrence.context === undefined) return {};
+  return {
+    ...(occurrence.text === undefined ? {} : { text: occurrence.text }),
+    occurrences: [
+      {
+        line: occurrence.line,
+        ...(occurrence.position === undefined ? {} : { position: occurrence.position }),
+        context: occurrence.context,
+        ...(occurrence.section === undefined ? {} : { section: occurrence.section }),
+      },
+    ],
+  };
 }
 
 /**
@@ -123,6 +145,7 @@ export function mentionLinks(input: MentionLinksInput): MentionLinksResult {
             path: occurrence.path,
             line: occurrence.line,
             section: section.name,
+            ...passageOf(occurrence),
           },
         );
         continue;
@@ -139,6 +162,7 @@ export function mentionLinks(input: MentionLinksInput): MentionLinksResult {
         confidence: occurrence.confidence ?? occurrenceConfidence,
         path: occurrence.path,
         line: occurrence.line,
+        ...passageOf(occurrence),
       },
     );
   }

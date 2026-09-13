@@ -63,13 +63,13 @@ describe("The accent colour never carries information on its own", () => {
       ".legend-written::before,\n.legend-recognised::before",
       ".banner",
       ".mentions-group h3",
-      ".mentions-more summary,\n.mentions-more button",
+      ".mentions-more button",
     ]);
   });
 
   it("underlines links and the disclosure of the remaining mentions, so that colour is not their only mark", () => {
     expect(ruleFor(base, "a").body).toContain("text-decoration: underline;");
-    expect(ruleFor(components, ".mentions-more summary,\n.mentions-more button").body).toContain(
+    expect(ruleFor(components, ".mentions-more button").body).toContain(
       "text-decoration: underline;",
     );
   });

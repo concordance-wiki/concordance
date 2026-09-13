@@ -83,13 +83,15 @@ describe("Full keyboard navigation, consistent tab order, always-visible focus",
     }
   });
 
-  it("serves the mentions beyond the threshold behind a native summary before hydration, a real button after", () => {
+  it("serves the file groups of the mentions behind native summaries and the rest behind a link before hydration, real buttons after", () => {
     const island = documents.find((document) => document.path === "mentions-panel-island.html");
     const html = island?.html ?? "";
     // The header carries the mode switch button on every page: only the main landmark is inspected.
     const main = html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"));
-    expect(main).toContain('<details class="mentions-more"><summary>');
+    expect(main).toContain('<details class="mention-group" open><summary>');
     expect(main).not.toContain("<button");
-    expect(componentsStylesheet()).toContain(".mentions-more summary,\n.mentions-more button {");
+    expect(main).not.toContain("<select");
+    expect(componentsStylesheet()).toContain(".mention-group summary {\n  cursor: pointer;");
+    expect(componentsStylesheet()).toContain(".mentions-more button {");
   });
 });

@@ -107,13 +107,16 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(files).toContain("todo/index.html");
     expect(files).toContain("search-index.json");
     expect(files).toContain("assets/site.css");
+    // One note fragment per entity, and one mentions fragment per entity another note cites.
     expect(io.fs.listFiles("/work/dist/fragments")).toEqual([
       "keywords/build-summary.json",
       "keywords/build.json",
       "keywords/summary.json",
       "notes/a.json",
+      "notes/a.mentions.json",
       "notes/a/figures/a.svg",
       "notes/b.json",
+      "notes/b.mentions.json",
       "notes/c.json",
     ]);
     const page = io.fs.readText("/work/dist/notes/a/index.html");
@@ -209,7 +212,12 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(await buildCommand([], io)).toBe(0);
     const page = io.fs.readText("/work/dist/notes/b/index.html");
     expect(page).toContain('<a class="entity-edit" href="https://forge.example/notes/edit/b.md">');
-    expect(page).toContain("<details");
+    expect(page.split('<li class="mention').length - 1).toBe(1);
+    expect(page).toContain('<a href="../../fragments/notes/b.mentions.json">');
+    const mentions = JSON.parse(io.fs.readText("/work/dist/fragments/notes/b.mentions.json")) as {
+      mentions: unknown[];
+    };
+    expect(mentions.mentions.length).toBeGreaterThan(1);
   });
 
   it("links the edit page of the forge from a git source URL on its declared ref when no edit_url is configured", async () => {

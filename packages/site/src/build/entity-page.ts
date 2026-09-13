@@ -1,28 +1,17 @@
-import { pagePath, type Entity, type Link, type Provenance } from "@concordance-wiki/core";
-import { formatMessage } from "@concordance-wiki/i18n";
+import { pagePath, type Entity } from "@concordance-wiki/core";
 
 import { byCodeUnit } from "../order.js";
 import type {
   Attribute,
   AttributeValue,
   EntityPageProps,
-  Mention,
   Neighbour,
   NeighbourhoodProps,
   SourceRef,
 } from "../slots.js";
-import {
-  editHref,
-  fileKey,
-  message,
-  relationLabel,
-  typeLabel,
-  type SiteContext,
-} from "./context.js";
+import { editHref, message, relationLabel, typeLabel, type SiteContext } from "./context.js";
+import { mentionsPanelOf } from "./mentions.js";
 import { entityHref } from "./paths.js";
-
-/** How many mentions the served HTML carries when the configuration says nothing (`build.mentions_inline`). */
-export const DEFAULT_MENTIONS_INLINE = 20;
 
 /** The properties every entity carries outside `attributes`, and the message that labels each. */
 const COMMON = ["application", "domain", "status"] as const;
@@ -145,92 +134,6 @@ export function neighbourhoodOf(
   return { centre: entity.title, neighbours };
 }
 
-const WRITTEN = new Set<Provenance["method"]>(["explicit_link", "frontmatter_ref"]);
-const LOCATED = new Set<Provenance["method"]>([
-  "explicit_link",
-  "frontmatter_ref",
-  "section_mention",
-  "glossary_occurrence",
-]);
-
-function contextOf(context: SiteContext, entity: Entity, provenance: Provenance): string {
-  if (provenance.text !== undefined) return provenance.text;
-  if (provenance.section !== undefined) {
-    return formatMessage(context.catalogue, "mentions.inSection", { section: provenance.section });
-  }
-  return provenance.attribute ?? entity.title;
-}
-
-interface LocatedMention {
-  mention: Mention;
-  /** Source name, then path, then line: the corpus order. */
-  source: string;
-  path: string;
-}
-
-/**
- * The note a provenance was read from: its path is relative to the source of the end that holds
- * it, which relation typing may have turned around; the other end of the link is the candidate,
- * and a provenance read from the page's own note cites the other entity, not this one.
- */
-function citingNote(
-  context: SiteContext,
-  entity: Entity,
-  link: Link,
-  path: string,
-): Entity | undefined {
-  const other = context.entities.get(link.from === entity.id ? link.to : link.from);
-  if (other === undefined) return undefined;
-  const note = context.byFile.get(fileKey(other.source.name, path));
-  return note === undefined || note.id === entity.id ? undefined : note;
-}
-
-function mentionOf(
-  context: SiteContext,
-  page: string,
-  entity: Entity,
-  link: Link,
-  provenance: Provenance,
-): LocatedMention | undefined {
-  if (!LOCATED.has(provenance.method) || provenance.path === undefined) return undefined;
-  const note = citingNote(context, entity, link, provenance.path);
-  if (note === undefined) return undefined;
-  const href = entityHref(page, note.id);
-  const line = provenance.line ?? note.source.line;
-  return {
-    mention: {
-      kind: WRITTEN.has(provenance.method) ? "written" : "recognised",
-      file: { label: provenance.path, href },
-      context: contextOf(context, entity, provenance),
-      line,
-      href: `${href}#L${String(line)}`,
-    },
-    source: note.source.name,
-    path: provenance.path,
-  };
-}
-
-/** Written links first, then recognised mentions, each group in corpus order; the model order breaks ties. */
-export function mentionsOf(context: SiteContext, page: string, entity: Entity): Mention[] {
-  const located: LocatedMention[] = [];
-  for (const link of context.touching.get(entity.id) ?? []) {
-    for (const provenance of link.provenance) {
-      const mention = mentionOf(context, page, entity, link, provenance);
-      if (mention !== undefined) located.push(mention);
-    }
-  }
-  const rank = (item: LocatedMention): number => (item.mention.kind === "written" ? 0 : 1);
-  return located
-    .sort(
-      (a, b) =>
-        rank(a) - rank(b) ||
-        byCodeUnit(a.source, b.source) ||
-        byCodeUnit(a.path, b.path) ||
-        a.mention.line - b.mention.line,
-    )
-    .map((item) => item.mention);
-}
-
 /** The files of an entity in its source, the note first with its edit link when the forge is known. */
 export function sourcesOf(context: SiteContext, entity: Entity): SourceRef[] {
   const paths = [
@@ -270,10 +173,7 @@ export function entityPageOf(
     sections: context.fragments.get(entity.id)?.sections ?? [],
     attributes: panelOf(context, page, entity),
     neighbours: neighbourhoodOf(context, page, entity),
-    mentions: {
-      mentions: mentionsOf(context, page, entity),
-      initial: options.mentionsInline ?? DEFAULT_MENTIONS_INLINE,
-    },
+    mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),
   };
 }

@@ -132,7 +132,8 @@ export const galleryPages: readonly GalleryPage[] = [
     slot: "MentionsPanel",
     rendered: "MentionsPanel",
     state: "default",
-    description: "three mentions, two written in notes and one recognised in a file, all inline",
+    description:
+      "three mentions in one note, two written and one recognised, all inline in one file group",
     ...chrome,
     props: { mentions: mentions(3), initial: 20 },
   },
@@ -151,7 +152,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "MentionsPanel",
     state: "island",
     description:
-      "twenty-five mentions: twenty inline, the rest behind the island, readable without JavaScript",
+      "twenty-five mentions in nine notes: twenty inline in collapsible file groups, the rest embedded for the island, readable without JavaScript",
     ...chrome,
     props: { mentions: mentions(25), initial: 20 },
   },

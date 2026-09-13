@@ -165,6 +165,10 @@ describe("the minimal corpus", () => {
             path: "rules/related-link-cap.rule.md",
             line: 10,
             section: "applies_to",
+            text: "Mentions panel",
+            occurrences: [
+              { line: 10, position: 0, context: "Mentions panel", section: "Applies to" },
+            ],
           },
           {
             method: "section_mention",
@@ -172,6 +176,8 @@ describe("the minimal corpus", () => {
             path: "screens/mentions-panel.md",
             line: 23,
             section: "rules",
+            text: "Related link cap",
+            occurrences: [{ line: 23, position: 0, context: "Related link cap", section: "Rules" }],
           },
         ],
       ],

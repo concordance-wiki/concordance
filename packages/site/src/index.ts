@@ -96,8 +96,12 @@ export {
   entityHref,
   fragmentImagePath,
   fragmentPath,
+  mentionsFragmentPath,
   relativeHref,
 } from "./build/paths.js";
+export { DEFAULT_MENTIONS_INLINE, mentionsOf, mentionsPanelOf } from "./build/mentions.js";
+export type { MentionsFragment } from "./build/mentions.js";
+export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions-island.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type { EntityFragment, FragmentImage, FragmentPassage } from "./build/fragments.js";
 export { defaultThemeConfig } from "./build/default-theme.js";
