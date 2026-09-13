@@ -152,25 +152,21 @@ function themeChrome(input: SiteInput, assetsBase: string): ThemeChrome {
     : chromeOf(input.theme.config, assetsBase);
 }
 
-/** What the chrome of a page knows of the site and of the page: the to-do count, the spaces, the page in the trail and its space. */
-interface PageChrome {
-  todoCount: number;
-  spaces: readonly SpaceCount[];
+/** What a page tells its chrome beyond the site: its place in the trail, its space, its search field. */
+interface PageExtras {
   current?: TrailPage;
-  /** The tree of the space of an entity page, for the drawer. */
-  space?: SpaceTree;
+  /** The tree of the space of an entity page or of a category list, for the drawer. */
+  space?: SpaceTree | undefined;
   /** The space a space page confines the search field to. */
   searchSource?: string;
   /** The search field of the page when it is not the one of every page: the field of a category list. */
   search?: (field: SearchField) => SearchField;
 }
 
-/** What a page tells its chrome beyond the site: its place in the trail, its space, its search field. */
-interface PageExtras {
-  current?: TrailPage;
-  space?: SpaceTree;
-  searchSource?: string;
-  search?: (field: SearchField) => SearchField;
+/** What the chrome of a page knows of the site and of the page: the to-do count, the spaces, and what the page tells. */
+interface PageChrome extends PageExtras {
+  todoCount: number;
+  spaces: readonly SpaceCount[];
 }
 
 /** The header and footer of one page, every href relative to it. */
@@ -365,7 +361,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       const props = keywordPageOf(context, entity, mentionsOptions);
       return render(page, "KeywordPage", props, entity.title, entity.locale, {
         current,
-        ...(props.space === undefined ? {} : { space: props.space }),
+        space: props.space,
       });
     }
     const props = entityPageOf(context, entity, {
@@ -377,7 +373,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       h(pageComponentFor(input.theme, entity.type), props),
       entity.title,
       entity.locale,
-      { current, ...(props.space === undefined ? {} : { space: props.space }) },
+      { current, space: props.space },
     );
   };
   // The list of every folder at the top of a space, in every state a reader can reach by a link.

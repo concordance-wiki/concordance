@@ -7,7 +7,7 @@
   "category.pages": "{count, plural, one {# page} other {# pages}}",
   "category.pagination": "Pages de la liste",
   "category.searchIn": "Rechercher dans les {name}",
-  "category.shown": "{shown} {name} sur {total} — pagination par vingt",
+  "category.shown": "{shown} {name} sur {total} — pagination par vingt.",
   "category.sort": "Tri",
   "category.sortLinks": "Liens",
   "category.sortTitle": "A–Z",

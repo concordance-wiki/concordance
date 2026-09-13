@@ -26,7 +26,7 @@ import {
   sortChoices,
 } from "../theme/default/category-island.js";
 import { labelIn, message, typeLabel, type SiteContext } from "./context.js";
-import { attributeOf, neighbourCount } from "./entity-page.js";
+import { attributeLabel, attributeOf, neighbourCount } from "./entity-page.js";
 import { entityHref, relativeHref, spaceHref, SPACES_PAGE } from "./paths.js";
 import { categoryPagePathOf, initialsOf } from "./space.js";
 
@@ -79,14 +79,14 @@ export function listedCategoriesOf(context: SiteContext): Category[] {
       const types = new Set(
         notes.filter((note) => note.type_origin !== "frontmatter").map((note) => note.type),
       );
-      const [type] = types;
+      const type = types.size === 1 ? [...types][0] : undefined;
       const sorted = [...notes].sort(
         (a, b) => context.collate(a.title, b.title) || byCodeUnit(a.id, b.id),
       );
       categories.push({
         source,
         folder,
-        ...(types.size === 1 && type !== undefined ? { type } : {}),
+        ...(type === undefined ? {} : { type }),
         notes: sorted,
         page,
       });
@@ -106,12 +106,20 @@ export function categoryName(folder: string): string {
   return folder.replaceAll(/[-_]+/g, " ").trim().toLowerCase();
 }
 
-/** The first attribute the type highlights; none for a folder mapping to no type or a type highlighting nothing. */
-export function highlightedAttribute(
+/** The type of a category and the first attribute it highlights: what the filter and the second column of the list show. */
+export interface CategoryHighlight {
+  type: string;
+  attribute: string;
+}
+
+/** The first attribute the type of a category highlights, with the type; none for a folder mapping to no type or a type highlighting nothing. */
+export function highlightOf(
   context: SiteContext,
-  type: string | undefined,
-): string | undefined {
-  return type === undefined ? undefined : context.profile.types[type]?.display?.highlight?.[0];
+  category: Category,
+): CategoryHighlight | undefined {
+  if (category.type === undefined) return undefined;
+  const attribute = context.profile.types[category.type]?.display?.highlight?.[0];
+  return attribute === undefined ? undefined : { type: category.type, attribute };
 }
 
 /**
@@ -161,7 +169,7 @@ export function valueKey(value: AttributeValue): string {
 
 /** The rows of a category from its page: every note with its highlighted attribute, its summary and its number of related pages. */
 export function rowsOf(context: SiteContext, category: Category): CategoryRow[] {
-  const attribute = highlightedAttribute(context, category.type);
+  const attribute = highlightOf(context, category)?.attribute;
   return category.notes.map((note) => {
     const values =
       attribute === undefined ? [] : attributeValuesOf(context, category.page, note, attribute);
@@ -366,7 +374,7 @@ export interface CategoryDocument {
 function choicesOf(
   context: SiteContext,
   category: Category,
-  attribute: string,
+  { type, attribute }: CategoryHighlight,
   values: readonly FilterValue[],
   state: CategoryState,
   addressed: boolean,
@@ -385,7 +393,7 @@ function choicesOf(
         }
       : {};
   return {
-    label: attributeLabelOf(context, category.type, attribute),
+    label: attributeLabel(context, type, attribute),
     choices: [
       {
         label: message(context, "category.all"),
@@ -400,20 +408,6 @@ function choicesOf(
       })),
     ],
   };
-}
-
-/** The label of an attribute of a type as the profile declares it, the attribute name otherwise. */
-function attributeLabelOf(
-  context: SiteContext,
-  type: string | undefined,
-  attribute: string,
-): string {
-  const label =
-    (type === undefined
-      ? undefined
-      : context.profile.types[type]?.attributes?.[attribute]?.label) ??
-    context.profile.common_attributes?.[attribute]?.label;
-  return label === undefined ? attribute.replaceAll("_", " ") : labelIn(label, context.language);
 }
 
 /** The pages of a list of that many rows from the page of a state, the current one without an address. */
@@ -442,8 +436,9 @@ function pagesOf(
  */
 export function categoryDocumentsOf(context: SiteContext, category: Category): CategoryDocument[] {
   const rows = rowsOf(context, category);
-  const attribute = highlightedAttribute(context, category.type);
-  const values = attribute === undefined ? [] : filterValuesOf(context, rows);
+  const highlight = highlightOf(context, category);
+  const attribute = highlight?.attribute;
+  const values = highlight === undefined ? [] : filterValuesOf(context, rows);
   const addressed = preRendered(values.length);
   const name = categoryName(category.folder);
   const labels = categoryLabels(context, name);
@@ -459,9 +454,9 @@ export function categoryDocumentsOf(context: SiteContext, category: Category): C
   const documentOf = (state: CategoryState, kept: CategoryRow[]): CategoryDocument => {
     const path = variantPath(category, attribute, state);
     const filter =
-      attribute === undefined
+      highlight === undefined
         ? undefined
-        : choicesOf(context, category, attribute, values, state, addressed);
+        : choicesOf(context, category, highlight, values, state, addressed);
     return {
       path,
       props: {

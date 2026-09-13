@@ -115,6 +115,25 @@ describe("Header", () => {
     expect(html).toContain('<a href="../pending/">Pending<span class="count">3</span></a>');
   });
 
+  it("submits the facets of a category list as hidden fields before the search field, so that the form works without any script", () => {
+    const html = renderSlot(
+      "Header",
+      {
+        ...header,
+        search: {
+          action: "../../search/",
+          placeholder: "Search in screens",
+          filters: { source: "specs", type: "screen" },
+        },
+      },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      '<label class="visually-hidden" for="site-search">Search</label><input type="hidden" name="source" value="specs"/><input type="hidden" name="type" value="screen"/><span class="site-search-field">',
+    );
+    expect(html).toContain('placeholder="Search in screens"');
+  });
+
   it("inlines an SVG logo hidden from assistive technology, the title next to it being the name", () => {
     const html = renderSlot(
       "Header",

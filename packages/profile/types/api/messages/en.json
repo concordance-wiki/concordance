@@ -29,7 +29,7 @@
   },
   "description": {
     "defaultMessage": "An API is a service the application exposes, with the operations its contract declares.",
-    "description": "One sentence saying what a API is, shown under the count of a category of APIs."
+    "description": "One sentence saying what an API is, shown under the count of a category of APIs."
   },
   "label": {
     "defaultMessage": "API",

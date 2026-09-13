@@ -9,7 +9,7 @@
   },
   "description": {
     "defaultMessage": "An actor is a person, a team or a system that takes part in a process from outside the application.",
-    "description": "One sentence saying what a actor is, shown under the count of a category of actors."
+    "description": "One sentence saying what an actor is, shown under the count of a category of actors."
   },
   "label": {
     "defaultMessage": "Actor",

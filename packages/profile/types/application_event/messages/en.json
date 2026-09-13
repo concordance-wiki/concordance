@@ -9,7 +9,7 @@
   },
   "description": {
     "defaultMessage": "An application event is something that happens inside the application and that other parts react to.",
-    "description": "One sentence saying what a application event is, shown under the count of a category of application events."
+    "description": "One sentence saying what an application event is, shown under the count of a category of application events."
   },
   "label": {
     "defaultMessage": "Application event",

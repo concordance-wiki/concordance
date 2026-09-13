@@ -21,7 +21,7 @@
   },
   "description": {
     "defaultMessage": "An application is a system the documentation describes, which files its screens, APIs and batches under it.",
-    "description": "One sentence saying what a application is, shown under the count of a category of applications."
+    "description": "One sentence saying what an application is, shown under the count of a category of applications."
   },
   "label": {
     "defaultMessage": "Application",

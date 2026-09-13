@@ -32,7 +32,7 @@
     "description": "Placeholder of the search field on a category list, the category name lowercased in it."
   },
   "category.shown": {
-    "defaultMessage": "{shown} {name} of {total} — pagination by twenty",
+    "defaultMessage": "{shown} {name} of {total} — pagination by twenty.",
     "description": "Under a category list: how many rows the page shows of the whole, the category name lowercased in it."
   },
   "category.sort": {

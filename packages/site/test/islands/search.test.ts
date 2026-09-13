@@ -1256,6 +1256,24 @@ describe("suggestionOf and seeResultsHref", () => {
       noteless: "any",
     });
   });
+
+  it("carries the facets the field of a category list submits with the query, and keeps its live results to them", () => {
+    const field = {
+      action: "../../search/index.html",
+      placeholder: "Search in screens",
+      filters: { source: "specs", type: "screen" },
+    };
+    expect(seeResultsHref(field, "home")).toBe(
+      "../../search/index.html?q=home&type=screen&source=specs",
+    );
+    expect(fieldState(field, "home")).toEqual({
+      query: "home",
+      filters: { type: ["screen"], source: ["specs"], domain: [], application: [] },
+      noteless: "any",
+    });
+    // A space named by both: the source of the field wins over its hidden fields.
+    expect(fieldState({ ...field, source: "glossary" }, "").filters.source).toEqual(["glossary"]);
+  });
 });
 
 interface ResultsPage {

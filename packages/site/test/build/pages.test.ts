@@ -465,6 +465,31 @@ describe("entityPageOf", () => {
         ],
       },
     ]);
+    expect(breadcrumbOf(nested, "specs/screens/service/query/index.html", deep)).toEqual([
+      { label: "specs", href: "../../../index.html" },
+      { label: "screens", href: "../../index.html" },
+      { label: "service" },
+      { label: "Query" },
+    ]);
+    // A note that takes the address of a folder at the top: the folder has no list to link to.
+    const taken = entity({
+      id: "specs/screens",
+      type: "document",
+      title: "Screens",
+      source: { name: "specs", path: "screens.md", line: 1 },
+    });
+    const shadowed = context({ model: model({ entities: [...model().entities, taken] }) });
+    const page = "specs/screens/mentions-panel/index.html";
+    expect(spaceOf(shadowed, page, screen).nodes).toEqual([
+      { label: "rules", count: 1, href: "../../rules/index.html" },
+      { label: "screens", count: 1, children: [{ label: "Mentions panel", current: true }] },
+      { label: "Screens", href: "../index.html" },
+    ]);
+    expect(breadcrumbOf(shadowed, page, screen)).toEqual([
+      { label: "specs", href: "../../index.html" },
+      { label: "screens" },
+      { label: "Mentions panel" },
+    ]);
     expect(initialsOf("demo-specs")).toBe("DS");
     expect(SPACE_PAGES_MAX).toBe(40);
     expect(initialsOf("Glossary of the tool")).toBe("GO");

@@ -4083,16 +4083,20 @@ tbody .spaces-name {
   text-align: start;
 }
 
+.category-table th:first-child,
+.category-table td:first-child {
+  padding-inline-start: 1.25rem;
+}
+
 .category-table th:last-child,
 .category-table td:last-child {
-  padding-inline-end: var(--space-3);
+  padding-inline-end: 1.25rem;
 }
 
 .category-table thead th {
   padding-block: 0.6875rem;
   background: var(--color-soft);
   color: var(--color-label);
-  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.07em;

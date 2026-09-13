@@ -13,7 +13,7 @@
   },
   "description": {
     "defaultMessage": "An application function is a capability the application provides, whatever the screen or API that exposes it.",
-    "description": "One sentence saying what a application function is, shown under the count of a category of application functions."
+    "description": "One sentence saying what an application function is, shown under the count of a category of application functions."
   },
   "label": {
     "defaultMessage": "Application function",
