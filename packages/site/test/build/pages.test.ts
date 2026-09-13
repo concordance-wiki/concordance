@@ -683,10 +683,27 @@ describe("entityPageOf", () => {
         rank: 4,
       },
     ]);
-    expect(neighbourhoodOf(context(), "glossary/page/index.html", page)).toEqual({
-      centre: "Page",
-      neighbours: [],
-      total: 2,
+    const empty = neighbourhoodOf(context(), "glossary/page/index.html", page);
+    expect(empty).toMatchObject({ centre: "Page", neighbours: [], total: 2 });
+    expect(empty.labels).toEqual({
+      map: "Neighbourhood map",
+      mapCaption: "The list below carries the same information as the map.",
+      distance: "Distance",
+      hop: "1 hop",
+      types: "Types",
+      existingPage: "existing page",
+      noteless: "word without a note",
+      neighbours: "The 0 neighbours",
+      textualEquivalent: "textual equivalent",
+      capNote:
+        "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over.",
+      noNeighbour: "No neighbour recorded.",
+      total: "2 neighbours in total, more than the map shows",
+      seeMentions: "see the mentions panel",
+    });
+    expect(neighbourhood.labels).toMatchObject({
+      neighbours: "The 3 neighbours",
+      total: "3 neighbours in total, more than the map shows",
     });
     const bare = model();
     delete bare.neighbours;
@@ -731,7 +748,15 @@ describe("entityPageOf", () => {
     );
     expect(relations).toEqual(["is accessed by", "accesses", "accesses", "is related to"]);
     const fr = context({ model: declared, catalogue: loadCatalogue("fr") });
-    expect(neighbourhoodOf(fr, pagePath, term).neighbours[0]?.relation).toBe("est accédé par");
+    const french = neighbourhoodOf(fr, pagePath, term);
+    expect(french.neighbours[0]?.relation).toBe("est accédé par");
+    expect(french.labels).toMatchObject({
+      map: "Carte du voisinage",
+      hop: "1 saut",
+      types: "Types",
+      neighbours: "Les 4 voisins",
+      noteless: "mot sans définition",
+    });
     expect(relationLabel(context(), "accesses", { inverse: true })).toBe("is accessed by");
     expect(relationLabel(context(), "accesses", { inverse: false })).toBe("accesses");
     expect(relationLabel(context(), "unknown_relation", { inverse: true })).toBe(

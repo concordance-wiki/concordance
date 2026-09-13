@@ -542,6 +542,8 @@ export interface EntityPageProps {
   documents?: DocumentView[];
   /** The imported contract of an `api` entity; absent for every other page. */
   contract?: ContractSectionProps;
+  /** The neighbourhood map served unfolded, the panel replaced by it; folded behind its line when absent. */
+  mapOpen?: boolean;
 }
 
 export interface Passage {
@@ -739,6 +741,36 @@ export interface Neighbour {
   typeGlyph?: string;
 }
 
+/** The strings of the neighbourhood map in the language of the site; the theme's own English when absent. */
+export interface NeighbourhoodLabels {
+  /** Heading of the map, before the title of the page at its centre. */
+  map: string;
+  /** Under the map: that the list carries the same information. */
+  mapCaption: string;
+  /** Before the distance control. */
+  distance: string;
+  /** The one distance the model records, worded: "1 hop". */
+  hop: string;
+  /** The button opening the type filter. */
+  types: string;
+  /** Legend of a plain edge: a neighbour that has a note. */
+  existingPage: string;
+  /** Legend of a dotted edge: a neighbour that is a word without a note. */
+  noteless: string;
+  /** Heading of the list, the count worded: "The 6 neighbours". */
+  neighbours: string;
+  /** After the heading of the list: that it is the textual equivalent of the map. */
+  textualEquivalent: string;
+  /** Under the list: why the map stops at six. */
+  capNote: string;
+  /** When the page has no neighbour. */
+  noNeighbour: string;
+  /** "{count} neighbours in total, more than the map shows", worded, when the map gives way to the pointer. */
+  total: string;
+  /** The pointer to the mentions panel. */
+  seeMentions: string;
+}
+
 export interface NeighbourhoodProps {
   /** Title of the entity at the centre. */
   centre: string;
@@ -749,6 +781,8 @@ export interface NeighbourhoodProps {
    * the map gives way to a pointer to the mentions panel; the list stays.
    */
   total?: number;
+  /** Absent, the theme uses its own English labels. */
+  labels?: Partial<NeighbourhoodLabels>;
 }
 
 export interface SearchResult {

@@ -31,6 +31,9 @@ export interface MessageArguments {
   "mentions.inSection": { section: string };
   "results.cited": { count: number };
   "results.usedIn": { count: number };
+  "neighbourhood.hop": { count: number };
+  "neighbourhood.list": { count: number };
+  "neighbourhood.total": { count: number };
   "search.results": { count: number };
   "site.generatedAt": { date: Date };
   "time.updatedAgo": { when: string };
@@ -117,6 +120,18 @@ export const messageArguments = {
   "nav.domains": {},
   "nav.index": {},
   "nav.types": {},
+  "neighbourhood.capNote": {},
+  "neighbourhood.distance": {},
+  "neighbourhood.existingPage": {},
+  "neighbourhood.hop": { count: "plural" },
+  "neighbourhood.list": { count: "plural" },
+  "neighbourhood.map": {},
+  "neighbourhood.mapCaption": {},
+  "neighbourhood.none": {},
+  "neighbourhood.noteless": {},
+  "neighbourhood.seeMentions": {},
+  "neighbourhood.textualEquivalent": {},
+  "neighbourhood.total": { count: "plural" },
   "related.cited": {},
   "related.clearAll": {},
   "related.filter": {},

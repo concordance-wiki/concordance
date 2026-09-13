@@ -14,6 +14,7 @@ import type {
   EntityPageLabels,
   EntityPageProps,
   Neighbour,
+  NeighbourhoodLabels,
   NeighbourhoodProps,
   Section,
   SourceRef,
@@ -290,10 +291,35 @@ export function neighbourhoodOf(
       };
     },
   );
+  const total = Math.max(neighbourCount(context, entity), neighbours.length);
   return {
     centre: entity.title,
     neighbours,
-    total: Math.max(neighbourCount(context, entity), neighbours.length),
+    total,
+    labels: neighbourhoodLabels(context, neighbours.length, total),
+  };
+}
+
+/** The strings of the map in the site language; the list heading is worded from the number listed, the pointer from the total. */
+export function neighbourhoodLabels(
+  context: SiteContext,
+  listed: number,
+  total: number,
+): NeighbourhoodLabels {
+  return {
+    map: message(context, "neighbourhood.map"),
+    mapCaption: message(context, "neighbourhood.mapCaption"),
+    distance: message(context, "neighbourhood.distance"),
+    hop: formatMessage(context.catalogue, "neighbourhood.hop", { count: 1 }),
+    types: message(context, "related.types"),
+    existingPage: message(context, "neighbourhood.existingPage"),
+    noteless: message(context, "neighbourhood.noteless"),
+    neighbours: formatMessage(context.catalogue, "neighbourhood.list", { count: listed }),
+    textualEquivalent: message(context, "neighbourhood.textualEquivalent"),
+    capNote: message(context, "neighbourhood.capNote"),
+    noNeighbour: message(context, "neighbourhood.none"),
+    total: formatMessage(context.catalogue, "neighbourhood.total", { count: total }),
+    seeMentions: message(context, "neighbourhood.seeMentions"),
   };
 }
 

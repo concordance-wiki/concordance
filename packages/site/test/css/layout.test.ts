@@ -131,6 +131,7 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
       ".passage-count",
       ".passage-at",
       ".similar-count",
+      ".neighbour > .weight",
     ]);
   });
 });
