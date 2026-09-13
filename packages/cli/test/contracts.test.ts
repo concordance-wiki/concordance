@@ -51,6 +51,7 @@ function record(
     location,
     title: "Model query API",
     version: "0.1.0",
+    format: "openapi 3.1",
     fingerprint,
     imported_at: "2026-09-12T10:00:00.000Z",
     ...overrides,

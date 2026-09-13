@@ -18,6 +18,8 @@ export interface ContractRecord {
   title: string;
   /** The version the contract declares, empty when it declares none. */
   version: string;
+  /** The format of the contract as the reader names it, with its version: `openapi 3.1`, `wsdl 1.1`. */
+  format: string;
   /** Hex SHA-256 of the contract bytes, the key of the contract cache. */
   fingerprint: string;
   /** ISO 8601 date of the import, from the injected clock. */

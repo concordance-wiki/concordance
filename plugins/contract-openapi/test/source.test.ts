@@ -19,6 +19,13 @@ describe("openApiReader", () => {
     expect(openApiReader.accepts('<?xml version="1.0"?>\n<definitions/>')).toBe(false);
     expect(openApiReader.accepts("<schema/>")).toBe(false);
   });
+
+  it("names the format after the specification version the document declares, without its patch level", () => {
+    const contract = { title: "", version: "", operations: [], schemas: [] };
+    expect(openApiReader.format({ ...contract, openapi: "3.1.0" })).toBe("openapi 3.1");
+    expect(openApiReader.format({ ...contract, openapi: "3.0.3" })).toBe("openapi 3.0");
+    expect(openApiReader.format({ ...contract, openapi: "3.2" })).toBe("openapi 3.2");
+  });
 });
 
 describe("loadContracts", () => {
@@ -342,6 +349,7 @@ describe("loadContracts", () => {
         location: "./payments.openapi.json",
         title: "Payments API",
         version: "2.0.0",
+        format: "openapi 3.1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
       },

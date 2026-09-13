@@ -81,6 +81,8 @@ export interface ContractReader<C extends ContractSummary> {
   accepts: (text: string) => boolean;
   /** The extracted contract, cached as-is by fingerprint, or an error naming the location and the reason. */
   read: (text: string, location: string) => C | ContractError;
+  /** The format of an extracted contract with its version, as the record names it: `openapi 3.1`, `wsdl 1.1`. */
+  format: (contract: C) => string;
   operations: (contract: C) => ContractOperation[];
   /** The schemas or types the operations reference, for the contract viewer; none when the format keeps no definition. */
   schemas?: (contract: C) => ContractSchema[];
@@ -335,6 +337,7 @@ async function loadOne<C extends ContractSummary>(
     location: declared.location,
     title: contract.title,
     version: contract.version,
+    format: reader.format(contract),
     fingerprint,
     imported_at: clock.now().toISOString(),
   });

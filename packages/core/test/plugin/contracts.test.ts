@@ -55,6 +55,7 @@ const linesReader: ContractReader<LinesContract> = {
           version: "1",
           lines: text.split("\n").filter((line) => line !== ""),
         },
+  format: (contract) => `lines ${contract.version}`,
   operations: (contract) => contract.lines.map(operationOf),
 };
 
@@ -637,7 +638,7 @@ describe("loadContracts", () => {
     expect(output.entities).toEqual([]);
   });
 
-  it("records the contract title and version read with its import date and fingerprint", async () => {
+  it("records the contract title, version and format read with its import date and fingerprint", async () => {
     const { input } = harness(localFile);
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.contracts).toEqual([
@@ -646,6 +647,7 @@ describe("loadContracts", () => {
         location: "./model-query.lines",
         title: "Lines",
         version: "1",
+        format: "lines 1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
       },

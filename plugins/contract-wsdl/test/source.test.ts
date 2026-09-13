@@ -23,6 +23,18 @@ describe("wsdlReader", () => {
     expect(wsdlReader.accepts('<?xml version="1.0"?><xs:schema xmlns:xs="x"/>')).toBe(false);
     expect(wsdlReader.accepts("")).toBe(false);
   });
+
+  it("names the format after the WSDL version of the document", () => {
+    const contract: WsdlContract = {
+      wsdl: "2.0",
+      title: "",
+      version: "",
+      operations: [],
+      types: [],
+    };
+    expect(wsdlReader.format(contract)).toBe("wsdl 2.0");
+    expect(wsdlReader.format({ ...contract, wsdl: "1.1" })).toBe("wsdl 1.1");
+  });
 });
 
 describe("loadContracts", () => {
@@ -236,6 +248,7 @@ describe("loadContracts", () => {
         location: "./orders.wsdl",
         title: "Orders API",
         version: "",
+        format: "wsdl 1.1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
       },

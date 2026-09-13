@@ -8,6 +8,7 @@ function record(api: string, location: string): ContractRecord {
     location,
     title: "T",
     version: "1",
+    format: "openapi 3.1",
     fingerprint: "f".repeat(64),
     imported_at: "2026-09-12T00:00:00.000Z",
   };
