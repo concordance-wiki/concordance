@@ -35,14 +35,14 @@ const headings: Readonly<Record<string, string>> = {
 
 // French application and domain identifiers, mapped to their English counterpart.
 const containers: Readonly<Record<string, string>> = {
-  "gestion-contrats": "policy-admin",
-  "portail-adherent": "member-portal",
-  adhesion: "membership",
-  versements: "payments",
-  plafonds: "caps",
-  "versements/plafonds": "payments/caps",
-  sinistres: "claims",
-  contrats: "contracts",
+  "concordance-cli": "concordance-cli",
+  "concordance-service": "concordance-service",
+  ingestion: "ingestion",
+  inference: "inference",
+  reconnaissance: "recognition",
+  "inference/reconnaissance": "inference/recognition",
+  publication: "publication",
+  qualite: "quality",
   unclassified: "unclassified",
 };
 
@@ -169,7 +169,7 @@ describe("the realistic corpus has the same structure in both languages", () => 
   it("has the same section headings once translated", () => {
     const translated = sectionHeadings(fr, (heading) => translate(headings, heading));
     expect(translated).toEqual(sectionHeadings(en, identity));
-    expect(translated).toHaveLength(70);
+    expect(translated).toHaveLength(68);
   });
 
   it("gives every note a title and a valid frontmatter", () => {

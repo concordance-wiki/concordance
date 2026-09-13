@@ -3,56 +3,92 @@ project:
   name: Realistic corpus
   locale: en
 applications:
-  - id: policy-admin
-    title: Policy administration
+  - id: concordance-cli
+    title: Concordance command line
     status: active
-  - id: member-portal
-    title: Member portal
+  - id: concordance-service
+    title: Concordance service
     status: target
 domains:
-  - id: membership
-    title: Membership
-    match: ["**/*member*", "**/*enrol*", "**/*household*"]
-  - id: payments
-    title: Payments
+  - id: ingestion
+    title: Ingestion
     match:
-      - "**/*payment*"
-      - "**/*premium*"
-      - "**/*refund*"
-      - "**/*direct-debit*"
-      - "**/*settlement*"
-      - "**/*value-date*"
-      - "**/*balance*"
-      - "**/statement*"
-      - "**/*interest-rate*"
-      - "**/*grace*"
-      - "**/*cap*"
-    subdomains:
-      - id: caps
-        title: Caps
-        match: ["**/*cap*"]
-  - id: claims
-    title: Claims
-    match: ["**/*claim*", "**/*indemnit*", "**/*deductible*", "**/*assessor*", "**/*reserve*"]
-  - id: contracts
-    title: Contracts
+      - "**/*source*"
+      - "**/*resource*"
+      - "**/*reader*"
+      - "**/*convert*"
+      - "**/*transcript*"
+      - "**/*twin*"
+      - "**/*repository*"
+      - "**/*identifier*"
+      - "**/*cache*"
+      - "**/*pseudonym*"
+      - "**/*personal-data*"
+      - "**/*privacy*"
+      - "**/*document*"
+      - "**/*representation*"
+      - "**/*clone*"
+  - id: inference
+    title: Inference
     match:
+      - "**/*link*"
+      - "**/*mention*"
+      - "**/*provenance*"
+      - "**/*confiden*"
+      - "**/*neighbour*"
+      - "**/*relation*"
+      - "**/*frontmatter*"
+      - "**/*co-occurrence*"
+      - "**/*lock*"
       - "**/*contract*"
-      - "**/*cover*"
-      - "**/*beneficiar*"
-      - "**/*quote*"
-      - "**/*rider*"
-      - "**/*subscription*"
-      - "**/*renewal*"
-      - "**/*termination*"
-      - "**/*cooling-off*"
-      - "**/*expiry*"
-      - "**/*suspension*"
-      - "**/*lapse*"
-      - "**/*exclusion*"
-      - "**/*effective-date*"
-      - "**/*policy*"
-      - "**/*general-conditions*"
+      - "**/*suggest*"
+      - "**/*section*"
+      - "**/*infer*"
+    subdomains:
+      - id: recognition
+        title: Recognition
+        match:
+          - "**/*keyword*"
+          - "**/occurrence*"
+          - "**/*diction*"
+          - "**/*alias*"
+          - "**/*homonym*"
+          - "**/*language-pack*"
+          - "**/*comparison*"
+          - "**/*threshold*"
+          - "**/*candidate*"
+          - "**/*rejected*"
+          - "**/*recogni*"
+  - id: publication
+    title: Publication
+    match:
+      - "**/*model*"
+      - "**/*site*"
+      - "**/*page*"
+      - "**/*theme*"
+      - "**/*search*"
+      - "**/*index*"
+      - "**/*entit*"
+      - "**/*profile*"
+      - "**/*island*"
+      - "**/*trail*"
+      - "**/*home*"
+      - "**/*locale*"
+      - "**/*render*"
+      - "**/*export*"
+  - id: quality
+    title: Quality
+    match:
+      - "**/*check*"
+      - "**/*finding*"
+      - "**/*lint*"
+      - "**/*build*"
+      - "**/*determinism*"
+      - "**/*fail-on*"
+      - "**/*forge*"
+      - "**/*stale*"
+      - "**/*to-do*"
+      - "**/*quality*"
 privacy:
   exclude: ["**/private/**"]
 sources:
@@ -60,10 +96,10 @@ sources:
     path: ./glossary
     type: term
     glossary: true
-    application: policy-admin
+    application: concordance-cli
   - name: specs
     path: ./specs
-    application: policy-admin
+    application: concordance-cli
     rules:
       - match: { path: "screens/**" }
         set: { type: screen }
@@ -83,16 +119,16 @@ sources:
         set: { type: rule }
       - match: { suffix: ".table.md" }
         set: { type: data_object }
-      - match: { path: "screens/portal/**" }
-        set: { type: screen, application: member-portal }
+      - match: { path: "screens/service/**" }
+        set: { type: screen, application: concordance-service }
   - name: decisions
     path: ./decisions
     type: decision
-    application: policy-admin
+    application: concordance-cli
   - name: meetings
     path: ./meetings
     default_type: meeting
-    application: policy-admin
+    application: concordance-cli
   - name: framing
     path: ./framing
     default_type: document

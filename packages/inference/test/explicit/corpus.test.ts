@@ -155,15 +155,15 @@ describe("the realistic corpus", () => {
     const { links } = await runCorpus("realistic/en");
     expect(
       links
-        .filter((link) => link.from === "meetings/2026-03-12-payments-workshop")
+        .filter((link) => link.from === "meetings/2026-03-12-keyword-page-threshold-review")
         .map((link) => [link.to, link.relation]),
     ).toEqual([
-      ["decisions/cap-checked-server-side", "documents"],
-      ["specs/batches/nightly-settlement", "documents"],
+      ["decisions/threshold-applied-in-model", "documents"],
+      ["specs/batches/nightly-build", "documents"],
     ]);
     expect(
       links.filter((link) => link.from.startsWith("specs/api/contracts/")).map((link) => link.to),
-    ).toEqual(["specs/api/claims", "specs/api/payments"]);
+    ).toEqual(["specs/api/forge-bridge", "specs/api/model-query"]);
   });
 });
 

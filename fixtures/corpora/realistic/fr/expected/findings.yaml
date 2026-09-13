@@ -1,18 +1,18 @@
 # Findings the engine must produce, sorted by check then path. A minimum, same cases as the English corpus:
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
-- { check: I-REL-AMBIGUOUS, path: specs/ecrans/saisie-versement-libre.md, note: "versement libre (term) mentioned in prose falls back to related" }
-- { check: W-API-CONSUMER-MISMATCH, path: specs/api/sinistres.md, note: "declares ecrans/instruction-sinistre as a consumer, which never cites it" }
-- { check: W-API-NOCONSUMER, path: specs/api/annuaire-adherents.md }
-- { check: W-APP-MISSING, source: cadrage, path: vision-portail.md }
-- { check: W-ATTRIBUTE-UNKNOWN, source: decisions, path: annuaire-adherents-expose.md, entity: decisions/annuaire-adherents-expose, note: "owner is not an attribute of decision" }
-- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: agence.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: marge-technique.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: remise-en-vigueur.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: subrogation.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/gestionnaire.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/responsable-d-agence.md }
-- { check: W-TERM-UNDEFINED, text: délai de carence, min_occurrences: 9, min_files: 4 }
-- { check: W-TERM-UNUSED, path: glossaire/marge-technique.md, note: "cited only under cadrage/prive/, which privacy.exclude removes before anything is read" }
-- { check: W-TERM-UNUSED, path: glossaire/remise-en-vigueur.md }
-- { check: W-TERM-UNUSED, path: glossaire/subrogation.md }
+- { check: I-REL-AMBIGUOUS, path: specs/ecrans/page-mot-cle.md, note: "page mot-clé (term) mentioned in prose falls back to related" }
+- { check: W-API-CONSUMER-MISMATCH, path: specs/api/requete-du-modele.md, note: "declares ecrans/service/revue-des-suggestions as a consumer, which never cites it" }
+- { check: W-API-NOCONSUMER, path: specs/api/pont-de-forge.md }
+- { check: W-APP-MISSING, source: cadrage, path: vision.md }
+- { check: W-ATTRIBUTE-UNKNOWN, source: decisions, path: pont-de-forge-expose.md, entity: decisions/pont-de-forge-expose, note: "owner is not an attribute of decision" }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: cue.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: marque-blanche.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: plugin.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: point-de-contribution.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/auteur.md }
+- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/mainteneur.md }
+- { check: W-TERM-UNDEFINED, text: résumé de build, min_occurrences: 7, min_files: 3 }
+- { check: W-TERM-UNUSED, path: glossaire/cue.md }
+- { check: W-TERM-UNUSED, path: glossaire/forme-de-comparaison.md }
+- { check: W-TERM-UNUSED, path: glossaire/marque-blanche.md, note: "cited only under cadrage/prive/, which privacy.exclude removes before anything is read" }
