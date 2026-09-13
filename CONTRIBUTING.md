@@ -26,7 +26,7 @@ pnpm check
 | `pnpm test` | every test with coverage; fails under 100% lines, branches, functions and statements |
 | `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation, distribution manifests |
 | `pnpm build:binary` | the standalone binary of the command line for the current platform, under `dist-bin/` (after `pnpm build`) |
-| `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85% |
+| `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85%; the pipeline runs it every night on the whole tree (`mutation` workflow) and, on a pull request, on the changed files only |
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
 | `pnpm licenses:update` | regenerate the [licence inventory](docs/licenses.md) from the installed dependencies; `pnpm licenses:check` verifies that it is current and that every licence is in the allow-list of `scripts/licenses.mjs` |
 | `pnpm reference:update` | regenerate the [reference pages](docs/reference/) from the JSON schemas of `packages/core/schemas`; `pnpm lint` fails when a committed page differs from its schema or when a property of those schemas has no `description`, so a schema change is a schema edit, a description, and this command |

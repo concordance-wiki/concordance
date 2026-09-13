@@ -1,0 +1,40 @@
+name: mutation
+
+# Mutates every source file of the core packages once a night: the whole run takes hours, which
+# no push should wait for. A run is never cancelled by the next one. The pull request pipeline
+# mutates only the files a change touches.
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation
+  cancel-in-progress: false
+
+jobs:
+  mutate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Mutation testing
+        # Fails under the 85% threshold of stryker.config.json.
+        run: pnpm mutation
+      - name: Publish mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation
+          path: reports/mutation
+          if-no-files-found: ignore
