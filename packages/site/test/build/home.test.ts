@@ -308,10 +308,10 @@ describe("homeOf", () => {
       question: "What are you looking for?",
       explanation:
         "Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.",
-      frequent: "Frequently consulted",
+      mostCited: "Most cited",
       spaces: "Spaces",
       spacesLead: "fed by your repositories",
-      moreSpaces: "0 more spaces, less consulted",
+      moreSpaces: "0 more spaces, less cited",
       datesNote: "The dates come from the history of the repositories, so they are always right.",
       recent: "Recently changed",
     });
@@ -331,14 +331,14 @@ describe("homeOf", () => {
       "s2",
     ]);
     expect(home.moreSpaces?.map((space) => space.name)).toEqual(["s3", "s4", "s5", "s6", "specs"]);
-    expect(home.labels?.moreSpaces).toBe("5 more spaces, less consulted");
+    expect(home.labels?.moreSpaces).toBe("5 more spaces, less cited");
     const fr = homeOf(
       context({ model: model({ entities: notes }), catalogue: loadCatalogue("fr") }),
     );
-    expect(fr.labels?.moreSpaces).toBe("5 espaces de plus, moins consultés");
+    expect(fr.labels?.moreSpaces).toBe("5 espaces de plus, moins cités");
     expect(homeLabels(context({ catalogue: loadCatalogue("fr") }), 1)).toMatchObject({
       question: "Que cherchez-vous ?",
-      moreSpaces: "1 espace de plus, moins consulté",
+      moreSpaces: "1 espace de plus, moins cité",
       recent: "Modifié récemment",
     });
   });

@@ -10,7 +10,7 @@ export function defaultHomeLabels(folded: number): HomeLabels {
   return {
     question: labels.homeQuestion,
     explanation: labels.homeExplanation,
-    frequent: labels.frequent,
+    mostCited: labels.mostCited,
     spaces: labels.spaces,
     spacesLead: labels.spacesLead,
     moreSpaces: `${String(folded)} ${labels.moreSpaces}`,
@@ -109,8 +109,8 @@ export function Home({
           />
         )}
         {shortcuts.length > 0 && (
-          <nav class="home-frequent" aria-label={text.frequent}>
-            <span class="home-frequent-lead">{text.frequent}</span>
+          <nav class="home-most-cited" aria-label={text.mostCited}>
+            <span class="home-most-cited-lead">{text.mostCited}</span>
             <ul class="home-shortcuts">
               {shortcuts.map((link) => (
                 <li key={link.href}>

@@ -1307,10 +1307,10 @@ export const corporateHome: SlotProps["Home"] = {
     question: "What are you looking for?",
     explanation:
       "Type a word of the business. If it is used anywhere in the documentation, it has a page \u2014 even if nobody has defined it yet.",
-    frequent: "Frequently consulted",
+    mostCited: "Most cited",
     spaces: "Spaces",
     spacesLead: "fed by your repositories",
-    moreSpaces: "2 more spaces, less consulted",
+    moreSpaces: "2 more spaces, less cited",
     datesNote: "The dates come from the history of the repositories, so they are always right.",
     recent: "Recently changed",
   },

@@ -244,7 +244,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
     expect(home).toContain('<div class="search-suggestions home-suggestions" hidden></div>');
     expect(home).toContain(
-      '<nav class="home-frequent" aria-label="Frequently consulted"><span class="home-frequent-lead">Frequently consulted</span><ul class="home-shortcuts"><li><a class="chip" href="keywords/build-summary/index.html">build summary</a></li>',
+      '<nav class="home-most-cited" aria-label="Most cited"><span class="home-most-cited-lead">Most cited</span><ul class="home-shortcuts"><li><a class="chip" href="keywords/build-summary/index.html">build summary</a></li>',
     );
   });
 
@@ -686,7 +686,7 @@ describe("The labels of the site come from the message catalogue of the project 
       '<h2 id="home-tree">Espaces <span class="home-lead">alimentés par vos dépôts</span></h2>',
     );
     expect(home).toContain('<span class="home-space-meta">2 pages</span>');
-    expect(home).toContain('aria-label="Fréquemment consulté"');
+    expect(home).toContain('aria-label="Les plus citées"');
     expect(home).toContain(">Modifié récemment</h2>");
     expect(home).toContain("&quot;enter&quot;:&quot;Entrée&quot;");
     expect(home).toContain('<html lang="fr"');

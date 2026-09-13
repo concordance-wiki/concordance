@@ -231,12 +231,12 @@ export interface HomeLabels {
   /** Under the question: that every word used anywhere has a page. */
   explanation: string;
   /** Lead of the shortcuts. */
-  frequent: string;
+  mostCited: string;
   /** Heading of the spaces. */
   spaces: string;
   /** After that heading: that the spaces come from the repositories. */
   spacesLead: string;
-  /** The line folding the spaces beyond the first ones, already counted: "3 more spaces, less consulted". */
+  /** The line folding the spaces beyond the first ones, already counted: "3 more spaces, less cited". */
   moreSpaces: string;
   /** Under the spaces: where their dates come from. */
   datesNote: string;

@@ -131,17 +131,17 @@
     "defaultMessage": "Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.",
     "description": "Explanation under the question that heads the home page, saying that every word used has a page."
   },
-  "home.frequent": {
-    "defaultMessage": "Frequently consulted",
-    "description": "Lead of the shortcuts of the home page, the most cited pages."
-  },
   "home.matches": {
     "defaultMessage": "{count, plural, one {# match} other {# matches}}",
     "description": "Number of pages a query matches, shown in the search field of the home page as the reader types."
   },
   "home.moreSpaces": {
-    "defaultMessage": "{count, plural, one {# more space, less consulted} other {# more spaces, less consulted}}",
+    "defaultMessage": "{count, plural, one {# more space, less cited} other {# more spaces, less cited}}",
     "description": "Line folding the spaces of the home page beyond the first five, the less cited ones."
+  },
+  "home.mostCited": {
+    "defaultMessage": "Most cited",
+    "description": "Lead of the shortcuts of the home page, the most cited pages."
   },
   "home.open": {
     "defaultMessage": "open",
