@@ -23,4 +23,6 @@ Horizontal lock-up: mark then word, with a gap equal to half the mark height. In
 
 The five-line variant clogs below 24 px: it is for large formats only.
 
+The accent of `theme.yaml` in light mode, `#B84820`, is one shade darker than the column of the mark, `#C24E24`: links are drawn in accent over the page background and must reach 4.5:1 there, which the mark's colour does not. The mark keeps its colour; a graphic is not text.
+
 Minimum mark size: 16 px. Clear space: a quarter of the height.

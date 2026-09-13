@@ -18,7 +18,13 @@ export function Header({
           {siteTitle}
         </a>
         {search && (
-          <form class="site-search" role="search" action={search.action} method="get">
+          <form
+            class="site-search"
+            role="search"
+            aria-label={labels.siteSearch}
+            action={search.action}
+            method="get"
+          >
             <label class="visually-hidden" for="site-search">
               {labels.search}
             </label>

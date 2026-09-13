@@ -68,7 +68,10 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(files.filter((file) => file.endsWith(".html"))).toHaveLength(pageCount);
     expect(files.some((file) => /^assets\/mentions-panel-[A-Z0-9]{8}\.js$/.test(file))).toBe(true);
     expect(io.stdout[0]).toBe(`gallery: ${String(pageCount)} pages written to /work/gallery`);
-    expect(io.stdout.at(-1)).toBe("accessibility: 0 findings");
+    expect(io.stdout.slice(-2)).toEqual([
+      "accessibility: 0 findings",
+      "contrast: 0 pairs below the minimum",
+    ]);
     expect(io.stderr).toEqual([]);
   });
 

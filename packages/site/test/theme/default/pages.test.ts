@@ -11,7 +11,7 @@ describe("Home", () => {
     expect(html).toContain("<h1>My wiki</h1>");
     expect(html).toContain("7 sources, 1894 files, built on <time");
     expect(html).toContain(
-      '<form class="home-search" role="search" action="search/" method="get">',
+      '<form class="home-search" role="search" aria-label="Search" action="search/" method="get">',
     );
     expect(html).toContain('<a class="chip" href="glossary/entity/">entity</a>');
     expect(html).toContain('<nav class="home-entries" aria-label="Entry points">');

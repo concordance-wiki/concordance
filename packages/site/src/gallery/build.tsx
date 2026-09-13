@@ -3,9 +3,11 @@ import { h, type JSX } from "preact";
 import type { FileSystem } from "@concordance-wiki/core";
 
 import { checkAccessibility, type A11yFinding } from "../a11y/check.js";
+import { checkContrast, type ContrastFinding } from "../a11y/contrast.js";
 import { measureBudget, type BudgetReport, type PageSize } from "../budget.js";
 import { siteStylesheet } from "../css/stylesheet.js";
-import { bundleIslands, defaultIslands } from "../islands/bundle.js";
+import type { ThemeConfig } from "../css/theme-config.js";
+import { bundleIslands, defaultIslands, type IslandBundle } from "../islands/bundle.js";
 import { byCodeUnit } from "../order.js";
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
@@ -19,8 +21,16 @@ export interface GalleryOptions {
   /** Folder receiving the pages, the stylesheet and the island bundles under `assets/`. */
   output: string;
   theme: ResolvedTheme;
+  /** The palette of the stylesheet, checked for contrast; the neutral gallery palette by default. */
+  tokens?: ThemeConfig;
   fileSystem: FileSystem;
   maxPageBytes?: number;
+}
+
+export interface GalleryDocument {
+  /** File name under the output folder. */
+  path: string;
+  html: string;
 }
 
 export interface GalleryPageReport {
@@ -35,6 +45,8 @@ export interface GalleryReport {
   pages: GalleryPageReport[];
   budget: BudgetReport;
   overrides: ThemeOverride[];
+  /** The pairs of the palette below their minimum ratio; reported in the summary, never a problem. */
+  contrast: ContrastFinding[];
   /** Lines describing what was written. */
   summary: string[];
   /** One line per page over budget or accessibility finding; empty when the gallery passes. */
@@ -77,15 +89,8 @@ function problemsOf(pages: GalleryPageReport[], budget: BudgetReport): string[] 
   ];
 }
 
-/** Writes every gallery page through the theme, measures them and checks their accessibility. */
-export async function buildGallery(options: GalleryOptions): Promise<GalleryReport> {
-  const { output, theme, fileSystem } = options;
-  const islands = await bundleIslands({
-    outDir: `${output}/assets`,
-    islands: defaultIslands(),
-    fileSystem,
-  });
-  fileSystem.writeText(`${output}/${STYLESHEET}`, siteStylesheet({ theme: galleryTheme }));
+/** Every page of the gallery and its index, rendered through the theme against the given bundles. */
+export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]): GalleryDocument[] {
   const render = (page: GalleryPage): RenderOptions => ({
     theme,
     locale: page.locale,
@@ -113,6 +118,20 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
       footer,
     }),
   });
+  return documents;
+}
+
+/** Writes every gallery page through the theme, measures them and checks their accessibility. */
+export async function buildGallery(options: GalleryOptions): Promise<GalleryReport> {
+  const { output, theme, fileSystem } = options;
+  const tokens = options.tokens ?? galleryTheme;
+  const islands = await bundleIslands({
+    outDir: `${output}/assets`,
+    islands: defaultIslands(),
+    fileSystem,
+  });
+  fileSystem.writeText(`${output}/${STYLESHEET}`, siteStylesheet({ theme: tokens }));
+  const documents = galleryDocuments(theme, islands);
   const pages: GalleryPageReport[] = [];
   for (const { path, html } of documents) {
     fileSystem.writeText(`${output}/${path}`, html);
@@ -124,10 +143,12 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
     maxPageBytes: options.maxPageBytes ?? GALLERY_PAGE_BUDGET,
   });
   const findings = pages.reduce((total, page) => total + page.findings.length, 0);
+  const contrast = checkContrast(tokens);
   return {
     pages,
     budget,
     overrides: theme.overrides,
+    contrast,
     summary: [
       `gallery: ${String(pages.length)} pages written to ${output}`,
       ...theme.overrides.map(
@@ -136,6 +157,8 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
       ),
       ...budget.summary,
       `accessibility: ${String(findings)} findings`,
+      `contrast: ${String(contrast.length)} pairs below the minimum`,
+      ...contrast.map((finding) => `warning: contrast: ${finding.message}`),
     ],
     problems: problemsOf(pages, budget),
   };
