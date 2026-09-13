@@ -56,14 +56,17 @@ export function describeSchemaError(error: ErrorObject, document: unknown): Conf
         received,
         expected: JSON.stringify((error.params as { allowedValue: unknown }).allowedValue),
       };
-    case "type":
+    case "type": {
+      // A union type in the schema reaches here as an array of type names.
+      const { type } = error.params as { type: string | string[] };
       return {
         severity: "error",
         path,
         message: "wrong type",
         received,
-        expected: (error.params as { type: string }).type,
+        expected: Array.isArray(type) ? type.join(" or ") : type,
       };
+    }
     case "pattern":
       return {
         severity: "error",

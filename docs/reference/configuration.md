@@ -15,7 +15,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | `profile` | string | — | — | Path of the project profile, relative to this configuration, merged key by key over the default profile. |
 | `plugins` | (string \| object)[] | — | each: non-empty | Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them. See [`plugins[]`](#plugins). |
 | `applications` | object[] | — | — | First-level containers every entity is resolved to, through its source, a typing rule or its frontmatter. An identifier not declared here yields W-APP-UNKNOWN; an entity without one yields W-APP-MISSING. See [`applications[]`](#applications). |
-| `domains` | object[] | — | — | Global business domains, orthogonal to the sources, resolved by globs on the path of every file relative to its source root. A frontmatter domain overrides the globs; a note no domain claims goes to unclassified. See [`domains[]`](#domains). |
+| `domains` | object[] | — | — | Global business domains, orthogonal to the sources, resolved by the folders and the globs on the path of every file relative to its source root. A frontmatter domain overrides them; a note no domain claims goes to unclassified. See [`domains[]`](#domains). |
 | `privacy` | object | — | — | What is never read, whether transcripts are pseudonymised and whether they are published. See [`privacy`](#privacy). |
 | `sources` (required) | object[] | — | at least 1 item | The repositories and local folders the wiki is built from, one entry each. Names are unique and prefix every identifier. See [`sources[]`](#sources). |
 | `staleness` | object | — | — | Days without a change after which a source or a note is flagged W-STALE and the home page marks the source dormant. See [`staleness`](#staleness). |
@@ -58,14 +58,15 @@ First-level containers every entity is resolved to, through its source, a typing
 
 ## `domains[]`
 
-Global business domains, orthogonal to the sources, resolved by globs on the path of every file relative to its source root. A frontmatter domain overrides the globs; a note no domain claims goes to unclassified.
+Global business domains, orthogonal to the sources, resolved by the folders and the globs on the path of every file relative to its source root. A frontmatter domain overrides them; a note no domain claims goes to unclassified.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `id` (required) | string | — | pattern `^[a-z][a-z0-9-]*$` | Identifier of the domain: lowercase letters, digits and hyphens. A subdomain is addressed by its identifier or by its identifier path (inference/recognition). |
 | `title` | string | — | — | Display title of the domain; the identifier when absent. |
 | `match` | string[] | — | each: non-empty | Globs evaluated on the path of every file relative to its source root, whatever the source. The deepest matching domain wins, then the last declared. |
-| `subdomains` | object[] | — | — | Domains nested under this one, with the same shape; their globs are evaluated after their parent's. Same shape as [`domains[]`](#domains). |
+| `folder` | boolean \| string | — | pattern `^[A-Za-z0-9._-]+$` | Claims every file with a folder of that name on its path, in any source: true for a folder named after the identifier, a string for another folder name (one path segment, no slash). A subdomain's folder must lie under its parent's. Combines with match. |
+| `subdomains` | object[] | — | — | Domains nested under this one, with the same shape; their globs are evaluated after their parent's, their folder is looked for under their parent's folder. Same shape as [`domains[]`](#domains). |
 
 ## `privacy`
 

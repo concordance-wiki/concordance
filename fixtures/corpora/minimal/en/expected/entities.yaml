@@ -13,6 +13,8 @@
 - { id: specs/objects/entity, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication }
 - { id: specs/objects/link, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
 - { id: specs/processes/confirm-a-link, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference }
+- { id: specs/quality/determinism/two-builds-compared, type: rule, type_origin: suffix, application: concordance-cli, domain: quality/determinism }
+- { id: specs/quality/fail-on-policy, type: rule, type_origin: suffix, application: concordance-cli, domain: quality }
 - { id: specs/roles/maintainer, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified }
 - { id: specs/rules/related-link-cap, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
 - { id: specs/screens/entity-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }

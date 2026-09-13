@@ -40,18 +40,31 @@ applications:
 
 ## `domains`
 
-Global business domains, orthogonal to sources. The globs of every domain are evaluated on the path of every file relative to its source root, whatever the source; a glob such as `**/*keyword*` therefore files `glossary/keyword-page.md` and `specs/screens/keyword-page.md` together. A subdomain's globs are evaluated on their own, after its parent's: the deepest matching domain wins, and between domains of the same depth the last declared. The entity records the full identifier path of its domain, `inference/recognition` below.
+Global business domains, orthogonal to sources. A domain claims files by the folders of the corpus, by globs, or both; a frontmatter `domain` overrides them. Whichever route claims a file, the entity records the full identifier path of its domain, `inference/recognition` below.
 
-A frontmatter `domain` overrides the globs; it names a domain by its identifier (`recognition`, the first declared with it) or by its identifier path (`inference/recognition`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
+`folder: true` claims every file that has a directory named after the identifier on its path, in any source: with `- id: ingestion` and `folder: true`, `specs/ingestion/clone.md` and `glossary/ingestion/twin-resources.md` are filed together, while `notes/ingestion.md` is not, the file name never counting as a folder. `folder: <name>` claims the files under a folder of another name, one path segment (`^[A-Za-z0-9._-]+$`; `validate-config` rejects a slash). A subdomain declared by folder claims only the files whose segment lies under its parent's: with `recognition` a folder subdomain of the folder domain `ingestion`, `ingestion/recognition/scan.md` is filed under `ingestion/recognition` and `recognition/scan.md` under nothing. When the parent is declared by globs rather than by folder, the subdomain's segment may sit anywhere on a path the parent's globs match; a parent declared by neither, a frontmatter-only domain, constrains nothing.
+
+`match` globs are evaluated on the path of every file relative to its source root, whatever the source; a glob such as `**/*keyword*` therefore files `glossary/keyword-page.md` and `specs/screens/keyword-page.md` together. A subdomain's globs are evaluated on their own, after its parent's.
+
+Folders and globs combine on the same domain, and the precedence between domains does not depend on the route: the deepest domain that claims the file wins, and between domains of the same depth the last declared. A domain with neither `folder` nor `match` claims no file and is only ever named in frontmatter.
+
+A frontmatter `domain` overrides folders and globs; it names a domain by its identifier (`recognition`, the first declared with it) or by its identifier path (`inference/recognition`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter, no folder and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
 
 ```yaml
 domains:
+  - id: ingestion
+    title: Ingestion
+    folder: true
+    subdomains:
+      - id: readers
+        folder: reader
   - id: inference
     title: Inference
     match: ["**/inference/**", "**/links/**"]
     subdomains:
       - id: recognition
-        match: ["**/recogni*/**", "**/dictionary/**"]
+        folder: true
+        match: ["**/dictionary/**"]
 ```
 
 ## `privacy`

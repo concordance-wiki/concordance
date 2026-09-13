@@ -10,6 +10,8 @@
 - { from: specs/rules/related-link-cap, to: specs/api/model-query, relation: constrains, method: section_mention, min_confidence: 0.7 }
 - { from: specs/tables/links, to: specs/objects/link, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
 - { from: specs/batches/nightly-build, to: specs/tables/links, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/quality/fail-on-policy, to: specs/objects/build, relation: constrains, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/quality/determinism/two-builds-compared, to: specs/screens/entity-page, relation: constrains, method: explicit_link, min_confidence: 1.0 }
 - { from: decisions/cap-checked-upstream, to: specs/api/model-query, relation: affects, method: section_mention, min_confidence: 0.7 }
 - { from: meetings/2026-03-12-links-workshop, to: decisions/cap-checked-upstream, relation: documents, method: explicit_link, min_confidence: 1.0 }
 - { from: glossary/explicit-link, to: glossary/link, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }

@@ -140,8 +140,8 @@ describe("the minimal corpus typed through the real file system", () => {
         "batch",
         "business_object",
         "process",
-        "role",
         "rule",
+        "role",
         "screen",
         "data_object",
       ]);

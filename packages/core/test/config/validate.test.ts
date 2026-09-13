@@ -235,6 +235,50 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
+  it("accepts a domain folder as true or as a single path segment, and rejects anything else", () => {
+    expect(
+      validateConfig({
+        ...minimal,
+        domains: [
+          { id: "ingestion", folder: true, subdomains: [{ id: "readers", folder: "reader" }] },
+          { id: "quality", folder: false, match: ["**/*check*"] },
+          { id: "publication", folder: "site_v2.pages" },
+        ],
+      }).ok,
+    ).toBe(true);
+    const result = validateConfig({
+      ...minimal,
+      domains: [
+        { id: "a", folder: "specs/ingestion", subdomains: [{ id: "b", folder: "" }] },
+        { id: "c", folder: 3 },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual([
+      {
+        severity: "error",
+        path: "domains[0].folder",
+        message: "value does not match the expected format",
+        received: "specs/ingestion",
+        expected: "a value matching ^[A-Za-z0-9._-]+$",
+      },
+      {
+        severity: "error",
+        path: "domains[0].subdomains[0].folder",
+        message: "value does not match the expected format",
+        received: "",
+        expected: "a value matching ^[A-Za-z0-9._-]+$",
+      },
+      {
+        severity: "error",
+        path: "domains[1].folder",
+        message: "wrong type",
+        received: 3,
+        expected: "boolean or string",
+      },
+    ]);
+  });
+
   it("accepts the lock key with a warning that it is ignored", () => {
     const result = validateConfig({ ...minimal, lock: "./concordance.lock.yaml" });
     expect(result.ok).toBe(true);

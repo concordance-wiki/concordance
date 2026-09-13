@@ -25,10 +25,11 @@ sources:
     #   - match: { suffix: ".rule.md" }
     #     set: { type: rule }
 
-# Global business domains, resolved by globs across every source.
+# Global business domains, resolved by a folder name or by globs across every source.
 # domains:
 #   - id: publication
-#     match: ["**/publication/**"]
+#     folder: true
+#     match: ["**/*page*"]
 
 build:
   output: ./dist

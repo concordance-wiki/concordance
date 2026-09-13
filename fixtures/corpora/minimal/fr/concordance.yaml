@@ -13,6 +13,15 @@ domains:
   - id: inference
     title: Inférence
     match: ["**/*lien*", "**/*mention*", "**/build-nocturne*", "**/requete-de-modele*", "**/carte-de-voisinage*"]
+  # Déclaré par dossier : chaque fichier dont le chemin comporte un répertoire `qualite`,
+  # quelle que soit la source, et un répertoire `determinisme` sous celui-ci pour le sous-domaine.
+  - id: qualite
+    title: Qualité
+    folder: true
+    subdomains:
+      - id: determinisme
+        title: Déterminisme
+        folder: true
 sources:
   - name: glossaire
     path: ./glossaire

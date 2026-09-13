@@ -34,7 +34,7 @@ describe("filingFindings", () => {
         entity: "specs/screens/keyword-page",
         message: "specs/screens/keyword-page matches no declared domain",
         remediation:
-          "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
+          "Add a folder or a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
       },
     ]);
     const declared = filing({

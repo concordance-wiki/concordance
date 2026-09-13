@@ -20,6 +20,8 @@ export interface DomainConfig {
   id: string;
   title?: string;
   match?: string[];
+  /** `true` claims the files under a folder named after the identifier, a string the files under that folder. */
+  folder?: boolean | string;
   subdomains?: DomainConfig[];
 }
 
