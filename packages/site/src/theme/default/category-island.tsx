@@ -1,4 +1,5 @@
 import { Component, type JSX } from "preact";
+import { useState } from "preact/hooks";
 
 import type {
   CategoryChoice,
@@ -100,7 +101,7 @@ function Choice({
 /**
  * A selector: a disclosure whose summary reads what is selected with a ▾ mark, the name of the
  * selector before it for assistive technology when the summary does not say it, and whose list
- * holds the choices.
+ * holds the choices. Once the island applies a choice in place, the disclosure closes on it.
  */
 function Selector({
   className,
@@ -115,8 +116,15 @@ function Selector({
   choices: CategoryChoice[];
   onChoose?: (choice: CategoryChoice) => void;
 }): JSX.Element {
+  const [open, setOpen] = useState(false);
   return (
-    <details class={`category-select ${className}`}>
+    <details
+      class={`category-select ${className}`}
+      open={open}
+      onToggle={(event) => {
+        setOpen(event.currentTarget.open);
+      }}
+    >
       <summary>
         {name !== undefined && <span class="visually-hidden">{name}: </span>}
         {label}
@@ -134,6 +142,7 @@ function Selector({
                 : {
                     onChoose: () => {
                       onChoose(choice);
+                      setOpen(false);
                     },
                   })}
             />

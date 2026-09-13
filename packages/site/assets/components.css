@@ -3924,13 +3924,14 @@ tbody .spaces-name {
 .category-main {
   display: grid;
   grid-area: main;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "crumbs crumbs"
-    "header toolbar"
-    "card card"
-    "foot foot"
-    "pages pages";
+    "crumbs"
+    "header"
+    "toolbar"
+    "card"
+    "foot"
+    "pages";
   align-items: end;
   column-gap: var(--space-3);
   inline-size: 100%;
@@ -3992,12 +3993,11 @@ tbody .spaces-name {
   color: var(--color-muted);
   font-size: 0.8125rem;
   font-weight: 500;
-  list-style: none;
-  cursor: pointer;
 }
 
-.category-select > summary::-webkit-details-marker {
-  display: none;
+/* The mark of the selector stays a ▾ whether it is open or not: the base marker gives way to it. */
+.category-select > summary::before {
+  content: none;
 }
 
 .category-select-mark {
@@ -4058,7 +4058,7 @@ tbody .spaces-name {
   margin-inline-start: auto;
 }
 
-/* The table in its card: uppercase mono-spaced labels on the soft surface, one row per page, its columns fixed. */
+/* The table in its card: uppercase labels on the soft surface, one row per page, its columns fixed; the links column is wider than the frame draws it so that its label fits at 13 px. */
 
 .category-card {
   grid-area: card;
@@ -4118,7 +4118,7 @@ tbody .spaces-name {
 }
 
 .category-table .category-links {
-  inline-size: 2.75rem;
+  inline-size: 3.5rem;
   text-align: end;
 }
 
@@ -4222,6 +4222,20 @@ tbody .spaces-name {
 .category-pages button:hover {
   color: var(--color-ink);
   text-decoration: underline;
+}
+
+/* The tablet: the selectors stand on the line of the lead, at its end. */
+
+@media (min-width: 48rem) {
+  .category-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "crumbs crumbs"
+      "header toolbar"
+      "card card"
+      "foot foot"
+      "pages pages";
+  }
 }
 
 /* The desktop: the tree returns to its column and the list reads in a measured column beside it. */
