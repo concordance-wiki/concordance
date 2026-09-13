@@ -21,6 +21,7 @@
     "reference:update": "node scripts/config-reference.mjs",
     "measure": "node scripts/measure.mjs",
     "walkthrough": "node scripts/walkthrough.mjs",
+    "parity": "node scripts/parity.mjs",
     "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/walkthrough.mjs && node scripts/hygiene.mjs && pnpm licenses:check"
   },
   "devDependencies": {
