@@ -249,21 +249,44 @@ describe("Six entries, then the button naming the other pages", () => {
     expect(host.querySelector(".mentions-more")).toBeNull();
   });
 
-  it("lists two entries on a phone, read from the stylesheet's own query when it mounts", async () => {
+  it("lists two entries on a phone, following the stylesheet's own query while it is mounted", async () => {
     expect(RELATED_PHONE).toBe(2);
     expect(PHONE_QUERY).toBe("(width < 48rem)");
+    const listeners = new Set<(event: MediaQueryListEvent) => void>();
+    const list = {
+      matches: true,
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.add(listener);
+      },
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.delete(listener);
+      },
+    };
+    // The test double answers the query of the island alone; its shape is what the island reads.
     const matchMedia = vi
       .spyOn(window, "matchMedia")
-      .mockImplementation(
-        (query: string) => ({ matches: query === PHONE_QUERY }) as MediaQueryList,
-      );
+      .mockImplementation((query: string) => (query === PHONE_QUERY ? list : {}) as MediaQueryList);
     const host = await mount(props(mentions(25)));
     expect(matchMedia).toHaveBeenCalledWith(PHONE_QUERY);
     expect(host.querySelectorAll(".related-page")).toHaveLength(2);
     expect(host.querySelector(".related-others")).toBeNull();
+    expect(button(host, "Show the 7 others")).toBeDefined();
+    // The screen turns: the island lists six again, then two.
+    for (const listener of listeners) listener({ matches: false } as MediaQueryListEvent);
+    await settle();
+    expect(host.querySelectorAll(".related-page")).toHaveLength(6);
+    for (const listener of listeners) listener({ matches: true } as MediaQueryListEvent);
+    await settle();
     button(host, "Show the 7 others").click();
     await settle();
     expect(host.querySelectorAll(".related-page")).toHaveLength(7);
+    expect(listeners.size).toBe(1);
+    render(h("div", {}), host);
+    expect(listeners.size).toBe(0);
+    // An island that never mounted follows no query and has nothing to leave.
+    expect(() => {
+      new MentionsIsland(props(mentions(25))).componentWillUnmount();
+    }).not.toThrow();
   });
 });
 
