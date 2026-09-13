@@ -1,7 +1,12 @@
 import { memoryFileSystem } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
-import { LintConfigError, parseLintConfig, readLintOverrides } from "../src/overrides.js";
+import {
+  LintConfigError,
+  parseLintConfig,
+  readLintConfig,
+  readLintOverrides,
+} from "../src/overrides.js";
 
 describe("parseLintConfig", () => {
   it("reads the checks block", () => {
@@ -42,6 +47,51 @@ describe("parseLintConfig", () => {
     });
   });
 
+  it("reads the global block next to the checks", () => {
+    expect(
+      parseLintConfig(
+        "global:\n  model: https://wiki.example/model.json\n  cache_dir: .cache/lint\n  max_age_hours: 6\n  profile: profile.yaml\n",
+      ),
+    ).toEqual({
+      ok: true,
+      checks: {},
+      global: {
+        model: "https://wiki.example/model.json",
+        cache_dir: ".cache/lint",
+        max_age_hours: 6,
+        profile: "profile.yaml",
+      },
+    });
+  });
+
+  it("rejects an unknown global key, an empty model and a negative validity", () => {
+    expect(
+      parseLintConfig("global:\n  model: ''\n  max_age_hours: -1\n  refresh: always\n"),
+    ).toEqual({
+      ok: false,
+      issues: [
+        {
+          severity: "error",
+          path: "global.refresh",
+          message: "unknown key",
+          expected: "one of the documented keys",
+        },
+        {
+          severity: "error",
+          path: "global.model",
+          message: "must NOT have fewer than 1 characters",
+          received: "",
+        },
+        {
+          severity: "error",
+          path: "global.max_age_hours",
+          message: "must be >= 0",
+          received: -1,
+        },
+      ],
+    });
+  });
+
   it("rejects an unknown top-level key and a wrong override value", () => {
     expect(parseLintConfig("profile: x\nchecks:\n  W-STALE: { enabled: no }\n")).toEqual({
       ok: false,
@@ -60,6 +110,25 @@ describe("parseLintConfig", () => {
           expected: "boolean",
         },
       ],
+    });
+  });
+});
+
+describe("readLintConfig", () => {
+  it("gives empty overrides and no global block when the repository has no concordance-lint.yaml", () => {
+    expect(readLintConfig(memoryFileSystem({ "/repo/note.md": "# Note\n" }), "/repo")).toEqual({
+      checks: {},
+    });
+  });
+
+  it("returns the checks and the global block of the file at the root", () => {
+    const fs = memoryFileSystem({
+      "/repo/concordance-lint.yaml":
+        "checks:\n  W-STALE: { severity: error }\nglobal:\n  model: ../wiki/dist/model.json\n",
+    });
+    expect(readLintConfig(fs, "/repo")).toEqual({
+      checks: { "W-STALE": { severity: "error" } },
+      global: { model: "../wiki/dist/model.json" },
     });
   });
 });

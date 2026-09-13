@@ -26,6 +26,8 @@ Or keep both titles and add to each note a `## Not to be confused with` section 
 
 ## How to fix
 
+`concordance lint --scope global` reports the same finding from one repository, for a local title or alias that an entity of another type carries in the published model, naming that entity.
+
 Give the entities distinct titles or aliases when they are different things. When the term and the object are the same concept seen from two sides, keep both and add a `## Not to be confused with` section, or link one to the other with `represents`.
 
 Severity can be overridden in `concordance.yaml` or in a repository's `concordance-lint.yaml` under `checks:`.

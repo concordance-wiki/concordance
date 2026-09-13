@@ -44,6 +44,16 @@ describe("The build block carries the tool version, the timestamp, the profile f
     });
   });
 
+  it("records cross_source_links when the build says how links were resolved, and leaves it out otherwise", () => {
+    expect(
+      assembleModel({ ...sampleInput(), crossSourceLinks: false }).build.cross_source_links,
+    ).toBe(false);
+    expect(
+      assembleModel({ ...sampleInput(), crossSourceLinks: true }).build.cross_source_links,
+    ).toBe(true);
+    expect("cross_source_links" in assembleModel(sampleInput()).build).toBe(false);
+  });
+
   it("sorts the sources by name, two sources of one name keeping their order", () => {
     const model = assembleModel({
       ...sampleInput(),

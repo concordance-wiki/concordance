@@ -190,6 +190,9 @@ importers:
       '@concordance-wiki/ingest':
         specifier: workspace:*
         version: link:../ingest
+      '@concordance-wiki/nlp':
+        specifier: workspace:*
+        version: link:../nlp
       '@concordance-wiki/profile':
         specifier: workspace:*
         version: link:../profile

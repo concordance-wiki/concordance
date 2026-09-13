@@ -56,6 +56,10 @@
         "counts": {
           "type": "object"
         },
+        "cross_source_links": {
+          "type": "boolean",
+          "description": "Whether the build resolved links across sources (inference.cross_source_links); the global lint reads it to tell a broken cross-source link from a disabled one"
+        },
         "contracts": {
           "type": "array",
           "description": "The contracts imported by the build, with the version each one declares and its import date",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { formatJson, type JsonReport } from "../../src/formats/json.js";
+import { checksOf, formatJson, type JsonReport } from "../../src/formats/json.js";
+import { GLOBAL_CHECKS } from "../../src/global/checks.js";
 import { LOCAL_CHECKS } from "../../src/local.js";
 import { broken, context, DOCUMENTATION, duplicate, findings, unreachable } from "./fixture.js";
 
@@ -101,5 +102,62 @@ describe("formatJson", () => {
     expect(parsed.scope).toBe("repo");
     expect(parsed.checks).toEqual(LOCAL_CHECKS);
     expect(parsed.checks).not.toContain("W-SOURCE-UNREACHABLE");
+    const explicit = JSON.parse(
+      formatJson([unreachable], { ...context, scope: { name: "repo" } }),
+    ) as JsonReport;
+    expect(explicit.checks).toEqual(LOCAL_CHECKS);
+  });
+
+  it("lists the local and the global checks once each, sorted, in the global scope", () => {
+    expect(checksOf({ name: "global" })).toEqual([
+      "E-ENCODING",
+      "E-FM-INVALID",
+      "E-ID-DUP",
+      "E-ID-INVALID",
+      "E-LINK-BROKEN",
+      "E-META-REL",
+      "I-TERM-HOMONYM",
+      "W-LINK-CROSS-SOURCE",
+    ]);
+    expect(checksOf({ name: "global" })).toEqual(
+      [...new Set([...LOCAL_CHECKS, ...GLOBAL_CHECKS])].sort(),
+    );
+    expect(checksOf(undefined)).toEqual(LOCAL_CHECKS);
+    expect(checksOf({ name: "global", degraded: "model x: HTTP 404" })).toEqual(LOCAL_CHECKS);
+  });
+
+  it("names the global scope, and says when it fell back to the local checks and why", () => {
+    const global = JSON.parse(
+      formatJson([], { ...context, scope: { name: "global" } }),
+    ) as JsonReport;
+    expect(Object.keys(global)).toEqual([
+      "version",
+      "tool",
+      "scope",
+      "checks",
+      "findings",
+      "summary",
+    ]);
+    expect(global.scope).toBe("global");
+    expect(global.checks).toEqual(checksOf({ name: "global" }));
+    const degraded = JSON.parse(
+      formatJson([], { ...context, scope: { name: "global", degraded: "model x: HTTP 404" } }),
+    ) as JsonReport;
+    expect(Object.keys(degraded)).toEqual([
+      "version",
+      "tool",
+      "scope",
+      "checks",
+      "degraded",
+      "reason",
+      "findings",
+      "summary",
+    ]);
+    expect(degraded).toMatchObject({
+      scope: "global",
+      checks: LOCAL_CHECKS,
+      degraded: true,
+      reason: "model x: HTTP 404",
+    });
   });
 });

@@ -21,6 +21,8 @@ export interface ModelBuild {
   profile_hash: string;
   sources: ModelSource[];
   counts?: Record<string, unknown>;
+  /** Whether links across sources were resolved (`inference.cross_source_links`); absent in older models. */
+  cross_source_links?: boolean;
 }
 
 export interface TermContext {

@@ -257,15 +257,28 @@ The same block, in a `concordance-lint.yaml` at the root of a knowledge reposito
 
 ## `concordance-lint.yaml`
 
-Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries the `checks` block alone, with the same shape and the same rules:
+Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries two blocks: `checks`, with the same shape and the same rules as above, and `global`, which says where the [global scope](getting-started.md#global-scope) finds the published model:
 
 ```yaml
 checks:
   E-LINK-BROKEN: { severity: warning }
   W-STALE: { enabled: false }
+global:
+  model: https://concordance-wiki.github.io/demo-wiki/model.json
+  cache_dir: .concordance-cache/lint
+  max_age_hours: 24
 ```
 
-An entry replaces the entry of the same check given under `checks` in the `concordance.yaml` passed with `--config`; the other entries of the configuration still apply. An empty file overrides nothing. Any other top-level key, a key that is not a check identifier, an unknown check or a value outside `severity` and `enabled` stops the linter with an execution error (exit code 2) naming the file and the key.
+A `checks` entry replaces the entry of the same check given under `checks` in the `concordance.yaml` passed with `--config`; the other entries of the configuration still apply. An empty file overrides nothing.
+
+| Key | Default | Effect |
+|---|---|---|
+| `global.model` | none | the published `model.json` of the wiki: a URL (`https://…/model.json`) fetched and cached, or a path relative to the repository (`../wiki/dist/model.json`) read as it is; without it `--scope global` degrades to the local checks |
+| `global.cache_dir` | `.concordance-cache/lint` | where the fetched model and its `model.meta.json` (fetch date, source URL, `ETag` and `Last-Modified` when the server gave them) live, relative to the repository |
+| `global.max_age_hours` | `24` | how long the cached model is reused without any request; `0` revalidates on every run, with the validators the server gave |
+| `global.profile` | none | a project profile, relative to the repository, merged over the default one for the relation matrix and the types of the global checks |
+
+Any other top-level key, a key that is not a check identifier, an unknown check, a value outside `severity` and `enabled`, an unknown `global` key, an empty `model` or a negative `max_age_hours` stops the linter with an execution error (exit code 2) naming the file and the key.
 
 ## `lock`
 

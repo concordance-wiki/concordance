@@ -136,7 +136,7 @@ Options:
 
 | Option | Default | Effect |
 |---|---|---|
-| `--scope repo` | `repo` | checks the current repository alone; `global` is not available in this version and is refused |
+| `--scope repo\|global` | `repo` | `repo` checks the current repository alone; `global` also checks it against the published model of the wiki; see [Global scope](#global-scope) |
 | `--source <name>` | none | names the source this repository is declared as, so that its rules apply: the type suffixes of its `rules` are stripped from identifiers; without `--config`, the name only prefixes the identifiers |
 | `--config <file>` | none | the `concordance.yaml` that declares the source; its `privacy.exclude` and `checks` blocks apply |
 | `--fail-on error\|warning\|info` | `error` | the severity from which a finding makes the command fail |
@@ -145,7 +145,7 @@ Options:
 | `--fix` | | applies the safe corrections before the check, after printing each of them; see [Safe fixes](#safe-fixes) |
 | `--dry-run` | | lists the corrections `--fix` would apply, prefixed with `would fix`, and writes nothing; implies `--fix` |
 
-What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package. Without `--source`, the repository is the source named `repo`: that name prefixes the identifiers and appears in the messages.
+What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is left to the [global scope](#global-scope). The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package. Without `--source`, the repository is the source named `repo`: that name prefixes the identifiers and appears in the messages.
 
 ### Parity with the build
 
@@ -155,7 +155,28 @@ The list of the local checks is exported as `LOCAL_CHECKS` by `@concordance-wiki
 
 In this mode the command never opens a network connection, and it writes nothing but the report named by `--output` and, under `--fix`, the corrected files. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
 
-Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option or format, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`, `--scope global`).
+Exit codes, whatever the format: 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run (unknown option, scope or format, missing or invalid configuration, unknown source, faulty `concordance-lint.yaml`).
+
+### Global scope
+
+A note that links to another repository, references an entity of it in its frontmatter, or reuses a title the glossary already carries, cannot be checked from where it is written. `--scope global` reads the last published `model.json` of the wiki and checks the local notes against its entities, without rebuilding anything:
+
+```bash
+npx concordance lint --scope global --source specs
+```
+
+The model comes from `global.model` in `concordance-lint.yaml`, a URL or a path (see the [configuration guide](configuration.md#concordance-lintyaml)); the local checks run as well, and the report holds both, deduplicated on check, file, line and entity. Three checks run over the local notes and the remote entities, each finding naming the remote entity and the build timestamp of the model it read:
+
+| Check | What is compared |
+|---|---|
+| `E-LINK-BROKEN` | a markdown link with a `<source>:` prefix, or a relative path that climbs above the repository into `../<source>/…`, must reach a note the model knows in that source; a target that is not a markdown file, an unknown prefix or a URL is left alone |
+| `W-LINK-CROSS-SOURCE` | such a link reaches a note, but the model was built with `inference.cross_source_links` off, so the build will not record it; the model says how it was built in its `build.cross_source_links` field, and a model without that field skips this check |
+| `E-META-REL` | every frontmatter key of the note's type that declares a relation (`reads`, `roles`, `applies_to`, `covers`…) is resolved against the remote entities, and the pair of types must be one the profile allows for that relation; `inverse` keys are read the other way round; the default profile applies unless `global.profile` names a project profile |
+| `I-TERM-HOMONYM` | the title or an alias of a local note, compared in the language of the source, is also the title or an alias of a remote entity of another type |
+
+The remote model is cached under `global.cache_dir` (`.concordance-cache/lint` by default) and reused without any request for `global.max_age_hours` (24 by default); past that, it is fetched again with the validators the server gave (`ETag`, `Last-Modified`), and a `304 Not Modified` renews the copy. The cache is the only thing this scope writes.
+
+When no model can be read (no `global.model`, no network, a non-2xx response, a file that is not a valid model, an unreadable project profile), the command prints one line on standard error, `global: <reason>; local checks only`, runs the local scope alone and exits according to the local findings; the JSON report then carries `scope: "global"`, `degraded: true` and the `reason`, with `checks` reduced to the local checks that ran, and the SARIF log the same three keys under the run's `properties`. A cache past its validity is still used when the refresh fails, and the line then says how old it is.
 
 ### Safe fixes
 
@@ -186,7 +207,7 @@ The linter uses the same checks as the build. See the [check pages](../checks/RE
 
 | Format | Content | Use it for |
 |---|---|---|
-| `json` | `{ version: 1, tool, scope, checks, findings, summary }`; `scope` is `repo` and `checks` lists the identifiers of the checks the run covers (the `LOCAL_CHECKS` of the [parity guarantee](#parity-with-the-build)), so that a report says what was checked; each finding carries its check, severity, source, path, line, entity, message, remediation and documentation URL; `summary` counts errors, warnings and info | scripts and dashboards |
+| `json` | `{ version: 1, tool, scope, checks, findings, summary }`; `scope` is `repo` or `global` and `checks` lists the identifiers of the checks the run covers, so that a report says what was checked: the `LOCAL_CHECKS` of the [parity guarantee](#parity-with-the-build) in the `repo` scope, those and the four checks of the [global scope](#global-scope), once each and sorted, in the `global` scope; a degraded global run adds `degraded: true` and the `reason` after `checks`, which then lists the local checks alone, since the global ones did not run; each finding carries its check, severity, source, path, line, entity, message, remediation and documentation URL; `summary` counts errors, warnings and info | scripts and dashboards |
 | `sarif` | a SARIF 2.1.0 log with one run: one rule per check met (description, documentation URL, default level) and one result per finding pointing at the file relative to the repository (`%SRCROOT%`) and the line; `info` findings are `note` results | the code-scanning upload of GitHub, the SARIF viewers of editors |
 | `junit` | one `concordance lint` test suite with one test case per finding, named `<check>` and `<path>:<line>`; errors and warnings fail their case, an info finding is only reported in its output; a clean repository gives one passing case named `no finding` | the test report of GitLab and of most pipeline runners |
 

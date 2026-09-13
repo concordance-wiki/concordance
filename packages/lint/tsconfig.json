@@ -22,6 +22,9 @@
     },
     {
       "path": "../ingest/tsconfig.build.json"
+    },
+    {
+      "path": "../nlp/tsconfig.build.json"
     }
   ]
 }

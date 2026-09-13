@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import type { Finding, Severity } from "@concordance-wiki/core";
 
 import { documentationOf } from "../report.js";
-import { REPOSITORY_URL, sortFindings, TOOL_NAME, type FormatContext } from "./context.js";
+import { REPOSITORY_URL, scopeOf, sortFindings, TOOL_NAME, type FormatContext } from "./context.js";
 
 export const SARIF_SCHEMA_URL = "https://json.schemastore.org/sarif-2.1.0.json";
 
@@ -47,6 +47,8 @@ export interface SarifLog {
       };
       originalUriBaseIds: Record<string, { uri: string }>;
       results: SarifResult[];
+      /** The scope of the run, and whether the global scope was degraded, as a SARIF property bag. */
+      properties: ReturnType<typeof scopeOf>;
     },
   ];
 }
@@ -119,6 +121,7 @@ export function formatSarif(findings: readonly Finding[], context: FormatContext
           [SOURCE_ROOT_ID]: { uri: pathToFileURL(join(context.root, sep)).href },
         },
         results,
+        properties: scopeOf(context),
       },
     ],
   };

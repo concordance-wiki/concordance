@@ -317,6 +317,15 @@ describe("concordance build", () => {
       expect(model.findings).toEqual(readLog(io).findings);
     });
 
+    it("records in the build block whether links across sources were resolved", async () => {
+      const off = linkedCorpus();
+      expect(await buildCommand([], off)).toBe(2);
+      expect(readModel(off).build.cross_source_links).toBe(false);
+      const on = linkedCorpus(`${validConfig}inference: { cross_source_links: true }\n`);
+      expect(await buildCommand([], on)).toBe(2);
+      expect(readModel(on).build.cross_source_links).toBe(true);
+    });
+
     it("embeds the same findings as the log, findings from typing and links included", async () => {
       const io = recordedIo({
         "/work/concordance.yaml": validConfig,
@@ -344,6 +353,7 @@ describe("concordance build", () => {
         at: "2026-09-12T12:00:00.000Z",
         profile_hash: fingerprintProfile(loadDefaultProfile()),
         sources: [{ name: "notes" }],
+        cross_source_links: false,
       });
     });
 

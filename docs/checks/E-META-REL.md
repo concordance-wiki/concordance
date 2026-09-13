@@ -6,6 +6,8 @@ A declared relation is not allowed between these two types by the profile.
 
 The profile lists, for each relation, the pairs of types it may join. A frontmatter reference or a mapped section that produces a relation outside that matrix, or a relation the profile does not declare, is dropped from the model by the relation typing step; the finding names the file, the line and the attribute the relation was declared in. A relation the type pair names on its own is never outside the matrix, and `related` is allowed between any two types.
 
+`concordance lint --scope global` reports it before the build: every frontmatter key of the note's type that declares a relation is resolved against the entities of the published model, and the finding names the remote entity and the build timestamp of the model it read.
+
 ## Before
 
 ```

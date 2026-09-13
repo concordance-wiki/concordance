@@ -216,6 +216,7 @@ export async function buildCommand(argv: string[], io: CommandIo): Promise<ExitC
     version: log.tool,
     timestamp: at,
     profileFingerprint: resolved.fingerprint,
+    crossSourceLinks: config.inference?.cross_source_links ?? false,
     sources: modelSources(config, ingested.sources),
     entities: typed.entities,
     links: linked.links,
