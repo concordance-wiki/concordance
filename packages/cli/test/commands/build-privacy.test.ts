@@ -63,6 +63,11 @@ function corpus(privacy: string, files: Record<string, string> = {}): RecordedIo
 }
 
 /** Every file the build wrote under the output, text decoded, by path. */
+/** The text of a page as a reader sees it: the marks of the text and their hidden explanations removed. */
+function visibleText(html: string): string {
+  return html.replace(/<span class="visually-hidden">[^<]*<\/span>/g, "").replace(/<[^>]+>/g, "");
+}
+
 function output(io: RecordedIo): Map<string, string> {
   const written = new Map<string, string>();
   for (const path of io.fs.listFiles("/work/dist")) {
@@ -107,7 +112,7 @@ describe("concordance build with pseudonymisation", () => {
     const model = parseModel(io.fs.readText("/work/dist/model.json"), "model.json");
     const meeting = model.entities.find((entity) => entity.id === page);
     expect(meeting?.attributes["participants"]).toEqual(["Participant-1", "Participant-2"]);
-    expect(io.fs.readText(`/work/dist/${page}/index.html`)).toContain(
+    expect(visibleText(io.fs.readText(`/work/dist/${page}/index.html`))).toContain(
       "Participant-1 opened the session; Participant-2 wrote the build summary.",
     );
     // The mention outside the dictionary is reported for review, the note titles are not.
@@ -140,7 +145,9 @@ describe("concordance build with pseudonymisation", () => {
     expect(keywords.map((entity) => entity.id)).not.toContain("keywords/second-person");
     expect(model.candidates.terms.map((term) => term.text)).not.toContain("Second Person");
     // A note outside the scope is published as written: the scope is the configuration's choice.
-    expect(io.fs.readText("/work/dist/notes/roadmap/index.html")).toContain("Second Person owns");
+    expect(visibleText(io.fs.readText("/work/dist/notes/roadmap/index.html"))).toContain(
+      "Second Person owns",
+    );
   });
 
   it("keeps the roles instead of the pseudonyms when keep_roles is set", async () => {
