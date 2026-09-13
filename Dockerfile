@@ -10,7 +10,7 @@
 ARG NODE_IMAGE=node:22-bookworm-slim
 
 FROM ${NODE_IMAGE} AS build
-RUN npm install --global pnpm@10.34.5
+RUN npm install --global --ignore-scripts pnpm@10.34.5
 WORKDIR /src
 COPY . .
 RUN pnpm install --frozen-lockfile
@@ -35,23 +35,22 @@ LABEL org.opencontainers.image.title="Concordance" \
 #   substitutes for the fonts office documents are usually set in (Arial, Times
 #   New Roman, Courier New, Calibri, Cambria), so that pagination is preserved.
 # fonts-dejavu: the fallback for every other face, and the default of LibreOffice.
+# The base image already owns uid 1000 as "node"; the image runs as that uid under
+# the tool's name so that a bind mount from a default Linux desktop user stays writable.
 RUN apt-get update \
   && apt-get install --yes --no-install-recommends \
     ca-certificates \
-    git \
-    libreoffice-core \
-    libreoffice-writer \
-    libreoffice-impress \
-    libreoffice-calc \
+    fonts-crosextra-caladea \
+    fonts-crosextra-carlito \
     fonts-dejavu \
     fonts-liberation \
-    fonts-crosextra-carlito \
-    fonts-crosextra-caladea \
-  && rm -rf /var/lib/apt/lists/*
-
-# The base image already owns uid 1000 as "node"; the image runs as that uid under
-# the tool's name so that a bind mount from a default Linux desktop user stays writable.
-RUN usermod --login concordance --home /home/concordance --move-home node \
+    git \
+    libreoffice-calc \
+    libreoffice-core \
+    libreoffice-impress \
+    libreoffice-writer \
+  && rm -rf /var/lib/apt/lists/* \
+  && usermod --login concordance --home /home/concordance --move-home node \
   && groupmod --new-name concordance node \
   && mkdir /wiki \
   && chown concordance:concordance /wiki
