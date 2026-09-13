@@ -15,7 +15,7 @@ The generated site is a set of named slots rendered at build by Preact component
 | `MentionsPanel` | two sections, written links and recognised mentions, grouped by file; the first `initial` inline, the rest from the fragment of the entity; sorting, filtering and a collapse-all once the island runs | — |
 | `Neighbourhood` | the map of the neighbourhood and its textual equivalent, the list of neighbours | — |
 | `SearchResults` | the summary, the facets, the ordered results | — |
-| `Index` | the letters, active or inactive, and the entries of one segment | — |
+| `Index` | the letters, active or inactive, and the entries of one segment: the whole index, anchored letter by letter, or one letter of a segmented index | — |
 | `Todo` | documents without markdown, words without a note | — |
 
 `renderPage(slot, props, options)` renders any slot but `Shell` as a complete page: the shell wraps the header, a `<main id="main">` holding the page, and the footer. `renderSlot(slot, props, theme)` renders one slot alone, for tests and galleries. A page component that needs a panel asks the theme for it with `useSlot("MentionsPanel")`, so that an override of the panel applies inside every page.
@@ -35,7 +35,7 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `MentionsPanel` | `mentions: { kind: "written" \| "recognised", file: { label, href }, context, line, href, surface? }[]` (written links first, then recognised mentions, each in corpus order; `surface` is the words of the context naming the entity), `initial` (20 by default, `build.mentions_inline`), `headings?: { written, recognised }` (from the catalogue, `mentions.explicit` and `mentions.inferred`), `fragmentHref?` (the JSON fragment holding every mention of the entity) |
 | `Neighbourhood` | `centre`, `neighbours: { id, label, href, typeLabel?, relation?, weight }[]` |
 | `SearchResults` | `query`, `total`, `results: { title, href, typeLabel?, snippet? }[]`, `facets: { name, label, values: { value, count, href }[] }[]` |
-| `Index` | `letters: { letter, href?, count }[]` (no `href`: the letter is inactive), `current?`, `entries: { label, href, glyph?, count }[]` (no `glyph`: a word without a note) |
+| `Index` | `letters: { letter, href?, count }[]` (no `href`: the letter is inactive), `current?` (the letter of a segment page), `entries: { label, href, glyph?, anchor?, count }[]` (no `glyph`: a word without a note; `anchor`, the `id` to give the first entry of a letter when the whole index is one page, which the letters link to) |
 | `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count }[]` (occurrences) |
 
 An `Attribute` is `{ name, label, values: { text, href? }[] }`. A `HomeTreeNode` is `{ label, href?, count?, children? }`: a source or a folder has `children` and a `count` of notes, a note has an `href`; the `tree` entry carries the nodes, the `index` entry one item per letter with entries, the `recent` entry the latest changes as items and every source under `sources`. The `builtAtLabel` and `dateLabel` strings are the instants spelled in the project locale; a component shows the ISO value when they are absent. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.

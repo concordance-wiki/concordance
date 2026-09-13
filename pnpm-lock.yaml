@@ -298,6 +298,9 @@ importers:
       '@concordance-wiki/fixture-plugin-theme-white-label':
         specifier: workspace:*
         version: link:../../fixtures/plugins/theme-white-label
+      '@concordance-wiki/nlp':
+        specifier: workspace:*
+        version: link:../nlp
       '@types/mdast':
         specifier: 4.0.4
         version: 4.0.4

@@ -10,6 +10,7 @@ import {
   type FileSystem,
   type PluginRegistry,
 } from "@concordance-wiki/core";
+import { languagePack } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
@@ -136,6 +137,7 @@ export async function renderSite(
       `warning: ${String(missing)} entities have no fragment under ${input.modelDirectory}; their pages carry no note text`,
     );
   }
+  const locale = config.project.locale ?? "en";
   const report = await buildSite({
     output: input.output,
     fileSystem: io.fs,
@@ -143,7 +145,8 @@ export async function renderSite(
     fragments,
     profile: input.profile,
     theme,
-    locale: config.project.locale ?? "en",
+    locale,
+    collate: languagePack(locale).compare,
     projectName: config.project.name,
     names: siteNames(config),
     sourceRefs: sourceRefs(config),

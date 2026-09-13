@@ -308,6 +308,8 @@ export interface IndexLetter {
 export interface IndexEntry extends Link {
   /** Glyph of the type; absent for a word without a note. */
   glyph?: string;
+  /** The `id` of the entry, on the first entry of every letter when the whole index is one page. */
+  anchor?: string;
   count: number;
 }
 

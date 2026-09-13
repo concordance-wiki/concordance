@@ -27,7 +27,7 @@ import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf } from "./entity-page.js";
 import type { EntityFragment } from "./fragments.js";
 import { homeOf } from "./home.js";
-import { indexOf } from "./index-page.js";
+import { letterHref, planIndex } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
 import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
 import {
@@ -63,6 +63,8 @@ export interface SiteInput {
   mentionsInline?: number;
   /** `staleness` of the configuration: the thresholds behind the dormant flag of the home page. */
   staleness?: StalenessConfig;
+  /** The collation of the project locale, `compare` of its language pack, which orders the alphabetical index. */
+  collate?: (a: string, b: string) => number;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -173,17 +175,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
     ...(input.editUrl === undefined ? {} : { editUrl: input.editUrl }),
     ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
     ...(input.staleness === undefined ? {} : { staleness: input.staleness }),
+    ...(input.collate === undefined ? {} : { collate: input.collate }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
-  const index = indexOf(context);
-  const letters = index.letters
-    .filter((letter) => letter.href !== undefined)
-    .map((letter) => ({
-      label: letter.letter,
-      href: relativeHref(HOME_PAGE, INDEX_PAGE),
-      count: letter.count,
-    }));
   const render = <S extends PageSlot>(
     page: string,
     slot: S,
@@ -232,6 +227,17 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
         ];
   };
   const siteTitle = themeChrome(input, "").siteTitle;
+  const indexTitle = message(context, "site.index");
+  const index = planIndex(context, (props) =>
+    Buffer.byteLength(render(INDEX_PAGE, "Index", props, indexTitle, input.locale).content),
+  );
+  const letters = index.counts
+    .filter(({ count }) => count > 0)
+    .map(({ letter, count }) => ({
+      label: letter,
+      href: letterHref(HOME_PAGE, letter, index.segmented),
+      count,
+    }));
   return [
     render(
       HOME_PAGE,
@@ -240,7 +246,15 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
       siteTitle,
       input.locale,
     ),
-    render(INDEX_PAGE, "Index", index, message(context, "site.index"), input.locale),
+    ...index.pages.map((page) =>
+      render(
+        page.path,
+        "Index",
+        page.props,
+        page.letter === undefined ? indexTitle : `${indexTitle} ${page.letter}`,
+        input.locale,
+      ),
+    ),
     render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
     ...input.model.entities.map(entityPage),
     { path: SEARCH_INDEX, content: searchIndexOf(input.model) },

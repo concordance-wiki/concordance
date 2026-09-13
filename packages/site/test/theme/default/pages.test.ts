@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { index, keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
+import { keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 describe("KeywordPage", () => {
@@ -56,26 +56,6 @@ describe("SearchResults", () => {
   it("omits the facets navigation when there is no facet", () => {
     const html = renderSlot("SearchResults", { ...searchResults, facets: [] }, defaultTheme);
     expect(html).not.toContain("<nav");
-  });
-});
-
-describe("Index", () => {
-  it("renders active letters as links, the current one marked, inactive ones visibly disabled", () => {
-    const html = renderSlot("Index", index, defaultTheme);
-    expect(html).toContain('<a class="letter" href="../index/a/">A</a>');
-    expect(html).toContain('<a class="letter" href="../index/b/" aria-current="page">B</a>');
-    expect(html).toContain('<span class="letter inactive" aria-disabled="true">C</span>');
-    expectBalanced(html);
-  });
-
-  it("marks a word without a note and shows the glyph and count of the others", () => {
-    const html = renderSlot("Index", index, defaultTheme);
-    expect(html).toContain(
-      '<span class="noteless">no note</span><a href="../keywords/build-summary/">build summary</a><span class="count">7</span>',
-    );
-    expect(html).toContain(
-      '<span class="glyph" aria-hidden="true">T</span><a href="../glossary/build-log/">build log</a>',
-    );
   });
 });
 

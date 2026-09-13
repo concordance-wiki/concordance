@@ -219,7 +219,7 @@ describe("The main content of every page is present in the served HTML, without 
     );
     expect(keyword).toContain("<q>the build summary is printed</q>");
     const index = withoutJavaScript(fileSystem.readText(`/dist/${INDEX_PAGE}`));
-    expect(count(index, '<li class="index-entry">')).toBe(7);
+    expect(count(index, '<li class="index-entry"')).toBe(7);
     const todo = withoutJavaScript(fileSystem.readText(`/dist/${TODO_PAGE}`));
     expect(todo).toContain(">build summary</a>");
   });
@@ -462,7 +462,7 @@ describe("siteDocuments", () => {
     ]);
   });
 
-  it("passes the mentions_inline, the edit link pattern, the names and the staleness thresholds of the configuration to the pages", () => {
+  it("passes the mentions_inline, the edit link pattern, the names, the staleness thresholds and the collation of the configuration to the pages", () => {
     const dated = {
       ...term,
       source: { ...term.source, last_modified: "2026-09-01T00:00:00.000Z" },
@@ -473,6 +473,7 @@ describe("siteDocuments", () => {
         editUrl: "https://forge.example/{source}/{path}",
         staleness: { warn_after_days: { default: 1 } },
         names: { domains: { publication: "Publication" } },
+        collate: (a, b) => b.localeCompare(a),
         model: model({
           entities: model().entities.map((entity) => (entity.id === term.id ? dated : entity)),
         }),
@@ -481,6 +482,10 @@ describe("siteDocuments", () => {
     );
     const home = documents.find((document) => document.path === HOME_PAGE);
     const entity = documents.find((document) => document.path === pagePath(term.id));
+    const index = documents.find((document) => document.path === INDEX_PAGE);
+    expect(index?.content.indexOf(">vision</a>")).toBeLessThan(
+      index?.content.indexOf(">#hash</a>") ?? -1,
+    );
     expect(entity?.content).toContain("<details");
     expect(count(entity?.content ?? "", '<li class="mention')).toBe(1);
     expect(entity?.content).toContain(

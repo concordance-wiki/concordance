@@ -18,6 +18,9 @@
       "path": "../i18n/tsconfig.build.json"
     },
     {
+      "path": "../nlp/tsconfig.build.json"
+    },
+    {
       "path": "../profile/tsconfig.build.json"
     }
   ]
