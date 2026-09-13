@@ -47,9 +47,9 @@ function readNote(path) {
     }
   }
   const body = match ? text.slice(match[0].length) : text;
-  const title = /^#\s+(.+)$/m.exec(body)?.[1]?.trim() ?? "";
+  const title = /^#[ \t]+(\S.*)$/m.exec(body)?.[1]?.trim() ?? "";
   const aliases = Array.isArray(frontmatter.aliases) ? frontmatter.aliases.map(String) : [];
-  const headings = [...body.matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim());
+  const headings = [...body.matchAll(/^##[ \t]+(\S.*)$/gm)].map((m) => m[1].trim());
   return { frontmatter, title, aliases, headings };
 }
 
@@ -122,7 +122,9 @@ const checks = readdirSync(checkDir)
   .filter((name) => name !== "README.md")
   .map((name) => {
     const id = name.replace(/\.md$/, "");
-    const family = /\*\*Family:\*\*\s*([^.]+)\./.exec(readFileSync(join(checkDir, name), "utf8"));
+    const family = /\*\*Family:\*\*\s*([^.\s][^.]*)\./.exec(
+      readFileSync(join(checkDir, name), "utf8"),
+    );
     return { id, family: family ? family[1].trim() : undefined };
   });
 const families = [...new Set(checks.flatMap((c) => (c.family ? [c.family] : [])))].sort(byCodeUnit);

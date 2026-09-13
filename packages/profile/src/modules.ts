@@ -74,6 +74,8 @@ export type TypeModuleReading =
   { ok: true; module: TypeModule; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };
 
 const SLUG_PATTERN = /^[a-z][a-z0-9_]*$/;
+// The run starts right after a non-separator: retrying inside it would make the runtime quadratic.
+const TRAILING_SEPARATORS = /(?<![\\/])[\\/]+$/;
 const MESSAGES_FILE_PATTERN = /^messages\/([a-z]{2,3})\.json$/;
 
 // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
@@ -90,7 +92,7 @@ function error(path: string, message: string, detail: Partial<ConfigIssue> = {})
 }
 
 function slugOf(directory: string): string {
-  const trimmed = directory.replace(/[\\/]+$/, "");
+  const trimmed = directory.replace(TRAILING_SEPARATORS, "");
   return trimmed.slice(Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\")) + 1);
 }
 
@@ -274,7 +276,7 @@ function componentsOf(files: readonly string[]): {
  * comes from; the slug is the folder name.
  */
 export function readTypeModule(fs: FileSystem, directory: string): TypeModuleReading {
-  const root = directory.replace(/[\\/]+$/, "");
+  const root = directory.replace(TRAILING_SEPARATORS, "");
   const slug = slugOf(root);
   const at = (file: string): string => `${root}/${file}`;
   if (!SLUG_PATTERN.test(slug)) {
@@ -372,7 +374,7 @@ export interface TypeModulesReading {
 
 /** Reads every module of a folder: each direct sub-folder holding a `type.yaml`, in slug order. */
 export function readTypeModules(fs: FileSystem, directory: string): TypeModulesReading {
-  const root = directory.replace(/[\\/]+$/, "");
+  const root = directory.replace(TRAILING_SEPARATORS, "");
   const slugs = new Set<string>();
   for (const file of fs.listFiles(root)) {
     const parts = file.split("/");

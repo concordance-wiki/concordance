@@ -32,7 +32,7 @@ export interface RenderOptions {
 const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
 
 export function directionOf(locale: string): TextDirection {
-  return RTL_LANGUAGES.has(locale.toLowerCase().replace(/-.*$/, "")) ? "rtl" : "ltr";
+  return RTL_LANGUAGES.has(locale.toLowerCase().replace(/-[^]*/, "")) ? "rtl" : "ltr";
 }
 
 /** A slot alone, inside the theme, for tests and galleries. */

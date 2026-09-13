@@ -33,7 +33,7 @@ function propertyLiteral(value: unknown): string | undefined {
 
 /** A property name that is not a plain identifier goes between backticks, a backtick doubled. */
 function propertyName(name: string): string {
-  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? name : `\`${name.replace(/`/g, "``")}\``;
+  return /^[A-Za-z_]\w*$/.test(name) ? name : `\`${name.replace(/`/g, "``")}\``;
 }
 
 function entityProperties(entity: Entity): string[] {

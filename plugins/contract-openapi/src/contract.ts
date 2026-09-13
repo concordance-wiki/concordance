@@ -65,7 +65,7 @@ function parseDocument(text: string, location: string): { document: unknown } | 
     return { document: text.trimStart().startsWith("{") ? JSON.parse(text) : parseYaml(text) };
   } catch (error) {
     // The first line of the parser's message; the YAML parser appends a snippet under it.
-    const reason = String(error).replace(/\n[\s\S]*$/, "");
+    const reason = String(error).replace(/\n[\s\S]*/, "");
     return { error: `${location} is neither valid JSON nor valid YAML: ${reason}` };
   }
 }

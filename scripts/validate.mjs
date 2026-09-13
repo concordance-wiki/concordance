@@ -213,7 +213,7 @@ for (const name of shipped) {
 //    one on purpose, and in the templates of the type modules, which link the
 //    other templates as copied side by side under templates/ (the core ones
 //    are checked in their docs/templates copy, identical by section 4).
-const linkPattern = /\[[^\]]*\]\(([^)\s]+)\)/g;
+const linkPattern = /\[[^[\]]*\]\(([^)\s]+)\)/g;
 for (const path of walk(
   root,
   (p) =>
@@ -299,7 +299,10 @@ const voidTags = new Set([
   "line",
 ]);
 const opened = new Map();
-for (const match of page.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)[^>]*?(\/?)>/g)) {
+// The attributes, when present, open with a character the name cannot hold: the engine never shifts name characters into them.
+for (const match of page.matchAll(
+  /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)(?:[^>a-zA-Z0-9-][^>]*?)??(\/?)>/g,
+)) {
   const [, closing, name, selfClosing] = match;
   const tag = name.toLowerCase();
   if (voidTags.has(tag) || selfClosing) continue;
@@ -349,7 +352,8 @@ const slugify = (segment) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    // The collapse above leaves no two dashes together, so a dash at either end stands alone.
+    .replace(/^-|-$/g, "");
 function corpusIdentifiers(configPath, config) {
   const ids = new Map();
   for (const source of config.sources) {

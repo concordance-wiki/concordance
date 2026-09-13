@@ -19,7 +19,8 @@ const VOID_ELEMENTS = new Set([
 /** Fails when a tag is closed out of order or left open; enough to catch a broken template. */
 export function expectBalanced(html: string): void {
   const stack: string[] = [];
-  for (const match of html.matchAll(/<(\/?)([a-zA-Z][\w-]*)[^>]*?(\/?)>/g)) {
+  // The attributes, when present, open with a character the name cannot hold: the engine never shifts name characters into them.
+  for (const match of html.matchAll(/<(\/?)([a-zA-Z][\w-]*)(?:[^>\w-][^>]*?)??(\/?)>/g)) {
     const [, closing, tag, selfClosing] = match;
     const name = (tag ?? "").toLowerCase();
     if (closing === "/") {

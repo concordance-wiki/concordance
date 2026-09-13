@@ -8,16 +8,25 @@ import { compact, nonBlank, splitKeywords, type OfficeMetadata } from "./metadat
 
 const pageObject = /\/Type\s*\/Page\b/g;
 const infoReference = /\/Info\s+(\d+)\s+(\d+)\s+R\b/g;
-const pdfDate =
-  /^(?:D:)?(\d{4})(\d{2})?(\d{2})?(\d{2})?(\d{2})?(\d{2})?(Z|[+-]\d{2}(?:'\d{2})?)?'?$/;
-const dateDefaults = ["0000", "01", "01", "00", "00", "00"];
+const pdfDate = /^(?:D:)?(\d{4}(?:\d{2}){0,5})(Z|[+-]\d\d(?:'\d\d)?)?'?$/;
+// Where each field sits in the digits, with the default the specification gives a missing one.
+const dateFields: readonly [number, number, string][] = [
+  [0, 4, "0000"],
+  [4, 6, "01"],
+  [6, 8, "01"],
+  [8, 10, "00"],
+  [10, 12, "00"],
+  [12, 14, "00"],
+];
 type Property = "Title" | "Author" | "Subject" | "Keywords" | "CreationDate" | "ModDate";
 
 const utf16 = new TextDecoder("utf-16be");
 const escapes: Record<string, number> = { n: 10, r: 13, t: 9, b: 8, f: 12 };
 
-function group(match: RegExpExecArray, index: number, fallback: string): string {
-  return match[index] ?? fallback;
+/** A group the pattern makes unconditional: every match carries it. */
+function group(match: RegExpExecArray, index: number): string {
+  // The callers only name groups that take part in every match of their pattern.
+  return match[index] as string;
 }
 
 /** Latin-1 keeps one character per byte, so that positions in the text are positions in the file. */
@@ -67,7 +76,7 @@ function literalString(text: string, start: number): string {
 function hexString(text: string, start: number): string {
   const digits = text
     .slice(start + 1)
-    .replace(/[^0-9A-Fa-f\s][\s\S]*$/, "")
+    .replace(/[^0-9A-Fa-f\s][\s\S]*/, "")
     .replace(/\s+/g, "");
   const bytes: number[] = [];
   for (let i = 0; i < digits.length; i += 2) {
@@ -94,9 +103,9 @@ function offset(zone: string | undefined): string {
 export function isoDate(value: string): string {
   const match = pdfDate.exec(value.trim());
   if (match === null) return value.trim();
-  // Every field after the year is optional; the specification defaults them as listed.
-  const fields = dateDefaults.map((fallback, index) => group(match, index + 1, fallback));
-  return `${fields.slice(0, 3).join("-")}T${fields.slice(3).join(":")}${offset(match[7])}`;
+  const digits = group(match, 1);
+  const fields = dateFields.map(([start, end, fallback]) => digits.slice(start, end) || fallback);
+  return `${fields.slice(0, 3).join("-")}T${fields.slice(3).join(":")}${offset(match[2])}`;
 }
 
 /** The body of the last Info object the file references: an update appends a new trailer at the end. */
@@ -104,13 +113,13 @@ function infoDictionary(text: string): string {
   const references = [...text.matchAll(infoReference)];
   const last = references[references.length - 1];
   if (last === undefined) return "";
-  const number = group(last, 1, "");
-  const generation = group(last, 2, "");
+  const number = group(last, 1);
+  const generation = group(last, 2);
   const object = new RegExp(
     `(?:^|\\s)${number}\\s+${generation}\\s+obj\\b([\\s\\S]*?)(?:endobj|$)`,
   );
   const match = object.exec(text);
-  return match === null ? "" : group(match, 1, "");
+  return match === null ? "" : group(match, 1);
 }
 
 /** Reads the native metadata of a PDF: the Info dictionary and the number of page objects. */

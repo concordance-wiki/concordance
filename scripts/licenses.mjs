@@ -59,7 +59,8 @@ function isAllowed(name, license) {
   if (exceptions.has(name)) return true;
   const alternatives = license
     .replace(/^\(|\)$/g, "")
-    .split(/\s+OR\s+/)
+    // The separator is taken from its first blank: retrying inside the run would make the runtime quadratic.
+    .split(/(?<!\s)\s+OR\s+/)
     .map((s) => s.trim());
   return alternatives.every((alternative) => allowed.has(alternative));
 }

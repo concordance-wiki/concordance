@@ -153,6 +153,22 @@ describe("parseTranscript", () => {
     expect("language" in transcript).toBe(false);
   });
 
+  it("leaves the language undefined when the header declares a blank one", () => {
+    const transcript = parseTranscript(
+      "WEBVTT\nLanguage:   \n\n00:00.000 --> 00:01.000\nHi",
+      "vtt",
+    );
+    expect("language" in transcript).toBe(false);
+  });
+
+  it("keeps an angle bracket that opens no tag", () => {
+    const transcript = parseTranscript(
+      "WEBVTT\n\n00:00.000 --> 00:01.000\n<b>a <b and <i>c</i>",
+      "vtt",
+    );
+    expect(transcript.cues[0]?.text).toBe("a <b and c");
+  });
+
   it("gives an empty transcript with a zero duration for a header alone", () => {
     expect(parseTranscript("WEBVTT - with a title\n", "vtt")).toEqual({
       format: "vtt",

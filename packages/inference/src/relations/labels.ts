@@ -10,7 +10,7 @@ export interface RelationLabelOptions {
 function localised(label: Label, locale: Locale): string {
   // The spread gives the label an anonymous type that a locale string can index.
   const byLocale: Partial<Record<string, string>> = { ...label };
-  return byLocale[locale] ?? byLocale[locale.replace(/-.*$/, "")] ?? label.en;
+  return byLocale[locale] ?? byLocale[locale.replace(/-[^]*/, "")] ?? label.en;
 }
 
 /**
