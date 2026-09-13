@@ -8,6 +8,7 @@ process.exitCode = await main(process.argv.slice(2), {
   fs: nodeFileSystem,
   git: nodeGit,
   clock: clockFromEnvironment(process.env),
+  fetch: (input, init) => fetch(input, init),
   cwd: process.cwd(),
   out: (line) => process.stdout.write(`${line}\n`),
   err: (line) => process.stderr.write(`${line}\n`),

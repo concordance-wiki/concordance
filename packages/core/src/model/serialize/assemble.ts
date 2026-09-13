@@ -19,6 +19,8 @@ export interface AssembleModelInput {
   /** ISO 8601 date from the injected clock, recorded as `build.at`. */
   timestamp: string;
   profileFingerprint: string;
+  /** Recorded as `build.cross_source_links` when given, so that a linter reading the model knows how links were resolved. */
+  crossSourceLinks?: boolean;
   sources: readonly ModelSource[];
   entities: readonly Entity[];
   links: readonly Link[];
@@ -105,6 +107,9 @@ export function assembleModel(input: AssembleModelInput): CanonicalModel {
       at: input.timestamp,
       profile_hash: input.profileFingerprint,
       sources: sortCanonically(input.sources, compareSources),
+      ...(input.crossSourceLinks === undefined
+        ? {}
+        : { cross_source_links: input.crossSourceLinks }),
     },
     entities: sortCanonically(input.entities, compareEntities),
     links: sortCanonically(input.links, compareLinks).map(sortLink),

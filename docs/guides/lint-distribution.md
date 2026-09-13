@@ -11,7 +11,7 @@
 | [Container image](#container-image) | any runner with a container engine | Docker or Podman |
 | [pre-commit hook](#pre-commit-hook) | every commit, on the author's machine | Python and pre-commit |
 
-Every form takes the options of [`concordance lint`](getting-started.md#lint-a-knowledge-repository): `--source`, `--config`, `--fail-on`, `--format`, `--output`. Every form honours a [`concordance-lint.yaml`](configuration.md#concordance-lintyaml) at the root of the repository, which overrides severities locally, and exits with 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run.
+Every form takes the options of [`concordance lint`](getting-started.md#lint-a-knowledge-repository): `--scope`, `--source`, `--config`, `--fail-on`, `--format`, `--output`. Every form honours a [`concordance-lint.yaml`](configuration.md#concordance-lintyaml) at the root of the repository, which overrides severities locally and names the published model for `--scope global`, and exits with 0 when no finding reaches the `--fail-on` severity, 1 when one does, 2 when the lint could not run. The examples below use `--scope repo`, which needs no network; `--scope global` works the same way in every form once the pipeline can reach the model, and falls back to the local checks when it cannot.
 
 Pin one version and use it in every form: the version of `@concordance-wiki/cli` is the version of the registry of checks. The action, the component and the hook default to the version they were released with.
 

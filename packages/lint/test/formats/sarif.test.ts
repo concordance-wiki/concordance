@@ -138,4 +138,16 @@ describe("formatSarif", () => {
     expect(run.tool.driver.rules).toEqual([]);
     expect(run.results).toEqual([]);
   });
+
+  it("carries the scope in the run properties, with the reason when the global scope was degraded", () => {
+    expect(parse(formatSarif([], context)).runs[0].properties).toEqual({ scope: "repo" });
+    expect(
+      parse(formatSarif([], { ...context, scope: { name: "global" } })).runs[0].properties,
+    ).toEqual({ scope: "global" });
+    expect(
+      parse(
+        formatSarif([], { ...context, scope: { name: "global", degraded: "model x: HTTP 404" } }),
+      ).runs[0].properties,
+    ).toEqual({ scope: "global", degraded: true, reason: "model x: HTTP 404" });
+  });
 });

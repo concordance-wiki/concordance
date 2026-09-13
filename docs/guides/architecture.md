@@ -64,7 +64,7 @@ The graph is built in memory and serialised to `model.json`, canonically sorted 
 
 | Block | Content |
 |---|---|
-| `build` | the only dated block: `tool` (version of the command line), `at` (timestamp from the injected clock), `profile_hash` (fingerprint of the merged profile) and `sources`, one entry per source with its `name` and, for a git repository, its `commit` and `url` |
+| `build` | the only dated block: `tool` (version of the command line), `at` (timestamp from the injected clock), `profile_hash` (fingerprint of the merged profile), `sources`, one entry per source with its `name` and, for a git repository, its `commit` and `url`, and `cross_source_links`, whether links across sources were resolved, which the global lint reads |
 | `entities` | one object per note: `id`, `type`, `title`, `locale`, `application` and `domain` when known, `type_origin`, `attributes` (the frontmatter keys that are not common attributes) and `source` with the `name`, `path` and `line` of the note, plus `aliases`, `status`, `summary` and `graph` |
 | `links` | one object per source-target-relation triple: `from`, `to`, `relation`, `attributes`, the combined `confidence` and `provenance`, the complete list of what every method recorded |
 | `findings` | the same array as `build.log.json` |

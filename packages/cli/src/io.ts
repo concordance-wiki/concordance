@@ -5,6 +5,8 @@ export interface CommandIo {
   fs: FileSystem;
   git: GitClient;
   clock: Clock;
+  /** Absent when the command must not open a network connection; `lint --scope global` then degrades. */
+  fetch?: typeof fetch;
   cwd: string;
   out: (line: string) => void;
   err: (line: string) => void;

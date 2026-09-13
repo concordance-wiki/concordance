@@ -14,15 +14,26 @@ import {
   formatFindingsAs,
   hasFindingAtOrAbove,
   isOutputFormat,
+  lintGlobal,
   lintRepository,
+  mergeFindings,
   OUTPUT_FORMATS,
+  readLintConfig,
   type FixRefusal,
+  type ReportScope,
 } from "@concordance-wiki/lint";
+import { loadDefaultProfile } from "@concordance-wiki/profile";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { toolVersion } from "../version.js";
 
 const severities: readonly Severity[] = ["error", "warning", "info"];
+
+const scopes: readonly ReportScope["name"][] = ["repo", "global"];
+
+function isScope(value: string): value is ReportScope["name"] {
+  return scopes.some((scope) => scope === value);
+}
 
 function isSeverity(value: string): value is Severity {
   return severities.some((severity) => severity === value);
@@ -54,8 +65,12 @@ function where(change: FixRefusal): string {
     .join(":");
 }
 
-/** Only the local scope exists yet: nothing is fetched; `--fix` writes after announcing every change, and `--output` writes the report. */
-export function lintCommand(argv: string[], io: CommandIo): ExitCode {
+/**
+ * The local scope fetches nothing; the global scope only reads the published model, from its cache
+ * when it is fresh, and falls back to the local checks when it cannot. `--fix` writes after
+ * announcing every change, and `--output` writes the report.
+ */
+export async function lintCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
   const { values } = parseArgs({
     args: argv,
     options: {
@@ -69,8 +84,8 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
       "dry-run": { type: "boolean", default: false },
     },
   });
-  if (values.scope !== "repo") {
-    io.err(`--scope ${values.scope} is not available in this version; only --scope repo is`);
+  if (!isScope(values.scope)) {
+    io.err(`--scope ${values.scope} is not a scope; expected ${listed(scopes)}`);
     return exitCodes.failure;
   }
   const failOn = values["fail-on"];
@@ -119,11 +134,32 @@ export function lintCommand(argv: string[], io: CommandIo): ExitCode {
       io.out(`refused: ${where(refusal)}: ${refusal.description}`);
     }
   }
-  const findings = lintRepository(repository);
+  let findings = lintRepository(repository);
+  let scope: ReportScope = { name: values.scope };
+  if (values.scope === "global") {
+    const global = await lintGlobal({
+      ...repository,
+      overrides: readLintConfig(io.fs, io.cwd),
+      clock: io.clock,
+      ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
+      profile: loadDefaultProfile(),
+    });
+    if (global.degraded !== undefined) {
+      io.err(`global: ${global.degraded.reason}; local checks only`);
+      scope = { name: "global", degraded: global.degraded.reason };
+    } else if (global.model?.stale !== undefined) {
+      const { stale } = global.model;
+      io.err(
+        `global: ${stale.reason}; using the copy of ${global.model.source} fetched ${global.model.fetchedAt}, ${String(stale.ageHours)} hours old`,
+      );
+    }
+    findings = mergeFindings(findings, global.findings);
+  }
   const document = formatFindingsAs(format, findings, {
     root: io.cwd,
     version: toolVersion(),
     registry: createRegistry(),
+    scope,
   });
   if (values.output === undefined) {
     for (const line of document.replace(/\n$/u, "").split("\n")) io.out(line);
