@@ -125,6 +125,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       url: "keywords/build-summary/index.html",
       status: "valid",
       source: "specs",
+      keyword: true,
+      occurrences: 5,
+      documents: 2,
     });
     expect(meta.entities.find((entry) => entry.id === "glossary/keyword-page")).toEqual({
       id: "glossary/keyword-page",

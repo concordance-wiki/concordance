@@ -8,7 +8,7 @@ import { expectBalanced } from "../../helpers/html.js";
 describe("SearchResults", () => {
   it("renders the summary, the facets with counts and the ordered results", () => {
     const html = renderSlot("SearchResults", searchResults, defaultTheme);
-    expect(html).toContain('<p class="search-summary">2 results</p>');
+    expect(html).toContain('<p class="search-summary">3 results</p>');
     expect(
       renderSlot(
         "SearchResults",
@@ -30,6 +30,9 @@ describe("SearchResults", () => {
     );
     expect(html).toContain(
       '<a href="../meetings/threshold-review/">Keyword page threshold review</a></li>',
+    );
+    expect(html).toContain(
+      '<li class="result result-keyword"><a href="../keywords/threshold-review/">threshold review</a>',
     );
     expectBalanced(html);
   });

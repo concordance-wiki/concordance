@@ -175,6 +175,10 @@
     "defaultMessage": "Domain",
     "description": "Facet that filters search results by domain."
   },
+  "search.facet.noNote": {
+    "defaultMessage": "Without a note",
+    "description": "Facet that keeps, isolates or excludes the recurring expressions nobody defined."
+  },
   "search.facet.source": {
     "defaultMessage": "Source",
     "description": "Facet that filters search results by the source repository of the note."
@@ -186,6 +190,18 @@
   "search.facets": {
     "defaultMessage": "Filters",
     "description": "Heading of the facet filters of the search page."
+  },
+  "search.noNote.any": {
+    "defaultMessage": "Included",
+    "description": "Value of the no-note facet that keeps the noteless words among the results."
+  },
+  "search.noNote.exclude": {
+    "defaultMessage": "Excluded",
+    "description": "Value of the no-note facet that leaves the noteless words out."
+  },
+  "search.noNote.only": {
+    "defaultMessage": "Only",
+    "description": "Value of the no-note facet that keeps the noteless words alone."
   },
   "search.noResult": {
     "defaultMessage": "No result",

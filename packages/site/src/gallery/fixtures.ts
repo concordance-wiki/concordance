@@ -327,8 +327,8 @@ export const home: SlotProps["Home"] = {
 
 export const searchResults: SlotProps["SearchResults"] = {
   query: "threshold",
-  total: 2,
-  summary: "2 results",
+  total: 3,
+  summary: "3 results",
   address: "search/index.html?q=threshold&source=glossary",
   results: [
     {
@@ -338,6 +338,14 @@ export const searchResults: SlotProps["SearchResults"] = {
       snippet: "Three occurrences in two files before a word gets a page.",
     },
     { title: "Keyword page threshold review", href: "../meetings/threshold-review/" },
+    {
+      title: "threshold review",
+      href: "../keywords/threshold-review/",
+      typeLabel: "Keyword",
+      keyword: true,
+      subtitle: "Expression without a note",
+      detail: "4 occurrences · 2 documents",
+    },
   ],
   active: [
     {
@@ -368,8 +376,33 @@ export const searchResults: SlotProps["SearchResults"] = {
       name: "source",
       label: "Source",
       values: [
-        { value: "glossary", count: 2, href: "?q=threshold", active: true },
+        { value: "glossary", count: 3, href: "?q=threshold", active: true },
         { value: "specs", count: 1, href: "?q=threshold&source=glossary,specs" },
+      ],
+    },
+    {
+      name: "nonote",
+      label: "Without a note",
+      values: [
+        {
+          value: "any",
+          label: "Included",
+          count: 3,
+          href: "?q=threshold&source=glossary",
+          active: true,
+        },
+        {
+          value: "only",
+          label: "Only",
+          count: 1,
+          href: "?q=threshold&source=glossary&nonote=only",
+        },
+        {
+          value: "exclude",
+          label: "Excluded",
+          count: 2,
+          href: "?q=threshold&source=glossary&nonote=exclude",
+        },
       ],
     },
   ],

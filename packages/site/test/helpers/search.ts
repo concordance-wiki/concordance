@@ -12,4 +12,8 @@ export const searchLabels: SearchLabels = {
   address: "Address of this search",
   copyAddress: "Copy",
   copied: "Address copied",
+  noteless: { label: "Without a note", any: "Included", only: "Only", exclude: "Excluded" },
+  undefinedExpression: "Expression without a note",
+  occurrences: { one: "# occurrence", other: "# occurrences" },
+  documents: { one: "# document", other: "# documents" },
 };
