@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+Search results page of the default theme: the facets as checkbox groups in the left column, "Page type" and "Space" open, the domain, the application and the no-note facet folded, with the note that the counters are set at publication and the filtering runs in the browser; the active filters as chips next to "N results, most cited first"; each result a card with the type chip, the title, "cited in N pages", the summary and the line of its space, other names and broader term, which the entity table now carries (`summary` cut at two hundred characters, `aliases`, `broader`, `cited`); the most cited first among results of the same relevance and over the whole table; a word without a note dashed, its title dotted, stating "Used in N documents, never defined in the glossary", with the note that such words show what the glossary lacks; the empty state naming the query and proposing the closest form of the dictionary (`closestForm`); the header field and the field of the home page showing their query with a ✕ that clears it; the `search-results-corporate` gallery state; the `results.*` messages and the reworded `search.results`, `search.facet.type` and `search.facet.source` in both catalogues.

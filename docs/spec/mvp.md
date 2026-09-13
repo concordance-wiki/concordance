@@ -1112,6 +1112,18 @@ As a reader who arrives on the site, I want to type a word or pick a space so th
 
 Depends on: L9-01, L2-07, L3-01.
 
+#### L9-03 Search results page
+
+As a reader of a corporate documentation, I want the results of a search laid out like a catalogue, the filters on the left and readable excerpts on the right, so that I narrow two hundred documents to the page I need without leaving the page.
+
+- The bar shows the query in the field with a ✕ that clears it, served hidden and shown by the search island while the field holds something; the shortcut hint yields to it. Left column: "Page type" and "Space" as checkbox groups with counts (the existing facets type and source, the keyword type drawn with a dashed box), the domain, the application and the no-note facet as secondary groups below, folded; under them the note "The counters are set when the site is published. Filtering happens in the browser, without a round trip."; the active filters as chips with ✕ above the results, next to "N results, most cited first"; the address of the search stays under them.
+- A result: the type as a chip, the title, "cited in N pages" (the distinct pages whose links point at the entity), the summary (a first paragraph standing in for one cut at two hundred characters, at a word), then the line "Space · Also called: aliases · Broader term: …" when the note declares them, the broader term named by the title of its page when the reference resolves; among results of the same relevance the most cited comes first, a keyword page still after the entities, and the whole table without a query lists the most cited first. A noteless word shows a dashed chip, a dotted title and "Used in N documents, never defined in the glossary"; under the list, the note "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks."
+- No result: the empty state names the query, and when the query has words the closest form of the dictionary is proposed ("plafon" → "plafond, N occurrences" for a keyword page, "cited in N pages" for a note): the title or alias sharing the longest common prefix with the query over the search table, at least two characters, the shortest form among equals, computed in the island and linked to the search on that form under the same filters.
+- The page keeps working without JavaScript (the field of the bar is a plain `GET` form to the results page, which the island fills from the address, the whole table under the facets for an empty query, as before) and over `file://`; the state stays in the URL, the ✕ rewriting the current entry at once.
+- Gallery state `search-results-corporate` (two notes of the fixtures corpus, a noteless word among the results and the glossary space selected); the accessibility checker and the contrast checker pass on it; a test pins the column of the facets from 768 px and the 40 px targets of the boxes, the chips and the clear links.
+
+Depends on: L9-01, L3-02, L3-03, L3-04.
+
 ## 5. Working conditions
 
 #### L9-04 Keyword page
