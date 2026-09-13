@@ -347,7 +347,7 @@ describe("entityPageOf", () => {
     ]);
     expect(stranger.labels).toEqual({
       properties: "Properties",
-      declaredAtTop: "Declared at the top of the file.",
+      declaredAtTop: "3 declared keys. The rest of the file is free text.",
       otherAttributes: "Other attributes",
       onThisPage: "On this page",
       spaceTree: "Tree of the space",
@@ -356,7 +356,11 @@ describe("entityPageOf", () => {
       edit: "Edit this page",
       seeNeighbourhood: "See the neighbourhood map",
       neighbourPages: "3 pages",
+      legendWritten: "written link",
+      legendRecognised: "recognised word",
+      imageNote: "Image of the repository, shown in the flow of the text",
     });
+    expect(stranger.attributes).toHaveLength(3);
     expect(stranger.neighbours.total).toBe(3);
     const declared = entityPageOf(context(), screen);
     expect(declared.declaration?.type).toBe("screen");

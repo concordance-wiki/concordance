@@ -10,11 +10,13 @@ import type {
   Section,
   SourceRef,
 } from "../../slots.js";
+import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList, AttributeValues } from "./attributes.js";
 import { ContractSection } from "./contract-section.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
+import { fill } from "./mention-list.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** How many highlights sit on the badge line; the next ones go on a line of their own. */
@@ -22,11 +24,13 @@ export const HIGHLIGHTS_WITH_BADGE = 2;
 /** How many highlights the header shows in all; the rest stays in the panel. */
 export const HIGHLIGHTS_MAX = 5;
 
-/** The labels of the default theme, used for every label the page does not receive; the neighbour count is worded from the page. */
-export function defaultEntityPageLabels(neighbours: number): EntityPageLabels {
+/** The labels of the default theme, used for every label the page does not receive; the neighbour and key counts are worded from the page. */
+export function defaultEntityPageLabels(neighbours: number, declared = 0): EntityPageLabels {
   return {
     properties: labels.properties,
-    declaredAtTop: labels.declaredAtTop,
+    declaredAtTop: fill(declared === 1 ? labels.declaredKey : labels.declaredKeys, {
+      count: declared,
+    }),
     otherAttributes: labels.otherAttributes,
     onThisPage: labels.onThisPage,
     spaceTree: labels.spaceTree,
@@ -35,6 +39,9 @@ export function defaultEntityPageLabels(neighbours: number): EntityPageLabels {
     edit: labels.edit,
     seeNeighbourhood: labels.seeNeighbourhood,
     neighbourPages: `${String(neighbours)} ${labels.neighbourPages}`,
+    legendWritten: labels.legendWritten,
+    legendRecognised: labels.legendRecognised,
+    imageNote: labels.imageNote,
   };
 }
 
@@ -53,11 +60,21 @@ function Highlight({
   );
 }
 
-function PlainSection({ section }: { section: Section }): JSX.Element {
+/** A section as the build rendered it, the note of the theme set under each image of the sources. */
+function PlainSection({
+  section,
+  imageNote,
+}: {
+  section: Section;
+  imageNote: string;
+}): JSX.Element {
   return (
     <section id={section.id}>
       {section.heading !== undefined && <h2>{section.heading}</h2>}
-      <div class="markdown" dangerouslySetInnerHTML={{ __html: section.html }} />
+      <div
+        class="markdown"
+        dangerouslySetInnerHTML={{ __html: withImageNotes(section.html, imageNote) }}
+      />
     </section>
   );
 }
@@ -67,24 +84,39 @@ function MappedSection({
   entity,
   section,
   sectionKey,
+  imageNote,
 }: {
   entity: EntityRef;
   section: Section;
   sectionKey: string;
+  imageNote: string;
 }): JSX.Element {
   const Part = useSectionPart(entity.type, sectionKey);
   return Part === undefined ? (
-    <PlainSection section={section} />
+    <PlainSection section={section} imageNote={imageNote} />
   ) : (
     <Part entity={entity} section={section} />
   );
 }
 
-function NoteSection({ entity, section }: { entity: EntityRef; section: Section }): JSX.Element {
+function NoteSection({
+  entity,
+  section,
+  imageNote,
+}: {
+  entity: EntityRef;
+  section: Section;
+  imageNote: string;
+}): JSX.Element {
   return section.key === undefined ? (
-    <PlainSection section={section} />
+    <PlainSection section={section} imageNote={imageNote} />
   ) : (
-    <MappedSection entity={entity} section={section} sectionKey={section.key} />
+    <MappedSection
+      entity={entity}
+      section={section}
+      sectionKey={section.key}
+      imageNote={imageNote}
+    />
   );
 }
 
@@ -228,7 +260,8 @@ export function NeighbourhoodFold({
  * The page of every typed entity, whatever its type: the tree of its space on the left; in the
  * centre the breadcrumb, the title, the line naming the type, the last change and the space
  * with the highlights, the note at full column width, its documents under it, the contract of
- * an API after it, then the path of the file with its edit link; on the right three stacked
+ * an API after it, then the foot of the article, the legend of the two marks of the text with
+ * the path of the file and its edit link; on the right three stacked
  * blocks, the declared attributes (and the attributes the type does not declare, when the note
  * sets some), the table of contents of the note, the related pages, then the neighbourhood
  * folded behind its line. An attribute value or a mapped section goes through the
@@ -255,7 +288,7 @@ export function EntityPage({
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
-    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length),
+    ...defaultEntityPageLabels(neighbours.total ?? neighbours.neighbours.length, attributes.length),
     ...given,
   };
   const withBadge = highlights.slice(0, HIGHLIGHTS_WITH_BADGE);
@@ -291,20 +324,25 @@ export function EntityPage({
         </header>
         <article class="entity-body">
           {sections.map((section) => (
-            <NoteSection key={section.id} entity={entity} section={section} />
+            <NoteSection
+              key={section.id}
+              entity={entity}
+              section={section}
+              imageNote={text.imageNote}
+            />
           ))}
-          {sections.length > 0 && (
-            <footer class="legend">
-              <span class="legend-written">{labels.legendWritten}</span>
-              <span class="legend-recognised">{labels.legendRecognised}</span>
-            </footer>
-          )}
           {documents.map((document, index) => (
             <DocumentBlock key={document.file.href} document={document} index={index + 1} />
           ))}
         </article>
         {contract !== undefined && <ContractSection {...contract} />}
         <footer class="entity-footer">
+          {sections.length > 0 && (
+            <p class="legend">
+              <span class="legend-written">{text.legendWritten}</span>
+              <span class="legend-recognised">{text.legendRecognised}</span>
+            </p>
+          )}
           {sources.map((source) => (
             <Source key={source.path} source={source} text={text} />
           ))}

@@ -451,11 +451,15 @@ export function neighbourPages(neighbourhood: NeighbourhoodProps): number {
   return neighbourhood.total ?? neighbourhood.neighbours.length;
 }
 
-/** The headings and notes of the page in the site language. */
-export function entityPageLabels(context: SiteContext, neighbours: number): EntityPageLabels {
+/** The headings and notes of the page in the site language, the counts of neighbours and of declared keys worded. */
+export function entityPageLabels(
+  context: SiteContext,
+  neighbours: number,
+  declared: number,
+): EntityPageLabels {
   return {
     properties: message(context, "entity.attributes"),
-    declaredAtTop: message(context, "entity.declaredAtTop"),
+    declaredAtTop: formatMessage(context.catalogue, "entity.declaredAtTop", { count: declared }),
     otherAttributes: message(context, "entity.otherAttributes"),
     onThisPage: message(context, "entity.onThisPage"),
     spaceTree: message(context, "entity.spaceTree"),
@@ -466,6 +470,9 @@ export function entityPageLabels(context: SiteContext, neighbours: number): Enti
     neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
       count: neighbours,
     }),
+    legendWritten: message(context, "entity.legendWritten"),
+    legendRecognised: message(context, "entity.legendRecognised"),
+    imageNote: message(context, "entity.imageNote"),
   };
 }
 
@@ -482,6 +489,7 @@ export function entityPageOf(
   const otherAttributes = othersOf(context, entity);
   const changed = changedOf(context, entity);
   const neighbours = neighbourhoodOf(context, page, entity);
+  const attributes = panelOf(context, page, entity);
   return {
     entity: {
       id: entity.id,
@@ -496,9 +504,9 @@ export function entityPageOf(
     ...(changed === undefined ? {} : { changed }),
     highlights: highlightsOf(context, page, entity),
     sections: sectionsOf(context, entity),
-    attributes: panelOf(context, page, entity),
+    attributes,
     ...(otherAttributes.length === 0 ? {} : { otherAttributes }),
-    labels: entityPageLabels(context, neighbourPages(neighbours)),
+    labels: entityPageLabels(context, neighbourPages(neighbours), attributes.length),
     neighbours,
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),

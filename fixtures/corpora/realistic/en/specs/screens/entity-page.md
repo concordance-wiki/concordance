@@ -21,3 +21,15 @@ Shows an entity with its attributes, its links grouped by relation, its neighbou
 
 - [Identifier pattern](../rules/identifier-pattern.rule.md)
 - [Related relation cap](../rules/related-relation-cap.rule.md)
+
+## Checks applied
+
+| Rule | Severity | Effect on validation |
+|---|---|---|
+| [Identifier pattern](../rules/identifier-pattern.rule.md) | blocking | The build stops and the finding names the file |
+| [Stale after 180 days](../rules/stale-after-180-days.rule.md) | warning | A badge on the page and a line in the staleness report |
+| [Related relation cap](../rules/related-relation-cap.rule.md) | warning | The confidence shown never exceeds 0.6 |
+
+## Original sketch
+
+![Sketch of the entity page: the tree of the space, the note, the panel](../assets/entity-page-sketch.svg)

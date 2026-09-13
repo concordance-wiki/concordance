@@ -242,8 +242,13 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
       locateLink(target, { name: source.name, path }, files, crossSource);
     const rendered = renderMarkdown(input.fs.readText(file.absolutePath), {
       // A link to a file of the sources leads to its page; a file without a page is not published,
-      // so the link goes. An image of the sources is copied next to the page; any other image,
-      // an external URL typically, is kept as written and never fetched.
+      // so the link goes. An image of the sources is copied next to the page and, on a line of its
+      // own, captioned with its path in the source; any other image, an external URL typically, is
+      // kept as written and never fetched.
+      imagePath: (target) => {
+        const located = locate(target);
+        return located.kind === "file" ? located.path : undefined;
+      },
       resolveHref: (target, kind) => {
         const located = locate(target);
         if (located.kind !== "file") return undefined;

@@ -112,8 +112,8 @@ describe("The accent colour never carries information on its own", () => {
       expect(match[1]).toBe("a");
     }
     expect(count(page, 'class="written"')).toBeGreaterThan(0);
-    expect(page).toContain('<span class="legend-written">link written in the note</span>');
-    expect(page).toContain('<span class="legend-recognised">word recognised at indexing</span>');
+    expect(page).toContain('<span class="legend-written">written link</span>');
+    expect(page).toContain('<span class="legend-recognised">recognised word</span>');
   });
 
   it("gives the accent-bordered notice of a keyword page a text of its own, and underlines the position of a passage", () => {

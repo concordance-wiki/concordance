@@ -97,11 +97,18 @@ describe("EntityPage", () => {
       "</article>",
       '<div class="entity-side"><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties<span class="count panel-count">2</span></h2></summary>',
       '<dt>Owner</dt><dd><a class="value" href="../publication/">Publication</a></dd>',
-      '<p class="panel-note">Declared at the top of the file.</p></details></section>',
+      '<p class="panel-note">2 declared keys. The rest of the file is free text.</p></details></section>',
     ]);
     expect(render({ attributes: [] })).not.toContain("entity-panel");
-    expect(render({ labels: { declaredAtTop: "Déclarées en tête du fichier." } })).toContain(
-      '<p class="panel-note">Déclarées en tête du fichier.</p>',
+    expect(render({ attributes: entityPage.attributes.slice(0, 1) })).toContain(
+      '<p class="panel-note">1 declared key. The rest of the file is free text.</p>',
+    );
+    expect(
+      render({
+        labels: { declaredAtTop: "4 clés déclarées. Le reste du fichier est du texte libre." },
+      }),
+    ).toContain(
+      '<p class="panel-note">4 clés déclarées. Le reste du fichier est du texte libre.</p>',
     );
   });
 
@@ -260,15 +267,50 @@ describe("EntityPage", () => {
     );
   });
 
-  it("distinguishes written links and recognised words in the text, with a legend under the article", () => {
+  it("distinguishes written links and recognised words in the text, with a legend at the foot of the article, before the path", () => {
     const html = render();
     expect(html).toContain('<a href="../page/" class="written">page</a>');
     expect(html).toContain('<a href="../occurrence/" class="recognised">occurrence</a>');
     const legend =
-      '<footer class="legend"><span class="legend-written">link written in the note</span><span class="legend-recognised">word recognised at indexing</span></footer></article>';
+      '</article><footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></p><p class="entity-source">';
     expect(html).toContain(legend);
     expect(html.indexOf(legend)).toBeGreaterThan(html.indexOf("<p>An entity page.</p>"));
-    expect(render({ sections: [] })).toContain('<article class="entity-body"></article>');
+    expect(
+      render({ labels: { legendWritten: "lien écrit", legendRecognised: "mot reconnu" } }),
+    ).toContain(
+      '<p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu</span></p>',
+    );
+    const without = render({ sections: [] });
+    expect(without).toContain('<article class="entity-body"></article>');
+    expect(without).not.toContain('class="legend"');
+  });
+
+  it("sets the note of the theme under every image of the repository, before the path of its file, and leaves an image among text alone", () => {
+    const html = render({
+      sections: [
+        {
+          id: "sketch",
+          heading: "Original sketch",
+          html: '<figure class="figure"><img src="entity-page-sketch.svg" alt="Sketch of the entity page"><figcaption><span class="figure-caption">Sketch of the entity page</span><code class="figure-path">assets/entity-page-sketch.svg</code></figcaption></figure><p>See <img src="https://forge.example/mark.png" alt="the mark"> too.</p>',
+        },
+      ],
+    });
+    expect(html).toContain(
+      '<figure class="figure"><img src="entity-page-sketch.svg" alt="Sketch of the entity page"><figcaption><span class="figure-caption">Sketch of the entity page</span><span class="figure-note">Image of the repository, shown in the flow of the text</span><code class="figure-path">assets/entity-page-sketch.svg</code></figcaption></figure><p>See <img src="https://forge.example/mark.png" alt="the mark"> too.</p>',
+    );
+    expect(
+      render({
+        sections: [
+          {
+            id: "sketch",
+            html: '<figure class="figure"><img src="a.svg" alt=""><figcaption><code class="figure-path">a.svg</code></figcaption></figure>',
+          },
+        ],
+        labels: { imageNote: "Image du dépôt, affichée dans <le> flux du texte" },
+      }),
+    ).toContain(
+      '<figcaption><span class="figure-note">Image du dépôt, affichée dans &lt;le&gt; flux du texte</span><code class="figure-path">a.svg</code></figcaption>',
+    );
   });
 
   it("renders the neighbourhood and the mentions through the slots of the theme", () => {
@@ -288,7 +330,7 @@ describe("EntityPage", () => {
   it("shows the source file path and the edit link to the forge under the note, the link only when the forge is known", () => {
     const html = render();
     expect(html).toContain(
-      '<footer class="entity-footer"><p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit this page</a></span></p></footer></div><div class="entity-side">',
+      '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit this page</a></span></p></footer></div><div class="entity-side">',
     );
     const without = render({ sources: [{ source: "framing", path: "a.md" }] });
     expect(without).toContain('<p class="entity-source"><code>framing/a.md</code></p>');

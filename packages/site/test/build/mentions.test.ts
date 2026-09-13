@@ -260,8 +260,7 @@ describe("mentionsPanelOf", () => {
       loadingOthers: "Loading the other pages…",
       othersUnavailable: "The other pages could not be loaded.",
       fullList: "Open the full list (JSON)",
-      orderNote:
-        "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
+      orderNote: "From the surest to the weakest: written links first, then recognised mentions.",
       noRelated: "No other page evokes this one yet.",
       noMatch: "No page matches the filter.",
     });
@@ -277,7 +276,7 @@ describe("mentionsPanelOf", () => {
     expect(french?.other).toBe("{count} autre");
     expect(french?.others).toBe("{count} autres");
     expect(french?.orderNote).toBe(
-      "Ordonnées par nombre de passages, écrits et relevés confondus. « Cité » signale un lien présent dans le texte.",
+      "Du plus sûr au plus faible : les liens écrits d’abord, les mentions relevées ensuite.",
     );
   });
 

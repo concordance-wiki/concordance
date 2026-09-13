@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { withImageNotes } from "../../src/markdown/figures.js";
 import {
   LEAD_SECTION_ID,
   RECOGNISED_CLASS,
@@ -158,6 +159,79 @@ describe("renderMarkdown", () => {
     expect(html).toContain('<pre><code class="language-yaml">version: 1\n</code></pre>');
     expect(html).toContain('<img src="pipeline.svg" alt="the pipeline">');
     expect(html).toContain('<img src="https://forge.example/logo.png" alt="the forge">');
+  });
+
+  describe("an image of the sources on a line of its own is a figure", () => {
+    const text = [
+      "# Screen",
+      "",
+      "## Original sketch",
+      "",
+      "![Sketch of the screen](../assets/sketch.svg)",
+      "",
+      "- ![In a list](../assets/list.svg)",
+      "",
+      "![](../assets/bare.svg)",
+      "",
+      "![Not a file](https://forge.example/sketch.png)",
+      "",
+      "See ![the pipeline](../assets/pipeline.svg) beside the text.",
+      "",
+    ].join("\n");
+    const options = {
+      resolveHref: (target: string, kind: TargetKind): string | undefined =>
+        kind === "image" && target.startsWith("../assets/")
+          ? target.replace("../assets/", "")
+          : undefined,
+      imagePath: (target: string): string | undefined =>
+        target.startsWith("../assets/") ? target.replace("../", "") : undefined,
+    };
+
+    it("captions the image with its alternative text and the path of its file, the href leading to the copy next to the page", () => {
+      const html = renderMarkdown(text, options).sections[0]?.html ?? "";
+      expect(html).toContain(
+        '<figure class="figure"><img src="sketch.svg" alt="Sketch of the screen"><figcaption><span class="figure-caption">Sketch of the screen</span><code class="figure-path">assets/sketch.svg</code></figcaption></figure>',
+      );
+      expect(html).toContain(
+        '<li>\n<figure class="figure"><img src="list.svg" alt="In a list"><figcaption><span class="figure-caption">In a list</span><code class="figure-path">assets/list.svg</code></figcaption></figure>\n</li>',
+      );
+    });
+
+    it("leaves out the caption of an image without alternative text, and keeps an external image or an image among text as it is", () => {
+      const html = renderMarkdown(text, options).sections[0]?.html ?? "";
+      expect(html).toContain(
+        '<figure class="figure"><img src="bare.svg" alt=""><figcaption><code class="figure-path">assets/bare.svg</code></figcaption></figure>',
+      );
+      expect(html).toContain(
+        '<p><img src="https://forge.example/sketch.png" alt="Not a file"></p>',
+      );
+      expect(html).toContain(
+        '<p>See <img src="pipeline.svg" alt="the pipeline"> beside the text.</p>',
+      );
+    });
+
+    it("renders every image as written when no path is given, and keeps the caption out of the plain text", () => {
+      const rendered = renderMarkdown(text, { resolveHref: options.resolveHref });
+      expect(rendered.sections[0]?.html).toContain(
+        '<p><img src="sketch.svg" alt="Sketch of the screen"></p>',
+      );
+      expect(rendered.sections[0]?.html).not.toContain("figure");
+      expect(renderMarkdown(text, options).text).toBe(rendered.text);
+      expect(rendered.text).not.toContain("assets/sketch.svg");
+    });
+
+    it("gets the note of a theme before the path of every figure, escaped, and leaves a section without a figure untouched", () => {
+      const html = renderMarkdown(text, options).sections[0]?.html ?? "";
+      const noted = withImageNotes(
+        html,
+        'Image of the repository, "shown" <in> the flow & the text',
+      );
+      expect(noted).toContain(
+        '<span class="figure-caption">Sketch of the screen</span><span class="figure-note">Image of the repository, &quot;shown&quot; &lt;in&gt; the flow &amp; the text</span><code class="figure-path">assets/sketch.svg</code>',
+      );
+      expect(noted.match(/figure-note/g)).toHaveLength(3);
+      expect(withImageNotes("<p>Nothing</p>", "note")).toBe("<p>Nothing</p>");
+    });
   });
 
   it("keeps GitHub flavoured markdown: tables, task lists, strikethrough and fenced code with its language", () => {

@@ -19,7 +19,8 @@ export interface RelatedPage {
 
 /**
  * Groups mentions by the page they come from, in the order the pages first appear, then orders
- * the pages by number of passages, written and recognised counted alike; the first appearance
+ * the pages from the surest to the weakest: the pages that write a link to the entity first,
+ * then by number of passages, written and recognised counted alike; the first appearance
  * breaks ties, so that the corpus order holds among equals.
  */
 export function groupByPage(mentions: readonly Mention[]): RelatedPage[] {
@@ -46,7 +47,9 @@ export function groupByPage(mentions: readonly Mention[]): RelatedPage[] {
       }
     }
   }
-  return [...pages.values()].sort((a, b) => b.mentions.length - a.mentions.length);
+  return [...pages.values()].sort(
+    (a, b) => Number(b.cited) - Number(a.cited) || b.mentions.length - a.mentions.length,
+  );
 }
 
 /** Whether a page matches a filter typed by the reader: on its title, its type and its passages, without regard to case. */

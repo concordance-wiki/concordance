@@ -10,6 +10,7 @@ export interface MessageArguments {
   "document.pages": { count: number };
   "entity.changed": { when: string };
   "entity.confidence": { value: number };
+  "entity.declaredAtTop": { count: number };
   "entity.mentionsCount": { count: number };
   "entity.neighbourPages": { count: number };
   "entity.otherPages": { count: number };
@@ -56,9 +57,12 @@ export const messageArguments = {
   "entity.changed": { when: "argument" },
   "entity.confidence": { value: "number" },
   "entity.correction": {},
-  "entity.declaredAtTop": {},
+  "entity.declaredAtTop": { count: "plural" },
   "entity.domain": {},
   "entity.edit": {},
+  "entity.imageNote": {},
+  "entity.legendRecognised": {},
+  "entity.legendWritten": {},
   "entity.mentions": {},
   "entity.mentionsCount": { count: "plural" },
   "entity.neighbourPages": { count: "plural" },

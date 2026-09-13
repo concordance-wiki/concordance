@@ -41,7 +41,7 @@ function withoutScripts(html: string): string {
 const fragmentHref = "../../fragments/glossary/entity.mentions.json";
 
 describe("Related pages: one entry per page that evokes the entity, title, type, passage count and excerpt", () => {
-  it("renders the block as a disclosure headed from the catalogue with the number of pages, one entry per page, most passages first", () => {
+  it("renders the block as a disclosure headed from the catalogue with the number of pages, one entry per page, the cited pages first", () => {
     const html = render({
       mentions: mentions(7),
       initial: 20,
@@ -66,7 +66,7 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
       '<span class="related-count">1<span class="visually-hidden"> passage</span></span>',
     );
     expect(html).toContain(
-      '<p class="related-note">Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.</p>',
+      '<p class="related-note">From the surest to the weakest: written links first, then recognised mentions.</p>',
     );
     expectBalanced(html);
   });
@@ -122,13 +122,18 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
     );
   });
 
-  it("groups the mentions by page and orders the pages by passage count, the first appearance breaking ties", () => {
+  it("groups the mentions by page and orders the pages cited first, then by passage count, the first appearance breaking ties", () => {
     const pages = groupByPage([mention(4), mention(1), mention(2, "written"), mention(5)]);
     expect(pages.map((page) => [page.key, page.mentions.length, page.cited])).toEqual([
-      ["../notes/note-2/", 2, false],
       ["../notes/note-1/", 2, true],
+      ["../notes/note-2/", 2, false],
     ]);
-    expect(pages[1]?.excerpt.line).toBe(2);
+    expect(pages[0]?.excerpt.line).toBe(2);
+    expect(
+      groupByPage([mention(4), mention(5), mention(1), mention(7, "written")]).map(
+        (page) => page.key,
+      ),
+    ).toEqual(["../notes/note-3/", "../notes/note-2/", "../notes/note-1/"]);
     expect(groupByPage([])).toEqual([]);
     expect(typeCounts(pages)).toEqual([
       { type: "screen", label: "Screen", count: 1 },
@@ -139,9 +144,13 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
     expect(typeCounts(groupByPage([unlabelled, mention(1)]))).toEqual([
       { type: "term", label: "term", count: 2 },
     ]);
-    expect(matchesFilter(pages[0] as (typeof pages)[number], "NOTE 2")).toBe(true);
-    expect(matchesFilter(pages[0] as (typeof pages)[number], "passage 5")).toBe(true);
-    expect(matchesFilter(pages[0] as (typeof pages)[number], "note 1")).toBe(false);
+    expect(typeCounts(groupByPage([mention(4), mention(1)])).map((type) => type.type)).toEqual([
+      "screen",
+      "term",
+    ]);
+    expect(matchesFilter(pages[1] as (typeof pages)[number], "NOTE 2")).toBe(true);
+    expect(matchesFilter(pages[1] as (typeof pages)[number], "passage 5")).toBe(true);
+    expect(matchesFilter(pages[1] as (typeof pages)[number], "note 1")).toBe(false);
     expect(fill("{shown} of {total} pages", { shown: 2, total: 5 })).toBe("2 of 5 pages");
   });
 });

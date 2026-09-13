@@ -21,3 +21,15 @@ Affiche une entité avec ses attributs, ses liens groupés par relation, son voi
 
 - [Motif d'identifiant](../regles/motif-d-identifiant.regle.md)
 - [Plafond de la relation liée](../regles/plafond-de-la-relation-liee.regle.md)
+
+## Contrôles appliqués
+
+| Règle | Sévérité | Effet à la validation |
+|---|---|---|
+| [Motif d'identifiant](../regles/motif-d-identifiant.regle.md) | bloquante | Le build s'arrête et le constat nomme le fichier |
+| [Obsolète après 180 jours](../regles/obsolete-apres-180-jours.regle.md) | avertissement | Un badge sur la page et une ligne dans le rapport d'obsolescence |
+| [Plafond de la relation liée](../regles/plafond-de-la-relation-liee.regle.md) | avertissement | La confiance affichée ne dépasse jamais 0,6 |
+
+## Maquette d'origine
+
+![Esquisse de la page d'entité : l'arborescence de l'espace, la fiche, le volet](../assets/esquisse-page-entite.svg)

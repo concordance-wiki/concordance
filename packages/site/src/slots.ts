@@ -364,7 +364,7 @@ export interface TypeDeclaration {
 export interface EntityPageLabels {
   /** Heading of the panel of declared attributes. */
   properties: string;
-  /** Note under the declared attributes: that they come from the top of the file. */
+  /** Note under the declared attributes, already worded with their count: "4 declared keys. The rest of the file is free text." */
   declaredAtTop: string;
   /** Heading of the section listing the attributes the type does not declare. */
   otherAttributes: string;
@@ -382,6 +382,11 @@ export interface EntityPageLabels {
   seeNeighbourhood: string;
   /** How many pages the neighbourhood holds, already worded: "5 pages". */
   neighbourPages: string;
+  /** The legend of the two marks of the text: a written link, a recognised word. */
+  legendWritten: string;
+  legendRecognised: string;
+  /** Under an image of the sources, before the path of its file. */
+  imageNote: string;
 }
 
 /** A step of the breadcrumb: the space, a folder, the page; only the space has a page of its own. */
