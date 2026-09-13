@@ -7,6 +7,7 @@ import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { buildGallery, GALLERY_PAGE_BUDGET, type GalleryReport } from "../../src/gallery/build.js";
+import { galleryTheme } from "../../src/gallery/fixtures.js";
 import { galleryPages } from "../../src/gallery/pages.js";
 import { SLOT_NAMES } from "../../src/slots.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
@@ -117,7 +118,9 @@ describe("A concordance gallery command renders every slot with fixture view mod
         ),
       ) as string,
       "accessibility: 0 findings",
+      "contrast: 0 pairs below the minimum",
     ]);
+    expect(report.contrast).toEqual([]);
   });
 
   it("gives the same bytes from one build to the next", async () => {
@@ -177,9 +180,33 @@ describe("The gallery is built in CI and its pages pass the accessibility checks
     expect(report.problems).toEqual(
       report.pages.map((page) => `${page.path}: link-text: <a href="nowhere"> has no text`),
     );
-    expect(report.summary.at(-1)).toBe(
+    expect(report.summary.at(-2)).toBe(
       `accessibility: ${String(galleryPages.length + 1)} findings`,
     );
+  });
+
+  it("warns in the summary about a palette whose text falls under the contrast minimum, without failing", async () => {
+    const fileSystem = memoryFileSystem();
+    const report = await buildGallery({
+      output: "/out",
+      theme: defaultTheme,
+      fileSystem,
+      tokens: {
+        ...galleryTheme,
+        light: { ...galleryTheme.light, muted: "#9A9A9A" },
+      },
+    });
+    expect(report.contrast.map((finding) => finding.message)).toEqual([
+      "light muted text: muted on bg is 2.58:1, below 4.5:1",
+      "light muted text: muted on surface is 2.81:1, below 4.5:1",
+    ]);
+    expect(report.summary.slice(-3)).toEqual([
+      "contrast: 2 pairs below the minimum",
+      "warning: contrast: light muted text: muted on bg is 2.58:1, below 4.5:1",
+      "warning: contrast: light muted text: muted on surface is 2.81:1, below 4.5:1",
+    ]);
+    expect(report.problems).toEqual([]);
+    expect(fileSystem.readText("/out/assets/site.css")).toContain("--color-muted: #9A9A9A;");
   });
 
   it("keeps every page under the budget and turns an exceeded budget into a problem", async () => {

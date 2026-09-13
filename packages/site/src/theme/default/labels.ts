@@ -2,6 +2,7 @@
 export const labels = {
   skipToContent: "Skip to content",
   siteNavigation: "Site",
+  siteSearch: "Site search",
   search: "Search",
   searchSubmit: "Search",
   version: "version",
@@ -32,7 +33,10 @@ export const labels = {
   noWrittenMention: "No note links here.",
   noRecognisedMention: "No file cites this entity.",
   showRemaining: "Show the remaining mentions",
+  hideRemaining: "Hide the remaining mentions",
   neighbourhood: "Neighbourhood",
+  neighbourhoodMap: "Map of the neighbourhood",
+  neighbourhoodMapCaption: "The list below carries the same information as the map.",
   noNeighbour: "No neighbour recorded.",
   resultsFor: "results for",
   facets: "Facets",

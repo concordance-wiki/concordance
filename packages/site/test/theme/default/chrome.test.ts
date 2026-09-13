@@ -34,7 +34,7 @@ describe("Header", () => {
     expect(html).toContain('<nav class="site-nav" aria-label="Site">');
     expect(html).toContain('<a class="site-title" href="../">My wiki</a>');
     expect(html).toContain(
-      '<form class="site-search" role="search" action="../search/" method="get">',
+      '<form class="site-search" role="search" aria-label="Site search" action="../search/" method="get">',
     );
     expect(html).toContain('<label class="visually-hidden" for="site-search">Search</label>');
     expect(html).toContain('<a href="../todo/">To do<span class="count">12</span></a>');

@@ -108,8 +108,16 @@ input {
   color: inherit;
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-accent);
+/* Focus: every interactive element shows the same ring, never removed without a replacement. */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -125,6 +133,7 @@ main {
   inset-inline-start: 0;
   padding: var(--space-2) var(--space-3);
   background: var(--color-surface);
+  color: var(--color-ink);
   transform: translateY(-100%);
 }
 

@@ -13,7 +13,7 @@ const theme: ThemeConfig = {
     border: "#E4E1DA",
     ink: "#16181B",
     muted: "#4E5259",
-    accent: "#C24E24",
+    accent: "#B84820",
   },
   dark: {
     bg: "#0E0F11",
@@ -38,7 +38,7 @@ describe("tokensStylesheet", () => {
     expect(css).toContain("  --space-1: 0.25rem;\n  --space-2: 0.5rem;\n  --space-3: 1rem;");
     expect(css).toContain("  --space-6: 4rem;");
     expect(css).toContain(
-      "  --color-bg: #F6F5F2;\n  --color-surface: #FFFFFF;\n  --color-border: #E4E1DA;\n  --color-ink: #16181B;\n  --color-muted: #4E5259;\n  --color-accent: #C24E24;\n}",
+      "  --color-bg: #F6F5F2;\n  --color-surface: #FFFFFF;\n  --color-border: #E4E1DA;\n  --color-ink: #16181B;\n  --color-muted: #4E5259;\n  --color-accent: #B84820;\n}",
     );
   });
 

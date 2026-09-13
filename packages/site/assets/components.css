@@ -385,6 +385,42 @@ concordance-island {
   background: none;
   border: none;
   padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.neighbourhood-map {
+  margin: 0 0 var(--space-3);
+}
+
+.neighbourhood-graph {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+
+.neighbourhood-graph .map-edge {
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.neighbourhood-graph circle {
+  fill: var(--color-ink);
+}
+
+.neighbourhood-graph text {
+  fill: var(--color-ink);
+}
+
+.neighbourhood-graph .map-centre text {
+  font-weight: 600;
+}
+
+.neighbourhood-map figcaption {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
 }
 
 .neighbour {

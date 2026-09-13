@@ -25,6 +25,8 @@
     "preact-render-to-string": "6.7.0"
   },
   "devDependencies": {
-    "@concordance-wiki/fixture-plugin-theme-example": "workspace:*"
+    "@concordance-wiki/fixture-plugin-theme-example": "workspace:*",
+    "axe-core": "4.13.0",
+    "happy-dom": "20.14.5"
   }
 }

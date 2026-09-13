@@ -134,6 +134,8 @@ Every package of this repository is published under the [GNU General Public Lice
 | @types/node | 22.20.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/picomatch | 4.0.3 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/unist | 3.0.3 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/whatwg-mimetype | 3.0.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/ws | 8.18.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @typescript-eslint/eslint-plugin | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
 | @typescript-eslint/parser | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
 | @typescript-eslint/project-service | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
@@ -162,11 +164,13 @@ Every package of this repository is published under the [GNU General Public Lice
 | anynum | 1.0.1 | MIT | runtime | <https://github.com/NaturalIntelligence/anynum> |
 | assertion-error | 2.0.1 | MIT | development | <https://github.com/chaijs/assertion-error> |
 | ast-v8-to-istanbul | 1.0.6 | MIT | development | <https://github.com/AriPerkkio/ast-v8-to-istanbul> |
+| axe-core | 4.13.0 | MPL-2.0 | development | <https://github.com/dequelabs/axe-core> |
 | bail | 2.0.2 | MIT | runtime | <https://github.com/wooorm/bail> |
 | balanced-match | 4.0.4 | MIT | development | <https://github.com/juliangruber/balanced-match> |
 | baseline-browser-mapping | 2.11.22 | Apache-2.0 | development | <https://github.com/web-platform-dx/baseline-browser-mapping> |
 | brace-expansion | 5.0.9 | MIT | development | <https://github.com/juliangruber/brace-expansion> |
 | browserslist | 4.28.9 | MIT | development | <https://github.com/browserslist/browserslist> |
+| buffer-image-size | 0.6.4 | MIT | development | <https://github.com/evidentpoint/buffer-image-size> |
 | cac | 7.0.0 | MIT | development | <https://github.com/cacjs/cac> |
 | cacheable | 2.5.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
 | call-bind-apply-helpers | 1.0.2 | MIT | development | <https://github.com/ljharb/call-bind-apply-helpers> |
@@ -193,6 +197,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | electron-to-chromium | 1.5.427 | ISC | development | <https://github.com/Kilian/electron-to-chromium> |
 | emoji-regex | 10.6.0 | MIT | development | <https://github.com/mathiasbynens/emoji-regex> |
 | empathic | 2.0.1 | MIT | development | <https://github.com/lukeed/empathic> |
+| entities | 7.0.1 | BSD-2-Clause | development | <https://github.com/fb55/entities> |
 | es-define-property | 1.0.1 | MIT | development | <https://github.com/ljharb/es-define-property> |
 | es-errors | 1.3.0 | MIT | development | <https://github.com/ljharb/es-errors> |
 | es-module-lexer | 2.3.2 | MIT | development | <https://github.com/guybedford/es-module-lexer> |
@@ -239,6 +244,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | get-stream | 9.0.1 | MIT | development | <https://github.com/sindresorhus/get-stream> |
 | glob-parent | 6.0.2 | ISC | development | <https://github.com/gulpjs/glob-parent> |
 | gopd | 1.2.0 | MIT | development | <https://github.com/ljharb/gopd> |
+| happy-dom | 20.14.5 | MIT | development | <https://github.com/capricorn86/happy-dom> |
 | has-flag | 4.0.0 | MIT | development | <https://github.com/sindresorhus/has-flag> |
 | has-symbols | 1.1.0 | MIT | development | <https://github.com/inspect-js/has-symbols> |
 | hashery | 1.5.1 | MIT | development | <https://github.com/jaredwray/hashery> |
@@ -422,9 +428,11 @@ Every package of this repository is published under the [GNU General Public Lice
 | vite | 8.3.0 | MIT | development | <https://github.com/vitejs/vite> |
 | vitest | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
 | weapon-regex | 2.0.5 | Apache-2.0 | development | <https://github.com/stryker-mutator/weapon-regex> |
+| whatwg-mimetype | 3.0.0 | MIT | development | <https://github.com/jsdom/whatwg-mimetype> |
 | which | 2.0.2 | ISC | development | <https://github.com/isaacs/node-which> |
 | why-is-node-running | 2.3.0 | MIT | development | <https://github.com/mafintosh/why-is-node-running> |
 | word-wrap | 1.2.5 | MIT | development | <https://github.com/jonschlinkert/word-wrap> |
+| ws | 8.21.3 | MIT | development | <https://github.com/websockets/ws> |
 | xml-naming | 0.3.0 | MIT | runtime | <https://github.com/NaturalIntelligence/xml-naming> |
 | yaml | 2.8.1 | ISC | runtime | <https://github.com/eemeli/yaml> |
 | yaml | 2.9.1 | ISC | runtime | <https://github.com/eemeli/yaml> |

@@ -39,7 +39,13 @@ export function Home({ title, search, shortcuts, stats, entries }: HomeProps): J
         <time dateTime={stats.builtAt}>{stats.builtAt}</time>
       </p>
       {search && (
-        <form class="home-search" role="search" action={search.action} method="get">
+        <form
+          class="home-search"
+          role="search"
+          aria-label={labels.search}
+          action={search.action}
+          method="get"
+        >
           <label for="home-search">{labels.search}</label>
           <input id="home-search" type="search" name="q" placeholder={search.placeholder} />
           <button type="submit">{labels.searchSubmit}</button>

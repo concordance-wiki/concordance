@@ -11,7 +11,7 @@ export const galleryTheme: ThemeConfig = {
     border: "#E4E1DA",
     ink: "#16181B",
     muted: "#4E5259",
-    accent: "#C24E24",
+    accent: "#B84820",
   },
   dark: {
     bg: "#0E0F11",

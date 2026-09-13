@@ -14,7 +14,10 @@ interface MentionsMoreState {
   expanded: boolean;
 }
 
-/** The mentions beyond the inline threshold: a details element without JavaScript, a button once hydrated. */
+/** The id of the list the button controls; one mentions panel per page, so one id. */
+export const MENTIONS_MORE_LIST = "mentions-more-list";
+
+/** The mentions beyond the inline threshold: a details element without JavaScript, a disclosure button once hydrated. */
 export class MentionsMore extends Component<MentionsMoreProps, MentionsMoreState> {
   override state: MentionsMoreState = { hydrated: false, expanded: false };
 
@@ -22,35 +25,38 @@ export class MentionsMore extends Component<MentionsMoreProps, MentionsMoreState
     this.setState({ hydrated: true });
   }
 
-  reveal = (): void => {
-    this.setState({ expanded: true });
+  toggle = (): void => {
+    this.setState((state) => ({ expanded: !state.expanded }));
   };
 
   override render(
     props: Readonly<MentionsMoreProps>,
     state: Readonly<MentionsMoreState>,
   ): JSX.Element {
-    const summary = `${labels.showRemaining} (${String(props.mentions.length)})`;
+    const count = `(${String(props.mentions.length)})`;
     if (!state.hydrated) {
       return (
         <details class="mentions-more">
-          <summary>{summary}</summary>
+          <summary>
+            {labels.showRemaining} {count}
+          </summary>
           <MentionList mentions={props.mentions} />
         </details>
       );
     }
-    if (!state.expanded) {
-      return (
-        <div class="mentions-more">
-          <button type="button" aria-expanded="false" onClick={this.reveal}>
-            {summary}
-          </button>
-        </div>
-      );
-    }
     return (
       <div class="mentions-more">
-        <MentionList mentions={props.mentions} />
+        <button
+          type="button"
+          aria-expanded={state.expanded ? "true" : "false"}
+          aria-controls={MENTIONS_MORE_LIST}
+          onClick={this.toggle}
+        >
+          {state.expanded ? labels.hideRemaining : labels.showRemaining} {count}
+        </button>
+        <div id={MENTIONS_MORE_LIST} hidden={!state.expanded}>
+          <MentionList mentions={props.mentions} />
+        </div>
       </div>
     );
   }

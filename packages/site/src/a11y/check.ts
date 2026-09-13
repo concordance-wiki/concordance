@@ -1,7 +1,7 @@
 /**
  * A static accessibility checker for the generated pages: the structural rules a page can break
- * at build time, with no browser and no dependency. The runtime audit of the accessibility story
- * extends it with contrast, focus and ARIA states.
+ * at build time, with no browser and no dependency. Contrast is checked on the palette by
+ * `checkContrast`, and the axe-core audit of the site tests covers what needs a DOM.
  */
 export const A11Y_RULES = [
   "html-lang",
@@ -13,6 +13,10 @@ export const A11Y_RULES = [
   "link-text",
   "unique-id",
   "skip-link",
+  "aria-expanded-on-toggles",
+  "details-summary",
+  "tab-roles",
+  "focusable-has-visible-name",
 ] as const;
 
 export type A11yRule = (typeof A11Y_RULES)[number];
@@ -164,12 +168,17 @@ function checkImages(root: Element): A11yFinding[] {
 
 const UNLABELLED_INPUT_TYPES = new Set(["hidden", "submit", "reset", "button", "image"]);
 
-function checkControls(root: Element): A11yFinding[] {
-  const labelled = new Set(
+/** The ids a `<label for>` points at. */
+function labelledIds(root: Element): Set<string> {
+  return new Set(
     elements(root, "label")
       .map((label) => label.attributes["for"])
       .filter((target): target is string => target !== undefined),
   );
+}
+
+function checkControls(root: Element): A11yFinding[] {
+  const labelled = labelledIds(root);
   const findings: A11yFinding[] = [];
   for (const element of walk(root)) {
     const type = (element.attributes["type"] ?? "text").toLowerCase();
@@ -232,7 +241,12 @@ function focusable(element: Element): boolean {
   if (element.attributes["tabindex"] !== undefined) return true;
   if (element.tag === "a") return element.attributes["href"] !== undefined;
   if (element.tag === "input") return element.attributes["type"] !== "hidden";
-  return element.tag === "button" || element.tag === "select" || element.tag === "textarea";
+  return (
+    element.tag === "button" ||
+    element.tag === "select" ||
+    element.tag === "textarea" ||
+    element.tag === "summary"
+  );
 }
 
 function checkSkipLink(root: Element): A11yFinding[] {
@@ -249,6 +263,182 @@ function checkSkipLink(root: Element): A11yFinding[] {
     : [{ rule: "skip-link", message: `the skip link points at #${target}, which does not exist` }];
 }
 
+const BOOLEAN_STATE = new Set(["true", "false"]);
+
+function ids(root: Element): Set<string> {
+  const found = new Set<string>();
+  for (const element of walk(root)) {
+    const id = element.attributes["id"];
+    if (id !== undefined) found.add(id);
+  }
+  return found;
+}
+
+function role(element: Element): string | undefined {
+  return element.attributes["role"];
+}
+
+/** A toggle is a button or summary that controls another element; a tab follows its own pattern. */
+function checkToggles(root: Element): A11yFinding[] {
+  const findings: A11yFinding[] = [];
+  const known = ids(root);
+  for (const element of walk(root)) {
+    const expanded = element.attributes["aria-expanded"];
+    const controls = element.attributes["aria-controls"];
+    const toggle =
+      (element.tag === "button" || element.tag === "summary") && role(element) !== "tab";
+    if (toggle && controls !== undefined) {
+      if (expanded === undefined) {
+        findings.push({
+          rule: "aria-expanded-on-toggles",
+          message: `${label(element)} controls #${controls} without an aria-expanded state`,
+        });
+      }
+      if (!controls.split(/\s+/).every((target) => known.has(target))) {
+        findings.push({
+          rule: "aria-expanded-on-toggles",
+          message: `${label(element)} controls #${controls}, which does not exist`,
+        });
+      }
+    }
+    if (expanded !== undefined && !BOOLEAN_STATE.has(expanded)) {
+      findings.push({
+        rule: "aria-expanded-on-toggles",
+        message: `${label(element)} carries aria-expanded="${expanded}", expected true or false`,
+      });
+    }
+  }
+  return findings;
+}
+
+function checkDetails(root: Element): A11yFinding[] {
+  const findings: A11yFinding[] = [];
+  for (const details of elements(root, "details")) {
+    const first = details.children.find(
+      (child) => typeof child !== "string" || child.trim() !== "",
+    );
+    if (first === undefined || typeof first === "string" || first.tag !== "summary") {
+      findings.push({
+        rule: "details-summary",
+        message: `${label(details)} does not start with a summary element`,
+      });
+    } else if (accessibleName(first) === "") {
+      findings.push({ rule: "details-summary", message: `${label(details)} has an empty summary` });
+    }
+  }
+  return findings;
+}
+
+/** Tabs follow the tablist pattern: tabs inside a tablist, each selected or not and controlling a labelled panel. */
+function checkTabs(root: Element): A11yFinding[] {
+  const findings: A11yFinding[] = [];
+  const all = [...walk(root)];
+  const panels = new Map<string, Element>();
+  for (const panel of all) {
+    const id = panel.attributes["id"];
+    if (role(panel) === "tabpanel" && id !== undefined) panels.set(id, panel);
+  }
+  const controlled = new Set<Element>();
+  const inLists = new Set<Element>();
+  for (const list of all.filter((element) => role(element) === "tablist")) {
+    const tabs = [...walk(list)].filter((element) => role(element) === "tab");
+    if (tabs.length === 0) {
+      findings.push({ rule: "tab-roles", message: `${label(list)} is a tablist without any tab` });
+    }
+    for (const tab of tabs) inLists.add(tab);
+  }
+  for (const tab of all.filter((element) => role(element) === "tab")) {
+    if (!inLists.has(tab)) {
+      findings.push({ rule: "tab-roles", message: `${label(tab)} is a tab outside any tablist` });
+    }
+    if (!BOOLEAN_STATE.has(tab.attributes["aria-selected"] ?? "")) {
+      findings.push({ rule: "tab-roles", message: `${label(tab)} has no aria-selected state` });
+    }
+    const controls = tab.attributes["aria-controls"];
+    const panel = controls === undefined ? undefined : panels.get(controls);
+    if (panel === undefined) {
+      findings.push({ rule: "tab-roles", message: `${label(tab)} controls no tabpanel` });
+      continue;
+    }
+    controlled.add(panel);
+    const id = tab.attributes["id"];
+    if (id === undefined || panel.attributes["aria-labelledby"] !== id) {
+      findings.push({
+        rule: "tab-roles",
+        message: `${label(panel)} is not labelled by the tab that controls it`,
+      });
+    }
+  }
+  for (const panel of panels.values()) {
+    if (!controlled.has(panel)) {
+      findings.push({ rule: "tab-roles", message: `${label(panel)} is controlled by no tab` });
+    }
+  }
+  return findings;
+}
+
+/** A submit or reset input has a default name in every browser; a button input needs its value, an image input its alt. */
+const NAMED_BY_DEFAULT = new Set(["submit", "reset"]);
+
+/** Text and alternatives an assistive technology exposes: hidden subtrees do not count, an SVG title does. */
+function exposedText(element: Element): string {
+  if (element.attributes["aria-hidden"] === "true") return "";
+  if (element.tag === "img") return element.attributes["alt"] ?? "";
+  if (element.tag === "svg") {
+    return elements(element, "title")
+      .map((title) => textOf(title))
+      .join(" ");
+  }
+  return element.children
+    .map((child) => (typeof child === "string" ? child : exposedText(child)))
+    .join("")
+    .replaceAll("&nbsp;", " ");
+}
+
+function exposedName(element: Element, labelled: Set<string>): string {
+  const attribute =
+    element.attributes["aria-label"] ??
+    element.attributes["aria-labelledby"] ??
+    element.attributes["title"] ??
+    "";
+  if (attribute.trim() !== "") return attribute;
+  const id = element.attributes["id"];
+  if (id !== undefined && labelled.has(id)) return id;
+  if (element.tag === "input") {
+    return element.attributes["type"] === "image"
+      ? (element.attributes["alt"] ?? "")
+      : (element.attributes["value"] ?? "");
+  }
+  return exposedText(element).trim();
+}
+
+/** A link or button with nothing at all is already reported by link-text or control-label: this rule keeps the icon-only cases. */
+function reportedElsewhere(element: Element): boolean {
+  return (element.tag === "a" || element.tag === "button") && accessibleName(element) === "";
+}
+
+function checkFocusableNames(root: Element): A11yFinding[] {
+  const labelled = labelledIds(root);
+  const findings: A11yFinding[] = [];
+  for (const element of walk(root)) {
+    if (!focusable(element) || element.tag === "select" || element.tag === "textarea") continue;
+    const type = (element.attributes["type"] ?? "text").toLowerCase();
+    if (
+      element.tag === "input" &&
+      (NAMED_BY_DEFAULT.has(type) || !UNLABELLED_INPUT_TYPES.has(type))
+    ) {
+      continue;
+    }
+    if (exposedName(element, labelled) === "" && !reportedElsewhere(element)) {
+      findings.push({
+        rule: "focusable-has-visible-name",
+        message: `${label(element)} exposes no accessible name`,
+      });
+    }
+  }
+  return findings;
+}
+
 /** Every finding of every rule, in rule order then document order; an empty list means the page passes. */
 export function checkAccessibility(html: string): A11yFinding[] {
   const root = parse(html);
@@ -261,5 +451,9 @@ export function checkAccessibility(html: string): A11yFinding[] {
     ...checkLinks(root),
     ...checkIds(root),
     ...checkSkipLink(root),
+    ...checkToggles(root),
+    ...checkDetails(root),
+    ...checkTabs(root),
+    ...checkFocusableNames(root),
   ];
 }

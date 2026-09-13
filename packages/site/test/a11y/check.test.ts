@@ -32,6 +32,10 @@ describe("checkAccessibility", () => {
       "link-text",
       "unique-id",
       "skip-link",
+      "aria-expanded-on-toggles",
+      "details-summary",
+      "tab-roles",
+      "focusable-has-visible-name",
     ]);
     expect(checkAccessibility(page())).toEqual([]);
   });
@@ -186,6 +190,7 @@ describe("checkAccessibility", () => {
       expect(rules(before('<select aria-label="Type"></select>'))).toEqual(["skip-link"]);
       expect(rules(before('<textarea aria-label="Note"></textarea>'))).toEqual(["skip-link"]);
       expect(rules(before('<div tabindex="0">Widget</div>'))).toEqual(["skip-link"]);
+      expect(rules(before("<details><summary>More</summary></details>"))).toEqual(["skip-link"]);
       expect(rules(before('<a id="anchor"></a><input type="hidden"><span>Text</span>'))).toEqual(
         [],
       );
@@ -195,6 +200,171 @@ describe("checkAccessibility", () => {
       const html =
         '<html lang="en"><body><header></header><nav></nav><main><h1>A</h1></main><footer></footer></body></html>';
       expect(checkAccessibility(html)).toEqual([]);
+    });
+  });
+
+  describe("aria-expanded-on-toggles", () => {
+    it("accepts a button or summary that controls an existing element and states whether it is expanded", () => {
+      const html = page(
+        '<h1>A</h1><button type="button" aria-expanded="false" aria-controls="more">More</button><div id="more" hidden></div>' +
+          '<details><summary aria-expanded="true" aria-controls="panel">Panel</summary><div id="panel"></div></details>' +
+          '<button type="button" aria-controls="tab-1" role="tab" aria-selected="true" id="t1">Tab</button>' +
+          '<div role="tablist"><span role="tab" id="t2" aria-selected="false" aria-controls="p2">B</span></div>' +
+          '<div role="tabpanel" id="p2" aria-labelledby="t2"></div>',
+      );
+      expect(rules(html)).toEqual(["tab-roles", "tab-roles"]);
+    });
+
+    it("reports a toggle without a state, a state that is not true or false, and a controlled id that does not exist", () => {
+      const html = page(
+        '<h1>A</h1><button type="button" aria-controls="more">More</button><div id="more"></div>' +
+          '<button type="button" id="b" aria-expanded="yes" aria-controls="more">More</button>' +
+          '<summary aria-expanded="false" aria-controls="more gone">S</summary>' +
+          '<a href="x" aria-expanded="maybe">Link</a>',
+      );
+      expect(checkAccessibility(html)).toEqual([
+        {
+          rule: "aria-expanded-on-toggles",
+          message: "<button> controls #more without an aria-expanded state",
+        },
+        {
+          rule: "aria-expanded-on-toggles",
+          message: '<button id="b"> carries aria-expanded="yes", expected true or false',
+        },
+        {
+          rule: "aria-expanded-on-toggles",
+          message: "<summary> controls #more gone, which does not exist",
+        },
+        {
+          rule: "aria-expanded-on-toggles",
+          message: '<a> carries aria-expanded="maybe", expected true or false',
+        },
+      ]);
+    });
+  });
+
+  describe("details-summary", () => {
+    it("accepts a details element starting with a named summary, whitespace before it allowed", () => {
+      const html = page(
+        "<h1>A</h1><details>\n  <summary>Show more</summary><p>More</p></details>" +
+          '<details><summary><img src="i.png" alt="Icon"></summary></details>',
+      );
+      expect(checkAccessibility(html)).toEqual([]);
+    });
+
+    it("reports a details element without a summary, with text before it, or with an empty summary", () => {
+      const html = page(
+        '<h1>A</h1><details id="d1"><p>No summary</p></details>' +
+          '<details id="d2">text<summary>Late</summary></details>' +
+          '<details id="d3"><summary> </summary></details><details id="d4"></details>',
+      );
+      expect(checkAccessibility(html)).toEqual([
+        {
+          rule: "details-summary",
+          message: '<details id="d1"> does not start with a summary element',
+        },
+        {
+          rule: "details-summary",
+          message: '<details id="d2"> does not start with a summary element',
+        },
+        { rule: "details-summary", message: '<details id="d3"> has an empty summary' },
+        {
+          rule: "details-summary",
+          message: '<details id="d4"> does not start with a summary element',
+        },
+        { rule: "focusable-has-visible-name", message: "<summary> exposes no accessible name" },
+      ]);
+    });
+  });
+
+  describe("tab-roles", () => {
+    const tabs =
+      '<div role="tablist" aria-label="Views">' +
+      '<button type="button" role="tab" id="tab-a" aria-selected="true" aria-controls="panel-a">A</button>' +
+      '<button type="button" role="tab" id="tab-b" aria-selected="false" aria-controls="panel-b">B</button>' +
+      "</div>" +
+      '<div role="tabpanel" id="panel-a" aria-labelledby="tab-a">Panel A</div>' +
+      '<div role="tabpanel" id="panel-b" aria-labelledby="tab-b" hidden>Panel B</div>';
+
+    it("accepts tabs inside a tablist, each selected or not and controlling a panel labelled by it", () => {
+      expect(checkAccessibility(page(`<h1>A</h1>${tabs}`))).toEqual([]);
+    });
+
+    it("reports a tablist without tabs, a tab outside a tablist, a missing state, a missing or mislabelled panel and a panel no tab controls", () => {
+      const html = page(
+        '<h1>A</h1><div role="tablist" id="empty"></div>' +
+          '<button type="button" role="tab" id="lone" aria-controls="p1">Lone</button>' +
+          '<div role="tablist"><button type="button" role="tab" id="t2" aria-selected="true" aria-controls="p2">T</button>' +
+          '<button type="button" role="tab" aria-selected="false" aria-controls="p3">U</button>' +
+          '<button type="button" role="tab" id="t4" aria-selected="false">V</button></div>' +
+          '<div role="tabpanel" id="p2" aria-labelledby="other"></div>' +
+          '<div role="tabpanel" id="p3"></div>' +
+          '<div role="tabpanel" id="orphan"></div><div role="tabpanel"></div>',
+      );
+      expect(checkAccessibility(html)).toEqual([
+        { rule: "tab-roles", message: '<div id="empty"> is a tablist without any tab' },
+        { rule: "tab-roles", message: '<button id="lone"> is a tab outside any tablist' },
+        { rule: "tab-roles", message: '<button id="lone"> has no aria-selected state' },
+        { rule: "tab-roles", message: '<button id="lone"> controls no tabpanel' },
+        { rule: "tab-roles", message: '<div id="p2"> is not labelled by the tab that controls it' },
+        { rule: "tab-roles", message: '<div id="p3"> is not labelled by the tab that controls it' },
+        { rule: "tab-roles", message: '<button id="t4"> controls no tabpanel' },
+        { rule: "tab-roles", message: '<div id="orphan"> is controlled by no tab' },
+      ]);
+    });
+  });
+
+  describe("focusable-has-visible-name", () => {
+    it("accepts a name from text, an SVG title, an image alternative, aria attributes, a title, a label or a value", () => {
+      const html = page(
+        '<h1>A</h1><button type="button"><svg><title>Close</title><path d="M0 0"/></svg></button>' +
+          '<a href="x"><img src="i.png" alt="Home"></a>' +
+          '<a href="y" aria-label="Menu"><span aria-hidden="true">&#9776;</span></a>' +
+          '<button type="button" aria-labelledby="main"><span aria-hidden="true">x</span></button>' +
+          '<button type="button" title="Search"><span aria-hidden="true">?</span></button>' +
+          '<label for="go">Go</label><button type="button" id="go"><span aria-hidden="true">&gt;</span></button>' +
+          '<input type="button" value="Run"><input type="image" src="i.png" alt="Send"><input type="submit"><input type="reset">' +
+          '<details><summary>More <span aria-hidden="true">v</span></summary></details>' +
+          '<div tabindex="0">Widget</div><input type="text" aria-label="Query">',
+      );
+      expect(checkAccessibility(html)).toEqual([]);
+    });
+
+    it("reports a focusable element whose only content is hidden from assistive technologies, leaving empty links and buttons to their own rules", () => {
+      const html = page(
+        '<h1>A</h1><button type="button"><span aria-hidden="true">&#10005;</span></button>' +
+          '<a href="x"><span aria-hidden="true">&#8592;</span></a>' +
+          '<a href="s"><svg><path d="M0 0"/></svg></a>' +
+          '<a href="i"><img src="i.png" alt="" aria-hidden="true"> </a>' +
+          '<input type="button" id="run"><input type="image" src="i.png" alt="" id="send">' +
+          '<input type="image" src="i.png" id="noalt">' +
+          '<details><summary><span aria-hidden="true">v</span></summary></details>' +
+          '<div tabindex="0"><span aria-hidden="true">Widget</span></div><div tabindex="-1"></div>' +
+          '<button type="button" id="empty"></button><a href="e"></a>',
+      );
+      expect(checkAccessibility(html)).toEqual([
+        { rule: "control-label", message: '<button id="empty"> has no label' },
+        { rule: "link-text", message: '<a href="s"> has no text' },
+        { rule: "link-text", message: '<a href="i"> has no text' },
+        { rule: "link-text", message: '<a href="e"> has no text' },
+        { rule: "focusable-has-visible-name", message: "<button> exposes no accessible name" },
+        { rule: "focusable-has-visible-name", message: "<a> exposes no accessible name" },
+        {
+          rule: "focusable-has-visible-name",
+          message: '<input id="run"> exposes no accessible name',
+        },
+        {
+          rule: "focusable-has-visible-name",
+          message: '<input id="send"> exposes no accessible name',
+        },
+        {
+          rule: "focusable-has-visible-name",
+          message: '<input id="noalt"> exposes no accessible name',
+        },
+        { rule: "focusable-has-visible-name", message: "<summary> exposes no accessible name" },
+        { rule: "focusable-has-visible-name", message: "<div> exposes no accessible name" },
+        { rule: "focusable-has-visible-name", message: "<div> exposes no accessible name" },
+      ]);
     });
   });
 
