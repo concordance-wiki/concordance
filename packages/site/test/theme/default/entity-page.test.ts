@@ -1,15 +1,22 @@
-import { h } from "preact";
+import { h, type JSX } from "preact";
 import { renderToString } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
-import type { Attribute, EntityPageProps } from "../../../src/slots.js";
+import type {
+  Attribute,
+  AttributeProps,
+  EntityPageProps,
+  SectionProps,
+} from "../../../src/slots.js";
+import { AttributeValues } from "../../../src/theme/default/attributes.js";
 import {
   EntityPage,
   HIGHLIGHTS_MAX,
   HIGHLIGHTS_WITH_BADGE,
 } from "../../../src/theme/default/entity-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
+import type { ResolvedTheme } from "../../../src/theme/types.js";
 import { entityPage } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
@@ -167,5 +174,92 @@ describe("EntityPage", () => {
     expect(() => renderToString(h(EntityPage, entityPage))).toThrow(
       "useSlot(Neighbourhood): no theme in context; render through renderPage or renderSlot",
     );
+    expect(() =>
+      renderToString(h(AttributeValues, { entity: entityPage.entity, attribute: highlight(1) })),
+    ).toThrow("useAttributePart(h1): no theme in context; render through renderPage or renderSlot");
+  });
+
+  it("lists the attributes the type does not declare in a panel of their own, after the properties, under the given heading", () => {
+    const others: Attribute[] = [
+      { name: "ticket", label: "ticket", values: [{ text: "WIKI-12" }] },
+      {
+        name: "steps",
+        label: "steps",
+        values: [{ text: '{"action":"rebuild"}' }, { text: "check" }],
+      },
+    ];
+    const html = render({
+      otherAttributes: others,
+      labels: { otherAttributes: "Autres attributs" },
+    });
+    expectInOrder(html, [
+      '<h2 id="entity-properties">Properties</h2>',
+      '<aside class="entity-panel entity-others" aria-labelledby="entity-other-attributes"><h2 id="entity-other-attributes">Autres attributs</h2>',
+      '<dt>ticket</dt><dd><span class="value">WIKI-12</span></dd>',
+      '<dt>steps</dt><dd><span class="value">{&quot;action&quot;:&quot;rebuild&quot;}</span><span class="value">check</span></dd>',
+      '<section class="neighbourhood"',
+    ]);
+    expect(render()).not.toContain("entity-others");
+    expect(render({ otherAttributes: [] })).not.toContain("entity-others");
+    expect(render({ otherAttributes: others })).toContain(
+      '<h2 id="entity-other-attributes">Other attributes</h2>',
+    );
+    expect(render({ labels: { properties: "Propriétés" } })).toContain(
+      '<h2 id="entity-properties">Propriétés</h2>',
+    );
+  });
+
+  it("renders an attribute value and a mapped section through the parts the theme resolved, the theme's before the type module's", () => {
+    const Steps = ({ attribute }: AttributeProps): JSX.Element =>
+      h(
+        "ol",
+        { class: "part-steps" },
+        ...attribute.values.map((value) => h("li", null, value.text)),
+      );
+    const Rules = ({ section }: SectionProps): JSX.Element =>
+      h("section", { id: section.id, class: "part-rules" }, section.heading);
+    const ModuleSteps = (): JSX.Element => h("p", { class: "module-steps" }, "module");
+    const theme: ResolvedTheme = {
+      ...defaultTheme,
+      typed: {
+        pages: {},
+        parts: { attributes: { steps: Steps }, sections: { rules: Rules } },
+        typeParts: {
+          term: { attributes: { steps: ModuleSteps, owner: ModuleSteps }, sections: {} },
+        },
+      },
+    };
+    const html = renderSlot(
+      "EntityPage",
+      {
+        ...entityPage,
+        highlights: [
+          { name: "steps", label: "Steps", values: [{ text: "rebuild" }, { text: "check" }] },
+        ],
+        attributes: [
+          { name: "steps", label: "Steps", values: [{ text: "rebuild" }] },
+          { name: "owner", label: "Owner", values: [{ text: "maintainers" }] },
+        ],
+        sections: [
+          { id: "section-rules", heading: "Rules", html: "<ul></ul>", key: "rules" },
+          { id: "section-steps", heading: "Steps", html: "<ol></ol>", key: "steps" },
+          { id: "section-notes", heading: "Notes", html: "<p>plain</p>" },
+        ],
+      },
+      theme,
+    );
+    expect(html).toContain(
+      '<span class="highlight-label">Steps</span> <ol class="part-steps"><li>rebuild</li><li>check</li></ol>',
+    );
+    expect(html).toContain('<dt>Steps</dt><dd><ol class="part-steps"><li>rebuild</li></ol></dd>');
+    expect(html).toContain('<dt>Owner</dt><dd><p class="module-steps">module</p></dd>');
+    expect(html).toContain('<section id="section-rules" class="part-rules">Rules</section>');
+    expect(html).toContain(
+      '<section id="section-steps"><h2>Steps</h2><div class="markdown"><ol></ol></div></section>',
+    );
+    expect(html).toContain(
+      '<section id="section-notes"><h2>Notes</h2><div class="markdown"><p>plain</p></div></section>',
+    );
+    expectBalanced(html);
   });
 });

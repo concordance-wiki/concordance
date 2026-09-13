@@ -9,6 +9,7 @@
   "entity.mentions": "Mentions",
   "entity.mentionsCount": "{count, plural, one {# mention} other {# mentions}}",
   "entity.neighbours": "Voisinage",
+  "entity.otherAttributes": "Autres attributs",
   "entity.relatedTo": "En relation avec",
   "entity.showLess": "Voir moins",
   "entity.showMore": "Voir plus",

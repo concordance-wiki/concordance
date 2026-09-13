@@ -65,9 +65,17 @@ export { MODES, MODE_SCRIPT, MODE_STORAGE_KEY } from "./mode.js";
 export type { ModeChoice } from "./mode.js";
 export { directionOf, renderDocument, renderPage, renderSlot } from "./render.js";
 export type { PageSlot, RenderOptions } from "./render.js";
-export { SLOT_NAMES, isSlotName } from "./slots.js";
+export { PART_NAMES, SLOT_NAMES, isSlotName, parseComponentName } from "./slots.js";
 export type * from "./slots.js";
-export { ThemeContext, useSlot } from "./theme/context.js";
+export {
+  attributeComponentFor,
+  pageComponentFor,
+  sectionComponentFor,
+  ThemeContext,
+  useAttributePart,
+  useSectionPart,
+  useSlot,
+} from "./theme/context.js";
 export {
   CENTRE_RADIUS,
   FONT_SIZE,
@@ -122,10 +130,21 @@ export type {
 } from "./theme/load.js";
 export { PROJECT_STYLESHEET, SITE_STYLESHEET, chromeOf, writeThemeAssets } from "./theme/chrome.js";
 export type { ThemeAssetsSource, ThemeChrome } from "./theme/chrome.js";
-export { importThemeModule, packageDirectoryOf, packageRootOf } from "./theme/node-loader.js";
+export {
+  importFile,
+  importThemeModule,
+  packageDirectoryOf,
+  packageRootOf,
+} from "./theme/node-loader.js";
 export { ThemeResolutionError, defaultTheme, resolveTheme } from "./theme/resolve.js";
 export type { ThemeLoader } from "./theme/resolve.js";
-export type { ResolvedTheme, SlotComponents, ThemeOverride } from "./theme/types.js";
+export type {
+  PartComponents,
+  ResolvedTheme,
+  SlotComponents,
+  ThemeOverride,
+  TypedComponents,
+} from "./theme/types.js";
 export { A11Y_RULES, checkAccessibility } from "./a11y/check.js";
 export type { A11yFinding, A11yRule } from "./a11y/check.js";
 export {
@@ -146,6 +165,8 @@ export type {
 export * as galleryFixtures from "./gallery/fixtures.js";
 export { galleryPages } from "./gallery/pages.js";
 export type { GalleryPage } from "./gallery/pages.js";
+export { typePages } from "./gallery/types.js";
+export type { GalleryTypes, TypePage } from "./gallery/types.js";
 export {
   LEAD_SECTION_ID,
   RECOGNISED_CLASS,

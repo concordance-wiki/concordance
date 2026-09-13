@@ -24,6 +24,7 @@ export const labels = {
   shortcuts: "Most cited words",
   sourceFreshness: "Freshness of the sources",
   properties: "Properties",
+  otherAttributes: "Other attributes",
   legendWritten: "link written in the note",
   legendRecognised: "word recognised at indexing",
   source: "source:",

@@ -45,6 +45,8 @@ export interface BuildDependencies extends PluginLoaderDependencies {
   fetch?: typeof fetch;
   /** Loads a theme component; the real importer when absent. */
   loadTheme?: ThemeDependencies["loadTheme"];
+  /** Loads a component file of a type module; the modules' components are left aside when absent. */
+  loadFile?: ThemeDependencies["loadFile"];
   rootOf?: ThemeDependencies["rootOf"];
   pluginFiles?: ThemeDependencies["pluginFiles"];
   /** The cores available for conversions when `conversion.parallelism` is unset; one when absent. */
@@ -63,6 +65,7 @@ function themeDependencies(deps: BuildDependencies): ThemeDependencies {
     load: deps.load,
     commandAvailable: deps.commandAvailable,
     loadTheme: deps.loadTheme ?? nodeThemeDependencies.loadTheme,
+    ...(deps.loadFile === undefined ? {} : { loadFile: deps.loadFile }),
     ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
     ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
   };
@@ -113,12 +116,13 @@ export interface LoadedProfile {
 
 /**
  * The merged profile and its fingerprint: the default profile, the type modules of the plugins,
- * those of the project's `types_dir`, then the project profile; undefined, with the issues
- * printed, when a module or the project profile is invalid.
+ * those of the project's `types_dir`, then the project profile (`profile` of the configuration,
+ * resolved against its folder); undefined, with the issues printed, when a module or the
+ * project profile is invalid.
  */
 export function loadProfile(
   io: CommandIo,
-  config: Config,
+  projectProfile: string | undefined,
   configDirectory: string,
   sources: ProfileSources,
 ): LoadedProfile | undefined {
@@ -129,8 +133,8 @@ export function loadProfile(
   let file: string | undefined;
   let text: string | undefined;
   let fromProject: TypeModule[] = [];
-  if (config.profile !== undefined) {
-    file = resolve(configDirectory, config.profile);
+  if (projectProfile !== undefined) {
+    file = resolve(configDirectory, projectProfile);
     if (!io.fs.exists(file)) {
       io.err(`${file}: profile file not found`);
       return undefined;
@@ -187,7 +191,7 @@ export async function buildCommand(
     ...deps,
     builtin: [defaultThemeManifest()],
   });
-  const resolved = loadProfile(io, config, configDirectory, {
+  const resolved = loadProfile(io, config.profile, configDirectory, {
     registry: plugins.registry,
     ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
     ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
@@ -299,6 +303,7 @@ export async function buildCommand(
     output,
     command: "build",
     registry: plugins.registry,
+    modules: resolved.modules,
   });
   if (rendered !== exitCodes.ok) {
     return rendered;

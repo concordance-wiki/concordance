@@ -29,7 +29,7 @@ types/runbook/
 | `messages/<language>.json` | no | a flat translation, `{ "<key>": "..." }`, for each other language of the interface (`fr` ships). |
 | `template.md` | for an active type | the note template: a note of the type, frontmatter first, that the linter accepts. |
 | `schema.json` | no | an object keyed by attribute name whose values are JSON Schemas of the items of that `list` attribute; a key naming an attribute that is not a `list` is an error. It becomes the `schema` of the attribute in the assembled profile. |
-| `components/` | no | one module file per override: `EntityPage`, `Attribute@<name>` or `Section@<key>`, default export a Preact component; any other name is an error. |
+| `components/` | no | one module file per override: `EntityPage` (the page of the type), `Attribute@<name>` (the values of that attribute) or `Section@<key>` (that mapped section), default export a Preact component receiving the props the [theming guide](theming.md#rendering-per-type) gives; any other name is an error. A theme may still override them for the project. |
 
 The messages are plain ICU MessageFormat strings without variables; the profile keeps, for every label, the source message and the translations the module ships (`{ en, fr }`). Every problem of a module is reported at once with the file it comes from: a `type.yaml` key against the schema, a message naming an attribute the module does not declare, a component with a name the module cannot provide.
 

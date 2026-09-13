@@ -39,6 +39,10 @@
     "defaultMessage": "Neighbourhood",
     "description": "Heading of the one-hop neighbourhood of an entity."
   },
+  "entity.otherAttributes": {
+    "defaultMessage": "Other attributes",
+    "description": "Heading of the section listing the frontmatter keys the profile does not declare for the type."
+  },
   "entity.relatedTo": {
     "defaultMessage": "Related to",
     "description": "Heading of the list of entities linked to the current one."

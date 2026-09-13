@@ -3,9 +3,12 @@ import type { JSX } from "preact";
 import { SLOT_NAMES, type SlotName } from "../slots.js";
 import type { ThemeOverride } from "../theme/types.js";
 import type { GalleryPage } from "./pages.js";
+import type { TypePage } from "./types.js";
 
 export interface GalleryIndexProps {
   pages: readonly GalleryPage[];
+  /** The registered types, one page each; none when the gallery was built without types. */
+  types?: readonly TypePage[];
   overrides: readonly ThemeOverride[];
 }
 
@@ -47,8 +50,36 @@ function Slot({
   );
 }
 
-/** The entry page of the gallery: every slot, who renders it, and one link per state. */
-export function GalleryIndex({ pages, overrides }: GalleryIndexProps): JSX.Element {
+/** The registered types, each with the component that renders its page. */
+function Types({ types }: { types: readonly TypePage[] }): JSX.Element {
+  return (
+    <section class="gallery-slot" aria-labelledby="gallery-types">
+      <h2 id="gallery-types">Types</h2>
+      <p class="gallery-provenance">
+        Every registered type, its note template rendered as a note of that type: through the
+        generic entity page, or through the component a theme or the type module provides for it.
+      </p>
+      <ul>
+        {types.map((page) => (
+          <li key={page.file}>
+            <a href={page.file}>{page.type}</a>: {page.label},{" "}
+            {page.override === undefined ? (
+              "generic entity page"
+            ) : (
+              <>
+                <code>{page.override.slot}</code> of <code>{page.override.plugin}</code>,{" "}
+                <code>{page.override.theme}</code>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** The entry page of the gallery: every slot, who renders it, one link per state, and the registered types. */
+export function GalleryIndex({ pages, types = [], overrides }: GalleryIndexProps): JSX.Element {
   return (
     <div class="gallery">
       <h1>Component gallery</h1>
@@ -70,6 +101,7 @@ export function GalleryIndex({ pages, overrides }: GalleryIndexProps): JSX.Eleme
           override={overrides.find((override) => override.slot === name)}
         />
       ))}
+      {types.length > 0 && <Types types={types} />}
     </div>
   );
 }

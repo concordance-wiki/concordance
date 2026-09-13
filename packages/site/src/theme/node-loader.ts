@@ -1,4 +1,4 @@
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
 
@@ -38,4 +38,12 @@ export function packageDirectoryOf(
   return fileURLToPath(
     packageRootOf(import.meta.resolve(plugin), (path) => fileSystem.exists(path)),
   );
+}
+
+/** Imports a module file by its absolute path: the components a type module ships. */
+export async function importFile(path: string): Promise<unknown> {
+  // The path is data from a module folder: no bundler must try to resolve it ahead of time.
+  const module: unknown = await import(/* @vite-ignore */ pathToFileURL(path).href);
+  // A module namespace is always an object; a missing default export reads as undefined.
+  return (module as { default?: unknown }).default;
 }

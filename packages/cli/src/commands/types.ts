@@ -38,7 +38,7 @@ export function pluginTypeModules(
     const directory = resolve(rootOf(contribution.plugin), contribution.path);
     const reading = readTypeModule(files, directory);
     if (reading.ok) {
-      modules.push(reading.module);
+      modules.push({ ...reading.module, origin: contribution.plugin });
       continue;
     }
     failed = true;

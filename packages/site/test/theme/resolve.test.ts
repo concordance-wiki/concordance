@@ -6,15 +6,21 @@ import {
   importPlugin,
   loadPlugins,
   memoryFileSystem,
+  nodeFileSystem,
   type PluginManifest,
 } from "@concordance-wiki/core";
+import { readTypeModule, type TypeModule } from "@concordance-wiki/profile";
+import { h } from "preact";
+import { renderToString } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 
 import { renderPage, renderSlot } from "../../src/render.js";
+import type { EntityPageProps } from "../../src/slots.js";
+import { attributeComponentFor, pageComponentFor, ThemeContext } from "../../src/theme/context.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
-import { importThemeModule, packageDirectoryOf } from "../../src/theme/node-loader.js";
+import { importFile, importThemeModule, packageDirectoryOf } from "../../src/theme/node-loader.js";
 import { ThemeResolutionError, defaultTheme, resolveTheme } from "../../src/theme/resolve.js";
-import { footer, header, todo } from "../../src/gallery/fixtures.js";
+import { entityPage, footer, header, todo } from "../../src/gallery/fixtures.js";
 
 const fixtures = resolve(fileURLToPath(import.meta.url), "../../../../../fixtures/plugins");
 const fixturePlugin = pathToFileURL(resolve(fixtures, "theme-example/index.mjs")).href;
@@ -28,6 +34,18 @@ const validTheme = [
 ].join("\n");
 
 const available = { commandAvailable: () => Promise.resolve(true) };
+
+/** A runbook page: the fixture entity page retyped, with a mapped section and an attribute the type does not declare. */
+const runbookPage: EntityPageProps = {
+  ...entityPage,
+  entity: { ...entityPage.entity, type: "runbook", typeLabel: "Runbook" },
+  highlights: [{ name: "trigger", label: "Trigger", values: [{ text: "a red build" }] }],
+  sections: [
+    { id: "section-lead", html: "<p>After a red build.</p>" },
+    { id: "section-steps", heading: "Steps", html: "<ol><li>Rebuild</li></ol>", key: "steps" },
+  ],
+  otherAttributes: [{ name: "ticket", label: "ticket", values: [{ text: "WIKI-12" }] }],
+};
 
 function themePlugin(
   name: string,
@@ -151,6 +169,187 @@ describe("resolveTheme", () => {
     expect((theme.components.Footer as () => string)()).toBe("@example/second:./footer.js");
   });
 
+  describe("components per type", () => {
+    /** The runbook module of the example plugin, read from the fixtures. */
+    function runbookModule(): TypeModule {
+      const reading = readTypeModule(nodeFileSystem, resolve(fixtures, "example/types/runbook"));
+      if (!reading.ok) throw new Error("the runbook fixture does not read");
+      return { ...reading.module, origin: "@concordance-wiki/fixture-plugin-example" };
+    }
+
+    it("files the typed components of a theme by type, attribute and section, and lists them as overrides", async () => {
+      const registry = await registryOf({
+        "@example/theme": themePlugin("@example/theme", {
+          "EntityPage@runbook": "./runbook.js",
+          "Attribute@steps": "./steps.js",
+          "Section@rules": "./rules.js",
+          Footer: "./footer.js",
+        }),
+      });
+      const theme = await resolveTheme(registry, {
+        load: (plugin, path) => Promise.resolve(() => `${plugin}:${path}`),
+      });
+      expect(theme.typed?.pages["runbook"]).toBeDefined();
+      expect((theme.typed?.pages["runbook"] as () => string)()).toBe("@example/theme:./runbook.js");
+      expect(Object.keys(theme.typed?.parts.attributes ?? {})).toEqual(["steps"]);
+      expect(Object.keys(theme.typed?.parts.sections ?? {})).toEqual(["rules"]);
+      expect(theme.typed?.typeParts).toEqual({});
+      expect(theme.overrides).toEqual([
+        { slot: "Attribute@steps", plugin: "@example/theme", theme: "custom" },
+        { slot: "EntityPage@runbook", plugin: "@example/theme", theme: "custom" },
+        { slot: "Footer", plugin: "@example/theme", theme: "custom" },
+        { slot: "Section@rules", plugin: "@example/theme", theme: "custom" },
+      ]);
+      expect(theme.components.EntityPage).toBe(defaultComponents.EntityPage);
+    });
+
+    it("carries no typed components when neither a theme nor a module provides any", async () => {
+      const registry = await registryOf({
+        "@example/theme": themePlugin("@example/theme", { Footer: "./footer.js" }),
+      });
+      const theme = await resolveTheme(registry, { load: () => Promise.resolve(() => null) }, [
+        { ...runbookModule(), components: {} },
+      ]);
+      expect(theme.typed).toBeUndefined();
+    });
+
+    it("loads the components of a type module for its own type when the loader imports files", async () => {
+      const module: TypeModule = {
+        ...runbookModule(),
+        components: {
+          EntityPage: "/modules/runbook/components/EntityPage.js",
+          "Attribute@steps": "/modules/runbook/components/Attribute@steps.js",
+          "Section@rules": "/modules/runbook/components/Section@rules.js",
+        },
+      };
+      const asked: string[] = [];
+      const theme = await resolveTheme(
+        await registryOf({}),
+        {
+          load: () => Promise.resolve(undefined),
+          loadFile: (path) => {
+            asked.push(path);
+            return Promise.resolve(() => path);
+          },
+        },
+        [module],
+      );
+      expect(asked).toEqual([
+        "/modules/runbook/components/Attribute@steps.js",
+        "/modules/runbook/components/EntityPage.js",
+        "/modules/runbook/components/Section@rules.js",
+      ]);
+      expect((theme.typed?.pages["runbook"] as () => string)()).toBe(
+        "/modules/runbook/components/EntityPage.js",
+      );
+      expect(theme.typed?.parts).toEqual({ attributes: {}, sections: {} });
+      expect(Object.keys(theme.typed?.typeParts["runbook"]?.attributes ?? {})).toEqual(["steps"]);
+      expect(Object.keys(theme.typed?.typeParts["runbook"]?.sections ?? {})).toEqual(["rules"]);
+      expect(theme.overrides).toEqual([
+        {
+          slot: "Attribute@steps",
+          plugin: "@concordance-wiki/fixture-plugin-example",
+          theme: "type module",
+        },
+        {
+          slot: "EntityPage@runbook",
+          plugin: "@concordance-wiki/fixture-plugin-example",
+          theme: "type module",
+        },
+        {
+          slot: "Section@rules",
+          plugin: "@concordance-wiki/fixture-plugin-example",
+          theme: "type module",
+        },
+      ]);
+    });
+
+    it("names a module of the project folder as types_dir in the overrides", async () => {
+      const reading = readTypeModule(nodeFileSystem, resolve(fixtures, "example/types/runbook"));
+      if (!reading.ok) throw new Error("the runbook fixture does not read");
+      const theme = await resolveTheme(
+        await registryOf({}),
+        { load: () => Promise.resolve(undefined), loadFile: () => Promise.resolve(() => null) },
+        [reading.module],
+      );
+      expect(theme.overrides).toEqual([
+        { slot: "EntityPage@runbook", plugin: "types_dir", theme: "type module" },
+      ]);
+    });
+
+    it("leaves the components of the modules aside when the loader cannot import files", async () => {
+      const theme = await resolveTheme(
+        await registryOf({}),
+        { load: () => Promise.resolve(undefined) },
+        [runbookModule()],
+      );
+      expect(theme.typed).toBeUndefined();
+      expect(theme.overrides).toEqual([]);
+    });
+
+    it("lets a theme win over a module for the same page, attribute or section", async () => {
+      const module: TypeModule = {
+        ...runbookModule(),
+        components: {
+          EntityPage: "/modules/runbook/components/EntityPage.js",
+          "Attribute@steps": "/modules/runbook/components/Attribute@steps.js",
+        },
+      };
+      const registry = await registryOf({
+        "@example/theme": themePlugin("@example/theme", {
+          "EntityPage@runbook": "./runbook.js",
+          "Attribute@steps": "./steps.js",
+        }),
+      });
+      const theme = await resolveTheme(
+        registry,
+        {
+          load: (plugin, path) => Promise.resolve(() => `${plugin}:${path}`),
+          loadFile: (path) => Promise.resolve(() => path),
+        },
+        [module],
+      );
+      expect((theme.typed?.pages["runbook"] as () => string)()).toBe("@example/theme:./runbook.js");
+      expect(attributeComponentFor(theme, "runbook", "steps")).toBe(
+        theme.typed?.parts.attributes["steps"],
+      );
+      expect(theme.overrides.map((override) => `${override.slot} ${override.plugin}`)).toEqual([
+        "Attribute@steps @example/theme",
+        "EntityPage@runbook @example/theme",
+      ]);
+    });
+
+    it("rejects a module component whose default export is not a component", async () => {
+      await expect(
+        resolveTheme(
+          await registryOf({}),
+          { load: () => Promise.resolve(undefined), loadFile: () => Promise.resolve("nope") },
+          [runbookModule()],
+        ),
+      ).rejects.toThrow(
+        new ThemeResolutionError(
+          `type module runbook: the default export of ${resolve(fixtures, "example/types/runbook/components/EntityPage.js")} is not a component`,
+        ),
+      );
+    });
+
+    it("renders the page of the runbook fixture through the component its module ships", async () => {
+      const theme = await resolveTheme(
+        await registryOf({}),
+        { load: () => Promise.resolve(undefined), loadFile: importFile },
+        [runbookModule()],
+      );
+      const Page = pageComponentFor(theme, "runbook");
+      expect(Page).not.toBe(defaultComponents.EntityPage);
+      const html = renderToString(h(ThemeContext.Provider, { value: theme }, h(Page, runbookPage)));
+      expect(html).toContain('class="entity runbook"');
+      expect(html).toContain("Trigger: a red build");
+      expect(html).toContain('class="runbook-steps"');
+      expect(html).toContain("Other attributes");
+      expect(pageComponentFor(theme, "screen")).toBe(defaultComponents.EntityPage);
+    });
+  });
+
   it("rejects a component for a name that is not a slot", async () => {
     const registry = await registryOf({
       "@example/theme": themePlugin("@example/theme", { Sidebar: "./sidebar.js" }),
@@ -159,7 +358,7 @@ describe("resolveTheme", () => {
       resolveTheme(registry, { load: () => Promise.resolve(() => null) }),
     ).rejects.toThrow(
       new ThemeResolutionError(
-        "plugin @example/theme, theme custom: Sidebar is not a slot; slots are Shell, Header, Footer, Home, EntityPage, KeywordPage, MentionsPanel, Neighbourhood, SearchResults, Index, Todo",
+        "plugin @example/theme, theme custom: Sidebar is not a slot; slots are Shell, Header, Footer, Home, EntityPage, KeywordPage, MentionsPanel, Neighbourhood, SearchResults, Index, Todo, EntityPage@<type>, Attribute@<attribute> or Section@<section>",
       ),
     );
   });

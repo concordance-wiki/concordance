@@ -107,7 +107,8 @@ export function message(
   return formatMessage(context.catalogue, id);
 }
 
-function labelIn(label: Label, language: string): string {
+/** A label of the profile in the given language, English when it has no translation. */
+export function labelIn(label: Label, language: string): string {
   const localized: Record<string, string | undefined> = { ...label };
   return localized[language] ?? label.en;
 }

@@ -21,6 +21,50 @@ export function isSlotName(value: string): value is SlotName {
   return (SLOT_NAMES as readonly string[]).includes(value);
 }
 
+/**
+ * The parts of an entity page a theme or a type module may render for one attribute or one
+ * mapped section: `Attribute@<name>` receives the value of that attribute, `Section@<key>` the
+ * section of the note the profile maps under that key.
+ */
+export const PART_NAMES = ["Attribute", "Section"] as const;
+
+export type PartName = (typeof PART_NAMES)[number];
+
+/** What a `components` key of a theme or a `components/` file of a type module names. */
+export type ComponentName =
+  | { kind: "slot"; slot: SlotName }
+  | { kind: "page"; type: string }
+  | { kind: "attribute"; name: string }
+  | { kind: "section"; key: string };
+
+const TYPED_NAME = /^([A-Za-z]+)@([a-z][a-z0-9_]*)$/;
+
+/**
+ * Reads a component name: a slot (`Footer`), the page of one type (`EntityPage@runbook`), the
+ * value of one attribute (`Attribute@steps`) or one mapped section (`Section@steps`); undefined
+ * for any other name.
+ */
+export function parseComponentName(name: string): ComponentName | undefined {
+  if (isSlotName(name)) {
+    return { kind: "slot", slot: name };
+  }
+  const match = TYPED_NAME.exec(name);
+  const [, base, key] = match ?? [];
+  if (base === undefined || key === undefined) {
+    return undefined;
+  }
+  switch (base) {
+    case "EntityPage":
+      return { kind: "page", type: key };
+    case "Attribute":
+      return { kind: "attribute", name: key };
+    case "Section":
+      return { kind: "section", key };
+    default:
+      return undefined;
+  }
+}
+
 export interface Link {
   label: string;
   href: string;
@@ -197,6 +241,7 @@ export interface AttributeValue {
 
 export interface Attribute {
   name: string;
+  /** The label the profile gives the attribute in the language of the page, else its name. */
   label: string;
   values: AttributeValue[];
 }
@@ -206,6 +251,66 @@ export interface Section {
   id: string;
   heading?: string;
   html: string;
+  /** The mapped section of the type whose heading the section carries, `steps` for instance; absent for an ordinary section. */
+  key?: string;
+}
+
+/** An attribute of the type as the profile declares it, labelled in the language of the page. */
+export interface DeclaredAttribute {
+  name: string;
+  label: string;
+  /** The kind of value: `string`, `ref[]`, `list`... as the profile writes it. */
+  type: string;
+  /** The type slugs a reference may point at, as declared (`any` and `same` included). */
+  target?: string[];
+  /** The relation a reference produces. */
+  relation?: string;
+  /** The allowed values of an enum. */
+  values?: string[];
+}
+
+/** A mapped section of the type: its key, its heading in the language of the page and the relation it produces. */
+export interface DeclaredSection {
+  key: string;
+  heading: string;
+  parse: string;
+  produces: string;
+}
+
+/** The declaration of the type of the page, as the profile has it, so that a dedicated component can lay the page out from it. */
+export interface TypeDeclaration {
+  type: string;
+  label: string;
+  group: string;
+  glyph?: string;
+  /** The attributes of the type in declaration order, the common attributes left out. */
+  attributes: DeclaredAttribute[];
+  /** The mapped sections in declaration order. */
+  sections: DeclaredSection[];
+  display: {
+    highlight: string[];
+    neighboursOrder: string[];
+  };
+}
+
+/** The headings the generic page adds itself, in the language of the site; the theme's own English when absent. */
+export interface EntityPageLabels {
+  /** Heading of the panel of declared attributes. */
+  properties: string;
+  /** Heading of the section listing the attributes the type does not declare. */
+  otherAttributes: string;
+}
+
+/** The value of one attribute of an entity page, what an `Attribute@<name>` component receives. */
+export interface AttributeProps {
+  entity: EntityRef;
+  attribute: Attribute;
+}
+
+/** One mapped section of an entity page, what a `Section@<key>` component receives. */
+export interface SectionProps {
+  entity: EntityRef;
+  section: Section;
 }
 
 export interface SourceRef {
@@ -285,6 +390,8 @@ export interface ContractSectionProps {
 
 export interface EntityPageProps {
   entity: EntityRef;
+  /** The type as the profile declares it; absent for a type the profile does not declare. */
+  declaration?: TypeDeclaration;
   /**
    * Qualifying properties, in the order of `display.highlight` of the type: the first two sit
    * next to the badge, the next three on a line under it, the template shows at most five.
@@ -292,8 +399,14 @@ export interface EntityPageProps {
   highlights: Attribute[];
   /** The note rendered by the build; the text marks written links and recognised words. */
   sections: Section[];
-  /** Declared metadata of the side panel. */
+  /**
+   * The side panel: the common properties, then the attributes the type declares in declaration
+   * order, then the other declared common attributes the note sets.
+   */
   attributes: Attribute[];
+  /** The frontmatter keys the profile declares for no type, kept as written, in key order; absent or empty when the note sets none. */
+  otherAttributes?: Attribute[];
+  labels?: Partial<EntityPageLabels>;
   neighbours: NeighbourhoodProps;
   mentions: MentionsPanelProps;
   sources: SourceRef[];

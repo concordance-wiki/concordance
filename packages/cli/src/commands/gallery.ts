@@ -1,11 +1,24 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { PluginConfig } from "@concordance-wiki/core";
-import { buildGallery, type ResolvedTheme, type ResolvedThemeConfig } from "@concordance-wiki/site";
+import { nodeFileSystem, type PluginConfig, type PluginRegistry } from "@concordance-wiki/core";
+import { defaultTypesDirectory, readTypeModules } from "@concordance-wiki/profile";
+import {
+  buildGallery,
+  resolveTheme,
+  type ResolvedTheme,
+  type ResolvedThemeConfig,
+} from "@concordance-wiki/site";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
-import { nodeThemeDependencies, projectTheme, themeOf, type ThemeDependencies } from "./theme.js";
+import { loadProfile } from "./build.js";
+import {
+  loaderOf,
+  nodeThemeDependencies,
+  pluginsOf,
+  projectTheme,
+  type ThemeDependencies,
+} from "./theme.js";
 import { defaultConfigFile, loadConfigFile } from "./validate-config.js";
 
 export const defaultGalleryDirectory = "./gallery";
@@ -18,15 +31,18 @@ interface ConfiguredGallery {
   plugins: PluginConfig[];
   /** The project's `theme.yaml`, when the configuration names one or one sits next to it. */
   theme?: ResolvedThemeConfig;
+  /** The project profile the configuration names, and the folder it is resolved against. */
+  profile?: string;
+  configDirectory: string;
 }
 
-/** The plugins and theme of the configuration; none when no configuration was asked for and none is found. */
+/** The plugins, theme and profile of the configuration; none when no configuration was asked for and none is found. */
 function fromConfig(
   io: CommandIo,
   configOption: string | undefined,
 ): ConfiguredGallery | { exit: ExitCode } {
   if (configOption === undefined && !io.fs.exists(resolve(io.cwd, defaultConfigFile))) {
-    return { plugins: [] };
+    return { plugins: [], configDirectory: io.cwd };
   }
   const loaded = loadConfigFile(io, configOption);
   if (loaded === undefined) {
@@ -36,16 +52,25 @@ function fromConfig(
     io.err("gallery stopped: fix the configuration first");
     return { exit: exitCodes.invalid };
   }
-  const theme = projectTheme(io, loaded.file, loaded.validation.config, "gallery");
+  const { config } = loaded.validation;
+  const theme = projectTheme(io, loaded.file, config, "gallery");
   if ("exit" in theme) {
     return theme;
   }
-  return { plugins: loaded.validation.config.plugins ?? [], ...theme };
+  return {
+    plugins: config.plugins ?? [],
+    ...theme,
+    ...(config.profile === undefined ? {} : { profile: config.profile }),
+    configDirectory: dirname(loaded.file),
+  };
 }
 
 /**
- * Renders every slot with fixture data through the theme of `--theme` or of the configuration:
- * the components of the plugins, and the `theme.yaml` of the project when there is one, else of the last plugin theme.
+ * Renders every slot with fixture data, and every registered type from its template, through
+ * the theme of `--theme` or of the configuration: the components of the plugins and of the type
+ * modules, and the `theme.yaml` of the project when there is one, else of the last plugin theme.
+ * The types are those of the profile: the core ones, read from the profile package, the ones
+ * the plugins contribute and, with a configuration, those of the project profile.
  */
 export async function galleryCommand(
   argv: string[],
@@ -69,21 +94,45 @@ export async function galleryCommand(
     }
     configured = found;
   } else {
-    configured = { plugins: values.theme };
+    configured = { plugins: values.theme, configDirectory: io.cwd };
   }
-  let theme: ResolvedTheme;
-  try {
-    theme = await themeOf(configured.plugins, io, deps);
-    if (configured.theme !== undefined) {
-      theme = { ...theme, config: configured.theme };
-    }
-  } catch (error) {
+  const failed = (error: unknown): ExitCode => {
     io.err(
       `gallery: cannot resolve the theme: ${error instanceof Error ? error.message : String(error)}`,
     );
     return exitCodes.failure;
+  };
+  let registry: PluginRegistry;
+  try {
+    registry = await pluginsOf(configured.plugins, io, deps);
+  } catch (error) {
+    return failed(error);
   }
-  const report = await buildGallery({ output, theme, fileSystem: io.fs });
+  const resolved = loadProfile(io, configured.profile, configured.configDirectory, {
+    registry,
+    ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
+    ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
+  });
+  if (resolved === undefined) {
+    io.err("gallery stopped: fix the profile first");
+    return exitCodes.invalid;
+  }
+  let theme: ResolvedTheme;
+  try {
+    theme = await resolveTheme(registry, loaderOf(deps), resolved.modules);
+  } catch (error) {
+    return failed(error);
+  }
+  if (configured.theme !== undefined) {
+    theme = { ...theme, config: configured.theme };
+  }
+  const core = readTypeModules(nodeFileSystem, defaultTypesDirectory());
+  const report = await buildGallery({
+    output,
+    theme,
+    fileSystem: io.fs,
+    types: { profile: resolved.profile, modules: [...core.modules, ...resolved.modules] },
+  });
   for (const line of report.summary) {
     io.out(line);
   }
