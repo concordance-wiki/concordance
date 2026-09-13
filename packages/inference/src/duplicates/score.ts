@@ -130,10 +130,10 @@ function nameSignal(a: DuplicateResource, b: DuplicateResource): DuplicateSignal
   };
 }
 
-function titleMatchesHeading(a: DuplicateResource, b: DuplicateResource): boolean {
-  if (a.title === undefined || b.heading === undefined) return false;
-  const title = comparisonKey(a.title);
-  return title !== "" && title === comparisonKey(b.heading);
+function titleMatchesHeading(titled: DuplicateResource, headed: DuplicateResource): boolean {
+  if (titled.title === undefined || headed.heading === undefined) return false;
+  const title = comparisonKey(titled.title);
+  return title !== "" && title === comparisonKey(headed.heading);
 }
 
 function titleSignal(a: DuplicateResource, b: DuplicateResource): DuplicateSignal | undefined {

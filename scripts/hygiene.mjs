@@ -33,8 +33,8 @@ const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\
 for (const path of tracked) {
   const segments = path.split("/");
   const base = segments[segments.length - 1];
-  const dotSegment = segments.find((s) => s.startsWith(".") && s !== "." && s !== "..");
-  if (dotSegment && !allowedDotPaths.some((re) => re.test(path)) && !allowedDotFiles.has(base)) {
+  const dotted = segments.some((s) => s.startsWith(".") && s !== "." && s !== "..");
+  if (dotted && !allowedDotPaths.some((re) => re.test(path)) && !allowedDotFiles.has(base)) {
     failures.push(`unexpected dot file or directory: ${path}`);
   }
   if (

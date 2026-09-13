@@ -163,7 +163,7 @@ describe("Linter and build parity", () => {
       const beyond = build.filter((finding) => !isLocal(finding)).map((finding) => finding.check);
       // The type cascade needs the profile and the whole source: the local scope does not run it yet.
       expect(beyond).toContain("E-TYPE-CONFLICT");
-      expect(build.filter(isLocal).length).toBe(4);
+      expect(build.filter(isLocal)).toHaveLength(4);
     });
   });
 
@@ -228,7 +228,7 @@ describe("Linter and build parity", () => {
       async (corpus) => {
         cpSync(join(corpora, corpus), copy, { recursive: true });
         const expected = expectedLocal(copy);
-        expect(expected.length).toBe(4);
+        expect(expected).toHaveLength(4);
         expect(lintCopy(copy, readConfig(copy)).map(location)).toEqual(expected);
         expect((await buildCopy(copy)).filter(isLocal).map(location)).toEqual(expected);
       },

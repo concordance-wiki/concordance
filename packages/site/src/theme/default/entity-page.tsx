@@ -134,7 +134,7 @@ export function Breadcrumb({
     <nav class="breadcrumbs" aria-label={label}>
       <ol class="breadcrumbs-list">
         {items.map((item, index) => (
-          <li key={index}>
+          <li key={item.href ?? item.label}>
             {index === last ? (
               <span aria-current="page">{item.label}</span>
             ) : item.href === undefined ? (

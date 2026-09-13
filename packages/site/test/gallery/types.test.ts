@@ -163,7 +163,7 @@ describe("the gallery with the registered types", () => {
     });
     const html = fileSystem.listFiles("/out").filter((file) => file.endsWith(".html"));
     const typeFiles = html.filter((file) => file.startsWith("type-"));
-    expect(typeFiles.length).toBe(16);
+    expect(typeFiles).toHaveLength(16);
     expect(html).toHaveLength(galleryPages.length + typeFiles.length + 1);
     expect(report.problems).toEqual([]);
     const index = fileSystem.readText("/out/index.html");

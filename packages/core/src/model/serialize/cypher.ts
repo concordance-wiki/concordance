@@ -15,7 +15,7 @@ function isScalar(value: unknown): value is Scalar {
 
 /** A Cypher string literal in single quotes; only the backslash and the quote need escaping. */
 export function quote(text: string): string {
-  return `'${text.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+  return `'${text.replaceAll("\\", String.raw`\\`).replaceAll("'", String.raw`\'`)}'`;
 }
 
 function literal(value: Scalar): string {
@@ -33,7 +33,7 @@ function propertyLiteral(value: unknown): string | undefined {
 
 /** A property name that is not a plain identifier goes between backticks, a backtick doubled. */
 function propertyName(name: string): string {
-  return /^[A-Za-z_]\w*$/.test(name) ? name : `\`${name.replace(/`/g, "``")}\``;
+  return /^[A-Za-z_]\w*$/.test(name) ? name : `\`${name.replaceAll("`", "``")}\``;
 }
 
 function entityProperties(entity: Entity): string[] {
@@ -62,7 +62,7 @@ function entityStatement(entity: Entity): string {
 
 /** The relation slug as a relationship type: upper case, with any dash turned into an underscore. */
 export function relationshipType(relation: string): string {
-  return relation.toUpperCase().replace(/-/g, "_");
+  return relation.toUpperCase().replaceAll("-", "_");
 }
 
 function linkStatement(link: Link): string {

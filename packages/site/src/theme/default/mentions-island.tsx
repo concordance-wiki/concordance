@@ -150,9 +150,7 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
             ))}
           </ul>
           <p class="related-type-summary">
-            <span role="status">
-              {fill(labels.pagesOf, { shown: shown.length, total: all.length })}
-            </span>
+            <output>{fill(labels.pagesOf, { shown: shown.length, total: all.length })}</output>
             <button type="button" class="related-clear" onClick={this.clearTypes}>
               {labels.clearAll}
             </button>

@@ -71,7 +71,7 @@ function archive(tree) {
       const absolute = join(directory, entry.name);
       if (entry.isDirectory()) walk(absolute);
       else if (!skippedSuffixes.some((suffix) => entry.name.endsWith(suffix))) {
-        const path = relative(tree, absolute).split("\\").join("/");
+        const path = relative(tree, absolute).replaceAll("\\", "/");
         files[path] = readFileSync(absolute).toString("base64");
       }
     }

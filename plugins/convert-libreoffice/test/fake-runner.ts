@@ -19,11 +19,12 @@ export type Behaviour =
 const encoder = new TextEncoder();
 
 export const PDF_BYTES = encoder.encode("%PDF-1.4 fake");
+const WRITES_PDF: Behaviour = { kind: "pdf", bytes: PDF_BYTES };
 
 /** Plays LibreOffice: writes the PDF where `--outdir` says, fails, hangs past the timeout, or exits silently. */
 export function fakeRunner(
   fs: FileSystem,
-  behaviour: Behaviour = { kind: "pdf", bytes: PDF_BYTES },
+  behaviour: Behaviour = WRITES_PDF,
 ): CommandRunner & { calls: RecordedCall[] } {
   const calls: RecordedCall[] = [];
   return {
@@ -31,7 +32,7 @@ export function fakeRunner(
     run: (command, args, options) => {
       calls.push({ command, args, options });
       const outdir = args[args.indexOf("--outdir") + 1] ?? "";
-      const input = args[args.length - 1] ?? "";
+      const input = args.at(-1) ?? "";
       const ok: CommandResult = { code: 0, stdout: "convert", stderr: "", timedOut: false };
       switch (behaviour.kind) {
         case "pdf":

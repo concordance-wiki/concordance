@@ -43,7 +43,7 @@ export function AttributeValues({
   return (
     <>
       {attribute.values.map((value, index) => (
-        <Value key={index} value={value} separated={index > 0} />
+        <Value key={value.href ?? value.text} value={value} separated={index > 0} />
       ))}
     </>
   );

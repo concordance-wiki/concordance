@@ -1866,12 +1866,12 @@ describe("The current URL is visible in the interface, which makes the state exp
     answer("ke", shards["ke"]);
     await settled();
     expect(results.html).toContain(
-      '<code class="search-url">search/index.html?q=key</code><button type="button" class="copy-address">Copy</button><span class="copied" role="status"></span></p>',
+      '<code class="search-url">search/index.html?q=key</code><button type="button" class="copy-address">Copy</button><output class="copied"></output></p>',
     );
     view.props().onCopy?.();
     await settled();
     expect(written).toEqual(["file:///dist/search/index.html?q=key"]);
-    expect(results.html).toContain('<span class="copied" role="status">Address copied</span>');
+    expect(results.html).toContain('<output class="copied">Address copied</output>');
     expect(view.props().copied).toBe(true);
   });
 
@@ -1882,14 +1882,14 @@ describe("The current URL is visible in the interface, which makes the state exp
     refusing.view.props().onCopy?.();
     await settled();
     expect(refusing.view.props().copied).toBe(false);
-    expect(refusing.results.html).toContain('<span class="copied" role="status"></span>');
+    expect(refusing.results.html).toContain('<output class="copied"></output>');
     const accepting = await resultsPage("", { clipboard: { writeText: () => Promise.resolve() } });
     accepting.view.props().onCopy?.();
     await settled();
     expect(accepting.view.props().copied).toBe(true);
     await accepting.follow("?type=term");
     expect(accepting.view.props().copied).toBe(false);
-    expect(accepting.results.html).toContain('<span class="copied" role="status"></span>');
+    expect(accepting.results.html).toContain('<output class="copied"></output>');
   });
 });
 

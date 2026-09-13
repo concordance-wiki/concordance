@@ -24,7 +24,7 @@ describe("island", () => {
     expect(html).toContain(
       'data-props="{&quot;name&quot;:&quot;&lt;/concordance-island>&lt;script>\\&quot;&quot;}"',
     );
-    expect(html.split("<concordance-island").length).toBe(2);
+    expect(html.split("<concordance-island")).toHaveLength(2);
   });
 });
 

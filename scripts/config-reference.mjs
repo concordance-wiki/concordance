@@ -58,7 +58,7 @@ const SCHEMA_BASE = "https://concordance-wiki.github.io/concordance/schemas/";
  * attribute and display definitions of the profile.
  */
 export function inlineExternalRefs(schema, readSchema) {
-  const defs = { ...(schema.$defs ?? {}) };
+  const defs = { ...schema.$defs };
   const visit = (node) => {
     if (Array.isArray(node)) return node.map(visit);
     if (!isObject(node)) return node;
@@ -85,7 +85,7 @@ const isObject = (value) => typeof value === "object" && value !== null && !Arra
 /** Markdown table cell: pipes escaped, newlines flattened. */
 const cell = (text) =>
   String(text)
-    .replace(/\|/g, "\\|")
+    .replaceAll("|", String.raw`\|`)
     // A blank run is taken from its first character: retrying inside it would make the runtime quadratic.
     .replace(/(?<!\s)\s*\n\s*/g, " ");
 const code = (text) => `\`${cell(text)}\``;
@@ -95,7 +95,7 @@ export function anchorOf(heading) {
   return heading
     .toLowerCase()
     .replace(/[^a-z0-9 _-]/g, "")
-    .replace(/ /g, "-");
+    .replaceAll(" ", "-");
 }
 
 function resolveRef(schema, ref) {
@@ -128,7 +128,7 @@ function typeOf(schema, raw) {
   if (node.const !== undefined) return "constant";
   if (node.enum !== undefined) return "enum";
   if (node.type === undefined && Array.isArray(node.oneOf)) {
-    return node.oneOf.map((branch) => typeOf(schema, branch)).join(" \\| ");
+    return node.oneOf.map((branch) => typeOf(schema, branch)).join(String.raw` \| `);
   }
   if (node.type === "array") {
     const items = typeOf(schema, node.items ?? {});
@@ -138,7 +138,7 @@ function typeOf(schema, raw) {
     if (mapValues(node) !== null) return `map of ${typeOf(schema, node.additionalProperties)}`;
     return "object";
   }
-  if (Array.isArray(node.type)) return node.type.join(" \\| ");
+  if (Array.isArray(node.type)) return node.type.join(String.raw` \| `);
   return node.type ?? "any";
 }
 
@@ -320,12 +320,13 @@ export function renderReference(schema, entry) {
           ? code(JSON.stringify(resolved.default))
           : "—";
       const allowed = allowedOf(schema, value);
+      const allowedValues = allowed.length > 0 ? allowed.join("; ") : "—";
+      const label = `${code(name)}${required.has(name) ? " (required)" : ""}`;
+      const childPath = path === "" ? name : `${path}.${name}`;
       body.push(
-        `| ${code(name)}${required.has(name) ? " (required)" : ""} | ${typeOf(schema, value)} | ${defaultValue} | ${
-          allowed.length > 0 ? allowed.join("; ") : "—"
-        } | ${cell(describe(value, `${path === "" ? "" : `${path}.`}${name}`))} |`,
+        `| ${label} | ${typeOf(schema, value)} | ${defaultValue} | ${allowedValues} | ${cell(describe(value, childPath))} |`,
       );
-      children.push(...nestedObjects(schema, value, `${path === "" ? "" : `${path}.`}${name}`));
+      children.push(...nestedObjects(schema, value, childPath));
     }
     const values = mapValues(node);
     if (values !== null) {
@@ -336,8 +337,9 @@ export function renderReference(schema, entry) {
     for (const child of children) section(child.node, child.path, child.ref, path === "" ? 2 : 3);
   };
 
-  lines.push(`# ${entry.title}`, "");
   lines.push(
+    `# ${entry.title}`,
+    "",
     `Every key of \`${entry.file}\`, generated from [\`${entry.schema}\`](../../packages/core/schemas/${entry.schema}) by \`scripts/config-reference.mjs\`: edit the schema, then run \`pnpm reference:update\`. The [guide](${entry.guide}) explains how the keys work together.`,
     "",
   );

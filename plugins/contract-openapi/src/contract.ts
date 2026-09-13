@@ -77,7 +77,7 @@ function resolvePointer(document: Json, ref: string): unknown {
   let node: unknown = document;
   for (const segment of ref.slice(2).split("/")) {
     if (!isObject(node)) return undefined;
-    node = node[segment.replace(/~1/g, "/").replace(/~0/g, "~")];
+    node = node[segment.replaceAll("~1", "/").replaceAll("~0", "~")];
   }
   return node;
 }

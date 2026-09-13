@@ -160,7 +160,11 @@ function termOf(candidate: KeywordCandidate, page: boolean): TermCandidate {
 function withDistinctIds(pages: readonly KeywordPage[], taken: Set<string>): KeywordPage[] {
   return pages.map((page) => {
     let id = page.id;
-    for (let rank = 2; taken.has(id); rank += 1) id = `${page.id}-${String(rank)}`;
+    let rank = 2;
+    while (taken.has(id)) {
+      id = `${page.id}-${String(rank)}`;
+      rank += 1;
+    }
     taken.add(id);
     return id === page.id ? page : { ...page, id };
   });

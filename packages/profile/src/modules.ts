@@ -87,7 +87,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function error(path: string, message: string, detail: Partial<ConfigIssue> = {}): ConfigIssue {
+function problem(path: string, message: string, detail: Partial<ConfigIssue> = {}): ConfigIssue {
   return { severity: "error", path, message, ...detail };
 }
 
@@ -112,18 +112,18 @@ type Parsed = { ok: true; document: unknown } | { ok: false; issue: ConfigIssue 
 function parseYamlFile(text: string): Parsed {
   try {
     return { ok: true, document: parse(text) };
-  } catch (caught) {
+  } catch (error) {
     // The parser only throws YAMLParseError instances.
-    const detail = (caught as YAMLParseError).message.split("\n", 1).join("");
-    return { ok: false, issue: error("", `not valid YAML: ${detail}`) };
+    const detail = (error as YAMLParseError).message.split("\n", 1).join("");
+    return { ok: false, issue: problem("", `not valid YAML: ${detail}`) };
   }
 }
 
 function parseJsonFile(text: string): Parsed {
   try {
     return { ok: true, document: JSON.parse(text) };
-  } catch (caught) {
-    return { ok: false, issue: error("", `not valid JSON: ${(caught as SyntaxError).message}`) };
+  } catch (error) {
+    return { ok: false, issue: problem("", `not valid JSON: ${(error as SyntaxError).message}`) };
   }
 }
 
@@ -170,7 +170,10 @@ function messagesOf(
     return {
       messages: {},
       issues: [
-        prefixed(file, error("", "wrong type", { received: parsed.document, expected: "object" })),
+        prefixed(
+          file,
+          problem("", "wrong type", { received: parsed.document, expected: "object" }),
+        ),
       ],
     };
   }
@@ -184,7 +187,7 @@ function messagesOf(
       issues.push(
         prefixed(
           file,
-          error(key, "not a message", {
+          problem(key, "not a message", {
             received: parsed.document[key],
             expected: "a string, or { defaultMessage, description }",
           }),
@@ -201,7 +204,7 @@ function messagesOf(
       issues.push(
         prefixed(
           file,
-          error(key, "message names nothing the module declares", {
+          problem(key, "message names nothing the module declares", {
             expected:
               "label, description, counted, attributes.<declared attribute> or sections.<declared section>",
           }),
@@ -227,7 +230,7 @@ function schemaOf(
       issues: [
         prefixed(
           MODULE_SCHEMA_FILE,
-          error("", "wrong type", { received: parsed.document, expected: "object" }),
+          problem("", "wrong type", { received: parsed.document, expected: "object" }),
         ),
       ],
     };
@@ -238,7 +241,7 @@ function schemaOf(
       issues.push(
         prefixed(
           MODULE_SCHEMA_FILE,
-          error(name, "not a list attribute of the type", {
+          problem(name, "not a list attribute of the type", {
             expected: "the name of an attribute declared with type list",
           }),
         ),
@@ -258,7 +261,7 @@ function componentsOf(files: readonly string[]): {
     const name = file.replace(/\.[^.]+$/, "");
     if (!MODULE_COMPONENT_PATTERN.test(name) || file.includes("/")) {
       issues.push(
-        error(`${MODULE_COMPONENTS_FOLDER}/${file}`, "not a component a module may provide", {
+        problem(`${MODULE_COMPONENTS_FOLDER}/${file}`, "not a component a module may provide", {
           expected:
             "EntityPage, Attribute@<attribute> or Section@<section>, as a single module file",
         }),
@@ -283,7 +286,7 @@ export function readTypeModule(fs: FileSystem, directory: string): TypeModuleRea
     return {
       ok: false,
       issues: [
-        error("", "folder name is not a type slug", {
+        problem("", "folder name is not a type slug", {
           received: slug,
           expected: "lowercase letters, digits and underscores, starting with a letter",
         }),
@@ -291,7 +294,7 @@ export function readTypeModule(fs: FileSystem, directory: string): TypeModuleRea
     };
   }
   if (!fs.exists(at(MODULE_DECLARATION_FILE))) {
-    return { ok: false, issues: [error(MODULE_DECLARATION_FILE, "file not found")] };
+    return { ok: false, issues: [problem(MODULE_DECLARATION_FILE, "file not found")] };
   }
   const declared = declarationOf(fs.readText(at(MODULE_DECLARATION_FILE)));
   if (!declared.ok) {
@@ -311,12 +314,12 @@ export function readTypeModule(fs: FileSystem, directory: string): TypeModuleRea
   const source = messages[MODULE_SOURCE_LANGUAGE];
   if (source === undefined) {
     issues.push(
-      error(`${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json`, "file not found"),
+      problem(`${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json`, "file not found"),
     );
   } else {
     if (source["label"] === undefined) {
       issues.push(
-        error(
+        problem(
           `${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json: label`,
           "required message is missing",
         ),
@@ -325,7 +328,7 @@ export function readTypeModule(fs: FileSystem, directory: string): TypeModuleRea
     for (const key of Object.keys(declaration.sections ?? {})) {
       if (source[`sections.${key}`] === undefined) {
         issues.push(
-          error(
+          problem(
             `${MODULE_MESSAGES_FOLDER}/${MODULE_SOURCE_LANGUAGE}.json: sections.${key}`,
             "required message is missing",
           ),

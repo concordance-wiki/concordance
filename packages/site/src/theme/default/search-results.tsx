@@ -148,9 +148,7 @@ function Address({
           <button type="button" class="copy-address" onClick={onCopy}>
             {wording.copyAddress}
           </button>
-          <span class="copied" role="status">
-            {copied === true ? wording.copied : ""}
-          </span>
+          <output class="copied">{copied === true ? wording.copied : ""}</output>
         </>
       )}
     </p>

@@ -80,7 +80,7 @@ describe("tokensStylesheet", () => {
 
   it("serves the shipped families before the platform fonts, the text family for the headings too, and the default radius when the theme names none", () => {
     const { font, radius, ...bare } = theme;
-    expect([font, radius].length).toBe(2);
+    expect([font, radius]).toHaveLength(2);
     const css = tokensStylesheet(bare);
     const ui = `"Instrument Sans", system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif`;
     expect(css).toContain(`  --font-display: ${ui};\n  --font-ui: ${ui};`);

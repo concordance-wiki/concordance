@@ -110,8 +110,8 @@ describe("Gaps between the contracts and the notes of the realistic corpus", () 
     expect(
       result.links.filter((link) =>
         link.provenance.some((provenance) => provenance.method === "contract_import"),
-      ).length,
-    ).toBe(5);
+      ),
+    ).toHaveLength(5);
     expect(result.findings.filter((finding) => finding.check.startsWith("W-OPERATION-"))).toEqual(
       [],
     );

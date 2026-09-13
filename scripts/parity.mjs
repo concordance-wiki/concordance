@@ -69,7 +69,7 @@ function globToRegExp(glob) {
     } else if (char === "?") {
       pattern += "[^/]";
     } else {
-      pattern += char.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+      pattern += char.replace(/[.+^${}()|[\]\\]/g, String.raw`\$&`);
     }
   }
   return new RegExp(`^${pattern}$`);
@@ -161,7 +161,7 @@ for (const source of config.sources) {
     process.exit(2);
   }
   for (const file of walk(folder, (p) => p.endsWith(".md"))) {
-    const path = relative(folder, file).split("\\").join("/");
+    const path = relative(folder, file).replaceAll("\\", "/");
     const note = readNote(file);
     const type = resolveType(source, path, note.frontmatter);
     notes.push({ ...note, type, ref: `${source.name}/${path}` });
@@ -197,7 +197,7 @@ for (const { id } of checks) {
 }
 
 // 4. Every slot that renders a page has a screen note whose title or alias reads
-//    like the slot name (`KeywordPage` is "Keyword page", `Todo` is "to-do").
+//    like the slot name, letters only (`KeywordPage` is "Keyword page", `EntityPage` "Entity page").
 const screens = ofType("screen");
 for (const slot of pageSlots) {
   const wanted = letters(slot);

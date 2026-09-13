@@ -56,7 +56,7 @@ export function parseXml(text: string): { root: XmlElement } | { error: string }
     return { error: `${validation.err.msg} (line ${String(validation.err.line)})` };
   }
   // A validated document has a root element, and the parser returns the ordered node list described above.
-  const [root] = elementsOf(parser.parse(text) as OrderedNode[]).filter((e) => e.name !== "#text");
+  const root = elementsOf(parser.parse(text) as OrderedNode[]).find((e) => e.name !== "#text");
   // The validator refuses a document without a root element.
   return { root: root as XmlElement };
 }

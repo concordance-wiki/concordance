@@ -317,8 +317,10 @@ export function globalFindings(input: GlobalChecksInput): StepFinding[] {
   const forms = new Map<string, { pack: LanguagePack; forms: Forms }>();
   const findings: StepFinding[] = [];
   for (const note of notes) {
-    findings.push(...linkFindings(note, files, remote, source));
-    findings.push(...relationFindings(note, remote, input.profile, source));
+    findings.push(
+      ...linkFindings(note, files, remote, source),
+      ...relationFindings(note, remote, input.profile, source),
+    );
     let locale = forms.get(note.locale);
     if (locale === undefined) {
       const pack = packOf(note.locale);

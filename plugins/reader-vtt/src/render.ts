@@ -21,10 +21,10 @@ export function groupCues(cues: Cue[]): CueGroup[] {
 
 export function escapeHtml(text: string): string {
   return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 /** The identifier of the anchor of a cue: `t-` followed by its start in milliseconds. */

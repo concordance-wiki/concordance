@@ -3,7 +3,7 @@ import type { Link } from "@concordance-wiki/core";
 import type { DisplayableEntity } from "../../src/display/types.js";
 
 export function entity(id: string, type = "screen", keyword?: boolean): DisplayableEntity {
-  const words = id.slice(id.indexOf("/") + 1).replace(/-/g, " ");
+  const words = id.slice(id.indexOf("/") + 1).replaceAll("-", " ");
   const title = words.charAt(0).toUpperCase() + words.slice(1);
   return { id, type, title, ...(keyword === true ? { keyword } : {}) };
 }
