@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { loadPseudonymDictionary } from "../../src/privacy/dictionary.js";
-import { pseudonymizeTranscript } from "../../src/privacy/transcript.js";
+import { pseudonymizeTranscript, transcriptSubstitution } from "../../src/privacy/transcript.js";
 
 const dictionary = loadPseudonymDictionary(`
 version: 1
@@ -159,6 +159,36 @@ describe("pseudonymizeTranscript", () => {
       expect(indexed.toLowerCase()).not.toContain(name.toLowerCase());
     }
     expect(indexed).toContain("Speaker-1: Yes. Participant-3 joins later.");
+  });
+
+  it("does not report a mention listed as ignored, the titles of the notes typically", () => {
+    const { findings } = pseudonymizeTranscript(
+      { cues: [{ text: "Jane Roe reads Keyword Page and Model Query." }], speakers: [] },
+      dictionary,
+      { keepRoles: false, ignore: ["keyword  page", "Model query"] },
+    );
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'personal mention "Jane Roe" in cue 1 at offset 0 is not in the pseudonymisation dictionary',
+    ]);
+  });
+
+  it("shares one substitution between the speakers, the texts and the numbered speakers", () => {
+    const substitution = transcriptSubstitution(["Alice Lee", "Bob Ray"], dictionary, {
+      keepRoles: true,
+    });
+    expect(substitution.speaker("Bob Ray")).toBe("Analyst");
+    expect(substitution.speaker("alice lee")).toBe("Speaker-1");
+    expect(substitution.speaker("Carol Day")).toBe("Speaker-2");
+    expect(substitution.text("Alice Lee met Mary Ann Smith and Carol Day")).toBe(
+      "Speaker-1 met Project lead and Speaker-2",
+    );
+    expect(substitution.dictionary.people.map((person) => person.pseudonym)).toEqual([
+      "Participant-1",
+      "Participant-3",
+      "Speaker-1",
+      "Speaker-2",
+      "Participant-4",
+    ]);
   });
 
   it("returns an empty transcript unchanged", () => {

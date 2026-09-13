@@ -273,6 +273,7 @@ export async function buildCommand(
       recognised: result.recognised,
       documents: result.documents,
       config,
+      notes: result.notes,
       fs: io.fs,
     },
     output,

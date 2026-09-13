@@ -37,6 +37,8 @@ const configText = [
   "project: { name: Concordance wiki }",
   "applications: [{ id: concordance-cli }]",
   "domains: [{ id: publication, match: ['**/*'] }]",
+  // The transcripts of the corpus are published, as the tests of their text expect.
+  "privacy: { publish_transcripts: true }",
   "sources:",
   "  - name: specs",
   "    path: ./specs",

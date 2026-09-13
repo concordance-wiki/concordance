@@ -72,6 +72,40 @@ export function pseudonymDictionary(people: readonly PseudonymEntry[]): Pseudony
   return { people: [...people].sort(compareEntries) };
 }
 
+/** The dictionary of a valid `pseudonyms.yaml`, or every issue of an invalid one, formatted like the configuration ones. */
+export type PseudonymDictionaryResult =
+  { ok: true; dictionary: PseudonymDictionary } | { ok: false; issues: ConfigIssue[] };
+
+/** Parses and validates the text of `pseudonyms.yaml`; an invalid file is a list of issues, never a failure. */
+export function parsePseudonymDictionary(text: string): PseudonymDictionaryResult {
+  let document: unknown;
+  try {
+    document = parse(text);
+  } catch (error) {
+    const detail = (error as YAMLParseError).message.replace(/\n[^]*/, "");
+    return {
+      ok: false,
+      issues: [{ severity: "error", path: "", message: `not valid YAML: ${detail}` }],
+    };
+  }
+  const issues = schemaIssues(document);
+  if (issues.length > 0) return { ok: false, issues };
+  // Validated against the schema just above.
+  const valid = document as PseudonymsDocument;
+  const invalidNames = nameIssues(valid);
+  if (invalidNames.length > 0) return { ok: false, issues: invalidNames };
+  return {
+    ok: true,
+    dictionary: pseudonymDictionary(
+      Object.entries(valid.people).map(([name, person]) => ({
+        name,
+        pseudonym: person.pseudonym,
+        ...(person.role === undefined ? {} : { role: person.role }),
+      })),
+    ),
+  };
+}
+
 /**
  * Parses and validates the text of `pseudonyms.yaml`. Throws an error whose message lists every
  * issue, formatted like the configuration ones; `file` names the file in those messages.
@@ -80,31 +114,9 @@ export function loadPseudonymDictionary(
   text: string,
   file = "pseudonyms.yaml",
 ): PseudonymDictionary {
-  let document: unknown;
-  try {
-    document = parse(text);
-  } catch (error) {
-    const detail = (error as YAMLParseError).message.replace(/\n[^]*/, "");
-    throw new Error(
-      formatIssue({ severity: "error", path: "", message: `not valid YAML: ${detail}` }, file),
-      { cause: error },
-    );
+  const result = parsePseudonymDictionary(text);
+  if (!result.ok) {
+    throw new Error(result.issues.map((issue) => formatIssue(issue, file)).join("\n"));
   }
-  const issues = schemaIssues(document);
-  if (issues.length > 0) {
-    throw new Error(issues.map((issue) => formatIssue(issue, file)).join("\n"));
-  }
-  // Validated against the schema just above.
-  const valid = document as PseudonymsDocument;
-  const invalidNames = nameIssues(valid);
-  if (invalidNames.length > 0) {
-    throw new Error(invalidNames.map((issue) => formatIssue(issue, file)).join("\n"));
-  }
-  return pseudonymDictionary(
-    Object.entries(valid.people).map(([name, person]) => ({
-      name,
-      pseudonym: person.pseudonym,
-      ...(person.role === undefined ? {} : { role: person.role }),
-    })),
-  );
+  return result.dictionary;
 }

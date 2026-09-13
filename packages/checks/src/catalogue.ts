@@ -211,6 +211,20 @@ export const catalogue: readonly CheckDefinition[] = [
     "Add the name to pseudonyms.yaml, or edit the transcript in its source repository.",
   ),
   step(
+    "W-PRIVACY-DICTIONARY",
+    "warning",
+    "sources",
+    "The pseudonymisation dictionary could not be read or does not match its schema; an error, and the build fails, when pseudonymisation is enabled.",
+    "Fix the path of privacy.pseudonymize.dictionary, or the file it names, one entry per real name with a pseudonym.",
+  ),
+  step(
+    "W-PRIVACY-WITHHELD",
+    "warning",
+    "documents",
+    "A transcript was kept out of the site because its reader cannot rewrite it with the pseudonyms; the raw file is never published.",
+    "Use a reader that implements rewrite for the format, or publish the transcript through a format the built-in reader handles.",
+  ),
+  step(
     "W-CONTRACT-UNREACHABLE",
     "warning",
     "contracts",

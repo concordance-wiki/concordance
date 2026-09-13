@@ -42,6 +42,8 @@ export interface DiscoverKeywordsInput {
   dictionaries: ReadonlyMap<string, LocaleDictionary>;
   config: Config;
   profile: Profile;
+  /** Expressions never proposed, on top of the lock's: the real names of the pseudonymisation dictionary. */
+  rejected?: readonly string[];
 }
 
 /** A page of the site offered as a lead from a keyword page: another keyword page or the note of a similar expression. */
@@ -255,7 +257,7 @@ function takenOverOf(
  */
 export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywords {
   const { config } = input;
-  const options = keywordOptions(config);
+  const options = keywordOptions(config, { rejected_terms: input.rejected ?? [] });
   const publication = keywordPublicationOptions(config);
   const result: DiscoveredKeywords = {
     entities: [],

@@ -94,7 +94,11 @@ export {
 export { PLUGIN_API_VERSION } from "./plugin/api.js";
 export {
   loadPseudonymDictionary,
+  nameKey,
+  parsePseudonymDictionary,
+  pseudonymDictionary,
   type PseudonymDictionary,
+  type PseudonymDictionaryResult,
   type PseudonymEntry,
 } from "./privacy/dictionary.js";
 export {
@@ -112,10 +116,14 @@ export {
 export { transcriptsPublished } from "./privacy/publication.js";
 export {
   pseudonymizeTranscript,
+  transcriptSubstitution,
   type PseudonymizedTranscript,
   type TranscriptCueLike,
   type TranscriptLike,
+  type TranscriptOptions,
+  type TranscriptSubstitution,
 } from "./privacy/transcript.js";
+export { substituteStrings } from "./privacy/values.js";
 export type * from "./plugin/api.js";
 export {
   cachedContractPath,

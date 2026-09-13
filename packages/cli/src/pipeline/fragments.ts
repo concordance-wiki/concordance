@@ -40,6 +40,8 @@ export interface FragmentsInput {
   documents?: readonly ReadDocument[];
   /** Whether a link may reach another source, as the link production decided (`inference.cross_source_links`). */
   config: Config;
+  /** The text of the notes pseudonymisation rewrote, by `<source>/<path>`, rendered in place of the file; none when absent. */
+  notes?: ReadonlyMap<string, string>;
   fs: FileSystem;
 }
 
@@ -148,7 +150,8 @@ export function propertiesOf(
  * The documents of an entity: its own file when it is not a note, and the files among its
  * representations, in path order; each copied for download and, when previews are on for its
  * source and a PDF exists, its PDF copied as the preview; its size and the properties its
- * reader exposed travel with it.
+ * reader exposed travel with it. A document the build withholds, a transcript it must not
+ * publish, is left out: no page, no download.
  */
 export function documentsOf(
   entity: Entity,
@@ -167,7 +170,7 @@ export function documentsOf(
   const found: FragmentDocument[] = [];
   for (const path of [...new Set(paths)].sort(byCodeUnit)) {
     const document = documents.get(documentKey(entity.source.name, path));
-    if (document === undefined) continue;
+    if (document === undefined || document.download?.kind === "withheld") continue;
     const target = fileTarget(entity, path);
     const preview = previews ? previewTarget(entity, path, document, target) : undefined;
     found.push({
@@ -378,7 +381,9 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
     const images = new Map<string, FragmentImage>();
     const locate = (target: string): LocatedLink =>
       locateLink(target, { name: source.name, path }, files, crossSource);
-    const rendered = renderMarkdown(input.fs.readText(file.absolutePath), {
+    const text =
+      input.notes?.get(fileKey(source.name, path)) ?? input.fs.readText(file.absolutePath);
+    const rendered = renderMarkdown(text, {
       // A link to a file of the sources leads to its page; a file without a page is not published,
       // so the link goes. An image of the sources is copied next to the page and, on a line of its
       // own, captioned with its path in the source; any other image, an external URL typically, is
@@ -429,7 +434,8 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
 /**
  * Writes `fragments/<id>.json` under the output folder for every entity, with the images the
  * notes embed and the documents of the entities under `fragments/` at their target path, where
- * the rendering takes them from; returns how many fragments were written.
+ * the rendering takes them from; a rewritten transcript is written from its pseudonymised
+ * bytes, never copied from the source. Returns how many fragments were written.
  */
 export function writeFragments(input: FragmentsInput, output: string): number {
   const fragments = fragmentsOf(input);
@@ -451,7 +457,13 @@ export function writeFragments(input: FragmentsInput, output: string): number {
     for (const document of fragment.documents ?? []) {
       // documentsOf only lists documents the step read, and only gives a preview to one with a PDF.
       const read = documents.get(documentKey(document.source, document.path)) as ReadDocument;
-      copy(read.absolutePath, document.target);
+      if (read.download === undefined) {
+        copy(read.absolutePath, document.target);
+      } else {
+        // documentsOf leaves a withheld document out: what is left here is rewritten.
+        const rewritten = read.download as { bytes: Uint8Array };
+        input.fs.writeBytes(join(output, fragmentImagePath(document.target)), rewritten.bytes);
+      }
       if (document.preview !== undefined && document.preview !== document.target) {
         copy(read.pdf as string, document.preview);
       }
