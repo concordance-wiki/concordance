@@ -10,6 +10,7 @@ import {
   type Reader,
   type SourceProvider,
   type ThemeContribution,
+  type TypeContribution,
   type UiComponent,
 } from "./api.js";
 import { isPluginManifest } from "./define.js";
@@ -28,6 +29,17 @@ export interface PluginRegistration {
   options: Record<string, unknown>;
 }
 
+/** A type module of a plugin, located: the plugin it comes from, the slug its folder names and the path as declared. */
+export interface RegisteredType extends TypeContribution {
+  plugin: string;
+  slug: string;
+}
+
+/** The slug a type contribution declares: the name of its folder. */
+export function typeSlugOf(contribution: TypeContribution): string {
+  return contribution.path.replace(/\/+$/, "").replace(/^.*\//, "");
+}
+
 export interface PluginRegistry {
   /** Names of the registered plugins, in declaration order. */
   plugins: () => string[];
@@ -40,6 +52,8 @@ export interface PluginRegistry {
   projections: () => Projection[];
   uiComponents: () => UiComponent[];
   themes: () => ThemeContribution[];
+  /** The type modules of every plugin, in declaration order, each with the plugin it comes from. */
+  types: () => RegisteredType[];
 }
 
 export interface PluginLoaderDependencies {
@@ -118,6 +132,7 @@ function claimsOf(manifest: PluginManifest): string[] {
     ...(contributes.projections ?? []).map((p) => `projection ${p.id}`),
     ...(contributes.uiComponents ?? []).map((u) => `ui slot ${u.slot}`),
     ...(contributes.themes ?? []).map((t) => `theme ${t.name}`),
+    ...(contributes.types ?? []).map((t) => `type ${typeSlugOf(t)}`),
   ];
 }
 
@@ -147,6 +162,14 @@ function createRegistry(registered: PluginRegistration[]): PluginRegistry {
     projections: () => collect((manifest) => manifest.contributes.projections),
     uiComponents: () => collect((manifest) => manifest.contributes.uiComponents),
     themes: () => collect((manifest) => manifest.contributes.themes),
+    types: () =>
+      registered.flatMap((registration) =>
+        (registration.manifest.contributes.types ?? []).map((contribution) => ({
+          ...contribution,
+          plugin: registration.name,
+          slug: typeSlugOf(contribution),
+        })),
+      ),
   };
 }
 

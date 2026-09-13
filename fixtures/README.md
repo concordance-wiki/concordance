@@ -8,7 +8,7 @@ Reference corpora for the tests. Every corpus speaks about Concordance itself: i
 | `corpora/faulty` | one note per expected finding, for every check a single file can trigger, written with the vocabulary of the tool (a model query API without consumer, an unknown `language_pack` type, a to-do page accessing a term); the checks and the linter are tested here |
 | `corpora/realistic` | 120 notes per language in which Concordance describes itself, covering every implemented type, every inference method and every file-level check, with the expected model and findings; see its [README](corpora/realistic/README.md) |
 | `generate` | a synthetic corpus generator for load tests |
-| `plugins/example` | the smallest plugin that exercises every contribution point of the plugin API; loaded by the core tests, never published |
+| `plugins/example` | the smallest plugin that exercises every contribution point of the plugin API, a `runbook` type module with a page of its own among them; loaded by the core, site and command line tests, never published |
 | `plugins/theme-example` | a theme plugin overriding the `Footer` slot alone; resolved through the registry and rendered by the site tests, never published |
 | `plugins/theme-white-label` | a theme plugin that overrides no slot and changes everything `theme.yaml` governs: the name of a team's pipeline notes, an inline SVG logo, a favicon, a blue palette, a radius of 2, families bound by `@font-face` rules in its stylesheet, an icons folder and `credit: false`; the site and gallery tests assert that a site built with it names the tool nowhere, never published |
 

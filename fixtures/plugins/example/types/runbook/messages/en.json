@@ -1,0 +1,30 @@
+{
+  "attributes.owner": {
+    "defaultMessage": "Owner",
+    "description": "Role that runs the runbook."
+  },
+  "attributes.rules": {
+    "defaultMessage": "Rules",
+    "description": "Rules the runbook obeys."
+  },
+  "attributes.steps": {
+    "defaultMessage": "Steps",
+    "description": "The ordered steps of the runbook."
+  },
+  "attributes.trigger": {
+    "defaultMessage": "Trigger",
+    "description": "What starts the runbook."
+  },
+  "label": {
+    "defaultMessage": "Runbook",
+    "description": "Label of the runbook type."
+  },
+  "sections.rules": {
+    "defaultMessage": "Rules",
+    "description": "Heading of the rules section."
+  },
+  "sections.steps": {
+    "defaultMessage": "Steps",
+    "description": "Heading of the steps section."
+  }
+}

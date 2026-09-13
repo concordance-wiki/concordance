@@ -59,6 +59,9 @@ importers:
       '@concordance-wiki/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      preact:
+        specifier: 10.29.8
+        version: 10.29.8(preact-render-to-string@6.7.0)
 
   fixtures/plugins/theme-example:
     dependencies:

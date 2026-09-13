@@ -96,6 +96,7 @@ function registryWith(readers: Reader[], converters: Converter[]): PluginRegistr
     projections: () => [],
     uiComponents: () => [],
     themes: () => [],
+    types: () => [],
   };
 }
 

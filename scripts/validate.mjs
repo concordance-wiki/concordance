@@ -205,15 +205,16 @@ for (const name of shipped) {
 }
 
 // 6. Relative markdown links resolve, except in the faulty corpus, which breaks
-//    one on purpose, and in the templates of the type modules, whose links
-//    resolve in their docs/templates copy, checked above to be identical.
+//    one on purpose, and in the templates of the type modules, which link the
+//    other templates as copied side by side under templates/ (the core ones
+//    are checked in their docs/templates copy, identical by section 4).
 const linkPattern = /\[[^\]]*\]\(([^)\s]+)\)/g;
 for (const path of walk(
   root,
   (p) =>
     p.endsWith(".md") &&
     !p.includes("/fixtures/corpora/faulty/") &&
-    !/\/packages\/profile\/types\/[^/]+\/template\.md$/.test(p),
+    !/\/types\/[a-z][a-z0-9_]*\/template\.md$/.test(p),
 )) {
   const text = readFileSync(path, "utf8").replace(/```[\s\S]*?```/g, "");
   for (const match of text.matchAll(linkPattern)) {

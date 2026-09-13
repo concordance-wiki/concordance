@@ -70,6 +70,7 @@ describe("@concordance-wiki/core", () => {
       "systemClock",
       "toCypher",
       "transcriptsPublished",
+      "typeSlugOf",
       "validateConfig",
       "validateModel",
       "validateTheme",

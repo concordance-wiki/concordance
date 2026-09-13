@@ -180,7 +180,7 @@ Two entities with the same title or alias, once spellings are compared, are homo
 
 ## Profile
 
-A project profile (`profile.yaml`) adds types, attributes, relations with their labels in both directions (`label`, `inverse_label`), relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../packages/profile/default.yaml) is the reference; [`profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
+A project profile (`profile.yaml`) adds types, attributes, relations with their labels in both directions (`label`, `inverse_label`), relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../packages/profile/default.yaml) is the reference; [`profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it. A type can also be written as a [type module](adding-a-type.md), a folder carrying its declaration, its labels and its template: `types_dir` names a folder of such modules, relative to `profile.yaml`, merged before the keys of the profile itself, and the plugins declared in `concordance.yaml` contribute modules the same way. The order is fixed: the default profile, the modules of the plugins in declaration order, the modules of `types_dir`, then the keys of `profile.yaml`; a module of a type the default profile already declares is a configuration error (extend that type under `types` instead), and so are two modules of one type.
 
 ```yaml
 types:

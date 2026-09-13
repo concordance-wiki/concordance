@@ -147,8 +147,10 @@ export { importPlugin } from "./plugin/node-loader.js";
 export {
   loadPlugins,
   PluginLoadError,
+  typeSlugOf,
   type LoadedPlugins,
   type PluginLoaderDependencies,
   type PluginRegistration,
   type PluginRegistry,
+  type RegisteredType,
 } from "./plugin/registry.js";
