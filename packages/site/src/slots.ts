@@ -894,14 +894,66 @@ export interface IndexLetter {
   /** Absent when the letter has no entry: it is shown inactive. */
   href?: string;
   count: number;
+  /** The count worded for the heading of the letter, "94 words"; the theme counts alone when absent. */
+  countLabel?: string;
 }
 
 export interface IndexEntry extends Link {
-  /** Glyph of the type; absent for a word without a note. */
+  /** The letter of the bar the entry files under, `#` for a title opening otherwise. */
+  letter: string;
+  /** Glyph of the type; absent for a word without a definition. */
   glyph?: string;
+  /** The label of the type in the site language; absent for a word without a definition. */
+  typeLabel?: string;
+  /**
+   * The first line of the page, its summary; for a word without a definition, the passage that
+   * uses it most, quoted and followed by the title of its file, "“…” — title"; absent when the
+   * page has neither.
+   */
+  summary?: string;
   /** The `id` of the entry, on the first entry of every letter when the whole index is one page. */
   anchor?: string;
+  /** How many pages cite the word: the pages linking to a note, the files using an expression. */
   count: number;
+}
+
+/** One value of a filter of the index: where it leads, the results page filtered by it, and how many entries it keeps. */
+export interface IndexFilterValue extends Link {
+  count: number;
+}
+
+/** The filters of the index, folded behind their button: every value leads to the results page filtered by it. */
+export interface IndexFilters {
+  /** The types of the pages with a note, in the order of their labels. */
+  types: IndexFilterValue[];
+  /** The spaces, the sources of the model, in name order. */
+  spaces: IndexFilterValue[];
+  /** The words without a definition, as one value. */
+  withoutDefinition: IndexFilterValue;
+}
+
+/** The strings of the index in the language of the site; the theme's own English when absent. */
+export interface IndexLabels {
+  title: string;
+  /** Under the title, worded with its counts: "2312 words used in the documentation. 569 have a written page, the others exist through their uses alone." */
+  lead: string;
+  /** The button folding the filters. */
+  filters: string;
+  byType: string;
+  bySpace: string;
+  /** Accessible name of the letter bar. */
+  letters: string;
+  /** After the letter bar, worded with its count: "10 letters without an entry". */
+  lettersWithout: string;
+  /** The four column headings. */
+  word: string;
+  type: string;
+  description: string;
+  pages: string;
+  /** In the type column of a word without a definition. */
+  noDefinition: string;
+  /** The note at the foot of the table. */
+  note: string;
 }
 
 export interface IndexProps {
@@ -909,6 +961,11 @@ export interface IndexProps {
   /** Letter of the segment shown. */
   current?: string;
   entries: IndexEntry[];
+  /** How many words the index holds and how many have a note, for the sentence under the title; absent, the theme counts the letters. */
+  counts?: { words: number; notes: number };
+  /** Absent, the page shows no filter button. */
+  filters?: IndexFilters;
+  labels?: Partial<IndexLabels>;
 }
 
 export interface TodoEntry extends Link {

@@ -128,6 +128,8 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
     expect(monospace).toEqual([
       ".count",
       ".related-count",
+      ".letter",
+      ".index-table .index-pages",
       ".passage-count",
       ".passage-at",
       ".similar-count",

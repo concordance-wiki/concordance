@@ -21,6 +21,10 @@ export interface MessageArguments {
   "home.stale": { count: number };
   "home.staleThreshold": { space: string; count: number };
   "home.usedIn": { count: number };
+  "index.lead": { words: number; notes: number };
+  "index.lettersWithout": { count: number };
+  "index.passage": { passage: string; title: string };
+  "index.words": { count: number };
   "keyword.filesSummary": { count: number };
   "keyword.noticeLead": { count: number };
   "keyword.occurrences": { count: number };
@@ -88,8 +92,23 @@ export const messageArguments = {
   "home.stale": { count: "plural" },
   "home.staleThreshold": { space: "argument", count: "plural" },
   "home.usedIn": { count: "plural" },
+  "index.bySpace": {},
+  "index.byType": {},
+  "index.columnDescription": {},
+  "index.columnPages": {},
+  "index.columnType": {},
+  "index.columnWord": {},
   "index.empty": {},
+  "index.filters": {},
+  "index.lead": { words: "plural", notes: "plural" },
   "index.letters": {},
+  "index.lettersWithout": { count: "plural" },
+  "index.noDefinition": {},
+  "index.note": {},
+  "index.passage": { passage: "argument", title: "argument" },
+  "index.title": {},
+  "index.withoutDefinition": {},
+  "index.words": { count: "plural" },
   "keyword.companions": {},
   "keyword.createNote": {},
   "keyword.factFiles": {},

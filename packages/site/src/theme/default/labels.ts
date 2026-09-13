@@ -155,4 +155,21 @@ export const labels = {
   resultsNotelessNote:
     "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
   closestForm: "Closest form:",
+  indexTitle: "A–Z index",
+  indexWordsUsed: "used in the documentation.",
+  indexHaveNote: "have a written page, the others exist through their uses alone.",
+  indexFilters: "Filters",
+  indexByType: "By type",
+  indexBySpace: "By space",
+  indexLetterWithout: "letter without an entry",
+  indexLettersWithout: "letters without an entry",
+  indexWord: "Word",
+  indexType: "Type",
+  indexDescription: "First line of the page, or most cited passage",
+  indexPages: "Pages",
+  indexNoDefinition: "no definition",
+  indexNote:
+    "Words without a definition sit in the index like the others, dotted, with the passage that uses them most in place of a definition. That is the working list of a glossary owner.",
+  indexWord1: "word",
+  indexWords: "words",
 } as const;
