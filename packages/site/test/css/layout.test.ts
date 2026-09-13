@@ -50,6 +50,18 @@ describe("Three widths: three columns from 1100 px, the tree folded from 700 px,
     );
   });
 
+  it("pads the centre column 18 by 16 px on the phone, 20 px on the tablet and 30 by 40 px on the desktop", () => {
+    expect(components).toContain(
+      ".entity-main {\n  grid-area: main;\n  min-inline-size: 0;\n  padding: 1.125rem 1rem var(--space-5);\n}",
+    );
+    expect(media(components, "(min-width: 43.75rem)")).toContain(
+      ".entity-main {\n    padding: 1.25rem 1.25rem var(--space-5);\n  }",
+    );
+    expect(media(components, "(min-width: 68.75rem)")).toContain(
+      ".entity-main {\n    padding: 1.875rem 2.5rem var(--space-5);\n  }",
+    );
+  });
+
   it("puts the panel beside the text from 700 px, the tree folded behind its name above them", () => {
     const medium = media(components, "(min-width: 43.75rem)");
     expect(medium).toContain('grid-template-areas:\n      "space space"\n      "main side";');
