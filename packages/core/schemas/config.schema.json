@@ -167,7 +167,7 @@
             "pattern": "^[a-z0-9][a-z0-9-]*$"
           },
           "git": {
-            "description": "URL of the git repository, cloned at depth 1 on ref with the credentials of the git environment; exclusive with path.",
+            "description": "URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; exclusive with path.",
             "type": "string",
             "minLength": 1
           },
@@ -523,7 +523,7 @@
           "default": 50
         },
         "cache": {
-          "description": "Cache folder, relative to this configuration and never published: the shallow clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source.",
+          "description": "Cache folder, relative to this configuration and never published: the clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source.",
           "type": "string",
           "default": ".concordance-cache"
         },

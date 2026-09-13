@@ -175,7 +175,7 @@ Depends on: L0-01.
 
 As an integrator, I want the build to fetch my repositories without modifying them so that the tool can never damage my sources.
 
-- Each source is cloned at depth 1 on the declared ref, or updated when already cached.
+- Each source is cloned on the declared ref with its whole history and without the blobs (a partial clone; the checkout fetches the files it reads), or updated when already cached; the date of every file is that of the last commit that touched it.
 - Nothing is written into source repositories; verified by a test comparing the working tree fingerprint before and after the build.
 - The exact commit and last-modified date of every file are recorded and carried through to the model.
 - An unreachable repository yields a finding and does not stop the build; entities from that source are absent from the model.

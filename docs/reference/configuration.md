@@ -98,7 +98,7 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `name` (required) | string | — | pattern `^[a-z0-9][a-z0-9-]*$` | Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens. |
-| `git` | string | — | non-empty | URL of the git repository, cloned at depth 1 on ref with the credentials of the git environment; exclusive with path. |
+| `git` | string | — | non-empty | URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; exclusive with path. |
 | `ref` | string | `"main"` | — | Branch, tag or commit of the git repository to read. |
 | `path` | string | — | non-empty | Local folder, relative to this configuration, read in place; exclusive with git. |
 | `kind` | enum | — | `git`, `path`, `tracker` | Kind of the source, deduced from git or path; tracker declares an issue tracker source, accepted but not read in this version. |
@@ -210,7 +210,7 @@ Office document conversion: its limits, its cache and its parallelism.
 |---|---|---|---|---|
 | `timeout_s` | integer | `120` | at least 1 | Seconds allowed per document; a document past it yields W-CONV-FAILED and stays downloadable. |
 | `max_size_mb` | integer | `50` | at least 1 | Size in megabytes above which a document is not converted and yields W-CONV-FAILED. |
-| `cache` | string | `".concordance-cache"` | — | Cache folder, relative to this configuration and never published: the shallow clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source. |
+| `cache` | string | `".concordance-cache"` | — | Cache folder, relative to this configuration and never published: the clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source. |
 | `parallelism` | integer | — | at least 1 | Concurrent conversions, the number of processor cores by default; changes the build time, never the output. |
 
 ## `build`
