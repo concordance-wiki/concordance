@@ -3228,7 +3228,7 @@ main > concordance-island[data-island="search"] {
 
 .spaces-table th,
 .spaces-table td {
-  padding: var(--space-3) var(--space-2);
+  padding: 0.9375rem var(--space-2);
   border-block-end: 1px solid var(--color-border);
   text-align: start;
   vertical-align: middle;
@@ -3245,8 +3245,8 @@ main > concordance-island[data-island="search"] {
 }
 
 .spaces-table thead th {
-  padding-block: var(--space-2);
-  background: var(--color-bg);
+  padding-block: 0.75rem;
+  background: var(--color-soft);
   color: var(--color-label);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -3296,20 +3296,20 @@ tbody .spaces-name {
   white-space: nowrap;
 }
 
-.spaces-count,
-.spaces-date {
+.spaces-table .spaces-count,
+.spaces-table .spaces-date {
   color: var(--color-label);
   font-size: 0.8125rem;
   text-align: end;
   white-space: nowrap;
 }
 
-.spaces-count {
+.spaces-table .spaces-count {
   inline-size: 5.5rem;
   font-family: var(--font-mono);
 }
 
-.spaces-date {
+.spaces-table .spaces-date {
   inline-size: 7.5rem;
 }
 
@@ -3326,38 +3326,47 @@ tbody .spaces-name {
   line-height: 1.65;
 }
 
-/* Under 48 rem the table gives up its content column and its heading row, the rows stacking their cells. */
+/* Under 48 rem the table gives up its content column and its heading row: a row reads the badge and the name, then the count and the date on one line. */
 
 @media (width < 48rem) {
   .spaces-table thead,
-  .spaces-content {
+  .spaces-table .spaces-content {
     display: none;
   }
 
   .spaces-table,
-  .spaces-table tbody,
-  .spaces-table tr {
+  .spaces-table tbody {
     display: block;
+  }
+
+  .spaces-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .spaces-table tr:last-child {
+    border-block-end: 0;
   }
 
   .spaces-table tbody .spaces-name,
   .spaces-table td {
     display: flex;
     inline-size: auto;
+    padding: 0;
     border-block-end: 0;
   }
 
-  .spaces-table td {
-    padding-block: 0 var(--space-2);
-    padding-inline: calc(var(--space-4) + 2.875rem + var(--space-3));
+  .spaces-table tbody .spaces-name {
+    flex: 1 1 100%;
+    min-block-size: 2.75rem;
   }
 
-  .spaces-row {
-    border-block-end: 1px solid var(--color-border);
-  }
-
-  .spaces-row:last-child {
-    border-block-end: 0;
+  .spaces-table .spaces-count {
+    margin-inline-start: calc(2.875rem + var(--space-3));
   }
 }
 
@@ -3371,6 +3380,12 @@ tbody .spaces-name {
 
 .space-overview .breadcrumbs-list {
   margin-inline: 0;
+}
+
+/* Two steps only: the first one carries no separator, whatever the width restores on the entity page. */
+
+.space-overview .breadcrumbs-list > li:first-child::before {
+  content: none;
 }
 
 .space-header {
