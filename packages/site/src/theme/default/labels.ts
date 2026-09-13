@@ -104,13 +104,8 @@ export const labels = {
   cues: "Cues",
   extractedText: "Extracted text",
   noExtractedText: "No text was extracted from this document.",
-  contract: "Contract",
-  contractVersion: "version",
-  contractImportedOn: "imported on",
   contractOperations: "Operations",
   contractNoOperation: "The contract declares no operation.",
-  withoutNote: "without a note",
-  noNoteYet: "no note yet",
   downloadContract: "Download the contract",
   contractData: "Contract data (JSON)",
   showContract: "Show the contract",
@@ -210,4 +205,20 @@ export const labels = {
   shownOf: "{shown} of {total} \u2014 pagination by twenty.",
   linksNote:
     "The Links column counts the related pages, which brings the most central pages of the journey to the top.",
+  apiOperationsLead: "Matched to the contract by operation name.",
+  apiGapsLead:
+    "The rows in italics are gaps: present in the contract without a page, or described without existing in the contract.",
+  apiMethod: "Method",
+  apiPath: "Path",
+  apiOperation: "Operation",
+  apiCallers: "Callers",
+  apiWithoutPage: "present in the contract, without a page",
+  apiNotInContract: "described, absent from the contract",
+  apiUnknownPath: "unknown path",
+  apiContract: "Interface contract",
+  apiViewerNote:
+    "No schema is copied into the text: the page shows the contract, it does not duplicate it.",
+  apiFiveKeys: "Five keys, no more. The operations come from the contract, not from the header.",
+  apiOperationsFirst:
+    "On an interface the operations rise to the top: that is the grain we work at.",
 } as const;

@@ -983,48 +983,15 @@ concordance-island[data-island="search"] {
   list-style: none;
 }
 
-/* Contract of an API page */
+/* Contract viewer of an API page; the block around it is styled with the API page at the end of the sheet. */
 
 .contract {
-  max-inline-size: var(--measure);
   margin-block: var(--space-4);
-  padding-block-start: var(--space-3);
-  border-block-start: 1px solid var(--color-border);
-}
-
-.contract-name {
-  font-weight: normal;
-  color: var(--color-muted);
-}
-
-.contract-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  color: var(--color-muted);
-  font-size: 0.875rem;
-}
-
-.contract-operations {
-  padding-inline-start: var(--space-4);
 }
 
 .contract-summary,
 .contract-description {
   color: var(--color-muted);
-}
-
-.contract-gap,
-.contract-flag {
-  margin-inline-start: var(--space-2);
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-  font-style: italic;
-  font-weight: normal;
-}
-
-.contract-flag::before {
-  content: "— ";
 }
 
 .contract-data button,
@@ -3905,6 +3872,196 @@ tbody .spaces-name {
 
 .legend + .entity-source {
   margin-inline-start: auto;
+}
+
+/* API page: the operations table matched to the contract, then the contract block; the panel cut to five keys. */
+
+.api-operations {
+  margin-block: var(--space-4);
+}
+
+.api-operations h2,
+.contract h2 {
+  margin-block: var(--space-4) var(--space-2);
+}
+
+.api-lead {
+  margin: 0 0 var(--space-3);
+  color: var(--color-label);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* One row per operation on the surface, ruled in the soft colour; the radius is on the table, so the borders stay on the cells. */
+
+.api-table {
+  inline-size: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.api-table td {
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-soft);
+  vertical-align: middle;
+}
+
+.api-table tr:last-child > td {
+  border-block-end: 0;
+}
+
+/* Three narrow cells around the title: the method as a chip in the monospace family, every method drawn in the same width, the path and the callers. */
+
+.api-cell-method,
+.api-cell-path,
+.api-cell-callers {
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
+.api-cell-path > code {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.api-method {
+  display: inline-block;
+  min-inline-size: 3.25rem;
+  padding: 0.3125em 0.4375em;
+  border-radius: calc(var(--radius) * 0.5);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.api-method > abbr {
+  text-decoration: none;
+}
+
+/* Without a method, a dashed hollow chip: the note declares none, the contract knows nothing. */
+
+.api-method-none {
+  border: 1px dashed var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-label);
+}
+
+.api-operation {
+  font-weight: 600;
+}
+
+a.api-operation {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+a.api-operation:hover {
+  text-decoration: underline;
+}
+
+.api-cell-callers {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  text-align: end;
+}
+
+/* A gap between the contract and the notes reads in italics on the soft surface, never by a colour alone. */
+
+.api-gap > td {
+  background: var(--color-soft);
+  font-style: italic;
+}
+
+.api-gap .api-operation {
+  font-weight: 500;
+}
+
+.api-gap-without-page .api-operation {
+  color: var(--color-muted);
+}
+
+.api-gap-note {
+  color: var(--color-muted);
+}
+
+/* The contract block of the API page: the meta line on the soft surface, the viewer centred under it. */
+
+.contract-card {
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.contract-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.contract-format {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.contract-file {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.contract-imported {
+  color: var(--color-label);
+}
+
+.contract-download {
+  margin-inline-start: auto;
+}
+
+.contract-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
+  min-block-size: 8.5rem;
+  padding: var(--space-3);
+  justify-content: center;
+  text-align: center;
+}
+
+.contract-body > concordance-island {
+  inline-size: 100%;
+}
+
+.contract-body .contract-data {
+  margin: 0;
+}
+
+.contract-body .contract-viewer {
+  text-align: start;
+}
+
+.contract-note {
+  max-inline-size: 28rem;
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.55;
 }
 
 /* Category list: the list of a folder at the top of a space. The tree of the space on the left, as on the entity page; the breadcrumb, the title and its lead, the two selectors on the same line, the table in a card, the counts and the note under it. Nothing under 13 px and no target under 40 px, where the reference frame goes lower. */

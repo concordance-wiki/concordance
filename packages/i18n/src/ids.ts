@@ -7,6 +7,8 @@ export type MessageId = keyof typeof source;
 
 /** The arguments of the messages that take some; a message absent from this interface takes none. */
 export interface MessageArguments {
+  "api.callers": { count: number };
+  "api.imported": { when: string };
   "category.linksNote": { name: string };
   "category.pages": { count: number };
   "category.searchIn": { name: string };
@@ -43,11 +45,11 @@ export interface MessageArguments {
   "meeting.participants": { count: number };
   "mentions.atLine": { line: number };
   "mentions.inSection": { section: string };
-  "results.cited": { count: number };
-  "results.usedIn": { count: number };
   "neighbourhood.hop": { count: number };
   "neighbourhood.list": { count: number };
   "neighbourhood.total": { count: number };
+  "results.cited": { count: number };
+  "results.usedIn": { count: number };
   "search.results": { count: number };
   "site.generatedAt": { date: Date };
   "space.categoriesLead": { count: number };
@@ -60,6 +62,24 @@ export interface MessageArguments {
 
 /** The ICU kind of every argument of every message, as declared by the source catalogue. */
 export const messageArguments = {
+  "api.callers": { count: "plural" },
+  "api.colCallers": {},
+  "api.colMethod": {},
+  "api.colOperation": {},
+  "api.colPath": {},
+  "api.contract": {},
+  "api.download": {},
+  "api.fiveKeys": {},
+  "api.gapsLead": {},
+  "api.imported": { when: "argument" },
+  "api.noOperation": {},
+  "api.notInContract": {},
+  "api.operations": {},
+  "api.operationsFirst": {},
+  "api.operationsLead": {},
+  "api.unknownPath": {},
+  "api.viewerNote": {},
+  "api.withoutPage": {},
   "category.all": {},
   "category.firstLine": {},
   "category.links": {},

@@ -10,6 +10,7 @@ import { formatMessage } from "@concordance-wiki/i18n";
 import { byCodeUnit } from "../order.js";
 import type { Mention, MentionsPanelProps, RelatedLabels } from "../slots.js";
 import { fileKey, message, typeLabel, type SiteContext } from "./context.js";
+import { exposedOperations } from "./operations.js";
 import { entityHref, mentionsFragmentPath, relativeHref } from "./paths.js";
 
 /** How many mentions the served HTML carries when the configuration says nothing (`build.mentions_inline`). */
@@ -128,9 +129,38 @@ function mentionOf(
   };
 }
 
+/**
+ * The notes describing the operations of an API cite it: each names its API in its frontmatter,
+ * which is how the contract import matched it. The `exposes` link carries no passage, so the
+ * mention quotes the summary of the operation, and the operation imported without a note is
+ * left out: it has no author.
+ */
+function operationMentions(context: SiteContext, page: string, api: Entity): LocatedMention[] {
+  return exposedOperations(context, api)
+    .filter((operation) => operation.documented)
+    .map(({ entity: note }) => {
+      const href = entityHref(page, note.id);
+      const { line } = note.source;
+      return {
+        mention: {
+          kind: "written",
+          file: { label: note.source.path, href },
+          title: note.title,
+          type: note.type,
+          typeLabel: typeLabel(context, note.type),
+          context: note.summary ?? note.title,
+          line,
+          href: `${href}#L${String(line)}`,
+        },
+        source: note.source.name,
+        path: note.source.path,
+      };
+    });
+}
+
 /** Written links first, then recognised mentions, each group in corpus order; the model order breaks ties. */
 export function mentionsOf(context: SiteContext, page: string, entity: Entity): Mention[] {
-  const located: LocatedMention[] = [];
+  const located: LocatedMention[] = operationMentions(context, page, entity);
   for (const link of context.touching.get(entity.id) ?? []) {
     for (const provenance of link.provenance) {
       const mention = mentionOf(context, page, entity, link, provenance);
@@ -147,6 +177,12 @@ export function mentionsOf(context: SiteContext, page: string, entity: Entity): 
         a.mention.line - b.mention.line,
     )
     .map((item) => item.mention);
+}
+
+/** How many pages cite an entity: the distinct pages of its mentions, what the related pages block counts. */
+export function citingPages(context: SiteContext, entity: Entity): number {
+  const page = pagePath(entity.id);
+  return new Set(mentionsOf(context, page, entity).map((mention) => mention.file.href)).size;
 }
 
 /** The strings of the related pages block in the site language; the two patterns keep their placeholders for the island. */

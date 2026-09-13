@@ -129,6 +129,20 @@ describe("The related pages offer a text filter and a type filter once the islan
     expect(entries(host)).toEqual(["Note 1 Term 2", "Note 2 Screen 3", "Note 3 Term 2"]);
   });
 
+  it("lifts the pages of the lead type to the top whatever their count, the written link then the passage count ordering the rest, and says why under the list", async () => {
+    const all = [mention(1, "written"), mention(4), mention(5), mention(6), mention(7), mention(8)];
+    const host = await mount({
+      ...props(all),
+      leadType: "term",
+      labels: { ...defaultRelatedLabels, leadNote: "The terms come first." },
+    });
+    expect(entries(host)).toEqual(["Note 1 Term 1", "Note 3 Term 2", "Note 2 Screen 3"]);
+    expect(q(host, ".related-lead-note").textContent).toBe("The terms come first.");
+    expect(host.querySelectorAll(".related-note")).toHaveLength(2);
+    const plain = await mount({ ...props(all), leadType: "term" });
+    expect(plain.querySelectorAll(".related-note")).toHaveLength(1);
+  });
+
   it("filters on the title, the type and the passages without regard to case, the counts and a status line following", async () => {
     const all = [
       mention(1, "written"),

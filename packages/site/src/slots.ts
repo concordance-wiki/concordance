@@ -413,7 +413,7 @@ export interface SpaceNode {
   href?: string;
   /** How many pages a folder holds: what tells a folder from a page. */
   count?: number;
-  /** The folders on the way to the current page open, their contents listed; a closed folder shows its count alone. */
+  /** The folders on the way to the current page open, their contents listed; a closed folder shows its count alone. The current page of an API lists its operations. */
   children?: SpaceNode[];
   /** The page of the tree that is the current one, or the folder whose list is the current page. */
   current?: boolean;
@@ -499,7 +499,7 @@ export interface DocumentView {
   positions: DocumentPosition[];
 }
 
-/** One operation of an imported contract, as the static list of the API page names it. */
+/** One operation of an imported contract, as the operations table of the API page lists it. */
 export interface ContractOperationItem {
   /** The operation name as the contract writes it. */
   name: string;
@@ -507,17 +507,62 @@ export interface ContractOperationItem {
   title: string;
   summary?: string;
   href: string;
-  /** Whether a hand-written note describes the operation; the page flags the operations that have none yet. */
+  /** Whether a hand-written note describes the operation; the table lists the operations that have none as gaps. */
   documented: boolean;
+  /** The HTTP method of the operation, as the contract or the note declares it; a SOAP operation has none. */
+  method?: string;
+  /** The path of the operation, as the contract or the note declares it; absent, the table says the path is unknown. */
+  path?: string;
+  /** How many pages cite the operation, already worded: "2 callers". */
+  callers?: string;
 }
 
-/** The contract section of an `api` page: what the model knows of the imported contract, the viewer loading the rest. */
+/** The type of the operations of an API, as the contract import produces them and the notes describe them: what the API page lifts to the top of its related pages. */
+export const OPERATION_TYPE = "endpoint";
+
+/** The headings and notes of the contract side of the API page, in the language of the site; the theme's own English when absent. */
+export interface ContractLabels {
+  /** Heading of the operations table. */
+  operations: string;
+  /** Sentence under that heading: how the operations were matched. */
+  operationsLead: string;
+  /** Sentence added when the table holds gap rows. */
+  gapsLead: string;
+  /** Column headers of the table, for assistive technology. */
+  method: string;
+  path: string;
+  operation: string;
+  callersColumn: string;
+  /** When the contract declares no operation. */
+  noOperation: string;
+  /** Gap row of an operation the contract declares that no note describes. */
+  withoutPage: string;
+  /** Gap row of a note the contract does not declare. */
+  notInContract: string;
+  /** Path cell of a gap row whose note declares no path. */
+  unknownPath: string;
+  /** Heading of the contract block. */
+  contract: string;
+  download: string;
+  /** Note next to the viewer: the contract is shown, never copied into the note. */
+  viewerNote: string;
+  /** Note under the properties, cut to five keys. */
+  fiveKeys: string;
+  /** Note under the related pages, where the operations come first. */
+  operationsFirst: string;
+}
+
+/** The contract side of an `api` page: what the model knows of the imported contract, the viewer loading the rest. */
 export interface ContractSectionProps {
   title: string;
   /** Empty when the contract declares none. */
   version: string;
+  /** The format of the contract with its version, as the record names it: `openapi 3.1`, `wsdl 1.1`. */
+  format: string;
   /** ISO 8601 instant of the import. */
   importedAt: string;
+  /** The import worded relative to the build, "imported 3 days ago"; the instant stands in when absent. */
+  imported?: ChangeDate;
   /** The contract location as written in the note: a URL, or a path relative to it. */
   location: string;
   /** The original contract: its URL, or the copy placed next to the page for a path. */
@@ -526,6 +571,9 @@ export interface ContractSectionProps {
   fragmentHref: string;
   /** In model order. */
   operations: ContractOperationItem[];
+  /** The `endpoint` notes that name the API and match none of its operations, in identifier order: described, absent from the contract. */
+  unmatched?: ContractOperationItem[];
+  labels?: Partial<ContractLabels>;
 }
 
 /** The headings and notes the page of a meeting adds itself, in the language of the site; the theme's own English when absent. */
@@ -618,7 +666,7 @@ export interface EntityPageProps {
   sources: SourceRef[];
   /** The documents of the entity beyond its note, in path order; absent or empty for a note alone. */
   documents?: DocumentView[];
-  /** The imported contract of an `api` entity; absent for every other page. */
+  /** The imported contract of an `api` entity, which gives the page its own layout; absent for every other page. */
   contract?: ContractSectionProps;
   /** The neighbourhood map served unfolded, the panel replaced by it; folded behind its line when absent. */
   mapOpen?: boolean;
@@ -787,6 +835,8 @@ export interface RelatedLabels {
   noRelated: string;
   /** When no page matches the filters. */
   noMatch: string;
+  /** Before the order note, when a `leadType` lifts its pages to the top: why they come first. */
+  leadNote?: string;
 }
 
 export interface MentionsPanelProps {
@@ -800,6 +850,8 @@ export interface MentionsPanelProps {
   labels?: Partial<RelatedLabels>;
   /** Href, relative to the page, of the JSON fragment holding every mention of the entity; absent when none was written. */
   fragmentHref?: string;
+  /** A type slug whose pages come first, whatever their passage count: the operations on an API page. */
+  leadType?: string;
 }
 
 export interface Neighbour {

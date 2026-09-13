@@ -2,11 +2,12 @@ import type { JSX } from "preact";
 
 import type { SpaceNode, SpaceTree as SpaceTreeModel } from "../../slots.js";
 
-/** A page of the tree links to itself; the current one is a plain entry marked `aria-current`, bold and ruled by the stylesheet. */
+/** A page of the tree links to itself; the current one is a plain entry marked `aria-current`, bold and ruled by the stylesheet, the pages hung under it listed after it. */
 function Page({ node }: { node: SpaceNode }): JSX.Element {
   return node.current === true ? (
     <li class="space-page space-current">
       <span aria-current="page">{node.label}</span>
+      {node.children !== undefined && <Nodes nodes={node.children} />}
     </li>
   ) : (
     <li class="space-page">
