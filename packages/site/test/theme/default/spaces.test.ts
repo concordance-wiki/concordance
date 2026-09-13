@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { corporateSpaces } from "../../../src/gallery/spaces.js";
+import { corporateSpaces } from "../../../src/gallery/fixtures/spaces.js";
 import { renderSlot } from "../../../src/render.js";
 import { defaultSpacesLabels } from "../../../src/theme/default/spaces.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
