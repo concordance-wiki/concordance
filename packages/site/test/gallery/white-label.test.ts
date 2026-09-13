@@ -75,7 +75,9 @@ describe("the gallery renders the white-label fixture theme with --theme", () =>
         '<a class="site-title" href="../"><span class="site-logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"',
       );
       expect(html, page.file).toContain('fill="currentColor"');
-      expect(html, page.file).toContain("</svg></span>Pipeline notes</a>");
+      expect(html, page.file).toContain(
+        '</svg></span><span class="site-name">Pipeline notes</span></a>',
+      );
       expect(html, page.file).toContain(
         '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"/>',
       );
@@ -165,7 +167,9 @@ describe("a project theme without a logo", () => {
     if (!loaded.ok) return;
     const { pages, report } = await build({ ...defaultTheme, config: loaded.theme });
     const logo = pages.get("header-logo.html") ?? "";
-    expect(logo).toContain('<a class="site-title" href="../">Pipeline notes</a>');
+    expect(logo).toContain(
+      '<a class="site-title" href="../"><span class="site-name">Pipeline notes</span></a>',
+    );
     expect(logo).not.toContain("site-logo");
     expect(logo).not.toContain('rel="icon"');
     expect(logo).not.toContain("project.css");

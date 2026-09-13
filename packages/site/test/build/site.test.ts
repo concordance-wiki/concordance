@@ -378,7 +378,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
   it("writes the project name as the site title, the spaces, index and recent links in the top bar, the to-do link with its count in the footer, and no credit without a theme", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
-    expect(home).toContain('<a class="site-title" href="index.html">Concordance notes</a>');
+    expect(home).toContain(
+      '<a class="site-title" href="index.html"><span class="site-name">Concordance notes</span></a>',
+    );
     expect(home).toContain('<a class="drawer-spaces-title" href="spaces/index.html">Spaces</a>');
     expect(home).toContain(
       '<ul class="site-links"><li><a href="index/index.html">A–Z index</a></li><li><a href="index.html#home-recent">Recent</a></li></ul>',
@@ -772,7 +774,7 @@ describe("The labels of the site come from the message catalogue of the project 
     );
     expect(home).toContain('<details class="site-drawer" aria-label="Menu">');
     expect(home).toContain('<summary class="site-search-button">');
-    expect(home).toContain("</svg>Rechercher</summary>");
+    expect(home).toContain('</svg><span class="site-search-label">Rechercher</span></summary>');
     expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
     expect(home).toContain('placeholder="Rechercher dans la documentation"');
     expect(home).toContain('<h1 id="home-question">Que cherchez-vous ?</h1>');
