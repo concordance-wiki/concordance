@@ -4,23 +4,29 @@ import { formatMessage, formatMonth } from "@concordance-wiki/i18n";
 import { byCodeUnit } from "../order.js";
 import type {
   ChangeDate,
-  Companion,
   KeywordPageLabels,
   KeywordPageProps,
+  Neighbour,
+  NeighbourhoodProps,
   PassageGroup,
   SimilarExpression,
 } from "../slots.js";
-import { createNoteHref, fileKey, message, typeLabel, type SiteContext } from "./context.js";
-import { neighbourhoodOf, neighbourPages } from "./entity-page.js";
+import {
+  createNoteHref,
+  fileKey,
+  glyphNameOf,
+  message,
+  typeLabel,
+  type SiteContext,
+} from "./context.js";
+import { neighbourhoodLabels, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
 import { mentionsPanelOf } from "./mentions.js";
 import { entityHref, spaceHref } from "./paths.js";
 import { spaceWithPageOf } from "./space.js";
 
-/** The heaviest companions weigh 5, the lightest 1, by rank of their count. */
-const COMPANION_WEIGHTS = 5;
-/** How many accompanying words the page shows. */
-export const COMPANIONS_MAX = 12;
+/** How many nodes the map of a keyword page draws: the words that accompany it most often. */
+export const KEYWORD_NEIGHBOURS_MAX = 6;
 
 function numberOf(value: unknown): number {
   return typeof value === "number" ? value : 0;
@@ -166,36 +172,42 @@ export function usedSinceOf(
 }
 
 /**
- * The weight of every count, from 1 to 5, by the rank of the count among the distinct counts:
- * the largest weighs 5, the smallest 1, equal counts weigh the same; a single count weighs 5.
+ * The neighbourhood of a word nobody defined: a keyword page carries no link, so its map is
+ * drawn from its co-occurrences, the `neighbours` block of the model, the most frequent first
+ * and six at most, the entities the model holds as full nodes and the other noteless words as
+ * dashed ones, each weighed by the number of paragraphs it shares with the word; a neighbour
+ * the model no longer holds is left out, and `total` counts every one it still holds.
  */
-export function weightsOf(counts: readonly number[]): number[] {
-  const distinct = [...new Set(counts)].sort((a, b) => a - b);
-  return counts.map((count) =>
-    distinct.length === 1
-      ? COMPANION_WEIGHTS
-      : 1 + Math.round(((COMPANION_WEIGHTS - 1) * distinct.indexOf(count)) / (distinct.length - 1)),
-  );
-}
-
-/**
- * The accompanying words: the co-occurrence neighbours of the page in the model, the most
- * frequent first, twelve at most, each weighed by the rank of its count. A neighbour the model
- * no longer holds keeps its identifier as label, without a link.
- */
-export function companionsOf(context: SiteContext, page: string, entity: Entity): Companion[] {
-  const neighbours = (context.model.neighbours?.[entity.id] ?? []).slice(0, COMPANIONS_MAX);
-  const weights = weightsOf(neighbours.map((neighbour) => neighbour.count));
-  return neighbours.map((neighbour, index) => {
+export function keywordNeighbourhoodOf(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+): NeighbourhoodProps {
+  const known = (context.model.neighbours?.[entity.id] ?? []).flatMap((neighbour) => {
     const target = context.entities.get(neighbour.id);
-    return {
-      label: target?.title ?? neighbour.id,
-      ...(target === undefined ? {} : { href: entityHref(page, neighbour.id) }),
-      count: neighbour.count,
-      // Built from the same list: one weight per neighbour.
-      weight: weights[index] as number,
-    };
+    return target === undefined ? [] : [{ target, count: neighbour.count }];
   });
+  const neighbours: Neighbour[] = known
+    .slice(0, KEYWORD_NEIGHBOURS_MAX)
+    .map(({ target, count }) => {
+      const keyword = target.keyword === true;
+      const glyph = keyword ? undefined : glyphNameOf(context, target.type);
+      return {
+        id: target.id,
+        label: target.title,
+        href: entityHref(page, target.id),
+        typeLabel: keyword ? message(context, "keyword.title") : typeLabel(context, target.type),
+        weight: count,
+        kind: keyword ? "keyword" : "entity",
+        ...(glyph === undefined ? {} : { typeGlyph: glyph }),
+      };
+    });
+  return {
+    centre: entity.title,
+    neighbours,
+    total: known.length,
+    labels: neighbourhoodLabels(context, neighbours.length, known.length),
+  };
 }
 
 /**
@@ -229,8 +241,6 @@ export function keywordPageLabels(context: SiteContext, neighbours: number): Key
     spaces: message(context, "keyword.factSpaces"),
     noProperty: message(context, "keyword.noProperty"),
     maybeSame: message(context, "keyword.maybeSame"),
-    companions: message(context, "keyword.companions"),
-    noCompanion: message(context, "keyword.noCompanion"),
     seeNeighbourhood: message(context, "entity.seeNeighbourhood"),
     neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
       count: neighbours,
@@ -246,8 +256,8 @@ export interface KeywordPageOptions {
  * The view model of a keyword page: the space the word is filed in and its breadcrumb, since
  * when it is used, the notice from the catalogue with the lead to propose a definition on the
  * glossary's forge when it is known, the counts from the entity, the passages and the leads
- * from its fragment, the companions from the model, the related pages with the note that none
- * is cited, and the labels of the page in the site language.
+ * from its fragment, the neighbourhood from its co-occurrences, the related pages with the note
+ * that none is cited, and the labels of the page in the site language.
  */
 export function keywordPageOf(
   context: SiteContext,
@@ -255,7 +265,7 @@ export function keywordPageOf(
   options: KeywordPageOptions = {},
 ): KeywordPageProps {
   const page = pagePath(entity.id);
-  const neighbourhood = neighbourhoodOf(context, page, entity);
+  const neighbourhood = keywordNeighbourhoodOf(context, page, entity);
   const passages = context.fragments.get(entity.id)?.passages ?? [];
   const groups = locatedGroupsOf(context, page, passages);
   const occurrences = numberOf(entity.attributes["occurrences"]);
@@ -299,7 +309,6 @@ export function keywordPageOf(
     spaces: [...new Set(groups.map((group) => group.source))],
     summary: formatMessage(context.catalogue, "keyword.filesSummary", { count: files }),
     passages: groups.map((group) => group.group),
-    companions: companionsOf(context, page, entity),
     similar: similarOf(context, page, entity),
     similarLead: message(context, "keyword.similarLead"),
     neighbours: neighbourhood,

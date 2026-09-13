@@ -315,7 +315,7 @@ export const corporateApiPage: SlotProps["EntityPage"] = {
     },
     { name: "version", label: "Version", values: [{ text: "0" }] },
   ],
-  labels: { ...corporateEntityPage.labels, neighbourPages: "9 pages" },
+  labels: { ...corporateEntityPage.labels, neighbourPages: "6 pages" },
   neighbours: {
     centre: "Model query API",
     neighbours: [

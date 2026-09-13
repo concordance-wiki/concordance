@@ -145,8 +145,18 @@ describe("An automated audit (axe-core) runs in continuous integration and fails
       { ...galleryFixtures.entityPage, neighbours: galleryFixtures.neighbourhoodOverflow },
       options,
     );
-    expect(overflow).toContain('<a href="#mentions-title">see the mentions panel</a>');
+    expect(overflow).toContain('<svg class="neighbourhood-graph"');
+    expect(overflow).toContain(
+      '<p class="neighbourhood-total">14 neighbours in total, more than the map shows.</p>',
+    );
     expect((await audit(overflow)).violations.map(describeViolation)).toEqual([]);
+    const empty = renderPage(
+      "EntityPage",
+      { ...galleryFixtures.entityPage, neighbours: { centre: "Entity page", neighbours: [] } },
+      options,
+    );
+    expect(empty).toContain('<a href="#mentions-title">See the mentions panel</a>');
+    expect((await audit(empty)).violations.map(describeViolation)).toEqual([]);
     // The pointer's target is on the same page.
     expect(document.getElementById("mentions-title")).not.toBeNull();
   });

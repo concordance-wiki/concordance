@@ -6,7 +6,7 @@ export const keywordPageEmptyState: GalleryPage = {
   slot: "KeywordPage",
   rendered: "KeywordPage",
   state: "empty",
-  description: "a keyword without passages, companions or similar forms",
+  description: "a keyword without passages, neighbours or similar forms",
   ...chrome,
   props: {
     ...keywordPage,
@@ -14,7 +14,7 @@ export const keywordPageEmptyState: GalleryPage = {
     spaces: [],
     summary: "0 files.",
     passages: [],
-    companions: [],
     similar: [],
+    neighbours: { centre: "build summary", neighbours: [] },
   },
 };

@@ -7,7 +7,7 @@ export const keywordPageState: GalleryPage = {
   rendered: "KeywordPage",
   state: "default",
   description:
-    "the notice, the passages by file, the counts, the similar forms and the companions, without a space",
+    "the notice, the passages by file, the counts, the similar forms and the neighbourhood of its co-occurrences, without a space",
   ...chrome,
   props: keywordPage,
 };

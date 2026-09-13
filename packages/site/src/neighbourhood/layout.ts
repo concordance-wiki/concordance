@@ -4,8 +4,8 @@ export const FONT_SIZE = 12;
 const CHAR_WIDTH = 0.55;
 /** A title longer than this is cut with an ellipsis; the full title travels in a `<title>` and in the list. */
 export const LABEL_MAX = 28;
-export const NODE_RADIUS = 9;
-export const CENTRE_RADIUS = 11;
+export const NODE_RADIUS = 6;
+export const CENTRE_RADIUS = 10;
 const LINE_HEIGHT = 14;
 const MARGIN = 8;
 /** Distance from a node centre to the start of its label. */
@@ -90,7 +90,7 @@ function widthOf(cut: Cut): number {
 }
 
 function ringRadius(count: number): number {
-  return Math.min(100, Math.max(60, 46 + 6 * count));
+  return Math.min(120, Math.max(64, 32 + 12 * count));
 }
 
 function sideOf(cosine: number, sine: number): LabelSide {

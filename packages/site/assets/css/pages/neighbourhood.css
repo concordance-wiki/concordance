@@ -16,6 +16,26 @@
   order: 2;
 }
 
+/* The mark before the lead: the centre in the accent, its neighbours in the label tone, the edges in the border tone; gone once the line is the head of the map. */
+.neighbourhood-icon {
+  flex: none;
+  fill: var(--color-label);
+}
+
+.neighbourhood-icon-centre {
+  fill: var(--color-accent);
+}
+
+.neighbourhood-icon-edges {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 1.2;
+}
+
+.neighbourhood-fold[open] > summary > .neighbourhood-icon {
+  display: none;
+}
+
 .neighbourhood-lead {
   flex: 1;
 }

@@ -7,7 +7,7 @@ export const neighbourhoodOverflowState: GalleryPage = {
   rendered: "Neighbourhood",
   state: "overflow",
   description:
-    "more neighbours in the model than the map may show: a pointer to the mentions panel replaces it, the list stays",
+    "more neighbours in the model than the map may show: the map draws the ones listed, the total under it",
   ...chrome,
   props: neighbourhoodOverflow,
 };

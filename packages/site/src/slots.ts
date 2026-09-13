@@ -787,15 +787,6 @@ export interface PassageGroup {
   passages: Passage[];
 }
 
-export interface Companion {
-  label: string;
-  href?: string;
-  /** Number of paragraphs the word shares with the expression. */
-  count: number;
-  /** Relative co-occurrence frequency, from 1 (rare) to 5 (frequent), by rank of the count among the companions. */
-  weight: number;
-}
-
 /** The lead to write the missing note: its label, and the new-file page of the glossary on its forge when known. */
 export interface CreateNoteLead {
   label: string;
@@ -835,10 +826,6 @@ export interface KeywordPageLabels {
   noProperty: string;
   /** Heading of the block of expressions with a similar form. */
   maybeSame: string;
-  /** Heading of the block of accompanying words. */
-  companions: string;
-  /** When the word shares no paragraph with another page. */
-  noCompanion: string;
   /** The line that unfolds the neighbourhood. */
   seeNeighbourhood: string;
   /** How many pages the neighbourhood holds, already worded: "5 pages". */
@@ -862,12 +849,11 @@ export interface KeywordPageProps {
   summary: string;
   /** Grouped by file, in corpus order. */
   passages: PassageGroup[];
-  /** The most frequent first, twelve at most. */
-  companions: Companion[];
   /** Expressions with a similar form, offered as a lead. */
   similar: SimilarExpression[];
   /** The note under that lead, already localised, which asserts no relation. */
   similarLead: string;
+  /** Drawn from the co-occurrences of the word: the pages and the words that accompany it most often. */
   neighbours: NeighbourhoodProps;
   mentions: MentionsPanelProps;
   labels?: Partial<KeywordPageLabels>;
@@ -988,9 +974,9 @@ export interface NeighbourhoodLabels {
   capNote: string;
   /** When the page has no neighbour. */
   noNeighbour: string;
-  /** "{count} neighbours in total, more than the map shows", worded, when the map gives way to the pointer. */
+  /** "{count} neighbours in total, more than the map shows", worded, under the map when the model holds more than it draws. */
   total: string;
-  /** The pointer to the mentions panel. */
+  /** The pointer to the mentions panel, after the notice that the page has no neighbour. */
   seeMentions: string;
 }
 
@@ -1001,7 +987,7 @@ export interface NeighbourhoodProps {
   neighbours: Neighbour[];
   /**
    * How many one-hop neighbours the entity has in the model. When more than `neighbours` lists,
-   * the map gives way to a pointer to the mentions panel; the list stays.
+   * a sentence under the map says so; the map and the list draw the neighbours listed.
    */
   total?: number;
   /** Absent, the theme uses its own English labels. */

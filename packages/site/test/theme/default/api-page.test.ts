@@ -140,7 +140,7 @@ describe("ApiPage", () => {
     expect(html).not.toContain("breadcrumbs");
     expect(html).not.toContain("entity-changed");
     expect(html).not.toContain("entity-space");
-    expect(html).toContain('<span class="neighbourhood-count">9 pages</span>');
+    expect(html).toContain('<span class="neighbourhood-count">6 pages</span>');
     expect(count(html, "<h1>")).toBe(1);
     expectBalanced(html);
     expect(

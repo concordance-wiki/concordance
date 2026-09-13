@@ -8,7 +8,7 @@
   "neighbourhood.mapCaption": "La liste ci-dessous porte la même information que la carte.",
   "neighbourhood.none": "Aucun voisin enregistré.",
   "neighbourhood.noteless": "mot sans définition",
-  "neighbourhood.seeMentions": "voir le volet des mentions",
+  "neighbourhood.seeMentions": "Voir le volet des mentions",
   "neighbourhood.textualEquivalent": "équivalent textuel",
   "neighbourhood.total": "{count, plural, one {# voisin en tout, plus que la carte n’en montre} other {# voisins en tout, plus que la carte n’en montre}}"
 }

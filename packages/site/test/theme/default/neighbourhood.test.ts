@@ -23,6 +23,7 @@ import { defaultTheme } from "../../../src/theme/resolve.js";
 import type { Neighbour } from "../../../src/slots.js";
 import { fragments, model, profile, tokenize } from "../../build/fixture.js";
 import { count, expectBalanced } from "../../helpers/html.js";
+import { NEIGHBOURHOOD_ICON } from "../../helpers/neighbourhood-icon.js";
 
 function render(props: Parameters<typeof renderSlot<"Neighbourhood">>[1]): string {
   return renderSlot("Neighbourhood", props, defaultTheme);
@@ -48,7 +49,7 @@ describe("Neighbourhood", () => {
       '<p class="neighbourhood-list-head"><span class="section-label">The 2 neighbours</span><span class="neighbourhood-equivalent">textual equivalent</span></p><ul id="neighbourhood-list" class="neighbour-list">',
     );
     expect(html).toContain(
-      '<li class="neighbour" data-type="1"><a href="../page/">page</a><span class="badge">term</span><span class="weight">12</span></li>',
+      '<li class="neighbour" data-type="1"><a href="../page/">page</a><span class="neighbour-type">term</span><span class="weight">12</span></li>',
     );
     expect(html).toContain(
       '<li class="neighbour group-start"><a href="../mentions-panel/">Mentions panel</a><span class="relation">displays</span><span class="weight">4</span></li>',
@@ -108,11 +109,15 @@ describe("Neighbourhood", () => {
     expect(html.match(/<li class="neighbour">/g)).toHaveLength(2);
   });
 
-  it("says when there is no neighbour and draws no map", () => {
+  it("says when there is no neighbour, points at the mentions panel and draws no map", () => {
     const html = render({ centre: "x", neighbours: [] });
-    expect(html).toContain('<p class="empty">No neighbour recorded.</p>');
+    expect(html).toContain(
+      '<p class="empty">No neighbour recorded. <a href="#mentions-title">See the mentions panel</a>.</p></section>',
+    );
     expect(html).not.toContain("<figure");
     expect(html).not.toContain("<svg");
+    expect(html).not.toContain("neighbourhood-controls");
+    expect(html).not.toContain("neighbourhood-total");
   });
 });
 
@@ -120,7 +125,7 @@ describe("Readable rendering of the neighbourhood map", () => {
   it("carries the label of every node in plain text next to it, the centre included", () => {
     const html = render(neighbourhoodFull);
     expect(html).toContain(
-      '<figure class="neighbourhood-map" aria-describedby="neighbourhood-list"><svg class="neighbourhood-graph" viewBox="0 0 372 236" font-size="12" aria-hidden="true" focusable="false">',
+      '<figure class="neighbourhood-map" aria-describedby="neighbourhood-list"><svg class="neighbourhood-graph" viewBox="0 0 404 274" font-size="12" aria-hidden="true" focusable="false">',
     );
     expect(count(html, '<g class="map-node')).toBe(6);
     expect(count(html, '<text class="map-label"')).toBe(7);
@@ -132,7 +137,7 @@ describe("Readable rendering of the neighbourhood map", () => {
       );
     }
     expect(html).toContain(
-      '<g class="map-centre"><circle class="map-shape" cx="186" cy="118" r="11"></circle><text class="map-label" x="186" y="140" dy="0.35em" text-anchor="middle">Model query</text></g></svg>',
+      '<g class="map-centre"><circle class="map-shape" cx="202" cy="137" r="10"></circle><text class="map-label" x="202" y="158" dy="0.35em" text-anchor="middle">Model query</text></g></svg>',
     );
     expect(html).not.toContain("<title>Model query</title>");
   });
@@ -142,7 +147,7 @@ describe("Readable rendering of the neighbourhood map", () => {
     const full = "Identifier pattern: lowercase, hyphens, one slash";
     expect(full.length).toBeGreaterThan(LABEL_MAX);
     expect(html).toContain(
-      `<text class="map-label" x="186" y="221" dy="0.35em" text-anchor="middle"><title>${full}</title>Identifier pattern: lowerca…</text>`,
+      `<text class="map-label" x="202" y="259" dy="0.35em" text-anchor="middle"><title>${full}</title>Identifier pattern: lowerca…</text>`,
     );
     expect(html).toContain(`<a href="../identifier-pattern/">${full}</a>`);
     expect(count(html, "<title>")).toBe(1);
@@ -166,16 +171,16 @@ describe("Readable rendering of the neighbourhood map", () => {
   it("carries the type by shape and glyph: a circle holding the shape of the glyph name for an entity, a dashed square for a noteless word", () => {
     const html = render(neighbourhoodFull);
     expect(html).toContain(
-      '<g class="map-node map-node-entity" data-weight="5" data-glyph="endpoint" data-type="1"><circle class="map-shape" cx="186" cy="36" r="9"></circle><use class="map-glyph" href="#glyph-hexagon" x="181" y="31" width="10" height="10"></use>',
+      '<g class="map-node map-node-entity" data-weight="5" data-glyph="endpoint" data-type="1"><circle class="map-shape" cx="202" cy="33" r="6"></circle><use class="map-glyph" href="#glyph-hexagon" x="198" y="29" width="8" height="8"></use>',
     );
     expect(html).toContain(
-      '<g class="map-node map-node-entity" data-weight="9" data-glyph="screen" data-type="2"><circle class="map-shape" cx="257" cy="159" r="9"></circle><use class="map-glyph" href="#glyph-rectangle"',
+      '<g class="map-node map-node-entity" data-weight="9" data-glyph="screen" data-type="2"><circle class="map-shape" cx="292" cy="189" r="6"></circle><use class="map-glyph" href="#glyph-rectangle"',
     );
     expect(html).toContain(
-      'data-glyph="rule" data-type="3"><circle class="map-shape" cx="186" cy="200" r="9"></circle><use class="map-glyph" href="#glyph-shield"',
+      'data-glyph="rule" data-type="3"><circle class="map-shape" cx="202" cy="241" r="6"></circle><use class="map-glyph" href="#glyph-shield"',
     );
     expect(html).toContain(
-      '<g class="map-node map-node-keyword" data-weight="7" data-type="5"><rect class="map-shape" x="106" y="68" width="18" height="18" stroke-dasharray="4 3"></rect><text class="map-label"',
+      '<g class="map-node map-node-keyword" data-weight="7" data-type="5"><rect class="map-shape" x="106" y="79" width="12" height="12" stroke-dasharray="4 3"></rect><text class="map-label"',
     );
     expect(html).toContain(
       '<defs><symbol id="glyph-hexagon" viewBox="0 0 10 10"><path d="M5 .5 9.5 3v4L5 9.5.5 7V3z"></path></symbol><symbol id="glyph-rectangle" viewBox="0 0 10 10"><path d="M1 2h8v6H1z"></path></symbol><symbol id="glyph-shield" viewBox="0 0 10 10">',
@@ -188,7 +193,7 @@ describe("Readable rendering of the neighbourhood map", () => {
   it("draws the initial of a glyph name the theme has no shape for, and no glyph on a node without a type glyph", () => {
     const html = render(neighbourhoodFull);
     expect(html).toContain(
-      'data-glyph="role" data-type="4"><circle class="map-shape" cx="115" cy="159" r="9"></circle><text class="map-glyph" x="115" y="159" dy="0.35em" text-anchor="middle">R</text>',
+      'data-glyph="role" data-type="4"><circle class="map-shape" cx="112" cy="189" r="6"></circle><text class="map-glyph" x="112" y="189" dy="0.35em" text-anchor="middle">R</text>',
     );
     expect(shapeOfGlyph("role")).toBeUndefined();
     expect(shapeOfGlyph("constructor")).toBeUndefined();
@@ -203,12 +208,12 @@ describe("Readable rendering of the neighbourhood map", () => {
   it("dashes the edge to a noteless word and draws the others plain", () => {
     const html = render(neighbourhoodFull);
     expect(html).toContain(
-      '<line class="map-edge map-edge-keyword" x1="186" y1="118" x2="115" y2="77" stroke-dasharray="4 3" data-type="5"></line>',
+      '<line class="map-edge map-edge-keyword" x1="202" y1="137" x2="112" y2="85" stroke-dasharray="4 3" data-type="5"></line>',
     );
     expect(count(html, '<line class="map-edge"')).toBe(5);
     expect(count(html, "stroke-dasharray")).toBe(2);
     expect(html).toContain(
-      '<line class="map-edge" x1="186" y1="118" x2="186" y2="36" data-type="1"></line>',
+      '<line class="map-edge" x1="202" y1="137" x2="202" y2="33" data-type="1"></line>',
     );
     const edges = html.indexOf('<line class="map-edge"');
     const nodes = html.indexOf('<g class="map-node');
@@ -216,26 +221,33 @@ describe("Readable rendering of the neighbourhood map", () => {
     expect(html.lastIndexOf("<line ")).toBeLessThan(nodes);
   });
 
-  it("replaces the map by a pointer to the mentions panel when the model holds more neighbours than shown, the list staying", () => {
+  it("draws the map of the neighbours listed when the model holds more, and says the total under it before the list", () => {
     const html = render(neighbourhoodOverflow);
+    expect(html).toContain("<svg");
+    expect(html).toContain("neighbourhood-controls");
     expect(html).toContain(
-      '</h2><p class="neighbourhood-overflow">14 neighbours in total, more than the map shows: <a href="#mentions-title">see the mentions panel</a>.</p><p class="neighbourhood-list-head"><span class="section-label">The 6 neighbours</span>',
+      '</figure><p class="neighbourhood-total">14 neighbours in total, more than the map shows.</p><p class="neighbourhood-list-head"><span class="section-label">The 6 neighbours</span>',
     );
-    expect(html).not.toContain("<figure");
-    expect(html).not.toContain("<svg");
-    expect(html).not.toContain("neighbourhood-controls");
-    expect(html).not.toContain("data-type");
-    expect(count(html, '<li class="neighbour')).toBe(6);
+    expect(html).not.toContain("#mentions-title");
+    expect(count(html, '<g class="map-node')).toBe(6);
+    expect(html.match(/<li class="neighbour[ "]/g)).toHaveLength(6);
     expect(html).toContain('<p class="neighbourhood-note">Six neighbours at most');
     expectBalanced(html);
   });
 
-  it("draws the map when every neighbour of the model is shown, or when the total is unknown", () => {
-    expect(render(neighbourhoodFull)).toContain("<svg");
-    expect(render({ ...neighbourhoodFull, total: 5 })).toContain("<svg");
+  it("draws the map from one neighbour on and says no total when every neighbour of the model is shown or the total is unknown", () => {
+    expect(render(neighbourhoodFull)).not.toContain("neighbourhood-total");
+    expect(render({ ...neighbourhoodFull, total: 5 })).not.toContain("neighbourhood-total");
     const unknown = { centre: neighbourhoodFull.centre, neighbours: neighbourhoodFull.neighbours };
-    expect(render(unknown)).toContain("<svg");
-    expect(render({ ...neighbourhoodFull, total: 7 })).not.toContain("<svg");
+    expect(render(unknown)).not.toContain("neighbourhood-total");
+    expect(render({ ...neighbourhoodFull, total: 7 })).toContain(
+      '<p class="neighbourhood-total">7 neighbours in total, more than the map shows.</p>',
+    );
+    const one = render({ centre: "check", neighbours: [neighbour(0)], total: 9 });
+    expect(one).toContain("<svg");
+    expect(one).toContain(
+      '<p class="neighbourhood-total">9 neighbours in total, more than the map shows.</p>',
+    );
   });
 
   it("keeps integer coordinates from one to twelve nodes and never overlaps two labels", () => {
@@ -296,10 +308,10 @@ describe("The textual equivalent of the neighbourhood map", () => {
     ];
     const html = render({ centre: "Page mot-clé", neighbours });
     expect(html).toContain(
-      '<li class="neighbour" data-type="1"><a href="../term-0/">Mentions panel</a><span class="badge">Écran</span><span class="relation">est accédé par</span><span class="weight">1</span></li>',
+      '<li class="neighbour" data-type="1"><a href="../term-0/">Mentions panel</a><span class="neighbour-type">Écran</span><span class="relation">est accédé par</span><span class="weight">1</span></li>',
     );
     expect(html).toContain(
-      '<li class="neighbour neighbour-noteless" data-type="2"><a href="../term-1/">build summary</a><span class="badge">Mot-clé</span><span class="weight">2</span></li>',
+      '<li class="neighbour neighbour-noteless" data-type="2"><a href="../term-1/">build summary</a><span class="neighbour-type">Mot-clé</span><span class="weight">2</span></li>',
     );
     expect(html).toContain(
       '<li class="neighbour"><a href="../term-2/">Page</a><span class="relation">broader</span><span class="weight">3</span></li>',
@@ -396,7 +408,7 @@ describe("The neighbourhood map in the panel", () => {
       neighbours: [neighbour(0, { typeLabel: "Term" }), neighbour(1)],
     });
     expect(mixed).toContain(
-      '<line class="map-edge" x1="160" y1="96" x2="160" y2="36" data-type="1"></line><line class="map-edge" x1="160" y1="96" x2="160" y2="156"></line>',
+      '<line class="map-edge" x1="160" y1="97" x2="160" y2="33" data-type="1"></line><line class="map-edge" x1="160" y1="97" x2="160" y2="161"></line>',
     );
     expect(count(mixed, "data-type")).toBe(3);
     expect(mixed).toContain('<li class="neighbour"><a href="../term-1/">term 1</a>');
@@ -413,7 +425,10 @@ describe("The neighbourhood map in the panel", () => {
       '.map-legend-entity::before,\n.map-legend-keyword::before {\n  content: "";',
     );
     expect(css).toContain(".map-legend-keyword::before {\n  border-block-end-style: dashed;\n}");
-    expect(css).toContain('.neighbour-noteless::before {\n  content: "◌" / "";\n}');
+    expect(css).toContain(
+      '.neighbour::before {\n  content: "●" / "";\n  flex: none;\n  color: var(--color-accent);',
+    );
+    expect(css).not.toContain("◌");
   });
 
   it("hides the nodes, edges and rows of an unticked type from the stylesheet alone, one rule per rank up to the twelve nodes the map may hold", () => {
@@ -467,16 +482,15 @@ describe("The neighbourhood map in the panel", () => {
     )) {
       expect(html).toContain(label);
     }
+    expect(html).not.toContain(labels.total);
     expect(html).toContain(
       '<h2 id="neighbourhood-title">Carte du voisinage <span class="neighbourhood-centre">Model query</span></h2>',
     );
     expect(html).not.toContain("Neighbourhood map");
     const overflow = render({ ...neighbourhoodOverflow, labels });
-    expect(overflow).toContain(
-      '<p class="neighbourhood-overflow">14 voisins en tout: <a href="#mentions-title">voir le volet</a>.</p>',
-    );
+    expect(overflow).toContain('<p class="neighbourhood-total">14 voisins en tout.</p>');
     expect(render({ centre: "x", neighbours: [], labels })).toContain(
-      '<p class="empty">Aucun voisin.</p>',
+      '<p class="empty">Aucun voisin. <a href="#mentions-title">voir le volet</a>.</p>',
     );
     expect(render({ ...neighbourhoodFull, labels: { hop: "1 saut" } })).toContain(
       '<span class="neighbourhood-hop" aria-current="true">1 saut</span></p><details class="related-types neighbourhood-types"><summary>Types</summary>',
@@ -507,7 +521,7 @@ describe("The neighbourhood map in the panel", () => {
     );
     const desktop = css.slice(desktopStart, css.indexOf("}\n}\n", desktopStart) + 4);
     expect(desktop).toBe(
-      "@media (min-width: 73.75rem) {\n  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }\n}\n",
+      "@media (min-width: 73.75rem) {\n  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }\n\n  .entity:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: minmax(0, 1fr) 26.875rem;\n  }\n\n  .entity-with-space:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: 16rem minmax(0, 1fr) 26.875rem;\n  }\n}\n",
     );
     expect(count(css, ".neighbourhood-fold[open]) > .panel-block")).toBe(1);
     const tabletStart = css.indexOf("@media (48rem <= width < 73.75rem) {");
@@ -526,7 +540,7 @@ describe("The neighbourhood map in the panel", () => {
     const html = fileSystem.readText("/out/entity-page-map.html");
     expect(html).toContain("<title>EntityPage, map</title>");
     expect(html).toContain(
-      '<details class="neighbourhood-fold" open><summary><span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">6 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Publication threshold</span></summary>',
+      `<details class="neighbourhood-fold" open><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">6 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Publication threshold</span></summary>`,
     );
     expect(count(html, '<g class="map-node')).toBe(6);
     expect(count(html, '<g class="map-node map-node-keyword"')).toBe(1);

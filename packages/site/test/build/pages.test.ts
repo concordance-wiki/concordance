@@ -24,6 +24,7 @@ import {
   declarationOf,
   entityPageOf,
   highlightsOf,
+  neighbourhoodLabels,
   neighbourhoodOf,
   neighbourPages,
   othersOf,
@@ -37,8 +38,8 @@ import type {
   FragmentPassage,
 } from "../../src/build/fragments.js";
 import {
-  COMPANIONS_MAX,
-  companionsOf,
+  KEYWORD_NEIGHBOURS_MAX,
+  keywordNeighbourhoodOf,
   keywordPageLabels,
   keywordPageOf,
   keywordSpaceOf,
@@ -46,7 +47,6 @@ import {
   passageLocationOf,
   similarOf,
   usedSinceOf,
-  weightsOf,
 } from "../../src/build/keyword-page.js";
 import { DEFAULT_MENTIONS_INLINE, mentionsPanelOf } from "../../src/build/mentions.js";
 import {
@@ -388,8 +388,15 @@ describe("entityPageOf", () => {
     expect(entityPageOf(context(), term).changed).toBeUndefined();
   });
 
-  it("counts the pages of the neighbourhood from the total of the model, or from the listed neighbours without one", () => {
-    expect(neighbourPages({ centre: "x", neighbours: [], total: 7 })).toBe(7);
+  it("counts the pages of the neighbourhood from the neighbours listed, never from the total the model holds beyond them", () => {
+    expect(neighbourPages({ centre: "x", neighbours: [], total: 7 })).toBe(0);
+    expect(
+      neighbourPages({
+        centre: "x",
+        neighbours: [{ id: "a", label: "a", href: "a/", weight: 1 }],
+        total: 7,
+      }),
+    ).toBe(1);
     expect(
       neighbourPages({
         centre: "x",
@@ -731,7 +738,7 @@ describe("entityPageOf", () => {
         "Six neighbours at most, always named. Beyond that the map teaches nothing: the list takes over.",
       noNeighbour: "No neighbour recorded.",
       total: "2 neighbours in total, more than the map shows",
-      seeMentions: "see the mentions panel",
+      seeMentions: "See the mentions panel",
     });
     expect(neighbourhood.labels).toMatchObject({
       neighbours: "The 3 neighbours",
@@ -1342,7 +1349,7 @@ describe("keywordPageOf", () => {
     expect(orphan.spaces).toEqual([]);
     expect(orphan.summary).toBe("0 files.");
     expect(orphan.passages).toEqual([]);
-    expect(orphan.companions).toEqual([]);
+    expect(orphan.neighbours).toMatchObject({ centre: "#hash", neighbours: [], total: 0 });
     expect(orphan.similar).toEqual([]);
     const one = { ...keyword, attributes: { ...keyword.attributes, documents: 1 } };
     expect(keywordPageOf(context(), one).summary).toBe("1 file.");
@@ -1378,10 +1385,8 @@ describe("keywordPageOf", () => {
       spaces: "Espaces",
       noProperty: "Aucune propriété déclarée\u00a0: il n’existe pas de fichier pour ce mot.",
       maybeSame: "Peut-être la même chose",
-      companions: "Mots qui l’accompagnent",
-      noCompanion: "Aucun mot d’accompagnement relevé.",
       seeNeighbourhood: "Voir la carte du voisinage",
-      neighbourPages: "0 page",
+      neighbourPages: "2 pages",
     });
   });
 
@@ -1397,10 +1402,8 @@ describe("keywordPageOf", () => {
       spaces: "Spaces",
       noProperty: "No declared property: there is no file for this word.",
       maybeSame: "Maybe the same thing",
-      companions: "Accompanying words",
-      noCompanion: "No accompanying word recorded.",
       seeNeighbourhood: "See the neighbourhood map",
-      neighbourPages: "0 pages",
+      neighbourPages: "2 pages",
     });
     expect(keywordPageLabels(context(), 1).neighbourPages).toBe("1 page");
   });
@@ -1640,41 +1643,105 @@ describe("keywordPageOf", () => {
     });
   });
 
-  it("sizes the companions by the rank of their co-occurrence count, twelve at most, a neighbour the model lost keeping its identifier without a link", () => {
-    expect(companionsOf(context(), "keywords/build-summary/index.html", keyword)).toEqual([
-      {
-        label: "Mentions panel",
-        href: "../../specs/screens/mentions-panel/index.html",
-        count: 6,
-        weight: 5,
+  it("draws the neighbourhood of a keyword page from its co-occurrences, the most frequent first, a page as a full node and a noteless word as a dashed one, a neighbour the model lost left out", () => {
+    const neighbourhood = keywordNeighbourhoodOf(
+      context(),
+      "keywords/build-summary/index.html",
+      keyword,
+    );
+    expect(neighbourhood).toEqual({
+      centre: "build summary",
+      neighbours: [
+        {
+          id: "specs/screens/mentions-panel",
+          label: "Mentions panel",
+          href: "../../specs/screens/mentions-panel/index.html",
+          typeLabel: "Screen",
+          typeGlyph: "screen",
+          weight: 6,
+          kind: "entity",
+        },
+        {
+          id: "glossary/keyword-page",
+          label: "Keyword page",
+          href: "../../glossary/keyword-page/index.html",
+          typeLabel: "Term",
+          typeGlyph: "term",
+          weight: 3,
+          kind: "entity",
+        },
+      ],
+      total: 2,
+      labels: neighbourhoodLabels(context(), 2, 2),
+    });
+    expect(neighbourhood.labels).toMatchObject({
+      neighbours: "The 2 neighbours",
+      total: "2 neighbours in total, more than the map shows",
+    });
+    const fellow = model({
+      neighbours: { [keyword.id]: [{ id: orphanKeyword.id, count: 2 }] },
+    });
+    const [word] = keywordNeighbourhoodOf(
+      context({ model: fellow }),
+      "keywords/build-summary/index.html",
+      keyword,
+    ).neighbours;
+    expect(word).toEqual({
+      id: "keywords/zzz",
+      label: "#hash",
+      href: "../zzz/index.html",
+      typeLabel: "Keyword",
+      weight: 2,
+      kind: "keyword",
+    });
+    const fr = keywordNeighbourhoodOf(
+      context({ model: fellow, catalogue: loadCatalogue("fr") }),
+      "keywords/build-summary/index.html",
+      keyword,
+    );
+    expect(fr.neighbours[0]?.typeLabel).toBe("Mot-clé");
+    expect(fr.labels?.map).toBe("Carte du voisinage");
+    const untyped = context({
+      profile: {
+        ...profile,
+        types: { ...profile.types, term: { label: { en: "Term" }, group: "business" } },
       },
-      {
-        label: "Keyword page",
-        href: "../../glossary/keyword-page/index.html",
-        count: 3,
-        weight: 3,
-      },
-      { label: "unknown/ghost", count: 1, weight: 1 },
-    ]);
-    expect(COMPANIONS_MAX).toBe(12);
-    const many = Array.from({ length: 15 }, (_, index) => ({
-      id: `n/${String(index)}`,
-      count: 30 - index,
-    }));
-    const crowded = context({ model: model({ neighbours: { [keyword.id]: many } }) });
-    const companions = companionsOf(crowded, "keywords/build-summary/index.html", keyword);
-    expect(companions).toHaveLength(12);
-    expect(companions.map((companion) => companion.weight)).toEqual([
-      5, 5, 4, 4, 4, 3, 3, 2, 2, 2, 1, 1,
-    ]);
+    });
+    const [, term] = keywordNeighbourhoodOf(
+      untyped,
+      "keywords/build-summary/index.html",
+      keyword,
+    ).neighbours;
+    expect(term).not.toHaveProperty("typeGlyph");
+    expect(term?.kind).toBe("entity");
   });
 
-  it("weighs equal counts alike, from 1 to 5, a single count weighing 5", () => {
-    expect(weightsOf([6, 3, 1])).toEqual([5, 3, 1]);
-    expect(weightsOf([4, 4, 4])).toEqual([5, 5, 5]);
-    expect(weightsOf([2, 1, 2])).toEqual([5, 1, 5]);
-    expect(weightsOf([9, 8, 7, 6])).toEqual([5, 4, 2, 1]);
-    expect(weightsOf([])).toEqual([]);
+  it("draws six nodes at most on a keyword page and counts every co-occurrence neighbour the model holds as the total, none without a neighbours block", () => {
+    expect(KEYWORD_NEIGHBOURS_MAX).toBe(6);
+    const many = Array.from({ length: 9 }, (_, index) => ({
+      id: index % 2 === 0 ? "glossary/page" : "specs/screens/mentions-panel",
+      count: 30 - index,
+    }));
+    const crowded = keywordNeighbourhoodOf(
+      context({ model: model({ neighbours: { [keyword.id]: many } }) }),
+      "keywords/build-summary/index.html",
+      keyword,
+    );
+    expect(crowded.neighbours).toHaveLength(6);
+    expect(crowded.neighbours.map((neighbour) => neighbour.weight)).toEqual([
+      30, 29, 28, 27, 26, 25,
+    ]);
+    expect(crowded.total).toBe(9);
+    expect(crowded.labels?.neighbours).toBe("The 6 neighbours");
+    expect(crowded.labels?.total).toBe("9 neighbours in total, more than the map shows");
+    const bare = model();
+    delete bare.neighbours;
+    const none = keywordNeighbourhoodOf(
+      context({ model: bare }),
+      "keywords/build-summary/index.html",
+      keyword,
+    );
+    expect(none).toMatchObject({ neighbours: [], total: 0 });
   });
 
   it("turns the leads of the fragment into links, a keyword page among them with its occurrences, a lead to a page the model lost being left out", () => {
@@ -1709,8 +1776,10 @@ describe("keywordPageOf", () => {
   it("gives the keyword page the neighbourhood and the mentions of the entity page, with the inline count and the note that none is cited", () => {
     const props = keywordPageOf(context(), keyword, { mentionsInline: 4 });
     expect(props.neighbours).toEqual(
-      neighbourhoodOf(context(), "keywords/build-summary/index.html", keyword),
+      keywordNeighbourhoodOf(context(), "keywords/build-summary/index.html", keyword),
     );
+    expect(props.neighbours.neighbours).toHaveLength(2);
+    expect(props.labels?.neighbourPages).toBe("2 pages");
     const mentions = mentionsPanelOf(context(), "keywords/build-summary/index.html", keyword, 4);
     expect(props.mentions).toEqual({
       ...mentions,

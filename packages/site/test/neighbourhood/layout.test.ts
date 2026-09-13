@@ -61,10 +61,10 @@ describe("layoutNeighbourhood", () => {
     expect(centre.x).toBe(placed.width / 2);
     expect(nodes.map((node) => node.item)).toEqual(["first", "second", "third", "fourth"]);
     const [top, right, bottom, left] = nodes;
-    expect(top).toMatchObject({ x: centre.x, y: centre.y - 70 });
-    expect(right).toMatchObject({ x: centre.x + 70, y: centre.y });
-    expect(bottom).toMatchObject({ x: centre.x, y: centre.y + 70 });
-    expect(left).toMatchObject({ x: centre.x - 70, y: centre.y });
+    expect(top).toMatchObject({ x: centre.x, y: centre.y - 80 });
+    expect(right).toMatchObject({ x: centre.x + 80, y: centre.y });
+    expect(bottom).toMatchObject({ x: centre.x, y: centre.y + 80 });
+    expect(left).toMatchObject({ x: centre.x - 80, y: centre.y });
   });
 
   it("puts a label right of a node on the right half, left of it on the left half, above and below at the poles, the centre's title under the centre", () => {
@@ -86,16 +86,16 @@ describe("layoutNeighbourhood", () => {
     expect(placed.centre.label.box.top).toBeGreaterThan(placed.centre.y);
   });
 
-  it("widens the ring with the number of nodes, between sixty and one hundred units", () => {
+  it("widens the ring with the number of nodes, between sixty-four and one hundred and twenty units", () => {
     const radius = (count: number): number => {
       const placed = layout("c", SHORT.slice(0, count));
       return placed.centre.y - (placed.nodes[0]?.y ?? 0);
     };
-    expect(radius(1)).toBe(60);
-    expect(radius(2)).toBe(60);
-    expect(radius(6)).toBe(82);
-    expect(radius(9)).toBe(100);
-    expect(radius(12)).toBe(100);
+    expect(radius(1)).toBe(64);
+    expect(radius(2)).toBe(64);
+    expect(radius(6)).toBe(104);
+    expect(radius(9)).toBe(120);
+    expect(radius(12)).toBe(120);
   });
 
   it("positions labels without overlap and inside the viewBox on six-node cases, short and long titles, one to twelve nodes", () => {
