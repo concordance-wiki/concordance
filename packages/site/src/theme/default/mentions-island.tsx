@@ -26,7 +26,7 @@ export const MENTIONS_EMBEDDED = "mentions-embedded";
 export const RELATED_PHONE = 2;
 
 /** The phone layout of the stylesheet, under which the island lists two entries: the same width as its breakpoint. */
-export const PHONE_QUERY = "(width < 48rem)";
+export const PHONE_QUERY = "(width < 43.75rem)";
 
 /** Where the mentions beyond the inline ones come from once the island runs; never serialised. */
 export type MentionsRest =

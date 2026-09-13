@@ -251,7 +251,7 @@ describe("Six entries, then the button naming the other pages", () => {
 
   it("lists two entries on a phone, following the stylesheet's own query while it is mounted", async () => {
     expect(RELATED_PHONE).toBe(2);
-    expect(PHONE_QUERY).toBe("(width < 48rem)");
+    expect(PHONE_QUERY).toBe("(width < 43.75rem)");
     const listeners = new Set<(event: MediaQueryListEvent) => void>();
     const list = {
       matches: true,

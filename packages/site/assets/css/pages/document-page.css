@@ -133,7 +133,7 @@
   color: var(--color-accent);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .document-stage {
     flex-direction: row;
   }

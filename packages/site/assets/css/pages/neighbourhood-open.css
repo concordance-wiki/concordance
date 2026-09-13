@@ -247,7 +247,7 @@
 }
 
 /* Where the panel has a column, the open map takes it: the blocks of the panel go until the fold closes, and the column widens to hold the map, the text keeping its column. */
-@media (min-width: 73.75rem) {
+@media (min-width: 68.75rem) {
   .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {
     display: none;
   }

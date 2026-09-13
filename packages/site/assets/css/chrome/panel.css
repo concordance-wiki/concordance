@@ -7,7 +7,7 @@
 }
 
 /* Every block is served folded; from the width where the panel has a column, the stylesheet keeps its content in view. */
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .panel-fold::details-content {
     display: block;
     content-visibility: visible;

@@ -97,7 +97,7 @@
 
 /* Open, the drawer takes the whole screen: the bar stays at the top with ✕ and the name, the search field comes first, then the spaces, the tree and the links, the mode switch at the foot. The button of the trail waits behind it. The drawer exists under the width where the bar has room for everything. */
 
-@media (width < 73.75rem) {
+@media (width < 68.75rem) {
   .site-header:has(.site-drawer[open]) {
     position: fixed;
     inset: 0;

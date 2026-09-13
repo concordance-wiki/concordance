@@ -30,7 +30,7 @@
 
 /* Tablet: the bar gains the search button and the mode switch, the panel stands beside the text, condensed; the tree stays in the drawer. */
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .site-search-fold {
     display: block;
     position: relative;
@@ -80,7 +80,7 @@
   }
 }
 
-@media (48rem <= width < 73.75rem) {
+@media (43.75rem <= width < 68.75rem) {
   /* The search button unfolds the field under itself, at the end of the bar, while the drawer is closed. */
   .site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {
     position: absolute;
@@ -170,7 +170,7 @@
 
 /* Desktop: the bar has room for everything. The drawer button goes, its content stays in view in the bar: the link to the spaces and the two others; the search field is unfolded; the tree of the space returns to its column. */
 
-@media (min-width: 73.75rem) {
+@media (min-width: 68.75rem) {
   .site-menu {
     display: none;
   }

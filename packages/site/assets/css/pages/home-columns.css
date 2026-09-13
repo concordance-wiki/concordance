@@ -6,7 +6,7 @@
   gap: var(--space-4);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .home-columns {
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
   }

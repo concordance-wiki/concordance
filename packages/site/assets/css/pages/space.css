@@ -77,7 +77,7 @@
   gap: var(--space-4);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .space-columns {
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   }
@@ -161,7 +161,7 @@
   font-size: 0.8125rem;
 }
 
-@media (width < 48rem) {
+@media (width < 43.75rem) {
   .space-category-name {
     inline-size: auto;
   }

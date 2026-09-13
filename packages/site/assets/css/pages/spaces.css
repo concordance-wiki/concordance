@@ -130,7 +130,7 @@ tbody .spaces-name {
 
 /* Under 48 rem the table gives up its content column and its heading row: a row reads the badge and the name, then the count and the date on one line. */
 
-@media (width < 48rem) {
+@media (width < 43.75rem) {
   .spaces-table thead,
   .spaces-table .spaces-content {
     display: none;

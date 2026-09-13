@@ -43,15 +43,15 @@ function media(css: string, query: string): string {
   return blocks.join("\n");
 }
 
-describe("Three widths: three columns from 1180 px, the tree folded from 768 px, one column under it", () => {
+describe("Three widths: three columns from 1100 px, the tree folded from 700 px, one column under it", () => {
   it("lays the entity page out in one column by default: the tree, the text, the panel", () => {
     expect(components).toContain(
       '.entity {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr);\n  grid-template-areas:\n    "space"\n    "main"\n    "side";\n}',
     );
   });
 
-  it("puts the panel beside the text from 768 px, the tree folded behind its name above them", () => {
-    const medium = media(components, "(min-width: 48rem)");
+  it("puts the panel beside the text from 700 px, the tree folded behind its name above them", () => {
+    const medium = media(components, "(min-width: 43.75rem)");
     expect(medium).toContain('grid-template-areas:\n      "space space"\n      "main side";');
     expect(medium).toContain("grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.5rem);");
     // The blocks of the panel are served folded; from here the stylesheet keeps their content in view.
@@ -62,8 +62,8 @@ describe("Three widths: three columns from 1180 px, the tree folded from 768 px,
     expect(medium).not.toContain(".space-tree::details-content");
   });
 
-  it("gives the tree its own column from 1180 px, the content of its disclosure kept in view", () => {
-    const wide = media(components, "(min-width: 73.75rem)");
+  it("gives the tree its own column from 1100 px, the content of its disclosure kept in view", () => {
+    const wide = media(components, "(min-width: 68.75rem)");
     expect(wide).toContain(
       '.entity-with-space {\n    grid-template-columns: 16rem minmax(0, 1fr) 21.5rem;\n    grid-template-areas: "space main side";\n  }',
     );
@@ -198,7 +198,7 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
   });
 
   it("opens the drawer over the whole screen under the desktop width: the header fixed, the search field first, the content then the mode switch, the button of the trail hidden", () => {
-    const narrow = media(components, "(width < 73.75rem)");
+    const narrow = media(components, "(width < 68.75rem)");
     expect(narrow).toContain(
       ".site-header:has(.site-drawer[open]) {\n    position: fixed;\n    inset: 0;\n    z-index: 3;\n    overflow-y: auto;\n  }",
     );
@@ -221,8 +221,8 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     );
   });
 
-  it("adds the search button and the mode switch to the bar from 768 px, and restores the breadcrumb, the space and the long date", () => {
-    const medium = media(components, "(min-width: 48rem)");
+  it("adds the search button and the mode switch to the bar from 700 px, and restores the breadcrumb, the space and the long date", () => {
+    const medium = media(components, "(min-width: 43.75rem)");
     expect(medium).toContain(
       ".site-search-fold {\n    display: block;\n    position: relative;\n    margin-inline-start: auto;\n  }",
     );
@@ -236,8 +236,8 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(medium).toContain(".entity-changed-short,\n  .panel-count {\n    display: none;\n  }");
   });
 
-  it("condenses the panel between 768 and 1179 px: the values of the properties alone, three related titles and the others folded, the neighbourhood at the foot of the page, the search field unfolded under its button", () => {
-    const tablet = media(components, "(48rem <= width < 73.75rem)");
+  it("condenses the panel between 700 and 1099 px: the values of the properties alone, three related titles and the others folded, the neighbourhood at the foot of the page, the search field unfolded under its button", () => {
+    const tablet = media(components, "(43.75rem <= width < 68.75rem)");
     expect(tablet).toContain(
       '.site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {\n    position: absolute;',
     );
@@ -260,8 +260,8 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     );
   });
 
-  it("keeps the desktop as it was from 1180 px: the menu button gone, the links and the search field of the drawer in view in the bar, the tree back in its column", () => {
-    const wide = media(components, "(min-width: 73.75rem)");
+  it("keeps the desktop as it was from 1100 px: the menu button gone, the links and the search field of the drawer in view in the bar, the tree back in its column", () => {
+    const wide = media(components, "(min-width: 68.75rem)");
     expect(wide).toContain(".site-menu {\n    display: none;\n  }");
     expect(wide).toContain(
       ".site-drawer::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
@@ -278,9 +278,9 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
   });
 });
 
-describe("Search results: the facets in a column from 768 px, folded above the list under it, every control a target", () => {
-  it("gives the facets a 250 px column from 768 px, as tall as the page and ruled on its right, keeps their disclosure in view and its head for assistive technology alone", () => {
-    const medium = media(components, "(min-width: 48rem)");
+describe("Search results: the facets in a column from 700 px, folded above the list under it, every control a target", () => {
+  it("gives the facets a 250 px column from 700 px, as tall as the page and ruled on its right, keeps their disclosure in view and its head for assistive technology alone", () => {
+    const medium = media(components, "(min-width: 43.75rem)");
     expect(medium).toContain(
       ".results-layout {\n    grid-template-columns: 15.625rem minmax(0, 1fr);\n    min-block-size: calc(100vh - 3.5rem);\n  }",
     );
