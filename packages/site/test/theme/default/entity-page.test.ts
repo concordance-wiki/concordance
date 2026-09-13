@@ -338,7 +338,7 @@ describe("EntityPage", () => {
     expect(withDefaults).toContain('<aside class="mentions panel-block"');
   });
 
-  it("shows the source file path and the edit link to the forge under the note, the link only when the forge is known", () => {
+  it("shows the source file path and the edit link to the forge under the note, the path linked to the file when the forge is known, the call to action only when it leads somewhere", () => {
     const html = render();
     expect(html).toContain(
       '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit this page</a></span></p></footer></div><div class="entity-side">',
@@ -346,6 +346,19 @@ describe("EntityPage", () => {
     const without = render({ sources: [{ source: "framing", path: "a.md" }] });
     expect(without).toContain('<p class="entity-source"><code>framing/a.md</code></p>');
     expect(without).not.toContain("entity-edit");
+    const onForge = render({
+      sources: [
+        {
+          source: "framing",
+          path: "a.md",
+          href: "https://forge.example/framing/edit/main/a.md",
+          editHref: "https://forge.example/framing/edit/main/a.md",
+        },
+      ],
+    });
+    expect(onForge).toContain(
+      '<p class="entity-source"><a class="entity-source-file" href="https://forge.example/framing/edit/main/a.md"><code>framing/a.md</code></a><span class="entity-edit-lead">',
+    );
     expect(render({ labels: { correction: "Une correction ?", edit: "Modifier" } })).toContain(
       '<span class="entity-edit-lead">Une correction ? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Modifier</a></span>',
     );

@@ -142,9 +142,9 @@ describe("KeywordPage", () => {
       banner: { text: "No note.", createNote: { label: "Propose a definition" } },
     });
     expect(plain).toContain(
-      '<aside class="keyword-notice" role="note"><p class="keyword-notice-lead">No note.</p><span class="create-note">Propose a definition</span></aside>',
+      '<aside class="keyword-notice" role="note"><p class="keyword-notice-lead">No note.</p></aside>',
     );
-    expect(plain).not.toContain('<a class="create-note"');
+    expect(plain).not.toContain("create-note");
   });
 
   it("lists the passages in corpus order under their summary, grouped by file with its type, its title and its count, each passage where it stands with the expression marked", () => {

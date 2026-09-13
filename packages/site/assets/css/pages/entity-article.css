@@ -125,6 +125,17 @@
   font-size: 0.8125rem;
 }
 
+/* The path linked to the file on its forge reads as the path does, the underline on hover telling the link. */
+
+.entity-source-file {
+  color: inherit;
+  text-decoration: none;
+}
+
+.entity-source-file:hover code {
+  text-decoration: underline;
+}
+
 .entity-edit-lead {
   margin-inline-start: auto;
 }

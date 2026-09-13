@@ -464,7 +464,9 @@ export interface SourceRef {
   source: string;
   /** Forward-slash path relative to the source root. */
   path: string;
-  /** Where the file is edited on its forge; absent for a local source without a known forge. */
+  /** Where the file stands on its forge, which its path links to; absent for a local source without a known forge. */
+  href?: string;
+  /** Where the call to action leads: the edit page of the file on its forge, else the contribution address of the project; absent without either, and the theme shows no call to action. */
   editHref?: string;
 }
 
@@ -794,7 +796,7 @@ export interface PassageGroup {
   passages: Passage[];
 }
 
-/** The lead to write the missing note: its label, and the new-file page of the glossary on its forge when known. */
+/** The lead to write the missing note: its label, and the new-file page of the glossary on its forge, else the contribution address of the project; without an address the theme shows no lead. */
 export interface CreateNoteLead {
   label: string;
   href?: string;
