@@ -128,7 +128,9 @@ function neighbourCount(context: SiteContext, entity: Entity): number {
 
 /**
  * The neighbourhood of a page as the model ordered it; `weight` is the co-occurrence count when
- * the model has one. `total` counts every neighbour of the model, shown or not.
+ * the model has one, and the relation reads from the page: a link pointing at the page takes the
+ * inverse label of its relation, so that the list names the nature of the link as the reader
+ * meets it. `total` counts every neighbour of the model, shown or not.
  */
 export function neighbourhoodOf(
   context: SiteContext,
@@ -152,7 +154,9 @@ export function neighbourhoodOf(
           neighbour.kind === "keyword"
             ? message(context, "keyword.title")
             : typeLabel(context, neighbour.type),
-        relation: relationLabel(context, neighbour.relation),
+        relation: relationLabel(context, neighbour.relation, {
+          inverse: neighbour.direction === "in",
+        }),
         weight: counts.get(neighbour.id) ?? 1,
         rank: neighbour.rank,
         kind: neighbour.kind,

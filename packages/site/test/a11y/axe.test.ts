@@ -10,6 +10,8 @@ import { describe, expect, it } from "vitest";
 
 import { siteDocuments } from "../../src/build/site.js";
 import { galleryDocuments, type GalleryDocument } from "../../src/gallery/build.js";
+import * as galleryFixtures from "../../src/gallery/fixtures.js";
+import { renderPage } from "../../src/render.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
@@ -113,6 +115,37 @@ describe("An automated audit (axe-core) runs in continuous integration and fails
     const failures = blocking(results);
     expect(failures.some((line) => line.startsWith("label (critical)"))).toBe(true);
     expect(failures.some((line) => line.startsWith("aria-hidden-focus (serious)"))).toBe(true);
+  });
+
+  it("finds no violation at all on an entity page whose map holds six nodes of every kind, nor on one whose map gives way to the pointer", async () => {
+    const options = {
+      theme: defaultTheme,
+      locale: "en",
+      title: "Model query",
+      stylesheets: ["../assets/site.css"],
+      islands,
+      assetsBase: "../assets/",
+      header: galleryFixtures.header,
+      footer: galleryFixtures.footer,
+    };
+    const full = renderPage(
+      "EntityPage",
+      { ...galleryFixtures.entityPage, neighbours: galleryFixtures.neighbourhoodFull },
+      options,
+    );
+    expect(full).toContain('<svg class="neighbourhood-graph"');
+    expect(full).toContain('aria-hidden="true" focusable="false"');
+    const results = await audit(full);
+    expect(results.violations.map(describeViolation)).toEqual([]);
+    const overflow = renderPage(
+      "EntityPage",
+      { ...galleryFixtures.entityPage, neighbours: galleryFixtures.neighbourhoodOverflow },
+      options,
+    );
+    expect(overflow).toContain('<a href="#mentions-title">see the mentions panel</a>');
+    expect((await audit(overflow)).violations.map(describeViolation)).toEqual([]);
+    // The pointer's target is on the same page.
+    expect(document.getElementById("mentions-title")).not.toBeNull();
   });
 
   it("is run by the test step of the continuous integration workflow", () => {
