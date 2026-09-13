@@ -45,7 +45,7 @@ describe("the faulty corpus through the real file system", () => {
         ["E-FM-INVALID", "invalid-frontmatter.md", undefined],
         ["E-ID-DUP", "dup/a.rule.md", "notes/dup/a"],
         ["E-ID-INVALID", "invalid-id.md", "notes/invalid-id"],
-        ["E-LINK-BROKEN", "broken-link.md", undefined],
+        ["E-LINK-BROKEN", "broken-link.md", "notes/broken-link"],
       ],
       orphan: [],
     });
@@ -57,7 +57,7 @@ describe("the faulty corpus through the real file system", () => {
         ["E-FM-INVALID", "frontmatter-invalide.md", undefined],
         ["E-ID-DUP", "doublon/a.regle.md", "notes/doublon/a"],
         ["E-ID-INVALID", "identifiant-invalide.md", "notes/identifiant-invalide"],
-        ["E-LINK-BROKEN", "lien-casse.md", undefined],
+        ["E-LINK-BROKEN", "lien-casse.md", "notes/lien-casse"],
       ],
       orphelin: [],
     });

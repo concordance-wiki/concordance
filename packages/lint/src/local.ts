@@ -1,6 +1,6 @@
 import { posix } from "node:path";
 
-import { createRegistry, type StepFinding } from "@concordance-wiki/checks";
+import { createRegistry, type CheckId, type StepFinding } from "@concordance-wiki/checks";
 import {
   compileGlobs,
   identifierFor,
@@ -17,6 +17,18 @@ import { readLintOverrides } from "./overrides.js";
 
 /** Identifier prefix of a repository linted without a declared source. */
 export const DEFAULT_SOURCE_NAME = "repo";
+
+/**
+ * The checks the local scope computes, sorted. The build produces the same findings for them on the
+ * same repository, and more for the checks that need the whole model; a parity test holds it to that.
+ */
+export const LOCAL_CHECKS: readonly CheckId[] = [
+  "E-ENCODING",
+  "E-FM-INVALID",
+  "E-ID-DUP",
+  "E-ID-INVALID",
+  "E-LINK-BROKEN",
+];
 
 export interface LintRepositoryInput {
   /** Absolute path of the repository to check. */
@@ -39,11 +51,13 @@ export function leavesRoot(path: string): boolean {
   return path === ".." || path.startsWith("../");
 }
 
+/** The same finding the build reports for the link, so that a local report is read the same way as the build log. */
 function brokenLinks(
   document: ParsedMarkdown,
   path: string,
   files: ReadonlySet<string>,
   source: string,
+  entity: string,
 ): StepFinding[] {
   const findings: StepFinding[] = [];
   for (const link of document.links) {
@@ -55,7 +69,8 @@ function brokenLinks(
       source,
       path,
       line: link.line,
-      message: `link "${link.target}" in ${path} points to ${resolved.path}, which does not exist`,
+      entity,
+      message: `link "${link.target}" in ${path} points to no file of source ${source}`,
     });
   }
   return findings;
@@ -96,7 +111,7 @@ export function lintRepository(input: LintRepositoryInput): Finding[] {
       findings.push(identity.finding);
     }
     identified.push({ id: identity.id, source, path });
-    findings.push(...brokenLinks(document, path, fileSet, source));
+    findings.push(...brokenLinks(document, path, fileSet, source, identity.id));
   }
   findings.push(...resolveDuplicates(identified).findings);
   return createRegistry().enrich(findings, overrides);

@@ -12,7 +12,8 @@ export const broken: Finding = {
   source: "notes",
   path: "specs/entry.md",
   line: 3,
-  message: 'link "gone.md" in specs/entry.md points to specs/gone.md, which does not exist',
+  entity: "notes/specs/entry",
+  message: 'link "gone.md" in specs/entry.md points to no file of source notes',
   remediation: "Fix the path.",
 };
 

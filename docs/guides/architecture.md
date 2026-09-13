@@ -77,6 +77,12 @@ An entity's identifier is `<source>/<relative path without extension or type suf
 
 A content anomaly becomes a finding: identifier, severity, file, line, message, remediation. Findings go to `dist/build.log.json` and `model.json`. The build fails only according to `build.fail_on`. Every check is a pure function `(model) → findings[]` in a registry shared by the build and the linter; a test enforces parity.
 
+## Linter and build parity
+
+The local lint and the build never disagree on what they both compute. The linter in `--scope repo` reads one repository file by file and produces the findings of `LOCAL_CHECKS` (`@concordance-wiki/lint`): `E-ENCODING`, `E-FM-INVALID`, `E-ID-DUP`, `E-ID-INVALID` and `E-LINK-BROKEN`. It does so with the same functions as the build: `readMarkdown` and `resolveLink` from the ingest package, `identifierFor` and `resolveDuplicates` from core, the catalogue of the checks package for severities and remediations. A finding of those checks is therefore the same object on both sides, entity and wording included; the only thing the local scope leaves aside is a link that climbs above the repository, which may land in another source that only the build can see. The build adds the findings of the steps that need the whole model: typing, filing, cross-source links, vocabulary.
+
+A parity test (`packages/cli/test/parity.test.ts`) holds the guarantee. For each fixture corpus, golden and faulty, it copies the corpus to a temporary folder, lints every source of the copy with the corpus configuration, builds the same copy with the clock pinned, and compares the two lists of findings restricted to `LOCAL_CHECKS` on `(check, source, path, line, entity)`, then field by field. Any divergence fails the test, and the test is part of `pnpm test`, so it fails continuous integration. The JSON report of the linter carries `scope` and `checks` so that a forge report states which checks the parity covers.
+
 ## Bounded neighbourhood
 
 Co-occurrence is accumulated per paragraph, never as a full matrix. Only the K best neighbours of each node are kept (50 by default, `inference.neighbours.k`), ranked by count then by identifier.

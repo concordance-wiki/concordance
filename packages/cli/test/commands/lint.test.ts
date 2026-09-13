@@ -1,3 +1,4 @@
+import { LOCAL_CHECKS } from "@concordance-wiki/lint";
 import { describe, expect, it, vi } from "vitest";
 
 import { lintCommand } from "../../src/commands/lint.js";
@@ -33,7 +34,7 @@ describe("concordance lint", () => {
       const io = repository();
       expect(lintCommand([], io)).toBe(1);
       expect(io.stdout).toEqual([
-        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)`,
+        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)`,
         "1 finding: 1 error, 0 warnings, 0 info",
       ]);
       expect(io.stderr).toEqual([]);
@@ -83,7 +84,7 @@ describe("concordance lint", () => {
       const io = repository();
       expect(lintCommand(["--output", "/elsewhere/lint.txt"], io)).toBe(1);
       expect(io.fs.readText("/elsewhere/lint.txt")).toBe(
-        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)\n1 finding: 1 error, 0 warnings, 0 info\n`,
+        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)\n1 finding: 1 error, 0 warnings, 0 info\n`,
       );
       expect(io.stdout).toEqual([]);
     });
@@ -109,7 +110,7 @@ describe("concordance lint", () => {
       expect(lintCommand(["--config", "concordance.yaml", "--source", "notes"], io)).toBe(1);
       expect(io.stdout).toEqual([
         `error: rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
-        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)`,
+        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
         "2 findings: 1 error, 1 warning, 0 info",
       ]);
     });
@@ -172,7 +173,7 @@ describe("concordance lint", () => {
         "fix: notes/entry.md:1: order the frontmatter keys: id, status",
         'fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
         `error: rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
-        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to gone.md, which does not exist (${documentation}/E-LINK-BROKEN.md)`,
+        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
         "2 findings: 1 error, 1 warning, 0 info",
       ]);
       expect(io.fs.readText("/work/notes/entry.md")).toBe(fixedEntry);
@@ -259,6 +260,8 @@ describe("concordance lint", () => {
       expect(parse(json)).toMatchObject({
         version: 1,
         tool: { name: "concordance", version: expect.stringMatching(/^\d+\.\d+\.\d+/u) as string },
+        scope: "repo",
+        checks: LOCAL_CHECKS,
         findings: [{ check: "E-LINK-BROKEN", path: "README.md", line: 3 }],
         summary: { error: 1, warning: 0, info: 0 },
       });

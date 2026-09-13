@@ -1,7 +1,7 @@
 import { memoryFileSystem, type Config, type Finding } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_SOURCE_NAME, lintRepository } from "../src/local.js";
+import { DEFAULT_SOURCE_NAME, lintRepository, LOCAL_CHECKS } from "../src/local.js";
 
 const root = "/repo";
 
@@ -44,9 +44,10 @@ describe("lintRepository", () => {
       ]);
       expect(findings.every((finding) => finding.source === "notes")).toBe(true);
       expect(findings.every((finding) => finding.remediation !== "")).toBe(true);
+      expect(findings.map((finding) => finding.check)).toEqual(LOCAL_CHECKS);
     });
 
-    it("describes a broken link with its target as written and the file it resolves to", () => {
+    it("describes a broken link with its target as written and the source it misses, on the linking note", () => {
       const fs = memoryFileSystem({
         [`${root}/specs/screens/entry.md`]: "# Entry\n\nSee [cap](../rules/anual-cap.rule.md).\n",
       });
@@ -57,8 +58,9 @@ describe("lintRepository", () => {
         source: DEFAULT_SOURCE_NAME,
         path: "specs/screens/entry.md",
         line: 3,
+        entity: "repo/specs/screens/entry",
         message:
-          'link "../rules/anual-cap.rule.md" in specs/screens/entry.md points to specs/rules/anual-cap.rule.md, which does not exist',
+          'link "../rules/anual-cap.rule.md" in specs/screens/entry.md points to no file of source repo',
         remediation:
           "Fix the path; the linter rewrites the link under --fix when exactly one file matches the old name.",
       });

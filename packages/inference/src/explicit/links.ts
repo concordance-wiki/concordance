@@ -102,7 +102,7 @@ function brokenLink(entity: LinkableEntity, link: MarkdownLink): Finding {
     entity: entity.id,
     message: `link "${link.target}" in ${entity.source.path} points to no file of source ${entity.source.name}`,
     remediation:
-      "Fix the path so that it points to an existing file; the linter rewrites it when exactly one file matches the old name.",
+      "Fix the path; the linter rewrites the link under --fix when exactly one file matches the old name.",
   };
 }
 

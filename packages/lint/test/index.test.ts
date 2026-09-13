@@ -10,6 +10,7 @@ describe("@concordance-wiki/lint", () => {
       "JUNIT_CLEAN_CASE",
       "JUNIT_SUITE_NAME",
       "LINT_CONFIG_FILE",
+      "LOCAL_CHECKS",
       "LintConfigError",
       "OUTPUT_FORMATS",
       "REPOSITORY_URL",
