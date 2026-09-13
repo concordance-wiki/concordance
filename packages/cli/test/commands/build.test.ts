@@ -65,6 +65,7 @@ function expectSiteSummary(
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
+    expect.stringMatching(/^island category-list: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island contract-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
@@ -1160,6 +1161,11 @@ describe("concordance build", () => {
       return [...result.pages.keys()].filter((path) => /^index\/[^/]+\/index\.html$/.test(path));
     }
 
+    /** The lists of the folders at the top of every space, with their pre-rendered variants, by path. */
+    function categoriesOf(result: Built): [string, string][] {
+      return [...result.pages].filter(([, html]) => html.includes('<div class="category">'));
+    }
+
     /** Whether a finding of the model is the one an expected entry describes. */
     function matches(finding: Finding, entry: ExpectedFinding): boolean {
       if (finding.check !== entry.check) return false;
@@ -1186,7 +1192,11 @@ describe("concordance build", () => {
         expect(built.exit).toBe(0);
         expectSiteSummary(
           built.stdout,
-          built.model.entities.length + 3 + redirectsOf(built).length + letterPagesOf(built).length,
+          built.model.entities.length +
+            3 +
+            redirectsOf(built).length +
+            letterPagesOf(built).length +
+            categoriesOf(built).length,
           built.output,
           redirectsOf(built).length,
           built.model.build.sources.length,
@@ -1319,8 +1329,10 @@ describe("concordance build", () => {
             5 +
             built.model.build.sources.length +
             redirectsOf(built).length +
-            letterPagesOf(built).length,
+            letterPagesOf(built).length +
+            categoriesOf(built).length,
         );
+        expect(categoriesOf(built).length).toBeGreaterThan(0);
       });
 
       it("keeps a keyword address for every recurring expression a note defines, forwarding to the note", () => {
