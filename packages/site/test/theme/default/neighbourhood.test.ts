@@ -516,21 +516,21 @@ describe("The neighbourhood map in the panel", () => {
   it("replaces the blocks of the panel by the open map where the panel has a column, and leaves the phone and the tablet as they are", () => {
     const css = componentsStylesheet();
     const desktopStart = css.indexOf(
-      "@media (min-width: 73.75rem) {",
+      "@media (min-width: 68.75rem) {",
       css.indexOf("/* Neighbourhood map, unfolded."),
     );
     const desktop = css.slice(desktopStart, css.indexOf("}\n}\n", desktopStart) + 4);
     expect(desktop).toBe(
-      "@media (min-width: 73.75rem) {\n  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }\n\n  .entity:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: minmax(0, 1fr) 26.875rem;\n  }\n\n  .entity-with-space:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: 16rem minmax(0, 1fr) 26.875rem;\n  }\n}\n",
+      "@media (min-width: 68.75rem) {\n  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }\n\n  .entity:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: minmax(0, 1fr) 26.875rem;\n  }\n\n  .entity-with-space:has(> .entity-side > .neighbourhood-fold[open]) {\n    grid-template-columns: 16rem minmax(0, 1fr) 26.875rem;\n  }\n}\n",
     );
     expect(count(css, ".neighbourhood-fold[open]) > .panel-block")).toBe(1);
     const tabletStart = css.indexOf(
-      "@media (48rem <= width < 73.75rem) {",
+      "@media (43.75rem <= width < 68.75rem) {",
       css.indexOf("/* The neighbourhood, folded behind its line at the foot of the panel. */"),
     );
     const tablet = css.slice(
       tabletStart,
-      css.indexOf("@media (min-width: 73.75rem) {", tabletStart),
+      css.indexOf("@media (min-width: 68.75rem) {", tabletStart),
     );
     expect(tablet).toContain(".entity-side > .neighbourhood-fold {\n    grid-area: 7 / 1 / 8 / 3;");
     expect(tablet).not.toContain("neighbourhood-fold[open]");

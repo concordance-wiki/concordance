@@ -317,7 +317,7 @@
 
 /* The tablet: the selectors stand on the line of the lead, at its end. */
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .category-main {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
@@ -331,7 +331,7 @@
 
 /* The desktop: the tree returns to its column and the list reads in a measured column beside it. */
 
-@media (min-width: 73.75rem) {
+@media (min-width: 68.75rem) {
   .category {
     grid-template-columns: 16rem minmax(0, 1fr);
     grid-template-areas: "space main";

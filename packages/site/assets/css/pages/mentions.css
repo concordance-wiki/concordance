@@ -248,7 +248,7 @@
 
 /* Phone: two entries in view before the button; the others return once the reader asks for them, through the island or the disclosure. */
 
-@media (width < 48rem) {
+@media (width < 43.75rem) {
   .mentions-body:not(.related-expanded):not(:has(.related-beyond[open]))
     > .related-list
     > .related-page:nth-child(n + 3),
@@ -259,7 +259,7 @@
 
 /* Tablet: while the entries beyond three stay folded behind their count, the way to the others stays with them. */
 
-@media (48rem <= width < 73.75rem) {
+@media (43.75rem <= width < 68.75rem) {
   .related-others:not([open]) ~ .related-beyond,
   .related-others:not([open]) ~ .mentions-more {
     display: none;

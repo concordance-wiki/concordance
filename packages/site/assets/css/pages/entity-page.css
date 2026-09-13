@@ -11,7 +11,7 @@
 
 /* Three widths: one column; the tree folded above the text with the panel beside it; three columns. */
 
-@media (min-width: 48rem) {
+@media (min-width: 43.75rem) {
   .entity {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.5rem);
     grid-template-areas:
@@ -25,7 +25,7 @@
   }
 }
 
-@media (min-width: 73.75rem) {
+@media (min-width: 68.75rem) {
   .entity {
     grid-template-columns: minmax(0, 1fr) 21.5rem;
     grid-template-areas: "main side";

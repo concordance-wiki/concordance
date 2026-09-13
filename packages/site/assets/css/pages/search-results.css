@@ -138,8 +138,8 @@ main > concordance-island[data-island="search"] {
   line-height: 1.6;
 }
 
-/* The facets take a 250 px column from 768 px, as tall as the page; under it they fold behind their heading above the results. */
-@media (min-width: 48rem) {
+/* The facets take a 250 px column from 700 px, as tall as the page; under it they fold behind their heading above the results. */
+@media (min-width: 43.75rem) {
   .results-layout {
     grid-template-columns: 15.625rem minmax(0, 1fr);
     min-block-size: calc(100vh - 3.5rem);
