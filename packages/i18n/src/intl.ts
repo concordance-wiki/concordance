@@ -55,13 +55,21 @@ const units: readonly [Intl.RelativeTimeFormatUnit, number][] = [
   ["second", second],
 ];
 
-/** The time elapsed from `from` to `to`, such as "3 days ago" or "in 2 hours" when `from` is later than `to`. */
-export function formatRelative(locale: Locale, from: Date, to: Date): string {
+/**
+ * The time elapsed from `from` to `to`, such as "3 days ago" or "in 2 hours" when `from` is
+ * later than `to`; the `short` style abbreviates the unit where the locale does, for a narrow line.
+ */
+export function formatRelative(
+  locale: Locale,
+  from: Date,
+  to: Date,
+  style: Intl.RelativeTimeFormatStyle = "long",
+): string {
   const elapsed = from.getTime() - to.getTime();
   const magnitude = Math.abs(elapsed);
   const [unit, size] = units.find(([, length]) => magnitude >= length) ?? ["second", second];
   const value = Math.round(elapsed / size);
-  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(value, unit);
+  return new Intl.RelativeTimeFormat(locale, { numeric: "auto", style }).format(value, unit);
 }
 
 export type TextDirection = "ltr" | "rtl";

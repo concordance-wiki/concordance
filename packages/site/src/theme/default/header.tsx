@@ -1,9 +1,10 @@
 import type { JSX } from "preact";
 
 import type { HeaderLogo, HeaderProps } from "../../slots.js";
+import { defaultHeaderLabels, Drawer } from "./drawer.js";
 import { labels } from "./labels.js";
 import { ModeSwitch } from "./mode-switch.js";
-import { SearchIsland } from "./search-island.js";
+import { SearchGlyph, SearchIsland } from "./search-island.js";
 import { Trail } from "./trail.js";
 
 /** The logo is decorative: the site title follows it as text, so an inline SVG is hidden from assistive technology. */
@@ -15,37 +16,50 @@ function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
   );
 }
 
+/**
+ * The bar: the drawer button, the mark and the site name, the search field folded behind a
+ * button where the bar is too narrow for it, the mode switch; the links stand in the drawer,
+ * which the stylesheet keeps in view in the bar where it has room.
+ */
 export function Header({
   siteTitle,
   homeHref,
   logo,
   navigation,
+  spaces,
+  space,
   search,
   trail,
+  drawerOpen = false,
+  labels: given = {},
 }: HeaderProps): JSX.Element {
+  const text = { ...defaultHeaderLabels, ...given };
   return (
     <header class="site-header">
       <nav class="site-nav" aria-label={labels.siteNavigation}>
+        <Drawer
+          {...(spaces === undefined ? {} : { spaces })}
+          {...(space === undefined ? {} : { space })}
+          navigation={navigation}
+          open={drawerOpen}
+          labels={text}
+        />
         <a class="site-title" href={homeHref}>
           {logo && <Logo logo={logo} />}
           {siteTitle}
         </a>
         {search && (
-          <SearchIsland
-            {...(search.root === undefined ? {} : { root: search.root })}
-            search={search}
-          />
+          <details class="site-search-fold">
+            <summary class="site-search-button">
+              <SearchGlyph />
+              {text.search}
+            </summary>
+            <SearchIsland
+              {...(search.root === undefined ? {} : { root: search.root })}
+              search={search}
+            />
+          </details>
         )}
-        <ul class="site-links">
-          {navigation.map((item) => (
-            <li key={item.href}>
-              <a href={item.href}>
-                {item.label}
-                {item.count !== undefined && <span class="count">{item.count}</span>}
-              </a>
-            </li>
-          ))}
-        </ul>
         <ModeSwitch />
       </nav>
       <Trail {...(trail === undefined ? {} : { trail })} />

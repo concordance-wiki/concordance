@@ -11,6 +11,10 @@
     "defaultMessage": "Preview",
     "description": "Link to the rendered preview of a converted document."
   },
+  "drawer.menu": {
+    "defaultMessage": "Menu",
+    "description": "Accessible name of the button that opens the drawer of the narrow layouts, and of the drawer itself."
+  },
   "entity.application": {
     "defaultMessage": "Application",
     "description": "Label of the application an entity belongs to."
@@ -342,6 +346,14 @@
   "related.orderNote": {
     "defaultMessage": "Ordered by number of passages, written and recognised alike. “Cited” marks a link present in the text.",
     "description": "Note under the related pages saying how they are ordered and what the cited mark means."
+  },
+  "related.other": {
+    "defaultMessage": "'{count}' other",
+    "description": "Line that unfolds the one related page beyond the first three where the panel is condensed, the quoted placeholder being filled in the browser."
+  },
+  "related.others": {
+    "defaultMessage": "'{count}' others",
+    "description": "Line that unfolds the related pages beyond the first three where the panel is condensed, the quoted placeholder being filled in the browser."
   },
   "related.othersUnavailable": {
     "defaultMessage": "The other pages could not be loaded.",

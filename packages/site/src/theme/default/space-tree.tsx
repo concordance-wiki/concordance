@@ -50,6 +50,27 @@ export function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
   );
 }
 
+/** The badge and the name of the space heading its tree, a disclosure: closed in the column, where the stylesheet keeps it in view, served open in the drawer. */
+export function SpaceTreeFold({
+  space,
+  open = false,
+}: {
+  space: SpaceTreeModel;
+  open?: boolean;
+}): JSX.Element {
+  return (
+    <details class="space-tree" open={open}>
+      <summary class="space-head">
+        <span class="space-initials" aria-hidden="true">
+          {space.initials}
+        </span>
+        <span class="space-name">{space.name}</span>
+      </summary>
+      <Nodes nodes={space.nodes} />
+    </details>
+  );
+}
+
 /**
  * The left column: the initials badge and the name of the space, then its tree, folded behind
  * that name where the layout has no column for it. The badge is decorative: the name follows it.
@@ -57,15 +78,7 @@ export function Nodes({ nodes }: { nodes: readonly SpaceNode[] }): JSX.Element {
 export function SpaceTree({ space, label }: { space: SpaceTreeModel; label: string }): JSX.Element {
   return (
     <nav class="space" aria-label={label}>
-      <details class="space-tree">
-        <summary class="space-head">
-          <span class="space-initials" aria-hidden="true">
-            {space.initials}
-          </span>
-          <span class="space-name">{space.name}</span>
-        </summary>
-        <Nodes nodes={space.nodes} />
-      </details>
+      <SpaceTreeFold space={space} />
     </nav>
   );
 }

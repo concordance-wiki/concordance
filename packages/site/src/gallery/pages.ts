@@ -2,6 +2,7 @@ import type { PageSlot } from "../render.js";
 import type { SlotName, SlotProps } from "../slots.js";
 import {
   apiPage,
+  corporateDrawerHeader,
   corporateEntityPage,
   corporateFooter,
   corporateHeader,
@@ -143,6 +144,42 @@ export const galleryPages: readonly GalleryPage[] = [
       "an API whose contract was imported: the contract section after the note, its operations as a plain list with one flagged as having no note yet, the viewer behind its button",
     ...chrome,
     props: apiPage,
+  },
+  {
+    file: "entity-page-phone.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "phone",
+    description:
+      "the corporate page as a phone shows it under 768 px: the bar reduced to the menu button, the mark and the name; the breadcrumb cut to the last folder and the page; the type and the short date under the title; the note; then the blocks of the panel as folded sections with their counts, the related pages open, the neighbourhood behind its line; targets of 48 px",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: corporateEntityPage,
+  },
+  {
+    file: "entity-page-drawer.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "drawer",
+    description:
+      "the same page with the drawer served open, as the menu button opens it under 1180 px: the bar with ✕ and the name, the search field first, the spaces with their initials and counts, the tree of the space unfolded to the page, the index and the recent changes at the foot, the mode switch after them; a disclosure, so that it works without any script and over file://",
+    ...chrome,
+    header: corporateDrawerHeader,
+    footer: corporateFooter,
+    props: corporateEntityPage,
+  },
+  {
+    file: "entity-page-tablet.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "tablet",
+    description:
+      "the corporate page between 768 and 1179 px: the bar with the menu button, the name, the search button that unfolds the field and the mode switch; the tree in the drawer; the panel beside the text, condensed, the properties as values alone, the related pages as three titles and the count of the others behind a disclosure; the neighbourhood at the foot of the page",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: corporateEntityPage,
   },
   {
     file: "keyword-page.html",

@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+The default theme serves the same page at three widths, mobile first. On a phone the bar is reduced to a menu button, the mark and the site name; the button opens a full-screen drawer, a `<details>` that works without JavaScript and over `file://`, holding the search field, the spaces with their initials and page counts, the tree of the current space unfolded to the page, the index and the recent changes and the mode switch; the breadcrumb keeps the last folder and the page, the line under the title reads the type and the short date, and the blocks of the panel follow the text as folded sections with their counts, the related pages open. On a tablet the bar gains a search button that unfolds the field and the mode switch, the tree stays in the drawer, the panel stays beside the text condensed, the properties as values alone and the related pages as three titles with the others behind their count, and the neighbourhood map moves to the foot of the page. The desktop is unchanged. The header receives `spaces`, `space`, `drawerOpen` and `labels`, the change date a `short` form, the related labels `other` and `others`; `formatRelative` takes a style; the gallery gains the `entity-page-phone`, `entity-page-drawer` and `entity-page-tablet` states.

@@ -217,7 +217,7 @@ export {
 } from "./build/mentions.js";
 export type { MentionsFragment } from "./build/mentions.js";
 export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions-island.js";
-export { groupByPage, typeCounts } from "./theme/default/mention-list.js";
+export { RELATED_CONDENSED, groupByPage, typeCounts } from "./theme/default/mention-list.js";
 export type { RelatedPage } from "./theme/default/mention-list.js";
 export {
   HOME_RECENT_ANCHOR,
@@ -225,10 +225,13 @@ export {
   SPACE_PAGES_MAX,
   breadcrumbOf,
   initialsOf,
+  spaceCountsOf,
+  spaceLinksOf,
   spaceOf,
   spaceWithPageOf,
   wholeTreeOf,
 } from "./build/space.js";
+export type { SpaceCount } from "./build/space.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
   EntityFragment,

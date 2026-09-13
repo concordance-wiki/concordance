@@ -30,6 +30,8 @@ export const defaultRelatedLabels: RelatedLabels = {
   passage: labels.passage,
   passages: labels.passagesOf,
   showOthers: labels.showOthers,
+  other: labels.other,
+  others: labels.others,
   loadingOthers: labels.loadingOthers,
   othersUnavailable: labels.othersUnavailable,
   fullList: labels.fullList,
@@ -43,7 +45,8 @@ export const defaultRelatedLabels: RelatedLabels = {
  * written and recognised alike. Three regimes by the number of mentions: all inline up to
  * `initial`; beyond it and under `MENTIONS_EMBEDDED_MAX`, the rest travels in a JSON script
  * block the island reads; from there on, the island fetches the fragment of the entity, and a
- * link to it stands meanwhile.
+ * link to it stands meanwhile. The block is served open: where the panel folds, this one is
+ * what the reader came for.
  */
 export function MentionsPanel({
   mentions,
@@ -61,7 +64,7 @@ export function MentionsPanel({
   const text = { ...defaultRelatedLabels, ...given };
   return (
     <aside class="mentions panel-block" aria-labelledby="mentions-title">
-      <details class="panel-fold">
+      <details class="panel-fold" open>
         <summary>
           <h2 id="mentions-title">
             {text.related} <span class="count">{total}</span>

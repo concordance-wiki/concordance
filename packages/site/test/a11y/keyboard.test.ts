@@ -92,7 +92,7 @@ describe("Full keyboard navigation, consistent tab order, always-visible focus",
     const html = island?.html ?? "";
     // The header carries the mode switch button on every page: only the main landmark is inspected.
     const main = html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"));
-    expect(main).toContain('<details class="panel-fold"><summary><h2 id="mentions-title">');
+    expect(main).toContain('<details class="panel-fold" open><summary><h2 id="mentions-title">');
     expect(main).toContain('<a class="related-title" href="../notes/note-1/">Note 1</a>');
     expect(main).toContain('<p class="mentions-more"><a href=');
     expect(main).not.toContain("<button");

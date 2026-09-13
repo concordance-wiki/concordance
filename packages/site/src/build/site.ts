@@ -25,7 +25,7 @@ import {
   searchLabels,
   type SearchTokenizer,
 } from "../search/build.js";
-import type { SearchField, SlotProps, TrailPage } from "../slots.js";
+import type { SearchField, SlotProps, SpaceTree, TrailPage } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
 import { pageComponentFor } from "../theme/context.js";
 import { SearchIsland } from "../theme/default/search-island.js";
@@ -56,7 +56,13 @@ import {
   TODO_PAGE,
 } from "./paths.js";
 import { redirectBody, redirectHref, redirectsOf } from "./redirect.js";
-import { HOME_RECENT_ANCHOR, HOME_TREE_ANCHOR } from "./space.js";
+import {
+  HOME_RECENT_ANCHOR,
+  HOME_TREE_ANCHOR,
+  spaceCountsOf,
+  spaceLinksOf,
+  type SpaceCount,
+} from "./space.js";
 import { todoOf } from "./todo.js";
 
 /** Excluding previews, per page. */
@@ -144,33 +150,49 @@ function themeChrome(input: SiteInput, assetsBase: string): ThemeChrome {
     : chromeOf(input.theme.config, assetsBase);
 }
 
+/** What the chrome of a page knows of the site and of the page: the to-do count, the spaces, the page in the trail and its space. */
+interface PageChrome {
+  todoCount: number;
+  spaces: readonly SpaceCount[];
+  current?: TrailPage;
+  /** The tree of the space of an entity page, for the drawer. */
+  space?: SpaceTree;
+}
+
 /** The header and footer of one page, every href relative to it. */
 function chromeFor(
   input: SiteInput,
   context: SiteContext,
   page: string,
-  todoCount: number,
-  current?: TrailPage,
+  { todoCount, spaces, current, space }: PageChrome,
 ): SiteChrome {
   const chrome = themeChrome(input, assetsBaseOf(page));
   const header: SlotProps["Header"] = {
     siteTitle: chrome.siteTitle,
     homeHref: relativeHref(page, HOME_PAGE),
     search: searchFieldOf(context, page),
+    spaces: {
+      label: message(context, "site.spaces"),
+      href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`,
+      items: spaceLinksOf(page, spaces),
+    },
     navigation: [
-      {
-        label: message(context, "site.spaces"),
-        href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`,
-      },
       { label: message(context, "nav.index"), href: relativeHref(page, INDEX_PAGE) },
       {
         label: message(context, "site.recent"),
         href: `${relativeHref(page, HOME_PAGE)}#${HOME_RECENT_ANCHOR}`,
       },
     ],
+    labels: {
+      menu: message(context, "drawer.menu"),
+      search: message(context, "site.search"),
+    },
   };
   if (chrome.logo !== undefined) {
     header.logo = chrome.logo;
+  }
+  if (space !== undefined) {
+    header.space = space;
   }
   header.trail = {
     base: siteRootOf(page),
@@ -265,13 +287,20 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
+  const spaces = spaceCountsOf(context);
   const optionsFor = (
     page: string,
     title: string,
     locale: string,
     current?: TrailPage,
+    space?: SpaceTree,
   ): RenderOptions => {
-    const chrome = chromeFor(input, context, page, todoCount, current);
+    const chrome = chromeFor(input, context, page, {
+      todoCount,
+      spaces,
+      ...(current === undefined ? {} : { current }),
+      ...(space === undefined ? {} : { space }),
+    });
     return {
       theme: input.theme,
       locale,
@@ -290,9 +319,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     title: string,
     locale: string,
     current?: TrailPage,
+    space?: SpaceTree,
   ): WrittenDocument => ({
     path: page,
-    content: renderDocument(body, optionsFor(page, title, locale, current)),
+    content: renderDocument(body, optionsFor(page, title, locale, current, space)),
   });
   const render = <S extends PageSlot>(
     page: string,
@@ -301,36 +331,32 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     title: string,
     locale: string,
     current?: TrailPage,
+    space?: SpaceTree,
   ): WrittenDocument =>
-    document(page, h(input.theme.components[slot], props), title, locale, current);
+    document(page, h(input.theme.components[slot], props), title, locale, current, space);
   const mentionsOptions =
     input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline };
   const viewer = viewerBundlesOf(islands);
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
     const current: TrailPage = { id: entity.id, title: entity.title };
-    return entity.keyword === true
-      ? render(
-          page,
-          "KeywordPage",
-          keywordPageOf(context, entity, mentionsOptions),
-          entity.title,
-          entity.locale,
-          current,
-        )
-      : document(
-          page,
-          h(
-            pageComponentFor(input.theme, entity.type),
-            entityPageOf(context, entity, {
-              ...mentionsOptions,
-              ...(viewer === undefined ? {} : { viewer }),
-            }),
-          ),
-          entity.title,
-          entity.locale,
-          current,
-        );
+    // The drawer of the page carries the same tree as its left column.
+    if (entity.keyword === true) {
+      const props = keywordPageOf(context, entity, mentionsOptions);
+      return render(page, "KeywordPage", props, entity.title, entity.locale, current, props.space);
+    }
+    const props = entityPageOf(context, entity, {
+      ...mentionsOptions,
+      ...(viewer === undefined ? {} : { viewer }),
+    });
+    return document(
+      page,
+      h(pageComponentFor(input.theme, entity.type), props),
+      entity.title,
+      entity.locale,
+      current,
+      props.space,
+    );
   };
   // An entity without a mention gets no fragment.
   const mentionsFragment = (entity: Entity): WrittenDocument[] => {

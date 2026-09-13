@@ -49,7 +49,7 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
       labels: { related: "Pages en relation" },
     });
     expect(html).toContain(
-      '<aside class="mentions panel-block" aria-labelledby="mentions-title"><details class="panel-fold"><summary><h2 id="mentions-title">Pages en relation <span class="count">3</span></h2></summary>',
+      '<aside class="mentions panel-block" aria-labelledby="mentions-title"><details class="panel-fold" open><summary><h2 id="mentions-title">Pages en relation <span class="count">3</span></h2></summary>',
     );
     const titles = [...html.matchAll(/<a class="related-title" href="([^"]+)">([^<]+)<\/a>/g)].map(
       (match) => [match[1], match[2]],

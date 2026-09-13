@@ -181,7 +181,9 @@ describe("the gallery with the registered types", () => {
     const screen = fileSystem.readText("/out/type-screen.html");
     expect(screen).toContain('<span class="badge">Screen</span>');
     expect(screen).toContain("<h1>To-do page</h1>");
-    expect(screen).toContain('<h2 id="entity-properties">Properties</h2>');
+    expect(screen).toContain(
+      '<h2 id="entity-properties">Properties<span class="count panel-count">3</span></h2>',
+    );
     expect(report.summary).toContain(
       "override EntityPage@runbook: plugin @concordance-wiki/fixture-plugin-example, theme type module",
     );

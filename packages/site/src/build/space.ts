@@ -2,7 +2,7 @@ import type { Entity } from "@concordance-wiki/core";
 import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
-import type { BreadcrumbItem, SpaceNode, SpaceTree } from "../slots.js";
+import type { BreadcrumbItem, SpaceLink, SpaceNode, SpaceTree } from "../slots.js";
 import type { SiteContext } from "./context.js";
 import { entityHref, HOME_PAGE, relativeHref } from "./paths.js";
 
@@ -148,6 +148,34 @@ export function spaceWithPageOf(
     initials: initialsOf(source),
     nodes: nodesOf(context, page, entity, root, []),
   };
+}
+
+/** A space of the site as the drawer lists it: its name, its initials and how many notes it holds. */
+export interface SpaceCount {
+  name: string;
+  initials: string;
+  count: number;
+}
+
+/** Every source of the site with its note count, sorted by name: those the build declares and those met on a note. */
+export function spaceCountsOf(context: SiteContext): SpaceCount[] {
+  const counts = new Map<string, number>();
+  for (const source of context.model.build.sources) {
+    counts.set(source.name, 0);
+  }
+  for (const entity of context.model.entities) {
+    if (entity.keyword === true) continue;
+    counts.set(entity.source.name, (counts.get(entity.source.name) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort(([a], [b]) => byCodeUnit(a, b))
+    .map(([name, count]) => ({ name, initials: initialsOf(name), count }));
+}
+
+/** The spaces as the drawer of a page links them: each to the file tree of the home page. */
+export function spaceLinksOf(page: string, spaces: readonly SpaceCount[]): SpaceLink[] {
+  const href = `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`;
+  return spaces.map(({ name, initials, count }) => ({ label: name, href, initials, count }));
 }
 
 /** Space › folders › page: the space links to the file tree of the home page, a folder has no page, the page is the current one. */

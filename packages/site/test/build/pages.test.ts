@@ -49,7 +49,14 @@ import {
   weightsOf,
 } from "../../src/build/keyword-page.js";
 import { DEFAULT_MENTIONS_INLINE, mentionsPanelOf } from "../../src/build/mentions.js";
-import { breadcrumbOf, initialsOf, SPACE_PAGES_MAX, spaceOf } from "../../src/build/space.js";
+import {
+  breadcrumbOf,
+  initialsOf,
+  SPACE_PAGES_MAX,
+  spaceCountsOf,
+  spaceLinksOf,
+  spaceOf,
+} from "../../src/build/space.js";
 import {
   entity,
   fragments,
@@ -364,12 +371,13 @@ describe("entityPageOf", () => {
     expect(changedOf(context(), dated)).toEqual({
       date: "2026-09-09",
       label: "Changed 3 days ago",
+      short: "3 days ago",
     });
     // The project locale words the duration; the language of the catalogue when the context names none.
     expect(changedOf(context({ locale: "fr" }), dated)?.label).toBe("Changed il y a 3 jours");
-    expect(changedOf(context({ catalogue: loadCatalogue("fr") }), dated)?.label).toBe(
-      "Modifié il y a 3 jours",
-    );
+    const french = changedOf(context({ catalogue: loadCatalogue("fr") }), dated);
+    expect(french?.label).toBe("Modifié il y a 3 jours");
+    expect(french?.short).toBe("il y a 3\u00a0j");
     expect(changedOf(context(), term)).toBeUndefined();
     expect(entityPageOf(context(), dated).changed?.date).toBe("2026-09-09");
     expect(entityPageOf(context(), term).changed).toBeUndefined();
@@ -456,6 +464,42 @@ describe("entityPageOf", () => {
     expect(initialsOf("Glossary of the tool")).toBe("GO");
     expect(initialsOf("x")).toBe("X");
     expect(initialsOf("--")).toBe("--");
+  });
+
+  it("counts the notes of every space for the drawer, a declared source without any at zero, a source met on a note alone counted too, all linked to the home tree", () => {
+    expect(spaceCountsOf(context())).toEqual([
+      { name: "framing", initials: "FR", count: 1 },
+      { name: "glossary", initials: "GL", count: 2 },
+      { name: "specs", initials: "SP", count: 2 },
+    ]);
+    const empty = context({
+      model: model({
+        build: { ...model().build, sources: [...model().build.sources, { name: "briefs" }] },
+      }),
+    });
+    expect(spaceCountsOf(empty).map(({ name, count }) => `${name}:${String(count)}`)).toEqual([
+      "briefs:0",
+      "framing:1",
+      "glossary:2",
+      "specs:2",
+    ]);
+    const stray = entity({
+      ...page,
+      id: "notes/stray",
+      title: "Stray",
+      source: { name: "notes", path: "stray.md", line: 1 },
+    });
+    const extra = context({ model: model({ entities: [...model().entities, stray] }) });
+    expect(spaceCountsOf(extra).map(({ name, count }) => `${name}:${String(count)}`)).toEqual([
+      "framing:1",
+      "glossary:2",
+      "notes:1",
+      "specs:2",
+    ]);
+    expect(spaceLinksOf(pagePath, spaceCountsOf(context()).slice(1))).toEqual([
+      { label: "glossary", href: "../../index.html#home-tree", initials: "GL", count: 2 },
+      { label: "specs", href: "../../index.html#home-tree", initials: "SP", count: 2 },
+    ]);
   });
 
   it("lists at most forty pages of a folder, a window around the current page, the pages left out counted at each end", () => {
