@@ -1,4 +1,4 @@
-import type { ContractError } from "@concordance-wiki/core";
+import type { ContractError, ContractField, ContractSchema } from "@concordance-wiki/core";
 
 import {
   childNamed,
@@ -12,6 +12,12 @@ import {
 
 export type WsdlVersion = "1.1" | "2.0";
 
+/** A fault of an operation: its name and, in WSDL 1.1, what its message carries. */
+export interface WsdlFault {
+  name: string;
+  type?: string;
+}
+
 export interface WsdlOperation {
   name: string;
   /** The port type (WSDL 1.1) or interface (WSDL 2.0) that declares the operation. */
@@ -24,15 +30,23 @@ export interface WsdlOperation {
   documentation?: string;
   /** Names of the XSD elements and complex types the operation's messages reference, sorted. */
   types: string[];
+  /** What the input message carries: its element, or its parts as `name: type` when there are several. */
+  input?: string;
+  output?: string;
+  faults: WsdlFault[];
 }
 
-/** What the plugin keeps of a contract: its identity and its operations, sorted by interface then name. */
+/**
+ * What the plugin keeps of a contract: its identity, its operations sorted by interface then name,
+ * and the inline elements and complex types the operations reference, sorted by name.
+ */
 export interface WsdlContract {
   wsdl: WsdlVersion;
   title: string;
   /** A WSDL declares no version. */
   version: "";
   operations: WsdlOperation[];
+  types: ContractSchema[];
 }
 
 /** The element names that differ between the two versions for the same role. */
@@ -185,6 +199,33 @@ function messageParts(root: XmlElement): Map<string, string[]> {
   return messages;
 }
 
+/** What a message carries, for the viewer: the reference of its only part, or `name: reference` per part. */
+function messageContents(root: XmlElement): Map<string, string> {
+  const contents = new Map<string, string>();
+  for (const message of childrenNamed(root, "message")) {
+    const parts = childrenNamed(message, "part").map((part) => ({
+      name: nameOf(part),
+      reference: localName(part.attributes["element"] ?? part.attributes["type"] ?? "any"),
+    }));
+    const only = parts.length === 1 ? parts[0] : undefined;
+    contents.set(
+      nameOf(message),
+      only === undefined
+        ? parts.map((part) => `${part.name}: ${part.reference}`).join(", ")
+        : only.reference,
+    );
+  }
+  return contents;
+}
+
+/** What one child of an operation carries: its message contents in 1.1, its element in 2.0. */
+function carried(child: XmlElement, contents: Map<string, string>): string | undefined {
+  const message = child.attributes["message"];
+  if (message !== undefined) return contents.get(localName(message));
+  const element = child.attributes["element"];
+  return element === undefined || element.startsWith("#") ? undefined : localName(element);
+}
+
 /** The names the operation's messages reference: through `message` in 1.1, through `element` in 2.0. */
 function referencedNames(operation: XmlElement, messages: Map<string, string[]>): string[] {
   const names: string[] = [];
@@ -251,13 +292,121 @@ function documentationOf(element: XmlElement): string | undefined {
   return text === "" ? undefined : text;
 }
 
+/** The `annotation/documentation` of an XSD component, whitespace collapsed. */
+function annotationOf(element: XmlElement): string | undefined {
+  const annotation = childNamed(element, "annotation");
+  return annotation === undefined ? undefined : documentationOf(annotation);
+}
+
+const FIELD_ELEMENTS = new Set(["element", "attribute"]);
+const DERIVATIONS = new Set(["extension", "restriction"]);
+
+/**
+ * The fields of a type: every `element` and `attribute` below it, the derivation base's first when
+ * the base is a complex type declared inline; a child element's own content is a type of its own
+ * and is not walked. A base that leads back to the type stops.
+ */
+function fieldsOf(
+  node: XmlElement,
+  declared: Map<string, XmlElement>,
+  seen: Set<string>,
+): ContractField[] {
+  const fields: ContractField[] = [];
+  for (const child of node.children) {
+    if (FIELD_ELEMENTS.has(child.name)) {
+      const reference = child.attributes["type"] ?? child.attributes["ref"];
+      const description = annotationOf(child);
+      fields.push({
+        name: nameOf(child) || localName(child.attributes["ref"] ?? ""),
+        type: reference === undefined ? "anonymous" : localName(reference),
+        required:
+          child.name === "attribute"
+            ? child.attributes["use"] === "required"
+            : child.attributes["minOccurs"] !== "0",
+        ...(description === undefined ? {} : { description }),
+      });
+      continue;
+    }
+    if (DERIVATIONS.has(child.name)) {
+      const base = localName(child.attributes["base"] ?? "");
+      const definition = declared.get(base);
+      if (definition?.name === "complexType" && !seen.has(base)) {
+        seen.add(base);
+        fields.push(...fieldsOf(definition, declared, seen));
+      }
+    }
+    fields.push(...fieldsOf(child, declared, seen));
+  }
+  return fields;
+}
+
+/** An inline element or complex type as the viewer shows it: its documentation, its named type and its fields. */
+function schemaOf(
+  name: string,
+  definition: XmlElement,
+  declared: Map<string, XmlElement>,
+): ContractSchema {
+  const description = annotationOf(definition);
+  const typeName = definition.attributes["type"];
+  const type = typeName === undefined ? undefined : localName(typeName);
+  const typed = type === undefined ? undefined : declared.get(type);
+  const body = typed?.name === "complexType" ? typed : definition;
+  return {
+    name,
+    ...(description === undefined ? {} : { description }),
+    ...(type === undefined ? {} : { type }),
+    fields: fieldsOf(body, declared, new Set(type === undefined ? [name] : [name, type])),
+  };
+}
+
+/** The inline definitions among the given names, sorted by name; an imported name has no definition to show. */
+function typesOf(declared: Map<string, XmlElement>, names: ReadonlySet<string>): ContractSchema[] {
+  const types: ContractSchema[] = [];
+  for (const name of [...names].sort(byCodeUnit)) {
+    const definition = declared.get(name);
+    if (definition !== undefined) types.push(schemaOf(name, definition, declared));
+  }
+  return types;
+}
+
 function titleOf(root: XmlElement): string {
   return documentationOf(root) ?? nameOf(root);
 }
 
-function operationsOf(root: XmlElement, dialect: Dialect): WsdlOperation[] {
-  const declared = declaredTypes(root);
+const FAULT_ELEMENTS = new Set(["fault", "infault", "outfault"]);
+
+/** What the operation exchanges: the contents of its input, its output and its faults. */
+function exchangeOf(
+  operation: XmlElement,
+  contents: Map<string, string>,
+): Pick<WsdlOperation, "input" | "output" | "faults"> {
+  const input = childNamed(operation, "input");
+  const output = childNamed(operation, "output");
+  const carriedIn = input === undefined ? undefined : carried(input, contents);
+  const carriedOut = output === undefined ? undefined : carried(output, contents);
+  const faults = operation.children
+    .filter((child) => FAULT_ELEMENTS.has(child.name))
+    .map((fault) => {
+      const type = carried(fault, contents);
+      return {
+        name: nameOf(fault) || localName(fault.attributes["ref"] ?? ""),
+        ...(type === undefined ? {} : { type }),
+      };
+    });
+  return {
+    ...(carriedIn === undefined ? {} : { input: carriedIn }),
+    ...(carriedOut === undefined ? {} : { output: carriedOut }),
+    faults,
+  };
+}
+
+function operationsOf(
+  root: XmlElement,
+  dialect: Dialect,
+  declared: Map<string, XmlElement>,
+): WsdlOperation[] {
   const messages = messageParts(root);
+  const contents = messageContents(root);
   const bindings = bindingsOf(root, dialect);
   const ports = portsOf(root, dialect);
   const operations: WsdlOperation[] = [];
@@ -281,6 +430,7 @@ function operationsOf(root: XmlElement, dialect: Dialect): WsdlOperation[] {
         ...(soapAction === undefined ? {} : { soapAction }),
         ...(documentation === undefined ? {} : { documentation }),
         types: [...names].sort(byCodeUnit),
+        ...exchangeOf(operation, contents),
       });
     }
   }
@@ -303,10 +453,13 @@ export function readWsdl(text: string, location: string): WsdlContract | Contrac
       error: `${location} is not a WSDL document: the root element is ${root.name}, not definitions or description`,
     };
   }
+  const declared = declaredTypes(root);
+  const operations = operationsOf(root, dialect, declared);
   return {
     wsdl: dialect.wsdl,
     title: titleOf(root),
     version: "",
-    operations: operationsOf(root, dialect),
+    operations,
+    types: typesOf(declared, new Set(operations.flatMap((operation) => operation.types))),
   };
 }

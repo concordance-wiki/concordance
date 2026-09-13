@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 
 import {
   formatIssue,
@@ -6,8 +6,10 @@ import {
   type FileSystem,
   type PluginRegistry,
   type ThemeContribution,
+  type UiComponent,
 } from "@concordance-wiki/core";
 
+import type { IslandEntry } from "../islands/bundle.js";
 import { byCodeUnit } from "../order.js";
 import { isSlotName, SLOT_NAMES, type SlotName } from "../slots.js";
 import { defaultComponents } from "./default/index.js";
@@ -57,8 +59,32 @@ function configOf(
 }
 
 /**
+ * The UI components of a registration as islands: a bundle written as an absolute path is taken
+ * as is (the built-in components); a relative one resolves against the plugin package, and is
+ * left aside when the loader cannot locate packages.
+ */
+function islandsOf(
+  registration: { name: string; manifest: { contributes: { uiComponents?: UiComponent[] } } },
+  loader: ThemeLoader,
+): IslandEntry[] {
+  const islands: IslandEntry[] = [];
+  for (const component of registration.manifest.contributes.uiComponents ?? []) {
+    if (isAbsolute(component.bundle)) {
+      islands.push({ name: component.slot, entry: component.bundle });
+    } else if (loader.rootOf !== undefined) {
+      islands.push({
+        name: component.slot,
+        entry: resolve(loader.rootOf(registration.name), component.bundle),
+      });
+    }
+  }
+  return islands;
+}
+
+/**
  * The default components, each replaced by the last theme of the registry that provides it,
- * and the `tokens` of the last theme when the loader can locate the plugin packages.
+ * the `tokens` of the last theme when the loader can locate the plugin packages, and the UI
+ * components of every registration as islands to bundle.
  */
 export async function resolveTheme(
   registry: PluginRegistry,
@@ -66,8 +92,10 @@ export async function resolveTheme(
 ): Promise<ResolvedTheme> {
   const loaded: Partial<Record<SlotName, unknown>> = {};
   const overrides = new Map<SlotName, ThemeOverride>();
+  const islands: IslandEntry[] = [];
   let config: ResolvedThemeConfig | undefined;
   for (const registration of registry.registrations()) {
+    islands.push(...islandsOf(registration, loader));
     for (const theme of registration.manifest.contributes.themes ?? []) {
       const label = `plugin ${registration.name}, theme ${theme.name}`;
       if (loader.rootOf !== undefined) {
@@ -100,5 +128,6 @@ export async function resolveTheme(
     components,
     overrides: [...overrides.values()].sort(compareOverrides),
     ...(config === undefined ? {} : { config }),
+    islands,
   };
 }

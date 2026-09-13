@@ -1,5 +1,6 @@
 import type { ComponentType } from "preact";
 
+import type { IslandEntry } from "../islands/bundle.js";
 import type { SlotName, SlotProps } from "../slots.js";
 import type { ResolvedThemeConfig } from "./load.js";
 
@@ -18,4 +19,6 @@ export interface ResolvedTheme {
   overrides: ThemeOverride[];
   /** The `theme.yaml` of the last theme contribution, when the loader could locate its package. */
   config?: ResolvedThemeConfig;
+  /** The UI components of the registry as islands, in registration order; the site bundles them next to its own. */
+  islands?: IslandEntry[];
 }

@@ -3,7 +3,7 @@ import { dirname, join, resolve } from "node:path";
 
 import { slugify } from "../identity/slug.js";
 import type { FileSystem } from "../io/file-system.js";
-import { compareContracts, type CandidateObject } from "../model/contract.js";
+import { compareContracts, type CandidateObject, type ContractSchema } from "../model/contract.js";
 import { compareEntities, type Entity } from "../model/entity.js";
 import { compareFindings, type Finding } from "../model/finding.js";
 import type { Link } from "../model/link.js";
@@ -27,6 +27,25 @@ export interface ContractSummary {
   version: string;
 }
 
+/** One parameter of an operation, as the contract viewer lists it. */
+export interface ContractParameter {
+  name: string;
+  /** Where the parameter travels: `path`, `query`, `header` or `cookie` for HTTP. */
+  in: string;
+  required: boolean;
+  /** The type as the format writes it, or the schema name it references. */
+  type: string;
+  description?: string;
+}
+
+/** One outcome of an operation: an HTTP status, or the output or a fault of a SOAP operation. */
+export interface ContractResponse {
+  status: string;
+  description?: string;
+  /** Name of the schema the response carries, when it names one. */
+  schema?: string;
+}
+
 /** One operation of a contract, in the shape the `endpoint` entity takes whatever the format. */
 export interface ContractOperation {
   /** The operation name as the contract writes it; the provenance carries it and the identifier derives from it. */
@@ -39,6 +58,21 @@ export interface ContractOperation {
   attributes: Record<string, unknown>;
   /** Names of the schemas or types the operation references, sorted. */
   objects: string[];
+  /** What the contract viewer shows of the signature; the entity carries none of it. */
+  parameters?: ContractParameter[];
+  /** Name of the schema of the request body or input message. */
+  request?: string;
+  responses?: ContractResponse[];
+}
+
+/** What the site shows of a contract, written next to the cached contract and copied as the fragment of the API page. */
+export interface ContractView {
+  title: string;
+  version: string;
+  /** In contract order, the same shape the entities were produced from. */
+  operations: ContractOperation[];
+  /** Sorted by name. */
+  schemas: ContractSchema[];
 }
 
 /** How a plugin reads one contract format; the loading, caching and reporting around it are shared. */
@@ -48,6 +82,8 @@ export interface ContractReader<C extends ContractSummary> {
   /** The extracted contract, cached as-is by fingerprint, or an error naming the location and the reason. */
   read: (text: string, location: string) => C | ContractError;
   operations: (contract: C) => ContractOperation[];
+  /** The schemas or types the operations reference, for the contract viewer; none when the format keeps no definition. */
+  schemas?: (contract: C) => ContractSchema[];
 }
 
 export interface DeclaredContract {
@@ -95,6 +131,44 @@ export function readCachedContract(fs: FileSystem, path: string): ContractSummar
 
 export function writeCachedContract(fs: FileSystem, path: string, contract: ContractSummary): void {
   fs.writeText(path, `${JSON.stringify(contract, null, 2)}\n`);
+}
+
+/** Where the view of a contract, what the site shows of it, lives under the pipeline cache. */
+export function cachedContractViewPath(cacheDirectory: string, fingerprint: string): string {
+  return join(cacheDirectory, "contracts", `${fingerprint}.view.json`);
+}
+
+/** The view kept for a fingerprint, or nothing when the contract was never loaded by this version. */
+export function readCachedContractView(fs: FileSystem, path: string): ContractView | undefined {
+  if (!fs.exists(path)) return undefined;
+  // The cache holds what writeCachedContractView serialised.
+  return JSON.parse(fs.readText(path)) as ContractView;
+}
+
+export function writeCachedContractView(fs: FileSystem, path: string, view: ContractView): void {
+  fs.writeText(path, `${JSON.stringify(view, null, 2)}\n`);
+}
+
+function byName(a: ContractSchema, b: ContractSchema): number {
+  return Number(a.name > b.name) - Number(a.name < b.name);
+}
+
+/**
+ * What the site shows of a contract: its operations in contract order and its schemas by name,
+ * in the common shape whatever the format. Written at every load, never read back by the loader,
+ * so that the view always reflects the reader that produced it.
+ */
+export function contractViewOf<C extends ContractSummary>(
+  contract: C,
+  reader: ContractReader<C>,
+  operations: readonly ContractOperation[],
+): ContractView {
+  return {
+    title: contract.title,
+    version: contract.version,
+    operations: [...operations],
+    schemas: [...(reader.schemas?.(contract) ?? [])].sort(byName),
+  };
 }
 
 function isUrl(location: string): boolean {
@@ -246,6 +320,11 @@ async function loadOne<C extends ContractSummary>(
   }
   const confidence = input.payload.confidence.contract_import ?? DEFAULT_CONTRACT_CONFIDENCE;
   const operations = reader.operations(contract);
+  writeCachedContractView(
+    fs,
+    cachedContractViewPath(input.payload.cacheDirectory, fingerprint),
+    contractViewOf(contract, reader, operations),
+  );
   for (const { operation, id } of identified(declared.api, operations)) {
     output.entities.push(endpointOf(declared, operation, id));
     output.links.push(exposes(declared, operation, id, confidence));

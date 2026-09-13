@@ -27,7 +27,7 @@ The confidence score is computed and stored: it orders mentions and decides what
 | GitHub organisation and npm scope | `concordance-wiki` |
 | Command | `concordance`, alias `conc`. Documentation always writes the full name; the alias appears only in the quick start. |
 | Core packages | `@concordance-wiki/core`, `/profile`, `/ingest`, `/typing`, `/nlp`, `/inference`, `/checks`, `/site`, `/ui`, `/cli`, `/lint` |
-| Official plugins | `@concordance-wiki/plugin-reader-vtt`, `/plugin-reader-office`, `/plugin-convert-libreoffice`, `/plugin-contract-openapi`, `/plugin-contract-wsdl`, `/plugin-viewer-pdf`, `/plugin-viewer-swagger` |
+| Official plugins | `@concordance-wiki/plugin-reader-vtt`, `/plugin-reader-office`, `/plugin-convert-libreoffice`, `/plugin-contract-openapi`, `/plugin-contract-wsdl`, `/plugin-viewer-pdf`; the contract viewer is a UI component of the default theme, in `/site` |
 | Preset | `concordance` (unscoped): depends on the core and every official plugin |
 | Configuration | `concordance.yaml` in a configuration repository, with `profile.yaml`, `theme.yaml`, `stopwords.*.txt`, `pseudonyms.yaml` (never published) |
 | Lock | `concordance.lock.yaml`; only `rejected_terms` is read in the MVP |
@@ -813,7 +813,7 @@ Depends on: L5-01.
 
 As a consuming developer, I want to see the contract without leaving the note so that I check a signature while reading the business.
 
-- The `viewer-swagger` plugin embeds Swagger UI in the page for OpenAPI contracts; the WSDL rendering occupies the same slot.
+- A contract viewer embedded in the page renders the operations and schemas of an OpenAPI contract; the WSDL rendering occupies the same slot. The viewer is a purpose-built island of the default theme, shipped as its first UI component contribution and fed by a JSON fragment the build writes from the cached contract; Swagger UI is not embedded: it needs a network fetch and weighs more than the page budget.
 - The contract is never copied into the markdown: the note displays it, it does not duplicate it.
 - The contract viewer is loaded on demand.
 - The original contract remains downloadable at its URL.

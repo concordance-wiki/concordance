@@ -138,6 +138,56 @@ describe("loadPlugins", () => {
     );
   });
 
+  it("registers the built-in manifests first, without loading them, and lists their UI components", async () => {
+    const site: PluginManifest = {
+      name: "@concordance-wiki/site",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { uiComponents: [{ slot: "contract-viewer", bundle: "/site/viewer.client" }] },
+    };
+    const modules = { a: plugin("a") };
+    const asked = loader(modules);
+    const { registry, findings } = await loadPlugins(["a"], { ...asked, builtin: [site] });
+    expect(registry.plugins()).toEqual(["@concordance-wiki/site", "a"]);
+    expect(registry.registrations()[0]).toEqual({
+      name: "@concordance-wiki/site",
+      manifest: site,
+      options: {},
+    });
+    expect(registry.uiComponents()).toEqual([
+      { slot: "contract-viewer", bundle: "/site/viewer.client" },
+    ]);
+    expect(findings).toEqual([]);
+  });
+
+  it("refuses a declared plugin that claims a key of a built-in manifest, or declares the built-in name", async () => {
+    const site: PluginManifest = {
+      name: "@concordance-wiki/site",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { uiComponents: [{ slot: "contract-viewer", bundle: "/site/viewer.client" }] },
+    };
+    const rival = contributing("rival", {
+      uiComponents: [{ slot: "contract-viewer", bundle: "./other.js" }],
+    });
+    const attempt = async (declarations: PluginConfig[], modules: Record<string, unknown>) => {
+      try {
+        await loadPlugins(declarations, { ...loader(modules), builtin: [site] });
+      } catch (error) {
+        return error instanceof PluginLoadError ? error.message : "another error";
+      }
+      return "no error";
+    };
+    expect(await attempt(["rival"], { rival })).toBe(
+      "plugin rival: ui slot contract-viewer is already contributed by @concordance-wiki/site",
+    );
+    expect(
+      await attempt(["@concordance-wiki/site"], {
+        "@concordance-wiki/site": plugin("@concordance-wiki/site"),
+      }),
+    ).toBe("plugin @concordance-wiki/site: declared more than once");
+  });
+
   it("rejects the same plugin declared twice", async () => {
     const modules = { a: plugin("a") };
     expect(await failure(["a", "a"], modules)).toBe("plugin a: declared more than once");

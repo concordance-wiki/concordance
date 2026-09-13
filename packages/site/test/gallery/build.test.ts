@@ -44,6 +44,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
       ].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
@@ -118,6 +119,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(report.overrides).toEqual([]);
     expect(report.summary).toEqual([
       `gallery: ${String(galleryPages.length + 1)} pages written to /out`,
+      expect.stringMatching(/^island contract-viewer: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,

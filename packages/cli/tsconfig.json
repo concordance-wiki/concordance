@@ -36,6 +36,12 @@
       "path": "../lint/tsconfig.build.json"
     },
     {
+      "path": "../../plugins/contract-openapi/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/contract-wsdl/tsconfig.build.json"
+    },
+    {
       "path": "../../plugins/convert-libreoffice/tsconfig.build.json"
     },
     {

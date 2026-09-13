@@ -1,9 +1,11 @@
-import { pagePath, type Entity } from "@concordance-wiki/core";
+import { CONTRACT_METHOD, CONTRACT_RELATION, pagePath, type Entity } from "@concordance-wiki/core";
 
 import { byCodeUnit } from "../order.js";
 import type {
   Attribute,
   AttributeValue,
+  ContractOperationItem,
+  ContractSectionProps,
   DocumentView,
   EntityPageProps,
   Neighbour,
@@ -19,7 +21,13 @@ import {
   type SiteContext,
 } from "./context.js";
 import { mentionsPanelOf } from "./mentions.js";
-import { entityHref, relativeHref } from "./paths.js";
+import {
+  contractFileTarget,
+  contractFragmentPath,
+  entityHref,
+  isContractUrl,
+  relativeHref,
+} from "./paths.js";
 
 /** The properties every entity carries outside `attributes`, and the message that labels each. */
 const COMMON = ["application", "domain", "status"] as const;
@@ -194,6 +202,46 @@ export interface ViewerBundles {
   worker: string;
 }
 
+/** The operations the contract import attached to the API, in model order: the `exposes` links of a `contract_import` provenance. */
+function operationsOf(context: SiteContext, page: string, entity: Entity): ContractOperationItem[] {
+  const operations: ContractOperationItem[] = [];
+  for (const link of context.touching.get(entity.id) ?? []) {
+    if (link.from !== entity.id || link.relation !== CONTRACT_RELATION) continue;
+    const imported = link.provenance.find((provenance) => provenance.method === CONTRACT_METHOD);
+    const operation = context.entities.get(link.to);
+    if (imported === undefined || operation === undefined) continue;
+    operations.push({
+      name: imported.operation ?? operation.title,
+      title: operation.title,
+      ...(operation.summary === undefined ? {} : { summary: operation.summary }),
+      href: entityHref(page, operation.id),
+    });
+  }
+  return operations;
+}
+
+/** The contract section of an `api` page, from the record the import left in the model; none without one. */
+export function contractOf(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+): ContractSectionProps | undefined {
+  const record = context.model.build.contracts?.find((candidate) => candidate.api === entity.id);
+  if (record === undefined) return undefined;
+  const { location } = record;
+  return {
+    title: record.title,
+    version: record.version,
+    importedAt: record.imported_at,
+    location,
+    downloadHref: isContractUrl(location)
+      ? location
+      : relativeHref(page, contractFileTarget(entity.id, location)),
+    fragmentHref: relativeHref(page, contractFragmentPath(entity.id)),
+    operations: operationsOf(context, page, entity),
+  };
+}
+
 export interface EntityPageOptions {
   mentionsInline?: number;
   viewer?: ViewerBundles;
@@ -242,6 +290,7 @@ export function entityPageOf(
 ): EntityPageProps {
   const page = pagePath(entity.id);
   const documents = documentsOf(context, page, entity, options.viewer);
+  const contract = contractOf(context, page, entity);
   return {
     entity: {
       id: entity.id,
@@ -257,5 +306,6 @@ export function entityPageOf(
     mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
     sources: sourcesOf(context, entity),
     ...(documents.length === 0 ? {} : { documents }),
+    ...(contract === undefined ? {} : { contract }),
   };
 }

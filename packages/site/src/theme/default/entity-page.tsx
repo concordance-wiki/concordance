@@ -3,6 +3,7 @@ import type { JSX } from "preact";
 import type { Attribute, EntityPageProps } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { AttributeList, Value } from "./attributes.js";
+import { ContractSection } from "./contract-section.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
 
@@ -24,9 +25,9 @@ function Highlight({ attribute }: { attribute: Attribute }): JSX.Element {
 
 /**
  * The page of every typed entity, whatever its type: the badge and the highlights, the title,
- * the note at full column width, its documents under it, then the side panel, the
- * neighbourhood, the mentions and the sources. What the profile does not name for the type is
- * left to the panel.
+ * the note at full column width, its documents under it, the contract of an API after it, then
+ * the side panel, the neighbourhood, the mentions and the sources. What the profile does not name
+ * for the type is left to the panel.
  */
 export function EntityPage({
   entity,
@@ -36,6 +37,7 @@ export function EntityPage({
   neighbours,
   mentions,
   sources,
+  contract,
   documents = [],
 }: EntityPageProps): JSX.Element {
   const Neighbourhood = useSlot("Neighbourhood");
@@ -77,6 +79,7 @@ export function EntityPage({
           <DocumentBlock key={document.file.href} document={document} index={index + 1} />
         ))}
       </article>
+      {contract !== undefined && <ContractSection {...contract} />}
       {attributes.length > 0 && (
         <aside class="entity-panel" aria-labelledby="entity-properties">
           <h2 id="entity-properties">{labels.properties}</h2>

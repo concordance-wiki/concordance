@@ -1,3 +1,4 @@
+import type { Link } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +18,7 @@ import {
   type SiteContextInput,
 } from "../../src/build/context.js";
 import {
+  contractOf,
   entityPageOf,
   highlightsOf,
   neighbourhoodOf,
@@ -373,6 +375,144 @@ describe("entityPageOf", () => {
       "../../fragments/glossary/keyword-page.mentions.json",
     );
     expect(withNote.sources).toEqual([{ source: "glossary", path: "keyword-page.md" }]);
+  });
+});
+
+describe("contractOf", () => {
+  const modelQuery = entity({
+    id: "specs/api/model-query",
+    type: "api",
+    title: "Model query API",
+    attributes: { contract: "contracts/model-query.openapi.json" },
+  });
+  const forgeBridge = entity({
+    id: "specs/api/forge-bridge",
+    type: "api",
+    title: "Forge bridge API",
+    attributes: { contract: "https://example.invalid/forge-bridge.wsdl" },
+  });
+  const listEntities = entity({
+    id: "specs/endpoints/list-entities",
+    type: "endpoint",
+    title: "List the entities",
+    summary: "Returns the entities of the last build.",
+    type_origin: "rule#7",
+    representations: [
+      { path: "endpoints/list-entities.md", format: "markdown" },
+      {
+        path: "contracts/model-query.openapi.json",
+        format: "json",
+        kind: "contract",
+        operation: "listEntities",
+      },
+    ],
+  });
+  const searchModel = entity({
+    id: "specs/api/model-query/searchmodel",
+    type: "endpoint",
+    title: "GET /search",
+    type_origin: "contract",
+  });
+  const exposes = (to: string, operation?: string, provenance = "contract_import"): Link => ({
+    from: "specs/api/model-query",
+    to,
+    relation: "exposes",
+    confidence: 0.95,
+    provenance: [
+      {
+        // The test writes the method it needs; the model only ever carries known methods.
+        method: provenance as Link["provenance"][number]["method"],
+        confidence: 0.95,
+        path: "contracts/model-query.openapi.json",
+        ...(operation === undefined ? {} : { operation }),
+      },
+    ],
+  });
+  const contracts = [
+    {
+      api: "specs/api/forge-bridge",
+      location: "https://example.invalid/forge-bridge.wsdl",
+      title: "Forge bridge",
+      version: "",
+      fingerprint: "b".repeat(64),
+      imported_at: "2026-09-12T10:00:00.000Z",
+    },
+    {
+      api: "specs/api/model-query",
+      location: "contracts/model-query.openapi.json",
+      title: "Model query API",
+      version: "0.1.0",
+      fingerprint: "a".repeat(64),
+      imported_at: "2026-09-12T10:00:00.000Z",
+    },
+  ];
+  const withContracts = (links: Link[]): SiteContext =>
+    context({
+      model: model({
+        build: { ...model().build, contracts },
+        entities: [modelQuery, forgeBridge, listEntities, searchModel, term],
+        links,
+      }),
+    });
+
+  it("describes the contract of an api page from the record of the model: title, version, import date, the copy of a path contract next to the page and the view under fragments/", () => {
+    const ctx = withContracts([
+      exposes("specs/endpoints/list-entities", "listEntities"),
+      exposes("specs/api/model-query/searchmodel", "searchModel"),
+    ]);
+    const props = entityPageOf(ctx, modelQuery);
+    expect(props.contract).toEqual({
+      title: "Model query API",
+      version: "0.1.0",
+      importedAt: "2026-09-12T10:00:00.000Z",
+      location: "contracts/model-query.openapi.json",
+      downloadHref: "model-query.openapi.json",
+      fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
+      operations: [
+        {
+          name: "listEntities",
+          title: "List the entities",
+          summary: "Returns the entities of the last build.",
+          href: "../../endpoints/list-entities/index.html",
+        },
+        { name: "searchModel", title: "GET /search", href: "searchmodel/index.html" },
+      ],
+    });
+  });
+
+  it("keeps the declared URL of a remote contract as the download link", () => {
+    const props = contractOf(withContracts([]), "specs/api/forge-bridge/index.html", forgeBridge);
+    expect(props?.downloadHref).toBe("https://example.invalid/forge-bridge.wsdl");
+    expect(props?.operations).toEqual([]);
+    expect(props?.version).toBe("");
+  });
+
+  it("lists the operations the contract import exposed only: a link of another provenance, towards the api or towards a lost entity is left out, and the title stands in for a missing operation name", () => {
+    const ctx = withContracts([
+      exposes("specs/endpoints/list-entities", undefined),
+      exposes("specs/api/model-query/searchmodel", "searchModel", "frontmatter_ref"),
+      exposes("specs/api/model-query/gone", "gone"),
+      {
+        from: "glossary/keyword-page",
+        to: "specs/api/model-query",
+        relation: "exposes",
+        confidence: 0.95,
+        provenance: [{ method: "contract_import", confidence: 0.95, operation: "x" }],
+      },
+    ]);
+    expect(contractOf(ctx, "specs/api/model-query/index.html", modelQuery)?.operations).toEqual([
+      {
+        name: "List the entities",
+        title: "List the entities",
+        summary: "Returns the entities of the last build.",
+        href: "../../endpoints/list-entities/index.html",
+      },
+    ]);
+  });
+
+  it("gives no contract section to a page without a record, and none when the model has no contracts block", () => {
+    expect(contractOf(withContracts([]), "glossary/keyword-page/index.html", term)).toBeUndefined();
+    expect(entityPageOf(context(), term)).not.toHaveProperty("contract");
   });
 });
 

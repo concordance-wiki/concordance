@@ -1,6 +1,7 @@
 import type { PageSlot } from "../render.js";
 import type { SlotName, SlotProps } from "../slots.js";
 import {
+  apiPage,
   documentEntityPage,
   entityPage,
   footer,
@@ -115,6 +116,16 @@ export const galleryPages: readonly GalleryPage[] = [
       "a workshop with a deck and a transcript: download links, the viewer opened on demand, the rail of slides, the extracted text",
     ...chrome,
     props: documentEntityPage,
+  },
+  {
+    file: "entity-page-contract.html",
+    slot: "EntityPage",
+    rendered: "EntityPage",
+    state: "contract",
+    description:
+      "an API whose contract was imported: the contract section after the note, its operations as a plain list, the viewer behind its button",
+    ...chrome,
+    props: apiPage,
   },
   {
     file: "keyword-page.html",

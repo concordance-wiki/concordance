@@ -8,9 +8,12 @@ import {
 } from "../../src/build/fragments.js";
 import {
   assetsBaseOf,
+  contractFileTarget,
+  contractFragmentPath,
   entityHref,
   fragmentImagePath,
   fragmentPath,
+  isContractUrl,
   relativeHref,
 } from "../../src/build/paths.js";
 
@@ -229,6 +232,22 @@ describe("paths", () => {
 
   it("places the fragment of an entity under fragments/ by identifier", () => {
     expect(fragmentPath("glossary/keyword-page")).toBe("fragments/glossary/keyword-page.json");
+  });
+
+  it("places the view of a contract next to the fragment of its API, and the copy of a path contract next to the page", () => {
+    expect(contractFragmentPath("specs/api/model-query")).toBe(
+      "fragments/specs/api/model-query.contract.json",
+    );
+    expect(contractFileTarget("specs/api/model-query", "contracts/model-query.openapi.json")).toBe(
+      "specs/api/model-query/model-query.openapi.json",
+    );
+    expect(contractFileTarget("specs/api/forge-bridge", "../shared/forge-bridge.wsdl")).toBe(
+      "specs/api/forge-bridge/forge-bridge.wsdl",
+    );
+    expect(isContractUrl("https://example.invalid/openapi.json")).toBe(true);
+    expect(isContractUrl("http://example.invalid/openapi.json")).toBe(true);
+    expect(isContractUrl("contracts/model-query.openapi.json")).toBe(false);
+    expect(isContractUrl("file:///contracts/model-query.openapi.json")).toBe(false);
   });
 
   it("writes every href relative to the page, climbing with .. and never starting with /", () => {

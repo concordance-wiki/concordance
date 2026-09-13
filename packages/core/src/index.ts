@@ -38,7 +38,13 @@ export {
   type DuplicateCounts,
   type KeywordCounts,
 } from "./model/build-log.js";
-export { compareContracts, type CandidateObject, type ContractRecord } from "./model/contract.js";
+export {
+  compareContracts,
+  type CandidateObject,
+  type ContractField,
+  type ContractRecord,
+  type ContractSchema,
+} from "./model/contract.js";
 export {
   compareEntities,
   type Entity,
@@ -113,20 +119,27 @@ export {
 export type * from "./plugin/api.js";
 export {
   cachedContractPath,
+  cachedContractViewPath,
   CONTRACT_METHOD,
   CONTRACT_RELATION,
   CONTRACT_UNREACHABLE,
+  contractViewOf,
   declaredContracts,
   DEFAULT_CONTRACT_CONFIDENCE,
   fingerprintOf,
   loadContracts,
   readCachedContract,
+  readCachedContractView,
   writeCachedContract,
+  writeCachedContractView,
   xmlRootOf,
   type ContractError,
   type ContractOperation,
+  type ContractParameter,
   type ContractReader,
+  type ContractResponse,
   type ContractSummary,
+  type ContractView,
   type DeclaredContract,
 } from "./plugin/contracts.js";
 export { definePlugin, PluginDefinitionError } from "./plugin/define.js";

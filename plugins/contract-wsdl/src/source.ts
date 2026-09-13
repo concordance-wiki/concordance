@@ -7,11 +7,25 @@ import {
   type SourceOutput,
 } from "@concordance-wiki/core";
 
+import type { ContractResponse } from "@concordance-wiki/core";
+
 import { isWsdlRoot, readWsdl, type WsdlContract, type WsdlOperation } from "./contract.js";
 
 export const SOURCE_KIND = "wsdl";
 /** The `style` attribute every endpoint of a SOAP contract carries. */
 export const STYLE = "soap";
+
+/** The output message, then the faults, as the outcomes the viewer lists. */
+function responsesOf(operation: WsdlOperation): ContractResponse[] {
+  return [
+    ...(operation.output === undefined ? [] : [{ status: "output", schema: operation.output }]),
+    ...operation.faults.map((fault) => ({
+      status: "fault",
+      description: fault.name,
+      ...(fault.type === undefined ? {} : { schema: fault.type }),
+    })),
+  ];
+}
 
 function operationOf(operation: WsdlOperation): ContractOperation {
   return {
@@ -28,6 +42,9 @@ function operationOf(operation: WsdlOperation): ContractOperation {
       style: STYLE,
     },
     objects: operation.types,
+    parameters: [],
+    ...(operation.input === undefined ? {} : { request: operation.input }),
+    responses: responsesOf(operation),
   };
 }
 
@@ -36,6 +53,7 @@ export const wsdlReader: ContractReader<WsdlContract> = {
   accepts: (text) => isWsdlRoot(xmlRootOf(text)),
   read: readWsdl,
   operations: (contract) => contract.operations.map(operationOf),
+  schemas: (contract) => contract.types,
 };
 
 /**

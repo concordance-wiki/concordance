@@ -16,6 +16,24 @@ export function fragmentPath(id: string): string {
   return `${FRAGMENTS_DIRECTORY}/${id}.json`;
 }
 
+/** The JSON view of the contract of an API, next to its fragment: `fragments/<id>.contract.json`. */
+export function contractFragmentPath(id: string): string {
+  return `${FRAGMENTS_DIRECTORY}/${id}.contract.json`;
+}
+
+/** Whether a contract location is fetched rather than read from the source. */
+export function isContractUrl(location: string): boolean {
+  return /^https?:\/\//.test(location);
+}
+
+/**
+ * Where the copy of a path contract lands under the site: next to the page of its API, under the
+ * file name the note points at. A URL contract is never copied.
+ */
+export function contractFileTarget(id: string, location: string): string {
+  return `${id}/${posix.basename(location)}`;
+}
+
 /** Where the build keeps an image of a note, by its target under the site, so that `render` places it without a source. */
 export function fragmentImagePath(target: string): string {
   return `${FRAGMENTS_DIRECTORY}/${target}`;

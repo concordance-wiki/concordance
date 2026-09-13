@@ -15,7 +15,13 @@ export type {
   ThemePalette,
 } from "./css/theme-config.js";
 export { tokensStylesheet } from "./css/tokens.js";
-export { bundleIslands, contentHash, defaultIslands } from "./islands/bundle.js";
+export {
+  bundleIslands,
+  contentHash,
+  defaultIslands,
+  islandOf,
+  mergeIslands,
+} from "./islands/bundle.js";
 export type { BundleOptions, IslandBundle, IslandEntry } from "./islands/bundle.js";
 export { ISLAND_ELEMENT, island, islandsUsed } from "./islands/island.js";
 export { mountIslands } from "./islands/mount.js";
@@ -61,6 +67,23 @@ export { defaultComponents } from "./theme/default/index.js";
 export { REPOSITORY_URL } from "./theme/default/footer.js";
 export { MODE_SWITCH_ISLAND, ModeSwitch } from "./theme/default/mode-switch.js";
 export type { ModeSwitchProps } from "./theme/default/mode-switch.js";
+export {
+  CONTRACT_VIEWER_ISLAND,
+  ContractViewer,
+  signatureOf,
+} from "./theme/default/contract-viewer.js";
+export type {
+  ContractViewerProps,
+  ContractViewerState,
+  ContractViewerStatus,
+  FetchView,
+} from "./theme/default/contract-viewer.js";
+export { ContractSection } from "./theme/default/contract-section.js";
+export {
+  DEFAULT_THEME_PLUGIN,
+  defaultThemeManifest,
+  defaultUiComponents,
+} from "./theme/default/plugin.js";
 export { loadTheme } from "./theme/load.js";
 export type {
   ResolvedThemeConfig,
@@ -116,9 +139,12 @@ export {
   SEARCH_PAGE,
   TODO_PAGE,
   assetsBaseOf,
+  contractFileTarget,
+  contractFragmentPath,
   entityHref,
   fragmentImagePath,
   fragmentPath,
+  isContractUrl,
   mentionsFragmentPath,
   relativeHref,
 } from "./build/paths.js";

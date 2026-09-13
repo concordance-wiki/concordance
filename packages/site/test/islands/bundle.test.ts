@@ -9,27 +9,34 @@ import {
   bundleIslands,
   contentHash,
   defaultIslands,
+  islandOf,
+  mergeIslands,
   viewerIslands,
 } from "../../src/islands/bundle.js";
+import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the document viewer, mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic", () => {
+  it("declares the document viewer, mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
       "document-viewer",
       "mentions-panel",
       "mode-switch",
       "search",
+      "contract-viewer",
     ]);
     expect(islands[0]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[2]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
     expect(islands[3]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands[4]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
+    expect(islands[4]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
     expect(islands.map((island) => island.classic)).toEqual([
       undefined,
       undefined,
       undefined,
       true,
+      undefined,
     ]);
   });
 
@@ -39,6 +46,28 @@ describe("defaultIslands", () => {
     expect(islands[0]?.entry.endsWith("/src/islands/viewer-pdf.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/pdfjs-dist/legacy/build/pdf.worker.mjs")).toBe(true);
     expect(defaultIslands().map((island) => island.name)).not.toContain("viewer-pdf");
+  });
+});
+
+describe("mergeIslands", () => {
+  it("keeps the first island of a name, the defaults winning over the contributed ones, and sorts by name", () => {
+    const merged = mergeIslands(
+      [
+        { name: "mode-switch", entry: "/default/mode" },
+        { name: "contract-viewer", entry: "/default/viewer" },
+      ],
+      [
+        { name: "pdf-viewer", entry: "/plugin/pdf" },
+        { name: "contract-viewer", entry: "/plugin/viewer" },
+        { name: "pdf-viewer", entry: "/plugin/pdf-again" },
+      ],
+    );
+    expect(merged).toEqual([
+      { name: "contract-viewer", entry: "/default/viewer" },
+      { name: "mode-switch", entry: "/default/mode" },
+      { name: "pdf-viewer", entry: "/plugin/pdf" },
+    ]);
+    expect(mergeIslands([], [])).toEqual([]);
   });
 });
 
@@ -70,9 +99,15 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(4);
+    expect(bundles).toHaveLength(5);
     const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
-    expect(bundle?.name).toBe("mentions-panel");
+    expect(bundles.map((candidate) => candidate.name)).toEqual([
+      "contract-viewer",
+      "document-viewer",
+      "mentions-panel",
+      "mode-switch",
+      "search",
+    ]);
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/site/assets/${bundle?.file ?? ""}`);
     expect(written.length).toBe(bundle?.bytes);
@@ -82,6 +117,21 @@ describe("bundleIslands", () => {
     expect(written).not.toContain("\n//");
     expect(written).not.toContain("sourceMappingURL");
     expect(written.split("\n").length).toBeLessThan(5);
+  });
+
+  it("bundles the contract viewer with the framework alone, under the weight of one page: no fetch of anything but its href, no form", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    const bundle = bundles.find((candidate) => candidate.name === "contract-viewer");
+    expect(bundle?.file).toMatch(/^contract-viewer-[A-Z0-9]{8}\.js$/);
+    const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
+    expect(bundle?.bytes).toBeLessThan(25_000);
+    expect(written).toContain('"contract-viewer"');
+    expect(written).toContain("Show the contract");
+    expect(written).not.toContain("<form");
+    expect(written).not.toContain("XMLHttpRequest");
+    expect(written).not.toContain("swagger");
+    expect(written.match(/fetch\(/g)).toHaveLength(1);
   });
 
   it("bundles the mode switch without any framework: a few hundred bytes reading the stored choice", async () => {

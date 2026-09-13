@@ -33,6 +33,9 @@ function operationOf(operation: OpenApiOperation): ContractOperation {
       style: STYLE,
     },
     objects: operation.schemas,
+    parameters: operation.parameters,
+    ...(operation.request === undefined ? {} : { request: operation.request }),
+    responses: operation.responses,
   };
 }
 
@@ -41,6 +44,7 @@ export const openApiReader: ContractReader<OpenApiContract> = {
   accepts: (text) => xmlRootOf(text) === undefined,
   read: readOpenApi,
   operations: (contract) => contract.operations.map(operationOf),
+  schemas: (contract) => contract.schemas,
 };
 
 /**

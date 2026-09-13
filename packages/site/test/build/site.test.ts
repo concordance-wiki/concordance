@@ -18,7 +18,7 @@ import {
   type SiteOptions,
   type SiteReport,
 } from "../../src/build/site.js";
-import type { IslandBundle } from "../../src/islands/bundle.js";
+import { defaultIslands, type IslandBundle } from "../../src/islands/bundle.js";
 import { searchFilePath } from "../../src/search/build.js";
 import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/shared.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
@@ -92,6 +92,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       [HOME_PAGE, ...entities, INDEX_PAGE, SEARCH_PAGE, TODO_PAGE].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
@@ -427,12 +428,37 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.summary[0]).toBe("site: 11 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(4);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(5);
     expect(
       report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
+  });
+
+  it("bundles the UI components the theme resolution collected next to the default islands, the defaults keeping their name", async () => {
+    const [mentions] = defaultIslands();
+    const { report, fileSystem } = await build({
+      theme: {
+        ...defaultTheme,
+        islands: [
+          { name: "pdf-viewer", entry: mentions?.entry ?? "" },
+          { name: "contract-viewer", entry: "/elsewhere/viewer.client" },
+        ],
+      },
+    });
+    expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "contract-viewer",
+      "document-viewer",
+      "mentions-panel",
+      "mode-switch",
+      "pdf-viewer",
+      "search",
+    ]);
+    const viewer = report.budget.islands.find((island) => island.name === "contract-viewer");
+    expect(fileSystem.readText(`/dist/assets/${viewer?.file ?? ""}`)).toContain(
+      "Show the contract",
+    );
   });
 
   it("warns about a page over the budget without failing the build", async () => {

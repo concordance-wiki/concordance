@@ -227,6 +227,33 @@ export interface DocumentView {
   positions: DocumentPosition[];
 }
 
+/** One operation of an imported contract, as the static list of the API page names it. */
+export interface ContractOperationItem {
+  /** The operation name as the contract writes it. */
+  name: string;
+  /** The title of its page: the note's when a note describes it, the contract's otherwise. */
+  title: string;
+  summary?: string;
+  href: string;
+}
+
+/** The contract section of an `api` page: what the model knows of the imported contract, the viewer loading the rest. */
+export interface ContractSectionProps {
+  title: string;
+  /** Empty when the contract declares none. */
+  version: string;
+  /** ISO 8601 instant of the import. */
+  importedAt: string;
+  /** The contract location as written in the note: a URL, or a path relative to it. */
+  location: string;
+  /** The original contract: its URL, or the copy placed next to the page for a path. */
+  downloadHref: string;
+  /** The JSON view of the contract the viewer fetches on demand, relative to the page. */
+  fragmentHref: string;
+  /** In model order. */
+  operations: ContractOperationItem[];
+}
+
 export interface EntityPageProps {
   entity: EntityRef;
   /**
@@ -243,6 +270,8 @@ export interface EntityPageProps {
   sources: SourceRef[];
   /** The documents of the entity beyond its note, in path order; absent or empty for a note alone. */
   documents?: DocumentView[];
+  /** The imported contract of an `api` entity; absent for every other page. */
+  contract?: ContractSectionProps;
 }
 
 export interface Passage {
