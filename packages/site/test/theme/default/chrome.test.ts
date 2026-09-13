@@ -167,7 +167,7 @@ describe("Footer", () => {
 
   it("carries the to-do link with its count without any project link, and neither without a to-do page", () => {
     const { todo, ...bare } = footer;
-    expect(todo).toBeDefined();
+    if (todo === undefined) throw new Error("the fixture footer carries the to-do link");
     const alone = renderSlot("Footer", { ...bare, links: [], todo }, defaultTheme);
     expect(alone).toContain(
       '<ul class="site-footer-links"><li class="site-footer-todo"><a href="../todo/">To do<span class="count">12</span></a></li></ul>',

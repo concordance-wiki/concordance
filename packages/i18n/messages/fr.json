@@ -3,7 +3,7 @@
   "document.pages": "{count, plural, one {# page} other {# pages}}",
   "document.preview": "Aperçu",
   "entity.application": "Application",
-  "entity.attributes": "Attributs",
+  "entity.attributes": "Propriétés",
   "entity.breadcrumb": "Vous êtes ici",
   "entity.changed": "Modifié {when}",
   "entity.confidence": "Confiance : {value, number, percent}",

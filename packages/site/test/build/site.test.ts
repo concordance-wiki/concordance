@@ -296,7 +296,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
 
   it("names the attributes and the other attributes of a page, the declared ones by the profile in the site language, the others as written", () => {
     const page = fileSystem.readText("/dist/glossary/keyword-page/index.html");
-    expect(page).toContain('<h2 id="entity-properties">Attributes</h2>');
+    expect(page).toContain('<h2 id="entity-properties">Properties</h2>');
     expect(page).toContain("<dt>Broader term</dt>");
     expect(page).toContain('<h2 id="entity-other-attributes">Other attributes</h2>');
     expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');

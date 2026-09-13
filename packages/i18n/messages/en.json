@@ -16,8 +16,8 @@
     "description": "Label of the application an entity belongs to."
   },
   "entity.attributes": {
-    "defaultMessage": "Attributes",
-    "description": "Heading of the attribute table of an entity page."
+    "defaultMessage": "Properties",
+    "description": "Heading of the block of declared properties of an entity page."
   },
   "entity.breadcrumb": {
     "defaultMessage": "You are here",
