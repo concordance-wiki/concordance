@@ -67,4 +67,6 @@ export const labels = {
   documentsWithoutMarkdown: "Documents without a markdown representation",
   termsWithoutNote: "Words without a note",
   nothingToDo: "Nothing to do.",
+  filesWithoutMarkdown: "Counted in files without a note.",
+  occurrencesUnit: "Counted in occurrences, then in files.",
 } as const;

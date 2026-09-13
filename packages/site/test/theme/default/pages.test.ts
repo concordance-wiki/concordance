@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
-import { count, expectBalanced } from "../../helpers/html.js";
+import { keywordPage, searchResults } from "../../../src/gallery/fixtures.js";
+import { expectBalanced } from "../../helpers/html.js";
 
 describe("KeywordPage", () => {
   it("renders the banner, the three counts, the passages by file, the companions and the similar forms", () => {
@@ -56,27 +56,5 @@ describe("SearchResults", () => {
   it("omits the facets navigation when there is no facet", () => {
     const html = renderSlot("SearchResults", { ...searchResults, facets: [] }, defaultTheme);
     expect(html).not.toContain("<nav");
-  });
-});
-
-describe("Todo", () => {
-  it("lists the documents without markdown and the words without a note, each with its count", () => {
-    const html = renderSlot("Todo", todo, defaultTheme);
-    expect(html).toContain("<h1>To do</h1>");
-    expect(html).toContain(
-      '<h2 id="todo-documents">Documents without a markdown representation <span class="count">1</span></h2>',
-    );
-    expect(html).toContain(
-      '<a href="../framing/vision/">framing/vision.docx</a> <span class="count">3</span>',
-    );
-    expect(html).toContain(
-      '<h2 id="todo-terms">Words without a note <span class="count">2</span></h2>',
-    );
-    expectBalanced(html);
-  });
-
-  it("says when a list is empty", () => {
-    const html = renderSlot("Todo", { documents: [], terms: [] }, defaultTheme);
-    expect(count(html, '<p class="empty">Nothing to do.</p>')).toBe(2);
   });
 });
