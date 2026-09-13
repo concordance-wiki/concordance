@@ -177,10 +177,17 @@ describe("The category island applies the sort and the filter in place once it r
     expect(q(host, ".category-shown").textContent).toBe("5 of 5 — pagination by twenty.");
   });
 
-  it("re-orders the rows by number of related pages and back by title, the summary of the sort selector following", async () => {
+  it("re-orders the rows by number of related pages and back by title, the summary of the sort selector following, the selector closing on the choice", async () => {
     const host = await mount(props());
+    const selector = q(host, "details.category-sort");
+    if (!(selector instanceof HTMLDetailsElement)) throw new Error("details expected");
+    selector.open = true;
+    selector.dispatchEvent(new Event("toggle"));
+    await settle();
+    expect(selector.open).toBe(true);
     button(host, ".category-sort", "Links").click();
     await settle();
+    expect(selector.open).toBe(false);
     expect(titles(host)).toEqual([
       "Keyword page",
       "Entity page",
