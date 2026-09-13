@@ -267,6 +267,55 @@ describe("ingestSources", () => {
       });
     });
 
+    it("dates the files of a path source inside a repository by their last commit, the changed ones by the file system", async () => {
+      const { fs, git, deps } = harness();
+      fs.writeText("/project/notes/a.md", "a");
+      fs.writeText("/project/notes/edited.md", "e");
+      fs.dates.set("/project/notes/edited.md", "2024-06-01T00:00:00.000Z");
+      git.local.set(
+        "/project/notes",
+        new Map([["a.md", { commit: COMMIT, modifiedAt: "2024-01-01T00:00:00.000Z" }]]),
+      );
+      const result = await ingestSources(config([{ name: "notes", path: "./notes" }]), deps);
+      expect(result.sources[0]?.commit).toBeUndefined();
+      expect(result.sources[0]?.files).toEqual([
+        {
+          path: "a.md",
+          absolutePath: "/project/notes/a.md",
+          commit: COMMIT,
+          modifiedAt: "2024-01-01T00:00:00.000Z",
+        },
+        {
+          path: "edited.md",
+          absolutePath: "/project/notes/edited.md",
+          modifiedAt: "2024-06-01T00:00:00.000Z",
+        },
+      ]);
+      expect(git.calls).toEqual(["localHistory /project/notes"]);
+    });
+
+    it("keeps the file system dates with a git client that knows nothing of local folders", async () => {
+      const { fs, git, deps } = harness();
+      fs.writeText("/project/notes/a.md", "a");
+      fs.dates.set("/project/notes/a.md", "2024-01-01T00:00:00.000Z");
+      const result = await ingestSources(config([{ name: "notes", path: "./notes" }]), {
+        ...deps,
+        git: {
+          clone: (url, ref, directory) => git.clone(url, ref, directory),
+          update: (directory, ref) => git.update(directory, ref),
+          head: (directory) => git.head(directory),
+          history: (directory) => git.history(directory),
+        },
+      });
+      expect(result.sources[0]?.files).toEqual([
+        {
+          path: "a.md",
+          absolutePath: "/project/notes/a.md",
+          modifiedAt: "2024-01-01T00:00:00.000Z",
+        },
+      ]);
+    });
+
     it("resolves the path relative to the configuration directory", async () => {
       const { fs, deps } = harness();
       fs.writeText("/shared/notes/a.md", "a");
