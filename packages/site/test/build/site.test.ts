@@ -284,7 +284,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
   it("heads the home page with the same field as the header, drawn large and submitting to the results page, the strings of its live results travelling with the island", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
-      '<h1 id="home-question">What are you looking for?</h1><p class="home-explanation">Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.</p><concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;,&quot;label&quot;:&quot;Search&quot;,&quot;clearLabel&quot;:&quot;Clear the search&quot;,&quot;root&quot;:&quot;&quot;,&quot;suggestions&quot;:{&quot;matches&quot;:{&quot;one&quot;:&quot;# match&quot;,&quot;other&quot;:&quot;# matches&quot;},&quot;usedIn&quot;:{&quot;one&quot;:&quot;Used in # document, never defined&quot;,&quot;other&quot;:&quot;Used in # documents, never defined&quot;},&quot;browse&quot;:&quot;browse&quot;,&quot;enter&quot;:&quot;Enter&quot;,&quot;open&quot;:&quot;open&quot;,&quot;seeResults&quot;:{&quot;one&quot;:&quot;See the # result&quot;,&quot;other&quot;:&quot;See the # results&quot;}}},&quot;home&quot;:true}"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
+      '<h1 id="home-question">What are you looking for?</h1><p class="home-explanation">Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.</p><concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;,&quot;label&quot;:&quot;Search&quot;,&quot;clearLabel&quot;:&quot;Clear the search&quot;,&quot;root&quot;:&quot;&quot;,&quot;suggestions&quot;:{&quot;matches&quot;:{&quot;one&quot;:&quot;# match&quot;,&quot;other&quot;:&quot;# matches&quot;},&quot;usedIn&quot;:{&quot;one&quot;:&quot;Used in # document, never defined&quot;,&quot;other&quot;:&quot;Used in # documents, never defined&quot;},&quot;typeSummary&quot;:&quot;{type} — {summary}&quot;,&quot;glossaryTerm&quot;:{&quot;one&quot;:&quot;Glossary term — cited in # page&quot;,&quot;other&quot;:&quot;Glossary term — cited in # pages&quot;},&quot;browse&quot;:&quot;browse&quot;,&quot;enter&quot;:&quot;Enter&quot;,&quot;open&quot;:&quot;open&quot;,&quot;seeResults&quot;:{&quot;one&quot;:&quot;See the # result&quot;,&quot;other&quot;:&quot;See the # results&quot;}}},&quot;home&quot;:true}"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
     );
     expect(home).toContain(
       '<input id="home-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><span class="search-count" aria-live="polite"></span><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button>',
@@ -543,9 +543,12 @@ describe("URLs follow the entity identifier and stay stable from one build to th
     expect(keyword).toContain(
       '<a class="create-note" href="https://github.com/concordance-wiki/demo-glossary/new/main?filename=build-summary.md">Propose a definition</a>',
     );
-    const plain = (await build()).fileSystem.readText("/dist/keywords/build-summary/index.html");
-    expect(plain).not.toContain("create-note");
-    expect(plain).toMatch(/<p class="keyword-notice-detail">[^<]+<\/p><\/aside>/);
+    expect(fileSystem.readText("/dist/search/meta.js")).toContain('"glossary":["glossary"]');
+    const plain = (await build()).fileSystem;
+    const bare = plain.readText("/dist/keywords/build-summary/index.html");
+    expect(bare).not.toContain("create-note");
+    expect(bare).toMatch(/<p class="keyword-notice-detail">[^<]+<\/p><\/aside>/);
+    expect(plain.readText("/dist/search/meta.js")).toContain('"glossary":[]');
   });
 
   it("keeps the same URL when the model gains an entity or a link", async () => {

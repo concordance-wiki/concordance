@@ -460,6 +460,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       labels: searchLabels(catalogue),
       locale: catalogue.locale,
       ...(input.names === undefined ? {} : { names: input.names }),
+      ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
       ...(input.bodyMaxChars === undefined ? {} : { bodyMaxChars: input.bodyMaxChars }),
     }),
   );

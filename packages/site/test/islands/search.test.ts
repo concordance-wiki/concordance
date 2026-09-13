@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   citedDetail,
   closestOf,
+  disambiguated,
   factsOf,
   hitsOf,
   isEditable,
@@ -39,6 +40,7 @@ import {
   type ShardHost,
 } from "../../src/islands/search.js";
 import type { SearchEntry, SearchMeta, ShardData } from "../../src/search/shared.js";
+import type { Suggestion } from "../../src/theme/default/search-suggestions.js";
 import { parseSearchState } from "../../src/search/state.js";
 import type { SearchResultsProps } from "../../src/slots.js";
 import { searchLabels } from "../helpers/search.js";
@@ -87,6 +89,7 @@ const meta: SearchMeta = {
   applications: { "concordance-cli": "Command line" },
   domains: { publication: "Publication" },
   sources: { glossary: "glossary", specs: "specs" },
+  glossary: ["glossary"],
   counts: {
     type: { keyword: 1, term: 1 },
     source: { glossary: 1, specs: 2 },
@@ -665,7 +668,7 @@ describe("mountSearch", () => {
     await settled();
     expect(panel.hidden).toBe(false);
     expect(panel.html).toBe(
-      '<ol class="suggestions"><li class="suggestion"><a href="../glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail"><span class="badge">Term</span></span><span class="suggestion-space">glossary</span></a></li><li class="suggestion suggestion-keyword"><a href="../keywords/build-summary/index.html"><span class="suggestion-title">build summary</span><span class="suggestion-detail">Used in 6 documents, never defined</span><span class="suggestion-space">specs</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="../search/index.html?q=key">See the 2 results</a></p>',
+      '<ol class="suggestions"><li class="suggestion"><a href="../glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail">Glossary term — cited in 4 pages</span><span class="suggestion-space">glossary</span></a></li><li class="suggestion suggestion-keyword"><a href="../keywords/build-summary/index.html"><span class="suggestion-title">build summary</span><span class="suggestion-detail">Used in 6 documents, never defined</span><span class="suggestion-space">specs</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="../search/index.html?q=key">See the 2 results</a></p>',
     );
     input.value = "zebra";
     input.fire("input");
@@ -732,6 +735,11 @@ describe("mountSearch", () => {
       suggestions: {
         matches: { one: "# correspondance", other: "# correspondances" },
         usedIn: { one: "Employé dans # document", other: "Employé dans # documents" },
+        typeSummary: "{type} — {summary}",
+        glossaryTerm: {
+          one: "Terme du glossaire — cité dans # page",
+          other: "Terme du glossaire — cité dans # pages",
+        },
         browse: "parcourir",
         enter: "Entrée",
         open: "ouvrir",
@@ -773,6 +781,9 @@ describe("mountSearch", () => {
     expect(panel.hidden).toBe(false);
     expect(counter.textContent).toBe("2 correspondances");
     expect(panel.html).toContain('<span class="suggestion-detail">Employé dans 6 documents</span>');
+    expect(panel.html).toContain(
+      '<span class="suggestion-detail">Terme du glossaire — cité dans 4 pages</span>',
+    );
     expect(panel.html).toContain(
       '<p class="suggestions-help"><kbd>↑ ↓</kbd> parcourir <kbd>Entrée</kbd> ouvrir<a class="suggestions-all" href="search/index.html?q=key">Voir les 2 résultats</a></p>',
     );
@@ -1222,13 +1233,20 @@ describe("suggestionOf and seeResultsHref", () => {
       title: "Keyword page",
       href: "../glossary/keyword-page/index.html",
       typeLabel: "Term",
+      summary: "The page built for a word above the threshold.",
+      glossary: true,
+      cited: 4,
       space: "glossary",
     });
     expect(suggestionOf({ ...(screen as SearchEntry), source: "notes" }, meta, "")).toEqual({
       title: "Search results",
       href: "specs/screens/search-results/index.html",
+      cited: 1,
       space: "notes",
     });
+    const { cited, ...uncited } = screen as SearchEntry;
+    expect(cited).toBe(1);
+    expect(suggestionOf(uncited, meta, "").cited).toBe(0);
     expect(suggestionOf(summary as SearchEntry, meta, "")).toEqual({
       title: "build summary",
       href: "keywords/build-summary/index.html",
@@ -1240,6 +1258,43 @@ describe("suggestionOf and seeResultsHref", () => {
     const { documents, ...uncounted } = summary as SearchEntry;
     expect(documents).toBe(6);
     expect(suggestionOf(uncounted, meta, "").documents).toBe(0);
+  });
+
+  it("tells the rows sharing a title apart by their space, or by their folder when a namesake shares the space, and leaves the others alone", () => {
+    const row = (
+      id: string,
+      title: string,
+      source: string,
+    ): { entry: SearchEntry; suggestion: Suggestion } => {
+      const entry: SearchEntry = {
+        id,
+        title,
+        type: "term",
+        url: `${id}/index.html`,
+        status: "active",
+        source,
+      };
+      return { entry, suggestion: suggestionOf(entry, meta, "") };
+    };
+    const rows = disambiguated([
+      row("glossary/ingestion/source", "Source", "glossary"),
+      row("specs/objects/ingestion/source", "Source", "specs"),
+      row("glossary/note", "Note", "glossary"),
+      row("specs/objects/ingestion/build", "Build", "specs"),
+      row("specs/processes/build", "Build", "specs"),
+      row("specs/build", "Build", "specs"),
+      row("glossary/ingestion/build", "Build", "glossary"),
+    ]);
+    expect(rows.map((suggestion) => suggestion.qualifier)).toEqual([
+      "glossary",
+      "specs",
+      undefined,
+      "objects/ingestion",
+      "processes",
+      "specs",
+      "glossary",
+    ]);
+    expect(rows[2]).toEqual(row("glossary/note", "Note", "glossary").suggestion);
   });
 
   it("leads to the results page with the query alone, readable in the address, the space of a space page kept as the source facet", () => {

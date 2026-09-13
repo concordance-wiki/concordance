@@ -12,6 +12,7 @@ export const homeMessages = {
     "home.documents": { count: "plural" },
     "home.enterKey": {},
     "home.explanation": {},
+    "home.glossaryTerm": { count: "plural" },
     "home.matches": { count: "plural" },
     "home.moreSpaces": { count: "plural" },
     "home.mostCited": {},
@@ -23,6 +24,7 @@ export const homeMessages = {
     "home.spacesLead": {},
     "home.stale": { count: "plural" },
     "home.staleThreshold": { space: "argument", count: "plural" },
+    "home.typeSummary": {},
     "home.usedIn": { count: "plural" },
   },
 } as const satisfies Area<keyof typeof en>;

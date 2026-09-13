@@ -57,6 +57,7 @@ const meta: SearchMeta = {
   sources: { glossary: "glossary", specs: "specs" },
   counts: countFacets(entries, emptyState()),
   labels: searchLabels,
+  glossary: [],
   locale: "en",
   bytes: 0,
 };

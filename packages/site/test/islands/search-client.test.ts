@@ -33,6 +33,7 @@ const meta: SearchMeta = {
     nonote: { only: 0, exclude: 1 },
   },
   labels: searchLabels,
+  glossary: [],
   locale: "en",
   bytes: 40,
 };
@@ -256,7 +257,7 @@ describe("the search entry on the home page", () => {
     const panel = document.querySelector<HTMLElement>(".home-suggestions");
     expect(panel?.hidden).toBe(false);
     expect(panel?.innerHTML).toContain(
-      '<li class="suggestion"><a href="glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail"><span class="badge">Term</span></span><span class="suggestion-space">glossary</span></a></li>',
+      '<li class="suggestion"><a href="glossary/keyword-page/index.html"><span class="suggestion-title"><mark>Key</mark>word page</span><span class="suggestion-detail">Term</span><span class="suggestion-space">glossary</span></a></li>',
     );
     expect(panel?.innerHTML).toContain(
       '<a class="suggestions-all" href="search/index.html?q=Key">See the 1 result</a>',

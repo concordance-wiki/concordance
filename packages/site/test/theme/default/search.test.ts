@@ -8,6 +8,7 @@ import { SearchIsland } from "../../../src/theme/default/search-island.js";
 import {
   defaultSuggestionLabels,
   SearchSuggestions,
+  suggestionDetail,
 } from "../../../src/theme/default/search-suggestions.js";
 import { defaultComponents } from "../../../src/theme/default/index.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
@@ -113,7 +114,7 @@ describe("the search island at the head of the home page", () => {
 });
 
 describe("SearchSuggestions", () => {
-  it("draws one link per row with the marked title, the type chip or the documents of a keyword page and the space, then the keyboard help and the link to the whole list", () => {
+  it("draws one link per row with the marked title, the detail line and the space, then the keyboard help and the link to the whole list", () => {
     const html = renderToString(
       h(SearchSuggestions, {
         query: "thresh",
@@ -122,6 +123,8 @@ describe("SearchSuggestions", () => {
             title: "Publication threshold",
             href: "specs/rules/publication-threshold/",
             typeLabel: "Business rule",
+            summary: "Three occurrences in two files before a word gets a page.",
+            cited: 12,
             space: "specs",
           },
           {
@@ -131,7 +134,7 @@ describe("SearchSuggestions", () => {
             documents: 1,
             space: "meetings",
           },
-          { title: "Untyped", href: "notes/untyped/", space: "notes" },
+          { title: "Untyped", href: "notes/untyped/", cited: 0, space: "notes" },
         ],
         total: 17,
         resultsHref: "search/index.html?q=thresh",
@@ -139,7 +142,7 @@ describe("SearchSuggestions", () => {
       }),
     );
     expect(html).toBe(
-      '<ol class="suggestions"><li class="suggestion"><a href="specs/rules/publication-threshold/"><span class="suggestion-title">Publication <mark>thresh</mark>old</span><span class="suggestion-detail"><span class="badge">Business rule</span></span><span class="suggestion-space">specs</span></a></li><li class="suggestion suggestion-keyword"><a href="keywords/threshold-applied/"><span class="suggestion-title"><mark>thresh</mark>old applied</span><span class="suggestion-detail">Used in 1 document, never defined</span><span class="suggestion-space">meetings</span></a></li><li class="suggestion"><a href="notes/untyped/"><span class="suggestion-title">Untyped</span><span class="suggestion-space">notes</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="search/index.html?q=thresh">See the 17 results</a></p>',
+      '<ol class="suggestions"><li class="suggestion"><a href="specs/rules/publication-threshold/"><span class="suggestion-title">Publication <mark>thresh</mark>old</span><span class="suggestion-detail">Business rule — Three occurrences in two files before a word gets a page.</span><span class="suggestion-space">specs</span></a></li><li class="suggestion suggestion-keyword"><a href="keywords/threshold-applied/"><span class="suggestion-title"><mark>thresh</mark>old applied</span><span class="suggestion-detail">Used in 1 document, never defined</span><span class="suggestion-space">meetings</span></a></li><li class="suggestion"><a href="notes/untyped/"><span class="suggestion-title">Untyped</span><span class="suggestion-space">notes</span></a></li></ol><p class="suggestions-help"><kbd>↑ ↓</kbd> browse <kbd>Enter</kbd> open<a class="suggestions-all" href="search/index.html?q=thresh">See the 17 results</a></p>',
     );
     const worded = renderToString(
       h(SearchSuggestions, {
@@ -161,6 +164,89 @@ describe("SearchSuggestions", () => {
     expect(worded).toContain('<span class="suggestion-detail">Employé dans 0 document</span>');
     expect(worded).toContain(
       '<kbd>↑ ↓</kbd> browse <kbd>Entrée</kbd> open<a class="suggestions-all" href="?">Voir le résultat</a>',
+    );
+  });
+
+  it("words the detail line of a glossary term by its citations, of a note by its type and its first line, either alone when the other is missing", () => {
+    const text = defaultSuggestionLabels;
+    expect(
+      suggestionDetail(
+        {
+          title: "Source",
+          href: "glossary/source/",
+          typeLabel: "Term",
+          glossary: true,
+          cited: 21,
+          space: "glossary",
+        },
+        text,
+        "en",
+      ),
+    ).toBe("Glossary term — cited in 21 pages");
+    expect(
+      suggestionDetail(
+        { title: "Source", href: "glossary/source/", glossary: true, space: "glossary" },
+        text,
+        "en",
+      ),
+    ).toBe("Glossary term — cited in 0 pages");
+    expect(
+      suggestionDetail(
+        {
+          title: "Build",
+          href: "specs/objects/build/",
+          typeLabel: "Business object",
+          space: "specs",
+        },
+        text,
+        "en",
+      ),
+    ).toBe("Business object");
+    expect(
+      suggestionDetail(
+        {
+          title: "Build",
+          href: "specs/objects/build/",
+          summary: "What one run produces.",
+          space: "specs",
+        },
+        text,
+        "en",
+      ),
+    ).toBe("What one run produces.");
+    expect(
+      suggestionDetail(
+        {
+          title: "Build",
+          href: "specs/objects/build/",
+          typeLabel: "Objet métier",
+          summary: "Ce qu'une exécution produit.",
+          space: "specs",
+        },
+        { ...text, typeSummary: "{summary} ({type})" },
+        "fr",
+      ),
+    ).toBe("Ce qu'une exécution produit. (Objet métier)");
+  });
+
+  it("tells a namesake apart by its qualifier after the title, in the label colour, outside the mark", () => {
+    const html = renderToString(
+      h(SearchSuggestions, {
+        query: "source",
+        suggestions: [
+          { title: "Source", href: "glossary/source/", qualifier: "glossary", space: "glossary" },
+          { title: "Source", href: "specs/objects/source/", qualifier: "specs", space: "specs" },
+        ],
+        total: 2,
+        resultsHref: "?q=source",
+        locale: "en",
+      }),
+    );
+    expect(html).toContain(
+      '<span class="suggestion-title"><mark>Source</mark><span class="suggestion-qualifier"> · glossary</span></span>',
+    );
+    expect(html).toContain(
+      '<span class="suggestion-title"><mark>Source</mark><span class="suggestion-qualifier"> · specs</span></span>',
     );
   });
 });
