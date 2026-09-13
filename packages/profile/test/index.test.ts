@@ -9,6 +9,7 @@ describe("@concordance-wiki/profile", () => {
       "fingerprintProfile",
       "loadDefaultProfile",
       "mergeProfiles",
+      "neighbourOrder",
       "parseProfile",
       "resolveProfile",
       "singleRelation",

@@ -1,4 +1,5 @@
 import type { Link } from "@concordance-wiki/core";
+import { neighbourOrder } from "@concordance-wiki/profile";
 
 import { byCodeUnit } from "../neighbourhood/order.js";
 import type {
@@ -19,9 +20,17 @@ interface Accumulated {
   confidence: number;
 }
 
-/** Best first: the larger confidence, then the lower identifier. */
+/** Best first: the lower rank, then the larger confidence, then the lower identifier. */
 function compareDisplayed(a: DisplayedNeighbour, b: DisplayedNeighbour): number {
-  return b.confidence - a.confidence || byCodeUnit(a.id, b.id);
+  return a.rank - b.rank || b.confidence - a.confidence || byCodeUnit(a.id, b.id);
+}
+
+/** The rank of every neighbour type for a page of the given type; unlisted types share the last rank. */
+function rankOf(order: readonly string[]): (type: string) => number {
+  return (type) => {
+    const index = order.indexOf(type);
+    return index === -1 ? order.length : index;
+  };
 }
 
 function merge(
@@ -47,7 +56,10 @@ function merge(
   }
 }
 
-function toDisplayed({ entity, relation, direction, confidence }: Accumulated): DisplayedNeighbour {
+function toDisplayed(
+  { entity, relation, direction, confidence }: Accumulated,
+  rank: (type: string) => number,
+): DisplayedNeighbour {
   return {
     id: entity.id,
     title: entity.title,
@@ -56,6 +68,7 @@ function toDisplayed({ entity, relation, direction, confidence }: Accumulated): 
     relation,
     direction,
     confidence,
+    rank: rank(entity.type),
   };
 }
 
@@ -63,7 +76,11 @@ function toDisplayed({ entity, relation, direction, confidence }: Accumulated): 
  * The one-hop neighbours of every entity through the links in either direction. A neighbour
  * reached by several links shows the relation of the most confident one; the merge is
  * commutative, so the result depends on the set of links alone. A link whose end is not an
- * entity of the model, or which loops on its node, shows nothing.
+ * entity of the model, or which loops on its node, shows nothing. The neighbours of a page come
+ * grouped by the priority of their type for the page's type (`display.neighbours_order` of the
+ * profile), best first within a group, and the truncation applies after the grouping: the nodes
+ * shown are the best of the priority order, not the most confident overall. A type without a
+ * declaration lists its neighbours by decreasing confidence alone.
  */
 export function displayedNeighbourhood(input: DisplayedNeighbourhoodInput): DisplayedNeighbourhood {
   const size = Math.min(input.size, MAX_DISPLAYED_NEIGHBOURS);
@@ -87,9 +104,11 @@ export function displayedNeighbourhood(input: DisplayedNeighbourhoodInput): Disp
     merge(rowOf(to.id), from, link, "in");
   }
   const nodes = new Map<string, DisplayedNeighbour[]>();
-  for (const id of [...entities.keys()].sort(byCodeUnit)) {
+  for (const [id, entity] of [...entities].sort(([a], [b]) => byCodeUnit(a, b))) {
+    const rank = rankOf(neighbourOrder(input.profile, entity.type));
     const row = rows.get(id);
-    const neighbours = row === undefined ? [] : [...row.values()].map(toDisplayed);
+    const neighbours =
+      row === undefined ? [] : [...row.values()].map((neighbour) => toDisplayed(neighbour, rank));
     nodes.set(id, neighbours.sort(compareDisplayed).slice(0, size));
   }
   return nodes;

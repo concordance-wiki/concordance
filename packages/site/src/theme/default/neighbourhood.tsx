@@ -72,7 +72,16 @@ function Map({ centre, neighbours }: NeighbourhoodProps): JSX.Element {
   );
 }
 
-/** The neighbourhood: a map placeholder and the textual list every graphical view must keep. */
+/** A neighbour opens a new priority group when its rank differs from the previous one's. */
+function opensGroup(neighbours: Neighbour[], index: number): boolean {
+  const previous = neighbours[index - 1];
+  return previous !== undefined && previous.rank !== neighbours[index]?.rank;
+}
+
+/**
+ * The neighbourhood: a map placeholder and the textual list every graphical view must keep. The
+ * list is rendered in the order received; a separator marks each change of priority group.
+ */
 export function Neighbourhood({ centre, neighbours }: NeighbourhoodProps): JSX.Element {
   return (
     <section class="neighbourhood" aria-labelledby="neighbourhood-title">
@@ -90,8 +99,11 @@ export function Neighbourhood({ centre, neighbours }: NeighbourhoodProps): JSX.E
             </figcaption>
           </figure>
           <ul id={NEIGHBOURHOOD_LIST} class="neighbour-list">
-            {neighbours.map((neighbour) => (
-              <li key={neighbour.id} class="neighbour">
+            {neighbours.map((neighbour, index) => (
+              <li
+                key={neighbour.id}
+                class={opensGroup(neighbours, index) ? "neighbour group-start" : "neighbour"}
+              >
                 <a href={neighbour.href}>{neighbour.label}</a>
                 {neighbour.typeLabel !== undefined && (
                   <span class="badge">{neighbour.typeLabel}</span>

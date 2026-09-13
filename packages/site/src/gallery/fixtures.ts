@@ -85,6 +85,7 @@ export const neighbourhood: SlotProps["Neighbourhood"] = {
       href: "../page/",
       typeLabel: "term",
       weight: 12,
+      rank: 0,
     },
     {
       id: "specs/screens/mentions-panel",
@@ -92,6 +93,7 @@ export const neighbourhood: SlotProps["Neighbourhood"] = {
       href: "../mentions-panel/",
       relation: "displays",
       weight: 4,
+      rank: 2,
     },
   ],
 };

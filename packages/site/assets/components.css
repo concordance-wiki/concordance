@@ -430,6 +430,13 @@ concordance-island {
   align-items: baseline;
 }
 
+/* A new priority group of neighbours, as ranked by the profile. */
+.neighbour.group-start {
+  margin-block-start: var(--space-2);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
 .relation {
   color: var(--color-muted);
   font-size: 0.875rem;

@@ -202,11 +202,17 @@ export interface Neighbour {
   relation?: string;
   /** Co-occurrence count with the centre. */
   weight: number;
+  /**
+   * The priority group of the neighbour, as the model computed it from the profile; the panel
+   * draws a separator where it changes and never decides the order itself.
+   */
+  rank?: number;
 }
 
 export interface NeighbourhoodProps {
   /** Title of the entity at the centre. */
   centre: string;
+  /** In the order the model gives, which the panel keeps. */
   neighbours: Neighbour[];
 }
 

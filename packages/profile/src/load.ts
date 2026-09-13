@@ -151,6 +151,17 @@ function referenceIssues(profile: Profile): ProfileIssue[] {
         issues.push(undeclaredRelation(path, section.produces, relations));
       }
     }
+    (type.display?.neighbours_order ?? []).forEach((neighbour, index) => {
+      if (!types.includes(neighbour)) {
+        issues.push({
+          severity: "error",
+          path: `types.${slug}.display.neighbours_order[${String(index)}]`,
+          message: "type is not declared",
+          received: neighbour,
+          expected: listOf(types),
+        });
+      }
+    });
   }
   for (const [slug, relation] of Object.entries(profile.relations)) {
     relation.allowed.forEach((pair, index) => {

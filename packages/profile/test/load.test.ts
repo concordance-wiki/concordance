@@ -427,6 +427,48 @@ describe("validateProfile", () => {
     ]);
   });
 
+  it("reports a neighbours_order naming a type that is not declared", () => {
+    const document = {
+      ...minimal,
+      types: {
+        ...minimal.types,
+        term: {
+          ...minimal.types["term"],
+          display: { neighbours_order: ["term", "screen", "process", "keyword"] },
+        },
+      },
+    };
+    expect(summarise(validateProfile(document).issues)).toEqual([
+      {
+        path: "types.term.display.neighbours_order[1]",
+        message: "type is not declared",
+        received: "screen",
+        expected: 'one of "term", "process"',
+      },
+      {
+        path: "types.term.display.neighbours_order[3]",
+        message: "type is not declared",
+        received: "keyword",
+        expected: 'one of "term", "process"',
+      },
+    ]);
+  });
+
+  it("accepts every type named in a neighbours_order of the default profile", () => {
+    const profile = loadDefaultProfile();
+    const types = Object.keys(profile.types);
+    const declared = Object.entries(profile.types).filter(
+      ([, type]) => type.display?.neighbours_order !== undefined,
+    );
+    expect(declared.length).toBeGreaterThanOrEqual(13);
+    for (const [slug, type] of declared) {
+      for (const neighbour of type.display?.neighbours_order ?? []) {
+        expect(types, `${slug} lists ${neighbour}`).toContain(neighbour);
+      }
+    }
+    expect(validateProfile(profile).ok).toBe(true);
+  });
+
   it("reports an allowed pair naming a type that is not declared, accepting the wildcards", () => {
     const document = {
       ...minimal,
