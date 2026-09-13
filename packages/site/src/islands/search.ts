@@ -2,6 +2,7 @@ import { h, type JSX } from "preact";
 
 import { activeFiltersOf, countFacets, facetsOf, filterEntries } from "../search/facets.js";
 import {
+  closestForm,
   plural,
   queryWords,
   rank,
@@ -22,7 +23,13 @@ import {
   withQuery,
   type SearchState,
 } from "../search/state.js";
-import type { SearchField, SearchResult, SearchResultsProps, SuggestionLabels } from "../slots.js";
+import type {
+  ClosestFormProposal,
+  SearchField,
+  SearchResult,
+  SearchResultsProps,
+  SuggestionLabels,
+} from "../slots.js";
 import { SearchResults } from "../theme/default/search-results.js";
 import {
   defaultSuggestionLabels,
@@ -108,8 +115,8 @@ export type SearchRunner = (query: string) => Promise<SearchOutcome>;
 
 /**
  * The hits of a query over the loaded files: the ranked entities for a query with words, the
- * whole table in its order for a query without, so that the results page lists the site under
- * the facets alone.
+ * whole table for a query without, the most cited first, so that the results page lists the
+ * site under the facets alone; the keyword pages come after the entities either way.
  */
 export function hitsOf(
   query: string,
@@ -118,47 +125,79 @@ export function hitsOf(
 ): SearchHit[] {
   const words = queryWords(query);
   const keyword = (entity: number): boolean => meta.entities[entity]?.keyword === true;
+  const cited = (entity: number): number => meta.entities[entity]?.cited ?? 0;
   if (words.length === 0) {
-    // Every entity scores the same: the entities keep the table order, the keyword pages after them.
-    const all = meta.entities.map((entry, entity) => ({ entry, score: 0, entity }));
-    return [
-      ...all.filter(({ entity }) => !keyword(entity)),
-      ...all.filter(({ entity }) => keyword(entity)),
-    ].map(({ entry, score }) => ({ entry, score }));
+    // Every entity scores the same: the most cited first, the table order among equals, the keyword pages after them.
+    return meta.entities
+      .map((entry, entity) => ({ entry, entity }))
+      .sort(
+        (a, b) =>
+          Number(keyword(a.entity)) - Number(keyword(b.entity)) ||
+          cited(b.entity) - cited(a.entity) ||
+          a.entity - b.entity,
+      )
+      .map(({ entry }) => ({ entry, score: 0 }));
   }
-  return rank(words, shards, keyword).flatMap(({ entity, score }) => {
+  return rank(words, shards, { keyword, cited }).flatMap(({ entity, score }) => {
     const entry = meta.entities[entity];
     return entry === undefined ? [] : [{ entry, score }];
   });
 }
 
-/** What the row of a keyword page states: its occurrences and its files, worded in the site language. */
+/** What the row of a keyword page states: in how many documents it is used, and that no note defines it, worded in the site language. */
 export function keywordDetail(entry: SearchEntry, meta: SearchMeta): string {
-  return [
-    plural(meta.labels.occurrences, entry.occurrences ?? 0, meta.locale),
-    plural(meta.labels.documents, entry.documents ?? 0, meta.locale),
-  ].join(" · ");
+  return plural(meta.labels.usedIn, entry.documents ?? 0, meta.locale);
 }
 
-/** A hit as the lists show it: the title, the type badge, the breadcrumb and the href from the page through `root`; a keyword page with its notice and its counts. */
+/** What the row of a note states on the line of its title: how many pages cite it, worded in the site language. */
+export function citedDetail(entry: SearchEntry, meta: SearchMeta): string {
+  return plural(meta.labels.cited, entry.cited ?? 0, meta.locale);
+}
+
+/** The line under the summary of a note: its space, then its other names and its broader term when it declares them. */
+export function factsOf(entry: SearchEntry, meta: SearchMeta): string[] {
+  const facts = [meta.sources[entry.source] ?? entry.source];
+  if (entry.aliases !== undefined && entry.aliases.length > 0) {
+    facts.push(meta.labels.alsoCalled.replace("{aliases}", entry.aliases.join(", ")));
+  }
+  if (entry.broader !== undefined) {
+    facts.push(meta.labels.broader.replace("{term}", entry.broader));
+  }
+  return facts;
+}
+
+/** A hit as the lists show it: the type badge, the title, the citations, the summary and the facts, the href from the page through `root`; a keyword page with its documents and its notice. */
 export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): SearchResult {
-  const breadcrumb = [
-    entry.application === undefined ? undefined : meta.applications[entry.application],
-    entry.domain === undefined ? undefined : meta.domains[entry.domain],
-  ].filter((part) => part !== undefined);
   const typeLabel = meta.types[entry.type];
   return {
     title: entry.title,
     href: `${root}${entry.url}`,
     ...(typeLabel === undefined ? {} : { typeLabel }),
-    ...(breadcrumb.length === 0 ? {} : { breadcrumb }),
     ...(entry.keyword === true
-      ? {
-          keyword: true,
-          subtitle: meta.labels.undefinedExpression,
-          detail: keywordDetail(entry, meta),
-        }
-      : {}),
+      ? { keyword: true, detail: keywordDetail(entry, meta) }
+      : {
+          cited: citedDetail(entry, meta),
+          ...(entry.summary === undefined ? {} : { snippet: entry.summary }),
+          facts: factsOf(entry, meta),
+        }),
+  };
+}
+
+/**
+ * What the empty state proposes for a query with words that matched nothing: the closest form
+ * of the dictionary with its counts, and the search on that form under the same filters.
+ */
+export function closestOf(state: SearchState, meta: SearchMeta): ClosestFormProposal | undefined {
+  const closest = closestForm(state.query, meta.entities);
+  const entry = closest === undefined ? undefined : meta.entities[closest.entity];
+  if (closest === undefined || entry === undefined) return undefined;
+  return {
+    form: closest.form,
+    href: resultsHref(withQuery(state, closest.form)),
+    detail:
+      entry.keyword === true
+        ? plural(meta.labels.occurrences, entry.occurrences ?? 0, meta.locale)
+        : citedDetail(entry, meta),
   };
 }
 
@@ -327,10 +366,18 @@ export interface CounterSlot {
   textContent: string | null;
 }
 
+/** The button clearing the field, served hidden and shown while the field holds a query. */
+export interface SearchClear {
+  hidden: boolean;
+  addEventListener(type: "click", listener: () => void): void;
+}
+
 export interface SearchIslandElement<P extends SearchPanel> {
   getAttribute(name: string): string | null;
   /** The field of a field island, none on the results island. */
   input(): SearchInput | null;
+  /** The button clearing the field of a field island, none on the results island. */
+  clear(): SearchClear | null;
   /** The panel of the live results of a field island, none on the results island. */
   panel(): P | null;
   /** The links of the rows the panel shows, in order; none before the island draws them. */
@@ -470,16 +517,21 @@ export function resultsPropsOf(
   const kept = filterEntries(entries, (entry) => entry, state);
   const hrefOf = resultsHref;
   const filters = activeFiltersOf(meta, state, hrefOf);
+  const worded = queryWords(state.query).length > 0;
+  const closest = worded && entries.length === 0 ? closestOf(state, meta) : undefined;
   return {
     query: state.query,
     total: kept.length,
     results: kept.map((entry) => resultOf(entry, meta, root)),
     facets: facetsOf(meta, state, countFacets(entries, state), hrefOf),
     summary:
-      kept.length === 0
-        ? meta.labels.noResult
-        : plural(meta.labels.results, kept.length, meta.locale),
+      kept.length > 0
+        ? plural(meta.labels.results, kept.length, meta.locale)
+        : worded
+          ? meta.labels.noResultFor.replace("{query}", state.query)
+          : meta.labels.noResult,
     ...(filters.length === 0 ? {} : { active: filters, clearHref: hrefOf(clearFilters(state)) }),
+    ...(closest === undefined ? {} : { closest }),
     labels: {
       facets: meta.labels.facets,
       activeFilters: meta.labels.activeFilters,
@@ -488,31 +540,58 @@ export function resultsPropsOf(
       address: meta.labels.address,
       copyAddress: meta.labels.copyAddress,
       copied: meta.labels.copied,
+      countersNote: meta.labels.countersNote,
+      notelessNote: meta.labels.notelessNote,
+      closestForm: meta.labels.closestForm,
     },
     address: resultsAddress(state),
     ...actions,
   };
 }
 
-/** A field island once read: its input, its panel and counter, and the field it was served with. */
+/** A field island once read: its input, its clear button, its panel and counter, and the field it was served with. */
 interface Field<P extends SearchPanel> {
   input: SearchInput;
+  clear: SearchClear | null;
   panel: P | null;
   counter: CounterSlot | null;
   links: () => readonly Focusable[];
   search: SearchField;
   home: boolean;
+  /** What clearing the field does beyond emptying it: runs the empty query, once the site has an index. */
+  onClear: () => void;
+}
+
+/** The clear button stands while the field holds something to clear. */
+function showClear<P extends SearchPanel>(field: Field<P>): void {
+  if (field.clear !== null) field.clear.hidden = field.input.value === "";
+}
+
+/** The clear button follows what the reader types and, pressed, empties the field, keeps the focus there and runs what the field does on an empty query. */
+function wireClear<P extends SearchPanel>(field: Field<P>): void {
+  const { input, clear } = field;
+  if (clear === null) return;
+  input.addEventListener("input", () => {
+    showClear(field);
+  });
+  clear.addEventListener("click", () => {
+    input.value = "";
+    showClear(field);
+    input.focus();
+    field.onClear();
+  });
 }
 
 /**
  * Wires every search island of a page: each field, the one of the header and the one at the
- * head of the home page, gets the `Escape` shortcut and, when the site has an index, its live
- * results as the reader types, walked by the arrow keys; `/` reaches the field of the home
- * page when there is one, else the field of the header. The results island, when the page has
- * one, shows the list for the state of the address, filtered by its facets, and follows the
- * field and the facets. Every change of state goes through the address: a facet followed
- * pushes an entry to the history, typing rewrites the current one once the reader pauses, and
- * going back replays the state of the address, the scroll position included.
+ * head of the home page, gets the `Escape` shortcut, its clear button and, when the site has
+ * an index, its live results as the reader types, walked by the arrow keys; `/` reaches the
+ * field of the home page when there is one, else the field of the header. The results island,
+ * when the page has one, shows the list for the state of the address, filtered by its facets,
+ * and follows the field and the facets. Every change of state goes through the address: a facet
+ * followed pushes an entry to the history, typing rewrites the current one once the reader
+ * pauses, clearing the field rewrites it at once, and going back replays the state of the
+ * address, the scroll position included.
  */
 export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): number {
   let root: string | undefined;
@@ -527,11 +606,13 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
     if (props.search !== undefined && input !== null) {
       fields.push({
         input,
+        clear: element.clear(),
         panel: element.panel(),
         counter: element.counter(),
         links: () => element.links(),
         search: props.search,
         home: props.home === true,
+        onClear: () => undefined,
       });
     }
     if (props.results !== undefined) {
@@ -552,6 +633,7 @@ export function mountSearch<P extends SearchPanel>(options: SearchIslands<P>): n
     } else {
       wireEscape(field.input, hide);
     }
+    wireClear(field);
   }
   if (root === undefined) {
     return mounted;
@@ -616,6 +698,9 @@ function suggest<P extends SearchPanel>(
   field.input.addEventListener("input", () => {
     void draw();
   });
+  field.onClear = (): void => {
+    void draw();
+  };
   if (field.panel !== null) {
     wireArrows(field.input, field.panel, field.links);
   }
@@ -671,6 +756,7 @@ function follow<P extends SearchPanel>(
     cancelReplace?.();
     state = parseSearchState(href);
     input.value = state.query;
+    showClear(field);
     options.location.push(searchQueryString(state));
     void show();
   };
@@ -682,11 +768,19 @@ function follow<P extends SearchPanel>(
     }, REPLACE_DELAY);
     void show();
   });
+  field.onClear = (): void => {
+    cancelReplace?.();
+    state = withQuery(state, "");
+    options.location.replace(searchQueryString(state));
+    void show();
+  };
   input.value = state.query;
+  showClear(field);
   options.location.onPop(() => {
     cancelReplace?.();
     state = parseSearchState(options.location.search());
     input.value = state.query;
+    showClear(field);
     void show(true);
   });
   options.scroll.onScroll(() => {

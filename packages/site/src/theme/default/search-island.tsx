@@ -1,7 +1,12 @@
 import type { JSX } from "preact";
 
 import { island } from "../../islands/island.js";
-import { SEARCH_ISLAND, SUGGESTIONS_CLASS, type SearchIslandProps } from "../../search/shared.js";
+import {
+  CLEAR_CLASS,
+  SEARCH_ISLAND,
+  SUGGESTIONS_CLASS,
+  type SearchIslandProps,
+} from "../../search/shared.js";
 import type { SearchField } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { labels } from "./labels.js";
@@ -29,9 +34,20 @@ export function SearchGlyph({ size = 15 }: { size?: number }): JSX.Element {
   );
 }
 
+/** The button clearing a field, served hidden: the island shows it while the field holds a query. */
+function ClearButton({ search }: { search: SearchField }): JSX.Element {
+  return (
+    <button type="button" class={CLEAR_CLASS} hidden>
+      <span aria-hidden="true">✕</span>
+      <span class="visually-hidden">{search.clearLabel ?? labels.clearSearch}</span>
+    </button>
+  );
+}
+
 /**
  * The form of the header: a plain `GET` to the results page, so that it works before any
- * script runs; the field shows the shortcut that reaches it once the search island runs.
+ * script runs; the field shows the shortcut that reaches it once the search island runs, and
+ * the button clearing it, served hidden, which the island shows while the field holds a query.
  */
 export function SearchForm({ search }: { search: SearchField }): JSX.Element {
   return (
@@ -54,6 +70,7 @@ export function SearchForm({ search }: { search: SearchField }): JSX.Element {
           placeholder={search.placeholder}
           autocomplete="off"
         />
+        <ClearButton search={search} />
         <kbd class="search-shortcut" aria-hidden="true">
           {SEARCH_SHORTCUT}
         </kbd>
@@ -64,7 +81,8 @@ export function SearchForm({ search }: { search: SearchField }): JSX.Element {
 
 /**
  * The field at the head of the home page: the same `GET` form, drawn large, with the place
- * where the island counts the matches; its live results follow in the flow of the page.
+ * where the island counts the matches and the same clear button; its live results follow in
+ * the flow of the page.
  */
 export function HomeSearchForm({ search }: { search: SearchField }): JSX.Element {
   const name = search.label ?? labels.search;
@@ -83,6 +101,7 @@ export function HomeSearchForm({ search }: { search: SearchField }): JSX.Element
           autocomplete="off"
         />
         <span class="search-count" aria-live="polite"></span>
+        <ClearButton search={search} />
       </span>
     </form>
   );

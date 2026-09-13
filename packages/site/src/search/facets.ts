@@ -8,6 +8,7 @@ import { byCodeUnit } from "../order.js";
 import type { ActiveFilter, Facet } from "../slots.js";
 import {
   FACET_NAMES,
+  KEYWORD_TYPE,
   NOTELESS_FACET,
   NOTELESS_FILTERS,
   type FacetCounts,
@@ -97,10 +98,15 @@ export function facetLabels(meta: SearchMeta, name: FacetName): Record<string, s
   return tables[name];
 }
 
+/** The facets the page opens: the type and the space; the others stand folded under them. */
+export const PRIMARY_FACETS: readonly FacetName[] = ["type", "source"];
+
 /**
  * The facets as the results page draws them: every value the site knows, in the order of the
  * table, with its count under the current filters, selected or not, and disabled when nothing
- * would come of selecting it; `hrefOf` gives the address of the state a click leads to.
+ * would come of selecting it; `hrefOf` gives the address of the state a click leads to. The
+ * type and the space are open, the domain, the application and the no-note facet folded; the
+ * keyword type is flagged so that the page draws it dotted like the rows of the words without a note.
  */
 export function facetsOf(
   meta: SearchMeta,
@@ -113,6 +119,7 @@ export function facetsOf(
     return {
       name,
       label: meta.labels.facet[name],
+      ...(PRIMARY_FACETS.includes(name) ? {} : { folded: true }),
       values: Object.entries(labels).map(([value, label]) => {
         const count = counts[name][value] ?? 0;
         const active = isSelected(state, name, value);
@@ -123,6 +130,7 @@ export function facetsOf(
           href: hrefOf(toggleValue(state, name, value)),
           active,
           disabled: count === 0 && !active,
+          ...(name === "type" && value === KEYWORD_TYPE ? { keyword: true } : {}),
         };
       }),
     };
@@ -145,6 +153,7 @@ export function notelessFacetOf(
   return {
     name: NOTELESS_FACET,
     label: meta.labels.noteless.label,
+    folded: true,
     values: NOTELESS_FILTERS.map((value) => {
       const count = notelessCount(counts, value);
       const active = state.noteless === value;

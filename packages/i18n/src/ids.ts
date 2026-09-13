@@ -21,7 +21,6 @@ export interface MessageArguments {
   "home.stale": { count: number };
   "home.staleThreshold": { space: string; count: number };
   "home.usedIn": { count: number };
-  "keyword.documents": { count: number };
   "keyword.filesSummary": { count: number };
   "keyword.noticeLead": { count: number };
   "keyword.occurrences": { count: number };
@@ -30,6 +29,8 @@ export interface MessageArguments {
   "keyword.usedSince": { month: string };
   "mentions.atLine": { line: number };
   "mentions.inSection": { section: string };
+  "results.cited": { count: number };
+  "results.usedIn": { count: number };
   "search.results": { count: number };
   "site.generatedAt": { date: Date };
   "time.updatedAgo": { when: string };
@@ -88,7 +89,6 @@ export const messageArguments = {
   "index.letters": {},
   "keyword.companions": {},
   "keyword.createNote": {},
-  "keyword.documents": { count: "plural" },
   "keyword.factFiles": {},
   "keyword.factOccurrences": {},
   "keyword.factSpaces": {},
@@ -134,6 +134,15 @@ export const messageArguments = {
   "related.showOthers": {},
   "related.title": {},
   "related.types": {},
+  "results.alsoCalled": {},
+  "results.broader": {},
+  "results.cited": { count: "plural" },
+  "results.clearQuery": {},
+  "results.closestForm": {},
+  "results.countersNote": {},
+  "results.noResultFor": {},
+  "results.notelessNote": {},
+  "results.usedIn": { count: "plural" },
   "search.activeFilters": {},
   "search.address": {},
   "search.clear": {},

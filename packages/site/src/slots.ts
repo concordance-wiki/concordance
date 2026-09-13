@@ -103,6 +103,8 @@ export interface SearchField {
   placeholder: string;
   /** Accessible name of the field; the theme's own label when absent. */
   label?: string;
+  /** Accessible name of the button clearing the field, shown by the search island once the field holds a query; the theme's own label when absent. */
+  clearLabel?: string;
   /**
    * Href of the root of the site from the page, `../` for instance, where `search/` holds the
    * index; absent when the site has no index, and the field then only submits.
@@ -755,12 +757,17 @@ export interface SearchResult {
   typeLabel?: string;
   /** Where the entity is filed: the titles of its application and domain, when it has them. */
   breadcrumb?: string[];
+  /** The summary of the note, shown under the title. */
   snippet?: string;
-  /** `true` for a keyword page, the page of a recurring expression nobody defined: the row is outlined in dots. */
+  /** "cited in 64 pages", worded in the site language, on the line of the title. */
+  cited?: string;
+  /** The line under the summary: the space, then what the note declares, "Also called: VL", "Broader term: payment", each already worded. */
+  facts?: string[];
+  /** `true` for a keyword page, the page of a recurring expression nobody defined: the row is outlined in dashes, its title dotted. */
   keyword?: boolean;
   /** What stands under the title of a keyword page: that no note defines the expression. */
   subtitle?: string;
-  /** The counts of a keyword page, "17 occurrences · 6 documents", worded in the site language. */
+  /** The line of a keyword page, "Used in 6 documents, never defined in the glossary", worded in the site language. */
   detail?: string;
 }
 
@@ -775,12 +782,16 @@ export interface FacetValue {
   active?: boolean;
   /** Whether selecting the value would keep no result: it is shown, but not followed. */
   disabled?: boolean;
+  /** Whether the value stands for the words without a note: the default component draws its box dashed, like their rows. */
+  keyword?: boolean;
 }
 
 export interface Facet {
   name: string;
   label: string;
   values: FacetValue[];
+  /** Whether the facet is served folded behind its heading, a secondary one; the primary facets stand open. */
+  folded?: boolean;
 }
 
 /** A selected facet value recalled above the results, with the address of the search without it. */
@@ -802,6 +813,20 @@ export interface SearchResultsLabels {
   address: string;
   copyAddress: string;
   copied: string;
+  /** The note under the facets: that the counters are set at publication and the filtering runs in the browser. */
+  countersNote: string;
+  /** The note under the results: that the words without a note appear dotted among the others. */
+  notelessNote: string;
+  /** The lead of the closest form proposed when nothing matches. */
+  closestForm: string;
+}
+
+/** What the empty state proposes: the closest form of the dictionary, with its counts, and the address of the search on it. */
+export interface ClosestFormProposal {
+  form: string;
+  href: string;
+  /** "12 occurrences" or "cited in 3 pages", worded in the site language. */
+  detail: string;
 }
 
 export interface SearchResultsProps {
@@ -819,6 +844,8 @@ export interface SearchResultsProps {
   address?: string;
   /** Whether the address was just copied: the status line says so. */
   copied?: boolean;
+  /** The closest form of the dictionary, proposed when the query matched nothing. */
+  closest?: ClosestFormProposal;
   /**
    * What a facet, an active filter or the clear link does once the search island runs: it
    * follows the address without leaving the page. Never serialised; the served page has links.

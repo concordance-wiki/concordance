@@ -73,7 +73,8 @@ describe("the search entry on the results page", () => {
     ].join("");
     vi.stubGlobal("location", { search: "?q=Keyword", pathname: "/dist/search/index.html" });
     const pushState = vi.fn();
-    vi.stubGlobal("history", { pushState });
+    const replaceState = vi.fn();
+    vi.stubGlobal("history", { pushState, replaceState });
     await import("../../src/islands/search.client.js");
     const input = document.querySelector("input");
     expect(input?.value).toBe("Keyword");
@@ -84,12 +85,26 @@ describe("the search entry on the results page", () => {
     window.__concordanceSearch?.shard("ke", shard);
     await settled();
     const results = document.querySelector("main")?.innerHTML ?? "";
-    expect(results).toContain('<p class="search-summary">1 result</p>');
+    expect(results).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results).toContain('<nav class="facets" aria-label="Filters">');
     expect(results).toContain(
-      '<li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span></li>',
+      '<li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a><span class="result-cited">cited in 0 pages</span></p><p class="result-facts"><span>glossary</span></p></li>',
     );
     expect(document.querySelector(".search-suggestions")?.hasAttribute("hidden")).toBe(true);
+    // The field holds a query: the clear button stands, and clicking it empties the field.
+    const clear = document.querySelector<HTMLButtonElement>(".search-clear");
+    expect(clear?.hidden).toBe(false);
+    clear?.click();
+    expect(input?.value).toBe("");
+    expect(clear?.hidden).toBe(true);
+    expect(document.activeElement).toBe(input);
+    expect(replaceState.mock.calls).toEqual([[null, "", "/dist/search/index.html"]]);
+    await settled();
+    expect(document.querySelector(".search-summary")?.textContent).toBe(
+      "1 result, most cited first",
+    );
     input?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
   });
 
@@ -125,17 +140,14 @@ describe("the search entry on the results page", () => {
     await settled();
     window.__concordanceSearch?.shard("ke", shard);
     await settled();
-    const facet = document.querySelector<HTMLAnchorElement>(
-      '.facet a[href="?q=Keyword&type=term"]',
-    );
-    expect(facet).not.toBeNull();
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
-    facet?.dispatchEvent(click);
-    expect(click.defaultPrevented).toBe(true);
+    const facet = document.querySelector<HTMLInputElement>("#facet-type-term");
+    expect(facet?.checked).toBe(false);
+    facet?.click();
     expect(pushState.mock.calls).toEqual([[null, "", "?q=Keyword&type=term"]]);
     await settled();
+    expect(document.querySelector<HTMLInputElement>("#facet-type-term")?.checked).toBe(true);
     expect(document.querySelector(".active-filter")?.textContent).toBe(
-      "Type Term ×Remove this filter",
+      "Remove this filter Page type: Term ✕",
     );
     expect(scripts()).toEqual(["../search/meta.js", "../search/ke.js"]);
     document
@@ -148,15 +160,13 @@ describe("the search entry on the results page", () => {
     if (input !== null) input.value = "";
     input?.dispatchEvent(new Event("input"));
     await settled();
-    expect(document.querySelector(".search-summary")?.textContent).toBe("1 result");
-    document
-      .querySelector<HTMLAnchorElement>('.facet a[href="?type=term"]')
-      ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(document.querySelector(".search-summary")?.textContent).toBe(
+      "1 result, most cited first",
+    );
+    document.querySelector<HTMLInputElement>("#facet-type-term")?.click();
     expect(pushState.mock.calls[2]).toEqual([null, "", "?type=term"]);
     await settled();
-    document
-      .querySelector<HTMLAnchorElement>('.facet a[href="?"]')
-      ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    document.querySelector<HTMLInputElement>("#facet-type-term")?.click();
     expect(pushState.mock.calls[3]).toEqual([null, "", "/dist/search/index.html"]);
     await settled();
     expect(scrollTo.mock.calls).toEqual([[0, 320]]);
@@ -173,7 +183,9 @@ describe("the search entry on the results page", () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
     await settled();
     expect(input?.value).toBe("Keyword");
-    expect(document.querySelector(".search-summary")?.textContent).toBe("1 result");
+    expect(document.querySelector(".search-summary")?.textContent).toBe(
+      "1 result, most cited first",
+    );
     expect(scrollTo.mock.calls).toEqual([[0, 320]]);
     document.querySelector<HTMLButtonElement>(".copy-address")?.click();
     await settled();

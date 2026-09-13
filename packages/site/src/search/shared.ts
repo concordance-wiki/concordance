@@ -12,12 +12,16 @@ export const SEARCH_DIRECTORY = "search";
 export const SEARCH_ISLAND = "search";
 /** The suggestions under the header field are rendered into the element of this class by the island. */
 export const SUGGESTIONS_CLASS = "search-suggestions";
+/** The button clearing a search field, served hidden; the island shows it while the field holds a query. */
+export const CLEAR_CLASS = "search-clear";
 /** Name of the entity table file, `search/meta.js`; never a shard name, which is at most two characters. */
 export const SEARCH_META = "meta";
 /** The global the shard files call back: `window.__concordanceSearch.shard(name, data)`. */
 export const SEARCH_GLOBAL = "__concordanceSearch";
 /** A shard gathers every token sharing its first characters; a query word shorter than this is not looked up. */
 export const SHARD_PREFIX_LENGTH = 2;
+/** The type stored for a keyword page, which has no type of its own; the type facet lists it dotted. */
+export const KEYWORD_TYPE = "keyword";
 
 /**
  * What the client entry reads from an island: the field of the header, with the root of the
@@ -45,6 +49,14 @@ export interface SearchEntry {
   domain?: string;
   status: string;
   source: string;
+  /** The summary of the note, what its row shows under the title. */
+  summary?: string;
+  /** The other names of the note, when it declares some. */
+  aliases?: string[];
+  /** The title of the broader term the note declares, or the value as written when it names no page. */
+  broader?: string;
+  /** How many pages cite the entity: the distinct sources of the links pointing at it. */
+  cited?: number;
   /** `true` for a keyword page, the page of a recurring expression nobody defined. */
   keyword?: true;
   /** How many times the expression was read and in how many files, for a keyword page. */
@@ -81,19 +93,31 @@ export interface SearchLabels {
   removeFilter: string;
   clear: string;
   noResult: string;
-  /** "N results", by plural category. */
+  /** "No result for {query}", the placeholder filled in the browser. */
+  noResultFor: string;
+  /** "N results, most cited first", by plural category. */
   results: PluralForms;
+  /** The note under the facets: that the counters are set at publication and the filtering runs in the browser. */
+  countersNote: string;
   /** The line showing the address of the search, its copy button and the status once copied. */
   address: string;
   copyAddress: string;
   copied: string;
   /** The no-note facet: its heading and its three values. */
   noteless: Record<"label" | NotelessFilter, string>;
-  /** What a keyword page row says under its title. */
-  undefinedExpression: string;
-  /** "N occurrences" and "N documents", by plural category, for the row of a keyword page. */
+  /** "cited in N pages", by plural category, for the row of a note. */
+  cited: PluralForms;
+  /** "Also called: {aliases}" and "Broader term: {term}", the placeholders filled in the browser. */
+  alsoCalled: string;
+  broader: string;
+  /** "Used in N documents, never defined in the glossary", by plural category, for the row of a keyword page. */
+  usedIn: PluralForms;
+  /** The note under the results: that the words without a note appear dotted among the others. */
+  notelessNote: string;
+  /** The lead of the closest form proposed when nothing matches. */
+  closestForm: string;
+  /** "N occurrences", by plural category, for the closest form when it is a keyword page. */
   occurrences: PluralForms;
-  documents: PluralForms;
 }
 
 /** The number of entities carrying every value of every facet, values in code-unit order; the keyword pages and the others under `nonote`. */
@@ -201,17 +225,26 @@ export interface Ranked {
   score: number;
 }
 
+/** What the ranking reads of the table: whether an entity is a keyword page, and how many pages cite it. */
+export interface RankOrder {
+  keyword?: (entity: number) => boolean;
+  cited?: (entity: number) => number;
+}
+
 /**
  * The entities matching every word of the query as a prefix of one of their tokens, best first:
- * each word counts the heaviest token it prefixes, the score is their sum, and ties keep the
- * table order, except that a keyword page, when `keyword` names it, never comes before an entity
- * of the same score. The shards given are those of the words; a word without a shard matches nothing.
+ * each word counts the heaviest token it prefixes, the score is their sum, and ties go to the
+ * most cited, then keep the table order, except that a keyword page, when `keyword` names it,
+ * never comes before an entity of the same score. The shards given are those of the words; a
+ * word without a shard matches nothing.
  */
 export function rank(
   words: readonly string[],
   shards: ReadonlyMap<string, ShardData>,
-  keyword: (entity: number) => boolean = () => false,
+  order: RankOrder = {},
 ): Ranked[] {
+  const keyword = order.keyword ?? ((): boolean => false);
+  const cited = order.cited ?? ((): number => 0);
   let scores: Map<number, number> | undefined;
   for (const word of words) {
     const best = new Map<number, number>();
@@ -239,6 +272,50 @@ export function rank(
       (a, b) =>
         b.score - a.score ||
         Number(keyword(a.entity)) - Number(keyword(b.entity)) ||
+        cited(b.entity) - cited(a.entity) ||
         a.entity - b.entity,
     );
+}
+
+/** The forms of an entry the dictionary knows: its title, then its aliases. */
+function formsOf(entry: SearchEntry): string[] {
+  return [entry.title, ...(entry.aliases ?? [])];
+}
+
+function commonPrefixLength(a: string, b: string): number {
+  let length = 0;
+  while (length < a.length && length < b.length && a[length] === b[length]) length += 1;
+  return length;
+}
+
+export interface ClosestForm {
+  /** Index in the entity table. */
+  entity: number;
+  /** The title or the alias matched, as written. */
+  form: string;
+}
+
+/**
+ * The form of the dictionary closest to a query that matched nothing: the title or alias sharing
+ * the longest prefix with the query, at least a shard's worth of it; the shortest form among
+ * equals, so that a word beats the expressions starting with it, then the earliest in the table;
+ * none when no form shares that much.
+ */
+export function closestForm(
+  query: string,
+  entries: readonly SearchEntry[],
+): ClosestForm | undefined {
+  const wanted = normalizeQuery(query);
+  let best: ClosestForm | undefined;
+  let longest = SHARD_PREFIX_LENGTH - 1;
+  for (const [entity, entry] of entries.entries()) {
+    for (const form of formsOf(entry)) {
+      const length = commonPrefixLength(wanted, normalizeQuery(form));
+      if (length > longest || (length === longest && form.length < (best?.form.length ?? 0))) {
+        longest = length;
+        best = { entity, form };
+      }
+    }
+  }
+  return best;
 }

@@ -141,4 +141,10 @@ export const labels = {
   browse: "browse",
   enterKey: "Enter",
   open: "open",
+  clearSearch: "Clear the search",
+  resultsCountersNote:
+    "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
+  resultsNotelessNote:
+    "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
+  closestForm: "Closest form:",
 } as const;

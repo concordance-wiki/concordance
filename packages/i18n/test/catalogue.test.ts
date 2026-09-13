@@ -143,8 +143,8 @@ describe("formatMessage", () => {
 
   it("reuses one formatter per message of a catalogue", () => {
     const en = loadCatalogue("en");
-    expect(formatMessage(en, "search.results", { count: 1 })).toBe("1 result");
-    expect(formatMessage(en, "search.results", { count: 2 })).toBe("2 results");
+    expect(formatMessage(en, "search.results", { count: 1 })).toBe("1 result, most cited first");
+    expect(formatMessage(en, "search.results", { count: 2 })).toBe("2 results, most cited first");
     expect(formatMessage(en, "search.noResult")).toBe("No result");
   });
 });

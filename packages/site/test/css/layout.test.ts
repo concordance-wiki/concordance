@@ -247,3 +247,48 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(wide).toContain(".entity > .space {\n    display: block;\n  }");
   });
 });
+
+describe("Search results: the facets in a column from 768 px, folded above the list under it, every control a target", () => {
+  it("gives the facets a 16 rem column from 768 px and keeps their disclosure in view, the marker of its head gone", () => {
+    const medium = media(components, "(min-width: 48rem)");
+    expect(medium).toContain(
+      ".results-layout {\n    grid-template-columns: 16rem minmax(0, 1fr);\n  }",
+    );
+    expect(medium).toContain(
+      ".facets-fold::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
+    );
+    expect(medium).toContain(".facets-head::before {\n    content: none;\n  }");
+    expect(components).toContain(
+      ".results-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr);",
+    );
+  });
+
+  it("lifts the measure of the header field from the island of the results page, which is the page itself", () => {
+    expect(components).toContain(
+      'main > concordance-island[data-island="search"] {\n  max-inline-size: none;\n}',
+    );
+  });
+
+  it("gives the boxes of the facets, the chips of the active filters and the clear links a target of 40 px, and draws the keyword type dashed", () => {
+    for (const selector of [
+      ".facet-value",
+      ".facet-value label",
+      ".remove-filter",
+      ".clear-filters a",
+      ".search-clear",
+    ]) {
+      const at = components.indexOf(`${selector} {`);
+      expect(at, selector).toBeGreaterThanOrEqual(0);
+      const body = components.slice(at, components.indexOf("}", at));
+      expect(body, selector).toMatch(/min-(block-size|inline-size): 2\.5rem;/);
+    }
+    expect(components).toContain(".facet-keyword input {\n  border-style: dashed;\n}");
+    expect(components).toContain(".result-keyword {\n  border-style: dashed;\n}");
+    expect(components).toContain(
+      ".result-keyword .result-title {\n  text-decoration: underline dotted;",
+    );
+    expect(components).toContain(
+      ".facet-active label {\n  color: var(--color-ink);\n  font-weight: 600;\n}",
+    );
+  });
+});

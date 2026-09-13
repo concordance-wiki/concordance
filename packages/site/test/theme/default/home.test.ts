@@ -26,7 +26,7 @@ describe("Home", () => {
       '<form class="home-search" role="search" aria-label="Search" action="search/" method="get"><label class="visually-hidden" for="home-search">Search</label><span class="home-search-field"><svg class="search-glyph" width="20" height="20"',
     );
     expect(html).toContain(
-      '<input id="home-search" type="search" name="q" placeholder="Search a word of your business" autocomplete="off"/><span class="search-count" aria-live="polite"></span></span></form><div class="search-suggestions home-suggestions" hidden></div></concordance-island>',
+      '<input id="home-search" type="search" name="q" placeholder="Search a word of your business" autocomplete="off"/><span class="search-count" aria-live="polite"></span><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button></span></form><div class="search-suggestions home-suggestions" hidden></div></concordance-island>',
     );
     const withRoot = renderSlot(
       "Home",

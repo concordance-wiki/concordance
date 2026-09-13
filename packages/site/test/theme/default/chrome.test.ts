@@ -96,7 +96,7 @@ describe("Header", () => {
       '<span class="site-search-field"><svg class="search-glyph" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false">',
     );
     expect(html).toContain(
-      '<input id="site-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><kbd class="search-shortcut" aria-hidden="true">/</kbd></span>',
+      '<input id="site-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button><kbd class="search-shortcut" aria-hidden="true">/</kbd></span>',
     );
     expect(html).toContain(
       '<ul class="site-links"><li><a href="../#home-tree">Spaces</a></li><li><a href="../index/">A–Z index</a></li><li><a href="../#home-recent">Recent</a></li></ul>',

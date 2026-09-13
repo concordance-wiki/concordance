@@ -39,10 +39,29 @@ describe("the search island in the header", () => {
     );
     expect(html).toContain('<label class="visually-hidden" for="site-search">Rechercher</label>');
     expect(html).toContain(
-      '<input id="site-search" type="search" name="q" placeholder="Search entities and keywords…" autocomplete="off"/>',
+      '<input id="site-search" type="search" name="q" placeholder="Search entities and keywords…" autocomplete="off"/><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button>',
     );
     expect(html).toContain('<div class="search-suggestions" hidden></div></concordance-island>');
     expectBalanced(html);
+  });
+
+  it("names the clear button from the catalogue when the field carries the label", () => {
+    const html = renderSlot(
+      "Header",
+      {
+        ...header,
+        search: {
+          ...header.search,
+          action: "../search/",
+          placeholder: "",
+          clearLabel: "Effacer la recherche",
+        },
+      },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      '<button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Effacer la recherche</span></button>',
+    );
   });
 
   it("carries no root when the site has no index, the field then only submitting the form", () => {
@@ -86,7 +105,7 @@ describe("the search island at the head of the home page", () => {
       '<form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get"><label class="visually-hidden" for="home-search">Search</label><span class="home-search-field"><svg class="search-glyph" width="20" height="20"',
     );
     expect(html).toContain(
-      '<span class="search-count" aria-live="polite"></span></span></form><div class="search-suggestions home-suggestions" hidden></div></concordance-island>',
+      '<span class="search-count" aria-live="polite"></span><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button></span></form><div class="search-suggestions home-suggestions" hidden></div></concordance-island>',
     );
     expect(html).not.toContain("site-search");
     expectBalanced(html);
@@ -162,7 +181,7 @@ describe("the search island on the results page", () => {
       },
     );
     expect(html).toBe(
-      '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:{&quot;query&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;results&quot;:[],&quot;facets&quot;:[]}}"><div class="search-results"><h1>Search</h1><p class="search-summary">0 results for <q></q></p><ol class="results"></ol></div></concordance-island>',
+      '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:{&quot;query&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;results&quot;:[],&quot;facets&quot;:[]}}"><div class="search-results"><h1>Search</h1><div class="results-layout"><div class="results-main"><div class="results-head"><p class="search-summary" role="status">0 results for <q></q></p></div><ol class="results"></ol></div></div></div></concordance-island>',
     );
     const theme: ResolvedTheme = {
       components: {
@@ -179,7 +198,7 @@ describe("the search island on the results page", () => {
 });
 
 describe("ResultList", () => {
-  it("shows the title as a link, the type badge, the breadcrumb of the application and domain, and the snippet, each when given", () => {
+  it("shows the type chip, the title as a link, the citations, the breadcrumb, the summary and the facts, each when given", () => {
     const html = renderToString(
       h(ResultList, {
         results: [
@@ -187,19 +206,26 @@ describe("ResultList", () => {
             title: "Keyword page",
             href: "../glossary/keyword-page/index.html",
             typeLabel: "Term",
+            cited: "cited in 4 pages",
             breadcrumb: ["Command line", "Publication"],
             snippet: "A page built for every word above the threshold.",
+            facts: ["glossary", "Also called: word page", "Broader term: Page"],
           },
-          { title: "build summary", href: "../keywords/build-summary/index.html", breadcrumb: [] },
+          {
+            title: "build summary",
+            href: "../keywords/build-summary/index.html",
+            breadcrumb: [],
+            facts: [],
+          },
         ],
       }),
     );
     expect(html).toBe(
-      '<ol class="results"><li class="result"><a href="../glossary/keyword-page/index.html">Keyword page</a><span class="badge">Term</span><span class="breadcrumb">Command line / Publication</span><p class="snippet">A page built for every word above the threshold.</p></li><li class="result"><a href="../keywords/build-summary/index.html">build summary</a></li></ol>',
+      '<ol class="results"><li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a><span class="result-cited">cited in 4 pages</span></p><span class="breadcrumb">Command line / Publication</span><p class="snippet">A page built for every word above the threshold.</p><p class="result-facts"><span>glossary</span><span>Also called: word page</span><span>Broader term: Page</span></p></li><li class="result"><p class="result-head"><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p></li></ol>',
     );
   });
 
-  it("outlines a word without a note with the result-keyword class, its notice and its counts under the title", () => {
+  it("outlines a word without a note with the result-keyword class, its notice and its documents under the title", () => {
     const html = renderToString(
       h(ResultList, {
         results: [
@@ -209,17 +235,17 @@ describe("ResultList", () => {
             typeLabel: "Keyword",
             keyword: true,
             subtitle: "Expression without a note",
-            detail: "17 occurrences · 6 documents",
+            detail: "Used in 6 documents, never defined in the glossary",
           },
         ],
       }),
     );
     expect(html).toBe(
-      '<ol class="results"><li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span><span class="result-detail">17 occurrences · 6 documents</span></li></ol>',
+      '<ol class="results"><li class="result result-keyword"><p class="result-head"><span class="badge">Keyword</span><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p><span class="result-subtitle">Expression without a note</span><p class="result-detail">Used in 6 documents, never defined in the glossary</p></li></ol>',
     );
   });
 
-  it("names a disabled facet value by its value when it has no label, like an enabled one", () => {
+  it("names a facet value by its value when it has no label, a disabled one boxed but disabled", () => {
     const html = renderSlot(
       "SearchResults",
       {
@@ -240,7 +266,7 @@ describe("ResultList", () => {
       defaultTheme,
     );
     expect(html).toContain(
-      '<li><a class="facet-value" role="link" aria-disabled="true">screen <span class="count">0</span></a></li><li><a href="?type=term">term <span class="count">0</span></a></li>',
+      '<li class="facet-value facet-disabled"><input type="checkbox" id="facet-type-screen" name="type" value="screen" disabled/><label for="facet-type-screen"><span class="facet-label">screen</span><span class="count">0</span></label></li><li class="facet-value"><input type="checkbox" id="facet-type-term" name="type" value="term"/><label for="facet-type-term"><span class="facet-label">term</span><span class="count">0</span></label></li>',
     );
   });
 

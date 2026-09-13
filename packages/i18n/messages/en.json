@@ -199,10 +199,6 @@
     "defaultMessage": "Propose a definition",
     "description": "Call to action that opens the note template of the glossary for a keyword."
   },
-  "keyword.documents": {
-    "defaultMessage": "{count, plural, one {# document} other {# documents}}",
-    "description": "Number of documents a keyword appears in."
-  },
   "keyword.factFiles": {
     "defaultMessage": "Files",
     "description": "Label of the number of files a keyword appears in, in the panel of its page."
@@ -383,6 +379,42 @@
     "defaultMessage": "Types",
     "description": "Button opening the type filter of the related pages."
   },
+  "results.alsoCalled": {
+    "defaultMessage": "Also called: '{aliases}'",
+    "description": "Other names of a note in its result row, the quoted placeholder being filled in the browser."
+  },
+  "results.broader": {
+    "defaultMessage": "Broader term: '{term}'",
+    "description": "Broader term of a note in its result row, the quoted placeholder being filled in the browser."
+  },
+  "results.cited": {
+    "defaultMessage": "{count, plural, one {cited in # page} other {cited in # pages}}",
+    "description": "How many pages cite the note of a result row."
+  },
+  "results.clearQuery": {
+    "defaultMessage": "Clear the search",
+    "description": "Accessible name of the button emptying the search field."
+  },
+  "results.closestForm": {
+    "defaultMessage": "Closest form:",
+    "description": "Lead of the closest form of the dictionary proposed when a search matches nothing."
+  },
+  "results.countersNote": {
+    "defaultMessage": "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
+    "description": "Note under the facets of the results page."
+  },
+  "results.noResultFor": {
+    "defaultMessage": "No result for “'{query}'”",
+    "description": "Notice shown when a search with words matches nothing, the quoted placeholder being filled in the browser."
+  },
+  "results.notelessNote": {
+    "defaultMessage": "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
+    "description": "Note under the list of results."
+  },
+  "results.usedIn": {
+    "defaultMessage": "{count, plural, one {Used in # document, never defined in the glossary} other {Used in # documents, never defined in the glossary}}",
+    "description": "Line of a result row that is a word without a note."
+  },
   "search.activeFilters": {
     "defaultMessage": "Active filters",
     "description": "Heading of the list recalling the facets selected on the search page."
@@ -416,11 +448,11 @@
     "description": "Facet that keeps, isolates or excludes the recurring expressions nobody defined."
   },
   "search.facet.source": {
-    "defaultMessage": "Source",
-    "description": "Facet that filters search results by the source repository of the note."
+    "defaultMessage": "Space",
+    "description": "Facet that filters search results by the space, the source repository of the note."
   },
   "search.facet.type": {
-    "defaultMessage": "Type",
+    "defaultMessage": "Page type",
     "description": "Facet that filters search results by entity type."
   },
   "search.facets": {
@@ -448,8 +480,8 @@
     "description": "Accessible name of the control that lifts one selected facet of the search."
   },
   "search.results": {
-    "defaultMessage": "{count, plural, one {# result} other {# results}}",
-    "description": "Number of results of a search."
+    "defaultMessage": "{count, plural, one {# result, most cited first} other {# results, most cited first}}",
+    "description": "Number of results of a search, saying that the most cited come first."
   },
   "site.generatedAt": {
     "defaultMessage": "Generated on {date, date, long}",
