@@ -49,7 +49,7 @@ function validateAgainst(schemaName, path, data) {
 
 // 1. Schemas compile under strict mode.
 const schemaDir = join(root, "packages/core/schemas");
-for (const name of readdirSync(schemaDir).sort()) {
+for (const name of readdirSync(schemaDir).sort(byCodeUnit)) {
   const schema = JSON.parse(readFileSync(join(schemaDir, name), "utf8"));
   try {
     ajv.addSchema(schema, name);
@@ -94,7 +94,7 @@ if (readFileSync(profileFile, "utf8") !== assembleProfileText()) {
   );
 }
 const profile = readYaml(join(root, "packages/profile/default.yaml"));
-const modules = readdirSync(typesDirectory).sort();
+const modules = readdirSync(typesDirectory).sort(byCodeUnit);
 for (const slug of modules) {
   const folder = join(typesDirectory, slug);
   const declaration = readYaml(join(folder, "type.yaml"));
@@ -188,8 +188,8 @@ for (const [type, definition] of Object.entries(profile.types)) {
 // 5. The copy the command line ships equals docs/templates, file for file
 //    (scripts/sync-templates.mjs refreshes it).
 const shippedDir = join(root, "packages/cli/templates");
-const shipped = existsSync(shippedDir) ? readdirSync(shippedDir).sort() : [];
-const published = readdirSync(templateDir).sort();
+const shipped = existsSync(shippedDir) ? readdirSync(shippedDir).sort(byCodeUnit) : [];
+const published = readdirSync(templateDir).sort(byCodeUnit);
 for (const name of published) {
   if (!shipped.includes(name)) {
     fail(`packages/cli/templates/${name}: missing, run node scripts/sync-templates.mjs`);
@@ -237,8 +237,8 @@ for (const path of walk(
 //    source carries a default message and a description per entry, a
 //    translation a string per entry. Parity between locales is a unit test.
 const messageDir = join(root, "packages/i18n/messages");
-for (const language of readdirSync(messageDir).sort()) {
-  for (const name of readdirSync(join(messageDir, language)).sort()) {
+for (const language of readdirSync(messageDir).sort(byCodeUnit)) {
+  for (const name of readdirSync(join(messageDir, language)).sort(byCodeUnit)) {
     const file = `packages/i18n/messages/${language}/${name}`;
     const area = name.replace(/\.json$/, "");
     let catalogue;
