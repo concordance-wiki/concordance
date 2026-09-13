@@ -46,7 +46,9 @@ const withDocuments = new Map<string, EntityFragment>([
           format: "vtt",
           target: `${screen.id}/screens/mentions-panel.vtt`,
           unit: "cue",
-          pages: [{ number: 1, label: "00:00:04", text: "The mentions panel." }],
+          pages: [
+            { number: 1, label: "00:00:04", text: "The mentions panel.", speaker: "Participant-1" },
+          ],
         },
       ],
     },
@@ -255,7 +257,9 @@ describe("documentsOf", () => {
       {
         file: { label: "mentions-panel.vtt", href: "screens/mentions-panel.vtt", format: "vtt" },
         unit: "cue",
-        positions: [{ number: 1, label: "00:00:04", text: "The mentions panel." }],
+        positions: [
+          { number: 1, label: "00:00:04", text: "The mentions panel.", speaker: "Participant-1" },
+        ],
       },
     ]);
     expect(documentsOf(context, page, screen)[0]?.preview).toEqual({

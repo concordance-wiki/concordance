@@ -35,6 +35,8 @@ export interface FragmentPage {
   /** `page 3`, `slide 3`, or the timecode of a transcript cue. */
   label: string;
   text: string;
+  /** Who speaks a transcript cue, as the transcript names them once pseudonymised; absent elsewhere. */
+  speaker?: string;
 }
 
 /** A document of an entity that is not a note: a deck, a PDF, a transcript, with what the page needs from it. */
@@ -141,7 +143,8 @@ function isPage(value: unknown): value is FragmentPage {
     isRecord(value) &&
     typeof value["number"] === "number" &&
     typeof value["label"] === "string" &&
-    typeof value["text"] === "string"
+    typeof value["text"] === "string" &&
+    (value["speaker"] === undefined || typeof value["speaker"] === "string")
   );
 }
 

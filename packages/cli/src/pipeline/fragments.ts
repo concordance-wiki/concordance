@@ -136,7 +136,12 @@ export function documentsOf(
       ...(preview === undefined ? {} : { preview }),
       unit: document.unit,
       pages: truncatePages(
-        document.pages.map(({ number, label, text }) => ({ number, label, text })),
+        document.pages.map(({ number, label, text, speaker }) => ({
+          number,
+          label,
+          text,
+          ...(speaker === undefined ? {} : { speaker }),
+        })),
         maxChars,
       ),
     });

@@ -42,6 +42,8 @@ export interface ReaderUnit {
   /** How a reader names the position: a timecode such as `00:12:05` for a transcript. */
   label: string;
   text: string;
+  /** Who speaks the unit, as the transcript names them; absent for a unit without a speaker or a format without any. */
+  speaker?: string;
   /** Fragment identifier of the unit in the reader's own HTML rendering, when it has one. */
   anchor?: string;
 }

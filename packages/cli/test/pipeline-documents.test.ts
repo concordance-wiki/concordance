@@ -472,8 +472,14 @@ describe("L4-07 extracted text indexed", () => {
           number: 1,
           label: "00:00:04",
           text: "The publication threshold stays at three occurrences.",
+          speaker: "Participant-1",
         },
-        { number: 2, label: "00:01:10", text: "The build summary will say so." },
+        {
+          number: 2,
+          label: "00:01:10",
+          text: "The build summary will say so.",
+          speaker: "Participant-2",
+        },
       ],
     });
     expect(transcript.documents?.[0]).not.toHaveProperty("preview");

@@ -38,7 +38,8 @@ export function transcriptText(transcript: Transcript): TranscriptText {
 
 /**
  * The spoken text as addressable units, one per speaker turn: labelled by the timecode of its
- * first cue and anchored like the rendered transcript, so that a citation lands on the passage.
+ * first cue, named after its speaker and anchored like the rendered transcript, so that a
+ * citation lands on the passage.
  */
 export function transcriptUnits(transcript: Transcript): ReaderUnit[] {
   return groupCues(transcript.cues).map((group) => {
@@ -48,6 +49,7 @@ export function transcriptUnits(transcript: Transcript): ReaderUnit[] {
       label: formatTimecode(first.start),
       text: group.cues.map((cue) => cue.text).join(" "),
       anchor: anchorOf(first),
+      ...(group.speaker === undefined ? {} : { speaker: group.speaker }),
     };
   });
 }

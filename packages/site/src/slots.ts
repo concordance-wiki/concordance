@@ -479,6 +479,8 @@ export interface DocumentPosition {
   /** `page 3`, `slide 3`, or a timecode. */
   label: string;
   text: string;
+  /** Who speaks a transcript cue; absent for a page, a slide or a cue without a speaker. */
+  speaker?: string;
 }
 
 /** A document of the entity that is not its note: what the page offers, with or without JavaScript. */
