@@ -272,9 +272,9 @@ function searchFieldOf(context: SiteContext, page: string, source?: string): Sea
   };
 }
 
-/** The label of the type stored in the index: the keyword marker for a keyword page, the profile label otherwise. */
+/** The label of the type stored in the index: "Without a definition" for a keyword page, the profile label otherwise. */
 function searchTypeLabel(context: SiteContext, type: string): string {
-  return type === "keyword" ? message(context, "keyword.title") : typeLabel(context, type);
+  return type === "keyword" ? message(context, "results.noteless") : typeLabel(context, type);
 }
 
 /** Whether any entity has a PDF to leaf through: the only case where the viewer bundles are worth building. */

@@ -252,9 +252,6 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     noResultFor: plain(catalogue, "results.noResultFor"),
     results: pluralForms(catalogue, "search.results"),
     countersNote: plain(catalogue, "results.countersNote"),
-    address: plain(catalogue, "search.address"),
-    copyAddress: plain(catalogue, "search.copyAddress"),
-    copied: plain(catalogue, "search.copied"),
     noteless: {
       label: plain(catalogue, "search.facet.noNote"),
       any: plain(catalogue, "search.noNote.any"),
@@ -268,6 +265,7 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     notelessNote: plain(catalogue, "results.notelessNote"),
     closestForm: plain(catalogue, "results.closestForm"),
     occurrences: pluralForms(catalogue, "keyword.occurrences"),
+    showNext: pluralForms(catalogue, "results.showNext"),
   };
 }
 

@@ -165,9 +165,14 @@ export function factsOf(entry: SearchEntry, meta: SearchMeta): string[] {
   return facts;
 }
 
-/** A hit as the lists show it: the type badge, the title, the citations, the summary and the facts, the href from the page through `root`; a keyword page with its documents and its notice. */
+/**
+ * A hit as the lists show it: the type badge, the title, the citations worded and as a bare
+ * count when any page cites it, the summary and the facts, the href from the page through
+ * `root`; a keyword page with its documents and its notice.
+ */
 export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): SearchResult {
   const typeLabel = meta.types[entry.type];
+  const cited = entry.cited ?? 0;
   return {
     title: entry.title,
     href: `${root}${entry.url}`,
@@ -175,7 +180,7 @@ export function resultOf(entry: SearchEntry, meta: SearchMeta, root: string): Se
     ...(entry.keyword === true
       ? { keyword: true, detail: keywordDetail(entry, meta) }
       : {
-          cited: citedDetail(entry, meta),
+          ...(cited === 0 ? {} : { cited: citedDetail(entry, meta), citedCount: cited }),
           ...(entry.summary === undefined ? {} : { snippet: entry.summary }),
           facts: factsOf(entry, meta),
         }),
@@ -438,8 +443,6 @@ export interface SearchIslandElement<P extends SearchPanel> {
 export interface SearchLocation {
   /** The query string of the address, `?q=…` or empty. */
   search(): string;
-  /** The whole address, what the copy button puts in the clipboard. */
-  href(): string;
   /** Adds an entry to the history with this query string, the page staying. */
   push(search: string): void;
   /** Rewrites the current entry of the history with this query string, as the reader types. */
@@ -507,23 +510,20 @@ export function scrollMemory(storage: KeyValueStorage | undefined, view: ScrollV
   };
 }
 
-/** The clipboard, when the page has one: secure contexts only, so not over `file://` in every browser. */
-export interface SearchClipboard {
-  writeText(text: string): Promise<void>;
-}
-
 /** Runs a callback after a delay in milliseconds and gives back what cancels it: `setTimeout` in the browser. */
 export type Defer = (callback: () => void, delay: number) => () => void;
 
 /** How long the address waits for the reader to stop typing before it is rewritten. */
 export const REPLACE_DELAY = 300;
 
+/** How many rows the results page draws at once; a button draws the next batch in place. */
+export const RESULTS_BATCH = 20;
+
 export interface SearchIslands<P extends SearchPanel> {
   islands: Iterable<SearchIslandElement<P>>;
   document: SearchDocument;
   location: SearchLocation;
   scroll: ScrollMemory;
-  clipboard: SearchClipboard | undefined;
   defer: Defer;
   inject: ScriptInjector;
   host: ShardHost;
@@ -536,19 +536,19 @@ export function resultsHref(state: SearchState): string {
   return search === "" ? "?" : search;
 }
 
-/** The address of a state from the root of the site, as the results page shows it. */
-export function resultsAddress(state: SearchState): string {
-  return `${SEARCH_DIRECTORY}/index.html${searchQueryString(state)}`;
-}
-
-/** What the results page does beyond showing: follows an address in place, copies the current one. */
+/** What the results page does beyond showing: follows an address in place, draws the next rows. */
 export interface ResultsActions {
   onNavigate: (href: string) => void;
-  onCopy?: () => void;
-  copied?: boolean;
+  /** How many rows the page draws, `RESULTS_BATCH` at first; the button under them adds a batch. */
+  shown: number;
+  onMore: () => void;
 }
 
-/** The view model of the results page for a state and the hits of its query, facets counted over those hits. */
+/**
+ * The view model of the results page for a state and the hits of its query, facets counted
+ * over those hits, the first `shown` rows drawn and the button under them worded with the
+ * size of the next batch when more remain.
+ */
 export function resultsPropsOf(
   state: SearchState,
   outcome: SearchOutcome,
@@ -565,10 +565,11 @@ export function resultsPropsOf(
   const filters = activeFiltersOf(meta, state, hrefOf);
   const worded = queryWords(state.query).length > 0;
   const closest = worded && entries.length === 0 ? closestOf(state, meta) : undefined;
+  const remaining = kept.length - actions.shown;
   return {
     query: state.query,
     total: kept.length,
-    results: kept.map((entry) => resultOf(entry, meta, root)),
+    results: kept.slice(0, actions.shown).map((entry) => resultOf(entry, meta, root)),
     facets: facetsOf(meta, state, countFacets(entries, state), hrefOf),
     summary:
       kept.length > 0
@@ -583,15 +584,19 @@ export function resultsPropsOf(
       activeFilters: meta.labels.activeFilters,
       removeFilter: meta.labels.removeFilter,
       clear: meta.labels.clear,
-      address: meta.labels.address,
-      copyAddress: meta.labels.copyAddress,
-      copied: meta.labels.copied,
       countersNote: meta.labels.countersNote,
       notelessNote: meta.labels.notelessNote,
       closestForm: meta.labels.closestForm,
     },
-    address: resultsAddress(state),
-    ...actions,
+    onNavigate: actions.onNavigate,
+    ...(remaining <= 0
+      ? {}
+      : {
+          more: {
+            label: plural(meta.labels.showNext, Math.min(remaining, RESULTS_BATCH), meta.locale),
+            onMore: actions.onMore,
+          },
+        }),
   };
 }
 
@@ -759,7 +764,11 @@ function suggest<P extends SearchPanel>(
   }
 }
 
-/** The results page: its list follows the field and the address, and the address follows the field. */
+/**
+ * The results page: its list follows the field and the address, and the address follows the
+ * field; the first batch of rows is drawn, the button under them adds the next one in place,
+ * and any change of state starts again from the first batch.
+ */
 function follow<P extends SearchPanel>(
   field: Field<P>,
   results: P,
@@ -769,27 +778,18 @@ function follow<P extends SearchPanel>(
 ): void {
   const input = field.input;
   let state = parseSearchState(options.location.search());
-  let copied = false;
+  let shown = RESULTS_BATCH;
   let latest = 0;
   let cancelReplace: (() => void) | undefined;
   const draw = (answer: SearchOutcome): void => {
-    const clipboard = options.clipboard;
-    const actions: ResultsActions =
-      clipboard === undefined
-        ? { onNavigate: navigate }
-        : {
-            onNavigate: navigate,
-            copied,
-            onCopy: () => {
-              clipboard.writeText(options.location.href()).then(
-                () => {
-                  copied = true;
-                  draw(answer);
-                },
-                () => undefined,
-              );
-            },
-          };
+    const actions: ResultsActions = {
+      onNavigate: navigate,
+      shown,
+      onMore: () => {
+        shown += RESULTS_BATCH;
+        draw(answer);
+      },
+    };
     options.render(h(SearchResults, resultsPropsOf(state, answer, site, actions)), results);
   };
   const show = async (restoreScroll = false): Promise<void> => {
@@ -798,7 +798,7 @@ function follow<P extends SearchPanel>(
     if (ticket !== latest) {
       return;
     }
-    copied = false;
+    shown = RESULTS_BATCH;
     draw(answer);
     const position = restoreScroll
       ? options.scroll.remembered(searchQueryString(state))

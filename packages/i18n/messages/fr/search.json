@@ -1,9 +1,6 @@
 {
   "search.activeFilters": "Filtres actifs",
-  "search.address": "Adresse de cette recherche",
   "search.clear": "Effacer les filtres",
-  "search.copied": "Adresse copiée",
-  "search.copyAddress": "Copier",
   "search.facet.application": "Application",
   "search.facet.domain": "Domaine",
   "search.facet.noNote": "Sans note",

@@ -8,10 +8,7 @@ export const searchMessages = {
   fr,
   arguments: {
     "search.activeFilters": {},
-    "search.address": {},
     "search.clear": {},
-    "search.copied": {},
-    "search.copyAddress": {},
     "search.facet.application": {},
     "search.facet.domain": {},
     "search.facet.noNote": {},

@@ -171,8 +171,11 @@ describe("facetsOf and activeFiltersOf", () => {
     expect(facetLabels(meta, "domain")).toBe(meta.domains);
   });
 
-  it("flags the keyword type among the page types, so that the page draws it dotted", () => {
-    const table: SearchMeta = { ...meta, types: { ...meta.types, keyword: "Keyword" } };
+  it("flags the keyword type among the page types and lists it last, so that the page draws it dotted under the others", () => {
+    const table: SearchMeta = {
+      ...meta,
+      types: { keyword: "Without a definition", ...meta.types },
+    };
     const facets = facetsOf(table, emptyState(), meta.counts, searchQueryString);
     expect(facets[0]?.values.map((value) => [value.value, value.keyword])).toEqual([
       ["rule", undefined],
@@ -180,6 +183,7 @@ describe("facetsOf and activeFiltersOf", () => {
       ["term", undefined],
       ["keyword", true],
     ]);
+    expect(facets[0]?.values[3]?.label).toBe("Without a definition");
     expect(facets[1]?.values.map((value) => value.keyword)).toEqual([undefined, undefined]);
   });
 

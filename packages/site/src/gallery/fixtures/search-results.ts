@@ -4,13 +4,13 @@ export const searchResults: SlotProps["SearchResults"] = {
   query: "threshold",
   total: 3,
   summary: "3 results, most cited first",
-  address: "search/index.html?q=threshold&source=glossary",
   results: [
     {
       title: "Publication threshold",
       href: "../glossary/publication-threshold/",
       typeLabel: "term",
       cited: "cited in 12 pages",
+      citedCount: 12,
       snippet: "Three occurrences in two files before a word gets a page.",
       facts: ["glossary", "Also called: threshold"],
     },
@@ -18,12 +18,13 @@ export const searchResults: SlotProps["SearchResults"] = {
       title: "Keyword page threshold review",
       href: "../meetings/threshold-review/",
       cited: "cited in 1 page",
+      citedCount: 1,
       facts: ["specs"],
     },
     {
       title: "threshold review",
       href: "../keywords/threshold-review/",
-      typeLabel: "Keyword",
+      typeLabel: "Without a definition",
       keyword: true,
       detail: "Used in 2 documents, never defined in the glossary",
     },
@@ -53,7 +54,7 @@ export const searchResults: SlotProps["SearchResults"] = {
         { value: "screen", label: "Screen", count: 0, href: "", disabled: true },
         {
           value: "keyword",
-          label: "Keyword",
+          label: "Without a definition",
           count: 1,
           href: "?q=threshold&source=glossary&type=keyword",
           keyword: true,
@@ -102,7 +103,6 @@ export const searchResultsEmpty: SlotProps["SearchResults"] = {
   query: "thresold",
   total: 0,
   summary: "No result for \u201cthresold\u201d",
-  address: "search/index.html?q=thresold",
   closest: {
     form: "threshold",
     href: "?q=threshold",
@@ -118,9 +118,6 @@ const searchResultsLabels = {
   activeFilters: "Active filters",
   removeFilter: "Remove this filter",
   clear: "Clear filters",
-  address: "Address of this search",
-  copyAddress: "Copy",
-  copied: "Address copied",
   countersNote:
     "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
   notelessNote:
@@ -138,7 +135,6 @@ export const searchResultsCorporate: SlotProps["SearchResults"] = {
   query: "threshold",
   total: 3,
   summary: "3 results, most cited first",
-  address: "search/index.html?q=threshold&source=glossary",
   labels: searchResultsLabels,
   results: [
     {
@@ -146,6 +142,7 @@ export const searchResultsCorporate: SlotProps["SearchResults"] = {
       href: "../glossary/keyword-page/",
       typeLabel: "Term",
       cited: "cited in 27 pages",
+      citedCount: 27,
       snippet:
         "The page built for a candidate expression that crosses the publication threshold without any note defining it.",
       facts: ["glossary", "Also called: word page"],
@@ -155,6 +152,7 @@ export const searchResultsCorporate: SlotProps["SearchResults"] = {
       href: "../glossary/publication-threshold/",
       typeLabel: "Term",
       cited: "cited in 12 pages",
+      citedCount: 12,
       snippet:
         "The minimum a candidate expression must reach to get a keyword page: three occurrences across two files by default.",
       facts: ["glossary", "Also called: threshold", "Broader term: Rule"],
@@ -162,7 +160,7 @@ export const searchResultsCorporate: SlotProps["SearchResults"] = {
     {
       title: "threshold review",
       href: "../keywords/threshold-review/",
-      typeLabel: "Keyword",
+      typeLabel: "Without a definition",
       keyword: true,
       detail: "Used in 2 documents, never defined in the glossary",
     },
@@ -187,7 +185,7 @@ export const searchResultsCorporate: SlotProps["SearchResults"] = {
         { value: "meeting", label: "Meeting", count: 0, href: "", disabled: true },
         {
           value: "keyword",
-          label: "Keyword",
+          label: "Without a definition",
           count: 1,
           href: "?q=threshold&source=glossary&type=keyword",
           keyword: true,
