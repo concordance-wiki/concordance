@@ -2,8 +2,10 @@ import { loadCatalogue } from "@concordance-wiki/i18n";
 import { describe, expect, it } from "vitest";
 
 import {
+  DEFAULT_SOURCE_REF,
   citations,
   editHref,
+  forgeEditHref,
   glyphOf,
   relationLabel,
   siteContext,
@@ -18,6 +20,7 @@ import {
   mentionsOf,
   neighbourhoodOf,
   panelOf,
+  sourcesOf,
 } from "../../src/build/entity-page.js";
 import { entriesOf, homeOf, shortcutsOf } from "../../src/build/home.js";
 import { foldTitle, indexOf, letterOf } from "../../src/build/index-page.js";
@@ -107,6 +110,44 @@ describe("siteContext", () => {
     expect(editHref(context({ editUrl: pattern }), screen)).toBeUndefined();
     expect(editHref(context({ editUrl: "https://forge.example/{source}/{path}" }), screen)).toBe(
       "https://forge.example/specs/screens/mentions-panel.md",
+    );
+  });
+
+  it("builds the edit link from the source URL of the model on GitHub and GitLab, on the declared ref or main, and gives none for a local source", () => {
+    const sources = (url: string) =>
+      context({
+        model: model({
+          build: { ...model().build, sources: [{ name: "glossary", url }, { name: "specs" }] },
+        }),
+        sourceRefs: { specs: "develop" },
+      });
+    expect(editHref(sources("https://github.com/concordance-wiki/demo-glossary.git"), term)).toBe(
+      "https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md",
+    );
+    expect(
+      editHref(
+        {
+          ...sources("https://gitlab.com/concordance-wiki/demo-glossary/"),
+          sourceRefs: { glossary: "v1" },
+        },
+        term,
+      ),
+    ).toBe("https://gitlab.com/concordance-wiki/demo-glossary/-/edit/v1/keyword-page.md");
+    expect(editHref(sources("https://gitlab.example.org/wiki/glossary"), term)).toBe(
+      "https://gitlab.example.org/wiki/glossary/-/edit/main/keyword-page.md",
+    );
+    expect(editHref(sources("https://forge.example.org/wiki/glossary"), term)).toBeUndefined();
+    expect(
+      editHref(sources("git@github.com:concordance-wiki/demo-glossary.git"), term),
+    ).toBeUndefined();
+    expect(
+      editHref(sources("http://github.com/concordance-wiki/demo-glossary"), term),
+    ).toBeUndefined();
+    expect(editHref(sources("https://github.com/x"), screen)).toBeUndefined();
+    expect(editHref(context(), term)).toBeUndefined();
+    expect(DEFAULT_SOURCE_REF).toBe("main");
+    expect(forgeEditHref("https://github.com/o/r", "main", "a/b.md")).toBe(
+      "https://github.com/o/r/edit/main/a/b.md",
     );
   });
 });
@@ -303,10 +344,15 @@ describe("entityPageOf", () => {
     );
     expect(props.sources).toEqual([
       {
+        source: "specs",
         path: "screens/mentions-panel.md",
         editHref: "https://forge.example/specs/screens/mentions-panel.md",
       },
-      { path: "screens/mentions-panel.pptx" },
+      { source: "specs", path: "screens/mentions-panel.pptx" },
+    ]);
+    expect(sourcesOf(context(), screen)).toEqual([
+      { source: "specs", path: "screens/mentions-panel.md" },
+      { source: "specs", path: "screens/mentions-panel.pptx" },
     ]);
     expect(props.sections).toEqual([]);
     expect(props.mentions).toEqual({ mentions: [], initial: DEFAULT_MENTIONS_INLINE });
@@ -323,7 +369,7 @@ describe("entityPageOf", () => {
       "section-not-to-be-confused-with",
     ]);
     expect(withNote.mentions.initial).toBe(3);
-    expect(withNote.sources).toEqual([{ path: "keyword-page.md" }]);
+    expect(withNote.sources).toEqual([{ source: "glossary", path: "keyword-page.md" }]);
   });
 });
 

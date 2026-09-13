@@ -23,6 +23,8 @@ export interface SiteContextInput {
   names?: SiteNames;
   /** Pattern of the edit link, with `{source}`, `{path}` and `{commit}` placeholders. */
   editUrl?: string;
+  /** The `ref` every source declares, by name; `main` is assumed for the others. */
+  sourceRefs?: Record<string, string>;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */
@@ -108,13 +110,34 @@ export function citations(context: SiteContext, id: string): number {
   return context.incoming.get(id)?.length ?? 0;
 }
 
-/** The edit link of a note, or none when the pattern needs a commit the source did not record. */
-export function editHref(context: SiteContext, entity: Entity): string | undefined {
-  const pattern = context.editUrl;
-  if (pattern === undefined) {
+/** The ref the edit link of a source points at: the one it declares, else `main`. */
+export const DEFAULT_SOURCE_REF = "main";
+
+/**
+ * The edit page of a file on the forge its HTTPS URL names: `<url>/edit/<ref>/<path>` on GitHub,
+ * `<url>/-/edit/<ref>/<path>` on GitLab; none for any other URL or a local source.
+ */
+export function forgeEditHref(url: string, ref: string, path: string): string | undefined {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
     return undefined;
   }
-  const { source } = entity;
+  if (parsed.protocol !== "https:") {
+    return undefined;
+  }
+  const repository = `${parsed.origin}${parsed.pathname.replace(/\.git$/, "").replace(/\/$/, "")}`;
+  if (parsed.hostname === "github.com") {
+    return `${repository}/edit/${ref}/${path}`;
+  }
+  if (parsed.hostname === "gitlab.com" || parsed.hostname.startsWith("gitlab.")) {
+    return `${repository}/-/edit/${ref}/${path}`;
+  }
+  return undefined;
+}
+
+function patternEditHref(pattern: string, source: Entity["source"]): string | undefined {
   if (pattern.includes("{commit}") && source.commit === undefined) {
     return undefined;
   }
@@ -122,4 +145,21 @@ export function editHref(context: SiteContext, entity: Entity): string | undefin
     .replaceAll("{source}", source.name)
     .replaceAll("{path}", source.path)
     .replaceAll("{commit}", source.commit ?? "");
+}
+
+/**
+ * The edit link of a note: the configured pattern when there is one (none when it needs a commit
+ * the source did not record), else the forge the source URL of the model names.
+ */
+export function editHref(context: SiteContext, entity: Entity): string | undefined {
+  const { source } = entity;
+  const pattern = context.editUrl;
+  if (pattern !== undefined) {
+    return patternEditHref(pattern, source);
+  }
+  const url = context.model.build.sources.find((candidate) => candidate.name === source.name)?.url;
+  if (url === undefined) {
+    return undefined;
+  }
+  return forgeEditHref(url, context.sourceRefs?.[source.name] ?? DEFAULT_SOURCE_REF, source.path);
 }

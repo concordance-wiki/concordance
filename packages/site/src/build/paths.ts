@@ -16,6 +16,11 @@ export function fragmentPath(id: string): string {
   return `${FRAGMENTS_DIRECTORY}/${id}.json`;
 }
 
+/** Where the build keeps an image of a note, by its target under the site, so that `render` places it without a source. */
+export function fragmentImagePath(target: string): string {
+  return `${FRAGMENTS_DIRECTORY}/${target}`;
+}
+
 /**
  * The href of one file of the site from a page, both as paths under the output folder: relative,
  * climbing with `..`, never starting with `/`, so that it resolves over `file://` as behind a server.

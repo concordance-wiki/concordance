@@ -11,9 +11,18 @@ export interface FragmentPassage {
   context: string;
 }
 
+/** An image of a note that is a file of the sources, copied next to the page. */
+export interface FragmentImage {
+  source: string;
+  /** Forward-slash path relative to the source root. */
+  path: string;
+  /** Where the copy lands, as a path under the output folder; the build keeps the bytes under `fragments/` at the same path. */
+  target: string;
+}
+
 /**
  * What the build writes next to the model for one entity, so that `render` needs no source:
- * the note rendered to sanitised HTML, and the passages of a keyword page.
+ * the note rendered to sanitised HTML, the images it embeds, and the passages of a keyword page.
  */
 export interface EntityFragment {
   id: string;
@@ -21,6 +30,8 @@ export interface EntityFragment {
   sections: Section[];
   /** In corpus order; absent for an entity that is not a keyword page. */
   passages?: FragmentPassage[];
+  /** By target; absent for a note without an image of the sources. */
+  images?: FragmentImage[];
 }
 
 export class FragmentError extends Error {
@@ -61,6 +72,15 @@ function isPassage(value: unknown): value is FragmentPassage {
   );
 }
 
+function isImage(value: unknown): value is FragmentImage {
+  return (
+    isRecord(value) &&
+    typeof value["source"] === "string" &&
+    typeof value["path"] === "string" &&
+    typeof value["target"] === "string"
+  );
+}
+
 /** Reads a fragment back, refusing anything but the shape the build writes. */
 export function parseFragment(text: string, file: string): EntityFragment {
   let document: unknown;
@@ -82,6 +102,12 @@ export function parseFragment(text: string, file: string): EntityFragment {
       throw new FragmentError(file, "passages must be a list of { source, path, line, context }");
     }
     fragment.passages = document["passages"];
+  }
+  if (document["images"] !== undefined) {
+    if (!Array.isArray(document["images"]) || !document["images"].every(isImage)) {
+      throw new FragmentError(file, "images must be a list of { source, path, target }");
+    }
+    fragment.images = document["images"];
   }
   return fragment;
 }

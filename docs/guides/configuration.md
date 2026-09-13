@@ -15,7 +15,7 @@ Required. Schema version, currently `1`.
 | `name` | string | required | displayed in the site |
 | `locale` | BCP 47 tag | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
 | `theme` | path | `./theme.yaml` | theme file, relative to this configuration; the default is used when the file exists |
-| `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders |
+| `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders. Without it, a source whose `git` URL is an HTTPS URL of `github.com`, `gitlab.com` or a `gitlab.` host gets `<url>/edit/<ref>/<path>` or `<url>/-/edit/<ref>/<path>`, the `ref` being the source's or `main`; a local source gets no link |
 
 ## `profile`
 

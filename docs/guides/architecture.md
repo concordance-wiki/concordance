@@ -30,7 +30,7 @@ Concordance reads CommonMark, GFM (tables, task lists) and optional YAML frontma
 | 12 | Twin resources | the markdown notes reconciled locale by locale (declared `source`, base names, headings, text); merged groups become one entity carrying every representation, the others yield `W-DUP-CANDIDATE` |
 | 13 | Model checks | every enabled check of the registry, plugin checks included, over the structural view of the model; the findings of every step are then enriched by the same registry (`checks:` overrides, missing remediations), sorted once and written once |
 | 14 | Model | `assembleModel` and `serializeModel` write `dist/model.json`; `dist/build.log.json` carries the same findings and the summary |
-| 15 | Fragments | one `dist/fragments/<id>.json` per entity: the note rendered to sanitised HTML section by section, its written links turned into page hrefs, or the passages of a keyword page; the last step that reads a source |
+| 15 | Fragments | one `dist/fragments/<id>.json` per entity: the note rendered to sanitised HTML section by section, its written links turned into page hrefs and marked as written, the words the scan recognised linked to their pages, the images of the sources it embeds listed and kept under `dist/fragments/<id>/`, or the passages of a keyword page; the last step that reads a source |
 | 16 | Rendering | `buildSite` of the site package, the same code `concordance render` runs alone: every page, the search index placeholder and the assets, from the model, the fragments, the profile, the theme and the catalogue of the project locale |
 
 Office conversion (step 5 of the specification's numbering) is not wired: no converter runs, so no document is left unconverted and `build.fail_on.unconverted_max` never triggers.

@@ -28,6 +28,7 @@ import { discoverKeywords } from "./keywords.js";
 import { produceLinks } from "./links.js";
 import { attachOperationNotes } from "./operations.js";
 import { indexDocuments, parseSources } from "./parse.js";
+import { recognisedWords, type RecognisedWord } from "./recognised.js";
 import { refineRelations } from "./relations.js";
 import { scanNotes } from "./scan.js";
 import { loadPluginSources } from "./sources.js";
@@ -64,6 +65,8 @@ export interface PipelineResult {
   keywords: KeywordCounts;
   /** The mentions of every keyword page by identifier, which its fragment records as passages. */
   keywordMentions: Map<string, KeywordMention[]>;
+  /** The recognised words of every note by `<source>/<path>`, which its fragment links in the text. */
+  recognised: Map<string, RecognisedWord[]>;
   duplicates: DuplicateCounts;
 }
 
@@ -174,6 +177,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     contracts: contributed.contracts,
     keywords: keywords.counts,
     keywordMentions: keywords.mentions,
+    recognised: recognisedWords({ occurrences, documents: parsed.documents, sources }),
     duplicates: twins.counts,
   };
 }

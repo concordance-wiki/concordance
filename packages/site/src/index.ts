@@ -73,8 +73,18 @@ export type {
 export * as galleryFixtures from "./gallery/fixtures.js";
 export { galleryPages } from "./gallery/pages.js";
 export type { GalleryPage } from "./gallery/pages.js";
-export { LEAD_SECTION_ID, renderMarkdown } from "./markdown/render.js";
-export type { MarkdownOptions, RenderedMarkdown } from "./markdown/render.js";
+export {
+  LEAD_SECTION_ID,
+  RECOGNISED_CLASS,
+  WRITTEN_CLASS,
+  renderMarkdown,
+} from "./markdown/render.js";
+export type {
+  MarkdownOptions,
+  RecognisedSpan,
+  RenderedMarkdown,
+  TargetKind,
+} from "./markdown/render.js";
 export {
   ASSETS_DIRECTORY,
   FRAGMENTS_DIRECTORY,
@@ -84,11 +94,12 @@ export {
   TODO_PAGE,
   assetsBaseOf,
   entityHref,
+  fragmentImagePath,
   fragmentPath,
   relativeHref,
 } from "./build/paths.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
-export type { EntityFragment, FragmentPassage } from "./build/fragments.js";
+export type { EntityFragment, FragmentImage, FragmentPassage } from "./build/fragments.js";
 export { defaultThemeConfig } from "./build/default-theme.js";
 export { assemblePages, assemblySummary } from "./build/assemble.js";
 export type { Assembled, AssembleOptions, PageReport, WrittenDocument } from "./build/assemble.js";
