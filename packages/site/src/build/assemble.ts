@@ -96,7 +96,7 @@ export async function assemblePages(options: AssembleOptions): Promise<Assembled
     budget,
     contrast: checkContrast(source.config),
     islands,
-    files: files.sort(byCodeUnit),
+    files: files.toSorted(byCodeUnit),
     problems: [
       ...budget.overBudget.map((page) => `${page.path}: over budget`),
       ...pages.flatMap((page) =>

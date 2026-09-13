@@ -331,9 +331,14 @@ export const messageArguments = {
   "transcript.speakers": {},
 } as const satisfies Record<MessageId, Readonly<Record<string, ArgumentKind>>>;
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+export function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** The identifiers of the source catalogue in sorted order. */
 export const messageIds: readonly MessageId[] = Object.keys(source)
-  .sort()
+  .sort(byCodeUnit)
   // Object.keys returns the keys of the imported catalogue, whose type lists exactly them.
   .map((id) => id as MessageId);
 
@@ -347,7 +352,7 @@ export function byMessageId<T>(value: (id: MessageId) => T): Readonly<Record<Mes
 
 /** The argument names of every message in sorted order, for checks against the parsed catalogues. */
 export const argumentNames: Readonly<Record<MessageId, readonly string[]>> = byMessageId((id) =>
-  Object.keys(messageArguments[id]).sort(),
+  Object.keys(messageArguments[id]).sort(byCodeUnit),
 );
 
 /** The TypeScript type a value must have for each ICU kind. */

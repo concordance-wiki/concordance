@@ -8,6 +8,7 @@ import {
   type PlacedLabel,
   type PlacedNode,
 } from "../../neighbourhood/layout.js";
+import { byCodeUnit } from "../../order.js";
 import type { Neighbour, NeighbourhoodLabels, NeighbourhoodProps } from "../../slots.js";
 import { GLYPH_SHAPES, initialOfGlyph, shapeOfGlyph, type GlyphShape } from "./glyphs.js";
 import { labels } from "./labels.js";
@@ -179,7 +180,7 @@ function spriteOf(neighbours: readonly Neighbour[]): GlyphShape[] {
     const shape = neighbour.typeGlyph === undefined ? undefined : shapeOfGlyph(neighbour.typeGlyph);
     if (shape !== undefined) shapes.add(shape);
   }
-  return [...shapes].sort();
+  return [...shapes].sort(byCodeUnit);
 }
 
 /**

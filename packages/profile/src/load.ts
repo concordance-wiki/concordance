@@ -19,6 +19,11 @@ const defaultProfileUrl = new URL("../default.yaml", import.meta.url);
 
 const wildcardEnds = new Set(["any", "same", "type"]);
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -30,7 +35,7 @@ function canonical(value: unknown): unknown {
   }
   if (isPlainObject(value)) {
     const sorted: Record<string, unknown> = {};
-    for (const key of Object.keys(value).sort()) {
+    for (const key of Object.keys(value).sort(byCodeUnit)) {
       sorted[key] = canonical(value[key]);
     }
     return sorted;
@@ -68,7 +73,7 @@ function unionOfPairs(base: unknown[], override: unknown[]): unknown[] {
 function mergeValues(base: unknown, override: unknown, path: string[]): unknown {
   if (isPlainObject(base) && isPlainObject(override)) {
     const merged: Record<string, unknown> = {};
-    const keys = [...new Set([...Object.keys(base), ...Object.keys(override)])].sort();
+    const keys = [...new Set([...Object.keys(base), ...Object.keys(override)])].sort(byCodeUnit);
     for (const key of keys) {
       merged[key] = Object.hasOwn(override, key)
         ? mergeValues(base[key], override[key], [...path, key])

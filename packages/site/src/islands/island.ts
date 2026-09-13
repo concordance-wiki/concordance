@@ -1,5 +1,6 @@
 import { h, type ComponentType, type FunctionComponent, type JSX } from "preact";
 
+import { byCodeUnit } from "../order.js";
 import { ISLAND_ELEMENT } from "./element.js";
 
 export { ISLAND_ELEMENT } from "./element.js";
@@ -30,5 +31,5 @@ export function islandsUsed(html: string): string[] {
     // The group is unconditional in the pattern: a match always carries it.
     names.add(match[1] as string);
   }
-  return [...names].sort();
+  return [...names].sort(byCodeUnit);
 }

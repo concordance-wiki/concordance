@@ -236,5 +236,5 @@ export function typeRelations(input: TypeRelationsInput): TypeRelationsResult {
       findings.push(ambiguous(link, { from: entities.get(link.from), to: entities.get(link.to) }));
     }
   }
-  return { links, findings: findings.sort(compareFindings) };
+  return { links, findings: findings.toSorted(compareFindings) };
 }

@@ -18,6 +18,9 @@ const gap = (message) => gaps.push(message);
 const CHROME_SLOTS = new Set(["Shell", "Header", "Footer"]);
 const FALLBACK_TYPE = "document";
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 function walk(dir, predicate, out = []) {
   for (const name of readdirSync(dir).sort()) {
     const path = join(dir, name);
@@ -122,7 +125,7 @@ const checks = readdirSync(checkDir)
     const family = /\*\*Family:\*\*\s*([^.]+)\./.exec(readFileSync(join(checkDir, name), "utf8"));
     return { id, family: family ? family[1].trim() : undefined };
   });
-const families = [...new Set(checks.flatMap((c) => (c.family ? [c.family] : [])))].sort();
+const families = [...new Set(checks.flatMap((c) => (c.family ? [c.family] : [])))].sort(byCodeUnit);
 
 const slotsSource = readFileSync(join(root, "packages/site/src/slots.ts"), "utf8");
 const slotList = /SLOT_NAMES = \[([^\]]*)\]/.exec(slotsSource);
@@ -137,7 +140,7 @@ const activeTypes = Object.entries(profile.types)
 const schema = JSON.parse(
   readFileSync(join(root, "packages/core/schemas/config.schema.json"), "utf8"),
 );
-const configKeys = Object.keys(schema.properties).sort();
+const configKeys = Object.keys(schema.properties).sort(byCodeUnit);
 
 // 2. What the wiki holds: every note of every source the demo configuration declares,
 //    with the type the cascade gives it.

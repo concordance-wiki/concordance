@@ -28,6 +28,11 @@ export interface FileSystem {
 /** Folders never read: a repository's own history and installed packages, whose READMEs are not notes. */
 const SKIPPED_FOLDERS = new Set([".git", "node_modules"]);
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function walk(root: string, directory: string, out: string[]): void {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (SKIPPED_FOLDERS.has(entry.name)) continue;
@@ -58,7 +63,7 @@ export const nodeFileSystem: FileSystem = {
   listFiles: (directory) => {
     const files: string[] = [];
     walk(directory, directory, files);
-    return files.sort();
+    return files.sort(byCodeUnit);
   },
   modifiedAt: (path) => statSync(path).mtime.toISOString(),
 };
@@ -128,7 +133,7 @@ export function memoryFileSystem(
               .some((segment) => SKIPPED_FOLDERS.has(segment)),
         )
         .map((key) => key.slice(prefix.length))
-        .sort();
+        .sort(byCodeUnit);
     },
     modifiedAt: (path) => stamps.get(path) ?? "1970-01-01T00:00:00.000Z",
   };

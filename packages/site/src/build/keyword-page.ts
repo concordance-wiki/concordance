@@ -116,7 +116,7 @@ export function locatedGroupsOf(
     )
     .map((entry) => ({
       ...entry,
-      group: { ...entry.group, passages: entry.group.passages.sort((a, b) => a.line - b.line) },
+      group: { ...entry.group, passages: entry.group.passages.toSorted((a, b) => a.line - b.line) },
     }));
 }
 

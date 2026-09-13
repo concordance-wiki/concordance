@@ -19,6 +19,9 @@ const fail = (message) => failures.push(message);
 const ajv = new Ajv2020({ strict: true, allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 function walk(dir, predicate, out = []) {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
@@ -103,7 +106,7 @@ for (const slug of modules) {
   }
   const messages = JSON.parse(readFileSync(messagesFile, "utf8"));
   const keys = Object.keys(messages);
-  if (keys.join() !== [...keys].sort().join()) {
+  if (keys.join() !== [...keys].sort(byCodeUnit).join()) {
     fail(`packages/profile/types/${slug}/messages/en.json: keys are not sorted`);
   }
   for (const key of [
@@ -302,7 +305,7 @@ for (const match of page.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)[^>]*?(\/?)>/g))
   if (voidTags.has(tag) || selfClosing) continue;
   opened.set(tag, (opened.get(tag) ?? 0) + (closing ? -1 : 1));
 }
-for (const [tag, balance] of [...opened].sort()) {
+for (const [tag, balance] of [...opened].sort(([a], [b]) => byCodeUnit(a, b))) {
   if (balance !== 0)
     fail(`docs/site/index.html: <${tag}> opened and closed an unequal number of times`);
 }

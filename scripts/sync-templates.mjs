@@ -21,11 +21,14 @@ for (const slug of readdirSync(modules).sort()) {
 }
 
 mkdirSync(copy, { recursive: true });
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 const wanted = new Set(readdirSync(source));
 for (const name of readdirSync(copy)) {
   if (!wanted.has(name)) rmSync(join(copy, name));
 }
-for (const name of [...wanted].sort()) {
+for (const name of [...wanted].sort(byCodeUnit)) {
   copyFileSync(join(source, name), join(copy, name));
 }
 console.log(

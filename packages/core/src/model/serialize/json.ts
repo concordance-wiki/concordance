@@ -1,3 +1,8 @@
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -11,7 +16,7 @@ export function sortKeysDeep(value: unknown): unknown {
     return value;
   }
   const sorted: Record<string, unknown> = {};
-  for (const key of Object.keys(value).sort()) {
+  for (const key of Object.keys(value).sort(byCodeUnit)) {
     sorted[key] = sortKeysDeep(value[key]);
   }
   return sorted;
