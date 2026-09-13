@@ -6,8 +6,8 @@ import { pagePath } from "@concordance-wiki/core";
 export const HOME_PAGE = "index.html";
 export const INDEX_PAGE = "index/index.html";
 export const TODO_PAGE = "todo/index.html";
-/** The placeholder of the search index: `{ entries: [{ id, title, type, url }] }` until the real index exists. */
-export const SEARCH_INDEX = "search-index.json";
+/** The results page; the files of the index sit next to it under `search/`. */
+export const SEARCH_PAGE = "search/index.html";
 export const ASSETS_DIRECTORY = "assets";
 export const FRAGMENTS_DIRECTORY = "fragments";
 

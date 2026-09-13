@@ -70,7 +70,7 @@ describe("fragments", () => {
     expect(parseFragment(serializeFragment(note), "f.json")).toEqual(note);
   });
 
-  it("refuses text that is not JSON, not an object with an id, or whose sections, passages or images have another shape, naming the file", () => {
+  it("refuses text that is not JSON, not an object with an id, or whose sections, passages, images or text have another shape, naming the file", () => {
     expect(() => parseFragment("{", "f.json")).toThrow(FragmentError);
     expect(() => parseFragment("{", "f.json")).toThrow(/^f\.json: not valid JSON: /);
     expect(() => parseFragment("[]", "f.json")).toThrow(
@@ -101,6 +101,12 @@ describe("fragments", () => {
         "f.json",
       ),
     ).toThrow("images must be a list");
+    expect(() => parseFragment('{"id": "a/b", "sections": [], "text": 3}', "f.json")).toThrow(
+      "f.json: text must be a string",
+    );
+    expect(parseFragment('{"id": "a/b", "sections": [], "text": "A page."}', "f.json").text).toBe(
+      "A page.",
+    );
     const error = (() => {
       try {
         parseFragment("null", "f.json");

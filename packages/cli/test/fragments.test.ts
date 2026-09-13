@@ -226,6 +226,20 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
       ["plugin/operation", 0],
     ]);
     expect(fragments[0]?.sections[0]?.html).toBe("<p>Lists the mentions.</p>");
+    expect(fragments.map((fragment) => fragment.text)).toEqual([
+      "Lists the mentions.",
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it("carries the plain text of the note for the search index, links and emphasis flattened, headings included", () => {
+    const [keywordPage] = fragmentsOf(input());
+    expect(keywordPage?.text).toContain("Not to be confused with");
+    expect(keywordPage?.text).toContain("mentions panel");
+    expect(keywordPage?.text).not.toContain("<");
+    expect(keywordPage?.text).not.toContain("](");
   });
 
   it("keeps a link to a sibling source as written when cross-source links are off, the default", () => {
@@ -280,6 +294,7 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     expect(JSON.parse(written)).toEqual({
       id: "glossary/page",
       sections: [{ id: "section-lead", html: "<p>A page of the site.</p>" }],
+      text: "A page of the site.",
     });
   });
 });

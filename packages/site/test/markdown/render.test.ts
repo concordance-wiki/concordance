@@ -217,10 +217,60 @@ describe("renderMarkdown", () => {
   });
 
   it("returns no title and no section for an empty note, and no lead when the body opens with a heading", () => {
-    expect(renderMarkdown("")).toEqual({ sections: [] });
-    expect(renderMarkdown("---\ntype: term\n---\n")).toEqual({ sections: [] });
+    expect(renderMarkdown("")).toEqual({ sections: [], text: "" });
+    expect(renderMarkdown("---\ntype: term\n---\n")).toEqual({ sections: [], text: "" });
     const rendered = renderMarkdown("# Title\n\n## Only\n");
     expect(rendered.sections).toEqual([{ id: "section-only", heading: "Only", html: "" }]);
+  });
+
+  it("gives the plain text of the body for the search index: headings and prose one block per line, lists and tables item by item, code and raw HTML left out", () => {
+    const rendered = renderMarkdown(
+      [
+        "---",
+        "type: screen",
+        "---",
+        "# Search results",
+        "",
+        "The **results** page of the [site](site.md), first  ",
+        "line broken.",
+        "",
+        "## Objects",
+        "",
+        "- Reads: entity",
+        "- Reads: `keyword page`",
+        "",
+        "> A quoted rule.",
+        "",
+        "```yaml",
+        "build: { output: dist }",
+        "```",
+        "",
+        "<div>raw</div>",
+        "",
+        "---",
+        "",
+        "| Column | Count |",
+        "|---|---|",
+        "| shards | 20 |",
+        "",
+      ].join("\n"),
+    );
+    expect(rendered.text).toBe(
+      [
+        "The results page of the site, first line broken.",
+        "Objects",
+        "Reads: entity",
+        "Reads: keyword page",
+        "A quoted rule.",
+        "Column",
+        "Count",
+        "shards",
+        "20",
+      ].join("\n"),
+    );
+    expect(rendered.text).not.toContain("output");
+    expect(rendered.text).not.toContain("raw");
+    expect(rendered.text).not.toContain("Search results");
   });
 
   it("reads the heading text through its inline markup, an image contributing nothing", () => {

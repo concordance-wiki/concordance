@@ -96,8 +96,10 @@ describe("An integration test builds the golden corpus twice and compares the fi
       expect(paths).toContain("build.log.json");
       expect(paths).toContain("model.json");
       expect(paths).toContain("index.html");
-      expect(paths).toContain("search-index.json");
+      expect(paths).toContain("search/meta.js");
+      expect(paths).toContain("search/index.html");
       expect(paths.some((path) => path.startsWith("fragments/"))).toBe(true);
+      expect(paths.filter((path) => /^search\/[^/]+\.js$/.test(path)).length).toBeGreaterThan(5);
       expect(paths.some((path) => /^assets\/mentions-panel-[A-Z0-9]+\.js$/.test(path))).toBe(true);
       expect(paths.filter((path) => path.endsWith("/index.html")).length).toBeGreaterThan(3);
       expect(listTree(second)).toEqual(listTree(first));

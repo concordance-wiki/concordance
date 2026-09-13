@@ -8,7 +8,7 @@ import { siteDocuments } from "../../src/build/site.js";
 import { DOCUMENT_WITHOUT_MARKDOWN, documentsOf, termsOf, todoOf } from "../../src/build/todo.js";
 import type { IslandBundle } from "../../src/islands/bundle.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
-import { fragments, keyword, model, profile } from "./fixture.js";
+import { fragments, keyword, model, profile, tokenize } from "./fixture.js";
 
 function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
   return siteContext({
@@ -23,6 +23,7 @@ function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
 const bundles: IslandBundle[] = [
   { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
   { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
+  { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
 ];
 
 /** Findings of every other kind, which the page must ignore. */
@@ -92,7 +93,7 @@ describe("documentsOf", () => {
 });
 
 describe("The to-do page is reachable from the home page and the header with its count", () => {
-  const documents = siteDocuments(
+  const { documents } = siteDocuments(
     {
       model: model({ findings: [...model().findings, ...otherFindings] }),
       fragments,
@@ -100,6 +101,7 @@ describe("The to-do page is reachable from the home page and the header with its
       theme: defaultTheme,
       locale: "en",
       projectName: "Concordance notes",
+      tokenize,
     },
     bundles,
   );

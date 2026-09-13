@@ -70,8 +70,11 @@ describe("One mentions fragment per entity, never a global index, on the realist
     }
     expect(
       files.filter((file) => file.endsWith(".json") && !file.startsWith("fragments/")),
-    ).toEqual(["build.log.json", "model.json", "search-index.json"]);
+    ).toEqual(["build.log.json", "model.json"]);
     expect(files.filter((file) => /^fragments\/[^/]+$/.test(file))).toEqual([]);
+    // The search index is one meta file and its shards, JavaScript so that a file:// page loads them.
+    expect(files.filter((file) => file.startsWith("search/"))).toContain("search/meta.js");
+    expect(files.some((file) => /^search\/[a-z0-9]{2}\.js$/.test(file))).toBe(true);
   });
 
   it("keeps every fragment under two hundred kilobytes and the largest page under the budget", () => {

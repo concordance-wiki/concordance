@@ -7,12 +7,21 @@ import type { Profile } from "@concordance-wiki/profile";
 import { parse } from "yaml";
 
 import type { EntityFragment } from "../../src/build/fragments.js";
+import type { SearchTokenizer } from "../../src/search/build.js";
+import { normalizeQuery, trimEdges } from "../../src/search/shared.js";
 
 // Read from the test file's own location, which stays a file URL under every test environment;
 // the profile package validates this file in its own tests, so the parsed document is a Profile.
 const defaultProfile = resolve(fileURLToPath(import.meta.url), "../../../../profile/default.yaml");
 
 export const profile = parse(readFileSync(defaultProfile, "utf8")) as Profile;
+
+/** Folds case and accents like the language packs, without their singular forms: enough for the site tests. */
+export const tokenize: SearchTokenizer = (text) =>
+  normalizeQuery(text)
+    .split(" ")
+    .map(trimEdges)
+    .filter((word) => word.length >= 2);
 
 export function entity(overrides: Partial<Entity> & Pick<Entity, "id" | "type" | "title">): Entity {
   const [source = "specs", ...rest] = overrides.id.split("/");
@@ -346,6 +355,7 @@ export const fragments = new Map<string, EntityFragment>([
           html: "<p>An entity page.</p>",
         },
       ],
+      text: "A page built for every word above the threshold.\nNot to be confused with\nAn entity page.",
     },
   ],
   [

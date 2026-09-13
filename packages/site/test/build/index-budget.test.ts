@@ -5,11 +5,12 @@ import { SITE_PAGE_BUDGET, siteDocuments, type SiteInput } from "../../src/build
 import type { IslandBundle } from "../../src/islands/bundle.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import { localTargets } from "../helpers/links.js";
-import { entity, fragments, model, profile } from "./fixture.js";
+import { entity, fragments, model, profile, tokenize } from "./fixture.js";
 
 const bundles: IslandBundle[] = [
   { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
   { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
+  { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
 ];
 
 const subjects = [
@@ -56,11 +57,12 @@ function corpus(): SiteInput {
     theme: defaultTheme,
     locale: "en",
     projectName: "Concordance notes",
+    tokenize,
   };
 }
 
 describe("The alphabetical index of a realistic corpus is segmented to stay under the page weight budget", () => {
-  const documents = siteDocuments(corpus(), bundles);
+  const { documents } = siteDocuments(corpus(), bundles);
   const indexPages = documents.filter((document) => document.path.startsWith("index/"));
   const written = new Set(documents.map((document) => document.path));
 

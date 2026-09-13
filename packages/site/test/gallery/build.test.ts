@@ -46,6 +46,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(report.budget.islands.map((island) => island.name)).toEqual([
       "mentions-panel",
       "mode-switch",
+      "search",
     ]);
     expect(fileSystem.readText("/out/assets/site.css")).toContain(
       "@layer tokens, base, components, project;",
@@ -118,6 +119,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
       `gallery: ${String(galleryPages.length + 1)} pages written to /out`,
       expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+      expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
       expect.stringMatching(
         new RegExp(
           `^pages: ${String(galleryPages.length + 1)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`,

@@ -10,7 +10,7 @@ import {
   type FileSystem,
   type PluginRegistry,
 } from "@concordance-wiki/core";
-import { languagePack } from "@concordance-wiki/nlp";
+import { languagePack, searchTokens } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
@@ -150,11 +150,15 @@ export async function renderSite(
     projectName: config.project.name,
     names: siteNames(config),
     sourceRefs: sourceRefs(config),
+    tokenize: (text, locale) => searchTokens(text, languagePack(locale)),
     ...(config.project.edit_url === undefined ? {} : { editUrl: config.project.edit_url }),
     ...(config.build?.mentions_inline === undefined
       ? {}
       : { mentionsInline: config.build.mentions_inline }),
     ...(config.staleness === undefined ? {} : { staleness: config.staleness }),
+    ...(config.build?.extracted_text_max_chars === undefined
+      ? {}
+      : { bodyMaxChars: config.build.extracted_text_max_chars }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   for (const line of report.summary) {

@@ -12,6 +12,12 @@ import { count, expectBalanced } from "./helpers/html.js";
 
 const bundle: IslandBundle = { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 };
 const modeBundle: IslandBundle = { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 };
+const searchBundle: IslandBundle = {
+  name: "search",
+  file: "search-0123ABCD.js",
+  bytes: 1,
+  classic: true,
+};
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   return {
@@ -19,7 +25,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     locale: "en",
     title: "Keyword page",
     stylesheets: ["../assets/site.css"],
-    islands: [bundle, modeBundle],
+    islands: [bundle, modeBundle, searchBundle],
     assetsBase: "../assets/",
     header,
     footer,
@@ -53,12 +59,20 @@ describe("renderPage", () => {
   /** An entity nobody cites: its panel carries no island. */
   const uncited = { ...entityPage, mentions: { mentions: [], initial: 20 } };
 
-  it("loads no bundle but the mode switch of the header for a page without another island", () => {
+  it("loads no bundle but the mode switch and the search field of the header for a page without another island", () => {
     const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
-    expect(count(html, "<concordance-island")).toBe(1);
+    expect(count(html, "<concordance-island")).toBe(2);
     expect(count(html, '<script type="module"')).toBe(1);
     expect(html).toContain('<script type="module" defer src="../assets/mode-switch-DEF456.js">');
+  });
+
+  it("loads the bundle of a classic island with a deferred classic script tag, never as a module nor preloaded", () => {
+    const html = renderPage("EntityPage", entityPage, options());
+    expect(html).toContain('<script defer src="../assets/search-0123ABCD.js"></script>');
+    expect(html).not.toContain('<script type="module" defer src="../assets/search-0123ABCD.js">');
+    expect(html).not.toContain('<link rel="modulepreload" href="../assets/search-0123ABCD.js"');
+    expect(count(html, "<script defer")).toBe(1);
   });
 
   it("emits no module script at all when a theme's header carries no island", () => {
@@ -110,9 +124,9 @@ describe("renderPage", () => {
 
   it("fails when a page uses an island that was not bundled", () => {
     const page = { ...entityPage, mentions: { mentions: mentions(21), initial: 20 } };
-    expect(() => renderPage("EntityPage", page, options({ islands: [modeBundle] }))).toThrow(
-      "renderPage: island mentions-panel has no bundle",
-    );
+    expect(() =>
+      renderPage("EntityPage", page, options({ islands: [modeBundle, searchBundle] })),
+    ).toThrow("renderPage: island mentions-panel has no bundle");
   });
 
   it("escapes the serialised props so that a closing script tag in the data cannot break the page", () => {

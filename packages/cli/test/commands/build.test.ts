@@ -1,6 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 
 import {
   definePlugin,
@@ -16,7 +17,7 @@ import {
 } from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
-import { fragmentPath } from "@concordance-wiki/site";
+import { fragmentPath, searchFilePath } from "@concordance-wiki/site";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
@@ -46,18 +47,24 @@ const modelLines = (stdout: string[]): string[] =>
     stdout.findIndex((line) => line.startsWith("site: ")),
   );
 
-/** The site summary the rendering appends to stdout; the island sizes vary with the code, so their lines are matched. */
+/**
+ * The site summary the rendering appends to stdout; the island sizes vary with the code, so their
+ * lines are matched. `pages` counts the pages of the model and the fixed ones, the search page apart.
+ */
 function expectSiteSummary(stdout: string[], pages: number, output: string): void {
   const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
+  const total = pages + 1;
   expect(lines).toEqual([
-    `site: ${String(pages)} pages written to ${output}`,
+    `site: ${String(total)} pages written to ${output}`,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+    expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
     expect.stringMatching(
-      new RegExp(`^pages: ${String(pages)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`),
+      new RegExp(`^pages: ${String(total)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`),
     ) as string,
     "accessibility: 0 findings",
     "contrast: 0 pairs below the minimum",
+    expect.stringMatching(/^search index: \d+\.\d kB in \d+ shards$/) as string,
   ]);
 }
 
@@ -744,6 +751,10 @@ describe("concordance build", () => {
       files: string[];
       /** The HTML pages by path. */
       pages: Map<string, string>;
+      /** The files of the search index under `search/`, by path. */
+      index: Map<string, string>;
+      /** The fragments, by path. */
+      fragments: Map<string, string>;
       stdout: string[];
       stderr: string[];
     }
@@ -791,6 +802,20 @@ describe("concordance build", () => {
     const expected = (corpus: string, file: string): unknown =>
       parse(readFileSync(join(corpora, corpus, "expected", file), "utf8"));
 
+    /** Reads an index file back the way the browser does: the script calls the global with its data. */
+    function readIndexFile(built: Built, name: string): unknown {
+      let received: unknown;
+      const window = {
+        __concordanceSearch: {
+          shard: (_n: string, data: unknown) => {
+            received = data;
+          },
+        },
+      };
+      runInNewContext(built.index.get(`search/${name}.js`) ?? "", { window });
+      return received;
+    }
+
     async function build(corpus: string): Promise<Built> {
       const output = mkdtempSync(join(tmpdir(), "concordance-build-"));
       const stdout: string[] = [];
@@ -816,6 +841,16 @@ describe("concordance build", () => {
           pages: new Map(
             files
               .filter((file) => file.endsWith(".html"))
+              .map((file) => [file, readFileSync(join(output, file), "utf8")]),
+          ),
+          index: new Map(
+            files
+              .filter((file) => /^search\/.*\.js$/.test(file))
+              .map((file) => [file, readFileSync(join(output, file), "utf8")]),
+          ),
+          fragments: new Map(
+            files
+              .filter((file) => file.startsWith("fragments/"))
               .map((file) => [file, readFileSync(join(output, file), "utf8")]),
           ),
           stdout,
@@ -959,12 +994,63 @@ describe("concordance build", () => {
         expect(built.files).toContain("index.html");
         expect(built.files).toContain("index/index.html");
         expect(built.files).toContain("todo/index.html");
-        expect(built.files).toContain("search-index.json");
+        expect(built.files).toContain("search/index.html");
+        expect(built.files).toContain("search/meta.js");
         expect(built.files).toContain("assets/site.css");
         expect(
           built.files.filter((file) => /^assets\/mentions-panel-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
-        expect(built.pages.size).toBe(built.model.entities.length + 3);
+        expect(
+          built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
+        ).toHaveLength(1);
+        expect(built.pages.size).toBe(built.model.entities.length + 4);
+      });
+
+      it("generates the search index at build, fragmented into shards under search/ that the page loads in pieces as the user types", () => {
+        const shards = [...built.index.keys()].filter((file) => file !== "search/meta.js");
+        // The realistic corpus is the one that measures the fragmentation; the minimal ones only prove the shape.
+        expect(shards.length).toBeGreaterThanOrEqual(corpus === "realistic/en" ? 20 : 1);
+        for (const shard of shards) {
+          expect(shard).toMatch(/^search\/[a-z0-9_]{1,10}\.js$/);
+          expect(Buffer.byteLength(built.index.get(shard) ?? "")).toBeLessThan(60_000);
+        }
+        const meta = readIndexFile(built, "meta") as {
+          entities: { id: string; type: string; url: string }[];
+          shards: string[];
+          types: Record<string, string>;
+          bytes: number;
+        };
+        expect(meta.entities.map((entry) => entry.id)).toEqual(
+          built.model.entities.map((e) => e.id),
+        );
+        expect(meta.entities.every((entry) => entry.url === pagePath(entry.id))).toBe(true);
+        expect(meta.shards.map(searchFilePath).sort()).toEqual([...shards].sort());
+        expect(meta.types["keyword"]).toBe(corpus === "minimal/fr" ? "Mot-clé" : "Keyword");
+        const total = [...built.index.values()].reduce(
+          (sum, content) => sum + Buffer.byteLength(content),
+          0,
+        );
+        expect(meta.bytes).toBe(total - Buffer.byteLength(built.index.get("search/meta.js") ?? ""));
+        expect(built.stdout).toContain(
+          `search index: ${(total / 1000).toFixed(1)} kB in ${String(shards.length)} shards`,
+        );
+      });
+
+      it("indexes the body of every note through its fragment, cut at build.extracted_text_max_chars", () => {
+        const index = built.model.entities.findIndex((e) => e.keyword !== true);
+        const note = built.model.entities[index]?.id ?? "";
+        const fragment = JSON.parse(built.fragments.get(fragmentPath(note)) ?? "{}") as {
+          text?: string;
+        };
+        expect(fragment.text).toBeDefined();
+        expect(fragment.text?.length).toBeGreaterThan(20);
+        const first = (fragment.text ?? "").split(/\W+/).find((word) => word.length > 4) ?? "";
+        const shard = readIndexFile(built, first.toLowerCase().slice(0, 2)) as Record<
+          string,
+          [number, number][]
+        >;
+        const pair = shard[first.toLowerCase()]?.find(([entity]) => entity === index);
+        expect(pair?.[1]).toBeGreaterThanOrEqual(1);
       });
 
       it("keeps every page under the 150 kB budget", () => {

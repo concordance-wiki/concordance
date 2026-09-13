@@ -34,7 +34,10 @@ export interface HeadAssets {
   inlineScripts?: string[];
   stylesheets: string[];
   modulePreloads: string[];
+  /** Module scripts, deferred by nature. */
   scripts: string[];
+  /** Classic scripts, written with `defer`: the islands that must run from a `file://` page in every browser. */
+  classicScripts?: string[];
   /** Href of the favicon; `type` is inferred from the extension. */
   favicon?: string;
 }
@@ -52,6 +55,13 @@ export interface SearchField {
   /** Page the query is submitted to, as a `GET` form with a `q` field. */
   action: string;
   placeholder: string;
+  /** Accessible name of the field; the theme's own label when absent. */
+  label?: string;
+  /**
+   * Href of the root of the site from the page, `../` for instance, where `search/` holds the
+   * index; absent when the site has no index, and the field then only submits.
+   */
+  root?: string;
 }
 
 export interface NavigationItem extends Link {
@@ -276,6 +286,8 @@ export interface SearchResult {
   title: string;
   href: string;
   typeLabel?: string;
+  /** Where the entity is filed: the titles of its application and domain, when it has them. */
+  breadcrumb?: string[];
   snippet?: string;
 }
 

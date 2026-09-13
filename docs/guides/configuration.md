@@ -221,7 +221,7 @@ The converted files are keyed by the SHA-256 of their source under `<cache>/conv
 | `fail_on.errors` | `true` | fail when any error finding exists |
 | `fail_on.unconverted_max` | 10 | fail beyond this many unconverted documents |
 | `mentions_inline` | 20 | mentions of an entity served in its page; the rest comes from the `fragments/<id>.mentions.json` of the entity |
-| `extracted_text_max_chars` | 20000 | extracted text indexed per document |
+| `extracted_text_max_chars` | 20000 | characters of the body of an entity that enter the search index: the plain text of its note today, the text extracted from its converted documents when conversion exists; the rest of the text is not searchable |
 
 `fail_on` is the only thing that makes the build fail on content: an anomaly is always recorded as a finding and the build goes on. With the defaults, one error finding is enough to exit with code 1, and so is the eleventh unconverted document; the log and the summary are written either way. A project that wants a site whatever the state of its notes declares:
 

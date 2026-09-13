@@ -1,5 +1,4 @@
 import {
-  canonicalJson,
   pagePath,
   type CanonicalModel,
   type Entity,
@@ -8,13 +7,16 @@ import {
 } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
 import type { Profile } from "@concordance-wiki/profile";
+import { h, type JSX } from "preact";
 
 import type { ContrastFinding } from "../a11y/contrast.js";
-import type { BudgetReport } from "../budget.js";
+import { formatKilobytes, type BudgetReport } from "../budget.js";
 import type { IslandBundle } from "../islands/bundle.js";
-import { renderPage, type PageSlot, type RenderOptions } from "../render.js";
-import type { SlotProps } from "../slots.js";
+import { renderDocument, type PageSlot, type RenderOptions } from "../render.js";
+import { buildSearchIndex, searchIndexFiles, type SearchTokenizer } from "../search/build.js";
+import type { SearchField, SlotProps } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
+import { SearchIsland } from "../theme/default/search-island.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import {
   assemblePages,
@@ -22,7 +24,7 @@ import {
   type PageReport,
   type WrittenDocument,
 } from "./assemble.js";
-import { message, siteContext, type SiteContext, type SiteNames } from "./context.js";
+import { message, siteContext, typeLabel, type SiteContext, type SiteNames } from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf } from "./entity-page.js";
 import type { EntityFragment } from "./fragments.js";
@@ -36,7 +38,7 @@ import {
   INDEX_PAGE,
   mentionsFragmentPath,
   relativeHref,
-  SEARCH_INDEX,
+  SEARCH_PAGE,
   TODO_PAGE,
 } from "./paths.js";
 import { todoOf } from "./todo.js";
@@ -65,6 +67,10 @@ export interface SiteInput {
   staleness?: StalenessConfig;
   /** The collation of the project locale, `compare` of its language pack, which orders the alphabetical index. */
   collate?: (a: string, b: string) => number;
+  /** The tokeniser of the search index; the commands give the one of the language packs. */
+  tokenize: SearchTokenizer;
+  /** `build.extracted_text_max_chars` of the configuration: characters of the body indexed per entity. */
+  bodyMaxChars?: number;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -81,10 +87,23 @@ export interface SiteReport {
   contrast: ContrastFinding[];
   /** Every file written under the output folder, sorted. */
   files: string[];
+  /** The search index written under `search/`: its weight and its number of shards. */
+  search: SearchIndexSize;
   /** Lines describing what was written. */
   summary: string[];
   /** One line per page over budget or accessibility finding; the site is written all the same. */
   warnings: string[];
+}
+
+export interface SearchIndexSize {
+  bytes: number;
+  shards: number;
+}
+
+/** The documents of a site: the pages, the index files, and the size of the index for the summary. */
+export interface SiteDocuments {
+  documents: WrittenDocument[];
+  search: SearchIndexSize;
 }
 
 interface SiteChrome {
@@ -116,6 +135,7 @@ function chromeFor(
   const header: SlotProps["Header"] = {
     siteTitle: chrome.siteTitle,
     homeHref: relativeHref(page, HOME_PAGE),
+    search: searchFieldOf(context, page),
     navigation: [
       { label: message(context, "site.index"), href: relativeHref(page, INDEX_PAGE) },
       {
@@ -146,20 +166,29 @@ function chromeFor(
   };
 }
 
-/** The placeholder of the search index: every page of the site, until the real index exists. */
-export function searchIndexOf(model: CanonicalModel): string {
-  return canonicalJson({
-    entries: model.entities.map((entity) => ({
-      id: entity.id,
-      title: entity.title,
-      type: entity.keyword === true ? "keyword" : entity.type,
-      url: pagePath(entity.id),
-    })),
-  });
+/** The search field of a page, in the header and in the search region of the home page: it submits to the results page. */
+function searchFieldOf(context: SiteContext, page: string): SearchField {
+  return {
+    action: relativeHref(page, SEARCH_PAGE),
+    placeholder: message(context, "site.searchPlaceholder"),
+    label: message(context, "site.search"),
+    root: siteRootOf(page),
+  };
+}
+
+/** The href of the root of the site from a page: `../` per folder, empty at the root. */
+export function siteRootOf(page: string): string {
+  const relative = relativeHref(page, ".");
+  return relative === "" ? "" : `${relative}/`;
+}
+
+/** The label of the type stored in the index: the keyword marker for a keyword page, the profile label otherwise. */
+function searchTypeLabel(context: SiteContext, type: string): string {
+  return type === "keyword" ? message(context, "keyword.title") : typeLabel(context, type);
 }
 
 /** Every document of the site, the pages and the search index, rendered against the given bundles. */
-export function siteDocuments(input: SiteInput, islands: IslandBundle[]): WrittenDocument[] {
+export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDocuments {
   const catalogue = loadCatalogue(input.locale, {
     ...(input.theme.config?.config.labels === undefined
       ? {}
@@ -179,10 +208,9 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
-  const render = <S extends PageSlot>(
+  const document = (
     page: string,
-    slot: S,
-    props: SlotProps[S],
+    body: JSX.Element,
     title: string,
     locale: string,
   ): WrittenDocument => {
@@ -198,8 +226,15 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
       header: chrome.header,
       footer: chrome.footer,
     };
-    return { path: page, content: renderPage(slot, props, options) };
+    return { path: page, content: renderDocument(body, options) };
   };
+  const render = <S extends PageSlot>(
+    page: string,
+    slot: S,
+    props: SlotProps[S],
+    title: string,
+    locale: string,
+  ): WrittenDocument => document(page, h(input.theme.components[slot], props), title, locale);
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
     return entity.keyword === true
@@ -238,40 +273,73 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
       href: letterHref(HOME_PAGE, letter, index.segmented),
       count,
     }));
-  return [
-    render(
-      HOME_PAGE,
-      "Home",
-      homeOf(context, siteTitle, { todoCount, letters }),
-      siteTitle,
-      input.locale,
-    ),
-    ...index.pages.map((page) =>
+  const searchTitle = message(context, "site.search");
+  // The results page is served empty: the island fills it from the query of the address.
+  const searchPage = document(
+    SEARCH_PAGE,
+    h(SearchIsland, {
+      root: siteRootOf(SEARCH_PAGE),
+      results: { query: "", total: 0, results: [], facets: [] },
+    }),
+    searchTitle,
+    input.locale,
+  );
+  const searchIndex = searchIndexFiles(
+    buildSearchIndex({
+      model: input.model,
+      fragments: input.fragments,
+      tokenize: input.tokenize,
+      typeLabel: (type) => searchTypeLabel(context, type),
+      ...(input.names === undefined ? {} : { names: input.names }),
+      ...(input.bodyMaxChars === undefined ? {} : { bodyMaxChars: input.bodyMaxChars }),
+    }),
+  );
+  return {
+    documents: [
       render(
-        page.path,
-        "Index",
-        page.props,
-        page.letter === undefined ? indexTitle : `${indexTitle} ${page.letter}`,
+        HOME_PAGE,
+        "Home",
+        {
+          ...homeOf(context, siteTitle, { todoCount, letters }),
+          search: searchFieldOf(context, HOME_PAGE),
+        },
+        siteTitle,
         input.locale,
       ),
-    ),
-    render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
-    ...input.model.entities.map(entityPage),
-    { path: SEARCH_INDEX, content: searchIndexOf(input.model) },
-    ...input.model.entities.flatMap(mentionsFragment),
-  ];
+      ...index.pages.map((page) =>
+        render(
+          page.path,
+          "Index",
+          page.props,
+          page.letter === undefined ? indexTitle : `${indexTitle} ${page.letter}`,
+          input.locale,
+        ),
+      ),
+      render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
+      searchPage,
+      ...input.model.entities.map(entityPage),
+      ...searchIndex.documents,
+      ...input.model.entities.flatMap(mentionsFragment),
+    ],
+    search: { bytes: searchIndex.bytes, shards: searchIndex.shards },
+  };
 }
 
 /** Writes the whole site from a model and its fragments; nothing here reads a source. */
 export async function buildSite(options: SiteOptions): Promise<SiteReport> {
   const { output, theme, fileSystem } = options;
+  let search: SearchIndexSize = { bytes: 0, shards: 0 };
   const assembled = await assemblePages({
     output,
     theme,
     fileSystem,
     fallback: defaultThemeConfig(options.projectName),
     maxPageBytes: options.maxPageBytes ?? SITE_PAGE_BUDGET,
-    documents: (islands) => siteDocuments(options, islands),
+    documents: (islands) => {
+      const site = siteDocuments(options, islands);
+      search = site.search;
+      return site.documents;
+    },
   });
   return {
     pages: assembled.pages,
@@ -279,9 +347,11 @@ export async function buildSite(options: SiteOptions): Promise<SiteReport> {
     overrides: theme.overrides,
     contrast: assembled.contrast,
     files: assembled.files,
+    search,
     summary: [
       `site: ${String(assembled.pages.length)} pages written to ${output}`,
       ...assemblySummary(assembled, theme),
+      `search index: ${formatKilobytes(search.bytes)} in ${String(search.shards)} shards`,
     ],
     warnings: assembled.problems,
   };

@@ -13,7 +13,7 @@ import { galleryDocuments, type GalleryDocument } from "../../src/gallery/build.
 import { defaultComponents } from "../../src/theme/default/index.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
-import { fragments, model, profile } from "../build/fixture.js";
+import { fragments, model, profile, tokenize } from "../build/fixture.js";
 
 const root = resolve(fileURLToPath(import.meta.url), "../../../../..");
 
@@ -29,6 +29,7 @@ const NEEDS_LAYOUT = ["color-contrast", "color-contrast-enhanced", "link-in-text
 const islands = [
   { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
   { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+  { name: "search", file: "search-00000000.js", bytes: 0, classic: true },
 ];
 
 /** Loads a rendered page into the test document, root attributes included, so that axe sees the page as served. */
@@ -84,9 +85,10 @@ describe("An automated audit (axe-core) runs in continuous integration and fails
       theme: defaultTheme,
       locale: "en",
       projectName: "Concordance notes",
+      tokenize,
     },
     islands,
-  ).filter((document) => document.path.endsWith(".html"));
+  ).documents.filter((document) => document.path.endsWith(".html"));
 
   for (const { path, content } of site) {
     it(`finds no violation at all on the site page ${path}, rendered from a model`, async () => {

@@ -7,11 +7,17 @@ import { build } from "esbuild";
 import { byCodeUnit } from "../order.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
+import { SEARCH_ISLAND } from "../search/shared.js";
 
 export interface IslandEntry {
   name: string;
   /** Absolute path of the hydration entry module. */
   entry: string;
+  /**
+   * Bundled as a classic script rather than a module: browsers load a classic script from a
+   * `file://` page, whereas a module script from `file://` is refused by some of them.
+   */
+  classic?: boolean;
 }
 
 export interface IslandBundle {
@@ -19,6 +25,8 @@ export interface IslandBundle {
   /** File name under the output folder, carrying a hash of the content. */
   file: string;
   bytes: number;
+  /** Loaded with a deferred classic script tag instead of a module one. */
+  classic?: boolean;
 }
 
 export interface BundleOptions {
@@ -39,6 +47,11 @@ export function defaultIslands(): IslandEntry[] {
       name: MODE_SWITCH_ISLAND,
       entry: fileURLToPath(new URL("./mode-switch.client", import.meta.url)),
     },
+    {
+      name: SEARCH_ISLAND,
+      entry: fileURLToPath(new URL("./search.client", import.meta.url)),
+      classic: true,
+    },
   ];
 }
 
@@ -51,7 +64,7 @@ export function contentHash(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex").slice(0, 8).toUpperCase();
 }
 
-/** One minified module per island, named after its content, written through the file system. */
+/** One minified script per island, a module unless the island asks for a classic one, named after its content, written through the file system. */
 export async function bundleIslands(options: BundleOptions): Promise<IslandBundle[]> {
   const fileSystem = options.fileSystem ?? nodeFileSystem;
   const bundles: IslandBundle[] = [];
@@ -61,7 +74,7 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
       outdir: options.outDir,
       entryNames: "[name]",
       bundle: true,
-      format: "esm",
+      format: island.classic === true ? "iife" : "esm",
       platform: "browser",
       target: "es2022",
       minify: true,
@@ -70,12 +83,20 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
       write: false,
       jsx: "automatic",
       jsxImportSource: "preact",
+      // No tsconfig lookup: a checkout has one next to the sources, a published package has none,
+      // and its strictness setting would otherwise decide whether the bundle starts with "use strict".
+      tsconfigRaw: {},
       logLevel: "silent",
     });
     for (const output of result.outputFiles) {
       const file = `${island.name}-${contentHash(output.contents)}.js`;
       fileSystem.writeBytes(`${options.outDir}/${file}`, output.contents);
-      bundles.push({ name: island.name, file, bytes: output.contents.byteLength });
+      bundles.push({
+        name: island.name,
+        file,
+        bytes: output.contents.byteLength,
+        ...(island.classic === true ? { classic: true } : {}),
+      });
     }
   }
   return bundles;
