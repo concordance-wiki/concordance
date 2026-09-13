@@ -34,6 +34,7 @@ const islands = [
   { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
   { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
   { name: "search", file: "search-00000000.js", bytes: 0, classic: true },
+  { name: "trail", file: "trail-00000000.js", bytes: 0 },
 ];
 
 /** Loads a rendered page into the test document, root attributes included, so that axe sees the page as served. */

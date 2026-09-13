@@ -68,7 +68,11 @@ The summary at the end reports entities per type, links per method, keyword page
 | `assets/` | `site.css`, the project stylesheet when `theme.yaml` names one, the island bundles named after their content, the pdf.js viewer and its worker when the site shows a PDF, and the favicon and logo of the theme |
 | `model.json`, `build.log.json`, `fragments/` | what the build wrote for the rendering, kept next to the site; see below |
 
-The URL of a page follows the identifier of its entity and nothing else, so it stays the same from one build to the next as long as the identifier does. The main content of every page is in the served HTML: the text of the note, the section headings, the neighbours and the first mentions read without JavaScript, which only adds the mode switch, the disclosure of the remaining mentions and the search. The page of a document adds its download link, a rail of its pages, slides or cues and their extracted text, all in the HTML, and a button that loads the pdf.js viewer on demand when the document has a PDF.
+The URL of a page follows the identifier of its entity and nothing else, so it stays the same from one build to the next as long as the identifier does. The main content of every page is in the served HTML: the text of the note, the section headings, the neighbours and the first mentions read without JavaScript, which only adds the mode switch, the trail, the disclosure of the remaining mentions and the search. The page of a document adds its download link, a rail of its pages, slides or cues and their extracted text, all in the HTML, and a button that loads the pdf.js viewer on demand when the document has a PDF.
+
+#### Keep a trail
+
+Under the header, the trail lists the pages you visited, in order, each a link. It travels in the URL as `#trail=glossary%2Fsource,glossary%2Fnote,…`, so copying the address of the page shares the path you followed and reloading restores it; following a link of the site carries it along. Press "Pin" to keep the trail in the browser between visits: the next visit starts from it, every page you then open joins it, and "Unpin" forgets it. Beyond twelve pages the oldest fold into one "… N earlier pages" entry that opens on demand. Nothing is fetched and nothing leaves the browser: the trail works over `file://` as it does behind a server, and without JavaScript it simply is not there. The [theming guide](theming.md#trail) describes the island, the URL format and the storage key.
 
 ### Search
 

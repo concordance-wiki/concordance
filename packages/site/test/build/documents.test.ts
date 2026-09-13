@@ -92,6 +92,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
       "mentions-panel",
       "mode-switch",
       "search",
+      "trail",
       "viewer-pdf",
       "viewer-pdf-worker",
     ]);
@@ -101,7 +102,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(viewer?.bytes).toBeGreaterThan(300_000);
     expect(worker?.bytes).toBeGreaterThan(1_000_000);
     expect(opener?.bytes).toBeLessThan(3_000);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(7);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(8);
     // The page loads the opener as any island; the viewer bundles are only named in its props.
     const loaded = references(html).filter((reference) => reference.includes("/assets/"));
     expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(2);
@@ -188,6 +189,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       "mentions-panel",
       "mode-switch",
       "search",
+      "trail",
     ]);
     const html = site.fileSystem.readText(`/dist/${page}`);
     expect(html).not.toContain('data-island="document-viewer"');
@@ -204,6 +206,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 1 },
       { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 1 },
       { name: "search", file: "search-00000000.js", bytes: 1 },
+      { name: "trail", file: "trail-00000000.js", bytes: 1 },
     ]);
     const html = documents.find((document) => document.path === page)?.content ?? "";
     expect(html).toContain('class="document-pdf"');

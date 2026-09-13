@@ -34,6 +34,33 @@ export type {
   ModeSwitchElement,
   ModeSwitchText,
 } from "./islands/mode-switch.js";
+export {
+  TRAIL_HASH_PARAMETER,
+  TRAIL_KEPT_MAX,
+  TRAIL_SHOWN_MAX,
+  TRAIL_STORAGE_KEY,
+  appendPage,
+  carryTrail,
+  condense,
+  parseTrailHash,
+  readTrail,
+  resolveTrail,
+  trailHash,
+  wireTrail,
+  writeTrail,
+} from "./islands/trail.js";
+export type {
+  CondensedTrail,
+  ResolvedTrail,
+  StoredTrail,
+  TrailAnchor,
+  TrailDocument,
+  TrailElement,
+  TrailEnvironment,
+  TrailHistory,
+  TrailLocation,
+  TrailStorage,
+} from "./islands/trail.js";
 export { MODES, MODE_SCRIPT, MODE_STORAGE_KEY } from "./mode.js";
 export type { ModeChoice } from "./mode.js";
 export { directionOf, renderDocument, renderPage, renderSlot } from "./render.js";
@@ -84,6 +111,7 @@ export {
   defaultThemeManifest,
   defaultUiComponents,
 } from "./theme/default/plugin.js";
+export { TRAIL_ISLAND, Trail, defaultTrailLabels } from "./theme/default/trail.js";
 export { loadTheme } from "./theme/load.js";
 export type {
   ResolvedThemeConfig,
@@ -147,6 +175,7 @@ export {
   isContractUrl,
   mentionsFragmentPath,
   relativeHref,
+  siteRootOf,
 } from "./build/paths.js";
 export { DEFAULT_MENTIONS_INLINE, mentionsOf, mentionsPanelOf } from "./build/mentions.js";
 export type { MentionsFragment } from "./build/mentions.js";
@@ -163,7 +192,7 @@ export type {
 export { defaultThemeConfig } from "./build/default-theme.js";
 export { assemblePages, assemblySummary } from "./build/assemble.js";
 export type { Assembled, AssembleOptions, PageReport, WrittenDocument } from "./build/assemble.js";
-export { SITE_PAGE_BUDGET, buildSite, siteDocuments, siteRootOf } from "./build/site.js";
+export { SITE_PAGE_BUDGET, buildSite, siteDocuments } from "./build/site.js";
 export type {
   SearchIndexSize,
   SiteDocuments,

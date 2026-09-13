@@ -9,6 +9,7 @@ import {
   INDEX_PAGE,
   mentionsFragmentPath,
   SEARCH_PAGE,
+  siteRootOf,
   TODO_PAGE,
 } from "../../src/build/paths.js";
 import {
@@ -97,6 +98,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "mentions-panel",
       "mode-switch",
       "search",
+      "trail",
     ]);
   });
 
@@ -428,7 +430,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.summary[0]).toBe("site: 11 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(5);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(6);
     expect(
       report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
@@ -454,6 +456,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
       "mode-switch",
       "pdf-viewer",
       "search",
+      "trail",
     ]);
     const viewer = report.budget.islands.find((island) => island.name === "contract-viewer");
     expect(fileSystem.readText(`/dist/assets/${viewer?.file ?? ""}`)).toContain(
@@ -670,6 +673,7 @@ describe("siteDocuments", () => {
     { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
     { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
+    { name: "trail", file: "trail-789ABC.js", bytes: 1 },
   ];
 
   it("renders the same documents as the build, in a fixed order, from the bundles it is given", () => {
@@ -735,6 +739,39 @@ describe("siteDocuments", () => {
     expect(home?.content).toContain(
       '<li class="home-item stale"><a href="glossary/keyword-page/index.html">Keyword page</a><time datetime="2026-09-01">Sep 1, 2026</time><span class="stale-mark">dormant</span></li>',
     );
+  });
+
+  it("gives the trail of every page its labels in the site language, the way to the root and, on an entity page, the page itself", () => {
+    const { documents } = siteDocuments(options({ locale: "fr" }), bundles);
+    const trailOf = (path: string): unknown => {
+      const html = documents.find((document) => document.path === path)?.content ?? "";
+      const match =
+        /<concordance-island data-island="trail" data-props="([^"]*)"><\/concordance-island>/.exec(
+          html,
+        );
+      return JSON.parse((match?.[1] ?? "null").replaceAll("&quot;", '"'));
+    };
+    const labels = {
+      title: "Parcours",
+      pin: "Épingler",
+      unpin: "Désépingler",
+      empty: "Aucune page épinglée",
+      earlier: "pages précédentes",
+    };
+    expect(trailOf(HOME_PAGE)).toEqual({ base: "", labels });
+    expect(trailOf(TODO_PAGE)).toEqual({ base: "../", labels });
+    expect(trailOf("glossary/keyword-page/index.html")).toEqual({
+      base: "../../",
+      labels,
+      current: { id: "glossary/keyword-page", title: "Keyword page" },
+    });
+    expect(trailOf("specs/screens/mentions-panel/index.html")).toEqual({
+      base: "../../../",
+      labels,
+      current: { id: "specs/screens/mentions-panel", title: "Mentions panel" },
+    });
+    expect(siteRootOf("index.html")).toBe("");
+    expect(siteRootOf("todo/index.html")).toBe("../");
   });
 
   it("links the edit page of the forge from the source URL of the model and the declared refs when no pattern is configured", () => {

@@ -91,6 +91,7 @@ export const messageArguments = {
   "todo.severity.info": {},
   "todo.severity.warning": {},
   "todo.title": {},
+  "trail.earlier": {},
   "trail.empty": {},
   "trail.pin": {},
   "trail.title": {},
