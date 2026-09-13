@@ -6,3 +6,5 @@ unpublished:
   - { text: démarrage à froid, reason: "2 occurrences in 1 file" }
   - { text: reconstruction incrémentale, reason: "1 occurrence" }
   - { text: marque blanche, reason: "defined in the glossary; its only citation is excluded by privacy.exclude" }
+  - { text: dernier build, reason: "starts with a stopword of the language pack" }
+  - { text: 180 jours, reason: "ends with a stopword of the language pack" }

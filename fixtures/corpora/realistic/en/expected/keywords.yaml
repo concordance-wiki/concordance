@@ -6,3 +6,5 @@ unpublished:
   - { text: cold start, reason: "2 occurrences in 1 file" }
   - { text: incremental rebuild, reason: "1 occurrence" }
   - { text: white label, reason: "defined in the glossary; its only citation is excluded by privacy.exclude" }
+  - { text: last build, reason: "starts with a stopword of the language pack" }
+  - { text: 180 days, reason: "ends with a stopword of the language pack" }
