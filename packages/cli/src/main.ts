@@ -3,6 +3,7 @@ import { exportCommand } from "./commands/export.js";
 import { galleryCommand } from "./commands/gallery.js";
 import { initCommand } from "./commands/init.js";
 import { lintCommand } from "./commands/lint.js";
+import { renderCommand } from "./commands/render.js";
 import { validateConfigCommand } from "./commands/validate-config.js";
 import { exitCodes, type CommandIo, type ExitCode } from "./io.js";
 
@@ -14,6 +15,7 @@ const commands: Record<string, Command> = {
   gallery: galleryCommand,
   init: initCommand,
   lint: lintCommand,
+  render: renderCommand,
   "validate-config": validateConfigCommand,
 };
 
@@ -21,7 +23,7 @@ export const usage = [
   "usage: concordance <command> [options]",
   "",
   "commands:",
-  "  build [--config file] [--output dir]  validate the configuration and build the site",
+  "  build [--config file] [--output dir]  validate the configuration, build the model and render the site",
   "  export [--format cypher] [--model dist/model.json] [--output file]",
   "                                        turn the model into a Cypher script (stdout by default)",
   "  gallery [--output dir] [--theme plugin] [--config file]",
@@ -30,6 +32,8 @@ export const usage = [
   "  lint [--scope repo|global] [--source name] [--config file] [--fail-on error|warning|info]",
   "       [--format text|json|sarif|junit] [--output file]",
   "                                        check the current repository alone, or against the published model",
+  "  render [--model dist/model.json] [--output dir] [--config file]",
+  "                                        render the site again from an existing model, without the sources",
   "  validate-config [--config file]       check the configuration and report its errors",
   "",
   "exit codes: 0 ok, 1 invalid configuration or findings, 2 execution error",

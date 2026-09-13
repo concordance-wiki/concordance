@@ -127,6 +127,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | @types/esrecurse | 4.3.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/estree | 1.0.9 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/gensync | 1.0.5 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/hast | 3.0.5 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/jsesc | 2.5.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/json-schema | 7.0.15 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/mdast | 4.0.4 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
@@ -146,6 +147,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | @typescript-eslint/typescript-estree | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
 | @typescript-eslint/utils | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
 | @typescript-eslint/visitor-keys | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @ungap/structured-clone | 1.4.0 | ISC | runtime | <https://github.com/ungap/structured-clone> |
 | @vitest/coverage-v8 | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
 | @vitest/expect | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
 | @vitest/mocker | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
@@ -180,8 +182,11 @@ Every package of this repository is published under the [GNU General Public Lice
 | chai | 6.2.2 | MIT | development | <https://github.com/chaijs/chai> |
 | chalk | 5.6.2 | MIT | development | <https://github.com/chalk/chalk> |
 | character-entities | 2.0.2 | MIT | runtime | <https://github.com/wooorm/character-entities> |
+| character-entities-html4 | 2.1.0 | MIT | runtime | <https://github.com/wooorm/character-entities-html4> |
+| character-entities-legacy | 3.0.0 | MIT | runtime | <https://github.com/wooorm/character-entities-legacy> |
 | chardet | 2.2.0 | MIT | development | <https://github.com/runk/node-chardet> |
 | cli-width | 4.1.0 | ISC | development | <https://github.com/knownasilya/cli-width> |
+| comma-separated-tokens | 2.0.3 | MIT | runtime | <https://github.com/wooorm/comma-separated-tokens> |
 | commander | 14.0.3 | MIT | development | <https://github.com/tj/commander.js> |
 | convert-source-map | 2.0.0 | MIT | development | <https://github.com/thlorenz/convert-source-map> |
 | cross-spawn | 7.0.6 | MIT | development | <https://github.com/moxystudio/node-cross-spawn> |
@@ -249,9 +254,13 @@ Every package of this repository is published under the [GNU General Public Lice
 | has-symbols | 1.1.0 | MIT | development | <https://github.com/inspect-js/has-symbols> |
 | hashery | 1.5.1 | MIT | development | <https://github.com/jaredwray/hashery> |
 | hasown | 2.0.4 | MIT | development | <https://github.com/inspect-js/hasOwn> |
+| hast-util-sanitize | 5.0.2 | MIT | runtime | <https://github.com/syntax-tree/hast-util-sanitize> |
+| hast-util-to-html | 9.0.5 | MIT | runtime | <https://github.com/syntax-tree/hast-util-to-html> |
+| hast-util-whitespace | 3.0.0 | MIT | runtime | <https://github.com/syntax-tree/hast-util-whitespace> |
 | hookified | 1.15.1 | MIT | development | <https://github.com/jaredwray/hookified> |
 | hookified | 2.2.0 | MIT | development | <https://github.com/jaredwray/hookified> |
 | html-escaper | 2.0.2 | MIT | development | <https://github.com/WebReflection/html-escaper> |
+| html-void-elements | 3.0.0 | MIT | runtime | <https://github.com/wooorm/html-void-elements> |
 | human-id | 4.2.1 | MIT | development | <https://github.com/RienNeVaPlus/human-id> |
 | human-signals | 8.0.1 | Apache-2.0 | development | <https://github.com/ehmicky/human-signals> |
 | iconv-lite | 0.7.3 | MIT | development | <https://github.com/pillarjs/iconv-lite> |
@@ -304,6 +313,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | mdast-util-gfm-table | 2.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-table> |
 | mdast-util-gfm-task-list-item | 2.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-task-list-item> |
 | mdast-util-phrasing | 4.1.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-phrasing> |
+| mdast-util-to-hast | 13.2.1 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-hast> |
 | mdast-util-to-markdown | 2.1.2 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-markdown> |
 | mdast-util-to-string | 4.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-string> |
 | micromark | 4.0.2 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark> |
@@ -369,12 +379,16 @@ Every package of this repository is published under the [GNU General Public Lice
 | prettier | 3.9.6 | MIT | development | <https://github.com/prettier/prettier> |
 | pretty-ms | 9.3.1 | MIT | development | <https://github.com/sindresorhus/pretty-ms> |
 | progress | 2.0.3 | MIT | development | <https://github.com/visionmedia/node-progress> |
+| property-information | 7.2.0 | MIT | runtime | <https://github.com/wooorm/property-information> |
 | punycode | 2.3.1 | MIT | development | <https://github.com/mathiasbynens/punycode.js> |
 | qified | 0.10.1 | MIT | development | <https://github.com/jaredwray/qified> |
 | qs | 6.15.1 | BSD-3-Clause | development | <https://github.com/ljharb/qs> |
+| rehype-sanitize | 6.0.0 | MIT | runtime | <https://github.com/rehypejs/rehype-sanitize> |
+| rehype-stringify | 10.0.1 | MIT | runtime | <https://github.com/rehypejs/rehype/tree/main/packages/rehype-stringify> |
 | remark-frontmatter | 5.0.0 | MIT | runtime | <https://github.com/remarkjs/remark-frontmatter> |
 | remark-gfm | 4.0.1 | MIT | runtime | <https://github.com/remarkjs/remark-gfm> |
 | remark-parse | 11.0.0 | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-parse> |
+| remark-rehype | 11.1.2 | MIT | runtime | <https://github.com/remarkjs/remark-rehype> |
 | remark-stringify | 11.0.0 | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-stringify> |
 | require-from-string | 2.0.2 | MIT | runtime | <https://github.com/floatdrop/require-from-string> |
 | rolldown | 1.2.8 | MIT | development | <https://github.com/rolldown/rolldown> |
@@ -393,8 +407,10 @@ Every package of this repository is published under the [GNU General Public Lice
 | sisteransi | 1.0.5 | MIT | development | <https://github.com/terkelg/sisteransi> |
 | source-map | 0.7.6 | BSD-3-Clause | development | <http://github.com/mozilla/source-map> |
 | source-map-js | 1.2.1 | BSD-3-Clause | development | <https://github.com/7rulnik/source-map-js> |
+| space-separated-tokens | 2.0.2 | MIT | runtime | <https://github.com/wooorm/space-separated-tokens> |
 | stackback | 0.0.2 | MIT | development | <https://github.com/shtylman/node-stackback> |
 | std-env | 4.2.0 | MIT | development | <https://github.com/unjs/std-env> |
+| stringify-entities | 4.0.4 | MIT | runtime | <https://github.com/wooorm/stringify-entities> |
 | strip-final-newline | 4.0.0 | MIT | development | <https://github.com/sindresorhus/strip-final-newline> |
 | strnum | 2.4.2 | MIT | runtime | <https://github.com/NaturalIntelligence/strnum> |
 | supports-color | 7.2.0 | MIT | development | <https://github.com/chalk/supports-color> |
@@ -403,6 +419,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | tinyglobby | 0.2.17 | MIT | development | <https://github.com/SuperchupuDev/tinyglobby> |
 | tinyrainbow | 3.1.1 | MIT | development | <https://github.com/tinylibs/tinyrainbow> |
 | tree-kill | 1.2.2 | MIT | development | <https://github.com/pkrumins/node-tree-kill> |
+| trim-lines | 3.0.1 | MIT | runtime | <https://github.com/wooorm/trim-lines> |
 | trough | 2.2.0 | MIT | runtime | <https://github.com/wooorm/trough> |
 | ts-api-utils | 2.5.0 | MIT | development | <https://github.com/JoshuaKGoldberg/ts-api-utils> |
 | tslib | 2.8.1 | 0BSD | development | <https://github.com/Microsoft/tslib> |
@@ -417,6 +434,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | unicorn-magic | 0.3.0 | MIT | development | <https://github.com/sindresorhus/unicorn-magic> |
 | unified | 11.0.5 | MIT | runtime | <https://github.com/unifiedjs/unified> |
 | unist-util-is | 6.0.1 | MIT | runtime | <https://github.com/syntax-tree/unist-util-is> |
+| unist-util-position | 5.0.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-position> |
 | unist-util-stringify-position | 4.0.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-stringify-position> |
 | unist-util-visit | 5.1.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit> |
 | unist-util-visit-parents | 6.0.2 | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit-parents> |

@@ -4,9 +4,7 @@ import { parseArgs } from "node:util";
 import { catalogue, createRegistry } from "@concordance-wiki/checks";
 import {
   assembleModel,
-  commandExists,
   formatIssue,
-  importPlugin,
   loadPlugins,
   serializeBuildLog,
   serializeModel,
@@ -14,7 +12,6 @@ import {
   summarize,
   type BuildLog,
   type Config,
-  type Finding,
   type ModelSource,
   type PluginLoaderDependencies,
 } from "@concordance-wiki/core";
@@ -28,8 +25,12 @@ import {
 } from "@concordance-wiki/profile";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
+import { writeFragments } from "../pipeline/fragments.js";
+import { formatFinding } from "./findings.js";
 import { runPipeline } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
+import { renderSite } from "./render.js";
+import { nodeThemeDependencies, type ThemeDependencies } from "./theme.js";
 import { loadConfigFile } from "./validate-config.js";
 
 export const defaultCacheDirectory = ".concordance-cache";
@@ -37,28 +38,33 @@ export const defaultOutputDirectory = "./dist";
 export const buildLogFile = "build.log.json";
 export const modelFile = "model.json";
 
-/** What the site generation will print until it exists: the model is complete, the pages are not. */
-export const renderUnavailable = "render: not available in this version";
-
-/** Module loading and network access, injected so that tests run plugins and contracts against doubles. */
+/** Module loading and network access, injected so that tests run plugins, contracts and themes against doubles. */
 export interface BuildDependencies extends PluginLoaderDependencies {
   /** Absent when the build must not touch the network. */
   fetch?: typeof fetch;
+  /** Loads a theme component; the real importer when absent. */
+  loadTheme?: ThemeDependencies["loadTheme"];
+  rootOf?: ThemeDependencies["rootOf"];
+  pluginFiles?: ThemeDependencies["pluginFiles"];
 }
 
 const nodeDependencies: BuildDependencies = {
-  load: importPlugin,
-  commandAvailable: commandExists,
+  ...nodeThemeDependencies,
   fetch: globalThis.fetch,
 };
 
-export function formatFinding(finding: Finding): string {
-  const where = [finding.source, finding.path, finding.line]
-    .filter((part) => part !== undefined)
-    .map(String)
-    .join(":");
-  return `${finding.severity}: ${finding.check}${where === "" ? "" : ` (${where})`}: ${finding.message}`;
+/** The theme loading of the build: what the caller injected, the real importer for the rest. */
+function themeDependencies(deps: BuildDependencies): ThemeDependencies {
+  return {
+    load: deps.load,
+    commandAvailable: deps.commandAvailable,
+    loadTheme: deps.loadTheme ?? nodeThemeDependencies.loadTheme,
+    ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
+    ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
+  };
 }
+
+export { formatFinding };
 
 function countLines(counts: Record<string, number>): string[] {
   return Object.entries(counts).map(([key, count]) => `  ${key}: ${String(count)}`);
@@ -89,7 +95,7 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
 }
 
 /** The merged profile and its fingerprint; undefined, with the issues printed, when the project profile is invalid. */
-function loadProfile(
+export function loadProfile(
   io: CommandIo,
   config: Config,
   configDirectory: string,
@@ -110,12 +116,13 @@ function loadProfile(
   return resolution.ok ? resolution : undefined;
 }
 
-/** What the `build` block records about each source: the name, and the commit and URL of a git source. */
+/** What the `build` block records about each source: the name, the file count, and the commit and URL of a git source. */
 export function modelSources(config: Config, ingested: readonly IngestedSource[]): ModelSource[] {
   return ingested.map((source) => {
     const declared = config.sources.find((candidate) => candidate.name === source.name);
     return {
       name: source.name,
+      files: source.files.length,
       ...(source.commit === undefined ? {} : { commit: source.commit }),
       ...(declared?.git === undefined ? {} : { url: declared.git }),
     };
@@ -211,6 +218,16 @@ export async function buildCommand(
     ...(result.contracts.length === 0 ? {} : { contracts: result.contracts }),
   });
   io.fs.writeText(join(output, modelFile), serializeModel(model));
+  writeFragments(
+    {
+      entities: result.entities,
+      sources: ingested.sources,
+      keywordMentions: result.keywordMentions,
+      config,
+      fs: io.fs,
+    },
+    output,
+  );
 
   for (const finding of log.findings) {
     io.err(formatFinding(finding));
@@ -218,7 +235,19 @@ export async function buildCommand(
   for (const line of formatSummary(log.summary)) {
     io.out(line);
   }
-  io.out(renderUnavailable);
+  const rendered = await renderSite(io, themeDependencies(deps), {
+    config,
+    configFile: loaded.file,
+    profile: resolved.profile,
+    model,
+    modelDirectory: output,
+    output,
+    command: "build",
+    registry: plugins.registry,
+  });
+  if (rendered !== exitCodes.ok) {
+    return rendered;
+  }
   // Conversion does not exist yet, so no document is left unconverted.
   const verdict = shouldFail(result.findings, config.build?.fail_on, 0);
   if (verdict.fail) {

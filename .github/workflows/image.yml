@@ -75,8 +75,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Build the golden corpus inside and outside the container
-        # The build exits 0 once its log and its model are written; any other
-        # status fails here, as it does in the determinism check.
+        # The build exits 0 once its log, its model, its fragments and its site
+        # are written; any other status fails here, as it does in the
+        # determinism check, and every file of the two trees is compared.
         run: |
           accept() {
             set +e
@@ -97,6 +98,7 @@ jobs:
           accept env SOURCE_DATE_EPOCH=0 node packages/cli/dist/bin.js build --config "$work/wiki/concordance.yaml" --output "$work/outside"
           accept docker run --rm -v "$work/wiki:/wiki" -e SOURCE_DATE_EPOCH=0 "$IMAGE:ci" build
           test -f "$work/wiki/dist/build.log.json"
+          test -f "$work/wiki/dist/index.html"
           node scripts/compare-builds.mjs "$work/outside" "$work/wiki/dist"
       - name: Check that the container writes nothing but dist and the cache
         run: |

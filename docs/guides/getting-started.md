@@ -81,17 +81,41 @@ concordance validate-config
 concordance build
 ```
 
-`validate-config` checks the file against the published schema and prints one line per problem: the path of the faulty key, the value received, the values expected. It exits with 0 when the configuration is valid, 1 when it is not, 2 when the file cannot be read. `build` runs the same validation as its first step and stops there when it fails, then loads the profile (the default one, merged with `profile` when the configuration names one; an invalid profile stops the build the same way), loads the plugins declared under `plugins:`, fetches every source into `.concordance-cache/sources/` (depth 1, updated on the next build) without ever writing into a source, and runs the inference chain described in the [architecture guide](architecture.md#the-build-pipeline): it parses every markdown file, types the notes, lets the source plugins import the contracts the API notes declare, builds the recognition dictionary of every locale, scans every note for the titles and aliases it holds, produces the links (written links, frontmatter references, mentions in sections and prose, co-occurrence), combines their confidences, discovers the recurring expressions without a note and publishes the keyword pages above the threshold, reconciles the notes that look like twin resources, runs the model checks, and writes `dist/model.json`, the [canonical model](architecture.md#canonical-model), with `dist/build.log.json`. A source it cannot reach is reported and skipped; see [private repositories](configuration.md#private-repositories) for credentials.
+`validate-config` checks the file against the published schema and prints one line per problem: the path of the faulty key, the value received, the values expected. It exits with 0 when the configuration is valid, 1 when it is not, 2 when the file cannot be read. `build` runs the same validation as its first step and stops there when it fails, then loads the profile (the default one, merged with `profile` when the configuration names one; an invalid profile stops the build the same way), loads the plugins declared under `plugins:`, fetches every source into `.concordance-cache/sources/` (depth 1, updated on the next build) without ever writing into a source, and runs the inference chain described in the [architecture guide](architecture.md#the-build-pipeline): it parses every markdown file, types the notes, lets the source plugins import the contracts the API notes declare, builds the recognition dictionary of every locale, scans every note for the titles and aliases it holds, produces the links (written links, frontmatter references, mentions in sections and prose, co-occurrence), combines their confidences, discovers the recurring expressions without a note and publishes the keyword pages above the threshold, reconciles the notes that look like twin resources, runs the model checks, and writes `dist/model.json`, the [canonical model](architecture.md#canonical-model), with `dist/build.log.json` and one fragment per entity under `dist/fragments/`; then it renders the site from those files alone, as `concordance render` does. A source it cannot reach is reported and skipped; see [private repositories](configuration.md#private-repositories) for credentials.
 
-The summary at the end reports entities per type, links per method, keyword pages generated and expressions under the threshold, the twin-resource statistics, and findings per severity and per check. The site generation (`concordance render`) does not exist yet: the build prints `render: not available in this version` after the summary and exits 0 with the model complete.
+The summary at the end reports entities per type, links per method, keyword pages generated and expressions under the threshold, the twin-resource statistics, and findings per severity and per check, then what the rendering wrote: the number of pages, the size of each island bundle, the largest page against the 150 kB budget, the accessibility findings and the palette pairs under the contrast minimum.
+
+### The site
+
+`dist/` holds the whole site once the build ends. Open `dist/index.html` in a browser: no server is needed, every link is relative and every page sits in its own folder as `index.html`, so the site reads over `file://` as it does behind a server, without any URL rewriting.
+
+| Path | What it is |
+|---|---|
+| `index.html` | the home page: the project name, the most cited entities as shortcuts, the counts of sources and files, and three entry points counting the entities by domain, by type and by application |
+| `<id>/index.html` | one page per entity, at the address of its identifier (`glossary/keyword-page/index.html`): the type badge and the highlighted properties the profile names, the title, the note rendered to HTML section by section, the properties panel, the neighbourhood, the mentions and the source file; a keyword page shows its counts, its passages grouped by file and its accompanying words instead |
+| `index/index.html` | the alphabetical index of every page, letters first, each entry with its type glyph or the "no note" mark and its citation count |
+| `todo/index.html` | the to-do page: the words above the threshold without a note, most cited first, and the documents without a markdown representation |
+| `search-index.json` | a placeholder for the search index: one entry per page with its identifier, title, type and URL, until the search exists |
+| `assets/` | `site.css`, the project stylesheet when `theme.yaml` names one, the island bundles named after their content, and the favicon and logo of the theme |
+| `model.json`, `build.log.json`, `fragments/` | what the build wrote for the rendering, kept next to the site; see below |
+
+The URL of a page follows the identifier of its entity and nothing else, so it stays the same from one build to the next as long as the identifier does. The main content of every page is in the served HTML: the text of the note, the section headings, the neighbours and the first mentions read without JavaScript, which only adds the mode switch and the disclosure of the remaining mentions. No preview of converted documents is written yet.
+
+### Render again without the sources
+
+```bash
+concordance render
+```
+
+`render` reads `dist/model.json` and the fragments next to it, and writes the site again under the same folder: after a change of `theme.yaml`, of the labels, or of the tool itself, the pages are rebuilt without cloning a source or running the inference chain. `--model` names another model file (its fragments are read from the folder holding it), `--output` another folder, `--config` another configuration; the configuration and the profile are read as the build reads them, for the site title, the locale, the plugins that bring a theme and the labels of the types. The command exits 0 when the site is written, 1 when the configuration, the profile, the theme or the model is invalid, 2 when the configuration or the model file is missing. A page over the budget or with an accessibility finding is a warning on stderr and in the summary, never a failure.
+
+The fragments are what lets the rendering forget the sources. The build writes `dist/fragments/<id>.json` for every entity: the note rendered to sanitised HTML, one section per heading with its identifier, its heading and its HTML, the written links already turned into page hrefs; for a keyword page, the passages where the expression was read, with their source, file, line and context. `render` reads them by identifier and renders an entity without one with no note text, with a warning that counts them.
 
 ### Findings and exit codes
 
 A content anomaly never stops the build: a file that is not UTF-8, a broken frontmatter or an unreachable source becomes a finding with an identifier, a severity, the file and line, a message and a remediation (see the [check pages](../checks/README.md)). Every finding is printed on stderr, and the summary on stdout counts sources, files, findings per severity and per check. The findings and the summary are written to `dist/build.log.json` (the folder is `--output`, else `build.output`, else `dist/` next to the configuration); the same `findings` array is embedded in `model.json`. The only timestamp in the log is its `at` field.
 
-Whether the build fails is decided by `build.fail_on` alone: by default it fails when any error finding exists and when more than ten documents could not be converted (`fail_on.errors`, `fail_on.unconverted_max`, see the [configuration guide](configuration.md#build)). Exit codes: 0 when the build succeeds, 1 when the configuration or the profile is invalid or the findings exceed `build.fail_on`, 2 on an execution error (a plugin that cannot be loaded, a missing stopword file). The log and the model are written before the verdict, so a failing build still leaves them for inspection.
-
-Once the site generation exists, `dist/index.html` will open in a browser over `file://`; no server will be needed.
+Whether the build fails is decided by `build.fail_on` alone: by default it fails when any error finding exists and when more than ten documents could not be converted (`fail_on.errors`, `fail_on.unconverted_max`, see the [configuration guide](configuration.md#build)). Exit codes: 0 when the build succeeds, 1 when the configuration or the profile is invalid or the findings exceed `build.fail_on`, 2 on an execution error (a plugin that cannot be loaded, a missing stopword file). The log, the model, the fragments and the site are written before the verdict, so a failing build still leaves them for inspection.
 
 ### Export the graph
 
@@ -115,7 +139,7 @@ The repository verifies this on every change: the golden corpora are built twice
 
 ## Publish
 
-`dist/` is a static folder. Copy it to GitHub Pages, GitLab Pages or any bucket. Pipeline examples for both forges are in the [configuration guide](configuration.md#continuous-integration).
+`dist/` is a static folder that needs no server-side configuration. Copy it as is to GitHub Pages or GitLab Pages, to an object storage bucket served as a static website, or to any web server: every page is a folder holding an `index.html`, so `https://wiki.example/glossary/keyword-page/` and `https://wiki.example/glossary/keyword-page/index.html` both work, and the pages link to each other through relative paths that resolve wherever the folder lands, at the root of a domain or under a prefix. Opening `dist/index.html` from a file manager works too, for a review before publishing or for a copy on a shared drive. Pipeline examples for both forges are in the [configuration guide](configuration.md#continuous-integration). The model and the log ship with the site; leave `fragments/` out of the copy if you do not want the rendered notes published twice, or keep everything so that `concordance render` can run from the published folder.
 
 ## Lint a knowledge repository
 

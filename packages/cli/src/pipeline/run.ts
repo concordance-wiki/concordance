@@ -16,6 +16,7 @@ import type {
 } from "@concordance-wiki/core";
 import { neighbourhoodToModel } from "@concordance-wiki/inference";
 import type { IngestedSource } from "@concordance-wiki/ingest";
+import type { KeywordMention } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 
 import { enrichStepFindings, runModelChecks } from "./checks.js";
@@ -61,6 +62,8 @@ export interface PipelineResult {
   displayedNeighbourhood: DisplayedNeighbourhood;
   contracts: ContractRecord[];
   keywords: KeywordCounts;
+  /** The mentions of every keyword page by identifier, which its fragment records as passages. */
+  keywordMentions: Map<string, KeywordMention[]>;
   duplicates: DuplicateCounts;
 }
 
@@ -170,6 +173,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     }),
     contracts: contributed.contracts,
     keywords: keywords.counts,
+    keywordMentions: keywords.mentions,
     duplicates: twins.counts,
   };
 }

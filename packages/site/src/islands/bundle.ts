@@ -1,4 +1,4 @@
-import { basename } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
@@ -42,6 +42,15 @@ export function defaultIslands(): IslandEntry[] {
   ];
 }
 
+/**
+ * The first eight hexadecimal characters, upper case, of the SHA-256 of the bytes: the bundler's
+ * own `[hash]` also folds in the path of the entry point, so it changes from one checkout to
+ * another for the same content; this one depends on the content alone.
+ */
+export function contentHash(bytes: Uint8Array): string {
+  return createHash("sha256").update(bytes).digest("hex").slice(0, 8).toUpperCase();
+}
+
 /** One minified module per island, named after its content, written through the file system. */
 export async function bundleIslands(options: BundleOptions): Promise<IslandBundle[]> {
   const fileSystem = options.fileSystem ?? nodeFileSystem;
@@ -50,7 +59,7 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
     const result = await build({
       entryPoints: { [island.name]: island.entry },
       outdir: options.outDir,
-      entryNames: "[name]-[hash]",
+      entryNames: "[name]",
       bundle: true,
       format: "esm",
       platform: "browser",
@@ -64,7 +73,7 @@ export async function bundleIslands(options: BundleOptions): Promise<IslandBundl
       logLevel: "silent",
     });
     for (const output of result.outputFiles) {
-      const file = basename(output.path);
+      const file = `${island.name}-${contentHash(output.contents)}.js`;
       fileSystem.writeBytes(`${options.outDir}/${file}`, output.contents);
       bundles.push({ name: island.name, file, bytes: output.contents.byteLength });
     }

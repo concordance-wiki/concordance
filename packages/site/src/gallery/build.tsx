@@ -2,14 +2,13 @@ import { h, type JSX } from "preact";
 
 import type { FileSystem } from "@concordance-wiki/core";
 
-import { checkAccessibility, type A11yFinding } from "../a11y/check.js";
-import { checkContrast, type ContrastFinding } from "../a11y/contrast.js";
-import { measureBudget, type BudgetReport, type PageSize } from "../budget.js";
-import { bundleIslands, defaultIslands, type IslandBundle } from "../islands/bundle.js";
-import { byCodeUnit } from "../order.js";
+import type { ContrastFinding } from "../a11y/contrast.js";
+import type { BudgetReport } from "../budget.js";
+import { assemblePages, assemblySummary, type PageReport } from "../build/assemble.js";
+import type { IslandBundle } from "../islands/bundle.js";
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
 import type { SlotProps } from "../slots.js";
-import { chromeOf, writeThemeAssets, type ThemeChrome } from "../theme/chrome.js";
+import { chromeOf, type ThemeChrome } from "../theme/chrome.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import { footer, galleryTheme, header } from "./fixtures.js";
 import { GalleryIndex } from "./index-page.js";
@@ -34,12 +33,7 @@ export interface GalleryDocument {
   html: string;
 }
 
-export interface GalleryPageReport {
-  /** File name under the output folder. */
-  path: string;
-  bytes: number;
-  findings: A11yFinding[];
-}
+export type GalleryPageReport = PageReport;
 
 export interface GalleryReport {
   /** Every page written, the index included, sorted by path. */
@@ -77,15 +71,6 @@ function body(page: GalleryPage, options: RenderOptions): string {
     default:
       return renderPage(page.rendered, page.props, options);
   }
-}
-
-function problemsOf(pages: GalleryPageReport[], budget: BudgetReport): string[] {
-  return [
-    ...budget.overBudget.map((page) => `${page.path}: over budget`),
-    ...pages.flatMap((page) =>
-      page.findings.map((finding) => `${page.path}: ${finding.rule}: ${finding.message}`),
-    ),
-  ];
 }
 
 interface FixtureChrome {
@@ -137,43 +122,25 @@ export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]):
 /** Writes every gallery page through the theme, measures them and checks their accessibility. */
 export async function buildGallery(options: GalleryOptions): Promise<GalleryReport> {
   const { output, theme, fileSystem } = options;
-  const assets = `${output}/assets`;
-  const islands = await bundleIslands({ outDir: assets, islands: defaultIslands(), fileSystem });
-  // The palette checked for contrast is the one the stylesheet is written from.
-  const source = theme.config ?? { config: galleryTheme, assets: [], fileSystem };
-  writeThemeAssets(source, fileSystem, assets);
-  const documents = galleryDocuments(theme, islands);
-  const pages: GalleryPageReport[] = [];
-  for (const { path, html } of documents) {
-    fileSystem.writeText(`${output}/${path}`, html);
-    pages.push({ path, bytes: Buffer.byteLength(html), findings: checkAccessibility(html) });
-  }
-  pages.sort((a, b) => byCodeUnit(a.path, b.path));
-  const sizes: PageSize[] = pages.map(({ path, bytes }) => ({ path, bytes }));
-  const budget = measureBudget(sizes, islands, {
+  const assembled = await assemblePages({
+    output,
+    theme,
+    fileSystem,
+    // The palette checked for contrast is the one the stylesheet is written from.
+    fallback: galleryTheme,
     maxPageBytes: options.maxPageBytes ?? GALLERY_PAGE_BUDGET,
+    documents: (islands) =>
+      galleryDocuments(theme, islands).map(({ path, html }) => ({ path, content: html })),
   });
-  const findings = pages.reduce((total, page) => total + page.findings.length, 0);
-  const contrast = checkContrast(source.config);
   return {
-    pages,
-    budget,
+    pages: assembled.pages,
+    budget: assembled.budget,
     overrides: theme.overrides,
-    contrast,
+    contrast: assembled.contrast,
     summary: [
-      `gallery: ${String(pages.length)} pages written to ${output}`,
-      ...(theme.config === undefined
-        ? []
-        : [`theme: ${theme.config.config.name}, from ${theme.config.file}`]),
-      ...theme.overrides.map(
-        (override) =>
-          `override ${override.slot}: plugin ${override.plugin}, theme ${override.theme}`,
-      ),
-      ...budget.summary,
-      `accessibility: ${String(findings)} findings`,
-      `contrast: ${String(contrast.length)} pairs below the minimum`,
-      ...contrast.map((finding) => `warning: contrast: ${finding.message}`),
+      `gallery: ${String(assembled.pages.length)} pages written to ${output}`,
+      ...assemblySummary(assembled, theme),
     ],
-    problems: problemsOf(pages, budget),
+    problems: assembled.problems,
   };
 }

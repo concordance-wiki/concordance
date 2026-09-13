@@ -8,10 +8,12 @@ import axe, { type AxeResults, type ImpactValue, type Result } from "axe-core";
 import { h, type JSX } from "preact";
 import { describe, expect, it } from "vitest";
 
+import { siteDocuments } from "../../src/build/site.js";
 import { galleryDocuments, type GalleryDocument } from "../../src/gallery/build.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
+import { fragments, model, profile } from "../build/fixture.js";
 
 const root = resolve(fileURLToPath(import.meta.url), "../../../../..");
 
@@ -69,6 +71,26 @@ describe("An automated audit (axe-core) runs in continuous integration and fails
   for (const { path, html } of documents) {
     it(`finds no violation at all on ${path}`, async () => {
       const results = await audit(html);
+      expect(blocking(results)).toEqual([]);
+      expect(results.violations.map(describeViolation)).toEqual([]);
+    });
+  }
+
+  const site = siteDocuments(
+    {
+      model: model(),
+      fragments,
+      profile,
+      theme: defaultTheme,
+      locale: "en",
+      projectName: "Concordance notes",
+    },
+    islands,
+  ).filter((document) => document.path.endsWith(".html"));
+
+  for (const { path, content } of site) {
+    it(`finds no violation at all on the site page ${path}, rendered from a model`, async () => {
+      const results = await audit(content);
       expect(blocking(results)).toEqual([]);
       expect(results.violations.map(describeViolation)).toEqual([]);
     });

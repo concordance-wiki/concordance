@@ -78,6 +78,8 @@ export interface DisplayedNeighbour {
   /** Where the links between the page and the neighbour point, seen from the page. */
   direction: "out" | "in" | "both";
   confidence: number;
+  /** Position of the neighbour's type in the `display.neighbours_order` of the page's type; unlisted types share the rank after the last one. */
+  rank: number;
 }
 
 /** The one-hop neighbours shown on the page of every entity, keyed by identifier, best first. */
