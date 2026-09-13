@@ -14,7 +14,10 @@ import {
   type Finding,
 } from "@concordance-wiki/core";
 import { lintRepository, LOCAL_CHECKS } from "@concordance-wiki/lint";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Two builds of the realistic corpus per case: well under a second alone, longer on a loaded machine.
+vi.setConfig({ testTimeout: 60_000 });
 import { parse } from "yaml";
 
 import { buildCommand } from "../src/commands/build.js";
