@@ -9,7 +9,7 @@ The generated site is a set of named slots rendered at build by Preact component
 | `Shell` | the document: `<html lang dir>`, the head assets (favicon, the mode script, stylesheets, bundles), the skip link, the body | everything |
 | `Header` | the site title linking home, the logo, the search field, the navigation with counts, the mode switch | — |
 | `Footer` | the version, the build instant, the project text and links, the optional credit of the tool | — |
-| `Home` | the title, the statistics, the search field with shortcuts, the three entry points | — |
+| `Home` | the title, the statistics, the search region (`data-slot="search"`, the field itself when the site has one) with the shortcuts, the three entry points, the link to the to-do page | — |
 | `EntityPage` | badge and highlights, title, the note as an article with its legend, side panel, sources | `Neighbourhood`, `MentionsPanel` |
 | `KeywordPage` | the banner, the three counts, passages by file, companions, similar forms | — |
 | `MentionsPanel` | two sections, written links and recognised mentions, grouped by file; the first `initial` inline, the rest from the fragment of the entity; sorting, filtering and a collapse-all once the island runs | — |
@@ -29,7 +29,7 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Shell` | `locale`, `direction` (`ltr` or `rtl`), `title`, `head: { inlineScripts?, stylesheets, modulePreloads, scripts, favicon? }`, `children` |
 | `Header` | `siteTitle`, `homeHref`, `logo?: { src, alt } \| { svg }`, `navigation: { label, href, count? }[]`, `search?: { action, placeholder }` |
 | `Footer` | `version`, `generatedAt`, `text?`, `links: { label, href }[]`, `credit` |
-| `Home` | `title`, `search?`, `shortcuts: { label, href }[]`, `stats: { sources, files, builtAt }`, `entries: { kind: "tree" \| "index" \| "recent", title, href, items: { label, href, count?, date?, stale? }[] }[]` |
+| `Home` | `title`, `search?`, `shortcuts: { label, href }[]`, `stats: { sources, files, builtAt, builtAtLabel? }`, `entries: { kind: "tree" \| "index" \| "recent", title, href?, items: { label, href, count?, date?, dateLabel?, stale? }[], tree?: HomeTreeNode[], sources?: { name, date?, dateLabel?, stale }[] }[]`, `todo?: { label, href, count? }` |
 | `EntityPage` | `entity: { id, type, typeLabel, title, locale }`, `highlights: Attribute[]` (at most five shown), `sections: { id, heading?, html }[]`, `attributes: Attribute[]`, `neighbours` (the `Neighbourhood` props), `mentions` (the `MentionsPanel` props), `sources: { source, path, editHref? }[]` |
 | `KeywordPage` | `entity: { id, title, locale }`, `counts: { occurrences, files, sources }`, `passages: { file: { label, href }, passages: { context, line, href }[] }[]`, `companions: { label, href?, weight }[]` (weight from 1 to 5), `similar: { label, href }[]` |
 | `MentionsPanel` | `mentions: { kind: "written" \| "recognised", file: { label, href }, context, line, href, surface? }[]` (written links first, then recognised mentions, each in corpus order; `surface` is the words of the context naming the entity), `initial` (20 by default, `build.mentions_inline`), `headings?: { written, recognised }` (from the catalogue, `mentions.explicit` and `mentions.inferred`), `fragmentHref?` (the JSON fragment holding every mention of the entity) |
@@ -38,7 +38,7 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Index` | `letters: { letter, href?, count }[]` (no `href`: the letter is inactive), `current?`, `entries: { label, href, glyph?, count }[]` (no `glyph`: a word without a note) |
 | `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count }[]` (occurrences) |
 
-An `Attribute` is `{ name, label, values: { text, href? }[] }`. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.
+An `Attribute` is `{ name, label, values: { text, href? }[] }`. A `HomeTreeNode` is `{ label, href?, count?, children? }`: a source or a folder has `children` and a `count` of notes, a note has an `href`; the `tree` entry carries the nodes, the `index` entry one item per letter with entries, the `recent` entry the latest changes as items and every source under `sources`. The `builtAtLabel` and `dateLabel` strings are the instants spelled in the project locale; a component shows the ISO value when they are absent. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.
 
 ### The entity page
 

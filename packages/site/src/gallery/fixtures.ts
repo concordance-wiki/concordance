@@ -149,13 +149,39 @@ export const home: SlotProps["Home"] = {
     { label: "entity", href: "glossary/entity/" },
     { label: "source", href: "glossary/source/" },
   ],
-  stats: { sources: 7, files: 1894, builtAt: "2024-05-01T10:00:00.000Z" },
+  stats: {
+    sources: 7,
+    files: 1894,
+    builtAt: "2024-05-01T10:00:00.000Z",
+    builtAtLabel: "May 1, 2024",
+  },
   entries: [
     {
       kind: "tree",
       title: "By file tree",
       href: "tree/",
       items: [{ label: "glossary", href: "tree/glossary/", count: 120 }],
+      tree: [
+        {
+          label: "glossary",
+          count: 2,
+          children: [
+            { label: "Keyword page", href: "glossary/keyword-page/" },
+            { label: "Source", href: "glossary/source/" },
+          ],
+        },
+        {
+          label: "specs",
+          count: 1,
+          children: [
+            {
+              label: "screens",
+              count: 1,
+              children: [{ label: "Home page", href: "specs/screens/home-page/" }],
+            },
+          ],
+        },
+      ],
     },
     {
       kind: "index",
@@ -168,11 +194,22 @@ export const home: SlotProps["Home"] = {
       title: "Latest changes",
       href: "recent/",
       items: [
-        { label: "Keyword page", href: "glossary/keyword-page/", date: "2024-04-30" },
+        {
+          label: "Keyword page",
+          href: "glossary/keyword-page/",
+          date: "2024-04-30",
+          dateLabel: "Apr 30, 2024",
+        },
         { label: "Old rule", href: "rules/old-rule/", date: "2023-01-01", stale: true },
+      ],
+      sources: [
+        { name: "glossary", date: "2024-04-30", dateLabel: "Apr 30, 2024", stale: false },
+        { name: "rules", date: "2023-01-01", stale: true },
+        { name: "framing", stale: false },
       ],
     },
   ],
+  todo: { label: "To do", href: "todo/", count: 12 },
 };
 
 export const searchResults: SlotProps["SearchResults"] = {

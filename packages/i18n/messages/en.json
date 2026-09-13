@@ -67,6 +67,18 @@
     "defaultMessage": "Built with Concordance",
     "description": "Optional discreet mention of the tool in the footer."
   },
+  "home.index": {
+    "defaultMessage": "By word",
+    "description": "Heading of the home page entry that leads to the alphabetical index, letter by letter."
+  },
+  "home.recent": {
+    "defaultMessage": "Latest changes",
+    "description": "Heading of the home page entry that lists the notes changed last and the freshness of every source."
+  },
+  "home.tree": {
+    "defaultMessage": "By file tree",
+    "description": "Heading of the home page entry that lists the sources, their folders and their notes."
+  },
   "index.empty": {
     "defaultMessage": "No entry under this letter",
     "description": "Notice shown when a letter of the index has no entry."

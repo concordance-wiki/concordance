@@ -368,9 +368,10 @@ describe("The labels of the site come from the message catalogue of the project 
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain('<a href="index/index.html">Index</a>');
     expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
-    expect(home).toContain(">Domaines</a>");
-    expect(home).toContain(">Types</a>");
-    expect(home).toContain(">Applications</a>");
+    expect(home).toContain(">Par arborescence</h2>");
+    expect(home).toContain(">Par mot</a>");
+    expect(home).toContain(">Derniers changements</h2>");
+    expect(home).toContain("12 septembre 2026</time>");
     expect(home).toContain('<html lang="fr"');
     const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
     expect(entity).toContain('<span class="badge">Terme</span>');
@@ -461,20 +462,33 @@ describe("siteDocuments", () => {
     ]);
   });
 
-  it("passes the mentions_inline, the edit link pattern and the names of the configuration to the pages", () => {
-    const [home, , , , entity] = siteDocuments(
+  it("passes the mentions_inline, the edit link pattern, the names and the staleness thresholds of the configuration to the pages", () => {
+    const dated = {
+      ...term,
+      source: { ...term.source, last_modified: "2026-09-01T00:00:00.000Z" },
+    };
+    const documents = siteDocuments(
       options({
         mentionsInline: 1,
         editUrl: "https://forge.example/{source}/{path}",
+        staleness: { warn_after_days: { default: 1 } },
         names: { domains: { publication: "Publication" } },
+        model: model({
+          entities: model().entities.map((entity) => (entity.id === term.id ? dated : entity)),
+        }),
       }),
       bundles,
     );
+    const home = documents.find((document) => document.path === HOME_PAGE);
+    const entity = documents.find((document) => document.path === pagePath(term.id));
+    expect(entity?.content).toContain("<details");
     expect(count(entity?.content ?? "", '<li class="mention')).toBe(1);
     expect(entity?.content).toContain(
       '<a class="entity-edit" href="https://forge.example/glossary/keyword-page.md">',
     );
-    expect(home?.content).toContain(">Publication</a>");
+    expect(home?.content).toContain(
+      '<li class="home-item stale"><a href="glossary/keyword-page/index.html">Keyword page</a><time datetime="2026-09-01">Sep 1, 2026</time><span class="stale-mark">dormant</span></li>',
+    );
   });
 
   it("links the edit page of the forge from the source URL of the model and the declared refs when no pattern is configured", () => {

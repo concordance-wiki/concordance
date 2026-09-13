@@ -86,22 +86,49 @@ export interface HomeStats {
   files: number;
   /** ISO 8601 instant of the build. */
   builtAt: string;
+  /** The day of the build in the words of the project locale; the theme shows the instant when absent. */
+  builtAtLabel?: string;
 }
 
 export interface HomeItem extends Link {
   count?: number;
   /** ISO 8601 date of the last change, for the freshness entry. */
   date?: string;
+  /** The date in the words of the project locale; the theme shows `date` when absent. */
+  dateLabel?: string;
   /** Whether the source of the item is dormant according to the staleness thresholds. */
   stale?: boolean;
+}
+
+/** A node of the file tree: a source, a folder or a note; only a note has a page. */
+export interface HomeTreeNode {
+  label: string;
+  href?: string;
+  /** How many notes a source or a folder holds. */
+  count?: number;
+  children?: HomeTreeNode[];
+}
+
+/** A source of the freshness entry: its newest change, and whether the staleness threshold makes it dormant. */
+export interface HomeSource {
+  name: string;
+  /** ISO 8601 date of the newest change among its notes; absent when none carries a git date. */
+  date?: string;
+  dateLabel?: string;
+  stale: boolean;
 }
 
 /** One of the three entry points of the home page: the file tree, the alphabetical index, the latest changes. */
 export interface HomeEntry {
   kind: "tree" | "index" | "recent";
   title: string;
-  href: string;
+  /** Where the whole of the entry lives, when it has a page of its own. */
+  href?: string;
   items: HomeItem[];
+  /** The sources, their folders and their notes, for the `tree` entry. */
+  tree?: HomeTreeNode[];
+  /** Every source with its newest change, for the `recent` entry. */
+  sources?: HomeSource[];
 }
 
 export interface HomeProps {
@@ -111,6 +138,8 @@ export interface HomeProps {
   shortcuts: Link[];
   stats: HomeStats;
   entries: HomeEntry[];
+  /** The link to the to-do page with the number of its entries. */
+  todo?: NavigationItem;
 }
 
 export interface EntityRef {

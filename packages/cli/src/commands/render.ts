@@ -151,6 +151,7 @@ export async function renderSite(
     ...(config.build?.mentions_inline === undefined
       ? {}
       : { mentionsInline: config.build.mentions_inline }),
+    ...(config.staleness === undefined ? {} : { staleness: config.staleness }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   for (const line of report.summary) {

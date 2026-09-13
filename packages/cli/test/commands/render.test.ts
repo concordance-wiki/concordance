@@ -241,6 +241,17 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ).toEqual({ a: "v2" });
   });
 
+  it("passes the staleness thresholds to the home page, which flags a source dormant by them", async () => {
+    const dormant = corpus();
+    expect(await buildCommand([], dormant)).toBe(0);
+    expect(dormant.fs.readText("/work/dist/index.html")).toContain(
+      '<li class="home-source stale"><span class="home-source-name">notes</span><time datetime="1970-01-01">Jan 1, 1970</time><span class="stale-mark">dormant</span></li>',
+    );
+    const patient = corpus(`${validConfig}staleness: { warn_after_days: { notes: 100000 } }\n`);
+    expect(await buildCommand([], patient)).toBe(0);
+    expect(patient.fs.readText("/work/dist/index.html")).not.toContain("dormant");
+  });
+
   it("takes the output folder from build.output, resolved against the configuration", async () => {
     const io = corpus(`${validConfig}build: { output: ../out }\n`);
     await buildCommand([], io);

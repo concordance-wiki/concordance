@@ -16,6 +16,8 @@ export const labels = {
   sources: "sources",
   files: "files",
   dormant: "dormant",
+  shortcuts: "Most cited words",
+  sourceFreshness: "Freshness of the sources",
   properties: "Properties",
   legendWritten: "link written in the note",
   legendRecognised: "word recognised at indexing",

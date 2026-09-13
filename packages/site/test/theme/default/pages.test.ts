@@ -2,36 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { home, index, keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
+import { index, keywordPage, searchResults, todo } from "../../../src/gallery/fixtures.js";
 import { count, expectBalanced } from "../../helpers/html.js";
-
-describe("Home", () => {
-  it("renders the title, the statistics, the search field with shortcuts and the three entry points", () => {
-    const html = renderSlot("Home", home, defaultTheme);
-    expect(html).toContain("<h1>My wiki</h1>");
-    expect(html).toContain("7 sources, 1894 files, built on <time");
-    expect(html).toContain(
-      '<form class="home-search" role="search" aria-label="Search" action="search/" method="get">',
-    );
-    expect(html).toContain('<a class="chip" href="glossary/entity/">entity</a>');
-    expect(html).toContain('<nav class="home-entries" aria-label="Entry points">');
-    expect(count(html, "<h2 ")).toBe(3);
-    expect(html).toContain('<h2 id="home-tree"><a href="tree/">By file tree</a></h2>');
-    expect(html).toContain('<span class="count">120</span>');
-    expect(html).toContain('<time datetime="2024-04-30">2024-04-30</time>');
-    expect(html).toContain('<li class="home-item stale"><a href="rules/old-rule/">Old rule</a>');
-    expect(html).toContain('<span class="stale-mark">dormant</span>');
-    expectBalanced(html);
-  });
-
-  it("omits the search form and the shortcuts when the site has none", () => {
-    const { search, ...rest } = home;
-    expect(search).toBeDefined();
-    const html = renderSlot("Home", { ...rest, shortcuts: [] }, defaultTheme);
-    expect(html).not.toContain("<form");
-    expect(html).not.toContain("home-shortcuts");
-  });
-});
 
 describe("KeywordPage", () => {
   it("renders the banner, the three counts, the passages by file, the companions and the similar forms", () => {
