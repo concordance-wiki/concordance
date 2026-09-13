@@ -1,0 +1,67 @@
+/* Search island: the field, and the suggestions its script draws under it. */
+
+concordance-island[data-island="search"] {
+  position: relative;
+  flex: 1 1 16rem;
+  max-inline-size: 26rem;
+}
+
+.site-search {
+  margin: 0;
+}
+
+.site-search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding-inline: var(--space-2);
+  border-radius: calc(var(--radius) * 1.125);
+  background: var(--color-soft);
+  color: var(--color-label);
+}
+
+.search-glyph {
+  flex: none;
+}
+
+.site-search input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+}
+
+.site-search input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.search-shortcut {
+  flex: none;
+  padding: 0.25em 0.5em;
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.search-suggestions {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 100%;
+  z-index: 1;
+  min-inline-size: 100%;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  margin-block-start: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+}

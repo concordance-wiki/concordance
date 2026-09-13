@@ -1,0 +1,74 @@
+/* The tree of the space: the initials badge and the name head it, folded behind them where the layout has no column. */
+
+.space-tree {
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.space-head {
+  min-block-size: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.space-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: calc(var(--radius) * 0.875);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.space-nodes {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.space-nodes .space-nodes {
+  padding: 0 0 0 var(--space-3);
+}
+
+.space-folder-name,
+.space-page > a,
+.space-page > span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.space-folder-name .count {
+  margin-inline-start: auto;
+}
+
+.space-open > .space-folder-name {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.space-page > a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* The current page: a rule on its side and the bold weight, never a colour alone. */
+
+.space-current > span {
+  border-inline-start: 3px solid var(--color-accent);
+  border-radius: calc(var(--radius) * 0.875);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-weight: 600;
+}

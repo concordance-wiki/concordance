@@ -1,0 +1,40 @@
+/* The neighbourhood, folded behind its line at the foot of the panel. */
+
+.neighbourhood-fold {
+  margin: 0;
+}
+
+.neighbourhood-fold > summary {
+  min-block-size: 3.25rem;
+  padding: 0 var(--space-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  list-style: none;
+}
+
+.neighbourhood-fold > summary::before {
+  order: 2;
+}
+
+.neighbourhood-lead {
+  flex: 1;
+}
+
+.neighbourhood-count {
+  color: var(--color-label);
+  font-weight: 400;
+}
+
+.neighbourhood {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.neighbourhood h2 {
+  margin-block-start: 0;
+  font-size: 1rem;
+}
+
+.neighbour-list {
+  padding: 0;
+  list-style: none;
+}

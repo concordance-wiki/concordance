@@ -1,0 +1,17 @@
+/* To do */
+
+.todo-section ul {
+  padding: 0;
+  list-style: none;
+}
+
+.todo-files {
+  margin-inline-start: var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.todo-unit {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}

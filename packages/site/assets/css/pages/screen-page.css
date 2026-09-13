@@ -1,0 +1,108 @@
+/* Screen page: the tables and the images of the repository in the note of any entity page, the legend of the two marks at the foot of the article next to the path. */
+
+/* A table of the note: a card whose header row reads in small capitals on the soft surface, the first column in the ink, the others in the secondary colour. */
+
+.markdown table {
+  margin: 0 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.markdown th {
+  padding: 0.6875rem 0.9375rem;
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.markdown td {
+  padding: 0.75rem 0.9375rem;
+  border-block-end: 1px solid var(--color-soft);
+  color: var(--color-muted);
+}
+
+.markdown td:first-child {
+  color: var(--color-ink);
+}
+
+.markdown tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+.markdown thead th:first-child {
+  border-start-start-radius: calc(var(--radius) * 1.25 - 1px);
+}
+
+.markdown thead th:last-child {
+  border-start-end-radius: calc(var(--radius) * 1.25 - 1px);
+}
+
+.markdown tbody tr:last-child td:first-child {
+  border-end-start-radius: calc(var(--radius) * 1.25 - 1px);
+}
+
+.markdown tbody tr:last-child td:last-child {
+  border-end-end-radius: calc(var(--radius) * 1.25 - 1px);
+}
+
+/* An image of the repository, at its place in the flow of the text: the image in a dashed frame, its caption under it, then the note saying what it is and the path of the file in the monospace family. */
+
+.figure {
+  margin: 0 0 var(--space-4);
+  overflow: hidden;
+  border: 1px dashed var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+}
+
+.figure img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.figure figcaption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4375rem;
+  padding: var(--space-3);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.figure-caption {
+  color: var(--color-muted);
+}
+
+.figure-path {
+  font-size: 0.8125rem;
+}
+
+/* The foot of the article: the legend of the two marks, then the path of the file at the end of the line with its edit link. */
+
+.entity-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.entity-footer .legend {
+  margin: 0;
+}
+
+.legend + .entity-source {
+  margin-inline-start: auto;
+}

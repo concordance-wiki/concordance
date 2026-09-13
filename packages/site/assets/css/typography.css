@@ -1,0 +1,104 @@
+/* One family for the text, headings included: the hierarchy comes from size and weight. */
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-block: var(--space-4) var(--space-2);
+  text-wrap: balance;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  letter-spacing: -0.022em;
+}
+
+h2 {
+  font-size: 1.1875rem;
+  line-height: 1.35;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+p,
+ul,
+ol,
+dl {
+  margin-block: 0 var(--space-3);
+}
+
+ul,
+ol {
+  padding-inline-start: var(--space-4);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* The monospace family is reserved to file paths and identifiers; never under 13 px. */
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: max(0.9375em, 0.8125rem);
+}
+
+mark {
+  background: var(--color-highlight);
+  color: var(--color-ink);
+  border-radius: 2px;
+}
+
+pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+img {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+table {
+  border-collapse: collapse;
+  inline-size: 100%;
+}
+
+th,
+td {
+  text-align: start;
+  padding: var(--space-1) var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+blockquote {
+  margin-inline: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-ink);
+  border-start-end-radius: var(--radius-large);
+  border-end-end-radius: var(--radius-large);
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}

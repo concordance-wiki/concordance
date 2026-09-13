@@ -1,0 +1,76 @@
+/* Entity page: the tree of the space, the text in the centre, what is computed in the right panel. */
+
+.entity {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "space"
+    "main"
+    "side";
+}
+
+/* Three widths: one column; the tree folded above the text with the panel beside it; three columns. */
+
+@media (min-width: 48rem) {
+  .entity {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.5rem);
+    grid-template-areas:
+      "space space"
+      "main side";
+  }
+
+  .entity-side {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--color-border);
+  }
+}
+
+@media (min-width: 73.75rem) {
+  .entity {
+    grid-template-columns: minmax(0, 1fr) 21.5rem;
+    grid-template-areas: "main side";
+  }
+
+  .entity-with-space {
+    grid-template-columns: 16rem minmax(0, 1fr) 21.5rem;
+    grid-template-areas: "space main side";
+  }
+
+  .space-tree {
+    block-size: 100%;
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  /* The tree stands in its column: the stylesheet keeps the content of the disclosure in view. */
+  .space-tree::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .space-head::before {
+    content: none;
+  }
+}
+
+.space {
+  grid-area: space;
+}
+
+.entity-main {
+  grid-area: main;
+  min-inline-size: 0;
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.entity-side {
+  grid-area: side;
+  min-inline-size: 0;
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.entity-main > * {
+  max-inline-size: 50rem;
+  margin-inline: auto;
+}

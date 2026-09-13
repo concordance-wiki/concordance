@@ -1,0 +1,85 @@
+.neighbourhood-map {
+  margin: 0 0 var(--space-3);
+}
+
+/* The font size is a presentation attribute of the SVG: the layout estimates label widths from it. */
+.neighbourhood-graph {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  font-family: var(--font-ui);
+}
+
+.neighbourhood-graph .map-edge {
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.neighbourhood-graph .map-shape {
+  fill: var(--color-ink);
+}
+
+/* A noteless word: a dashed, hollow square, its edge dashed too. */
+.neighbourhood-graph .map-node-keyword .map-shape {
+  fill: var(--color-surface);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+/* The type glyph sits inside the node, drawn in the surface colour over the ink. */
+.neighbourhood-graph .map-glyph {
+  fill: var(--color-surface);
+}
+
+.neighbourhood-graph text.map-glyph {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* A halo lets a label stay readable where an edge passes under it. */
+.neighbourhood-graph .map-label {
+  fill: var(--color-ink);
+  paint-order: stroke;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.neighbourhood-graph .map-centre .map-label {
+  font-weight: 600;
+}
+
+.neighbourhood-overflow {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.neighbourhood-map figcaption {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.neighbour {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+/* A new priority group of neighbours, as ranked by the profile. */
+.neighbour.group-start {
+  margin-block-start: var(--space-2);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.relation {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.weight {
+  margin-inline-start: auto;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}

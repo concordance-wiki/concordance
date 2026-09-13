@@ -1,0 +1,323 @@
+/* Search results: the facets in the left column, the rows as cards, the words without a note dotted. */
+
+/* The island of the results page is the page itself: the measure the header gives the search island does not apply. */
+main > concordance-island[data-island="search"] {
+  max-inline-size: none;
+}
+
+.search-results {
+  max-inline-size: 90rem;
+}
+
+.results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* The facets take a column from 768 px; under it they fold behind their heading above the results. */
+@media (min-width: 48rem) {
+  .results-layout {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+
+  .facets-fold::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .facets-head::before {
+    content: none;
+  }
+}
+
+.facets {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.facets-head {
+  min-block-size: 3rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  list-style: none;
+}
+
+.facet-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.facet > summary {
+  min-block-size: 2.5rem;
+  list-style: none;
+}
+
+.facet > summary::before {
+  order: 1;
+  margin-inline-start: auto;
+}
+
+.facet h2 {
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.facet-values {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A value: its box, its label covering the row, its count; a selected value is filled and bold, never a colour alone. */
+.facet-value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+}
+
+.facet-value input {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  appearance: none;
+  cursor: pointer;
+}
+
+.facet-value input[type="radio"] {
+  border-radius: 50%;
+}
+
+.facet-value input:checked {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+}
+
+.facet-value input[disabled] {
+  cursor: default;
+}
+
+.facet-value label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.facet-value label .count {
+  margin-inline-start: auto;
+}
+
+.facet-active label {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.facet-disabled label {
+  color: var(--color-label);
+  cursor: default;
+}
+
+/* The words without a note: a dashed box, like their rows. */
+.facet-keyword input {
+  border-style: dashed;
+}
+
+.facets-note {
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+/* The active filters as chips, then the summary, on one line above the results. */
+.results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.remove-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding-inline: var(--space-3);
+  border-radius: 1.25rem;
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.remove-filter:hover {
+  text-decoration: underline;
+}
+
+.clear-filters a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  font-size: 0.8125rem;
+}
+
+.search-summary {
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+/* The address of the search, shown so that the state is explicit and can be copied. */
+.search-address {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.search-url {
+  overflow-wrap: anywhere;
+}
+
+.copied:empty {
+  display: none;
+}
+
+.search-closest {
+  color: var(--color-muted);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+}
+
+.result-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.result-title {
+  color: var(--color-ink);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.result-title:hover {
+  text-decoration: underline;
+}
+
+.result-cited {
+  margin-inline-start: auto;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.snippet {
+  margin: var(--space-2) 0 0;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+.result-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.result-facts > span + span::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-3);
+}
+
+.breadcrumb {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+/* A word without a note: outlined in dashes, its chip too, its title dotted, like its square on the map. */
+.result-keyword {
+  border-style: dashed;
+}
+
+.result-keyword .badge {
+  border: 1px dashed var(--color-border);
+  background: var(--color-bg);
+}
+
+.result-keyword .result-title {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.result-subtitle,
+.result-detail {
+  display: block;
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.results-note {
+  margin: var(--space-3) 0 0;
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}

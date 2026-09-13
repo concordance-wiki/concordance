@@ -1,0 +1,81 @@
+/* Home: the question, the field with its live results in the flow, the shortcuts; then the spaces and the recent changes in two columns. */
+
+.home {
+  max-inline-size: 65rem;
+  padding-block-start: var(--space-5);
+}
+
+.home h1 {
+  margin-block: 0 var(--space-2);
+  font-size: 2.375rem;
+  letter-spacing: -0.024em;
+}
+
+.home-explanation {
+  max-inline-size: 41rem;
+  margin-block-end: var(--space-4);
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* The field of the home page: drawn large across the column, ruled in the ink, its live results joined under it. */
+
+.home-ask concordance-island[data-island="search"] {
+  position: static;
+  max-inline-size: none;
+}
+
+.home-search {
+  margin: 0;
+}
+
+.home-search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 3.5rem;
+  padding-inline: var(--space-3);
+  border: 1.5px solid var(--color-ink);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.home-search-field input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 1.125rem;
+}
+
+.home-search-field input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.search-count {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.home-search:has(+ .home-suggestions:not([hidden])) .home-search-field {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.home-suggestions {
+  position: static;
+  min-inline-size: 0;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--color-ink);
+  border-block-start: 0;
+  border-radius: 0 0 calc(var(--radius) * 1.25) calc(var(--radius) * 1.25);
+  box-shadow: none;
+}
