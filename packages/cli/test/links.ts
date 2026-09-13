@@ -16,6 +16,6 @@ export function localTargets(page: string, html: string): { reference: string; t
     .filter((reference) => !EXTERNAL.test(reference))
     .map((reference) => ({
       reference,
-      target: posix.join(posix.dirname(page), reference.replace(/[#?].*$/, "")),
+      target: posix.join(posix.dirname(page), reference.replace(/[#?][^]*/, "")),
     }));
 }

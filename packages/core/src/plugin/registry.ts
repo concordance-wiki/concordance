@@ -37,7 +37,7 @@ export interface RegisteredType extends TypeContribution {
 
 /** The slug a type contribution declares: the name of its folder. */
 export function typeSlugOf(contribution: TypeContribution): string {
-  return contribution.path.replace(/\/+$/, "").replace(/^.*\//, "");
+  return contribution.path.replace(/(?<!\/)\/+$/, "").replace(/^.*\//, "");
 }
 
 export interface PluginRegistry {

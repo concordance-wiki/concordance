@@ -50,16 +50,18 @@ const VOID_ELEMENTS = new Set([
   "wbr",
 ]);
 
-const TAG =
-  /<(\/?)([a-zA-Z][\w-]*)((?:\s+[^\s=>/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?)>/g;
-const ATTRIBUTE = /([^\s=>/]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+// A tag runs to the first `>` outside double quotes, the only quotes the renderer writes; the lookahead
+// after the name keeps the engine from shifting name characters into the attributes on a malformed tag.
+const TAG = /<(\/?)([a-zA-Z][\w-]*)(?![\w-])((?:"[^"]*"|[^"<>])*?)(\/?)>/g;
+// A quoted value ends at the quote that opened it; the `s` flag lets it span lines.
+const ATTRIBUTE = /([^\s=>/]+)(?:\s*=\s*(?:(["'])(.*?)\2|([^\s>]+)))?/gs;
 
 function parseAttributes(source: string): Record<string, string> {
   const attributes: Record<string, string> = {};
   for (const match of source.matchAll(ATTRIBUTE)) {
-    const [, name, double, single, bare] = match;
+    const [, name, , quoted, bare] = match;
     // The name group is unconditional in the pattern: a match always carries it.
-    attributes[(name as string).toLowerCase()] = double ?? single ?? bare ?? "";
+    attributes[(name as string).toLowerCase()] = quoted ?? bare ?? "";
   }
   return attributes;
 }

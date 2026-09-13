@@ -106,12 +106,13 @@ export function declaredContracts(entities: readonly Entity[]): DeclaredContract
   return declared;
 }
 
-const XML_ROOT =
-  /^\uFEFF?(?:\s|<\?[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>)*<(?:[A-Za-z_][\w.-]*:)?([A-Za-z_][\w.-]*)[\s/>]/;
+// What may precede the root element: a byte order mark, blanks, processing instructions, comments, a doctype.
+const XML_PROLOG = /^\uFEFF?(?:\s|<\?[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>)*/;
+const XML_ROOT = /^<(?:[A-Za-z_][\w.-]*:)?([A-Za-z_][\w.-]*)[\s/>]/;
 
 /** The local name of the root element of an XML text, or nothing when the text is not an XML document. */
 export function xmlRootOf(text: string): string | undefined {
-  return XML_ROOT.exec(text)?.[1];
+  return XML_ROOT.exec(text.replace(XML_PROLOG, ""))?.[1];
 }
 
 /** Hex SHA-256 of the contract text, the key of the contract cache. */

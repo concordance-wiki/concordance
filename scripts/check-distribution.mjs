@@ -18,7 +18,7 @@ const files = {
 const pins = [
   { file: files.action, pattern: /(\n {2}version:\n(?: {4}.*\n)*? {4}default: ")[^"]*(")/u },
   { file: files.component, pattern: /(\n {4}version:\n(?: {6}.*\n)*? {6}default: ")[^"]*(")/u },
-  { file: files.hooks, pattern: /(@concordance-wiki\/cli@)[^"\s]*()/u },
+  { file: files.hooks, pattern: /(@concordance-wiki\/cli@)[^"\s]*/u },
 ];
 
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
@@ -138,7 +138,11 @@ export function writeDistributionVersion(root) {
   for (const { file, pattern } of pins) {
     const path = join(root, file);
     const text = readFileSync(path, "utf8");
-    const updated = text.replace(pattern, `$1${version}$2`);
+    // The groups surround the version; the hook pin has none after it, so the offset comes in its place.
+    const updated = text.replace(
+      pattern,
+      (_, before, after) => `${before}${version}${typeof after === "string" ? after : ""}`,
+    );
     if (updated === text && !text.includes(version)) {
       throw new Error(`${file}: the version pin was not found`);
     }

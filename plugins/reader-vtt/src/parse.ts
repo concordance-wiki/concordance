@@ -30,7 +30,8 @@ interface Block {
 
 const TIMESTAMP = String.raw`(?:(\d{2,}):)?(\d{2}):(\d{2})[.,](\d{3})`;
 const TIMING = new RegExp(String.raw`^${TIMESTAMP}\s+-->\s+${TIMESTAMP}(?:\s+.*)?$`);
-const VOICE = /^<v(?:\.[^\s>]*)?\s+([^>]+)>/;
+// The name opens with a non-blank, or is one blank: the engine never trades the blanks before it back and forth.
+const VOICE = /^<v(?:\.[^\s>]*)?\s+([^\s>][^>]*|\s)>/;
 /** Up to four words, each starting with a capital or a digit: "Alice", "Speaker 1", "MARY ANN". */
 const SPEAKER_NAME = /^\p{Lu}[\p{L}\p{N}.'-]*(?: [\p{Lu}\p{N}][\p{L}\p{N}.'-]*){0,3}$/u;
 
@@ -97,7 +98,7 @@ function splitSpeaker(raw: string): { speaker?: string; text: string } {
   const voice = VOICE.exec(raw);
   const voiceName = voice?.[1];
   const body = voice === null ? raw : raw.slice(voice[0].length);
-  const text = decodeEntities(body.replace(/<[^>]*>/g, "")).trim();
+  const text = decodeEntities(body.replace(/<[^<>]*>/g, "")).trim();
   if (voiceName !== undefined) {
     return { speaker: voiceName.trim(), text };
   }
@@ -129,7 +130,7 @@ function parseHeader(blocks: Block[]): string | undefined {
     throw new Error("line 1: missing WEBVTT header");
   }
   for (const line of header.rest) {
-    const language = /^Language:\s*(.+)$/.exec(line)?.[1];
+    const language = /^Language:\s*(\S.*)$/.exec(line)?.[1];
     if (language !== undefined) {
       return language.trim();
     }

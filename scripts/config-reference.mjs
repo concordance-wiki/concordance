@@ -86,7 +86,8 @@ const isObject = (value) => typeof value === "object" && value !== null && !Arra
 const cell = (text) =>
   String(text)
     .replace(/\|/g, "\\|")
-    .replace(/\s*\n\s*/g, " ");
+    // A blank run is taken from its first character: retrying inside it would make the runtime quadratic.
+    .replace(/(?<!\s)\s*\n\s*/g, " ");
 const code = (text) => `\`${cell(text)}\``;
 
 /** The anchor GitHub gives a heading made of one inline code span. */

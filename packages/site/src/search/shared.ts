@@ -155,7 +155,8 @@ export type ShardData = Record<string, [number, number][]>;
 
 const combiningMarks = /\p{M}+/gu;
 const apostrophes = /[’ʼ]/g;
-const edges = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
+// The trailing run starts right after a letter or digit: retrying inside the run would make the runtime quadratic.
+const edges = /^[^\p{L}\p{N}]+|(?<![^\p{L}\p{N}])[^\p{L}\p{N}]+$/gu;
 
 /**
  * The form a query is compared on, the same the language packs give to the indexed text: case

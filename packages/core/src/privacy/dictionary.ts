@@ -84,7 +84,7 @@ export function loadPseudonymDictionary(
   try {
     document = parse(text);
   } catch (error) {
-    const detail = (error as YAMLParseError).message.replace(/\n[^]*$/, "");
+    const detail = (error as YAMLParseError).message.replace(/\n[^]*/, "");
     throw new Error(
       formatIssue({ severity: "error", path: "", message: `not valid YAML: ${detail}` }, file),
       { cause: error },

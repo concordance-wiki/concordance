@@ -2,7 +2,8 @@ import type { LanguagePack } from "../locale/pack.js";
 import { comparisonForm } from "./comparison-form.js";
 
 // Punctuation at both ends of a word goes; the inside stays, so that a hyphenated word is one token.
-const edges = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
+// The trailing run starts right after a letter or digit: retrying inside the run would make the runtime quadratic.
+const edges = /^[^\p{L}\p{N}]+|(?<![^\p{L}\p{N}])[^\p{L}\p{N}]+$/gu;
 const separators = /[^\p{L}\p{N}]+/u;
 
 /**
