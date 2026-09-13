@@ -217,6 +217,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "The contract an API note declares could not be fetched, read or parsed, so the note keeps its manual operations.",
     "Fix the contract URL or path, give the build network access, or check that the file is an OpenAPI 3.x or WSDL document.",
   ),
+  step(
+    "W-OPERATION-AMBIGUOUS",
+    "warning",
+    "contracts",
+    "Two operation notes claim the same imported operation, or one note matches several operations of its API; nothing is attached.",
+    "Give each operation note the operation_id of exactly one operation of its API, name the API in the api attribute when the source declares several contracts, or remove the note that duplicates another.",
+  ),
   model(
     "W-API-NOCONSUMER",
     "warning",

@@ -185,6 +185,14 @@
                 },
                 "preview": {
                   "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "description": "contract when the representation is an operation of an imported contract; absent for a file of the source"
+                },
+                "operation": {
+                  "type": "string",
+                  "description": "the operation name as the contract writes it, for a contract representation"
                 }
               }
             }

@@ -79,3 +79,22 @@ export {
   type TypeRelationsInput,
   type TypeRelationsResult,
 } from "./relations/index.js";
+export {
+  attachOperations,
+  CONTRACT_REPRESENTATION,
+  importedOperations,
+  MATCH_RUNGS,
+  matchOperations,
+  mergeOperation,
+  OPERATION_AMBIGUOUS,
+  operationNotes,
+  redirectLinks,
+  type Ambiguity,
+  type AttachOperationsInput,
+  type AttachOperationsResult,
+  type ImportedOperation,
+  type MatchResult,
+  type MatchRung,
+  type OperationMatch,
+  type OperationNote,
+} from "./operations/index.js";
