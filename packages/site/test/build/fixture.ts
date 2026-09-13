@@ -363,21 +363,28 @@ export const fragments = new Map<string, EntityFragment>([
     {
       id: "keywords/build-summary",
       sections: [],
+      // Not in corpus order on purpose: the specs source is declared after the glossary one.
       passages: [
-        { source: "glossary", path: "page.md", line: 3, context: "the build summary is printed" },
-        {
-          source: "specs",
-          path: "screens/mentions-panel.md",
-          line: 12,
-          context: "after the build summary",
-        },
         {
           source: "specs",
           path: "screens/mentions-panel.md",
           line: 40,
+          text: "build summary",
           context: "the build summary again",
         },
+        {
+          source: "specs",
+          path: "screens/mentions-panel.md",
+          line: 12,
+          text: "Build summaries",
+          context: "after the Build summaries",
+        },
+        { source: "glossary", path: "page.md", line: 3, context: "the build summary is printed" },
         { source: "specs", path: "unknown.md", line: 1, context: "a file that is no page" },
+      ],
+      leads: [
+        { id: "glossary/keyword-page", title: "Keyword page" },
+        { id: "unknown/lost", title: "lost" },
       ],
     },
   ],

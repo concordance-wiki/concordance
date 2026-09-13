@@ -12,6 +12,7 @@ export interface MessageArguments {
   "entity.mentionsCount": { count: number };
   "keyword.documents": { count: number };
   "keyword.occurrences": { count: number };
+  "keyword.passages": { count: number };
   "mentions.atLine": { line: number };
   "mentions.inSection": { section: string };
   "search.results": { count: number };
@@ -46,7 +47,10 @@ export const messageArguments = {
   "index.letters": {},
   "keyword.createNote": {},
   "keyword.documents": { count: "plural" },
+  "keyword.noteWritten": {},
   "keyword.occurrences": { count: "plural" },
+  "keyword.passages": { count: "plural" },
+  "keyword.similarLead": {},
   "keyword.title": {},
   "keyword.undefinedExpression": {},
   "mentions.atLine": { line: "number" },

@@ -233,8 +233,12 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(entity).toContain('<span class="badge">Term</span>');
     expect(entity).toContain("<p>An entity page.</p>");
     const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
-    expect(keyword).toContain('<article class="keyword">');
+    expect(keyword).toContain('<div class="entity keyword">');
     expect(keyword).toContain("<h1>build summary</h1>");
+    expect(keyword).toContain(
+      '<span class="badge">Keyword</span><span class="noteless">no note</span>',
+    );
+    expect(keyword).toContain("Expression without a note. 5 passages recorded.");
     const rule = fileSystem.readText("/dist/specs/rules/publication-threshold/index.html");
     expect(rule.startsWith('<!doctype html>\n<html lang="fr" dir="ltr">')).toBe(true);
     for (const page of report.pages) {
@@ -307,6 +311,69 @@ describe("URLs follow the entity identifier and stay stable from one build to th
     }
   });
 
+  it("keeps the URL of a keyword page when a note is created later: the address forwards to the note", async () => {
+    const written = {
+      ...term,
+      id: "glossary/build-summary",
+      title: "Build summary",
+      source: { name: "glossary", path: "build-summary.md", line: 1 },
+    };
+    const later = model({
+      entities: model().entities.filter((entity) => entity.id !== "keywords/build-summary"),
+    });
+    later.entities.push(written);
+    const withNote = new Map(fragments);
+    withNote.set("glossary/build-summary", {
+      id: "glossary/build-summary",
+      sections: [{ id: "section-lead", html: "<p>What the build prints last.</p>" }],
+      keywords: ["keywords/build-summary", "keywords/zzz", "keywords/summary"],
+    });
+    // Another note claiming an address already taken keeps none of it.
+    withNote.set("glossary/page", {
+      id: "glossary/page",
+      sections: [],
+      keywords: ["keywords/summary"],
+    });
+    const { fileSystem, report } = await build({ model: later, fragments: withNote });
+    const redirect = fileSystem.readText("/dist/keywords/build-summary/index.html");
+    expect(redirect).toContain(
+      '<meta http-equiv="refresh" content="0; url=../../glossary/build-summary/index.html"/>',
+    );
+    expect(redirect).toContain("<title>Build summary – Concordance notes</title>");
+    expect(redirect).toContain(
+      '<main id="main"><div class="redirect"><h1>Build summary</h1><p>A note now defines this expression: <a href="../../glossary/build-summary/index.html">Build summary</a></p></div></main>',
+    );
+    expect(redirect).not.toContain("Expression without a note");
+    // The address a keyword page of this build holds stays that page; a free one is claimed once.
+    expect(fileSystem.readText("/dist/keywords/zzz/index.html")).toContain("<h1>#hash</h1>");
+    const summary = fileSystem.readText("/dist/keywords/summary/index.html");
+    expect(summary).toContain('url=../../glossary/build-summary/index.html"');
+    expect(report.pages.map((page) => page.path)).toContain("keywords/build-summary/index.html");
+    expect(report.redirects).toBe(2);
+    expect(report.summary).toContain("redirects: 2 former keyword addresses forwarding to a note");
+    expect(report.warnings).toEqual([]);
+    expect(fileSystem.exists("/dist/keywords/build-summary/index.html")).toBe(true);
+  });
+
+  it("offers to create the missing note on the forge of the glossary source the configuration names", async () => {
+    const block = model().build;
+    const sources = block.sources.map((source) =>
+      source.name === "glossary"
+        ? { ...source, url: "https://github.com/concordance-wiki/demo-glossary" }
+        : source,
+    );
+    const { fileSystem } = await build({
+      model: model({ build: { ...block, sources } }),
+      glossarySources: ["glossary"],
+    });
+    const keyword = fileSystem.readText("/dist/keywords/build-summary/index.html");
+    expect(keyword).toContain(
+      '<a class="create-note" href="https://github.com/concordance-wiki/demo-glossary/new/main?filename=build-summary.md">Create a note</a>',
+    );
+    const plain = (await build()).fileSystem.readText("/dist/keywords/build-summary/index.html");
+    expect(plain).toContain('<span class="create-note">Create a note</span>');
+  });
+
   it("keeps the same URL when the model gains an entity or a link", async () => {
     const base = model();
     const grown = model({
@@ -339,6 +406,7 @@ describe("The main content of every page is present in the served HTML, without 
       fileSystem.readText("/dist/keywords/build-summary/index.html"),
     );
     expect(keyword).toContain("<q>the build summary is printed</q>");
+    expect(keyword).toContain("<q>after the <mark>Build summaries</mark></q>");
     const index = withoutJavaScript(fileSystem.readText(`/dist/${INDEX_PAGE}`));
     expect(count(index, '<li class="index-entry"')).toBe(7);
     const todo = withoutJavaScript(fileSystem.readText(`/dist/${TODO_PAGE}`));
@@ -353,6 +421,8 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
     expect(report.summary[0]).toBe("site: 11 pages written to /dist");
+    expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
+    expect(report.redirects).toBe(0);
     expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(3);
     expect(
       report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),

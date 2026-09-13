@@ -446,7 +446,15 @@ concordance-island[data-island="search"] {
   font-weight: 600;
 }
 
-.companions ul {
+.keyword-body {
+  grid-area: body;
+}
+
+.keyword-panel {
+  grid-area: panel;
+}
+
+.companions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);

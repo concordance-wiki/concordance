@@ -31,6 +31,8 @@ export interface SiteContextInput {
   staleness?: StalenessConfig;
   /** The collation of the project locale, the `compare` of its language pack; a collator of the locale when absent. */
   collate?: (a: string, b: string) => number;
+  /** The names of the glossary sources, in declaration order; the first with a known forge receives new notes. */
+  glossarySources?: string[];
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */
@@ -158,11 +160,10 @@ export function citations(context: SiteContext, id: string): number {
 /** The ref the edit link of a source points at: the one it declares, else `main`. */
 export const DEFAULT_SOURCE_REF = "main";
 
-/**
- * The edit page of a file on the forge its HTTPS URL names: `<url>/edit/<ref>/<path>` on GitHub,
- * `<url>/-/edit/<ref>/<path>` on GitLab; none for any other URL or a local source.
- */
-export function forgeEditHref(url: string, ref: string, path: string): string | undefined {
+type Forge = "github" | "gitlab";
+
+/** The forge an HTTPS repository URL names, with the repository address it edits; none for any other URL. */
+function forgeOf(url: string): { forge: Forge; repository: string } | undefined {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -174,10 +175,58 @@ export function forgeEditHref(url: string, ref: string, path: string): string | 
   }
   const repository = `${parsed.origin}${parsed.pathname.replace(/\.git$/, "").replace(/\/$/, "")}`;
   if (parsed.hostname === "github.com") {
-    return `${repository}/edit/${ref}/${path}`;
+    return { forge: "github", repository };
   }
   if (parsed.hostname === "gitlab.com" || parsed.hostname.startsWith("gitlab.")) {
-    return `${repository}/-/edit/${ref}/${path}`;
+    return { forge: "gitlab", repository };
+  }
+  return undefined;
+}
+
+/**
+ * The edit page of a file on the forge its HTTPS URL names: `<url>/edit/<ref>/<path>` on GitHub,
+ * `<url>/-/edit/<ref>/<path>` on GitLab; none for any other URL or a local source.
+ */
+export function forgeEditHref(url: string, ref: string, path: string): string | undefined {
+  const forge = forgeOf(url);
+  if (forge === undefined) {
+    return undefined;
+  }
+  return forge.forge === "github"
+    ? `${forge.repository}/edit/${ref}/${path}`
+    : `${forge.repository}/-/edit/${ref}/${path}`;
+}
+
+/**
+ * The page that creates a file at the root of the repository on its forge, the name filled in:
+ * `<url>/new/<ref>?filename=<file>` on GitHub, `<url>/-/new/<ref>?file_name=<file>` on GitLab;
+ * none for any other URL.
+ */
+export function forgeNewFileHref(url: string, ref: string, file: string): string | undefined {
+  const forge = forgeOf(url);
+  if (forge === undefined) {
+    return undefined;
+  }
+  const name = encodeURIComponent(file);
+  return forge.forge === "github"
+    ? `${forge.repository}/new/${ref}?filename=${name}`
+    : `${forge.repository}/-/new/${ref}?file_name=${name}`;
+}
+
+/**
+ * Where a note for a keyword is written: the new-file page of the first glossary source whose
+ * URL names a forge, for `<slug>.md`; none without a glossary source on a known forge.
+ */
+export function createNoteHref(context: SiteContext, slug: string): string | undefined {
+  for (const name of context.glossarySources ?? []) {
+    const url = context.model.build.sources.find((candidate) => candidate.name === name)?.url;
+    if (url === undefined) continue;
+    const href = forgeNewFileHref(
+      url,
+      context.sourceRefs?.[name] ?? DEFAULT_SOURCE_REF,
+      `${slug}.md`,
+    );
+    if (href !== undefined) return href;
   }
   return undefined;
 }

@@ -26,7 +26,7 @@ Concordance reads CommonMark, GFM (tables, task lists) and optional YAML frontma
 | 8 | Links | four producers in the order of the specification: written links, frontmatter references, mentions (in a mapped section or in prose), co-occurrence per paragraph, which also gives the bounded neighbourhood |
 | 9 | Combination | one link per source, target, relation and attributes, at `1 − Π(1 − cᵢ)` over its methods, every provenance kept |
 | 10 | Relation typing | `typeRelations` of the inference package: a relation a producer named stands if the profile matrix allows it between the two types and is dropped with `E-META-REL` otherwise; a `related` link takes the single relation its type pair admits, or stays `related`, capped at 0.6, with `I-REL-AMBIGUOUS` on its first located provenance unless co-occurrence alone knows it |
-| 11 | Keywords | n-grams over the scannable units, headings and the section labels a list item opens with (`- Reads:`) left out as titles rather than usage, scored against the dictionary of the locale, `W-TERM-UNDEFINED` above the score threshold, keyword pages above the publication threshold appended to the entities |
+| 11 | Keywords | n-grams over the scannable units, headings and the section labels a list item opens with (`- Reads:`) left out as titles rather than usage, scored against the dictionary of the locale, `W-TERM-UNDEFINED` above the score threshold, keyword pages above the publication threshold appended to the entities, with their accompanying words, their similar expressions and the addresses the notes take over |
 | 12 | Twin resources | the markdown notes reconciled locale by locale (declared `source`, base names, headings, text); merged groups become one entity carrying every representation, the others yield `W-DUP-CANDIDATE` |
 | 13 | Model checks | every enabled check of the registry, plugin checks included, over the structural view of the model; the findings of every step are then enriched by the same registry (`checks:` overrides, missing remediations), sorted once and written once |
 | 14 | Model | `assembleModel` and `serializeModel` write `dist/model.json`; `dist/build.log.json` carries the same findings and the summary |
@@ -100,7 +100,7 @@ The graph is built in memory and serialised to `model.json`, canonically sorted 
 | `links` | one object per source-target-relation triple: `from`, `to`, `relation`, `attributes`, the combined `confidence` and `provenance`, the complete list of what every method recorded |
 | `findings` | the same array as `build.log.json` |
 | `candidates` | `terms` (every recurring expression the keyword discovery kept, with its score, counts, contexts and whether it has a page), `objects` (the schemas an imported contract names, when any) and `duplicates` (every pair of resources scored at or above the candidate threshold, with its signals) |
-| `neighbours` | the K best co-occurrence neighbours per entity |
+| `neighbours` | the K best co-occurrence neighbours per entity, and per keyword page the entities and keyword pages named in the paragraphs of its mentions |
 | `displayed_neighbourhood` | the one-hop neighbours shown on the page of every entity, best first |
 
 `assembleModel` in core puts every block in canonical order (sources by name, contracts by API and location, entities by identifier, links by triple, provenances by method, path and line, findings by check, source, path, line and message, candidates by score, objects by API, name and contract, both neighbourhoods by identifier then best first) and `serializeModel` writes it as canonical JSON: keys sorted at every depth, two-space indentation, a trailing newline. `parseModel` reads a model back and refuses anything the schema does not describe, with the same error wording as the configuration validator: parsing a serialised model gives back the assembled one.
@@ -131,7 +131,7 @@ Co-occurrence is accumulated per paragraph, never as a full matrix. Only the K b
 
 Two entities named in the same paragraph (same source, file and line) are neighbours once, however many times each is mentioned there; their count is the number of such paragraphs. Each node keeps its own row of counts; a row is trimmed to its best K by count then by identifier whenever it grows past 2K, so memory is proportional to the number of nodes times K, never to the square of the number of nodes. A neighbour dropped by a trim starts again from zero if it reappears: a count is never overestimated, and the K retained are the true best K as soon as the frequent pairs stand out from the occasional ones, which is what a bounded neighbourhood is for. Paragraphs are visited in `(source, path, line)` order, so the result depends on the set of occurrences alone. A paragraph naming more than 200 distinct entities is a list or a table rather than prose: only its first 200 identifiers are paired.
 
-Each pair gives one undirected `related` link at the `cooccurrence` confidence, emitted once from the lower identifier, with the number of shared paragraphs as the `count` of its single provenance; the relation typing step may refine `related` from the type pair. The `neighbours` block of `model.json` lists, per identifier and in identifier order, the retained neighbours best first, for the mini-map and the accompanying-words panel.
+Each pair gives one undirected `related` link at the `cooccurrence` confidence, emitted once from the lower identifier, with the number of shared paragraphs as the `count` of its single provenance; the relation typing step may refine `related` from the type pair. The `neighbours` block of `model.json` lists, per identifier and in identifier order, the retained neighbours best first, for the mini-map and the accompanying-words panel. Keyword pages get a row of their own after discovery: the entities and the other keyword pages named in the paragraphs of their mentions, counted the same way over those paragraphs only; the rows of the entities are not changed by it.
 
 ## Displayed neighbourhood
 
@@ -145,7 +145,7 @@ Text similarity works on extracted text, never on binary content. Each text goes
 
 ## Keyword page threshold
 
-A keyword page exists from three occurrences in at least two files (`inference.keyword_pages`). Below the threshold the word is searchable but has no page. The build summary reports pages generated and expressions discarded.
+A keyword page exists from three occurrences in at least two files (`inference.keyword_pages`). Below the threshold the word is searchable but has no page. The build summary reports pages generated and expressions discarded. An expression a note defines that reaches the same threshold is what its page would have been: the note's fragment lists the address `keywords/<slug>` and the site writes a page there forwarding to the note, so that a link to the keyword page survives the note; an address a keyword page of the build holds is never taken over. Every page also offers as leads the other pages and the notes whose expression has a similar form (one contained in the other, or half the words shared), five at most.
 
 ## Paginated mentions
 

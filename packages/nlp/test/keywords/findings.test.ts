@@ -34,17 +34,46 @@ const summary = candidate("build summary", 13.8621, [
     path: "explicit-link.md",
     line: 11,
     position: 3,
+    surface: "build summary",
     context: "The build…",
   },
-  { source: "meetings", path: "workshop.md", line: 7, position: 60, context: "…build…" },
-  { source: "specs", path: "rules/related-link-cap.rule.md", line: 6, position: 140, context: "…" },
+  {
+    source: "meetings",
+    path: "workshop.md",
+    line: 7,
+    position: 60,
+    surface: "build summary",
+    context: "…build…",
+  },
+  {
+    source: "specs",
+    path: "rules/related-link-cap.rule.md",
+    line: 6,
+    position: 140,
+    surface: "build summary",
+    context: "…",
+  },
 ]);
 
 describe("undefinedTermFindings", () => {
   it("produces a W-TERM-UNDEFINED finding above a score threshold", () => {
     const below = candidate("cold start", 3.1579, [
-      { source: "specs", path: "api/model-query.md", line: 4, position: 0, context: "Cold start" },
-      { source: "specs", path: "api/model-query.md", line: 9, position: 0, context: "Cold start" },
+      {
+        source: "specs",
+        path: "api/model-query.md",
+        line: 4,
+        position: 0,
+        surface: "Cold start",
+        context: "Cold start",
+      },
+      {
+        source: "specs",
+        path: "api/model-query.md",
+        line: 9,
+        position: 0,
+        surface: "Cold start",
+        context: "Cold start",
+      },
     ]);
     const expected: Finding[] = [
       {
@@ -71,7 +100,13 @@ describe("undefinedTermFindings", () => {
   it("names the display form and writes singular counts for one occurrence in one file", () => {
     const single: KeywordCandidate = {
       ...candidate("nightly", 5, [
-        { path: "batches/nightly.md", line: 1, position: 0, context: "Nightly" },
+        {
+          path: "batches/nightly.md",
+          line: 1,
+          position: 0,
+          surface: "Nightly",
+          context: "Nightly",
+        },
       ]),
       display: "Nightly",
     };
@@ -103,6 +138,7 @@ describe("undefinedTermFindings", () => {
         path: "batches/nightly.md",
         line: 2,
         position: 0,
+        surface: "Nightly batch",
         context: "Nightly batch",
       },
       {
@@ -110,6 +146,7 @@ describe("undefinedTermFindings", () => {
         path: "batches/nightly.md",
         line: 5,
         position: 0,
+        surface: "Nightly batch",
         context: "Nightly batch",
       },
     ]);

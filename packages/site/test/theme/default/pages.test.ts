@@ -2,38 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { keywordPage, searchResults } from "../../../src/gallery/fixtures.js";
+import { searchResults } from "../../../src/gallery/fixtures.js";
 import { expectBalanced } from "../../helpers/html.js";
-
-describe("KeywordPage", () => {
-  it("renders the banner, the three counts, the passages by file, the companions and the similar forms", () => {
-    const html = renderSlot("KeywordPage", keywordPage, defaultTheme);
-    expect(html).toContain('<span class="badge">keyword</span>');
-    expect(html).toContain("<h1>build summary</h1>");
-    expect(html).toContain(
-      '<p class="banner" role="note">No note defines this word yet: 7 passages recorded.</p>',
-    );
-    expect(html).toContain("<dt>Occurrences</dt><dd>7</dd>");
-    expect(html).toContain("<dt>Files</dt><dd>3</dd>");
-    expect(html).toContain("<dt>Sources</dt><dd>2</dd>");
-    expect(html).toContain('<h3><a href="../build-pipeline/">processes/build-pipeline.md</a></h3>');
-    expect(html).toContain(
-      '<a href="../build-pipeline/#L12">line 12</a><q>the build summary is printed</q>',
-    );
-    expect(html).toContain(
-      '<li class="companion" data-weight="5"><a href="../build-log/">build log</a></li>',
-    );
-    expect(html).toContain('<li class="companion" data-weight="2"><span>counts</span></li>');
-    expect(html).toContain("Offered as a lead: nothing here asserts a relation.");
-    expect(html).toContain('<a href="../build-summaries/">build summaries</a>');
-    expectBalanced(html);
-  });
-
-  it("omits the similar forms section when there is none", () => {
-    const html = renderSlot("KeywordPage", { ...keywordPage, similar: [] }, defaultTheme);
-    expect(html).not.toContain('class="similar"');
-  });
-});
 
 describe("SearchResults", () => {
   it("renders the summary, the facets with counts and the ordered results", () => {

@@ -160,6 +160,7 @@ describe("scoreCandidates", () => {
       path: "index.md",
       line: 1,
       position: 0,
+      surface: "nightly batch",
       context: "nightly batch",
     });
   });
@@ -197,15 +198,30 @@ describe("scoreCandidates", () => {
       documents: 3,
       score: 3.2958,
       mentions: [
-        { source: "glossary", path: "a.md", line: 1, position: 0, context: "Related cap" },
+        {
+          source: "glossary",
+          path: "a.md",
+          line: 1,
+          position: 0,
+          surface: "Related cap",
+          context: "Related cap",
+        },
         {
           source: "specs",
           path: "a.md",
           line: 3,
           position: 0,
+          surface: "Related cap",
           context: "Related cap set in the profile",
         },
-        { source: "specs", path: "b.md", line: 1, position: 4, context: "the related cap" },
+        {
+          source: "specs",
+          path: "b.md",
+          line: 1,
+          position: 4,
+          surface: "related cap",
+          context: "the related cap",
+        },
       ],
     });
   });

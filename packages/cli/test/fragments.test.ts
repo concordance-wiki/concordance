@@ -84,8 +84,21 @@ const keywordMentions = new Map<string, KeywordMention[]>([
   [
     "keywords/build-summary",
     [
-      { source: "glossary", path: "page.md", line: 3, position: 0, context: "the build summary" },
-      { path: "screens/mentions-panel.md", line: 3, position: 4, context: "a build summary" },
+      {
+        source: "glossary",
+        path: "page.md",
+        line: 3,
+        position: 0,
+        surface: "build summary",
+        context: "the build summary",
+      },
+      {
+        path: "screens/mentions-panel.md",
+        line: 3,
+        position: 4,
+        surface: "build summary",
+        context: "a build summary",
+      },
     ],
   ],
 ]);
@@ -260,14 +273,26 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     }
   });
 
-  it("records the passages of a keyword page from its mentions, in corpus order, and none for a page without any", () => {
+  it("records the passages of a keyword page from its mentions, in corpus order with the expression as written, and none for a page without any", () => {
     const fragments = fragmentsOf(input());
     expect(fragments.find((fragment) => fragment.id === "keywords/build-summary")).toEqual({
       id: "keywords/build-summary",
       sections: [],
       passages: [
-        { source: "glossary", path: "page.md", line: 3, context: "the build summary" },
-        { source: "", path: "screens/mentions-panel.md", line: 3, context: "a build summary" },
+        {
+          source: "glossary",
+          path: "page.md",
+          line: 3,
+          text: "build summary",
+          context: "the build summary",
+        },
+        {
+          source: "",
+          path: "screens/mentions-panel.md",
+          line: 3,
+          text: "build summary",
+          context: "a build summary",
+        },
       ],
     });
     expect(fragments.find((fragment) => fragment.id === "keywords/cold-start")).toEqual({
@@ -275,6 +300,39 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
       sections: [],
       passages: [],
     });
+  });
+
+  it("records the leads of a keyword page and the keyword addresses a note took over, nothing when there is none", () => {
+    const fragments = fragmentsOf(
+      input({
+        keywordLeads: new Map([
+          ["keywords/build-summary", [{ id: "keywords/cold-start", title: "cold start" }]],
+        ]),
+        takenOver: new Map([
+          ["glossary/page", ["keywords/page"]],
+          ["specs/screens/mentions-panel", ["keywords/mention-panel", "keywords/panel"]],
+        ]),
+      }),
+    );
+    const byId = new Map(fragments.map((fragment) => [fragment.id, fragment]));
+    expect(byId.get("keywords/build-summary")?.leads).toEqual([
+      { id: "keywords/cold-start", title: "cold start" },
+    ]);
+    expect(byId.get("keywords/cold-start")).not.toHaveProperty("leads");
+    expect(byId.get("glossary/page")?.keywords).toEqual(["keywords/page"]);
+    expect(byId.get("specs/screens/mentions-panel")?.keywords).toEqual([
+      "keywords/mention-panel",
+      "keywords/panel",
+    ]);
+    expect(byId.get("glossary/keyword-page")).not.toHaveProperty("keywords");
+    // A note whose file the sources lost still keeps the addresses it took over.
+    const lost = fragmentsOf(
+      input({
+        entities: [entity("glossary/gone", "glossary", "gone.md")],
+        takenOver: new Map([["glossary/gone", ["keywords/gone"]]]),
+      }),
+    );
+    expect(lost).toEqual([{ id: "glossary/gone", sections: [], keywords: ["keywords/gone"] }]);
   });
 
   it("writes one canonical JSON file per entity under fragments/ and counts them", () => {

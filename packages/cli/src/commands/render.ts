@@ -10,7 +10,7 @@ import {
   type FileSystem,
   type PluginRegistry,
 } from "@concordance-wiki/core";
-import { languagePack, searchTokens } from "@concordance-wiki/nlp";
+import { glossarySources, languagePack, searchTokens } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
@@ -151,6 +151,7 @@ export async function renderSite(
     names: siteNames(config),
     sourceRefs: sourceRefs(config),
     tokenize: (text, locale) => searchTokens(text, languagePack(locale)),
+    glossarySources: [...glossarySources(config)],
     ...(config.project.edit_url === undefined ? {} : { editUrl: config.project.edit_url }),
     ...(config.build?.mentions_inline === undefined
       ? {}

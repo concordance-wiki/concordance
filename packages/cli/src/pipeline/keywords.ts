@@ -1,19 +1,32 @@
-import type { Config, Entity, Finding, KeywordCounts, TermCandidate } from "@concordance-wiki/core";
+import {
+  slugify,
+  type Config,
+  type Entity,
+  type Finding,
+  type KeywordCounts,
+  type TermCandidate,
+} from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { scannableText, type IngestedSource, type ScannableUnit } from "@concordance-wiki/ingest";
 import {
+  definedExpressions,
   extractNgrams,
   keywordEntities,
+  keywordForm,
   keywordOptions,
   keywordPublicationOptions,
   languagePack,
   publishKeywords,
   scoreCandidates,
+  similarExpressions,
   undefinedTermFindings,
+  type Dictionary,
   type KeywordCandidate,
   type KeywordMention,
   type KeywordPage,
   type KeywordUnit,
+  type LanguagePack,
+  type NgramOccurrence,
 } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 
@@ -28,6 +41,12 @@ export interface DiscoverKeywordsInput {
   profile: Profile;
 }
 
+/** A page of the site offered as a lead from a keyword page: another keyword page or the note of a similar expression. */
+export interface KeywordLead {
+  id: string;
+  title: string;
+}
+
 export interface DiscoveredKeywords {
   /** One `term` entity per published page, marked `keyword: true`. */
   entities: Entity[];
@@ -37,6 +56,13 @@ export interface DiscoveredKeywords {
   terms: TermCandidate[];
   /** The mentions of every published page by identifier, in corpus order, for the passages of its page. */
   mentions: Map<string, KeywordMention[]>;
+  /** The expressions of a similar form to every published page, by identifier, closest first. */
+  leads: Map<string, KeywordLead[]>;
+  /**
+   * The keyword page identifiers every note takes over, by entity identifier: the recurring
+   * expressions its title or aliases define, whose address the site keeps as a redirect.
+   */
+  takenOver: Map<string, string[]>;
   counts: KeywordCounts;
 }
 
@@ -131,6 +157,83 @@ function withDistinctIds(pages: readonly KeywordPage[], taken: Set<string>): Key
   });
 }
 
+/** What a lead is compared on: the key of the expression, and the page it leads to. */
+interface LeadCandidate extends KeywordLead {
+  key: string;
+}
+
+/** The identifier a keyword page of the expression has, or would have: `keywords/<slug of the key>`. */
+export function keywordPageId(key: string): string {
+  return `keywords/${slugify(key)}`;
+}
+
+/**
+ * The entries of the dictionary as leads, by the keyword form of their key: the first target of
+ * each, a note of the glossary before any other, so that a lead names one page.
+ */
+function dictionaryLeads(dictionary: Dictionary, pack: LanguagePack): LeadCandidate[] {
+  const leads: LeadCandidate[] = [];
+  for (const entry of dictionary.entries.values()) {
+    // An entry always has a target; the slice spares a guard for a case that cannot occur.
+    for (const target of entry.targets.slice(0, 1)) {
+      leads.push({ key: keywordForm(entry.key, pack), id: target.id, title: target.form });
+    }
+  }
+  return leads;
+}
+
+/** The similar expressions of every page: the other pages of the locale and the dictionary entries. */
+function leadsOf(
+  pages: readonly KeywordPage[],
+  dictionary: Dictionary,
+  pack: LanguagePack,
+): Map<string, KeywordLead[]> {
+  const candidates: LeadCandidate[] = [
+    ...pages.map((page) => ({ key: page.key, id: page.id, title: page.display })),
+    ...dictionaryLeads(dictionary, pack),
+  ];
+  const leads = new Map<string, KeywordLead[]>();
+  for (const page of pages) {
+    const similar = similarExpressions(page.key, candidates).map(({ id, title }) => ({
+      id,
+      title,
+    }));
+    if (similar.length > 0) leads.set(page.id, similar);
+  }
+  return leads;
+}
+
+/**
+ * The keyword page identifiers the notes take over: an expression the dictionary defines that
+ * reaches the publication threshold would have had a page; the first target of its entry keeps
+ * its address. An identifier a page of this build holds is never a redirect.
+ */
+function takenOverOf(
+  ngrams: readonly NgramOccurrence[],
+  dictionary: Dictionary,
+  pack: LanguagePack,
+  options: { minOccurrences: number; minFiles: number },
+  taken: ReadonlySet<string>,
+): Map<string, Set<string>> {
+  const defined = new Set(
+    definedExpressions(ngrams, {
+      pack,
+      dictionaryKeys: new Set(dictionary.entries.keys()),
+      minOccurrences: options.minOccurrences,
+      minDocuments: options.minFiles,
+    }).map((expression) => expression.key),
+  );
+  const result = new Map<string, Set<string>>();
+  for (const lead of dictionaryLeads(dictionary, pack)) {
+    const id = keywordPageId(lead.key);
+    if (!defined.has(lead.key) || taken.has(id)) continue;
+    const ids = result.get(lead.id) ?? new Set<string>();
+    ids.add(id);
+    result.set(lead.id, ids);
+  }
+  return result;
+}
+
 /**
  * The recurring expressions no note defines, locale by locale: n-grams over the scannable units
  * of every note, headings and section labels left out, scored by C-value × IDF against the
@@ -146,8 +249,11 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     findings: [],
     terms: [],
     mentions: new Map(),
+    leads: new Map(),
+    takenOver: new Map(),
     counts: { published: 0, discarded: 0 },
   };
+  const pending: { ngrams: NgramOccurrence[]; dictionary: Dictionary; pack: LanguagePack }[] = [];
   const taken = new Set<string>();
   const labels = sectionLabels(input.profile);
   for (const [locale, { dictionary, stopwords }] of input.dictionaries) {
@@ -169,12 +275,25 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     for (const page of pages) {
       result.mentions.set(page.id, page.mentions);
     }
+    for (const [id, leads] of leadsOf(pages, dictionary, pack)) {
+      result.leads.set(id, leads);
+    }
+    pending.push({ ngrams, dictionary, pack });
     const publishedKeys = new Set(pages.map((page) => page.key));
     result.terms.push(
       ...candidates.map((candidate) => termOf(candidate, publishedKeys.has(candidate.key))),
     );
     result.counts.published += pages.length;
     result.counts.discarded += discarded.length;
+  }
+  // Every page of every locale is known: an address one of them holds is no redirect.
+  for (const { ngrams, dictionary, pack } of pending) {
+    for (const [entity, ids] of takenOverOf(ngrams, dictionary, pack, publication, taken)) {
+      result.takenOver.set(
+        entity,
+        [...new Set([...(result.takenOver.get(entity) ?? []), ...ids])].sort(byCodeUnit),
+      );
+    }
   }
   result.entities.sort((a, b) => byCodeUnit(a.id, b.id));
   return result;

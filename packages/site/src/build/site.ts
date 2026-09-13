@@ -41,6 +41,7 @@ import {
   SEARCH_PAGE,
   TODO_PAGE,
 } from "./paths.js";
+import { redirectBody, redirectHref, redirectsOf } from "./redirect.js";
 import { todoOf } from "./todo.js";
 
 /** Excluding previews, per page. */
@@ -61,6 +62,8 @@ export interface SiteInput {
   editUrl?: string;
   /** The `ref` of every source that declares one, for the edit links when `edit_url` is unset. */
   sourceRefs?: Record<string, string>;
+  /** The names of the glossary sources, where the lead of a keyword page offers to write the note. */
+  glossarySources?: string[];
   /** `build.mentions_inline` of the configuration. */
   mentionsInline?: number;
   /** `staleness` of the configuration: the thresholds behind the dormant flag of the home page. */
@@ -89,6 +92,8 @@ export interface SiteReport {
   files: string[];
   /** The search index written under `search/`: its weight and its number of shards. */
   search: SearchIndexSize;
+  /** How many pages are former keyword addresses forwarding to a note. */
+  redirects: number;
   /** Lines describing what was written. */
   summary: string[];
   /** One line per page over budget or accessibility finding; the site is written all the same. */
@@ -205,17 +210,13 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     ...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
     ...(input.staleness === undefined ? {} : { staleness: input.staleness }),
     ...(input.collate === undefined ? {} : { collate: input.collate }),
+    ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
-  const document = (
-    page: string,
-    body: JSX.Element,
-    title: string,
-    locale: string,
-  ): WrittenDocument => {
+  const optionsFor = (page: string, title: string, locale: string): RenderOptions => {
     const chrome = chromeFor(input, context, page, todoCount);
-    const options: RenderOptions = {
+    return {
       theme: input.theme,
       locale,
       title: title === chrome.siteTitle ? title : `${title} – ${chrome.siteTitle}`,
@@ -226,8 +227,16 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       header: chrome.header,
       footer: chrome.footer,
     };
-    return { path: page, content: renderDocument(body, options) };
   };
+  const document = (
+    page: string,
+    body: JSX.Element,
+    title: string,
+    locale: string,
+  ): WrittenDocument => ({
+    path: page,
+    content: renderDocument(body, optionsFor(page, title, locale)),
+  });
   const render = <S extends PageSlot>(
     page: string,
     slot: S,
@@ -235,23 +244,29 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     title: string,
     locale: string,
   ): WrittenDocument => document(page, h(input.theme.components[slot], props), title, locale);
+  const mentionsOptions =
+    input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline };
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
     return entity.keyword === true
-      ? render(page, "KeywordPage", keywordPageOf(context, entity), entity.title, entity.locale)
+      ? render(
+          page,
+          "KeywordPage",
+          keywordPageOf(context, entity, mentionsOptions),
+          entity.title,
+          entity.locale,
+        )
       : render(
           page,
           "EntityPage",
-          entityPageOf(context, entity, {
-            ...(input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline }),
-          }),
+          entityPageOf(context, entity, mentionsOptions),
           entity.title,
           entity.locale,
         );
   };
-  // Keyword pages list their passages instead; an entity without a mention gets no fragment.
+  // An entity without a mention gets no fragment.
   const mentionsFragment = (entity: Entity): WrittenDocument[] => {
-    const fragment = entity.keyword === true ? undefined : mentionsFragmentOf(context, entity);
+    const fragment = mentionsFragmentOf(context, entity);
     return fragment === undefined
       ? []
       : [
@@ -261,6 +276,18 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
           },
         ];
   };
+  // A former keyword address forwards to the note that took the expression over.
+  const redirects = redirectsOf(context).map((redirect): WrittenDocument => {
+    const page = pagePath(redirect.from);
+    return {
+      path: page,
+      content: renderDocument(redirectBody(context, redirect), {
+        ...optionsFor(page, redirect.to.title, redirect.to.locale),
+        redirect: redirectHref(redirect),
+      }),
+      kind: "redirect",
+    };
+  });
   const siteTitle = themeChrome(input, "").siteTitle;
   const indexTitle = message(context, "site.index");
   const index = planIndex(context, (props) =>
@@ -318,6 +345,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
       searchPage,
       ...input.model.entities.map(entityPage),
+      ...redirects,
       ...searchIndex.documents,
       ...input.model.entities.flatMap(mentionsFragment),
     ],
@@ -329,6 +357,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
 export async function buildSite(options: SiteOptions): Promise<SiteReport> {
   const { output, theme, fileSystem } = options;
   let search: SearchIndexSize = { bytes: 0, shards: 0 };
+  let redirects = 0;
   const assembled = await assemblePages({
     output,
     theme,
@@ -338,6 +367,7 @@ export async function buildSite(options: SiteOptions): Promise<SiteReport> {
     documents: (islands) => {
       const site = siteDocuments(options, islands);
       search = site.search;
+      redirects = site.documents.filter((document) => document.kind === "redirect").length;
       return site.documents;
     },
   });
@@ -348,8 +378,10 @@ export async function buildSite(options: SiteOptions): Promise<SiteReport> {
     contrast: assembled.contrast,
     files: assembled.files,
     search,
+    redirects,
     summary: [
       `site: ${String(assembled.pages.length)} pages written to ${output}`,
+      `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
       ...assemblySummary(assembled, theme),
       `search index: ${formatKilobytes(search.bytes)} in ${String(search.shards)} shards`,
     ],

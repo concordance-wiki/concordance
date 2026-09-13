@@ -17,6 +17,7 @@ import {
   type RecognisedSpan,
 } from "@concordance-wiki/site";
 
+import type { KeywordLead } from "./keywords.js";
 import type { RecognisedWord } from "./recognised.js";
 
 export interface FragmentsInput {
@@ -24,6 +25,10 @@ export interface FragmentsInput {
   /** The ingested sources, whose checkouts the notes are read from. */
   sources: readonly IngestedSource[];
   keywordMentions: ReadonlyMap<string, readonly KeywordMention[]>;
+  /** The expressions of a similar form to every keyword page, offered as leads; none when absent. */
+  keywordLeads?: ReadonlyMap<string, readonly KeywordLead[]>;
+  /** The keyword page identifiers every note takes over, whose address the site keeps; none when absent. */
+  takenOver?: ReadonlyMap<string, readonly string[]>;
   /** The recognised words of every note by `<source>/<path>`, marked in the rendered text. */
   recognised: ReadonlyMap<string, readonly RecognisedWord[]>;
   /** Whether a link may reach another source, as the link production decided (`inference.cross_source_links`). */
@@ -53,6 +58,7 @@ function passagesOf(mentions: readonly KeywordMention[]): FragmentPassage[] {
     source: mention.source ?? "",
     path: mention.path,
     line: mention.line,
+    text: mention.surface,
     context: mention.context,
   }));
 }
@@ -104,17 +110,21 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
   }
   return input.entities.map((entity) => {
     if (entity.keyword === true) {
+      const leads = input.keywordLeads?.get(entity.id) ?? [];
       return {
         id: entity.id,
         sections: [],
         passages: passagesOf(input.keywordMentions.get(entity.id) ?? []),
+        ...(leads.length === 0 ? {} : { leads: leads.map((lead) => ({ ...lead })) }),
       };
     }
+    const keywords = input.takenOver?.get(entity.id) ?? [];
+    const takenOver = keywords.length === 0 ? {} : { keywords: [...keywords] };
     const source = sources.get(entity.source.name);
     const path = notePath(entity);
     const file = source?.files.find((candidate) => candidate.path === path);
     if (source === undefined || path === undefined || file === undefined) {
-      return { id: entity.id, sections: [] };
+      return { id: entity.id, sections: [], ...takenOver };
     }
     const page = pagePath(entity.id);
     const images = new Map<string, FragmentImage>();
@@ -147,6 +157,7 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
     return {
       id: entity.id,
       sections: rendered.sections,
+      ...takenOver,
       ...(images.size === 0
         ? {}
         : { images: [...images.values()].sort((a, b) => byCodeUnit(a.target, b.target)) }),

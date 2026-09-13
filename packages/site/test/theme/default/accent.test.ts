@@ -99,7 +99,7 @@ describe("The accent colour never carries information on its own", () => {
   it("gives the accent-bordered banner and the accent headings of the mentions a text of their own", () => {
     const keyword = pages.get("keyword-page.html") ?? "";
     expect(keyword).toMatch(
-      /<p class="banner" role="note">No note defines this word yet: \d+ passages recorded\.<\/p>/,
+      /<p class="banner" role="note">Expression without a note\. \d+ passages recorded\. <a class="create-note" [^>]*>Create a note<\/a><\/p>/,
     );
     const mentions = pages.get("mentions-panel.html") ?? "";
     expect(mentions).toContain(

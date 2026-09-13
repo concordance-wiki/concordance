@@ -223,6 +223,8 @@ export async function buildCommand(
       entities: result.entities,
       sources: ingested.sources,
       keywordMentions: result.keywordMentions,
+      keywordLeads: result.keywordLeads,
+      takenOver: result.takenOver,
       recognised: result.recognised,
       config,
       fs: io.fs,

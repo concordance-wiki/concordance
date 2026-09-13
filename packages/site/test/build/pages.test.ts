@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SOURCE_REF,
   citations,
+  createNoteHref,
   editHref,
   forgeEditHref,
+  forgeNewFileHref,
   glyphNameOf,
   glyphOf,
   relationLabel,
@@ -21,8 +23,14 @@ import {
   panelOf,
   sourcesOf,
 } from "../../src/build/entity-page.js";
-import { DEFAULT_MENTIONS_INLINE } from "../../src/build/mentions.js";
-import { companionsOf, keywordPageOf } from "../../src/build/keyword-page.js";
+import {
+  COMPANIONS_MAX,
+  companionsOf,
+  keywordPageOf,
+  passageGroupsOf,
+  weightsOf,
+} from "../../src/build/keyword-page.js";
+import { DEFAULT_MENTIONS_INLINE, mentionsPanelOf } from "../../src/build/mentions.js";
 import {
   entity,
   fragments,
@@ -369,14 +377,71 @@ describe("entityPageOf", () => {
 });
 
 describe("keywordPageOf", () => {
-  it("counts from the entity, groups the passages by file in corpus order and leaves out a file that is no page", () => {
+  it("counts from the entity and states the three numbers only: occurrences, files, sources", () => {
     const props = keywordPageOf(context(), keyword);
     expect(props.entity).toEqual({
       id: "keywords/build-summary",
       title: "build summary",
       locale: "en",
+      typeLabel: "Keyword",
     });
     expect(props.counts).toEqual({ occurrences: 5, files: 2, sources: 2 });
+    expect(Object.keys(props.counts)).toEqual(["occurrences", "files", "sources"]);
+    const orphan = keywordPageOf(context(), orphanKeyword);
+    expect(orphan.counts).toEqual({ occurrences: 0, files: 0, sources: 0 });
+    expect(orphan.passages).toEqual([]);
+    expect(orphan.companions).toEqual([]);
+    expect(orphan.similar).toEqual([]);
+  });
+
+  it("writes the banner from the catalogue with the number of passages, in the language of the site", () => {
+    expect(keywordPageOf(context(), keyword).banner.text).toBe(
+      "Expression without a note. 5 passages recorded.",
+    );
+    const one = { ...keyword, attributes: { ...keyword.attributes, occurrences: 1 } };
+    expect(keywordPageOf(context(), one).banner.text).toBe(
+      "Expression without a note. 1 passage recorded.",
+    );
+    const fr = keywordPageOf(context({ catalogue: loadCatalogue("fr") }), keyword);
+    expect(fr.banner.text).toBe("Expression sans note. 5 passages relevés.");
+    expect(fr.entity.typeLabel).toBe("Mot-clé");
+    expect(fr.similarLead).toBe("Vous pensiez peut-être à\u00a0:");
+  });
+
+  it("offers to create the note on the forge of the first glossary source it knows, as plain text otherwise", () => {
+    expect(keywordPageOf(context(), keyword).banner.createNote).toEqual({
+      label: "Create a note",
+    });
+    const sources = [
+      { name: "framing", url: "https://example.org/wiki/framing.git" },
+      { name: "glossary", url: "https://github.com/concordance-wiki/demo-glossary.git", files: 2 },
+      { name: "specs", url: "https://gitlab.com/concordance-wiki/demo-specs", files: 3 },
+    ];
+    const withForge = context({
+      model: model({ build: { ...model().build, sources } }),
+      glossarySources: ["framing", "glossary", "specs"],
+      sourceRefs: { glossary: "v2" },
+    });
+    expect(keywordPageOf(withForge, keyword).banner.createNote).toEqual({
+      label: "Create a note",
+      href: "https://github.com/concordance-wiki/demo-glossary/new/v2?filename=build-summary.md",
+    });
+    expect(createNoteHref(withForge, "build-summary")).toBe(
+      "https://github.com/concordance-wiki/demo-glossary/new/v2?filename=build-summary.md",
+    );
+    expect(createNoteHref({ ...withForge, glossarySources: ["specs"] }, "cold-start")).toBe(
+      "https://gitlab.com/concordance-wiki/demo-specs/-/new/main?file_name=cold-start.md",
+    );
+    expect(createNoteHref({ ...withForge, glossarySources: ["framing"] }, "x")).toBeUndefined();
+    expect(createNoteHref({ ...withForge, glossarySources: ["nowhere"] }, "x")).toBeUndefined();
+    expect(forgeNewFileHref("not a url", "main", "a.md")).toBeUndefined();
+    expect(forgeNewFileHref("https://gitlab.example.org/wiki/glossary/", "main", "a b.md")).toBe(
+      "https://gitlab.example.org/wiki/glossary/-/new/main?file_name=a%20b.md",
+    );
+  });
+
+  it("lists the passages grouped by file in corpus order, sources as declared then paths, with their text, and leaves out a file that is no page", () => {
+    const props = keywordPageOf(context(), keyword);
     expect(props.passages).toEqual([
       {
         file: { label: "page.md", href: "../../glossary/page/index.html" },
@@ -395,30 +460,102 @@ describe("keywordPageOf", () => {
         },
         passages: [
           {
-            context: "after the build summary",
+            context: "after the Build summaries",
+            text: "Build summaries",
             line: 12,
             href: "../../specs/screens/mentions-panel/index.html#L12",
           },
           {
             context: "the build summary again",
+            text: "build summary",
             line: 40,
             href: "../../specs/screens/mentions-panel/index.html#L40",
           },
         ],
       },
     ]);
-    expect(props.similar).toEqual([]);
+    // Declaration order, not name order: specs before glossary once the build block says so.
+    const build = model().build;
+    const reversed = context({
+      model: model({ build: { ...build, sources: [...build.sources].reverse() } }),
+    });
+    expect(keywordPageOf(reversed, keyword).passages.map((group) => group.file.label)).toEqual([
+      "screens/mentions-panel.md",
+      "page.md",
+    ]);
+    // A source the build block does not name comes last, sources then paths by code unit.
+    const passages = [
+      { source: "zeta", path: "b.md", line: 1, context: "c" },
+      { source: "zeta", path: "a.md", line: 1, context: "c" },
+      { source: "alpha", path: "z.md", line: 1, context: "c" },
+    ];
+    const extra = context({
+      model: model({
+        entities: [
+          ...model().entities,
+          entity({ id: "zeta/a", type: "term", title: "a" }),
+          entity({ id: "zeta/b", type: "term", title: "b" }),
+          entity({ id: "alpha/z", type: "term", title: "z" }),
+        ],
+      }),
+    });
+    expect(
+      passageGroupsOf(extra, "keywords/x/index.html", passages).map((group) => group.file.href),
+    ).toEqual(["../../alpha/z/index.html", "../../zeta/a/index.html", "../../zeta/b/index.html"]);
   });
 
-  it("weighs the companions against the most frequent one, a neighbour the model lost keeping its identifier without a link", () => {
+  it("sizes the companions by the rank of their co-occurrence count, twelve at most, a neighbour the model lost keeping its identifier without a link", () => {
     expect(companionsOf(context(), "keywords/build-summary/index.html", keyword)).toEqual([
-      { label: "Mentions panel", href: "../../specs/screens/mentions-panel/index.html", weight: 5 },
-      { label: "Keyword page", href: "../../glossary/keyword-page/index.html", weight: 3 },
-      { label: "unknown/ghost", weight: 1 },
+      {
+        label: "Mentions panel",
+        href: "../../specs/screens/mentions-panel/index.html",
+        count: 6,
+        weight: 5,
+      },
+      {
+        label: "Keyword page",
+        href: "../../glossary/keyword-page/index.html",
+        count: 3,
+        weight: 3,
+      },
+      { label: "unknown/ghost", count: 1, weight: 1 },
     ]);
-    const orphan = keywordPageOf(context(), orphanKeyword);
-    expect(orphan.counts).toEqual({ occurrences: 0, files: 0, sources: 0 });
-    expect(orphan.passages).toEqual([]);
-    expect(orphan.companions).toEqual([]);
+    expect(COMPANIONS_MAX).toBe(12);
+    const many = Array.from({ length: 15 }, (_, index) => ({
+      id: `n/${String(index)}`,
+      count: 30 - index,
+    }));
+    const crowded = context({ model: model({ neighbours: { [keyword.id]: many } }) });
+    const companions = companionsOf(crowded, "keywords/build-summary/index.html", keyword);
+    expect(companions).toHaveLength(12);
+    expect(companions.map((companion) => companion.weight)).toEqual([
+      5, 5, 4, 4, 4, 3, 3, 2, 2, 2, 1, 1,
+    ]);
+  });
+
+  it("weighs equal counts alike, from 1 to 5, a single count weighing 5", () => {
+    expect(weightsOf([6, 3, 1])).toEqual([5, 3, 1]);
+    expect(weightsOf([4, 4, 4])).toEqual([5, 5, 5]);
+    expect(weightsOf([2, 1, 2])).toEqual([5, 1, 5]);
+    expect(weightsOf([9, 8, 7, 6])).toEqual([5, 4, 2, 1]);
+    expect(weightsOf([])).toEqual([]);
+  });
+
+  it("turns the leads of the fragment into links, a lead to a page the model lost being left out", () => {
+    expect(keywordPageOf(context(), keyword).similar).toEqual([
+      { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
+    ]);
+    expect(keywordPageOf(context(), keyword).similarLead).toBe("You may also mean:");
+  });
+
+  it("gives the keyword page the neighbourhood and the mentions of the entity page, with the inline count", () => {
+    const props = keywordPageOf(context(), keyword, { mentionsInline: 4 });
+    expect(props.neighbours).toEqual(
+      neighbourhoodOf(context(), "keywords/build-summary/index.html", keyword),
+    );
+    expect(props.mentions).toEqual(
+      mentionsPanelOf(context(), "keywords/build-summary/index.html", keyword, 4),
+    );
+    expect(keywordPageOf(context(), keyword).mentions.initial).toBe(DEFAULT_MENTIONS_INLINE);
   });
 });

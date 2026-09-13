@@ -25,6 +25,8 @@ export interface RenderOptions {
   assetsBase?: string;
   header: SlotProps["Header"];
   footer: SlotProps["Footer"];
+  /** Href the page forwards to at once; the head carries it as a refresh. */
+  redirect?: string;
 }
 
 const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
@@ -86,6 +88,7 @@ export function renderDocument(body: JSX.Element, options: RenderOptions): strin
     modulePreloads: [],
     scripts: [],
     ...(options.favicon === undefined ? {} : { favicon: options.favicon }),
+    ...(options.redirect === undefined ? {} : { redirect: options.redirect }),
   };
   const first = document(body, options, head);
   const islands = islandsUsed(first);

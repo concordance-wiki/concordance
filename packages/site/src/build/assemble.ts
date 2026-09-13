@@ -15,6 +15,8 @@ export interface WrittenDocument {
   /** Path under the output folder. */
   path: string;
   content: string;
+  /** A former keyword address forwarding to the note that took the expression over. */
+  kind?: "redirect";
 }
 
 export interface PageReport {

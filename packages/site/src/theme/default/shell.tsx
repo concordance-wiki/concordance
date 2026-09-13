@@ -20,6 +20,9 @@ export function Shell({ locale, direction, title, head, children }: ShellProps):
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{title}</title>
+        {head.redirect !== undefined && (
+          <meta http-equiv="refresh" content={`0; url=${head.redirect}`} />
+        )}
         {head.favicon !== undefined && (
           <link rel="icon" href={head.favicon} type={iconType(head.favicon)} />
         )}
