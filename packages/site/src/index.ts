@@ -57,6 +57,7 @@ export * as galleryFixtures from "./gallery/fixtures.js";
 export * from "./gallery/pages.js";
 export * from "./gallery/types.js";
 export * from "./markdown/figures.js";
+export * from "./markdown/marks.js";
 export * from "./markdown/render.js";
 export * from "./build/paths.js";
 export {

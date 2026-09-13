@@ -8,6 +8,7 @@ import {
   entityHref,
   fragmentImagePath,
   fragmentPath,
+  markLabels,
   relativeHref,
   renderMarkdown,
   serializeFragment,
@@ -16,6 +17,7 @@ import {
   type FragmentImage,
   type FragmentPage,
   type FragmentPassage,
+  type MarkLabels,
   type RecognisedSpan,
 } from "@concordance-wiki/site";
 
@@ -216,18 +218,104 @@ function withDocuments(
   };
 }
 
-/** The recognised words as the renderer links them; the page's own name and a lost target are passed over. */
+/** A recognised expression of a note that has a keyword page and no note: where it was read, and its page. */
+interface KeywordWord {
+  line: number;
+  position: number;
+  text: string;
+  /** Identifier of the keyword page. */
+  target: string;
+  /** How many passages the page lists. */
+  passages: number;
+}
+
+/**
+ * The expressions of every note that have a keyword page, by `<source>/<path>`, from the
+ * mentions of the published pages: an expression under the publication threshold has no page
+ * and gets no mark, so that one setting governs the volume of the site and the density of the
+ * text.
+ */
+function keywordWords(
+  mentions: ReadonlyMap<string, readonly KeywordMention[]>,
+): Map<string, KeywordWord[]> {
+  const result = new Map<string, KeywordWord[]>();
+  for (const [target, found] of mentions) {
+    for (const mention of found) {
+      const key = fileKey(mention.source ?? "", mention.path);
+      const words = result.get(key) ?? [];
+      words.push({
+        line: mention.line,
+        position: mention.position,
+        text: mention.surface,
+        target,
+        passages: found.length,
+      });
+      result.set(key, words);
+    }
+  }
+  return result;
+}
+
+/** A span and where it starts in its unit, which orders the spans of a line. */
+interface PlacedSpan {
+  position: number;
+  span: RecognisedSpan;
+}
+
+/**
+ * The recognised words as the renderer links them, in text order: the page's own name and a
+ * lost target are passed over; a word with a note tells the title of its note, an expression
+ * without one the number of its passages. Where two overlap, the longest expression wins its
+ * position and the words it holds are left out, a word with a note before an expression without
+ * one of the same length; the mentions of the model keep them all.
+ */
 function spansOf(
   words: readonly RecognisedWord[],
+  keywords: readonly KeywordWord[],
   entity: Entity,
   page: string,
   byId: ReadonlyMap<string, Entity>,
+  labels: MarkLabels,
 ): RecognisedSpan[] {
-  return words.map((word) =>
-    word.target === entity.id || !byId.has(word.target)
-      ? { line: word.line, text: word.text }
-      : { line: word.line, text: word.text, href: entityHref(page, word.target) },
+  const noted: PlacedSpan[] = words.map((word) => {
+    const target = byId.get(word.target);
+    const span: RecognisedSpan =
+      word.target === entity.id || target === undefined
+        ? { line: word.line, text: word.text }
+        : {
+            line: word.line,
+            text: word.text,
+            href: entityHref(page, word.target),
+            title: labels.note(target.title),
+          };
+    return { position: word.position, span };
+  });
+  const unnoted: PlacedSpan[] = keywords.map((word) => ({
+    position: word.position,
+    span: {
+      line: word.line,
+      text: word.text,
+      href: entityHref(page, word.target),
+      title: labels.noNote(word.passages),
+      keyword: true,
+    },
+  }));
+  const placed = [...noted, ...unnoted].sort(
+    (a, b) =>
+      a.span.line - b.span.line ||
+      a.position - b.position ||
+      b.span.text.length - a.span.text.length,
   );
+  const spans: RecognisedSpan[] = [];
+  let line = 0;
+  let end = 0;
+  for (const { position, span } of placed) {
+    if (span.line === line && position < end) continue;
+    line = span.line;
+    end = position + span.text.length;
+    spans.push(span);
+  }
+  return spans;
 }
 
 /** The documents keyed by `<source>/<path>`. */
@@ -250,6 +338,9 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
     input.sources.map((source) => [source.name, new Set(source.files.map((file) => file.path))]),
   );
   const crossSource = input.config.inference?.cross_source_links ?? false;
+  // The same default as the site gives a project without a locale.
+  const labels = markLabels(input.config.project.locale ?? "en");
+  const keywordsByFile = keywordWords(input.keywordMentions);
   const byFile = new Map<string, Entity>();
   const byId = new Map<string, Entity>();
   for (const entity of input.entities) {
@@ -311,9 +402,11 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
       },
       recognised: spansOf(
         input.recognised.get(fileKey(source.name, path)) ?? [],
+        keywordsByFile.get(fileKey(source.name, path)) ?? [],
         entity,
         page,
         byId,
+        labels,
       ),
     });
     return withDocuments(

@@ -47,14 +47,26 @@
   margin-block-start: var(--space-4);
 }
 
+/* The three marks of the text, one per degree of curation: a link someone wrote, solid in the
+   accent; a recognised word whose entity has a note, dotted in the accent; a recognised
+   expression that has a keyword page and no note, dashed in the label grey, never the accent.
+   The dots and dashes never carry the information alone: the anchor's title and hidden text do. */
+
 .markdown .written {
   color: var(--color-accent);
 }
 
-.markdown .recognised {
+.markdown .recognised,
+.markdown .recognised-keyword {
   color: var(--color-ink);
-  text-decoration: underline dotted;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--color-accent);
   text-underline-offset: 0.2em;
+}
+
+.markdown .recognised-keyword {
+  text-decoration-style: dashed;
+  text-decoration-color: var(--color-label);
 }
 
 .markdown img {
@@ -72,7 +84,8 @@
 }
 
 .legend-written::before,
-.legend-recognised::before {
+.legend-recognised::before,
+.legend-keyword::before {
   content: "";
   display: inline-block;
   inline-size: 1.25em;
@@ -83,7 +96,11 @@
 
 .legend-recognised::before {
   border-block-end-style: dotted;
-  border-color: var(--color-ink);
+}
+
+.legend-keyword::before {
+  border-block-end-style: dashed;
+  border-color: var(--color-label);
 }
 
 /* The footer of the note: the path of the file, then the edit link. */

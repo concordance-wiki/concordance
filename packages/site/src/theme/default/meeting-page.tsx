@@ -130,6 +130,7 @@ function Notes({ entity, sections }: { entity: EntityRef; sections: Section[] })
       <footer class="legend">
         <span class="legend-written">{labels.legendWritten}</span>
         <span class="legend-recognised">{labels.legendRecognised}</span>
+        <span class="legend-keyword">{labels.legendKeyword}</span>
       </footer>
     </article>
   );

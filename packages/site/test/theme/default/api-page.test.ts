@@ -53,7 +53,7 @@ describe("ApiPage", () => {
       '<article class="entity-body">',
       '<section class="api-operations"',
       '<section class="contract"',
-      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></p><p class="entity-source"><code>specs/api/model-query.md</code>',
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></p><p class="entity-source"><code>specs/api/model-query.md</code>',
       '<div class="entity-side">',
       '<section class="panel-block entity-panel" aria-labelledby="entity-properties">',
       '<aside class="mentions panel-block"',

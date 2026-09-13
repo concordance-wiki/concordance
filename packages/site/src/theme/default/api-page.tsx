@@ -114,6 +114,7 @@ export function ApiPage({
             <p class="legend">
               <span class="legend-written">{text.legendWritten}</span>
               <span class="legend-recognised">{text.legendRecognised}</span>
+              <span class="legend-keyword">{text.legendKeyword}</span>
             </p>
           )}
           {sources.map((source) => (

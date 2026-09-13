@@ -82,7 +82,8 @@ const files = {
   ].join("\n"),
   "/work/glossary/figures/pipeline.svg": "<svg/>",
   "/work/specs/screens/mentions-panel.png": "PNG",
-  "/work/glossary/page.md": "# Page\n\nA page of the site.\n",
+  "/work/glossary/page.md":
+    "# Page\n\nA page of the site, as the build summary counts it; the build summary counts the keyword page too.\n",
   "/work/specs/screens/mentions-panel.md": "# Mentions panel\n\nLists the mentions.\n",
 };
 
@@ -94,7 +95,7 @@ const keywordMentions = new Map<string, KeywordMention[]>([
         source: "glossary",
         path: "page.md",
         line: 3,
-        position: 0,
+        position: 27,
         surface: "build summary",
         context: "the build summary",
       },
@@ -170,17 +171,83 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     expect(lead).not.toContain("word page");
   });
 
-  it("links every recognised word of the note in the text, the words inside written links, the entity's own name and a lost target left alone", () => {
+  it("links every recognised word of the note in the text, the words inside written links, the entity's own name, a lost target and a page a written link already leads to left alone", () => {
     const [keywordPage] = fragmentsOf(input());
     expect(keywordPage?.sections[0]?.html).toContain(
       '<a href="../page/index.html#definition" class="written">page</a> shown on the <a href="../../specs/screens/mentions-panel/index.html" class="written">mentions panel</a>',
     );
     expect(keywordPage?.sections[1]?.html).toBe(
-      '<p>An entity page, which a <a href="../page/index.html" class="recognised">page</a> of the site links to.</p>',
+      "<p>An entity page, which a page of the site links to.</p>",
+    );
+    const [belowLink] = fragmentsOf(
+      input({
+        recognised: new Map([
+          [
+            "glossary/keyword-page.md",
+            (recognised.get("glossary/keyword-page.md") ?? []).filter((word) => word.line === 19),
+          ],
+        ]),
+        fs: memoryFileSystem({
+          ...files,
+          "/work/glossary/keyword-page.md": files["/work/glossary/keyword-page.md"].replace(
+            "A [page](page.md#definition) shown",
+            "A page shown",
+          ),
+        }),
+      }),
+    );
+    expect(belowLink?.sections[1]?.html).toBe(
+      '<p>An entity page, which a <a href="../page/index.html" class="recognised" title="note: glossary/page">page<span class="visually-hidden"> (note: glossary/page)</span></a> of the site links to.</p>',
     );
     const [withoutWords] = fragmentsOf(input({ recognised: new Map() }));
     expect(withoutWords?.sections[1]?.html).toBe(
       "<p>An entity page, which a page of the site links to.</p>",
+    );
+  });
+
+  it("marks the expressions that have a keyword page and no note once per page, with the count of their passages, in text order with the recognised words, the longest expression winning its position", () => {
+    const [, page] = fragmentsOf(
+      input({
+        recognised: new Map([
+          [
+            "glossary/page.md",
+            [
+              { line: 3, position: 27, text: "build", target: "glossary/keyword-page" },
+              { line: 3, position: 56, text: "build", target: "glossary/keyword-page" },
+              { line: 3, position: 81, text: "keyword page", target: "glossary/keyword-page" },
+              { line: 3, position: 89, text: "page", target: "glossary/keyword-page" },
+            ],
+          ],
+        ]),
+        keywordMentions: new Map([
+          [
+            "keywords/build-summary",
+            [
+              ...(keywordMentions.get("keywords/build-summary") ?? []),
+              {
+                source: "glossary",
+                path: "page.md",
+                line: 3,
+                position: 56,
+                surface: "build summary",
+                context: "the build summary counts",
+              },
+            ],
+          ],
+        ]),
+      }),
+    );
+    expect(page?.sections[0]?.html).toBe(
+      '<p>A page of the site, as the <a href="../../keywords/build-summary/index.html" class="recognised-keyword" title="3 passages, no note">build summary<span class="visually-hidden"> (3 passages, no note)</span></a> counts it; the build summary counts the <a href="../keyword-page/index.html" class="recognised" title="note: glossary/keyword-page">keyword page<span class="visually-hidden"> (note: glossary/keyword-page)</span></a> too.</p>',
+    );
+    expect(page?.text).toBe(
+      "A page of the site, as the build summary counts it; the build summary counts the keyword page too.",
+    );
+    const [, french] = fragmentsOf(
+      input({ config: { ...config, project: { name: "Notes", locale: "fr" } } }),
+    );
+    expect(french?.sections[0]?.html).toContain(
+      'class="recognised-keyword" title="2 passages, sans fiche">build summary<span class="visually-hidden"> (2 passages, sans fiche)</span></a>',
     );
   });
 
@@ -361,8 +428,13 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     expect(written.endsWith("\n")).toBe(true);
     expect(JSON.parse(written)).toEqual({
       id: "glossary/page",
-      sections: [{ id: "section-lead", html: "<p>A page of the site.</p>" }],
-      text: "A page of the site.",
+      sections: [
+        {
+          id: "section-lead",
+          html: '<p>A page of the site, as the <a href="../../keywords/build-summary/index.html" class="recognised-keyword" title="2 passages, no note">build summary<span class="visually-hidden"> (2 passages, no note)</span></a> counts it; the build summary counts the keyword page too.</p>',
+        },
+      ],
+      text: "A page of the site, as the build summary counts it; the build summary counts the keyword page too.",
     });
   });
 });

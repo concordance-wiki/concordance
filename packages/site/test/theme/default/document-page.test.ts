@@ -182,7 +182,7 @@ describe("The text and the notes: reachable without JavaScript by their anchors"
     );
     expect(html).toContain('<section id="decisions"><h2>Decisions</h2>');
     expect(html).toContain(
-      '<footer class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></footer>',
+      '<footer class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></footer>',
     );
     expect(render({ sections: [] })).toContain(
       'aria-label="Related notes"><p class="empty">No note describes this document yet.</p></section>',

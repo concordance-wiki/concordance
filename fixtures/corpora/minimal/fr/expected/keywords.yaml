@@ -1,5 +1,6 @@
 # Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
+# `marked_once_in` names a note that uses the expression more than once: its page marks the first occurrence only.
 published:
-  - { text: résumé de build, min_occurrences: 5, min_files: 3 }
+  - { text: résumé de build, min_occurrences: 5, min_files: 3, marked_once_in: { source: reunions, path: 2026-03-12-atelier-liens.md } }
 unpublished:
   - { text: démarrage à froid, reason: "2 occurrences in a single file" }
