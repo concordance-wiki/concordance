@@ -1098,6 +1098,22 @@ As a reader of a corporate documentation, I want the site to look like a wiki I 
 
 Depends on: L2-02, L2-08, L2-10, L2-12, L2-15, L7-02.
 
+#### L9-02 Home page
+
+As a reader who arrives on the site, I want to type a word or pick a space so that I reach a page in thirty seconds, whether or not anyone has defined that word.
+
+- The page opens on the question "What are you looking for?" and its explanation ("Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet."), then the search field, drawn large; its live results appear under it as the reader types, in the flow of the page: one row per match with its title, the query marked in it, its type chip or "Used in N documents, never defined" for a keyword page, and its space; the "N matches" counter in the field; the keyboard help "↑ ↓ browse · Enter open", the arrow keys walking the rows and Enter opening the one in focus; and the link "See the N results" to the results page. The field works without JavaScript as a `GET` form submitting to the results page; the field of the top bar shows the same rows.
+- "Frequently consulted": the twelve most cited pages as chips.
+- "Spaces — fed by your repositories": one row per source, most cited first, with an initials badge, its name, "N pages" (or "N documents" when its notes mostly stand for converted documents) and its freshness from the git history ("2 days ago"); the tree of the space folds behind its row; past five spaces, the others fold behind "N more spaces, less consulted"; the note "The dates come from the history of the repositories, so they are always right." follows.
+- "Recently changed": the eight latest pages, each with its space and its date relative to the build.
+- The alert "A space has not moved for N days" for every dormant space, naming it and the threshold of `staleness`: "The alert threshold is set to 180 days in the configuration."
+- The file tree, the letters and the to-do link of the former home stay reachable: the tree behind the rows of the spaces, the letters on the A–Z index page, the to-do link in the footer; the "Spaces" and "Recent" links of the top bar still land on the two headings.
+- Gallery: a state named `home-corporate`; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01, L2-07, L3-01.
+
+## 5. Working conditions
+
 #### L9-04 Keyword page
 
 As a reader, I want the page of a word nobody defined to look like every other page so that I understand at once what is known of the word and what is missing.
@@ -1108,9 +1124,6 @@ As a reader, I want the page of a word nobody defined to look like every other p
 - Gallery state `keyword-page-corporate` on an expression of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
 
 Depends on: L9-01, L2-04, L3-04.
-
-## 5. Working conditions
-
 ### 5.1 Ready
 
 A story enters development only when its upstream batch is delivered, its acceptance criteria are testable without interpretation, the golden corpus contains a case that exercises it, and its effect on build time or published weight is estimated when it has one.
