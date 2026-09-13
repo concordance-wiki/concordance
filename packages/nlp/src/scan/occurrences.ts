@@ -41,6 +41,8 @@ export interface Occurrence {
   line: number;
   /** Code unit offset of the match in the paragraph text. */
   position: number;
+  /** The match as written, from its first to its last token. */
+  text: string;
   section?: string;
   /** 80 characters of the original text centred on the match, an ellipsis marking each cut. */
   context: string;
@@ -156,6 +158,7 @@ export function scanDocument(input: ScanDocumentInput): Occurrence[] {
         path: document.path,
         line: paragraph.line,
         position: span.start,
+        text: paragraph.text.slice(span.start, span.end),
         ...(paragraph.section === undefined ? {} : { section: paragraph.section }),
         context: contextAround(paragraph.text, span.start, span.end, contextWidth),
         ...(expectedType === undefined ? {} : { expectedType }),

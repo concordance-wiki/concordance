@@ -28,10 +28,12 @@ import type { EntityFragment } from "./fragments.js";
 import { homeOf } from "./home.js";
 import { indexOf } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
+import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
 import {
   assetsBaseOf,
   HOME_PAGE,
   INDEX_PAGE,
+  mentionsFragmentPath,
   relativeHref,
   SEARCH_INDEX,
   TODO_PAGE,
@@ -204,6 +206,18 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
           entity.locale,
         );
   };
+  // Keyword pages list their passages instead; an entity without a mention gets no fragment.
+  const mentionsFragment = (entity: Entity): WrittenDocument[] => {
+    const fragment = entity.keyword === true ? undefined : mentionsFragmentOf(context, entity);
+    return fragment === undefined
+      ? []
+      : [
+          {
+            path: mentionsFragmentPath(entity.id),
+            content: serializeMentionsFragment(fragment),
+          },
+        ];
+  };
   const siteTitle = themeChrome(input, "").siteTitle;
   return [
     render(HOME_PAGE, "Home", homeOf(context, siteTitle), siteTitle, input.locale),
@@ -211,6 +225,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): Writte
     render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
     ...input.model.entities.map(entityPage),
     { path: SEARCH_INDEX, content: searchIndexOf(input.model) },
+    ...input.model.entities.flatMap(mentionsFragment),
   ];
 }
 

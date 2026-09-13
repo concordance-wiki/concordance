@@ -21,6 +21,11 @@ export function fragmentImagePath(target: string): string {
   return `${FRAGMENTS_DIRECTORY}/${target}`;
 }
 
+/** The mentions of an entity, one file per entity and never a global index: `fragments/<id>.mentions.json`. */
+export function mentionsFragmentPath(id: string): string {
+  return `${FRAGMENTS_DIRECTORY}/${id}.mentions.json`;
+}
+
 /**
  * The href of one file of the site from a page, both as paths under the output folder: relative,
  * climbing with `..`, never starting with `/`, so that it resolves over `file://` as behind a server.

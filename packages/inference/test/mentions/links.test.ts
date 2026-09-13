@@ -280,4 +280,48 @@ describe("mentionLinks", () => {
       ["related", "glossary_occurrence"],
     ]);
   });
+
+  it("keeps the passage of a mention on its provenance, with its position and heading, so that the mentions panel can show it", () => {
+    const { links } = run([
+      {
+        ...mention(screen, object, 8, "Objects"),
+        position: 14,
+        text: "links",
+        context: "…the entry screen lists every link of the model…",
+      },
+      { ...mention(screen, term, 3), context: "A link joins two entities." },
+      mention(screen, summary, 12),
+    ]);
+    // Strict: an absent position, heading or text must not be written as undefined into the model.
+    expect(links.map((link) => link.provenance)).toStrictEqual([
+      [
+        {
+          method: "glossary_occurrence",
+          confidence: 0.6,
+          path: "screens/entry.md",
+          line: 3,
+          occurrences: [{ line: 3, context: "A link joins two entities." }],
+        },
+      ],
+      [
+        {
+          method: "section_mention",
+          confidence: 0.7,
+          path: "screens/entry.md",
+          line: 8,
+          section: "objects",
+          text: "links",
+          occurrences: [
+            {
+              line: 8,
+              position: 14,
+              context: "…the entry screen lists every link of the model…",
+              section: "Objects",
+            },
+          ],
+        },
+      ],
+      [{ method: "glossary_occurrence", confidence: 0.6, path: "screens/entry.md", line: 12 }],
+    ]);
+  });
 });

@@ -218,7 +218,7 @@ The converted files are keyed by the SHA-256 of their source under `<cache>/conv
 | `output` | `./dist` | site folder |
 | `fail_on.errors` | `true` | fail when any error finding exists |
 | `fail_on.unconverted_max` | 10 | fail beyond this many unconverted documents |
-| `mentions_inline` | 20 | mentions served in the HTML before the JSON fragment |
+| `mentions_inline` | 20 | mentions of an entity served in its page; the rest comes from the `fragments/<id>.mentions.json` of the entity |
 | `extracted_text_max_chars` | 20000 | extracted text indexed per document |
 
 `fail_on` is the only thing that makes the build fail on content: an anomaly is always recorded as a finding and the build goes on. With the defaults, one error finding is enough to exit with code 1, and so is the eleventh unconverted document; the log and the summary are written either way. A project that wants a site whatever the state of its notes declares:
@@ -229,6 +229,8 @@ build:
 ```
 
 `--output` on the command line overrides `output`; the folder receives `build.log.json` with the summary and every finding, sorted.
+
+`mentions_inline` bounds what the mentions panel of an entity page carries in the served HTML: that many mentions, readable without JavaScript, grouped by citing file. The others stay in the JSON fragment of the entity, one file per entity, which the panel loads on demand; under two hundred mentions in all they also travel in the page, inside a script block, so that no request is needed. `0` serves no mention inline and leaves everything to the fragment; a large value trades page weight against requests. The [theming guide](theming.md#mentions-panel) describes the three regimes.
 
 ## `site`
 

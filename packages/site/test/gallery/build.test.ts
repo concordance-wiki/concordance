@@ -84,8 +84,10 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(empty).toContain('<p class="empty">No note links here.</p>');
     expect(empty).not.toContain("mentions-panel-");
     const island = fileSystem.readText("/out/mentions-panel-island.html");
-    expect(count(island, '<li class="mention')).toBe(25);
+    expect(count(island, '<li class="mention')).toBe(20);
+    expect(count(island, '<details class="mention-group"')).toBe(8);
     expect(island).toContain('<concordance-island data-island="mentions-panel"');
+    expect(island).toContain('<script type="application/json" id="mentions-embedded">');
     expect(island).toMatch(
       /<script type="module" defer src="assets\/mentions-panel-[A-Z0-9]{8}\.js"><\/script>/,
     );

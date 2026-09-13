@@ -166,6 +166,25 @@ describe("validateConfig against the published schema", () => {
     ]);
   });
 
+  it("accepts build.mentions_inline from zero up and rejects a negative or fractional count", () => {
+    for (const count of [0, 1, 20, 500]) {
+      const result = validateConfig({ ...minimal, build: { mentions_inline: count } });
+      expect(result.ok, String(count)).toBe(true);
+      if (result.ok) expect(result.config.build?.mentions_inline).toBe(count);
+    }
+    expect(issuesOf({ ...minimal, build: { mentions_inline: -1 } })).toEqual([
+      { path: "build.mentions_inline", message: "must be >= 0", severity: "error" },
+    ]);
+    expect(issuesOf({ ...minimal, build: { mentions_inline: 2.5 } })).toEqual([
+      {
+        path: "build.mentions_inline",
+        message: "wrong type",
+        severity: "error",
+        expected: "integer",
+      },
+    ]);
+  });
+
   it("names the array index in the path of a nested error", () => {
     expect(
       issuesOf({ ...minimal, domains: [{ id: "d", subdomains: [{ title: "no id" }] }] }),

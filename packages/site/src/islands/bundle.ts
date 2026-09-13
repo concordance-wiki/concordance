@@ -5,7 +5,7 @@ import { nodeFileSystem, type FileSystem } from "@concordance-wiki/core";
 import { build } from "esbuild";
 
 import { byCodeUnit } from "../order.js";
-import { MENTIONS_ISLAND } from "../theme/default/mentions-more.js";
+import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 
 export interface IslandEntry {

@@ -20,6 +20,7 @@ function occurrence(
     target: { id: `glossary/${overrides.key.replaceAll(" ", "-")}`, kind: "title" },
     source: "glossary",
     path: "keyword-page.md",
+    text: overrides.key,
     context: "",
     confidence: 0.6,
     ...overrides,

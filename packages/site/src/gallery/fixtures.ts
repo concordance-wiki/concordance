@@ -5,13 +5,18 @@ import { defaultThemeConfig } from "../build/default-theme.js";
 /** The neutral palette of a project without `theme.yaml`, named after the gallery. */
 export const galleryTheme: ThemeConfig = defaultThemeConfig("Gallery");
 
+/** The mentions of the fixtures come three per note, so that the panel shows its file groups. */
+export const MENTIONS_PER_NOTE = 3;
+
 export function mention(index: number, kind: Mention["kind"] = "recognised"): Mention {
+  const note = `note-${String(Math.ceil(index / MENTIONS_PER_NOTE))}`;
   return {
     kind,
-    file: { label: `note-${String(index)}.md`, href: `../notes/note-${String(index)}/` },
+    file: { label: `${note}.md`, href: `../notes/${note}/` },
     context: `passage ${String(index)} cites the entity`,
     line: index,
-    href: `../notes/note-${String(index)}/#L${String(index)}`,
+    href: `../notes/${note}/#L${String(index)}`,
+    surface: "the entity",
   };
 }
 

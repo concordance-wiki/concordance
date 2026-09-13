@@ -200,6 +200,14 @@ export interface Mention {
   context: string;
   line: number;
   href: string;
+  /** The words of the context that name the entity, as written there; the panel marks them. */
+  surface?: string;
+}
+
+/** The headings of the two sections of the panel, in the locale of the site. */
+export interface MentionsHeadings {
+  written: string;
+  recognised: string;
 }
 
 export interface MentionsPanelProps {
@@ -207,6 +215,10 @@ export interface MentionsPanelProps {
   mentions: Mention[];
   /** How many mentions are in the served HTML; the rest is revealed on demand. */
   initial: number;
+  /** Absent, the theme uses its own English labels. */
+  headings?: MentionsHeadings;
+  /** Href, relative to the page, of the JSON fragment holding every mention of the entity; absent when none was written. */
+  fragmentHref?: string;
 }
 
 export interface Neighbour {
