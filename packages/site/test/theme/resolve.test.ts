@@ -160,7 +160,10 @@ describe("resolveTheme", () => {
       locale: "en",
       title: "To do",
       stylesheets: [],
-      islands: [{ name: "mode-switch", file: "mode-switch.js", bytes: 1 }],
+      islands: [
+        { name: "mode-switch", file: "mode-switch.js", bytes: 1 },
+        { name: "search", file: "search.js", bytes: 1, classic: true },
+      ],
       header,
       footer,
     });

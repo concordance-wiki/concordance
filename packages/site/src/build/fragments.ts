@@ -32,6 +32,8 @@ export interface EntityFragment {
   passages?: FragmentPassage[];
   /** By target; absent for a note without an image of the sources. */
   images?: FragmentImage[];
+  /** The plain text of the note, what the search index reads as the body; absent for an entity without a note. */
+  text?: string;
 }
 
 export class FragmentError extends Error {
@@ -108,6 +110,12 @@ export function parseFragment(text: string, file: string): EntityFragment {
       throw new FragmentError(file, "images must be a list of { source, path, target }");
     }
     fragment.images = document["images"];
+  }
+  if (document["text"] !== undefined) {
+    if (typeof document["text"] !== "string") {
+      throw new FragmentError(file, "text must be a string");
+    }
+    fragment.text = document["text"];
   }
   return fragment;
 }

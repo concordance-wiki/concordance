@@ -105,7 +105,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(files).toContain("index.html");
     expect(files).toContain("index/index.html");
     expect(files).toContain("todo/index.html");
-    expect(files).toContain("search-index.json");
+    expect(files).toContain("search/index.html");
+    expect(files).toContain("search/meta.js");
+    expect(files).toContain("search/sc.js");
     expect(files).toContain("assets/site.css");
     // One note fragment per entity, and one mentions fragment per entity another note cites.
     expect(io.fs.listFiles("/work/dist/fragments")).toEqual([
@@ -252,6 +254,18 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(patient.fs.readText("/work/dist/index.html")).not.toContain("dormant");
   });
 
+  it("cuts the body indexed for the search at build.extracted_text_max_chars", async () => {
+    const whole = corpus();
+    expect(await buildCommand([], whole)).toBe(0);
+    expect(whole.fs.readText("/work/dist/search/pr.js")).toContain('"printed"');
+    const cut = corpus(`${validConfig}build: { extracted_text_max_chars: 8 }\n`);
+    expect(await buildCommand([], cut)).toBe(0);
+    const shard = cut.fs.exists("/work/dist/search/pr.js")
+      ? cut.fs.readText("/work/dist/search/pr.js")
+      : "";
+    expect(shard).not.toContain('"printed"');
+  });
+
   it("takes the output folder from build.output, resolved against the configuration", async () => {
     const io = corpus(`${validConfig}build: { output: ../out }\n`);
     await buildCommand([], io);
@@ -330,8 +344,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
     expect(await renderCommand([], io, fakeDependencies(BareFooter)).catch(() => 2)).toBe(2);
     expect(await buildCommand([], io, fakeDependencies(BareFooter))).toBe(0);
+    // One page more than the entities and the three fixed ones: the search page carries the footer too.
     expect(io.stdout.find((line) => line.startsWith("accessibility: "))).toBe(
-      "accessibility: 9 findings",
+      "accessibility: 10 findings",
     );
     expect(io.stderr).toContain(
       'warning: index.html: img-alt: <img src="x.png"> has no alt attribute',

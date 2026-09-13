@@ -63,15 +63,19 @@ function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): 
   );
 }
 
-function scriptsFor(names: string[], options: RenderOptions): string[] {
-  const base = options.assetsBase ?? "";
+function bundlesFor(names: string[], options: RenderOptions): IslandBundle[] {
   return names.map((name) => {
     const bundle = options.islands.find((candidate) => candidate.name === name);
     if (bundle === undefined) {
       throw new Error(`renderPage: island ${name} has no bundle`);
     }
-    return `${base}${bundle.file}`;
+    return bundle;
   });
+}
+
+function hrefsOf(bundles: IslandBundle[], options: RenderOptions): string[] {
+  const base = options.assetsBase ?? "";
+  return bundles.map((bundle) => `${base}${bundle.file}`);
 }
 
 /** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
@@ -85,14 +89,23 @@ export function renderDocument(body: JSX.Element, options: RenderOptions): strin
   };
   const first = document(body, options, head);
   const islands = islandsUsed(first);
+  const bundles = bundlesFor(islands, options);
+  const modules = hrefsOf(
+    bundles.filter((bundle) => bundle.classic !== true),
+    options,
+  );
   // Components are pure: rendering again with the scripts known gives the same body.
   const html =
     islands.length === 0
       ? first
       : document(body, options, {
           ...head,
-          modulePreloads: scriptsFor(islands, options),
-          scripts: scriptsFor(islands, options),
+          modulePreloads: modules,
+          scripts: modules,
+          classicScripts: hrefsOf(
+            bundles.filter((bundle) => bundle.classic === true),
+            options,
+          ),
         });
   return `<!doctype html>\n${html}\n`;
 }

@@ -3,6 +3,7 @@ import type { JSX } from "preact";
 import type { HeaderLogo, HeaderProps } from "../../slots.js";
 import { labels } from "./labels.js";
 import { ModeSwitch } from "./mode-switch.js";
+import { SearchIsland } from "./search-island.js";
 
 /** The logo is decorative: the site title follows it as text, so an inline SVG is hidden from assistive technology. */
 function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
@@ -28,18 +29,10 @@ export function Header({
           {siteTitle}
         </a>
         {search && (
-          <form
-            class="site-search"
-            role="search"
-            aria-label={labels.siteSearch}
-            action={search.action}
-            method="get"
-          >
-            <label class="visually-hidden" for="site-search">
-              {labels.search}
-            </label>
-            <input id="site-search" type="search" name="q" placeholder={search.placeholder} />
-          </form>
+          <SearchIsland
+            {...(search.root === undefined ? {} : { root: search.root })}
+            search={search}
+          />
         )}
         <ul class="site-links">
           {navigation.map((item) => (

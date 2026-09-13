@@ -39,7 +39,7 @@ for (const corpus of corpora) {
 
     const [first, second] = outputs;
     const { paths, differences } = compareTrees(first, second);
-    for (const required of ["build.log.json", "model.json", "index.html", "search-index.json"]) {
+    for (const required of ["build.log.json", "model.json", "index.html", "search/meta.js"]) {
       if (!paths.includes(required)) {
         console.error(`determinism: the build of ${corpus} did not write ${required}`);
         process.exit(1);

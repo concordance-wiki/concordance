@@ -83,7 +83,8 @@ function spansOf(
 /**
  * The fragment of every entity: the passages of a keyword page, the note of a typed entity
  * rendered to sanitised HTML with its written links turned into page hrefs, its recognised
- * words linked, and its images of the sources listed for the copy, in identifier order.
+ * words linked, its images of the sources listed for the copy, and its plain text for the
+ * search index, in identifier order.
  */
 export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
   const sources = new Map(input.sources.map((source) => [source.name, source]));
@@ -149,6 +150,7 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
       ...(images.size === 0
         ? {}
         : { images: [...images.values()].sort((a, b) => byCodeUnit(a.target, b.target)) }),
+      text: rendered.text,
     };
   });
 }

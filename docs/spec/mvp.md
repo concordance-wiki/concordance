@@ -624,7 +624,7 @@ Exit criterion: a search on the golden corpus returns results in under 100 ms af
 
 As a reader, I want to search the whole corpus without waiting so that I use the tool as a reflex.
 
-- Pagefind index generated at build, fragmented, loaded in pieces as the user types.
+- Search index generated at build, fragmented, loaded in pieces as the user types; the index files are classic scripts so that they load from a `file://` page, where a fetched index would not.
 - Indexed fields: title, aliases, summary, body, type, application, domain, status, source.
 - The text extracted from converted documents is indexed, truncated to a configurable size.
 - Search works over `file://`.

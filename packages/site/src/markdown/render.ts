@@ -60,6 +60,8 @@ export interface RenderedMarkdown {
   title?: string;
   /** The lead before the first H2, when there is one, then one section per H1 or H2. */
   sections: Section[];
+  /** The plain text of the sections, headings included and code blocks left out, one block per line: what the search index reads. */
+  text: string;
 }
 
 /** Identifier of the section before the first heading; every other section is `section-<slug>`. */
@@ -93,6 +95,47 @@ function textOf(node: Nodes): string {
     return node.value;
   }
   return "children" in node ? node.children.map(textOf).join("") : "";
+}
+
+/** Nodes whose text is not prose: code is not searched, raw HTML is dropped from the page too. */
+const SILENT = new Set<string>(["code", "html"]);
+
+/** Nodes whose children follow one another as blocks rather than inline. */
+const BLOCK_CONTAINERS = new Set<string>([
+  "root",
+  "list",
+  "listItem",
+  "blockquote",
+  "table",
+  "tableRow",
+  "footnoteDefinition",
+]);
+
+function plainTextOf(node: Nodes): string {
+  if (SILENT.has(node.type)) {
+    return "";
+  }
+  if ("value" in node) {
+    return node.value;
+  }
+  if (node.type === "break") {
+    return " ";
+  }
+  if (!("children" in node)) {
+    return "";
+  }
+  const parts = node.children.map(plainTextOf);
+  return BLOCK_CONTAINERS.has(node.type) ? parts.join("\n") : parts.join("");
+}
+
+/** The prose of a list of nodes, one block per line, blank lines removed. */
+export function plainText(nodes: RootContent[]): string {
+  const root: Root = { type: "root", children: nodes };
+  return plainTextOf(root)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "")
+    .join("\n");
 }
 
 function replacement(node: Link | Image | Definition): RootContent[] {
@@ -296,6 +339,7 @@ export function renderMarkdown(text: string, options: MarkdownOptions = {}): Ren
     markRecognised(tree, options.recognised);
   }
   const sections: Section[] = [];
+  const body: RootContent[] = [];
   const taken = new Set<string>();
   let title: string | undefined;
   let current: OpenSection = { id: LEAD_SECTION_ID, nodes: [] };
@@ -317,6 +361,7 @@ export function renderMarkdown(text: string, options: MarkdownOptions = {}): Ren
       title = textOf(node);
       continue;
     }
+    body.push(node);
     if (node.type === "heading" && node.depth <= 2) {
       close();
       const heading = textOf(node);
@@ -326,5 +371,5 @@ export function renderMarkdown(text: string, options: MarkdownOptions = {}): Ren
     current.nodes.push(node);
   }
   close();
-  return { ...(title === undefined ? {} : { title }), sections };
+  return { ...(title === undefined ? {} : { title }), sections, text: plainText(body) };
 }

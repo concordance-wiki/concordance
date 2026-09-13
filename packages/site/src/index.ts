@@ -77,6 +77,7 @@ export {
   LEAD_SECTION_ID,
   RECOGNISED_CLASS,
   WRITTEN_CLASS,
+  plainText,
   renderMarkdown,
 } from "./markdown/render.js";
 export type {
@@ -90,7 +91,7 @@ export {
   FRAGMENTS_DIRECTORY,
   HOME_PAGE,
   INDEX_PAGE,
-  SEARCH_INDEX,
+  SEARCH_PAGE,
   TODO_PAGE,
   assetsBaseOf,
   entityHref,
@@ -107,6 +108,77 @@ export type { EntityFragment, FragmentImage, FragmentPassage } from "./build/fra
 export { defaultThemeConfig } from "./build/default-theme.js";
 export { assemblePages, assemblySummary } from "./build/assemble.js";
 export type { Assembled, AssembleOptions, PageReport, WrittenDocument } from "./build/assemble.js";
-export { SITE_PAGE_BUDGET, buildSite, searchIndexOf, siteDocuments } from "./build/site.js";
-export type { SiteInput, SiteOptions, SiteReport } from "./build/site.js";
+export { SITE_PAGE_BUDGET, buildSite, siteDocuments, siteRootOf } from "./build/site.js";
+export type {
+  SearchIndexSize,
+  SiteDocuments,
+  SiteInput,
+  SiteOptions,
+  SiteReport,
+} from "./build/site.js";
+export {
+  DEFAULT_BODY_MAX_CHARS,
+  FIELD_WEIGHTS,
+  buildSearchIndex,
+  compactJson,
+  searchFields,
+  searchFilePath,
+  searchIndexFiles,
+  searchType,
+} from "./search/build.js";
+export type {
+  SearchFieldName,
+  SearchIndex,
+  SearchIndexFiles,
+  SearchIndexInput,
+  SearchTokenizer,
+} from "./search/build.js";
+export {
+  SEARCH_DIRECTORY,
+  SEARCH_GLOBAL,
+  SEARCH_ISLAND,
+  SEARCH_META,
+  SHARD_PREFIX_LENGTH,
+  SUGGESTIONS_CLASS,
+  normalizeQuery,
+  queryWords,
+  rank,
+  shardFile,
+  shardHref,
+  shardOf,
+  shardScript,
+  trimEdges,
+} from "./search/shared.js";
+export type {
+  Ranked,
+  SearchEntry,
+  SearchIslandProps,
+  SearchMeta,
+  ShardData,
+} from "./search/shared.js";
+export {
+  SUGGESTIONS,
+  isEditable,
+  mountSearch,
+  outcomeOf,
+  searchRunner,
+  shardLoader,
+  wireShortcuts,
+} from "./islands/search.js";
+export type {
+  KeyEvent,
+  ScriptInjector,
+  SearchDocument,
+  SearchInput,
+  SearchIslandElement,
+  SearchIslands,
+  SearchOutcome,
+  SearchPanel,
+  SearchRunner,
+  ShardHost,
+  ShardLoader,
+  ShardReceiver,
+} from "./islands/search.js";
+export { SearchForm, SearchIsland } from "./theme/default/search-island.js";
+export { ResultList } from "./theme/default/result-list.js";
 export type { SiteNames } from "./build/context.js";

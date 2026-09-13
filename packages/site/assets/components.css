@@ -71,6 +71,35 @@ concordance-island {
   margin-inline-start: auto;
 }
 
+/* Search island: the field, and the suggestions its script draws under it. */
+
+concordance-island[data-island="search"] {
+  position: relative;
+  margin-inline-start: auto;
+}
+
+.search-suggestions {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 1;
+  min-inline-size: 20rem;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-bg);
+}
+
+.search-suggestions .result {
+  padding-block: var(--space-1);
+}
+
+.search-suggestions .result:last-child {
+  border-block-end: none;
+}
+
 .site-search input,
 .home-search input {
   padding: var(--space-1) var(--space-2);
@@ -617,6 +646,16 @@ concordance-island {
 .snippet {
   margin: 0;
   color: var(--color-muted);
+}
+
+.result .badge {
+  margin-inline-start: var(--space-2);
+}
+
+.breadcrumb {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.875rem;
 }
 
 /* Index */

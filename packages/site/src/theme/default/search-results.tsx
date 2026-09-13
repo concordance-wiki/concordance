@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 
 import type { SearchResultsProps } from "../../slots.js";
 import { labels } from "./labels.js";
+import { ResultList } from "./result-list.js";
 
 export function SearchResults({ query, total, results, facets }: SearchResultsProps): JSX.Element {
   return (
@@ -28,15 +29,7 @@ export function SearchResults({ query, total, results, facets }: SearchResultsPr
           ))}
         </nav>
       )}
-      <ol class="results">
-        {results.map((result) => (
-          <li key={result.href} class="result">
-            <a href={result.href}>{result.title}</a>
-            {result.typeLabel !== undefined && <span class="badge">{result.typeLabel}</span>}
-            {result.snippet !== undefined && <p class="snippet">{result.snippet}</p>}
-          </li>
-        ))}
-      </ol>
+      <ResultList results={results} />
     </div>
   );
 }

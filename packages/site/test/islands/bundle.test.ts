@@ -8,11 +8,17 @@ import { describe, expect, it } from "vitest";
 import { bundleIslands, contentHash, defaultIslands } from "../../src/islands/bundle.js";
 
 describe("defaultIslands", () => {
-  it("declares the mentions panel and mode switch islands with their entries next to the bundler", () => {
+  it("declares the mentions panel, mode switch and search islands with their entries next to the bundler, the search one classic", () => {
     const islands = defaultIslands();
-    expect(islands.map((island) => island.name)).toEqual(["mentions-panel", "mode-switch"]);
+    expect(islands.map((island) => island.name)).toEqual([
+      "mentions-panel",
+      "mode-switch",
+      "search",
+    ]);
     expect(islands[0]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
+    expect(islands[2]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands.map((island) => island.classic)).toEqual([undefined, undefined, true]);
   });
 });
 
@@ -44,7 +50,7 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(2);
+    expect(bundles).toHaveLength(3);
     const [bundle] = bundles;
     expect(bundle?.name).toBe("mentions-panel");
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
@@ -70,6 +76,25 @@ describe("bundleIslands", () => {
     expect(written).toContain("aria-pressed");
     expect(written).not.toContain("preact");
     expect(written).not.toContain("hydrate");
+  });
+
+  it("bundles the search island as a classic script, without import or export, so that a file:// page loads it", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    const bundle = bundles.find((candidate) => candidate.name === "search");
+    expect(bundle?.file).toMatch(/^search-[A-Z0-9]{8}\.js$/);
+    expect(bundle?.classic).toBe(true);
+    const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
+    expect(written.startsWith("(()=>{")).toBe(true);
+    expect(written).not.toContain("import ");
+    expect(written).not.toContain("export ");
+    expect(written).toContain("__concordanceSearch");
+    expect(written).toContain('"search"');
+    expect(written).not.toContain("useSlot");
+    expect(written).not.toContain("hydrate");
+    expect(bundles.find((candidate) => candidate.name === "mentions-panel")?.classic).toBe(
+      undefined,
+    );
   });
 
   it("gives byte-identical bundles from one run to the next, whatever the output folder", async () => {

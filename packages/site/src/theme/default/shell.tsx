@@ -36,6 +36,9 @@ export function Shell({ locale, direction, title, head, children }: ShellProps):
         {head.scripts.map((src) => (
           <script key={src} type="module" defer src={src} />
         ))}
+        {(head.classicScripts ?? []).map((src) => (
+          <script key={src} defer src={src} />
+        ))}
       </head>
       <body>
         <a class="skip-link" href="#main">

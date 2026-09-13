@@ -1,3 +1,5 @@
+import { runInNewContext } from "node:vm";
+
 import { memoryFileSystem, pagePath } from "@concordance-wiki/core";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -6,7 +8,7 @@ import {
   HOME_PAGE,
   INDEX_PAGE,
   mentionsFragmentPath,
-  SEARCH_INDEX,
+  SEARCH_PAGE,
   TODO_PAGE,
 } from "../../src/build/paths.js";
 import {
@@ -17,11 +19,13 @@ import {
   type SiteReport,
 } from "../../src/build/site.js";
 import type { IslandBundle } from "../../src/islands/bundle.js";
+import { searchFilePath } from "../../src/search/build.js";
+import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/shared.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
 import { count, expectBalanced } from "../helpers/html.js";
 import { localTargets, references } from "../helpers/links.js";
-import { fragments, model, profile, term } from "./fixture.js";
+import { fragments, model, profile, term, tokenize } from "./fixture.js";
 
 type Options = SiteOptions & { fileSystem: ReturnType<typeof memoryFileSystem> };
 
@@ -35,6 +39,7 @@ function options(overrides: Partial<Omit<SiteOptions, "fileSystem">> = {}): Opti
     theme: defaultTheme,
     locale: "en",
     projectName: "Concordance notes",
+    tokenize,
     ...overrides,
   };
 }
@@ -63,15 +68,19 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ({ fileSystem, report } = await build());
   });
 
-  it("writes the home, the index, the to-do page, one page per entity and per keyword, the search index and the assets", () => {
+  it("writes the home, the index, the to-do page, the search page, one page per entity and per keyword, the search index and the assets", () => {
     const entities = model().entities.map((entity) => pagePath(entity.id));
+    const index = fileSystem.listFiles("/dist").filter((file) => /^search\/.*\.js$/.test(file));
+    expect(index).toContain(searchFilePath(SEARCH_META));
+    expect(index.length).toBeGreaterThan(10);
     expect(fileSystem.listFiles("/dist")).toEqual(
       [
         HOME_PAGE,
         INDEX_PAGE,
         TODO_PAGE,
-        SEARCH_INDEX,
+        SEARCH_PAGE,
         ...entities,
+        ...index,
         ...cited.map(mentionsFragmentPath),
         "assets/site.css",
         ...report.budget.islands.map((island) => `assets/${island.file}`),
@@ -80,26 +89,138 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
 
     expect(report.files).toEqual(fileSystem.listFiles("/dist"));
     expect(report.pages.map((page) => page.path)).toEqual(
-      [HOME_PAGE, ...entities, INDEX_PAGE, TODO_PAGE].sort(),
+      [HOME_PAGE, ...entities, INDEX_PAGE, SEARCH_PAGE, TODO_PAGE].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
       "mentions-panel",
       "mode-switch",
+      "search",
     ]);
   });
 
-  it("writes the search index placeholder with one entry per page, keyword pages typed as such", () => {
-    const index = JSON.parse(fileSystem.readText(`/dist/${SEARCH_INDEX}`)) as {
-      entries: { id: string; title: string; type: string; url: string }[];
+  /** Reads an index file back the way the browser does: the script calls the global with its name and its data. */
+  function readIndexFile(name: string): unknown {
+    const script = fileSystem.readText(`/dist/${searchFilePath(name)}`);
+    let received: unknown;
+    const window = {
+      __concordanceSearch: {
+        shard: (_name: string, data: unknown) => {
+          received = data;
+        },
+      },
     };
-    expect(index.entries).toHaveLength(7);
-    expect(index.entries.find((entry) => entry.id === "keywords/build-summary")).toEqual({
+    runInNewContext(script, { window });
+    return received;
+  }
+
+  it("writes the entity table with one row per page, keyword pages typed as such, and the labels the results show", () => {
+    // The table is read back from the file the build wrote.
+    const meta = readIndexFile(SEARCH_META) as SearchMeta;
+    expect(meta.entities).toHaveLength(7);
+    expect(meta.entities.map((entry) => entry.id)).toEqual(model().entities.map((e) => e.id));
+    expect(meta.entities.find((entry) => entry.id === "keywords/build-summary")).toEqual({
       id: "keywords/build-summary",
       title: "build summary",
       type: "keyword",
       url: "keywords/build-summary/index.html",
+      status: "valid",
+      source: "specs",
     });
-    expect(index.entries.find((entry) => entry.id === "glossary/keyword-page")?.type).toBe("term");
+    expect(meta.entities.find((entry) => entry.id === "glossary/keyword-page")).toEqual({
+      id: "glossary/keyword-page",
+      title: "Keyword page",
+      type: "term",
+      url: "glossary/keyword-page/index.html",
+      application: "concordance-cli",
+      domain: "publication",
+      status: "active",
+      source: "glossary",
+    });
+    expect(meta.types).toEqual({
+      document: "Document",
+      keyword: "Keyword",
+      rule: "Business rule",
+      screen: "Screen",
+      term: "Term",
+    });
+    expect(meta.applications).toEqual({ "concordance-cli": "concordance-cli" });
+    expect(meta.domains).toEqual({
+      "inference/recognition": "inference/recognition",
+      publication: "publication",
+    });
+    expect(meta.shards).toEqual(
+      fileSystem
+        .listFiles("/dist/search")
+        .filter((file) => file.endsWith(".js") && file !== "meta.js")
+        .map((file) => file.replace(/\.js$/, "")),
+    );
+    expect(meta.bytes).toBeGreaterThan(0);
+    expect(report.search.shards).toBe(meta.shards.length);
+    expect(report.search.bytes).toBeGreaterThan(meta.bytes);
+  });
+
+  it("writes one shard per two-character prefix, holding its tokens with the weight of every entity carrying them, in table order", () => {
+    // The shard is read back from the file the build wrote.
+    const shard = readIndexFile("ke") as ShardData;
+    const ids = model().entities.map((entity) => entity.id);
+    const term = ids.indexOf("glossary/keyword-page");
+    const keyword = ids.indexOf("keywords/build-summary");
+    const orphan = ids.indexOf("keywords/zzz");
+    // In the title of the term (5); the type of both keyword pages (1).
+    expect(shard["keyword"]).toEqual([
+      [term, 5],
+      [keyword, 1],
+      [orphan, 1],
+    ]);
+    expect(Object.keys(shard).every((token) => token.startsWith("ke"))).toBe(true);
+    expect(Object.keys(shard)).toEqual([...Object.keys(shard)].sort());
+    // In the title (5), the alias "word page" (4) and the body (1) of the term; in the title of "Page" (5).
+    const pa = readIndexFile("pa") as ShardData;
+    expect(pa["page"]).toEqual([
+      [term, 10],
+      [ids.indexOf("glossary/page"), 5],
+    ]);
+  });
+
+  it("reports the weight of the index and its number of shards in the summary", () => {
+    expect(report.summary.at(-1)).toMatch(/^search index: \d+\.\d kB in \d+ shards$/);
+    expect(report.summary.at(-1)).toBe(
+      `search index: ${(report.search.bytes / 1000).toFixed(1)} kB in ${String(report.search.shards)} shards`,
+    );
+  });
+
+  it("serves the results page empty, the field of the header carrying the root of the site and the results island waiting for the query", () => {
+    const page = fileSystem.readText(`/dist/${SEARCH_PAGE}`);
+    expect(page).toContain("<title>Search – Concordance notes</title>");
+    expect(page).toContain(
+      '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:',
+    );
+    expect(page).toContain('<div class="search-results"><h1>Search</h1>');
+    expect(page).toContain(
+      '<form class="site-search" role="search" aria-label="Site search" action="index.html" method="get">',
+    );
+    expect(page).toContain('<label class="visually-hidden" for="site-search">Search</label>');
+    expect(page).toMatch(/<script defer src="\.\.\/assets\/search-[A-Z0-9]+\.js"><\/script>/);
+    const entity = fileSystem.readText("/dist/glossary/keyword-page/index.html");
+    expect(entity).toContain(
+      'data-props="{&quot;root&quot;:&quot;../../&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;../../search/index.html&quot;',
+    );
+    expect(entity).toContain('placeholder="Search entities and keywords…"');
+    expect(entity).toContain('<div class="search-suggestions" hidden></div>');
+    const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
+    expect(home).toContain(
+      'data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;',
+    );
+  });
+
+  it("fills the search region of the home page with the same field as the header, submitting to the results page", () => {
+    const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
+    expect(home).toContain(
+      '<div class="home-search-slot" data-slot="search"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
+    );
+    expect(home).toContain(
+      '<input id="home-search" type="search" name="q" placeholder="Search entities and keywords…"/>',
+    );
   });
 
   it("renders a typed entity through the entity page and a keyword through the keyword page, both complete documents", () => {
@@ -231,10 +352,10 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.maxPageBytes).toBe(SITE_PAGE_BUDGET);
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.summary[0]).toBe("site: 10 pages written to /dist");
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(2);
+    expect(report.summary[0]).toBe("site: 11 pages written to /dist");
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(3);
     expect(
-      report.summary.some((line) => /^pages: 10, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
+      report.summary.some((line) => /^pages: 11, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
@@ -448,18 +569,38 @@ describe("siteDocuments", () => {
   const bundles: IslandBundle[] = [
     { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
+    { name: "search", file: "search-0123ABCD.js", bytes: 1, classic: true },
   ];
 
   it("renders the same documents as the build, in a fixed order, from the bundles it is given", () => {
-    const documents = siteDocuments(options(), bundles);
+    const { documents, search } = siteDocuments(options(), bundles);
+    const index = documents.filter(
+      (document) => document.path.startsWith("search/") && document.path.endsWith(".js"),
+    );
     expect(documents.map((document) => document.path)).toEqual([
       HOME_PAGE,
       INDEX_PAGE,
       TODO_PAGE,
+      SEARCH_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),
-      SEARCH_INDEX,
+      ...index.map((document) => document.path),
       ...cited.map(mentionsFragmentPath),
     ]);
+    expect(index[0]?.path).toBe(searchFilePath(SEARCH_META));
+    expect(search).toEqual({
+      bytes: index.reduce((total, document) => total + Buffer.byteLength(document.content), 0),
+      shards: index.length - 1,
+    });
+  });
+
+  it("cuts the body of the index at bodyMaxChars, the build.extracted_text_max_chars of the configuration", () => {
+    const shardOf = (documents: ReturnType<typeof siteDocuments>["documents"], name: string) =>
+      documents.find((document) => document.path === searchFilePath(name))?.content ?? "";
+    const whole = siteDocuments(options(), bundles).documents;
+    expect(shardOf(whole, "th")).toContain('"threshold"');
+    const cut = siteDocuments(options({ bodyMaxChars: 20 }), bundles).documents;
+    expect(shardOf(cut, "th")).not.toContain('"threshold"');
+    expect(shardOf(cut, "bu")).toContain('"built"');
   });
 
   it("passes the mentions_inline, the edit link pattern, the names, the staleness thresholds and the collation of the configuration to the pages", () => {
@@ -467,7 +608,7 @@ describe("siteDocuments", () => {
       ...term,
       source: { ...term.source, last_modified: "2026-09-01T00:00:00.000Z" },
     };
-    const documents = siteDocuments(
+    const { documents } = siteDocuments(
       options({
         mentionsInline: 1,
         editUrl: "https://forge.example/{source}/{path}",
@@ -503,10 +644,10 @@ describe("siteDocuments", () => {
       { name: "specs", url: "https://gitlab.com/concordance-wiki/demo-specs" },
       { name: "framing" },
     ];
-    const [, , , , entity, , , , , screen] = siteDocuments(
+    const [, , , , , entity, , , , , screen] = siteDocuments(
       options({ model: withForge, sourceRefs: { specs: "develop" } }),
       bundles,
-    );
+    ).documents;
     expect(entity?.content).toContain(
       '<p class="entity-source">source: <code>glossary/keyword-page.md</code><a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit in the forge</a></p>',
     );
