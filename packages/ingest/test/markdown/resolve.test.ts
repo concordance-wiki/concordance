@@ -4,22 +4,22 @@ import { resolveLink } from "../../src/markdown/resolve.js";
 
 const sourceFiles: ReadonlySet<string> = new Set([
   "decisions/cap-checked-server-side.md",
-  "specs/api/payments.md",
-  "specs/objects/payment.md",
+  "specs/api/model-query.md",
+  "specs/objects/link.md",
   "specs/rules/annual-cap.rule.md",
-  "specs/screens/free-payment-entry.md",
-  "specs/screens/member-search.md",
+  "specs/screens/mentions-panel.md",
+  "specs/screens/entity-page.md",
   "images/entry screen.png",
 ]);
 
-const context = { path: "specs/screens/free-payment-entry.md", sourceFiles };
+const context = { path: "specs/screens/mentions-panel.md", sourceFiles };
 
 describe("resolveLink", () => {
   describe("Relative links are resolved against the file, then against the source root; anchors are kept in the provenance", () => {
     it("resolves a sibling file against the directory of the file", () => {
-      expect(resolveLink("member-search.md", context)).toEqual({
+      expect(resolveLink("entity-page.md", context)).toEqual({
         kind: "internal",
-        path: "specs/screens/member-search.md",
+        path: "specs/screens/entity-page.md",
       });
     });
 
@@ -31,13 +31,13 @@ describe("resolveLink", () => {
     });
 
     it("falls back to the source root when the file-relative path does not exist", () => {
-      expect(resolveLink("specs/api/payments.md", context)).toEqual({
+      expect(resolveLink("specs/api/model-query.md", context)).toEqual({
         kind: "internal",
-        path: "specs/api/payments.md",
+        path: "specs/api/model-query.md",
       });
-      expect(resolveLink("/specs/api/payments.md", context)).toEqual({
+      expect(resolveLink("/specs/api/model-query.md", context)).toEqual({
         kind: "internal",
-        path: "specs/api/payments.md",
+        path: "specs/api/model-query.md",
       });
     });
 
@@ -49,9 +49,9 @@ describe("resolveLink", () => {
     });
 
     it("keeps the anchor of an internal link", () => {
-      expect(resolveLink("../api/payments.md#consumers", context)).toEqual({
+      expect(resolveLink("../api/model-query.md#consumers", context)).toEqual({
         kind: "internal",
-        path: "specs/api/payments.md",
+        path: "specs/api/model-query.md",
         anchor: "consumers",
       });
     });
@@ -59,7 +59,7 @@ describe("resolveLink", () => {
     it("points an anchor-only link at the file itself", () => {
       expect(resolveLink("#objects", context)).toEqual({
         kind: "internal",
-        path: "specs/screens/free-payment-entry.md",
+        path: "specs/screens/mentions-panel.md",
         anchor: "objects",
       });
     });
@@ -91,9 +91,9 @@ describe("resolveLink", () => {
     });
 
     it("reports a target that neither resolution finds, with the file-relative path and its anchor", () => {
-      expect(resolveLink("../objects/contract.md#fields", context)).toEqual({
+      expect(resolveLink("../objects/build.md#fields", context)).toEqual({
         kind: "missing",
-        path: "specs/objects/contract.md",
+        path: "specs/objects/build.md",
         anchor: "fields",
       });
       expect(resolveLink("../../../outside.md", context)).toEqual({

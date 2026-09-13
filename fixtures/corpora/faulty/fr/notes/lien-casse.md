@@ -1,3 +1,3 @@
 # Lien cassé
 
-Cette fiche pointe vers un [fichier absent](n-existe-pas.md).
+Cette fiche pointe vers une [page de contrôle absente](n-existe-pas.md).

@@ -52,7 +52,7 @@ describe("parseMarkdown", () => {
 
   describe("Extracted: the H1 title, H2 sections with their content, lists, tables, links, images, code blocks, block quotes", () => {
     it("takes the text of the first H1 as the title", () => {
-      expect(parse("# Free *payment* entry\n\nBody.\n").title).toBe("Free payment entry");
+      expect(parse("# Explicit *link* entry\n\nBody.\n").title).toBe("Explicit link entry");
     });
 
     it("keeps the first H1 when the document has two", () => {
@@ -68,10 +68,10 @@ describe("parseMarkdown", () => {
 
     it("gives every H2 its heading, line and the plain text until the next H2 or H1", () => {
       const document = parse(
-        "# Title\n\nIntro.\n\n## Objects\n\nReads the `contract`.\n\n### Detail\n\nMore.\n\n## Actions\n\nValidate.\n\n# Appendix\n\nOutside.\n",
+        "# Title\n\nIntro.\n\n## Objects\n\nReads the `build`.\n\n### Detail\n\nMore.\n\n## Actions\n\nValidate.\n\n# Appendix\n\nOutside.\n",
       );
       expect(document.sections).toEqual([
-        { heading: "Objects", line: 5, text: "Reads the contract.\nDetail\nMore.", items: [] },
+        { heading: "Objects", line: 5, text: "Reads the build.\nDetail\nMore.", items: [] },
         { heading: "Actions", line: 13, text: "Validate.", items: [] },
       ]);
     });
@@ -83,10 +83,10 @@ describe("parseMarkdown", () => {
 
     it("lists the ordered and bullet items placed directly under a section, in document order", () => {
       const document = parse(
-        "## Steps\n\n1. Find the member.\n2. Enter the amount.\n\nThen:\n\n- Validate\n- Cancel\n",
+        "## Steps\n\n1. Find the entity.\n2. Enter the amount.\n\nThen:\n\n- Validate\n- Cancel\n",
       );
       expect(document.sections[0]?.items).toEqual([
-        { text: "Find the member.", ordered: true, line: 3 },
+        { text: "Find the entity.", ordered: true, line: 3 },
         { text: "Enter the amount.", ordered: true, line: 4 },
         { text: "Validate", ordered: false, line: 8 },
         { text: "Cancel", ordered: false, line: 9 },
@@ -120,21 +120,21 @@ describe("parseMarkdown", () => {
 
     it("records every markdown link with its text, target as written, line and column", () => {
       const document = parse(
-        '# Title\n\nSee [the cap](../rules/annual-cap.rule.md) and [the API](../api/payments.md "Payments").\n\n## Consumers\n\n- [Entry](../screens/entry.md)\n',
+        '# Title\n\nSee [the cap](../rules/size-ratio.rule.md) and [the API](../api/mentions.md "Mentions").\n\n## Consumers\n\n- [Entry](../screens/entry.md)\n',
       );
       expect(document.links).toEqual([
-        { text: "the cap", target: "../rules/annual-cap.rule.md", line: 3, column: 5 },
-        { text: "the API", target: "../api/payments.md", line: 3, column: 48 },
+        { text: "the cap", target: "../rules/size-ratio.rule.md", line: 3, column: 5 },
+        { text: "the API", target: "../api/mentions.md", line: 3, column: 48 },
         { text: "Entry", target: "../screens/entry.md", line: 7, column: 3 },
       ]);
     });
 
     it("records a link inside a list item and a bare URL turned into a link", () => {
       const document = parse(
-        "- Open [member search](member-search.md)\n- Or https://example.invalid/x\n",
+        "- Open [entity search](entity-search.md)\n- Or https://example.invalid/x\n",
       );
       expect(document.links).toEqual([
-        { text: "member search", target: "member-search.md", line: 1, column: 8 },
+        { text: "entity search", target: "entity-search.md", line: 1, column: 8 },
         {
           text: "https://example.invalid/x",
           target: "https://example.invalid/x",
@@ -168,20 +168,20 @@ describe("parseMarkdown", () => {
 
     it("records block quotes with their plain text", () => {
       const document = parse(
-        "# Title\n\n> A payment is **free** or scheduled.\n> Second line.\n\nAfter.\n",
+        "# Title\n\n> A link is **explicit** or inferred.\n> Second line.\n\nAfter.\n",
       );
       expect(document.quotes).toEqual([
-        { line: 3, text: "A payment is free or scheduled.\nSecond line." },
+        { line: 3, text: "A link is explicit or inferred.\nSecond line." },
       ]);
     });
 
     it("records every paragraph with its line and enclosing section", () => {
       const document = parse(
-        "# Title\n\nSummary.\n\n## Objects\n\nReads the contract.\n\n- Item text\n\n> Quoted.\n",
+        "# Title\n\nSummary.\n\n## Objects\n\nReads the build.\n\n- Item text\n\n> Quoted.\n",
       );
       expect(document.paragraphs).toEqual([
         { line: 3, text: "Summary." },
-        { line: 7, text: "Reads the contract.", section: "Objects" },
+        { line: 7, text: "Reads the build.", section: "Objects" },
         { line: 9, text: "Item text", section: "Objects" },
         { line: 11, text: "Quoted.", section: "Objects" },
       ]);
@@ -189,10 +189,10 @@ describe("parseMarkdown", () => {
 
     it("reads plain text through inline code, images, hard breaks and reference images, skipping raw HTML", () => {
       const document = parse(
-        "# Title\n\nA `PAYMENT` row ![shot][ref] <b>bold</b> end  \nnext line\n\n[ref]: shot.png\n\n---\n\n[^1]: A note.\n\nSee[^1].\n",
+        "# Title\n\nA `LINKS` row ![shot][ref] <b>bold</b> end  \nnext line\n\n[ref]: shot.png\n\n---\n\n[^1]: A note.\n\nSee[^1].\n",
       );
       expect(document.paragraphs.map((paragraph) => paragraph.text)).toEqual([
-        "A PAYMENT row shot bold end\nnext line",
+        "A LINKS row shot bold end\nnext line",
         "A note.",
         "See.",
       ]);
@@ -202,7 +202,7 @@ describe("parseMarkdown", () => {
   describe("Invalid YAML frontmatter yields an E-FM-INVALID finding; the body is still processed", () => {
     it("reports an unclosed bracket on line 1 and still parses the body", () => {
       const document = parse(
-        "---\ntitle: Entry\naliases: [FP, free contribution\n---\n# Entry\n\nBody text.\n\n## Objects\n\n- [Payment](../objects/payment.md)\n",
+        "---\ntitle: Entry\naliases: [EL, the authored link\n---\n# Entry\n\nBody text.\n\n## Objects\n\n- [Link](../objects/link.md)\n",
       );
       expect(document.findings).toEqual([
         {

@@ -18,33 +18,33 @@ function normalizeText(text: string): string[] {
 
 describe("the reconciliation with the shipped English pack", () => {
   it("compares texts on their comparison form, punctuation and stopwords removed", () => {
-    expect(normaliseText("The Annual Caps, of the members.", normalizeText)).toEqual({
-      lines: ["annual cap member"],
-      words: ["annual", "cap", "member"],
-      characters: "annual cap member".length,
+    expect(normaliseText("The Related Caps, of the entities.", normalizeText)).toEqual({
+      lines: ["related cap entity"],
+      words: ["related", "cap", "entity"],
+      characters: "related cap entity".length,
     });
   });
 
   it("finds the deck and the notes of one workshop as twins through their text", () => {
     const deck = [
-      "The payments workshop opened with the annual cap of the members.",
-      "Every member reviewed the settlement rules of the shared ledger.",
-      "The decision was to align the ledger with the annual reporting cycle.",
-      "Open questions remain on the refund path and the dispute process.",
-      "The next session covers the reconciliation of the monthly statements.",
+      "The keywords workshop opened with the related cap of the entities.",
+      "Every entity reviewed the pipeline rules of the shared model.",
+      "The decision was to align the model with the nightly reporting cycle.",
+      "Open questions remain on the export path and the review process.",
+      "The next session covers the reconciliation of the monthly summaries.",
     ].join("\n");
     const notes = [
-      "PAYMENTS WORKSHOP opened with the annual caps of the member;",
-      "every members reviewed the settlement rule of the shared ledgers.",
-      "The decision was to align the ledgers with the annual reporting cycles.",
-      "Open question remains on the refund paths and the dispute process.",
-      "The next sessions cover the reconciliation of the monthly statement.",
+      "KEYWORDS WORKSHOP opened with the related caps of the entity;",
+      "every entities reviewed the pipeline rule of the shared models.",
+      "The decision was to align the models with the nightly reporting cycles.",
+      "Open question remains on the export paths and the review process.",
+      "The next sessions cover the reconciliation of the monthly summary.",
     ].join("\n");
     const result = resolveDuplicateResources(
       {
         resources: [
-          resource({ path: "meetings/deck.pptx", text: deck, title: "Payments workshop" }),
-          resource({ path: "notes/workshop.md", text: notes, heading: "Payments Workshop" }),
+          resource({ path: "meetings/deck.pptx", text: deck, title: "Keywords workshop" }),
+          resource({ path: "notes/workshop.md", text: notes, heading: "Keywords Workshop" }),
         ],
         normalizeText,
       },

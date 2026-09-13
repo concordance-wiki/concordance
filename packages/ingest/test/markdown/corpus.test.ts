@@ -41,11 +41,11 @@ describe("the minimal corpus parses through the real file system", () => {
     expect(documents.size).toBe(19);
     expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(32);
 
-    const entry = documents.get("specs/screens/free-payment-entry.md");
-    expect(entry?.title).toBe("Free payment entry");
+    const entry = documents.get("specs/screens/mentions-panel.md");
+    expect(entry?.title).toBe("Mentions panel");
     expect(entry?.frontmatter).toEqual({
-      roles: ["roles/account-manager"],
-      url_pattern: "/contract/:id/pay",
+      roles: ["roles/maintainer"],
+      url_pattern: "/entities/:id/mentions",
     });
     expect(entry?.sections.map((section) => section.heading)).toEqual([
       "Objects",
@@ -53,27 +53,27 @@ describe("the minimal corpus parses through the real file system", () => {
       "Rules",
     ]);
     expect(entry?.sections[1]?.items.map((item) => item.text)).toEqual([
-      "Validate → payment summary",
-      "Cancel → member search",
+      "Confirm → neighbourhood map",
+      "Cancel → entity page",
     ]);
     expect(entry?.links.map((link) => link.target)).toEqual([
-      "../rules/annual-cap.rule.md",
-      "../api/payments.md",
-      "../objects/contract.md",
-      "../objects/member.md",
-      "../objects/payment.md",
-      "payment-summary.md",
-      "member-search.md",
-      "../rules/annual-cap.rule.md",
+      "../rules/related-link-cap.rule.md",
+      "../api/model-query.md",
+      "../objects/build.md",
+      "../objects/entity.md",
+      "../objects/link.md",
+      "neighbourhood-map.md",
+      "entity-page.md",
+      "../rules/related-link-cap.rule.md",
     ]);
 
-    const process = documents.get("specs/processes/record-a-payment.md");
+    const process = documents.get("specs/processes/confirm-a-link.md");
     expect(process?.sections[0]?.items.map((item) => item.line)).toEqual([8, 9, 11, 12]);
 
-    const glossary = documents.get("glossary/free-payment.md");
+    const glossary = documents.get("glossary/explicit-link.md");
     expect(glossary?.frontmatter).toEqual({
-      aliases: ["FP", "free contribution"],
-      broader: "payment",
+      aliases: ["EL", "authored link"],
+      broader: "link",
     });
     expect(glossary?.sections.map((section) => section.heading)).toEqual([
       "Not to be confused with",
@@ -85,8 +85,8 @@ describe("the minimal corpus parses through the real file system", () => {
     expect(documents.size).toBe(19);
     expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(32);
 
-    const entry = documents.get("specs/ecrans/saisie-versement-libre.md");
-    expect(entry?.title).toBe("Saisie de versement libre");
+    const entry = documents.get("specs/ecrans/panneau-des-mentions.md");
+    expect(entry?.title).toBe("Panneau des mentions");
     expect(entry?.sections.map((section) => section.heading)).toEqual([
       "Objets",
       "Actions",

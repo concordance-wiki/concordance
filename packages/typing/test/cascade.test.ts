@@ -215,13 +215,13 @@ describe("the type cascade", () => {
   describe("attribute defaults", () => {
     it("records the other set keys of every matching rule, in rule order", () => {
       const rules: TypingRule[] = [
-        { match: { path: "roles/**" }, set: { type: "screen", kind: "member", level: 1 } },
+        { match: { path: "roles/**" }, set: { type: "screen", kind: "entity", level: 1 } },
         { match: { path: "roles/admin/**" }, set: { level: 2, internal: true } },
         { match: { path: "nothing/**" }, set: { kind: "nobody" } },
       ];
       const resolved = resolve(rules, "roles/admin/a.md");
       expect(resolved.type).toBe("screen");
-      expect(resolved.defaults).toEqual({ kind: "member", level: 2, internal: true });
+      expect(resolved.defaults).toEqual({ kind: "entity", level: 2, internal: true });
     });
   });
 });

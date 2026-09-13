@@ -72,16 +72,16 @@ export function profile(overrides: Partial<Profile> = {}, withCommon = true): Pr
 }
 
 export const APPLICATIONS: ApplicationConfig[] = [
-  { id: "policy-admin", title: "Policy administration", status: "active" },
-  { id: "billing" },
+  { id: "concordance-cli", title: "Concordance command line", status: "active" },
+  { id: "concordance-service" },
 ];
 
 /** A root domain with a subdomain, and a second root whose globs overlap the first. */
 export const DOMAINS: DomainConfig[] = [
   {
-    id: "membership",
-    match: ["**/*member*"],
-    subdomains: [{ id: "payments", match: ["**/*payment*", "**/member-payments/**"] }],
+    id: "inference",
+    match: ["**/*link*"],
+    subdomains: [{ id: "recognition", match: ["**/*keyword*", "**/link-keywords/**"] }],
   },
-  { id: "contracts", match: ["contracts/**"] },
+  { id: "quality", match: ["quality/**"] },
 ];

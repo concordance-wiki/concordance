@@ -10,7 +10,7 @@ const source: SourceConfig = {
     { match: { path: "screens/**" }, set: { type: "screen" } },
     { match: { suffix: ".rule.md" }, set: { type: "rule" } },
     { match: { ext: [".vtt", ".md"], frontmatter: "meeting" }, set: { type: "meeting" } },
-    { match: { path: "screens/**" }, set: { application: "policy" } },
+    { match: { path: "screens/**" }, set: { application: "concordance-cli" } },
   ],
 };
 

@@ -6,10 +6,10 @@ import type { CheckDefinition } from "../src/definition.js";
 import { CheckRegistryError, createRegistry } from "../src/registry.js";
 import { entity, filed, input, link } from "./fixtures.js";
 
-const payments = filed("specs/api/payments", "api");
-const orphan = entity("specs/rules/annual-cap", "rule", { application: "apps/policy-admin" });
-const related = link("specs/rules/annual-cap", "specs/api/payments", "related");
-const model = input({ entities: [payments, orphan], links: [related] });
+const api = filed("specs/api/model-query", "api");
+const orphan = entity("specs/rules/related-cap", "rule", { application: "apps/concordance-cli" });
+const related = link("specs/rules/related-cap", "specs/api/model-query", "related");
+const model = input({ entities: [api, orphan], links: [related] });
 
 const expectedChecks = ["I-REL-AMBIGUOUS", "W-API-NOCONSUMER"];
 
@@ -23,9 +23,9 @@ const stale: Finding = {
 const broken = {
   check: "E-LINK-BROKEN",
   severity: "error" as const,
-  message: "rules/anual-cap.rule.md does not exist",
+  message: "rules/relatd-cap.rule.md does not exist",
   source: "specs",
-  path: "screens/free-payment-entry.md",
+  path: "screens/mentions-panel.md",
   line: 3,
 };
 

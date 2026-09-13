@@ -27,27 +27,27 @@ describe("compileDomains", () => {
 
 describe("resolveDomain", () => {
   it("declares domains globally and resolves them by globs evaluated across all sources", () => {
-    expect(resolveDomain("member.md", undefined, domains)).toEqual({
-      domain: "membership",
+    expect(resolveDomain("link.md", undefined, domains)).toEqual({
+      domain: "inference",
       origin: "glob",
       declared: true,
     });
-    expect(resolveDomain("specs/objects/member.md", undefined, domains)).toEqual({
-      domain: "membership",
+    expect(resolveDomain("specs/objects/link.md", undefined, domains)).toEqual({
+      domain: "inference",
       origin: "glob",
       declared: true,
     });
-    expect(resolveDomain("contracts/annual.md", undefined, domains).domain).toBe("contracts");
+    expect(resolveDomain("quality/staleness.md", undefined, domains).domain).toBe("quality");
   });
 
   it("resolves subdomains after their parent, and the most specific wins", () => {
-    expect(resolveDomain("member-payments/member-fee.md", undefined, domains)).toEqual({
-      domain: "membership/payments",
+    expect(resolveDomain("link-keywords/link-page.md", undefined, domains)).toEqual({
+      domain: "inference/recognition",
       origin: "glob",
       declared: true,
     });
-    expect(resolveDomain("screens/payment-summary.md", undefined, domains).domain).toBe(
-      "membership/payments",
+    expect(resolveDomain("screens/keyword-page.md", undefined, domains).domain).toBe(
+      "inference/recognition",
     );
     const overlapping = compileDomains([
       { id: "wide", match: ["**/*.md"], subdomains: [{ id: "deep", match: ["deep/**"] }] },
@@ -67,33 +67,33 @@ describe("resolveDomain", () => {
   });
 
   it("lets a domain declared in frontmatter take precedence over globs", () => {
-    expect(resolveDomain("screens/payment-summary.md", "contracts", domains)).toEqual({
-      domain: "contracts",
+    expect(resolveDomain("screens/keyword-page.md", "quality", domains)).toEqual({
+      domain: "quality",
       origin: "frontmatter",
       declared: true,
     });
   });
 
   it("accepts a frontmatter domain by its id path or by the id of the first domain declared with it", () => {
-    expect(resolveDomain("a.md", "membership/payments", domains).domain).toBe(
-      "membership/payments",
+    expect(resolveDomain("a.md", "inference/recognition", domains).domain).toBe(
+      "inference/recognition",
     );
-    expect(resolveDomain("a.md", "payments", domains).domain).toBe("membership/payments");
+    expect(resolveDomain("a.md", "recognition", domains).domain).toBe("inference/recognition");
     const twice = compileDomains([
-      { id: "billing", subdomains: [{ id: "payments" }] },
-      { id: "membership", subdomains: [{ id: "payments" }] },
+      { id: "ingestion", subdomains: [{ id: "recognition" }] },
+      { id: "inference", subdomains: [{ id: "recognition" }] },
     ]);
-    expect(resolveDomain("a.md", "payments", twice).domain).toBe("billing/payments");
-    expect(resolveDomain("a.md", "membership/payments", twice)).toEqual({
-      domain: "membership/payments",
+    expect(resolveDomain("a.md", "recognition", twice).domain).toBe("ingestion/recognition");
+    expect(resolveDomain("a.md", "inference/recognition", twice)).toEqual({
+      domain: "inference/recognition",
       origin: "frontmatter",
       declared: true,
     });
   });
 
   it("keeps an unknown frontmatter domain as written and marks it undeclared", () => {
-    expect(resolveDomain("screens/payment-summary.md", "claims", domains)).toEqual({
-      domain: "claims",
+    expect(resolveDomain("screens/keyword-page.md", "theming", domains)).toEqual({
+      domain: "theming",
       origin: "frontmatter",
       declared: false,
     });
@@ -105,7 +105,7 @@ describe("resolveDomain", () => {
   });
 
   it("accepts unclassified as a frontmatter domain", () => {
-    expect(resolveDomain("screens/payment-summary.md", "unclassified", domains)).toEqual({
+    expect(resolveDomain("screens/keyword-page.md", "unclassified", domains)).toEqual({
       domain: UNCLASSIFIED_DOMAIN,
       origin: "frontmatter",
       declared: true,
@@ -118,8 +118,6 @@ describe("resolveDomain", () => {
       origin: "unclassified",
       declared: true,
     });
-    expect(resolveDomain("screens/member-search.md", undefined, []).domain).toBe(
-      UNCLASSIFIED_DOMAIN,
-    );
+    expect(resolveDomain("screens/link-search.md", undefined, []).domain).toBe(UNCLASSIFIED_DOMAIN);
   });
 });

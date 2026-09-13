@@ -352,7 +352,7 @@ describe("describeSchemaError", () => {
 
 describe("isWellFormedGlob", () => {
   it.each([
-    ["**/payment*", true],
+    ["**/keyword*", true],
     ["{a,b}/**", true],
     ["[abc]*.md", true],
     ["**/{a", false],

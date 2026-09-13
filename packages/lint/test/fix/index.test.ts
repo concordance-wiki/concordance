@@ -18,10 +18,10 @@ const entry = [
   "status: draft",
   "id: notes/entry",
   "---",
-  "# Free payment entry",
+  "# Mentions panel",
   "",
-  "The Annual cap applies to every Free payment; see [the cap](annual-cap.rule.md#limits).",
-  "Payment schedule and Member are business words that inference would link.",
+  "The Related cap applies to every Explicit link; see [the cap](related-cap.rule.md#limits).",
+  "Section mention and Entity are business words that inference would link.",
   "",
 ].join("\n");
 
@@ -30,19 +30,19 @@ const fixedEntry = [
   "id: notes/entry",
   "status: draft",
   "---",
-  "# Free payment entry",
+  "# Mentions panel",
   "",
-  "The Annual cap applies to every Free payment; see [the cap](../rules/annual-cap.rule.md#limits).",
-  "Payment schedule and Member are business words that inference would link.",
+  "The Related cap applies to every Explicit link; see [the cap](../rules/related-cap.rule.md#limits).",
+  "Section mention and Entity are business words that inference would link.",
   "",
 ].join("\n");
 
 function repository(extra: Record<string, string> = {}) {
   return memoryFileSystem({
     [`${root}/notes/entry.md`]: entry,
-    [`${root}/rules/annual-cap.rule.md`]: "---\ntitle: Annual cap\n---\n# Annual cap\n",
-    [`${root}/glossary/member.md`]: "# Member\n",
-    [`${root}/glossary/payment-schedule.md`]: "# Payment schedule\n\nSee [cap](cap.md).\n",
+    [`${root}/rules/related-cap.rule.md`]: "---\ntitle: Related cap\n---\n# Related cap\n",
+    [`${root}/glossary/entity.md`]: "# Entity\n",
+    [`${root}/glossary/section-mention.md`]: "# Section mention\n\nSee [cap](cap.md).\n",
     [`${root}/a/cap.md`]: "# Cap\n",
     [`${root}/b/cap.md`]: "# Cap\n",
     [`${root}/notes/cap.png`]: "not markdown",
@@ -54,7 +54,7 @@ describe("fixRepository", () => {
   describe("--fix normalises frontmatter, adds the deduced type, orders keys and rewrites renamed links", () => {
     it("applies every fixer to every markdown file and writes only the files that changed", () => {
       const fs = repository();
-      const untouched = fs.readText(`${root}/glossary/member.md`);
+      const untouched = fs.readText(`${root}/glossary/entity.md`);
       const result = fixRepository({ root, source: notes, fs, dryRun: false });
       expect(result).toEqual({
         applied: [
@@ -69,24 +69,24 @@ describe("fixRepository", () => {
             path: "notes/entry.md",
             line: 7,
             description:
-              'rewrite link "annual-cap.rule.md#limits" to "../rules/annual-cap.rule.md#limits", the only file named annual-cap.rule.md',
+              'rewrite link "related-cap.rule.md#limits" to "../rules/related-cap.rule.md#limits", the only file named related-cap.rule.md',
           },
           {
             kind: "frontmatter-type",
-            path: "rules/annual-cap.rule.md",
+            path: "rules/related-cap.rule.md",
             line: 1,
             description: 'add the deduced "type: rule" to the frontmatter',
           },
           {
             kind: "frontmatter-order",
-            path: "rules/annual-cap.rule.md",
+            path: "rules/related-cap.rule.md",
             line: 1,
             description: "order the frontmatter keys: type, title",
           },
         ],
         refused: [
           {
-            path: "glossary/payment-schedule.md",
+            path: "glossary/section-mention.md",
             line: 3,
             description: 'link "cap.md" matches several files: a/cap.md, b/cap.md; choose one',
           },
@@ -94,10 +94,10 @@ describe("fixRepository", () => {
         files: 2,
       });
       expect(fs.readText(`${root}/notes/entry.md`)).toBe(fixedEntry);
-      expect(fs.readText(`${root}/rules/annual-cap.rule.md`)).toBe(
-        "---\ntype: rule\ntitle: Annual cap\n---\n# Annual cap\n",
+      expect(fs.readText(`${root}/rules/related-cap.rule.md`)).toBe(
+        "---\ntype: rule\ntitle: Related cap\n---\n# Related cap\n",
       );
-      expect(fs.readText(`${root}/glossary/member.md`)).toBe(untouched);
+      expect(fs.readText(`${root}/glossary/entity.md`)).toBe(untouched);
     });
 
     it("clears the findings the fixes address and leaves the refused one to the lint", () => {
@@ -105,7 +105,7 @@ describe("fixRepository", () => {
       fixRepository({ root, source: notes, fs, dryRun: false });
       const findings = lintRepository({ root, source: notes, fs });
       expect(findings.map((finding) => [finding.check, finding.path])).toEqual([
-        ["E-LINK-BROKEN", "glossary/payment-schedule.md"],
+        ["E-LINK-BROKEN", "glossary/section-mention.md"],
       ]);
     });
 
@@ -119,12 +119,12 @@ describe("fixRepository", () => {
       const fs = repository();
       const result = fixRepository({ root, source: notes, config, fs, dryRun: false });
       expect(result.applied.map((change) => [change.kind, change.path])).toEqual([
-        ["link-target", "glossary/payment-schedule.md"],
+        ["link-target", "glossary/section-mention.md"],
         ["frontmatter-order", "notes/entry.md"],
       ]);
       expect(result.refused).toEqual([]);
-      expect(fs.readText(`${root}/rules/annual-cap.rule.md`)).toBe(
-        "---\ntitle: Annual cap\n---\n# Annual cap\n",
+      expect(fs.readText(`${root}/rules/related-cap.rule.md`)).toBe(
+        "---\ntitle: Related cap\n---\n# Related cap\n",
       );
     });
 
@@ -150,16 +150,16 @@ describe("fixRepository", () => {
       // Lines 1 and 2 are the frontmatter keys; line 6 holds the link.
       expect(differing).toEqual([1, 2, 6]);
       expect(after[6]).toBe(
-        before[6]?.replace("(annual-cap.rule.md#limits)", "(../rules/annual-cap.rule.md#limits)"),
+        before[6]?.replace("(related-cap.rule.md#limits)", "(../rules/related-cap.rule.md#limits)"),
       );
     });
 
     it("leaves a note without frontmatter or broken link byte-identical, whatever words it uses", () => {
       const fs = repository();
-      const text = "# Member\n\nA Member makes a Free payment under the Annual cap.\n";
-      fs.writeText(`${root}/glossary/member.md`, text);
+      const text = "# Entity\n\nAn Entity carries an Explicit link under the Related cap.\n";
+      fs.writeText(`${root}/glossary/entity.md`, text);
       fixRepository({ root, source: notes, fs, dryRun: false });
-      expect(fs.readText(`${root}/glossary/member.md`)).toBe(text);
+      expect(fs.readText(`${root}/glossary/entity.md`)).toBe(text);
     });
   });
 
@@ -177,10 +177,10 @@ describe("fixRepository", () => {
       expect(events).toEqual([
         "announce notes/entry.md:1 frontmatter-order",
         "announce notes/entry.md:7 link-target",
-        "announce rules/annual-cap.rule.md:1 frontmatter-type",
-        "announce rules/annual-cap.rule.md:1 frontmatter-order",
+        "announce rules/related-cap.rule.md:1 frontmatter-type",
+        "announce rules/related-cap.rule.md:1 frontmatter-order",
         "write /repo/notes/entry.md",
-        "write /repo/rules/annual-cap.rule.md",
+        "write /repo/rules/related-cap.rule.md",
       ]);
     });
 

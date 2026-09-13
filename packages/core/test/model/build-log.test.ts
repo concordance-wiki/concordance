@@ -263,14 +263,18 @@ describe("serializeBuildLog", () => {
 
   it("records the imported contracts between the summary and the findings, in canonical order", () => {
     const record = {
-      api: "specs/api/payments",
+      api: "specs/api/model-query",
       location: "./openapi.json",
-      title: "Payments API",
+      title: "Model query API",
       version: "2.0.0",
       fingerprint: "a".repeat(64),
       imported_at: "2026-09-12T12:00:00.000Z",
     };
-    const earlier = { ...record, api: "specs/api/members", location: "https://example.invalid/b" };
+    const earlier = {
+      ...record,
+      api: "specs/api/forge-bridge",
+      location: "https://example.invalid/b",
+    };
     const first = { ...earlier, location: "https://example.invalid/a" };
     const text = serializeBuildLog({ ...log, contracts: [record, earlier, first] });
     expect(parse(text).contracts).toEqual([first, earlier, record]);

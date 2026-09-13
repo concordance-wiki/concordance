@@ -98,8 +98,8 @@ describe("The file is validated by schemas/model.schema.json, published with the
       candidates: {
         terms: [
           {
-            text: "premium",
-            normalized: "premium",
+            text: "build summary",
+            normalized: "build summary",
             score: 1.5,
             occurrences: 3,
             documents: 2,

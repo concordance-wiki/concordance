@@ -14,7 +14,7 @@ export interface RecordedIo extends CommandIo {
   stderr: string[];
 }
 
-/** One local source filed under a declared application, every note claimed by one domain. */
+/** One local source filed under a declared application, every note filed under one domain. */
 export const validConfig = [
   "version: 1",
   "project: { name: Wiki }",

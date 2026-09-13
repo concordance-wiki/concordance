@@ -1,11 +1,11 @@
 # Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
 # further I-REL-AMBIGUOUS findings on other prose mentions are allowed.
-- { check: I-REL-AMBIGUOUS, path: specs/screens/free-payment-entry.md, note: "free payment (term) mentioned in prose falls back to related" }
-- { check: I-TERM-HOMONYM, form: contract, entities: [glossary/contract, specs/objects/contract] }
-- { check: I-TERM-HOMONYM, form: member, entities: [glossary/member, specs/objects/member] }
-- { check: I-TERM-HOMONYM, form: payment, entities: [glossary/payment, specs/objects/payment] }
-- { check: W-DOMAIN-UNCLASSIFIED, path: decisions/cap-checked-server-side.md }
-- { check: W-DOMAIN-UNCLASSIFIED, path: glossary/contract.md }
-- { check: W-DOMAIN-UNCLASSIFIED, path: specs/objects/contract.md }
-- { check: W-DOMAIN-UNCLASSIFIED, path: specs/roles/account-manager.md }
-- { check: W-TERM-UNDEFINED, text: exceptional payment, min_occurrences: 4, min_files: 3 }
+- { check: I-REL-AMBIGUOUS, path: specs/screens/mentions-panel.md, note: "explicit link (term) mentioned in prose falls back to related" }
+- { check: I-TERM-HOMONYM, form: build, entities: [glossary/build, specs/objects/build] }
+- { check: I-TERM-HOMONYM, form: entity, entities: [glossary/entity, specs/objects/entity] }
+- { check: I-TERM-HOMONYM, form: link, entities: [glossary/link, specs/objects/link] }
+- { check: W-DOMAIN-UNCLASSIFIED, path: decisions/cap-checked-upstream.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: glossary/build.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: specs/objects/build.md }
+- { check: W-DOMAIN-UNCLASSIFIED, path: specs/roles/maintainer.md }
+- { check: W-TERM-UNDEFINED, text: build summary, min_occurrences: 5, min_files: 3 }

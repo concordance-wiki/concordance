@@ -10,10 +10,10 @@ describe("A Cypher export is provided for those who want to load the graph elsew
       [
         "// Concordance model, tool 1.2.3, built at 2026-09-12T12:00:00.000Z",
         "// One MERGE per entity, then one per link; nested attributes are not exported.",
-        "MERGE (n:Entity {id: 'glossary/member'}) SET n.type = 'term', n.title = 'member', n.locale = 'en', n.domain = 'membership', n.type_origin = 'source';",
-        "MERGE (n:Entity {id: 'specs/screens/member-search'}) SET n.type = 'screen', n.title = 'screens/member-search', n.locale = 'en', n.application = 'policy-admin', n.domain = 'payments', n.type_origin = 'rule#1', n.attr_owner = 'team-a', n.attr_tags = ['b', 'a'];",
-        "MERGE (a:Entity {id: 'glossary/member'}) MERGE (b:Entity {id: 'specs/screens/member-search'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 1, r.methods = ['explicit_link'];",
-        "MERGE (a:Entity {id: 'specs/screens/member-search'}) MERGE (b:Entity {id: 'glossary/member'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 0.7, r.methods = ['explicit_link', 'section_mention'];",
+        "MERGE (n:Entity {id: 'glossary/entity'}) SET n.type = 'term', n.title = 'entity', n.locale = 'en', n.domain = 'publication', n.type_origin = 'source';",
+        "MERGE (n:Entity {id: 'specs/screens/entity-page'}) SET n.type = 'screen', n.title = 'screens/entity-page', n.locale = 'en', n.application = 'concordance-cli', n.domain = 'inference', n.type_origin = 'rule#1', n.attr_owner = 'team-a', n.attr_tags = ['b', 'a'];",
+        "MERGE (a:Entity {id: 'glossary/entity'}) MERGE (b:Entity {id: 'specs/screens/entity-page'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 1, r.methods = ['explicit_link'];",
+        "MERGE (a:Entity {id: 'specs/screens/entity-page'}) MERGE (b:Entity {id: 'glossary/entity'}) MERGE (a)-[r:RELATED]->(b) SET r.confidence = 0.7, r.methods = ['explicit_link', 'section_mention'];",
         "",
       ].join("\n"),
     );

@@ -11,8 +11,8 @@ export function entity(id: string, overrides: Partial<Entity> = {}): Entity {
     title: rest.join("/"),
     aliases: [],
     locale: "en",
-    application: "policy-admin",
-    domain: "payments",
+    application: "concordance-cli",
+    domain: "inference",
     status: "valid",
     type_origin: "rule#1",
     graph: "full",
@@ -55,13 +55,13 @@ export function finding(check: string, overrides: Partial<Finding> = {}): Findin
 
 /** A small, deliberately unsorted input: every block has at least two items out of order. */
 export function sampleInput(): AssembleModelInput {
-  const member = entity("glossary/member", {
+  const term = entity("glossary/entity", {
     type: "term",
     type_origin: "source",
-    domain: "membership",
+    domain: "publication",
   });
   // A glossary term of no application: the optional fields must survive the round trip.
-  delete member.application;
+  delete term.application;
   return {
     version: "1.2.3",
     timestamp: "2026-09-12T12:00:00.000Z",
@@ -75,44 +75,44 @@ export function sampleInput(): AssembleModelInput {
       { name: "glossary" },
     ],
     entities: [
-      entity("specs/screens/member-search", { attributes: { owner: "team-a", tags: ["b", "a"] } }),
-      member,
+      entity("specs/screens/entity-page", { attributes: { owner: "team-a", tags: ["b", "a"] } }),
+      term,
     ],
     links: [
-      link("specs/screens/member-search", "glossary/member", "related", {
+      link("specs/screens/entity-page", "glossary/entity", "related", {
         confidence: 0.7,
         attributes: { mode: "read" },
         provenance: [
           {
             method: "section_mention",
             confidence: 0.7,
-            path: "screens/member-search.md",
+            path: "screens/entity-page.md",
             line: 9,
             section: "Objects",
           },
           {
             method: "explicit_link",
             confidence: 1,
-            path: "screens/member-search.md",
+            path: "screens/entity-page.md",
             line: 12,
-            text: "member",
+            text: "entity",
           },
           {
             method: "explicit_link",
             confidence: 1,
-            path: "screens/member-search.md",
+            path: "screens/entity-page.md",
             line: 4,
-            text: "the member",
+            text: "the entity",
           },
         ],
       }),
-      link("glossary/member", "specs/screens/member-search", "related"),
+      link("glossary/entity", "specs/screens/entity-page", "related"),
     ],
     findings: [
-      finding("W-STALE", { source: "specs", path: "screens/member-search.md" }),
+      finding("W-STALE", { source: "specs", path: "screens/entity-page.md" }),
       finding("I-REL-AMBIGUOUS", {
         source: "specs",
-        path: "screens/member-search.md",
+        path: "screens/entity-page.md",
         line: 12,
         severity: "info",
       }),

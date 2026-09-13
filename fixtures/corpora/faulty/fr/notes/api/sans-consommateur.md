@@ -1,6 +1,6 @@
 ---
 protocol: rest
 ---
-# API sans consommateur
+# API Pont de forge sans consommateur
 
-Rien ne déclare ni ne mentionne cette API.
+Aucun écran ne déclare ni ne mentionne cette API.

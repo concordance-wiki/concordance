@@ -3,8 +3,8 @@ project:
   name: Faulty corpus
   locale: en
 applications:
-  - id: policy-admin
-    title: Policy administration
+  - id: concordance-cli
+    title: Concordance command line
 domains:
   - id: everything
     title: Everything
@@ -12,7 +12,7 @@ domains:
 sources:
   - name: notes
     path: ./notes
-    application: policy-admin
+    application: concordance-cli
     rules:
       - match: { path: "screens/**" }
         set: { type: screen }

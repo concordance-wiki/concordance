@@ -3,27 +3,27 @@ project:
   name: Corpus minimal
   locale: fr
 applications:
-  - id: gestion-contrats
-    title: Gestion des contrats
+  - id: concordance-cli
+    title: Ligne de commande Concordance
     status: active
 domains:
-  - id: adhesion
-    title: Adhésion
-    match: ["**/*adherent*"]
-  - id: versements
-    title: Versements
-    match: ["**/*versement*", "**/traitement-de-nuit*", "**/plafond-annuel*"]
+  - id: publication
+    title: Publication
+    match: ["**/*entite*"]
+  - id: inference
+    title: Inférence
+    match: ["**/*lien*", "**/*mention*", "**/build-nocturne*", "**/requete-de-modele*", "**/carte-de-voisinage*"]
 sources:
   - name: glossaire
     path: ./glossaire
     locale: fr
     type: term
     glossary: true
-    application: gestion-contrats
+    application: concordance-cli
   - name: specs
     path: ./specs
     locale: fr
-    application: gestion-contrats
+    application: concordance-cli
     rules:
       - match: { path: "ecrans/**" }
         set: { type: screen }
@@ -45,12 +45,12 @@ sources:
     path: ./decisions
     locale: fr
     type: decision
-    application: gestion-contrats
+    application: concordance-cli
   - name: reunions
     path: ./reunions
     locale: fr
     default_type: meeting
-    application: gestion-contrats
+    application: concordance-cli
 inference:
   cross_source_links: true
   keyword_pages: { min_occurrences: 3, min_files: 2 }

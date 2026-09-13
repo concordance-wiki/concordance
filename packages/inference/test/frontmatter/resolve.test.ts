@@ -12,32 +12,32 @@ function entity(
   return { id, type, title, attributes: {}, source };
 }
 
-const screen = entity("specs/screens/entry", "screen", "Free payment entry", {
+const screen = entity("specs/screens/entry", "screen", "Mentions panel", {
   name: "specs",
   path: "screens/entry.md",
 });
-const role = entity("specs/roles/account-manager", "role", "Account manager", {
+const role = entity("specs/roles/maintainer", "role", "Maintainer", {
   name: "specs",
-  path: "roles/account-manager.md",
+  path: "roles/maintainer.md",
 });
-const cap = entity("specs/rules/annual-cap", "rule", "Annual cap", {
+const cap = entity("specs/rules/related-cap", "rule", "Related cap", {
   name: "specs",
-  path: "rules/annual-cap.rule.md",
+  path: "rules/related-cap.rule.md",
 });
-const payment = entity("specs/objects/payment", "business_object", "Payment", {
+const object = entity("specs/objects/link", "business_object", "Link", {
   name: "specs",
-  path: "objects/payment.md",
+  path: "objects/link.md",
 });
-const term = entity("glossary/payment", "term", "Payment", {
+const term = entity("glossary/link", "term", "Link", {
   name: "glossary",
-  path: "payment.md",
+  path: "link.md",
 });
-const renamed = entity("specs/roles/branch", "role", "Branch clerk", {
+const renamed = entity("specs/roles/theme", "role", "Theme author", {
   name: "specs",
-  path: "roles/Branch Clerk.md",
+  path: "roles/Theme Author.md",
 });
 
-const index = indexEntities([screen, role, cap, payment, term, renamed]);
+const index = indexEntities([screen, role, cap, object, term, renamed]);
 
 function resolve(value: string, from: LinkableEntity = screen) {
   return resolveReference(value, { from, index });
@@ -50,29 +50,26 @@ describe("indexEntities", () => {
       path: "roles/clerk.md",
     });
     const built = indexEntities([spaced, role]);
-    expect([...built.byId.keys()]).toEqual(["specs/roles/clerk", "specs/roles/account-manager"]);
-    expect([...built.byPath.keys()]).toEqual([
-      "specs/roles/clerk.md",
-      "specs/roles/account-manager.md",
-    ]);
-    expect([...built.byTitle.keys()]).toEqual(["Clerk", "Account manager"]);
+    expect([...built.byId.keys()]).toEqual(["specs/roles/clerk", "specs/roles/maintainer"]);
+    expect([...built.byPath.keys()]).toEqual(["specs/roles/clerk.md", "specs/roles/maintainer.md"]);
+    expect([...built.byTitle.keys()]).toEqual(["Clerk", "Maintainer"]);
   });
 
   it("keeps the first entity of a repeated identifier or path and every entity of a repeated title", () => {
-    const twin = entity("specs/objects/payment", "term", "Payment", {
+    const twin = entity("specs/objects/link", "term", "Link", {
       name: "specs",
-      path: "objects/payment.md",
+      path: "objects/link.md",
     });
-    const built = indexEntities([payment, twin, term]);
-    expect(built.byId.get("specs/objects/payment")).toBe(payment);
-    expect(built.byPath.get("specs/objects/payment.md")).toBe(payment);
-    expect(built.byTitle.get("Payment")).toEqual([payment, twin, term]);
+    const built = indexEntities([object, twin, term]);
+    expect(built.byId.get("specs/objects/link")).toBe(object);
+    expect(built.byPath.get("specs/objects/link.md")).toBe(object);
+    expect(built.byTitle.get("Link")).toEqual([object, twin, term]);
   });
 });
 
 describe("resolveReference", () => {
   it("resolves a full identifier", () => {
-    expect(resolve("specs/roles/account-manager")).toEqual({
+    expect(resolve("specs/roles/maintainer")).toEqual({
       kind: "resolved",
       entity: role,
       by: "id",
@@ -80,18 +77,18 @@ describe("resolveReference", () => {
   });
 
   it("resolves an identifier relative to the source of the referring note", () => {
-    expect(resolve("roles/account-manager")).toEqual({ kind: "resolved", entity: role, by: "id" });
-    expect(resolve("payment", term)).toEqual({ kind: "resolved", entity: term, by: "id" });
-    expect(resolve("payment")).toEqual({ kind: "unresolved" });
+    expect(resolve("roles/maintainer")).toEqual({ kind: "resolved", entity: role, by: "id" });
+    expect(resolve("link", term)).toEqual({ kind: "resolved", entity: term, by: "id" });
+    expect(resolve("link")).toEqual({ kind: "unresolved" });
   });
 
   it("resolves a source-relative path, type suffix and extension included", () => {
-    expect(resolve("roles/account-manager.md")).toEqual({
+    expect(resolve("roles/maintainer.md")).toEqual({
       kind: "resolved",
       entity: role,
       by: "path",
     });
-    expect(resolve("rules/annual-cap.rule.md")).toEqual({
+    expect(resolve("rules/related-cap.rule.md")).toEqual({
       kind: "resolved",
       entity: cap,
       by: "path",
@@ -99,8 +96,8 @@ describe("resolveReference", () => {
   });
 
   it("resolves a path through the identifier it derives when the file was renamed by slugification", () => {
-    expect(resolve("roles/branch.md")).toEqual({ kind: "resolved", entity: renamed, by: "path" });
-    expect(resolve("Roles/Account Manager.md")).toEqual({
+    expect(resolve("roles/theme.md")).toEqual({ kind: "resolved", entity: renamed, by: "path" });
+    expect(resolve("Roles/Maintainer.md")).toEqual({
       kind: "resolved",
       entity: role,
       by: "path",
@@ -109,32 +106,32 @@ describe("resolveReference", () => {
   });
 
   it("resolves an exact title after trimming, case-sensitively", () => {
-    expect(resolve("Annual cap")).toEqual({ kind: "resolved", entity: cap, by: "title" });
-    expect(resolve("  Annual cap ")).toEqual({ kind: "resolved", entity: cap, by: "title" });
-    expect(resolve("annual cap")).toEqual({ kind: "unresolved" });
+    expect(resolve("Related cap")).toEqual({ kind: "resolved", entity: cap, by: "title" });
+    expect(resolve("  Related cap ")).toEqual({ kind: "resolved", entity: cap, by: "title" });
+    expect(resolve("related cap")).toEqual({ kind: "unresolved" });
   });
 
   it("reports a title shared by several notes as ambiguous with every candidate", () => {
-    expect(resolve("Payment")).toEqual({ kind: "ambiguous", candidates: [payment, term] });
+    expect(resolve("Link")).toEqual({ kind: "ambiguous", candidates: [object, term] });
   });
 
   it("tries the identifier before the path and the path before the title", () => {
-    const identified = entity("specs/roles/account-manager.md", "role", "Named by frontmatter", {
+    const identified = entity("specs/roles/maintainer.md", "role", "Named by frontmatter", {
       name: "specs",
       path: "roles/named.md",
     });
-    const titled = entity("specs/roles/titled", "role", "roles/account-manager.md", {
+    const titled = entity("specs/roles/titled", "role", "roles/maintainer.md", {
       name: "specs",
       path: "roles/titled.md",
     });
     const context = { from: screen, index: indexEntities([screen, role, identified, titled]) };
-    expect(resolveReference("roles/account-manager.md", context)).toEqual({
+    expect(resolveReference("roles/maintainer.md", context)).toEqual({
       kind: "resolved",
       entity: identified,
       by: "id",
     });
     const shadowed = { from: screen, index: indexEntities([screen, role, titled]) };
-    expect(resolveReference("roles/account-manager.md", shadowed)).toEqual({
+    expect(resolveReference("roles/maintainer.md", shadowed)).toEqual({
       kind: "resolved",
       entity: role,
       by: "path",
@@ -142,7 +139,7 @@ describe("resolveReference", () => {
   });
 
   it("resolves nothing for a value without an extension that is neither an identifier nor a title", () => {
-    expect(resolve("roles/account-manager.txt")).toEqual({ kind: "unresolved" });
+    expect(resolve("roles/maintainer.txt")).toEqual({ kind: "unresolved" });
     expect(resolve("")).toEqual({ kind: "unresolved" });
   });
 });

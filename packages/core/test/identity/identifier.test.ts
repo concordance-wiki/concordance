@@ -7,8 +7,8 @@ const suffixes = [".rule.md", ".table.md"];
 describe("identifierFor", () => {
   it("is the source name and the slugified path without extension", () => {
     expect(
-      identifierFor({ source: "glossary", path: "free-payment.md", typeSuffixes: [] }),
-    ).toEqual({ id: "glossary/free-payment", origin: "path" });
+      identifierFor({ source: "glossary", path: "explicit-link.md", typeSuffixes: [] }),
+    ).toEqual({ id: "glossary/explicit-link", origin: "path" });
   });
 
   it("slugifies accents, spaces, underscores and uppercase in every segment", () => {
@@ -20,29 +20,29 @@ describe("identifierFor", () => {
       }).id,
     ).toBe("specs/regles-metier/reglementation-generale");
     expect(
-      identifierFor({ source: "specs", path: "Business_Rules/Annual CAP.md", typeSuffixes: [] }).id,
-    ).toBe("specs/business-rules/annual-cap");
+      identifierFor({ source: "specs", path: "Business_Rules/Related CAP.md", typeSuffixes: [] })
+        .id,
+    ).toBe("specs/business-rules/related-cap");
   });
 
   it("keeps nested folders as segments", () => {
     expect(
-      identifierFor({ source: "specs", path: "a/b/c/record-a-payment.md", typeSuffixes: [] }).id,
-    ).toBe("specs/a/b/c/record-a-payment");
+      identifierFor({ source: "specs", path: "a/b/c/confirm-a-link.md", typeSuffixes: [] }).id,
+    ).toBe("specs/a/b/c/confirm-a-link");
   });
 
   it("strips a declared type suffix", () => {
     expect(
-      identifierFor({ source: "specs", path: "tables/payment.table.md", typeSuffixes: suffixes })
-        .id,
-    ).toBe("specs/tables/payment");
+      identifierFor({ source: "specs", path: "tables/links.table.md", typeSuffixes: suffixes }).id,
+    ).toBe("specs/tables/links");
     expect(
-      identifierFor({ source: "specs", path: "rules/annual-cap.rule.md", typeSuffixes: suffixes })
+      identifierFor({ source: "specs", path: "rules/related-cap.rule.md", typeSuffixes: suffixes })
         .id,
-    ).toBe("specs/rules/annual-cap");
+    ).toBe("specs/rules/related-cap");
   });
 
   it("strips the longest declared suffix whatever their declaration order", () => {
-    const path = "rules/annual-cap.business.rule.md";
+    const path = "rules/related-cap.business.rule.md";
     const forward = identifierFor({
       source: "specs",
       path,
@@ -53,8 +53,8 @@ describe("identifierFor", () => {
       path,
       typeSuffixes: [".business.rule.md", ".rule.md"],
     });
-    expect(forward.id).toBe("specs/rules/annual-cap");
-    expect(backward.id).toBe("specs/rules/annual-cap");
+    expect(forward.id).toBe("specs/rules/related-cap");
+    expect(backward.id).toBe("specs/rules/related-cap");
   });
 
   it("does not strip a suffix that would leave an empty name", () => {
@@ -67,8 +67,8 @@ describe("identifierFor", () => {
     expect(identifierFor({ source: "specs", path: "notes.v2.md", typeSuffixes: suffixes }).id).toBe(
       "specs/notes-v2",
     );
-    expect(identifierFor({ source: "specs", path: "payment.table.md", typeSuffixes: [] }).id).toBe(
-      "specs/payment-table",
+    expect(identifierFor({ source: "specs", path: "links.table.md", typeSuffixes: [] }).id).toBe(
+      "specs/links-table",
     );
   });
 
@@ -83,15 +83,15 @@ describe("identifierFor", () => {
 
   it("does not match a suffix in the middle of the path", () => {
     expect(
-      identifierFor({ source: "specs", path: "x.rule.md/payment.md", typeSuffixes: suffixes }).id,
-    ).toBe("specs/x-rule-md/payment");
+      identifierFor({ source: "specs", path: "x.rule.md/link.md", typeSuffixes: suffixes }).id,
+    ).toBe("specs/x-rule-md/link");
   });
 
   it("takes a frontmatter id in precedence over the path", () => {
     expect(
       identifierFor({
         source: "specs",
-        path: "rules/annual-cap.rule.md",
+        path: "rules/related-cap.rule.md",
         typeSuffixes: suffixes,
         frontmatterId: "rules/cap",
       }),
@@ -102,28 +102,28 @@ describe("identifierFor", () => {
     expect(
       identifierFor({
         source: "specs",
-        path: "rules/annual-cap.rule.md",
+        path: "rules/related-cap.rule.md",
         typeSuffixes: suffixes,
-        frontmatterId: "Annual Cap",
+        frontmatterId: "Related Cap",
       }),
     ).toEqual({
-      id: "specs/rules/annual-cap",
+      id: "specs/rules/related-cap",
       origin: "path",
       finding: {
         check: "E-ID-INVALID",
         severity: "error",
         source: "specs",
-        path: "rules/annual-cap.rule.md",
-        entity: "specs/rules/annual-cap",
+        path: "rules/related-cap.rule.md",
+        entity: "specs/rules/related-cap",
         message:
-          'frontmatter id "Annual Cap" of rules/annual-cap.rule.md is not a valid identifier; using specs/rules/annual-cap',
+          'frontmatter id "Related Cap" of rules/related-cap.rule.md is not a valid identifier; using specs/rules/related-cap',
         remediation:
           "Use lowercase letters, digits and hyphens with at least one '/', such as specs/rules/annual-cap, or remove the id key to derive it from the path.",
       },
     });
   });
 
-  it.each(["annual-cap", "/specs/cap", "specs/cap/", "specs//cap", "specs.x/cap", "-specs/cap"])(
+  it.each(["related-cap", "/specs/cap", "specs/cap/", "specs//cap", "specs.x/cap", "-specs/cap"])(
     "rejects the frontmatter id %s",
     (frontmatterId) => {
       const result = identifierFor({
@@ -137,7 +137,7 @@ describe("identifierFor", () => {
     },
   );
 
-  it.each(["specs/cap", "a1/b.c_d-e/f", "specs/rules/annual-cap"])(
+  it.each(["specs/cap", "a1/b.c_d-e/f", "specs/rules/related-cap"])(
     "accepts the frontmatter id %s",
     (frontmatterId) => {
       expect(
@@ -163,42 +163,42 @@ describe("identifierFor", () => {
 
 describe("pagePath", () => {
   it("is a folder per entity holding an index.html", () => {
-    expect(pagePath("glossary/free-payment")).toBe("glossary/free-payment/index.html");
-    expect(pagePath("specs/rules/annual-cap")).toBe("specs/rules/annual-cap/index.html");
+    expect(pagePath("glossary/explicit-link")).toBe("glossary/explicit-link/index.html");
+    expect(pagePath("specs/rules/related-cap")).toBe("specs/rules/related-cap/index.html");
   });
 });
 
 describe("pageUrl", () => {
   it("is root-relative without an origin page", () => {
-    expect(pageUrl("glossary/free-payment")).toBe("/glossary/free-payment/");
+    expect(pageUrl("glossary/explicit-link")).toBe("/glossary/explicit-link/");
   });
 
   it("climbs out of the origin folder to reach another page", () => {
-    expect(pageUrl("glossary/free-payment", "specs/rules/annual-cap/index.html")).toBe(
-      "../../../glossary/free-payment/",
+    expect(pageUrl("glossary/explicit-link", "specs/rules/related-cap/index.html")).toBe(
+      "../../../glossary/explicit-link/",
     );
-    expect(pageUrl("glossary/free-payment", "specs/payment/index.html")).toBe(
-      "../../glossary/free-payment/",
+    expect(pageUrl("glossary/explicit-link", "specs/link/index.html")).toBe(
+      "../../glossary/explicit-link/",
     );
   });
 
   it("shares the common folders between two nested pages", () => {
-    expect(pageUrl("specs/rules/annual-cap", "specs/objects/payment/index.html")).toBe(
-      "../../rules/annual-cap/",
+    expect(pageUrl("specs/rules/related-cap", "specs/objects/link/index.html")).toBe(
+      "../../rules/related-cap/",
     );
-    expect(pageUrl("specs/rules/annual-cap", "specs/rules/monthly-cap/index.html")).toBe(
-      "../annual-cap/",
+    expect(pageUrl("specs/rules/related-cap", "specs/rules/size-ratio/index.html")).toBe(
+      "../related-cap/",
     );
-    expect(pageUrl("specs/rules/annual-cap/detail", "specs/rules/annual-cap/index.html")).toBe(
+    expect(pageUrl("specs/rules/related-cap/detail", "specs/rules/related-cap/index.html")).toBe(
       "detail/",
     );
   });
 
   it("descends from the site root page", () => {
-    expect(pageUrl("glossary/free-payment", "index.html")).toBe("glossary/free-payment/");
+    expect(pageUrl("glossary/explicit-link", "index.html")).toBe("glossary/explicit-link/");
   });
 
   it("points to the current folder from the entity's own page", () => {
-    expect(pageUrl("glossary/free-payment", "glossary/free-payment/index.html")).toBe("./");
+    expect(pageUrl("glossary/explicit-link", "glossary/explicit-link/index.html")).toBe("./");
   });
 });

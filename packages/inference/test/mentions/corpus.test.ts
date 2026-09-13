@@ -111,23 +111,13 @@ async function runCorpus(locale: string): Promise<Link[]> {
   return mentionLinks({ occurrences, entities, profile }).links;
 }
 
-/**
- * Mentions the scan cannot see yet: its leftmost longest match, "enregistrer un versement", swallows
- * the "versement libre" that overlaps it in the prose of the screen.
- */
-const overlappedByTheScan = new Set([
-  "glossaire/versement-libre -> specs/ecrans/saisie-versement-libre",
-]);
-
 describe("the minimal corpus", () => {
   it.each(["en", "fr"])(
     "produces every section_mention and glossary_occurrence link of the %s corpus with its relation at its minimum confidence",
     async (locale) => {
       const links = await runCorpus(locale);
       const expected = expectedLinks(posix.join(corpora, locale)).filter(
-        (link) =>
-          (link.method === "section_mention" || link.method === "glossary_occurrence") &&
-          !overlappedByTheScan.has(`${link.from} -> ${link.to}`),
+        (link) => link.method === "section_mention" || link.method === "glossary_occurrence",
       );
       expect(expected.length).toBeGreaterThan(5);
       for (const { from, to, relation, method, min_confidence } of expected) {
@@ -144,42 +134,42 @@ describe("the minimal corpus", () => {
     },
   );
 
-  it("names the section and the line of every mention under the Objects section of the free payment entry screen", async () => {
+  it("names the section and the line of every mention under the Objects section of the mentions panel screen", async () => {
     const links = await runCorpus("en");
     const objects = links.filter(
       (link) =>
-        link.from === "specs/screens/free-payment-entry" &&
+        link.from === "specs/screens/mentions-panel" &&
         link.provenance.some((provenance) => provenance.section === "objects"),
     );
     expect(
       objects.map((link) => [link.to, link.relation, link.provenance.map((p) => p.line)]),
     ).toEqual([
-      ["specs/objects/contract", "accesses", [13]],
-      ["specs/objects/member", "accesses", [13]],
-      ["specs/objects/payment", "accesses", [14]],
+      ["specs/objects/build", "accesses", [13]],
+      ["specs/objects/entity", "accesses", [13]],
+      ["specs/objects/link", "accesses", [14]],
     ]);
   });
 
   it("links the rule to the screen once, from the Rules section of the screen (inverse) and the Applies to section of the rule", async () => {
     const links = await runCorpus("en");
     const constrains = links.filter(
-      (link) => link.relation === "constrains" && link.to === "specs/screens/free-payment-entry",
+      (link) => link.relation === "constrains" && link.to === "specs/screens/mentions-panel",
     );
     expect(constrains.map((link) => [link.from, link.provenance])).toEqual([
       [
-        "specs/rules/annual-cap",
+        "specs/rules/related-link-cap",
         [
           {
             method: "section_mention",
             confidence: 0.7,
-            path: "rules/annual-cap.rule.md",
+            path: "rules/related-link-cap.rule.md",
             line: 10,
             section: "applies_to",
           },
           {
             method: "section_mention",
             confidence: 0.7,
-            path: "screens/free-payment-entry.md",
+            path: "screens/mentions-panel.md",
             line: 23,
             section: "rules",
           },

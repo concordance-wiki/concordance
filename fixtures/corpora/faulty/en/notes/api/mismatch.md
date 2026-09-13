@@ -2,6 +2,6 @@
 protocol: rest
 consumers: [screens/prose-mention]
 ---
-# API with a mismatched consumer
+# Model query API with a mismatched consumer
 
-Declares a consumer that never cites it.
+Declares the prose mention screen as a consumer, which never cites it.

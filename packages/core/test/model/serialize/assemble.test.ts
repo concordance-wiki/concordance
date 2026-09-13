@@ -65,21 +65,21 @@ describe("The build block carries the tool version, the timestamp, the profile f
 
 describe("Each entity carries its identifier, type, title, locale, application, domain, type origin, attributes and source with path and line", () => {
   it("keeps every field of the entity as the typing step built it", () => {
-    const [member] = assembleModel(sampleInput()).entities;
-    expect(member).toEqual({
-      id: "glossary/member",
+    const [term] = assembleModel(sampleInput()).entities;
+    expect(term).toEqual({
+      id: "glossary/entity",
       type: "term",
-      title: "member",
+      title: "entity",
       aliases: [],
       locale: "en",
-      domain: "membership",
+      domain: "publication",
       status: "valid",
       type_origin: "source",
       graph: "full",
       attributes: {},
       source: {
         name: "glossary",
-        path: "member.md",
+        path: "entity.md",
         line: 1,
         last_modified: "2026-03-01T00:00:00Z",
       },
@@ -91,8 +91,8 @@ describe("Each entity carries its identifier, type, title, locale, application, 
     const before = input.entities.map((item) => item.id);
     const model = assembleModel(input);
     expect(model.entities.map((item) => item.id)).toEqual([
-      "glossary/member",
-      "specs/screens/member-search",
+      "glossary/entity",
+      "specs/screens/entity-page",
     ]);
     expect(input.entities.map((item) => item.id)).toEqual(before);
   });
@@ -101,7 +101,7 @@ describe("Each entity carries its identifier, type, title, locale, application, 
 describe("Each link carries source, target, relation, attributes, confidence and the complete list of its provenances", () => {
   it("keeps the attributes, the confidence and every provenance", () => {
     const model = assembleModel(sampleInput());
-    const found = model.links.find((item) => item.from === "specs/screens/member-search");
+    const found = model.links.find((item) => item.from === "specs/screens/entity-page");
     expect(found?.attributes).toEqual({ mode: "read" });
     expect(found?.confidence).toBe(0.7);
     expect(found?.provenance).toHaveLength(3);
@@ -121,7 +121,7 @@ describe("Each link carries source, target, relation, attributes, confidence and
 
   it("sorts the provenances of each link by method, path and line", () => {
     const model = assembleModel(sampleInput());
-    const found = model.links.find((item) => item.from === "specs/screens/member-search");
+    const found = model.links.find((item) => item.from === "specs/screens/entity-page");
     expect(found?.provenance.map((item) => [item.method, item.line])).toEqual([
       ["explicit_link", 4],
       ["explicit_link", 12],

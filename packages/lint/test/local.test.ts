@@ -105,7 +105,7 @@ describe("lintRepository", () => {
   describe("cross-source targets are not checked locally", () => {
     it("ignores a target with a source prefix", () => {
       const fs = memoryFileSystem({
-        [`${root}/note.md`]: "# Note\n\nSee [the API](specs:api/payments.md).\n",
+        [`${root}/note.md`]: "# Note\n\nSee [the API](specs:api/model-query.md).\n",
       });
       expect(lintRepository({ root, fs })).toEqual([]);
     });

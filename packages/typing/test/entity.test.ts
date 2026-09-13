@@ -16,7 +16,7 @@ import {
 } from "./helpers.js";
 
 const specs = sourceConfig({
-  application: "policy-admin",
+  application: "concordance-cli",
   rules: [
     { match: { path: "screens/**" }, set: { type: "screen", audience: "internal" } },
     { match: { suffix: ".rule.md" }, set: { type: "rule" } },
@@ -25,12 +25,12 @@ const specs = sourceConfig({
 });
 
 function build(overrides: Partial<BuildEntityInput> = {}): { entity: Entity; findings: Finding[] } {
-  const ingested = file("screens/free-payment-entry.md");
+  const ingested = file("screens/keyword-page.md");
   return buildEntity({
     file: ingested,
     source: source("specs", [ingested]),
     sourceConfig: specs,
-    document: document({ title: "Free payment entry" }),
+    document: document({ title: "Keyword page" }),
     profile: profile(),
     applications: APPLICATIONS,
     domains: compileDomains(DOMAINS),
@@ -40,9 +40,9 @@ function build(overrides: Partial<BuildEntityInput> = {}): { entity: Entity; fin
 
 describe("buildEntity", () => {
   it("derives the identifier from the path with the type suffixes stripped", () => {
-    expect(build().entity.id).toBe("specs/screens/free-payment-entry");
-    const rule = build({ file: file("rules/Annual cap.rule.md") });
-    expect(rule.entity.id).toBe("specs/rules/annual-cap");
+    expect(build().entity.id).toBe("specs/screens/keyword-page");
+    const rule = build({ file: file("rules/Publication threshold.rule.md") });
+    expect(rule.entity.id).toBe("specs/rules/publication-threshold");
     expect(typeSuffixesOf(specs)).toEqual([".rule.md"]);
     expect(typeSuffixesOf(sourceConfig())).toEqual([]);
   });
@@ -52,18 +52,18 @@ describe("buildEntity", () => {
     expect(valid.entity.id).toBe("specs/entry");
     expect(valid.findings).toEqual([]);
     const invalid = build({ document: document({ frontmatter: { id: "Entry" } }) });
-    expect(invalid.entity.id).toBe("specs/screens/free-payment-entry");
+    expect(invalid.entity.id).toBe("specs/screens/keyword-page");
     expect(invalid.findings.map((finding) => finding.check)).toEqual(["E-ID-INVALID"]);
   });
 
   it("takes the title from the frontmatter, then the H1, then the file name", () => {
     const fromFrontmatter = build({
-      document: document({ title: "Free payment entry", frontmatter: { title: "Entry" } }),
+      document: document({ title: "Keyword page", frontmatter: { title: "Entry" } }),
     });
     expect(fromFrontmatter.entity.title).toBe("Entry");
-    expect(build().entity.title).toBe("Free payment entry");
+    expect(build().entity.title).toBe("Keyword page");
     const fromFile = build({ document: document({ frontmatter: { title: 3 } }) });
-    expect(fromFile.entity.title).toBe("free-payment-entry");
+    expect(fromFile.entity.title).toBe("keyword-page");
     expect(build({ file: file("a.rule.md"), document: document() }).entity.title).toBe("a.rule");
   });
 
@@ -98,15 +98,15 @@ describe("buildEntity", () => {
 
   it("takes the summary from the frontmatter, then the first paragraph, else none", () => {
     const paragraphs = [
-      { line: 3, text: "Lets an account manager record a payment." },
+      { line: 3, text: "Lets a maintainer publish an entity." },
       { line: 5, text: "Second paragraph." },
     ];
     const declared = build({
-      document: document({ paragraphs, frontmatter: { summary: "Records a payment." } }),
+      document: document({ paragraphs, frontmatter: { summary: "Publishes an entity." } }),
     });
-    expect(declared.entity.summary).toBe("Records a payment.");
+    expect(declared.entity.summary).toBe("Publishes an entity.");
     const first = build({ document: document({ paragraphs, frontmatter: { summary: 0 } }) });
-    expect(first.entity.summary).toBe("Lets an account manager record a payment.");
+    expect(first.entity.summary).toBe("Lets a maintainer publish an entity.");
     expect("summary" in build().entity).toBe(false);
   });
 
@@ -118,32 +118,32 @@ describe("buildEntity", () => {
       status: "valid",
       summary: "s",
       tags: ["a"],
-      application: "policy-admin",
-      domain: "payments",
+      application: "concordance-cli",
+      domain: "recognition",
       id: "specs/entry",
       type: "screen",
       audience: "public",
-      roles: ["roles/account-manager"],
+      roles: ["roles/maintainer"],
     };
     const built = build({ document: document({ frontmatter }) });
     expect(Object.keys(built.entity.attributes)).toEqual(["audience", "roles", "url_pattern"]);
     expect(built.entity.attributes).toEqual({
       audience: "public",
-      roles: ["roles/account-manager"],
+      roles: ["roles/maintainer"],
       url_pattern: "/pay",
     });
     expect(build().entity.attributes).toEqual({ audience: "internal" });
     expect([built.entity.application, built.entity.domain]).toEqual([
-      "policy-admin",
-      "membership/payments",
+      "concordance-cli",
+      "inference/recognition",
     ]);
   });
 
   it("files the entity under its application and domain and keeps a rule's application out of the attributes", () => {
     const built = build();
     expect([built.entity.application, built.entity.domain]).toEqual([
-      "policy-admin",
-      "membership/payments",
+      "concordance-cli",
+      "inference/recognition",
     ]);
     expect(Object.keys(built.entity)).toEqual([
       "id",
@@ -162,9 +162,14 @@ describe("buildEntity", () => {
     const byRule = build({ file: file("billing/invoice.md") });
     expect([byRule.entity.application, byRule.entity.attributes]).toEqual(["billing", {}]);
     const declared = build({
-      document: document({ frontmatter: { application: "billing", domain: "contracts" } }),
+      document: document({
+        frontmatter: { application: "concordance-service", domain: "quality" },
+      }),
     });
-    expect([declared.entity.application, declared.entity.domain]).toEqual(["billing", "contracts"]);
+    expect([declared.entity.application, declared.entity.domain]).toEqual([
+      "concordance-service",
+      "quality",
+    ]);
     expect(declared.findings).toEqual([]);
   });
 
@@ -186,9 +191,9 @@ describe("buildEntity", () => {
 
   it("reports an undeclared application or domain of the frontmatter and keeps both as written", () => {
     const built = build({
-      document: document({ frontmatter: { application: "claims", domain: "claims" } }),
+      document: document({ frontmatter: { application: "forge-bridge", domain: "theming" } }),
     });
-    expect([built.entity.application, built.entity.domain]).toEqual(["claims", "claims"]);
+    expect([built.entity.application, built.entity.domain]).toEqual(["forge-bridge", "theming"]);
     expect(built.findings.map((finding) => finding.check)).toEqual([
       "W-APP-UNKNOWN",
       "W-DOMAIN-UNKNOWN",
@@ -198,7 +203,7 @@ describe("buildEntity", () => {
   it("exempts applications and domains, which are containers, from the filing findings", () => {
     const container = build({
       sourceConfig: sourceConfig({ type: "application" }),
-      file: file("apps/policy-admin.md"),
+      file: file("apps/concordance-cli.md"),
     });
     expect([container.entity.type, container.entity.domain]).toEqual([
       "application",
@@ -211,14 +216,14 @@ describe("buildEntity", () => {
     expect("commit" in build().entity.source).toBe(false);
     expect(build().entity.source).toEqual({
       name: "specs",
-      path: "screens/free-payment-entry.md",
+      path: "screens/keyword-page.md",
       line: 1,
       last_modified: MODIFIED_AT,
     });
-    const committed = file("screens/free-payment-entry.md", "0123456789abcdef");
+    const committed = file("screens/keyword-page.md", "0123456789abcdef");
     expect(build({ file: committed }).entity.source).toEqual({
       name: "specs",
-      path: "screens/free-payment-entry.md",
+      path: "screens/keyword-page.md",
       line: 1,
       commit: "0123456789abcdef",
       last_modified: MODIFIED_AT,
@@ -253,8 +258,8 @@ describe("buildEntity", () => {
     });
     const built = build({
       profile: withoutDocument,
-      sourceConfig: sourceConfig({ application: "policy-admin" }),
-      file: file("member.md"),
+      sourceConfig: sourceConfig({ application: "concordance-cli" }),
+      file: file("link.md"),
     });
     expect([built.entity.type, built.entity.graph]).toEqual(["document", "full"]);
     expect(built.findings.map((finding) => finding.check)).toEqual(["W-TYPE-UNKNOWN"]);
@@ -281,10 +286,10 @@ describe("buildEntity", () => {
         check: "W-ATTRIBUTE-UNKNOWN",
         severity: "warning",
         source: "specs",
-        path: "screens/free-payment-entry.md",
+        path: "screens/keyword-page.md",
         entity: "specs/entry",
         message:
-          'frontmatter attribute "colour" of screens/free-payment-entry.md is not declared for type screen; it is kept as-is',
+          'frontmatter attribute "colour" of screens/keyword-page.md is not declared for type screen; it is kept as-is',
         remediation:
           "Use an attribute of the type, declare it in the project profile, or remove the key.",
       },
@@ -292,10 +297,10 @@ describe("buildEntity", () => {
         check: "W-ATTRIBUTE-UNKNOWN",
         severity: "warning",
         source: "specs",
-        path: "screens/free-payment-entry.md",
+        path: "screens/keyword-page.md",
         entity: "specs/entry",
         message:
-          'frontmatter attribute "weight" of screens/free-payment-entry.md is not declared for type screen; it is kept as-is',
+          'frontmatter attribute "weight" of screens/keyword-page.md is not declared for type screen; it is kept as-is',
         remediation:
           "Use an attribute of the type, declare it in the project profile, or remove the key.",
       },
@@ -319,12 +324,12 @@ describe("buildEntity", () => {
     );
     const built = build({
       profile: bare,
-      sourceConfig: sourceConfig({ application: "policy-admin" }),
-      file: file("member.md"),
+      sourceConfig: sourceConfig({ application: "concordance-cli" }),
+      file: file("link.md"),
       document: document({ frontmatter: { id: "specs/a", type: "document", title: "A" } }),
     });
     expect(built.findings.map((finding) => finding.message)).toEqual([
-      'frontmatter attribute "title" of member.md is not declared for type document; it is kept as-is',
+      'frontmatter attribute "title" of link.md is not declared for type document; it is kept as-is',
     ]);
   });
 });

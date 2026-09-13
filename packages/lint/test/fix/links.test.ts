@@ -49,11 +49,11 @@ describe("rewriteRenamedLinks", () => {
     });
 
     it("writes a destination with a space between angle brackets", () => {
-      const result = rewriteRenamedLinks("[x](annual%20cap.md)", {
+      const result = rewriteRenamedLinks("[x](related%20cap.md)", {
         path: "entry.md",
-        sourceFiles: new Set(["entry.md", "rules/annual cap.md"]),
+        sourceFiles: new Set(["entry.md", "rules/related cap.md"]),
       });
-      expect(result.text).toBe("[x](<rules/annual cap.md>)");
+      expect(result.text).toBe("[x](<rules/related cap.md>)");
     });
   });
 

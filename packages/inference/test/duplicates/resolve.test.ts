@@ -59,8 +59,8 @@ describe("the three outcomes", () => {
 
   it("produces a W-DUP-CANDIDATE finding between 0.5 and 0.9 and keeps the resources separate", () => {
     const result = resolve([
-      resource({ path: "meetings/payments-workshop.pptx" }),
-      resource({ path: "framing/payments-workshop.md" }),
+      resource({ path: "meetings/keywords-workshop.pptx" }),
+      resource({ path: "framing/keywords-workshop.md" }),
     ]);
     expect(result.groups).toEqual([]);
     expect(result.findings).toEqual([
@@ -68,10 +68,10 @@ describe("the three outcomes", () => {
         check: "W-DUP-CANDIDATE",
         severity: "info",
         source: "docs",
-        path: "framing/payments-workshop.md",
-        entity: "docs/framing/payments-workshop.md",
+        path: "framing/keywords-workshop.md",
+        entity: "docs/framing/keywords-workshop.md",
         message:
-          "docs/framing/payments-workshop.md and docs/meetings/payments-workshop.pptx look like two representations of one document (score 0.50: same base name in another folder 0.50); they stay separate",
+          "docs/framing/keywords-workshop.md and docs/meetings/keywords-workshop.pptx look like two representations of one document (score 0.50: same base name in another folder 0.50); they stay separate",
         remediation: REMEDIATION,
       },
     ]);
@@ -248,8 +248,8 @@ describe("the content signal in the reconciliation", () => {
 describe("the title signal in the reconciliation", () => {
   it("pairs a document whose property title is the heading of a note", () => {
     const result = resolve([
-      resource({ path: "a/deck.pptx", title: "Payments Workshop" }),
-      resource({ path: "b/notes.md", heading: "Payments workshop", title: "Payments workshop" }),
+      resource({ path: "a/deck.pptx", title: "Keywords Workshop" }),
+      resource({ path: "b/notes.md", heading: "Keywords workshop", title: "Keywords workshop" }),
     ]);
     expect(result.pairs.map((pair) => pair.score)).toEqual([0.6]);
     expect(result.findings).toHaveLength(1);

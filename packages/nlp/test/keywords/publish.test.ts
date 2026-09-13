@@ -35,40 +35,37 @@ function candidate(
   return { key, display: key, words: key.split(" ").length, ...counts, score, mentions };
 }
 
-const exceptional = candidate("exceptional payment", { occurrences: 4, documents: 3 }, 13.8621);
-const contractual = candidate("contractual frame", { occurrences: 2, documents: 2 }, 2.1);
+const summary = candidate("build summary", { occurrences: 4, documents: 3 }, 13.8621);
+const cold = candidate("cold start", { occurrences: 2, documents: 2 }, 2.1);
 const nightly = candidate("nightly batch", { occurrences: 3, documents: 1 }, 5.5);
 const threshold = { minOccurrences: 3, minFiles: 2 };
 
 describe("publishKeywords", () => {
   it("generates a keyword page only from three occurrences in at least two distinct files", () => {
-    const exactly = candidate("annual cap", { occurrences: 3, documents: 2 }, 4.2);
-    const result = publishKeywords([exceptional, contractual, nightly, exactly], threshold);
-    expect(result.published.map((page) => page.key)).toEqual(["annual cap", "exceptional payment"]);
-    expect(result.discarded.map((page) => page.key)).toEqual([
-      "nightly batch",
-      "contractual frame",
-    ]);
+    const exactly = candidate("related cap", { occurrences: 3, documents: 2 }, 4.2);
+    const result = publishKeywords([summary, cold, nightly, exactly], threshold);
+    expect(result.published.map((page) => page.key)).toEqual(["build summary", "related cap"]);
+    expect(result.discarded.map((page) => page.key)).toEqual(["nightly batch", "cold start"]);
   });
 
   it("keeps an expression below the threshold findable through search but without a page", () => {
-    const result = publishKeywords([contractual], threshold);
+    const result = publishKeywords([cold], threshold);
     expect(result.published).toEqual([]);
-    expect(result.discarded).toEqual([contractual]);
-    expect(result.discarded[0]?.mentions).toBe(contractual.mentions);
+    expect(result.discarded).toEqual([cold]);
+    expect(result.discarded[0]?.mentions).toBe(cold.mentions);
   });
 
   it("addresses every page under keywords/ by the slug of its key, sorted by identifier", () => {
     const accented = candidate("règle d'écrêtage", { occurrences: 3, documents: 2 }, 9);
-    const result = publishKeywords([exceptional, accented], threshold);
+    const result = publishKeywords([summary, accented], threshold);
     const expected: KeywordPage = {
-      id: "keywords/exceptional-payment",
-      key: "exceptional payment",
-      display: "exceptional payment",
+      id: "keywords/build-summary",
+      key: "build summary",
+      display: "build summary",
       occurrences: 4,
       documents: 3,
       score: 13.8621,
-      mentions: exceptional.mentions,
+      mentions: summary.mentions,
     };
     expect(result.published).toEqual([
       expected,
@@ -90,18 +87,18 @@ describe("publishKeywords", () => {
 
   it("lists the discarded expressions best score first, then by key", () => {
     const tie = candidate("a tie", { occurrences: 1, documents: 1 }, 5.5);
-    const result = publishKeywords([contractual, nightly, tie], threshold);
+    const result = publishKeywords([cold, nightly, tie], threshold);
     expect(result.discarded.map((page) => page.key)).toEqual([
       "a tie",
       "nightly batch",
-      "contractual frame",
+      "cold start",
     ]);
   });
 
   it("lowering the threshold increases the page count and raising it decreases it", () => {
     const candidates = [
-      exceptional,
-      contractual,
+      summary,
+      cold,
       nightly,
       candidate("single mention", { occurrences: 1, documents: 1 }, 1),
       candidate("five in three", { occurrences: 5, documents: 3 }, 8),
@@ -123,9 +120,9 @@ describe("publishKeywords", () => {
   });
 
   it("leaves the input untouched", () => {
-    const candidates = [contractual, exceptional];
+    const candidates = [cold, summary];
     publishKeywords(candidates, threshold);
-    expect(candidates.map((c) => c.key)).toEqual(["contractual frame", "exceptional payment"]);
+    expect(candidates.map((c) => c.key)).toEqual(["cold start", "build summary"]);
   });
 });
 
@@ -160,11 +157,11 @@ describe("keywordPublicationOptions", () => {
 
 describe("keywordEntities", () => {
   it("turns each page into a term entity marked as a keyword, located on its first mention", () => {
-    const pages = publishKeywords([exceptional], threshold).published;
+    const pages = publishKeywords([summary], threshold).published;
     const expected: Entity = {
-      id: "keywords/exceptional-payment",
+      id: "keywords/build-summary",
       type: "term",
-      title: "exceptional payment",
+      title: "build summary",
       aliases: [],
       locale: "en",
       status: "valid",
@@ -180,13 +177,13 @@ describe("keywordEntities", () => {
 
   it("keeps the page order and the locale it is given", () => {
     const pages = publishKeywords(
-      [exceptional, candidate("annual cap", { occurrences: 3, documents: 2 }, 4)],
+      [summary, candidate("related cap", { occurrences: 3, documents: 2 }, 4)],
       threshold,
     ).published;
     const entities = keywordEntities(pages, { locale: "fr" });
     expect(entities.map((entity) => entity.id)).toEqual([
-      "keywords/annual-cap",
-      "keywords/exceptional-payment",
+      "keywords/build-summary",
+      "keywords/related-cap",
     ]);
     expect(entities.map((entity) => entity.locale)).toEqual(["fr", "fr"]);
   });
@@ -226,14 +223,14 @@ describe("keywordEntities", () => {
 
 describe("the build summary of the keyword publication", () => {
   it("counts the keyword pages generated and the expressions discarded by the threshold", () => {
-    const result = publishKeywords([exceptional, contractual, nightly], threshold);
-    const summary = summarize({
+    const result = publishKeywords([summary, cold, nightly], threshold);
+    const counts = summarize({
       sources: 1,
       files: 3,
       findings: [],
       keywords: { published: result.published.length, discarded: result.discarded.length },
     });
-    expect(summary.keywords).toEqual({ published: 1, discarded: 2 });
+    expect(counts.keywords).toEqual({ published: 1, discarded: 2 });
   });
 });
 
@@ -253,7 +250,7 @@ describe.each(["en", "fr"])("the keyword pages of the minimal %s corpus", (local
       expect(page, expectation.text).toBeDefined();
       expect(page?.occurrences).toBeGreaterThanOrEqual(expectation.min_occurrences ?? 0);
       expect(page?.documents).toBeGreaterThanOrEqual(expectation.min_files ?? 0);
-      expect(page?.id).toBe(`keywords/${pack.normalize(expectation.text).replace(" ", "-")}`);
+      expect(page?.id).toBe(`keywords/${pack.normalize(expectation.text).replaceAll(" ", "-")}`);
     }
   });
 

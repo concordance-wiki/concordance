@@ -55,14 +55,14 @@ const screen: Note = {
   source: "specs",
   path: "screens/entry.md",
   type: "screen",
-  text: "# Entry\n\nChecked against the [annual cap](../rules/cap.rule.md).\n",
+  text: "# Entry\n\nChecked against the [related cap](../rules/cap.rule.md).\n",
 };
 
 const rule: Note = {
   source: "specs",
   path: "rules/cap.rule.md",
   type: "rule",
-  text: "# Annual cap\n",
+  text: "# Related cap\n",
 };
 
 describe("explicitLinks", () => {
@@ -82,7 +82,7 @@ describe("explicitLinks", () => {
             confidence: 1,
             path: "screens/entry.md",
             line: 3,
-            text: "annual cap",
+            text: "related cap",
           },
         ],
       },
@@ -92,7 +92,7 @@ describe("explicitLinks", () => {
   it("the provenance records the file, the line and the link text", () => {
     const note: Note = {
       ...screen,
-      text: "# Entry\n\nSee the rule.\n\n## Rules\n\n- The [cap on payments](../rules/cap.rule.md)\n",
+      text: "# Entry\n\nSee the rule.\n\n## Rules\n\n- The [cap on links](../rules/cap.rule.md)\n",
     };
     const { links } = run(corpus([note, rule]));
     expect(links[0]?.provenance).toEqual([
@@ -101,7 +101,7 @@ describe("explicitLinks", () => {
         confidence: 1,
         path: "screens/entry.md",
         line: 7,
-        text: "cap on payments",
+        text: "cap on links",
       },
     ]);
   });
@@ -202,15 +202,15 @@ describe("explicitLinks", () => {
   it("merges two links from the same note to the same target into one link with two provenances", () => {
     const note: Note = {
       ...screen,
-      text: "# Entry\n\nChecked against the [annual cap](../rules/cap.rule.md).\n\n## Rules\n\n- [Annual cap](../rules/cap.rule.md#scope)\n",
+      text: "# Entry\n\nChecked against the [related cap](../rules/cap.rule.md).\n\n## Rules\n\n- [Related cap](../rules/cap.rule.md#scope)\n",
     };
     const { links } = run(corpus([note, rule]));
     expect(links).toHaveLength(1);
     expect(links[0]).toMatchObject({
       confidence: 1,
       provenance: [
-        { line: 3, text: "annual cap" },
-        { line: 7, text: "Annual cap", anchor: "scope" },
+        { line: 3, text: "related cap" },
+        { line: 7, text: "Related cap", anchor: "scope" },
       ],
     });
   });
@@ -236,13 +236,13 @@ describe("explicitLinks", () => {
   it("names the relation of a type pair admitting a single relation, as a screen linking an object gives accesses", () => {
     const object: Note = {
       source: "specs",
-      path: "objects/payment.md",
+      path: "objects/link.md",
       type: "business_object",
-      text: "# Payment\n",
+      text: "# Link\n",
     };
     const note: Note = {
       ...screen,
-      text: "# Entry\n\nWrites a [payment](../objects/payment.md).\n",
+      text: "# Entry\n\nWrites a [link](../objects/link.md).\n",
     };
     const { links } = run(corpus([note, object]));
     expect(links.map((link) => link.relation)).toEqual(["accesses"]);

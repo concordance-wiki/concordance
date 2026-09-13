@@ -78,81 +78,82 @@ describe("the minimal en corpus", () => {
 
   it("reads every glossary term and spec object as an entity", () => {
     const ids = corpus.entities.map((entity) => entity.id);
-    expect(ids).toContain("glossary/free-payment");
-    expect(ids).toContain("specs/objects/contract");
-    expect(ids).toContain("specs/rules/annual-cap");
-    expect(corpus.entities.find((entity) => entity.id === "glossary/free-payment")).toEqual({
-      id: "glossary/free-payment",
+    expect(ids).toContain("glossary/explicit-link");
+    expect(ids).toContain("specs/objects/build");
+    expect(ids).toContain("specs/rules/related-link-cap");
+    expect(corpus.entities.find((entity) => entity.id === "glossary/explicit-link")).toEqual({
+      id: "glossary/explicit-link",
       source: "glossary",
       type: "term",
-      title: "Free payment",
-      aliases: ["FP", "free contribution"],
+      title: "Explicit link",
+      aliases: ["EL", "authored link"],
       locale: "en",
     });
   });
 
   it("keys the glossary titles, aliases and object names", () => {
     const keys = [...dictionary.entries.keys()];
-    for (const key of ["free payment", "scheduled payment", "payment", "member", "policy"]) {
+    for (const key of ["explicit link", "section mention", "link", "entity", "pipeline run"]) {
       expect(keys, key).toContain(key);
     }
-    expect(dictionary.entries.get("free payment")?.targets).toEqual([
-      { id: "glossary/free-payment", kind: "title", form: "Free payment", priority: 0 },
+    expect(dictionary.entries.get("explicit link")?.targets).toEqual([
+      { id: "glossary/explicit-link", kind: "title", form: "Explicit link", priority: 0 },
     ]);
     expect(keys).toEqual([...keys].sort());
   });
 
-  it("flags contract as a homonym of the glossary term and the business object, glossary first", () => {
-    expect(dictionary.entries.get("contract")).toEqual({
-      key: "contract",
+  it("flags build as a homonym of the glossary term and the business object, glossary first", () => {
+    expect(dictionary.entries.get("build")).toEqual({
+      key: "build",
       homonym: true,
       targets: [
-        { id: "glossary/contract", kind: "title", form: "Contract", priority: 0 },
-        { id: "specs/objects/contract", kind: "title", form: "Contract", priority: 1 },
+        { id: "glossary/build", kind: "title", form: "Build", priority: 0 },
+        { id: "specs/objects/build", kind: "title", form: "Build", priority: 1 },
       ],
     });
     expect(dictionary.findings.map((finding) => finding.message)).toEqual([
-      '"contract" is the title or an alias of 2 entities: glossary/contract, specs/objects/contract',
-      '"member" is the title or an alias of 2 entities: glossary/member, specs/objects/member',
-      '"payment" is the title or an alias of 2 entities: glossary/payment, specs/objects/payment',
+      '"build" is the title or an alias of 2 entities: glossary/build, specs/objects/build',
+      '"entity" is the title or an alias of 2 entities: glossary/entity, specs/objects/entity',
+      '"link" is the title or an alias of 2 entities: glossary/link, specs/objects/link',
     ]);
   });
 
-  it("drops the short aliases FP and SP unless inference.short_terms allows them", () => {
-    expect(dictionary.entries.has("fp")).toBe(false);
-    expect(dictionary.entries.has("sp")).toBe(false);
-    const allowed = dictionaryOf(corpus, ["FP"]);
-    expect(allowed.entries.get("fp")?.targets).toEqual([
-      { id: "glossary/free-payment", kind: "alias", form: "FP", priority: 0 },
+  it("drops the short aliases EL and SM unless inference.short_terms allows them", () => {
+    expect(dictionary.entries.has("el")).toBe(false);
+    expect(dictionary.entries.has("sm")).toBe(false);
+    const allowed = dictionaryOf(corpus, ["EL"]);
+    expect(allowed.entries.get("el")?.targets).toEqual([
+      { id: "glossary/explicit-link", kind: "alias", form: "EL", priority: 0 },
     ]);
-    expect(allowed.entries.has("sp")).toBe(false);
+    expect(allowed.entries.has("sm")).toBe(false);
   });
 });
 
 describe("the minimal fr corpus", () => {
   const corpus = readCorpus("fr");
-  const dictionary = dictionaryOf(corpus, ["VL"]);
+  const dictionary = dictionaryOf(corpus, ["MS"]);
 
-  it("flags contrat as a homonym and keeps the allowed short alias VL only", () => {
-    expect(dictionary.entries.get("contrat")?.targets.map((target) => target.id)).toEqual([
-      "glossaire/contrat",
-      "specs/objets/contrat",
+  it("flags build as a homonym and keeps the allowed short alias MS only", () => {
+    expect(dictionary.entries.get("build")?.targets.map((target) => target.id)).toEqual([
+      "glossaire/build",
+      "specs/objets/build",
     ]);
-    expect(dictionary.entries.get("vl")?.targets.map((target) => target.id)).toEqual([
-      "glossaire/versement-libre",
+    expect(dictionary.entries.get("ms")?.targets.map((target) => target.id)).toEqual([
+      "glossaire/mention-de-section",
     ]);
-    expect(dictionary.entries.has("vp")).toBe(false);
+    expect(dictionaryOf(corpus, []).entries.has("ms")).toBe(false);
     expect(dictionary.findings.map((finding) => finding.message)).toEqual([
-      '"adherent" is the title or an alias of 2 entities: glossaire/adherent, specs/objets/adherent',
-      '"contrat" is the title or an alias of 2 entities: glossaire/contrat, specs/objets/contrat',
-      '"versement" is the title or an alias of 2 entities: glossaire/versement, specs/objets/versement',
+      '"build" is the title or an alias of 2 entities: glossaire/build, specs/objets/build',
+      '"entite" is the title or an alias of 2 entities: glossaire/entite, specs/objets/entite',
+      '"lien" is the title or an alias of 2 entities: glossaire/lien, specs/objets/lien',
     ]);
     for (const key of [
-      "versement libre",
-      "versement programme",
-      "versement",
-      "adherent",
-      "police",
+      "lien explicite",
+      "lex",
+      "mention de section",
+      "lien",
+      "entite",
+      "passe de pipeline",
     ]) {
       expect(dictionary.entries.has(key), key).toBe(true);
     }
