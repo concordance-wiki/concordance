@@ -10,6 +10,11 @@ import { recordedIo, validConfig } from "../helpers.js";
 
 const root = resolve(import.meta.dirname, "../../../..");
 const fixturePlugin = resolve(root, "fixtures/plugins/theme-example/index.mjs");
+const whiteLabelPlugin = resolve(root, "fixtures/plugins/theme-white-label/index.mjs");
+
+const palette =
+  "{ bg: '#F4F7FB', surface: '#FFFFFF', border: '#D5DCE6', ink: '#101820', muted: '#4A5566', accent: '#1F5FA8' }";
+const projectTheme = `name: Pipeline notes\nlight: ${palette}\ndark: ${palette}\n`;
 
 const pageCount = galleryPages.length + 1;
 
@@ -135,18 +140,45 @@ describe("Every theme override is visible there", () => {
     expect(io.fs.exists("/work/gallery/todo.html")).toBe(true);
   });
 
-  it("renders the example theme fixture loaded from its path, the footer replaced on every page", async () => {
+  it("renders the example theme fixture loaded from its path, the footer replaced on every page and its tokens applied", async () => {
     const io = recordedIo({}, root);
     expect(await galleryCommand(["--theme", fixturePlugin, "--output", "/out"], io)).toBe(0);
-    expect(io.stdout[1]).toBe(
+    // The package is reached through node_modules: its path may be the real one rather than the fixture's.
+    expect(io.stdout[1]).toMatch(/^theme: Example, from \/.*\/theme-example\/theme\/theme\.yaml$/);
+    expect(io.stdout[2]).toBe(
       "override Footer: plugin @concordance-wiki/fixture-plugin-theme-example, theme example",
     );
+    expect(io.fs.readText("/out/assets/site.css")).toContain("--color-accent: #0055AA;");
+    expect(io.fs.readText("/out/todo.html")).toContain("<title>Todo, default – Example</title>");
     for (const file of io.fs.listFiles("/out").filter((path) => path.endsWith(".html"))) {
       expect(io.fs.readText(`/out/${file}`)).toContain("example theme, version 0.1.0");
     }
     expect(io.fs.readText("/out/index.html")).toContain(
       "Overridden by plugin <code>@concordance-wiki/fixture-plugin-theme-example</code>",
     );
+  });
+
+  it("renders the white-label fixture: its name, logo, palette and stylesheet, and no mention of the tool", async () => {
+    const io = recordedIo({}, root);
+    expect(await galleryCommand(["--theme", whiteLabelPlugin, "--output", "/out"], io)).toBe(0);
+    expect(io.stdout[1]).toMatch(
+      /^theme: Pipeline notes, from \/.*\/theme-white-label\/theme\/theme\.yaml$/,
+    );
+    expect(io.stdout).not.toContain(expect.stringMatching(/^override /));
+    expect(io.fs.listFiles("/out/assets")).toEqual(
+      expect.arrayContaining(["favicon.svg", "icons/stage.svg", "project.css", "site.css"]),
+    );
+    expect(io.fs.readText("/out/assets/site.css")).toContain("--radius: 2px;");
+    for (const file of io.fs.listFiles("/out").filter((path) => path.endsWith(".html"))) {
+      const html = io.fs.readText(`/out/${file}`);
+      expect(html, file).toContain("</svg></span>Pipeline notes</a>");
+      expect(html, file).toContain('<link rel="stylesheet" href="assets/project.css"/>');
+      expect(
+        html.replace(/<script>.*?<\/script>/gs, "").replace(/<[^>]+>/g, " "),
+        file,
+      ).not.toMatch(/concordance/i);
+    }
+    expect(io.stderr).toEqual([]);
   });
 
   it("takes the plugins of the configuration when --theme is absent", async () => {
@@ -169,6 +201,62 @@ describe("Every theme override is visible there", () => {
     expect(deps.asked).toEqual([]);
     expect(io.stdout[0]).toBe("/work/concordance.yaml: valid configuration");
     expect(io.stdout[2]).toMatch(/^island mentions-panel: /);
+  });
+
+  it("reads the theme.yaml next to the configuration, or the one project.theme names, and lets it win over plugin tokens", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}plugins: ["@example/theme"]\n`,
+      "/work/theme.yaml": projectTheme,
+    });
+    const deps = fakeDependencies({ "@example/theme": themePlugin("@example/theme", {}) });
+    expect(await galleryCommand(["--output", "/out"], io, deps)).toBe(0);
+    expect(io.stdout[2]).toBe("theme: Pipeline notes, from /work/theme.yaml");
+    expect(io.fs.readText("/out/home.html")).toContain(
+      "<title>Home, default – Pipeline notes</title>",
+    );
+    const named = recordedIo({
+      "/work/config/concordance.yaml": validConfig.replace(
+        "project: { name: Wiki }",
+        "project: { name: Wiki, theme: ../brand/theme.yaml }",
+      ),
+      "/work/brand/theme.yaml": projectTheme.replace("Pipeline notes", "Brand"),
+      "/work/config/theme.yaml": projectTheme,
+    });
+    expect(await galleryCommand(["-c", "config/concordance.yaml", "-o", "/out"], named, deps)).toBe(
+      0,
+    );
+    expect(named.stdout[2]).toBe("theme: Brand, from /work/brand/theme.yaml");
+  });
+
+  it("stops with exit code 1 on an invalid theme.yaml, naming the file and the faulty key", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": validConfig,
+      "/work/theme.yaml": projectTheme.replace("#1F5FA8", "blue"),
+    });
+    expect(await galleryCommand([], io, fakeDependencies({}))).toBe(1);
+    expect(io.stderr).toEqual([
+      'error: /work/theme.yaml: light.accent: value does not match the expected format; received "blue"; expected a value matching ^#[0-9A-Fa-f]{6}$',
+      "gallery stopped: fix /work/theme.yaml first",
+    ]);
+    expect(io.fs.exists("/work/gallery")).toBe(false);
+  });
+
+  it("exits 2 when the theme file the configuration names is missing, and renders without one when none is named", async () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": validConfig.replace(
+        "project: { name: Wiki }",
+        "project: { name: Wiki, theme: ./missing.yaml }",
+      ),
+    });
+    expect(await galleryCommand([], io, fakeDependencies({}))).toBe(2);
+    expect(io.stderr).toEqual([
+      'error: /work/missing.yaml: theme file not found; received "/work/missing.yaml"',
+      "gallery stopped: fix /work/missing.yaml first",
+    ]);
+    const bare = recordedIo({ "/work/concordance.yaml": validConfig });
+    expect(await galleryCommand([], bare, fakeDependencies({}))).toBe(0);
+    expect(bare.stdout).not.toContain(expect.stringMatching(/^theme: /));
+    expect(bare.fs.readText("/work/gallery/home.html")).toContain("<title>Home, default</title>");
   });
 
   it("ignores the configuration when --theme is given", async () => {

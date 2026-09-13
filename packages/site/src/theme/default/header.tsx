@@ -1,7 +1,17 @@
 import type { JSX } from "preact";
 
-import type { HeaderProps } from "../../slots.js";
+import type { HeaderLogo, HeaderProps } from "../../slots.js";
 import { labels } from "./labels.js";
+import { ModeSwitch } from "./mode-switch.js";
+
+/** The logo is decorative: the site title follows it as text, so an inline SVG is hidden from assistive technology. */
+function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
+  return "svg" in logo ? (
+    <span class="site-logo" aria-hidden="true" dangerouslySetInnerHTML={{ __html: logo.svg }} />
+  ) : (
+    <img class="site-logo" src={logo.src} alt={logo.alt} />
+  );
+}
 
 export function Header({
   siteTitle,
@@ -14,7 +24,7 @@ export function Header({
     <header class="site-header">
       <nav class="site-nav" aria-label={labels.siteNavigation}>
         <a class="site-title" href={homeHref}>
-          {logo && <img class="site-logo" src={logo.src} alt={logo.alt} />}
+          {logo && <Logo logo={logo} />}
           {siteTitle}
         </a>
         {search && (
@@ -41,6 +51,7 @@ export function Header({
             </li>
           ))}
         </ul>
+        <ModeSwitch />
       </nav>
     </header>
   );

@@ -1,0 +1,31 @@
+/* The project's stylesheet: it enters the project layer, after the tool's own. */
+
+/* The families named in theme.yaml, bound to fonts the reader already has: no third-party host. */
+@font-face {
+  font-family: "Pipeline Serif";
+  src: local("Georgia"), local("Times New Roman");
+}
+
+@font-face {
+  font-family: "Pipeline Sans";
+  src: local("Helvetica Neue"), local("Arial");
+}
+
+@font-face {
+  font-family: "Pipeline Mono";
+  src: local("Menlo"), local("Consolas");
+}
+
+.site-header {
+  border-block-end-width: 3px;
+}
+
+.home-entries h2::before {
+  content: "";
+  display: inline-block;
+  inline-size: 1em;
+  block-size: 1em;
+  margin-inline-end: var(--space-1);
+  vertical-align: -0.125em;
+  background: url("icons/stage.svg") center / contain no-repeat;
+}

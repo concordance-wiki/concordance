@@ -5,22 +5,27 @@ import {
   definePlugin,
   importPlugin,
   loadPlugins,
+  memoryFileSystem,
   type PluginManifest,
 } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
 import { renderPage, renderSlot } from "../../src/render.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
-import { importThemeModule } from "../../src/theme/node-loader.js";
+import { importThemeModule, packageDirectoryOf } from "../../src/theme/node-loader.js";
 import { ThemeResolutionError, defaultTheme, resolveTheme } from "../../src/theme/resolve.js";
 import { footer, header, todo } from "../../src/gallery/fixtures.js";
 
-const fixturePlugin = pathToFileURL(
-  resolve(
-    fileURLToPath(import.meta.url),
-    "../../../../../fixtures/plugins/theme-example/index.mjs",
-  ),
-).href;
+const fixtures = resolve(fileURLToPath(import.meta.url), "../../../../../fixtures/plugins");
+const fixturePlugin = pathToFileURL(resolve(fixtures, "theme-example/index.mjs")).href;
+const whiteLabelPlugin = pathToFileURL(resolve(fixtures, "theme-white-label/index.mjs")).href;
+
+const validTheme = [
+  "name: Pipeline notes",
+  "light: { bg: '#F4F7FB', surface: '#FFFFFF', border: '#D5DCE6', ink: '#101820', muted: '#4A5566', accent: '#1F5FA8' }",
+  "dark: { bg: '#0F1419', surface: '#171E26', border: '#2A3441', ink: '#E6EBF2', muted: '#9AA7B8', accent: '#8FB8F0' }",
+  "",
+].join("\n");
 
 const available = { commandAvailable: () => Promise.resolve(true) };
 
@@ -155,12 +160,98 @@ describe("resolveTheme", () => {
       locale: "en",
       title: "To do",
       stylesheets: [],
-      islands: [],
+      islands: [{ name: "mode-switch", file: "mode-switch.js", bytes: 1 }],
       header,
       footer,
     });
     expect(page).toContain("example theme, version 0.1.0");
     expect(page).toContain('<header class="site-header">');
-    expect(page).not.toContain("Generated with");
+    expect(page).not.toContain("Built with");
+    expect(theme.config).toBeUndefined();
+  });
+
+  it("loads the tokens file of the last theme when the loader locates the packages, its stylesheet and assets resolved against the package", async () => {
+    const fileSystem = memoryFileSystem({
+      "/plugins/first/theme.yaml": validTheme.replace("Pipeline notes", "First"),
+      "/plugins/second/theme/theme.yaml": validTheme,
+      "/plugins/second/theme/extra.css": ".site-header { border: 0 }\n",
+      "/plugins/second/static/fonts/pipeline.woff2": "font",
+    });
+    const registry = await registryOf({
+      "@example/first": themePlugin("@example/first", {}, "one"),
+      "@example/second": definePlugin({
+        name: "@example/second",
+        version: "1.0.0",
+        apiVersion: "1",
+        contributes: {
+          themes: [
+            {
+              name: "two",
+              tokens: "./theme/theme.yaml",
+              stylesheet: "./theme/extra.css",
+              assets: "./static",
+            },
+          ],
+        },
+      }),
+    });
+    const roots: Record<string, string> = {
+      "@example/first": "/plugins/first",
+      "@example/second": "/plugins/second/",
+    };
+    const theme = await resolveTheme(registry, {
+      load: () => Promise.reject(new Error("unused")),
+      rootOf: (plugin) => roots[plugin] ?? "/nowhere",
+      fileSystem,
+    });
+    expect(theme.config?.config.name).toBe("Pipeline notes");
+    expect(theme.config?.file).toBe("/plugins/second/theme/theme.yaml");
+    expect(theme.config?.fileSystem).toBe(fileSystem);
+    expect(theme.config?.stylesheet).toEqual({
+      path: "/plugins/second/theme/extra.css",
+      content: ".site-header { border: 0 }\n",
+    });
+    expect(theme.config?.assets).toEqual([
+      { path: "/plugins/second/static/fonts/pipeline.woff2", file: "fonts/pipeline.woff2" },
+    ]);
+  });
+
+  it("names the plugin, the theme and the faulty key when a tokens file is invalid", async () => {
+    const fileSystem = memoryFileSystem({
+      "/plugins/theme/theme.yaml": validTheme.replace("#1F5FA8", "blue"),
+    });
+    const registry = await registryOf({ "@example/theme": themePlugin("@example/theme", {}) });
+    await expect(
+      resolveTheme(registry, {
+        load: () => Promise.reject(new Error("unused")),
+        rootOf: () => "/plugins/theme",
+        fileSystem,
+      }),
+    ).rejects.toThrow(
+      new ThemeResolutionError(
+        'plugin @example/theme, theme custom: error: ./theme.yaml: light.accent: value does not match the expected format; received "blue"; expected a value matching ^#[0-9A-Fa-f]{6}$',
+      ),
+    );
+  });
+
+  it("reads the white-label fixture from the real file system through its package directory", async () => {
+    const { registry } = await loadPlugins([whiteLabelPlugin], {
+      load: importPlugin,
+      ...available,
+    });
+    const theme = await resolveTheme(registry, {
+      load: importThemeModule,
+      rootOf: (plugin) => packageDirectoryOf(plugin),
+    });
+    expect(theme.overrides).toEqual([]);
+    expect(theme.config?.config.name).toBe("Pipeline notes");
+    expect(theme.config?.config.footer?.credit).toBe(false);
+    expect(theme.config?.logo?.svg?.startsWith("<svg")).toBe(true);
+    expect(theme.config?.favicon?.file).toBe("favicon.svg");
+    expect(theme.config?.stylesheet?.content).toContain("@font-face");
+    expect(theme.config?.assets.map((asset) => asset.file)).toEqual([
+      "favicon.svg",
+      "icons/stage.svg",
+    ]);
   });
 });

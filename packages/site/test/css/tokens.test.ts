@@ -47,8 +47,12 @@ describe("tokensStylesheet", () => {
     expect(css).toContain(
       '@media (prefers-color-scheme: dark) {\n:root:not([data-mode="light"]) {\n  --color-bg: #0E0F11;',
     );
-    expect(css).toContain(':root[data-mode="dark"] {\n  --color-bg: #0E0F11;');
-    expect(css).not.toContain('[data-mode="light"] {');
+    expect(css).toContain(
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --color-bg: #0E0F11;\n  --color-surface: #16181B;\n  --color-border: #26292E;\n  --color-ink: #E8E6E1;\n  --color-muted: #8B9199;\n  --color-accent: #E8703A;\n}',
+    );
+    expect(css).toContain(
+      ':root[data-mode="light"] {\n  color-scheme: light;\n  --color-bg: #F6F5F2;',
+    );
     expect(css.endsWith("}\n")).toBe(true);
   });
 
@@ -65,17 +69,22 @@ describe("tokensStylesheet", () => {
 
   it("starts light and ignores the system preference when the default mode is light", () => {
     const css = tokensStylesheet({ ...theme, default_mode: "light" });
-    expect(css).toContain("  color-scheme: light;");
+    expect(css).toContain(":root {\n  color-scheme: light;\n");
     expect(css).not.toContain("prefers-color-scheme");
-    expect(css).toContain(':root[data-mode="dark"] {\n  --color-bg: #0E0F11;');
+    expect(css).toContain(
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --color-bg: #0E0F11;',
+    );
+    expect(css).not.toContain('[data-mode="light"]');
   });
 
   it("starts dark and keeps the light palette for the remembered mode when the default mode is dark", () => {
     const css = tokensStylesheet({ ...theme, default_mode: "dark" });
-    expect(css).toContain("  color-scheme: dark;\n");
+    expect(css).toContain(":root {\n  color-scheme: dark;\n");
     expect(css).toContain("  --color-bg: #0E0F11;\n  --color-surface: #16181B;");
     expect(css).not.toContain("prefers-color-scheme");
-    expect(css).toContain(':root[data-mode="light"] {\n  --color-bg: #F6F5F2;');
+    expect(css).toContain(
+      ':root[data-mode="light"] {\n  color-scheme: light;\n  --color-bg: #F6F5F2;',
+    );
     expect(css).not.toContain('[data-mode="dark"]');
   });
 

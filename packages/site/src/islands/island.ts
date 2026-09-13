@@ -1,7 +1,8 @@
 import { h, type ComponentType, type FunctionComponent, type JSX } from "preact";
 
-/** The custom element that marks an island in the served HTML; unknown to the browser, it renders inline. */
-export const ISLAND_ELEMENT = "concordance-island";
+import { ISLAND_ELEMENT } from "./element.js";
+
+export { ISLAND_ELEMENT } from "./element.js";
 
 /**
  * Wraps a component so that its static markup is served with its props serialised next to it;

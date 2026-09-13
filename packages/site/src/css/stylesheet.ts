@@ -17,24 +17,26 @@ export function componentsStylesheet(): string {
 
 export interface StylesheetOptions {
   theme: ThemeConfig;
-  /** Content of the project's `stylesheet:`, placed in the last layer so that it wins every cascade. */
-  project?: string;
 }
 
 function layer(name: string, content: string): string {
   return `@layer ${name} {\n${content.trimEnd()}\n}\n`;
 }
 
-/** The single stylesheet of the site: the four layers declared, then filled in order. */
-export function siteStylesheet({ theme, project }: StylesheetOptions): string {
-  const parts = [
+/** The tool's own stylesheet: the four layers declared, then the first three filled in order. */
+export function siteStylesheet({ theme }: StylesheetOptions): string {
+  return [
     `@layer ${CSS_LAYERS.join(", ")};\n`,
     layer("tokens", tokensStylesheet(theme)),
     layer("base", baseStylesheet()),
     layer("components", componentsStylesheet()),
-  ];
-  if (project !== undefined) {
-    parts.push(layer("project", project));
-  }
-  return parts.join("\n");
+  ].join("\n");
+}
+
+/**
+ * The project's `stylesheet:` as a second file, linked after the tool's own: its rules enter the
+ * `project` layer, declared last, so they win every cascade whatever their specificity.
+ */
+export function projectStylesheet(content: string): string {
+  return layer("project", content);
 }

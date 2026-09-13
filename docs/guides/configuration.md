@@ -14,7 +14,7 @@ Required. Schema version, currently `1`.
 |---|---|---|---|
 | `name` | string | required | displayed in the site |
 | `locale` | BCP 47 tag | `en` | interface language and default source locale; see [`sources[].locale`](#sources) for what a locale selects |
-| `theme` | path | `./theme.yaml` | theme file |
+| `theme` | path | `./theme.yaml` | theme file, relative to this configuration; the default is used when the file exists |
 | `edit_url` | string | — | pattern for the "edit in the forge" link, with `{source}`, `{path}` and `{commit}` placeholders |
 
 ## `profile`
@@ -286,7 +286,23 @@ Path to `concordance.lock.yaml`. See [`schemas/lock.schema.json`](../../packages
 
 ## `theme.yaml`
 
-See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example. Name, logo, favicon, fonts, radius, light and dark palettes, default mode, optional footer, an optional additional stylesheet and optional label overrides. The accent colour never carries information on its own.
+See [`schemas/theme.schema.json`](../../packages/core/schemas/theme.schema.json) and the theme shipped in [`brand/theme.yaml`](../../brand/theme.yaml) as an example; `fixtures/plugins/theme-white-label/theme/theme.yaml` shows a complete white-label one. Paths are relative to the file. A faulty key is reported by its path (`light.accent`, `footer.credit`), a named file that does not exist by its key; the [theming guide](theming.md#white-label) says what each key changes in the site. The accent colour never carries information on its own.
+
+| Key | Type | Default | Meaning |
+|---|---|---|---|
+| `name` | string | required | the name of the site, in the header and every page title |
+| `logo` | path | — | the logo before the name; an SVG is inlined, any other image copied under `assets/` |
+| `favicon` | path | — | copied under `assets/` and linked from every page |
+| `font.display`, `font.ui`, `font.mono` | string | platform fonts | the families of headings, interface and code; the files are shipped by the project through `assets` and `@font-face` rules in `stylesheet`, never fetched from another host |
+| `radius` | integer | `8` | corner radius in pixels |
+| `light`, `dark` | object | required | `bg`, `surface`, `border`, `ink`, `muted`, `accent`, each a `#RRGGBB` colour; text must reach 4.5:1 over `bg` and `surface`, headings 3:1 |
+| `default_mode` | `system`, `light`, `dark` | `system` | the palette the site starts with; the reader's own choice, remembered by the mode switch, wins |
+| `footer.text` | string | — | a paragraph in the footer |
+| `footer.links` | `{ label, url }[]` | — | links in the footer |
+| `footer.credit` | boolean | `false` | shows "Built with Concordance" as a link to the repository; nothing else in the interface names the tool |
+| `stylesheet` | path | — | a stylesheet loaded after the tool's own, in the `project` cascade layer |
+| `assets` | path | — | a folder copied as-is under `assets/` (fonts, icons) |
+| `labels` | object | — | message overrides, below |
 
 ### `labels`
 

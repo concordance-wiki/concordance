@@ -5,11 +5,11 @@ import type { FileSystem } from "@concordance-wiki/core";
 import { checkAccessibility, type A11yFinding } from "../a11y/check.js";
 import { checkContrast, type ContrastFinding } from "../a11y/contrast.js";
 import { measureBudget, type BudgetReport, type PageSize } from "../budget.js";
-import { siteStylesheet } from "../css/stylesheet.js";
-import type { ThemeConfig } from "../css/theme-config.js";
 import { bundleIslands, defaultIslands, type IslandBundle } from "../islands/bundle.js";
 import { byCodeUnit } from "../order.js";
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
+import type { SlotProps } from "../slots.js";
+import { chromeOf, writeThemeAssets, type ThemeChrome } from "../theme/chrome.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import { footer, galleryTheme, header } from "./fixtures.js";
 import { GalleryIndex } from "./index-page.js";
@@ -17,12 +17,13 @@ import { galleryPages, type GalleryPage } from "./pages.js";
 
 export const GALLERY_PAGE_BUDGET = 150_000;
 
+const ASSETS_BASE = "assets/";
+
 export interface GalleryOptions {
-  /** Folder receiving the pages, the stylesheet and the island bundles under `assets/`. */
+  /** Folder receiving the pages, the stylesheets and the island bundles under `assets/`. */
   output: string;
+  /** The components, and the `theme.yaml` of the last theme when the loader found it: its name, logo, palette, stylesheet and credit then apply. */
   theme: ResolvedTheme;
-  /** The palette of the stylesheet, checked for contrast; the neutral gallery palette by default. */
-  tokens?: ThemeConfig;
   fileSystem: FileSystem;
   maxPageBytes?: number;
 }
@@ -52,8 +53,6 @@ export interface GalleryReport {
   /** One line per page over budget or accessibility finding; empty when the gallery passes. */
   problems: string[];
 }
-
-const STYLESHEET = "assets/site.css";
 
 function framed(page: GalleryPage, panel: JSX.Element, options: RenderOptions): string {
   const document: JSX.Element = (
@@ -89,34 +88,48 @@ function problemsOf(pages: GalleryPageReport[], budget: BudgetReport): string[] 
   ];
 }
 
+interface FixtureChrome {
+  header: SlotProps["Header"];
+  footer: SlotProps["Footer"];
+}
+
+/** The fixture chrome, or the project's when the theme carries a `theme.yaml`: its name, logo and footer replace the fixtures'. */
+function chromeFor(fixtures: FixtureChrome, chrome: ThemeChrome | undefined): FixtureChrome {
+  if (chrome === undefined) {
+    return fixtures;
+  }
+  const header: SlotProps["Header"] = { ...fixtures.header, siteTitle: chrome.siteTitle };
+  delete header.logo;
+  if (chrome.logo !== undefined) {
+    header.logo = chrome.logo;
+  }
+  return { header, footer: { ...fixtures.footer, ...chrome.footer } };
+}
+
 /** Every page of the gallery and its index, rendered through the theme against the given bundles. */
 export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]): GalleryDocument[] {
-  const render = (page: GalleryPage): RenderOptions => ({
+  const chrome = theme.config === undefined ? undefined : chromeOf(theme.config, ASSETS_BASE);
+  const suffix = chrome === undefined ? "" : ` – ${chrome.siteTitle}`;
+  const options = (title: string, locale: string, page: FixtureChrome): RenderOptions => ({
     theme,
-    locale: page.locale,
-    title: `${page.slot}, ${page.state}`,
-    stylesheets: [STYLESHEET],
+    locale,
+    title: `${title}${suffix}`,
+    stylesheets: chrome?.stylesheets ?? [`${ASSETS_BASE}site.css`],
+    ...(chrome?.favicon === undefined ? {} : { favicon: chrome.favicon }),
     islands,
-    assetsBase: "assets/",
-    header: page.header,
-    footer: page.footer,
+    assetsBase: ASSETS_BASE,
+    ...chromeFor(page, chrome),
   });
   const documents = galleryPages.map((page) => ({
     path: page.file,
-    html: body(page, render(page)),
+    html: body(page, options(`${page.slot}, ${page.state}`, page.locale, page)),
   }));
   documents.push({
     path: "index.html",
-    html: renderDocument(<GalleryIndex pages={galleryPages} overrides={theme.overrides} />, {
-      theme,
-      locale: "en",
-      title: "Component gallery",
-      stylesheets: [STYLESHEET],
-      islands,
-      assetsBase: "assets/",
-      header,
-      footer,
-    }),
+    html: renderDocument(
+      <GalleryIndex pages={galleryPages} overrides={theme.overrides} />,
+      options("Component gallery", "en", { header, footer }),
+    ),
   });
   return documents;
 }
@@ -124,13 +137,11 @@ export function galleryDocuments(theme: ResolvedTheme, islands: IslandBundle[]):
 /** Writes every gallery page through the theme, measures them and checks their accessibility. */
 export async function buildGallery(options: GalleryOptions): Promise<GalleryReport> {
   const { output, theme, fileSystem } = options;
-  const tokens = options.tokens ?? galleryTheme;
-  const islands = await bundleIslands({
-    outDir: `${output}/assets`,
-    islands: defaultIslands(),
-    fileSystem,
-  });
-  fileSystem.writeText(`${output}/${STYLESHEET}`, siteStylesheet({ theme: tokens }));
+  const assets = `${output}/assets`;
+  const islands = await bundleIslands({ outDir: assets, islands: defaultIslands(), fileSystem });
+  // The palette checked for contrast is the one the stylesheet is written from.
+  const source = theme.config ?? { config: galleryTheme, assets: [], fileSystem };
+  writeThemeAssets(source, fileSystem, assets);
   const documents = galleryDocuments(theme, islands);
   const pages: GalleryPageReport[] = [];
   for (const { path, html } of documents) {
@@ -143,7 +154,7 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
     maxPageBytes: options.maxPageBytes ?? GALLERY_PAGE_BUDGET,
   });
   const findings = pages.reduce((total, page) => total + page.findings.length, 0);
-  const contrast = checkContrast(tokens);
+  const contrast = checkContrast(source.config);
   return {
     pages,
     budget,
@@ -151,6 +162,9 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
     contrast,
     summary: [
       `gallery: ${String(pages.length)} pages written to ${output}`,
+      ...(theme.config === undefined
+        ? []
+        : [`theme: ${theme.config.config.name}, from ${theme.config.file}`]),
       ...theme.overrides.map(
         (override) =>
           `override ${override.slot}: plugin ${override.plugin}, theme ${override.theme}`,

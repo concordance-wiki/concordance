@@ -61,6 +61,12 @@ concordance-island {
   block-size: 1.5rem;
 }
 
+.site-logo svg {
+  display: block;
+  block-size: 1.5rem;
+  inline-size: auto;
+}
+
 .site-search {
   margin-inline-start: auto;
 }
@@ -86,6 +92,26 @@ concordance-island {
   text-decoration: none;
 }
 
+/* Mode switch: served hidden, revealed by its script; the label names the current scheme. */
+
+.mode-switch {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--color-bg);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.mode-switch[aria-pressed="true"] {
+  color: var(--color-ink);
+}
+
+.mode-switch-value {
+  font-weight: 600;
+}
+
 /* Footer */
 
 .site-footer {
@@ -102,6 +128,10 @@ concordance-island {
   gap: var(--space-3);
   padding: 0;
   list-style: none;
+}
+
+.site-footer-credit {
+  font-size: 0.8125rem;
 }
 
 /* Home */

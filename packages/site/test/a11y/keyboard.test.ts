@@ -4,7 +4,10 @@ import { baseStylesheet, componentsStylesheet } from "../../src/css/stylesheet.j
 import { galleryDocuments } from "../../src/gallery/build.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 
-const islands = [{ name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 }];
+const islands = [
+  { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
+  { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+];
 const documents = galleryDocuments(defaultTheme, islands);
 
 /** Every rule of a stylesheet as `[selector, declarations]`, nested blocks flattened. */
@@ -82,8 +85,11 @@ describe("Full keyboard navigation, consistent tab order, always-visible focus",
 
   it("serves the mentions beyond the threshold behind a native summary before hydration, a real button after", () => {
     const island = documents.find((document) => document.path === "mentions-panel-island.html");
-    expect(island?.html).toContain('<details class="mentions-more"><summary>');
-    expect(island?.html).not.toContain("<button");
+    const html = island?.html ?? "";
+    // The header carries the mode switch button on every page: only the main landmark is inspected.
+    const main = html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"));
+    expect(main).toContain('<details class="mentions-more"><summary>');
+    expect(main).not.toContain("<button");
     expect(componentsStylesheet()).toContain(".mentions-more summary,\n.mentions-more button {");
   });
 });

@@ -6,6 +6,7 @@ import { build } from "esbuild";
 
 import { byCodeUnit } from "../order.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-more.js";
+import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 
 export interface IslandEntry {
   name: string;
@@ -33,6 +34,10 @@ export function defaultIslands(): IslandEntry[] {
     {
       name: MENTIONS_ISLAND,
       entry: fileURLToPath(new URL("./mentions-panel.client", import.meta.url)),
+    },
+    {
+      name: MODE_SWITCH_ISLAND,
+      entry: fileURLToPath(new URL("./mode-switch.client", import.meta.url)),
     },
   ];
 }

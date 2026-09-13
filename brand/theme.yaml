@@ -1,8 +1,8 @@
-# Concordance brand tokens. A white-label installation overrides the accent
-# and the logo; it never touches the mark files.
+# Concordance brand tokens; paths are relative to this file. A white-label
+# installation writes its own theme.yaml; it never touches the mark files.
 name: Concordance
-logo: brand/concordance-mark.svg
-favicon: brand/favicon.svg
+logo: concordance-mark.svg
+favicon: favicon.svg
 font:
   display: Instrument Serif
   ui: Instrument Sans

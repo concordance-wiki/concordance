@@ -4,23 +4,52 @@ export {
   CSS_LAYERS,
   baseStylesheet,
   componentsStylesheet,
+  projectStylesheet,
   siteStylesheet,
 } from "./css/stylesheet.js";
 export type { StylesheetOptions } from "./css/stylesheet.js";
-export type { ThemeConfig, ThemePalette } from "./css/theme-config.js";
+export type {
+  ThemeConfig,
+  ThemeFooterConfig,
+  ThemeMode,
+  ThemePalette,
+} from "./css/theme-config.js";
 export { tokensStylesheet } from "./css/tokens.js";
 export { bundleIslands, defaultIslands } from "./islands/bundle.js";
 export type { BundleOptions, IslandBundle, IslandEntry } from "./islands/bundle.js";
 export { ISLAND_ELEMENT, island, islandsUsed } from "./islands/island.js";
 export { mountIslands } from "./islands/mount.js";
 export type { IslandElement, IslandHost } from "./islands/mount.js";
+export { applyChoice, nextChoice, readChoice, wireModeSwitch } from "./islands/mode-switch.js";
+export type {
+  ModeRoot,
+  ModeStorage,
+  ModeSwitchButton,
+  ModeSwitchElement,
+  ModeSwitchText,
+} from "./islands/mode-switch.js";
+export { MODES, MODE_SCRIPT, MODE_STORAGE_KEY } from "./mode.js";
+export type { ModeChoice } from "./mode.js";
 export { directionOf, renderDocument, renderPage, renderSlot } from "./render.js";
 export type { PageSlot, RenderOptions } from "./render.js";
 export { SLOT_NAMES, isSlotName } from "./slots.js";
 export type * from "./slots.js";
 export { ThemeContext, useSlot } from "./theme/context.js";
 export { defaultComponents } from "./theme/default/index.js";
-export { importThemeModule, packageRootOf } from "./theme/node-loader.js";
+export { REPOSITORY_URL } from "./theme/default/footer.js";
+export { MODE_SWITCH_ISLAND, ModeSwitch } from "./theme/default/mode-switch.js";
+export type { ModeSwitchProps } from "./theme/default/mode-switch.js";
+export { loadTheme } from "./theme/load.js";
+export type {
+  ResolvedThemeConfig,
+  ThemeContributionFiles,
+  ThemeFile,
+  ThemeLoad,
+  ThemeLogo,
+} from "./theme/load.js";
+export { PROJECT_STYLESHEET, SITE_STYLESHEET, chromeOf, writeThemeAssets } from "./theme/chrome.js";
+export type { ThemeAssetsSource, ThemeChrome } from "./theme/chrome.js";
+export { importThemeModule, packageDirectoryOf, packageRootOf } from "./theme/node-loader.js";
 export { ThemeResolutionError, defaultTheme, resolveTheme } from "./theme/resolve.js";
 export type { ThemeLoader } from "./theme/resolve.js";
 export type { ResolvedTheme, SlotComponents, ThemeOverride } from "./theme/types.js";

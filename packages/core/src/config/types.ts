@@ -150,3 +150,41 @@ export interface ConfigIssue {
 
 export type ConfigValidation =
   { ok: true; config: Config; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };
+
+/** The palette of one mode, six colours as `#RRGGBB`. */
+export interface ThemePalette {
+  bg: string;
+  surface: string;
+  border: string;
+  ink: string;
+  muted: string;
+  accent: string;
+}
+
+export type ThemeMode = "light" | "dark" | "system";
+
+export interface ThemeFooterConfig {
+  text?: string;
+  links?: { label: string; url: string }[];
+  /** Whether the footer credits the tool with a discreet link; false by default. */
+  credit?: boolean;
+}
+
+/** A `theme.yaml` document once validated by the theme schema; paths are relative to the file. */
+export interface ThemeConfig {
+  name: string;
+  logo?: string;
+  favicon?: string;
+  font?: { display?: string; ui?: string; mono?: string };
+  radius?: number;
+  light: ThemePalette;
+  dark: ThemePalette;
+  default_mode?: ThemeMode;
+  footer?: ThemeFooterConfig;
+  stylesheet?: string;
+  assets?: string;
+  labels?: Record<string, Record<string, string>>;
+}
+
+export type ThemeValidation =
+  { ok: true; theme: ThemeConfig; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };

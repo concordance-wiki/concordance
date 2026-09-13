@@ -1,12 +1,12 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 
-import { readSchema } from "./schema.js";
+import { readSchema, type SchemaName } from "./schema.js";
 import type { Config, ConfigIssue, ConfigValidation, DomainConfig } from "./types.js";
 
-/** Compiles the published schema; validation runs once per command, so nothing is cached. */
-function validator(): ValidateFunction<Config> {
+/** Compiles a published schema; validation runs once per command, so nothing is cached. */
+function validator<T>(name: SchemaName): ValidateFunction<T> {
   const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  return ajv.compile<Config>(readSchema("config"));
+  return ajv.compile<T>(readSchema(name));
 }
 
 function pathOf(error: ErrorObject): string {
@@ -95,21 +95,37 @@ function valueAt(document: unknown, instancePath: string): unknown {
   return current;
 }
 
-function issuesFromSchema(document: unknown): ConfigIssue[] {
-  const validate = validator();
+/** The issues of a document against one of the published schemas, each naming the path of the faulty key. */
+export function schemaIssues(name: SchemaName, document: unknown): ConfigIssue[] {
+  const validate = validator<unknown>(name);
   if (validate(document)) {
     return [];
   }
   // The validator fills `errors` whenever it returns false.
   const relevant = (validate.errors as ErrorObject[]).filter(
-    (error) => !isInsideFailedBranch(error),
+    (error) => !isInsideFailedBranch(error) && !isPropertyNamesSummary(error),
   );
-  return relevant.map((error) => describeSchemaError(error, document));
+  return relevant.map((error) => describeKeyError(error, document));
 }
 
 /** Errors raised inside a oneOf branch describe the branch, not the document. */
 function isInsideFailedBranch(error: ErrorObject): boolean {
   return /\/oneOf\/\d+\//.test(error.schemaPath);
+}
+
+/** A `propertyNames` failure comes with the error raised on the key itself, which names it. */
+function isPropertyNamesSummary(error: ErrorObject): boolean {
+  return error.keyword === "propertyNames";
+}
+
+/** The validator reports a faulty key at its object, never at the root; the issue names the key instead. */
+function describeKeyError(error: ErrorObject, document: unknown): ConfigIssue {
+  const issue = describeSchemaError(error, document);
+  if (error.propertyName === undefined) {
+    return issue;
+  }
+  const path = `${issue.path}.${error.propertyName}`;
+  return { ...issue, path, message: "key is not allowed", received: error.propertyName };
 }
 
 function duplicateSources(config: Config): ConfigIssue[] {
@@ -220,9 +236,9 @@ function unpseudonymisedPublication(config: Config): ConfigIssue[] {
 }
 
 export function validateConfig(document: unknown): ConfigValidation {
-  const schemaIssues = issuesFromSchema(document);
-  if (schemaIssues.length > 0) {
-    return { ok: false, issues: schemaIssues };
+  const fromSchema = schemaIssues("config", document);
+  if (fromSchema.length > 0) {
+    return { ok: false, issues: fromSchema };
   }
   const config = document as Config;
   const errors = [
