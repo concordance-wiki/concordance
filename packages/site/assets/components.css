@@ -1193,8 +1193,8 @@ concordance-island[data-island="search"] {
 /* Index: the title and its sentence with the filters button beside them, the letter bar ruled above and below, then the entries of every letter of the page in a table of four columns, and the note on the words without a definition at the foot. */
 
 .index {
-  max-inline-size: 66.25rem;
-  padding-block-start: 2.125rem;
+  max-inline-size: 71.25rem;
+  padding: 2.125rem 2.5rem var(--space-5);
 }
 
 .index-head {
@@ -1323,11 +1323,13 @@ concordance-island[data-island="search"] {
   border-block: 1px solid var(--color-border);
 }
 
+/* The letters stay on one line where the bar is wide enough, the count after them or under them at the end of the bar. */
 .letters ul {
   display: flex;
-  flex: 1;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   gap: 0.1875rem;
+  min-inline-size: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1367,6 +1369,7 @@ a.letter:hover {
 .letters-without {
   flex: none;
   margin: 0;
+  margin-inline-start: auto;
   color: var(--color-label);
   font-size: 0.8125rem;
 }
