@@ -1,27 +1,9 @@
 import type { ThemeConfig } from "../css/theme-config.js";
 import type { Mention, SlotProps } from "../slots.js";
+import { defaultThemeConfig } from "../build/default-theme.js";
 
-/** A neutral palette for the gallery stylesheet; a project sees its own `theme.yaml` in its build. */
-export const galleryTheme: ThemeConfig = {
-  name: "Gallery",
-  radius: 8,
-  light: {
-    bg: "#F6F5F2",
-    surface: "#FFFFFF",
-    border: "#E4E1DA",
-    ink: "#16181B",
-    muted: "#4E5259",
-    accent: "#B84820",
-  },
-  dark: {
-    bg: "#0E0F11",
-    surface: "#16181B",
-    border: "#26292E",
-    ink: "#E8E6E1",
-    muted: "#8B9199",
-    accent: "#E8703A",
-  },
-};
+/** The neutral palette of a project without `theme.yaml`, named after the gallery. */
+export const galleryTheme: ThemeConfig = defaultThemeConfig("Gallery");
 
 export function mention(index: number, kind: Mention["kind"] = "recognised"): Mention {
   return {

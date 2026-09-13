@@ -26,8 +26,8 @@ describe("model.json contains the build, entities, links, findings and candidate
     expect(assembleModel(sampleInput())).not.toHaveProperty("neighbours");
   });
 
-  it("adds the displayed neighbourhood only when it is given, keys sorted and each list best first", () => {
-    const neighbour = (id: string, confidence: number) => ({
+  it("adds the displayed neighbourhood only when it is given, keys sorted and each list by rank, then confidence, then identifier", () => {
+    const neighbour = (id: string, confidence: number, rank = 0) => ({
       id,
       title: id,
       type: "term",
@@ -35,6 +35,7 @@ describe("model.json contains the build, entities, links, findings and candidate
       relation: "related",
       direction: "out" as const,
       confidence,
+      rank,
     });
     const model = assembleModel({
       ...sampleInput(),
@@ -43,6 +44,7 @@ describe("model.json contains the build, entities, links, findings and candidate
         "specs/a": [
           neighbour("specs/d", 0.4),
           neighbour("specs/c", 0.9),
+          neighbour("specs/e", 1, 1),
           neighbour("specs/b", 0.4),
         ],
       },
@@ -52,6 +54,7 @@ describe("model.json contains the build, entities, links, findings and candidate
       "specs/c",
       "specs/b",
       "specs/d",
+      "specs/e",
     ]);
     expect(assembleModel(sampleInput())).not.toHaveProperty("displayed_neighbourhood");
   });

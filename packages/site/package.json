@@ -1,7 +1,7 @@
 {
   "name": "@concordance-wiki/site",
   "version": "0.0.0",
-  "description": "Site generation: slots, default theme, islands, stylesheet and page budget.",
+  "description": "Site generation: slots, default theme, islands, stylesheet, markdown rendering, page budget and the site build.",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "exports": {
@@ -23,11 +23,19 @@
     "@concordance-wiki/profile": "workspace:*",
     "esbuild": "0.28.2",
     "preact": "10.29.8",
-    "preact-render-to-string": "6.7.0"
+    "preact-render-to-string": "6.7.0",
+    "rehype-sanitize": "6.0.0",
+    "rehype-stringify": "10.0.1",
+    "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
+    "unified": "11.0.5"
   },
   "devDependencies": {
     "@concordance-wiki/fixture-plugin-theme-example": "workspace:*",
     "@concordance-wiki/fixture-plugin-theme-white-label": "workspace:*",
+    "@types/mdast": "4.0.4",
     "axe-core": "4.13.0",
     "happy-dom": "20.14.5"
   }

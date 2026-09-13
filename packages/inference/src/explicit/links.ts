@@ -11,7 +11,8 @@ import { resolveLink, type MarkdownLink } from "@concordance-wiki/ingest";
 
 import type { ExplicitLinksInput, ExplicitLinksResult, LinkableEntity } from "./types.js";
 
-type SourceFiles = ReadonlyMap<string, ReadonlySet<string>>;
+/** The files of every source, by source name. */
+export type SourceFiles = ReadonlyMap<string, ReadonlySet<string>>;
 
 interface OtherSource {
   source: string;
@@ -20,7 +21,8 @@ interface OtherSource {
   sourceFiles: ReadonlySet<string>;
 }
 
-type Located =
+/** Where a written link lands: a file of a source, another source when cross-source links are off, nothing, or the web. */
+export type LocatedLink =
   | { kind: "external" }
   | { kind: "denied"; source: string }
   | { kind: "missing" }
@@ -36,7 +38,7 @@ function anchorOf(anchor: string | undefined): { anchor?: string } {
   return anchor === undefined ? {} : { anchor };
 }
 
-function inSource(source: string, path: string, anchor: string | undefined): Located {
+function inSource(source: string, path: string, anchor: string | undefined): LocatedLink {
   return { kind: "file", source, path, ...anchorOf(anchor) };
 }
 
@@ -62,12 +64,16 @@ function siblingSource(path: string, files: SourceFiles): OtherSource | undefine
   return sourceFiles === undefined ? undefined : { source, rest: rest.join("/"), sourceFiles };
 }
 
-function locate(
+/**
+ * The file a link target reaches from a note: in its own source, in a source named as a prefix
+ * or reached as a sibling folder when cross-source links are on.
+ */
+export function locateLink(
   target: string,
-  from: LinkableEntity["source"],
+  from: Pick<LinkableEntity["source"], "name" | "path">,
   files: SourceFiles,
   crossSource: boolean,
-): Located {
+): LocatedLink {
   const prefixed = prefixedSource(target, files);
   if (prefixed !== undefined) {
     if (!crossSource) return { kind: "denied", source: prefixed.source };
@@ -155,7 +161,7 @@ export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
     const entity = entities.get(key);
     if (entity === undefined) continue;
     for (const link of document.links) {
-      const target = locate(link.target, entity.source, files, crossSource);
+      const target = locateLink(link.target, entity.source, files, crossSource);
       if (target.kind !== "file") {
         if (target.kind === "denied") {
           findings.push(crossSourceLink(entity, link, target.source));

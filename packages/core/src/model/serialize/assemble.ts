@@ -102,9 +102,9 @@ function compareObjects(a: CandidateObject, b: CandidateObject): number {
   );
 }
 
-/** Best first: the larger confidence, then the identifier, as the display step ranks them. */
+/** Best first: the lower rank, then the larger confidence, then the identifier, as the display step orders them. */
 function compareDisplayed(a: DisplayedNeighbour, b: DisplayedNeighbour): number {
-  return b.confidence - a.confidence || byCodeUnit(a.id, b.id);
+  return a.rank - b.rank || b.confidence - a.confidence || byCodeUnit(a.id, b.id);
 }
 
 function sortDisplayed(neighbourhood: DisplayedNeighbourhood): DisplayedNeighbourhood {

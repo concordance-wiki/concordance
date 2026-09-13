@@ -32,5 +32,8 @@
     "@concordance-wiki/profile": "workspace:*",
     "@concordance-wiki/site": "workspace:*",
     "@concordance-wiki/typing": "workspace:*"
+  },
+  "devDependencies": {
+    "preact": "10.29.8"
   }
 }

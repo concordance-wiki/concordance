@@ -30,6 +30,7 @@ describe("@concordance-wiki/inference", () => {
       "glossaryConfidence",
       "importedOperations",
       "indexEntities",
+      "locateLink",
       "mappedSection",
       "matchOperations",
       "mentionLinks",

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { memoryFileSystem } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
-import { bundleIslands, defaultIslands } from "../../src/islands/bundle.js";
+import { bundleIslands, contentHash, defaultIslands } from "../../src/islands/bundle.js";
 
 describe("defaultIslands", () => {
   it("declares the mentions panel and mode switch islands with their entries next to the bundler", () => {
@@ -13,6 +13,26 @@ describe("defaultIslands", () => {
     expect(islands.map((island) => island.name)).toEqual(["mentions-panel", "mode-switch"]);
     expect(islands[0]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[1]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
+  });
+});
+
+describe("contentHash", () => {
+  it("names a bundle after its bytes alone, whatever the path it was built from", () => {
+    const bytes = new TextEncoder().encode("export const a = 1;\n");
+    expect(contentHash(bytes)).toMatch(/^[0-9A-F]{8}$/);
+    expect(contentHash(bytes)).toBe(contentHash(new Uint8Array(bytes)));
+    expect(contentHash(new TextEncoder().encode("export const a = 2;\n"))).not.toBe(
+      contentHash(bytes),
+    );
+  });
+
+  it("gives the bundle file that hash", async () => {
+    const fileSystem = memoryFileSystem();
+    const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
+    for (const bundle of bundles) {
+      const bytes = fileSystem.readBytes(`/out/${bundle.file}`);
+      expect(bundle.file).toBe(`${bundle.name}-${contentHash(bytes)}.js`);
+    }
   });
 });
 

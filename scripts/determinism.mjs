@@ -1,8 +1,10 @@
 // Builds the golden corpora twice through the built command line, with
 // SOURCE_DATE_EPOCH pinning the only timestamp, and compares the two output
-// trees byte for byte. Every file the build writes is compared, so the script
-// needs no update when the site appears. The build exits 0 once its log and
-// its model are written; any other status, or any differing file, fails the step.
+// trees byte for byte: the log, the model, the fragments, every page of the
+// site, the search index and the assets, island bundles included. The build
+// exits 0 once its log, its model and its site are written; any other status,
+// or any differing file, fails the step. A tree without the pages of the site
+// fails too: the rendering is part of what determinism covers.
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -37,6 +39,12 @@ for (const corpus of corpora) {
 
     const [first, second] = outputs;
     const { paths, differences } = compareTrees(first, second);
+    for (const required of ["build.log.json", "model.json", "index.html", "search-index.json"]) {
+      if (!paths.includes(required)) {
+        console.error(`determinism: the build of ${corpus} did not write ${required}`);
+        process.exit(1);
+      }
+    }
     if (differences.length > 0) {
       console.error(`determinism: two builds of ${corpus} differ`);
       for (const { path, where } of differences) {

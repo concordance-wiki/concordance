@@ -11,6 +11,7 @@ import {
   scoreCandidates,
   undefinedTermFindings,
   type KeywordCandidate,
+  type KeywordMention,
   type KeywordPage,
   type KeywordUnit,
 } from "@concordance-wiki/nlp";
@@ -34,6 +35,8 @@ export interface DiscoveredKeywords {
   findings: Finding[];
   /** Every candidate, published or not, as the `candidates.terms` block records it. */
   terms: TermCandidate[];
+  /** The mentions of every published page by identifier, in corpus order, for the passages of its page. */
+  mentions: Map<string, KeywordMention[]>;
   counts: KeywordCounts;
 }
 
@@ -142,6 +145,7 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     entities: [],
     findings: [],
     terms: [],
+    mentions: new Map(),
     counts: { published: 0, discarded: 0 },
   };
   const taken = new Set<string>();
@@ -162,6 +166,9 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     const { published, discarded } = publishKeywords(candidates, publication);
     const pages = withDistinctIds(published, taken);
     result.entities.push(...keywordEntities(pages, { locale }));
+    for (const page of pages) {
+      result.mentions.set(page.id, page.mentions);
+    }
     const publishedKeys = new Set(pages.map((page) => page.key));
     result.terms.push(
       ...candidates.map((candidate) => termOf(candidate, publishedKeys.has(candidate.key))),

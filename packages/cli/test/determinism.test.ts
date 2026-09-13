@@ -58,7 +58,7 @@ function readLog(tree: string): BuildLog {
 // Four full builds and possibly a compilation of the command line; the machine may be loaded.
 vi.setConfig({ testTimeout: 120_000, hookTimeout: 180_000 });
 
-describe("An integration test builds the golden corpus twice and compares the fingerprints of model.json and of the dist/ tree", () => {
+describe("An integration test builds the golden corpus twice and compares the fingerprints of model.json and of the whole dist/ tree, pages and assets included", () => {
   const outputs: string[] = [];
   const temporaryOutput = (): string => {
     const output = mkdtempSync(join(tmpdir(), "concordance-determinism-"));
@@ -91,8 +91,15 @@ describe("An integration test builds the golden corpus twice and compares the fi
       const second = temporaryOutput();
       expect(await buildInProcess(corpus, first)).toBe(0);
       expect(await buildInProcess(corpus, second)).toBe(0);
-      // No site yet: every file the build writes is compared, today the log and the model.
-      expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
+      // Every file the build writes is compared: the log, the model, the fragments and the whole site.
+      const paths = listTree(first).map(([path]) => path);
+      expect(paths).toContain("build.log.json");
+      expect(paths).toContain("model.json");
+      expect(paths).toContain("index.html");
+      expect(paths).toContain("search-index.json");
+      expect(paths.some((path) => path.startsWith("fragments/"))).toBe(true);
+      expect(paths.some((path) => /^assets\/mentions-panel-[A-Z0-9]+\.js$/.test(path))).toBe(true);
+      expect(paths.filter((path) => path.endsWith("/index.html")).length).toBeGreaterThan(3);
       expect(listTree(second)).toEqual(listTree(first));
       expect(fingerprint(second)).toBe(fingerprint(first));
       expect(readLog(first).at).toBe("2026-09-12T12:00:00.000Z");
@@ -133,7 +140,7 @@ describe("An integration test builds the golden corpus twice and compares the fi
         const runs = [buildWithExecutable(corpus, first), buildWithExecutable(corpus, second)];
         for (const run of runs) {
           expect(run.status).toBe(0);
-          expect(run.stdout).toContain("render: not available in this version\n");
+          expect(run.stdout).toMatch(/\nsite: \d+ pages written to /);
           expect(run.stderr).not.toContain("not implemented");
         }
         expect(readLog(first).at).toBe("1970-01-01T00:00:00.000Z");
@@ -141,7 +148,11 @@ describe("An integration test builds the golden corpus twice and compares the fi
           "1970-01-01T00:00:00.000Z",
         );
         expect(listTree(second)).toEqual(listTree(first));
-        expect(listTree(first).map(([path]) => path)).toEqual(["build.log.json", "model.json"]);
+        const paths = listTree(first).map(([path]) => path);
+        expect(paths).toContain("build.log.json");
+        expect(paths).toContain("model.json");
+        expect(paths).toContain("index.html");
+        expect(paths).toContain("assets/site.css");
         expect(fingerprint(second)).toBe(fingerprint(first));
       },
     );

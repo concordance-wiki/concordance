@@ -6,6 +6,7 @@ import {
   definePlugin,
   fixedClock,
   nodeFileSystem,
+  pagePath,
   parseModel,
   validateModel,
   type BuildLog,
@@ -15,6 +16,7 @@ import {
 } from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
+import { fragmentPath } from "@concordance-wiki/site";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
@@ -27,6 +29,7 @@ import {
 import { sectionLabels } from "../../src/pipeline/keywords.js";
 import { toolVersion } from "../../src/version.js";
 import { FakeGit, recordedIo, validConfig, type RecordedIo } from "../helpers.js";
+import { localTargets, references } from "../links.js";
 
 // The log is our own JSON: parsing it back yields the shape that was written.
 const readLog = (io: RecordedIo, path = "/work/dist/build.log.json"): BuildLog =>
@@ -35,6 +38,28 @@ const readLog = (io: RecordedIo, path = "/work/dist/build.log.json"): BuildLog =
 /** The model as the build wrote it, validated on the way. */
 const readModel = (io: RecordedIo, path = "/work/dist/model.json"): CanonicalModel =>
   parseModel(io.fs.readText(path), path);
+
+/** The lines of stdout before the site summary: the configuration line and the model summary. */
+const modelLines = (stdout: string[]): string[] =>
+  stdout.slice(
+    0,
+    stdout.findIndex((line) => line.startsWith("site: ")),
+  );
+
+/** The site summary the rendering appends to stdout; the island sizes vary with the code, so their lines are matched. */
+function expectSiteSummary(stdout: string[], pages: number, output: string): void {
+  const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
+  expect(lines).toEqual([
+    `site: ${String(pages)} pages written to ${output}`,
+    expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
+    expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+    expect.stringMatching(
+      new RegExp(`^pages: ${String(pages)}, largest \\d+\\.\\d kB, budget 150\\.0 kB$`),
+    ) as string,
+    "accessibility: 0 findings",
+    "contrast: 0 pairs below the minimum",
+  ]);
+}
 
 /** Two notes linking each other, one typed by its frontmatter, so that the model has links. */
 function linkedCorpus(config = validConfig): RecordedIo {
@@ -84,7 +109,7 @@ describe("concordance build", () => {
       "clone https://forge.example/specs.git main /work/.concordance-cache/sources/specs",
     ]);
     // The source names no application and the configuration no domain: the cloned note is filed nowhere.
-    expect(io.stdout).toEqual([
+    expect(modelLines(io.stdout)).toEqual([
       "/work/concordance.yaml: valid configuration",
       "sources: 1",
       "files: 1",
@@ -100,8 +125,9 @@ describe("concordance build", () => {
       "findings: error 0, warning 1, info 1",
       "  W-APP-MISSING: 1",
       "  W-DOMAIN-UNCLASSIFIED: 1",
-      "render: not available in this version",
     ]);
+    // The home, the index, the to-do page and the page of the one entity.
+    expectSiteSummary(io.stdout, 4, "/work/dist");
     expect(io.stderr).toEqual([
       "warning: W-APP-MISSING (specs:README.md): specs/readme resolves to no application",
       "info: W-DOMAIN-UNCLASSIFIED (specs:README.md): specs/readme matches no declared domain",
@@ -130,11 +156,11 @@ describe("concordance build", () => {
       ) as string,
     ]);
     expect(io.stdout.slice(1, 5)).toEqual(["sources: 0", "files: 0", "entities: 0", "links: 0"]);
-    expect(io.stdout.slice(-3)).toEqual([
+    expect(modelLines(io.stdout).slice(-2)).toEqual([
       "findings: error 0, warning 1, info 0",
       "  W-SOURCE-UNREACHABLE: 1",
-      "render: not available in this version",
     ]);
+    expectSiteSummary(io.stdout, 3, "/work/dist");
   });
 
   it("reads a local source without touching git", async () => {
@@ -177,7 +203,7 @@ describe("concordance build", () => {
     it("parses the sound file and reports the faulty ones instead of throwing", async () => {
       const io = faultyCorpus();
       await expect(buildCommand([], io)).resolves.toBe(1);
-      expect(io.stdout.slice(1)).toEqual([
+      expect(modelLines(io.stdout).slice(1)).toEqual([
         "sources: 1",
         "files: 3",
         "entities: 2",
@@ -192,8 +218,8 @@ describe("concordance build", () => {
         "findings: error 2, warning 0, info 0",
         "  E-ENCODING: 1",
         "  E-FM-INVALID: 1",
-        "render: not available in this version",
       ]);
+      expectSiteSummary(io.stdout, 5, "/work/dist");
     });
 
     it("ignores files that are not markdown", async () => {
@@ -286,7 +312,7 @@ describe("concordance build", () => {
         "/work/notes/c.md": "# C\n",
       });
       await buildCommand([], io);
-      expect(io.stdout).toEqual([
+      expect(modelLines(io.stdout)).toEqual([
         "/work/concordance.yaml: valid configuration",
         "sources: 1",
         "files: 3",
@@ -302,8 +328,8 @@ describe("concordance build", () => {
         "duplicates merged: 0, candidates: 0",
         "duplicate detection time: 0 ms",
         "findings: error 0, warning 0, info 0",
-        "render: not available in this version",
       ]);
+      expectSiteSummary(io.stdout, 6, "/work/dist");
     });
 
     it("records the entity and link counts in the log", async () => {
@@ -540,7 +566,7 @@ describe("concordance build", () => {
         tool: toolVersion(),
         at: "2026-09-12T12:00:00.000Z",
         profile_hash: fingerprintProfile(loadDefaultProfile()),
-        sources: [{ name: "notes" }],
+        sources: [{ name: "notes", files: 2 }],
         cross_source_links: false,
       });
     });
@@ -554,6 +580,7 @@ describe("concordance build", () => {
       expect(readModel(io).build.sources).toEqual([
         {
           name: "specs",
+          files: 1,
           commit: "0123456789abcdef0123456789abcdef01234567",
           url: "https://forge.example/specs.git",
         },
@@ -593,7 +620,7 @@ describe("concordance build", () => {
       ]);
     });
 
-    it("lists the sources in the order ingestion gives them, git fields only when present", () => {
+    it("lists the sources in the order ingestion gives them with their file count, git fields only when present", () => {
       const config = {
         version: 1 as const,
         project: { name: "W" },
@@ -608,8 +635,8 @@ describe("concordance build", () => {
           { name: "b", locale: "en", root: "/b", commit: "c0ffee", files: [] },
         ]),
       ).toEqual([
-        { name: "a" },
-        { name: "b", commit: "c0ffee", url: "https://forge.example/b.git" },
+        { name: "a", files: 0 },
+        { name: "b", files: 0, commit: "c0ffee", url: "https://forge.example/b.git" },
       ]);
     });
   });
@@ -710,8 +737,13 @@ describe("concordance build", () => {
     }
     interface Built {
       exit: number;
+      output: string;
       model: CanonicalModel;
       log: BuildLog;
+      /** Every file written under the output folder, as sorted forward-slash paths. */
+      files: string[];
+      /** The HTML pages by path. */
+      pages: Map<string, string>;
       stdout: string[];
       stderr: string[];
     }
@@ -774,10 +806,18 @@ describe("concordance build", () => {
       try {
         const exit = await buildCommand(["--output", output], io);
         expect(io.git.calls).toEqual([]);
+        const files = nodeFileSystem.listFiles(output);
         return {
           exit,
+          output,
           model: parseModel(readFileSync(join(output, "model.json"), "utf8")),
           log: JSON.parse(readFileSync(join(output, "build.log.json"), "utf8")) as BuildLog,
+          files,
+          pages: new Map(
+            files
+              .filter((file) => file.endsWith(".html"))
+              .map((file) => [file, readFileSync(join(output, file), "utf8")]),
+          ),
           stdout,
           stderr,
         };
@@ -808,10 +848,11 @@ describe("concordance build", () => {
         built = await build(corpus);
       });
 
-      it("exits 0 after writing the model and says that the rendering is not available", () => {
+      it("exits 0 after writing the model and rendering the site", () => {
         expect(built.exit).toBe(0);
-        expect(built.stdout.at(-1)).toBe("render: not available in this version");
+        expectSiteSummary(built.stdout, built.model.entities.length + 3, built.output);
         expect(built.stderr.some((line) => line.includes("build stopped"))).toBe(false);
+        expect(built.stderr.some((line) => line.startsWith("warning: accessibility"))).toBe(false);
       });
 
       it("writes the entities of expected/entities.yaml with their type, origin, application and domain", () => {
@@ -910,12 +951,60 @@ describe("concordance build", () => {
         ).toEqual(prose);
       });
 
+      it("writes one HTML page per entity and per keyword, one fragment per entity, the search index and the static assets", () => {
+        for (const entity of built.model.entities) {
+          expect(built.files).toContain(pagePath(entity.id));
+          expect(built.files).toContain(fragmentPath(entity.id));
+        }
+        expect(built.files).toContain("index.html");
+        expect(built.files).toContain("index/index.html");
+        expect(built.files).toContain("todo/index.html");
+        expect(built.files).toContain("search-index.json");
+        expect(built.files).toContain("assets/site.css");
+        expect(
+          built.files.filter((file) => /^assets\/mentions-panel-[A-Z0-9]+\.js$/.test(file)),
+        ).toHaveLength(1);
+        expect(built.pages.size).toBe(built.model.entities.length + 3);
+      });
+
+      it("keeps every page under the 150 kB budget", () => {
+        const sizes = [...built.pages].map(
+          ([path, html]) => [path, Buffer.byteLength(html)] as const,
+        );
+        const largest = sizes.reduce((max, [, bytes]) => Math.max(max, bytes), 0);
+        expect(largest).toBeLessThan(150_000);
+        expect(sizes.filter(([, bytes]) => bytes >= 150_000)).toEqual([]);
+      });
+
+      it("writes every href and src relative to the page, resolving to a written file, so that the site works over file://", () => {
+        const written = new Set(built.files);
+        let checked = 0;
+        for (const [path, html] of built.pages) {
+          for (const reference of references(html)) {
+            expect(reference.startsWith("/")).toBe(false);
+          }
+          for (const { reference, target } of localTargets(path, html)) {
+            expect(written.has(target), `${path}: ${reference} resolves to ${target}`).toBe(true);
+            checked += 1;
+          }
+        }
+        expect(checked).toBeGreaterThan(built.pages.size);
+      });
+
+      it("serves the note text of an entity, its written links turned into page links, and the passages of a keyword page", () => {
+        const note = built.model.entities.find(
+          (entity) => entity.keyword !== true && entity.type === "term",
+        );
+        const page = built.pages.get(pagePath(note?.id ?? "")) ?? "";
+        expect(page).toContain('<div class="markdown">');
+        expect(page).not.toMatch(/href="[^"]*\.md"/);
+        const keyword = built.model.entities.find((entity) => entity.keyword === true);
+        expect(built.pages.get(pagePath(keyword?.id ?? ""))).toContain("<q>");
+      });
+
       it("counts entities per type, links per method, keywords, duplicates and findings alike in the log and on stdout", () => {
         const summary = built.log.summary;
-        expect(built.stdout.slice(1)).toEqual([
-          ...formatSummary(summary),
-          "render: not available in this version",
-        ]);
+        expect(modelLines(built.stdout).slice(1)).toEqual(formatSummary(summary));
         expect(Object.values(summary.entities).reduce((a, b) => a + b, 0)).toBe(
           built.model.entities.length,
         );

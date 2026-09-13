@@ -15,7 +15,7 @@ export type {
   ThemePalette,
 } from "./css/theme-config.js";
 export { tokensStylesheet } from "./css/tokens.js";
-export { bundleIslands, defaultIslands } from "./islands/bundle.js";
+export { bundleIslands, contentHash, defaultIslands } from "./islands/bundle.js";
 export type { BundleOptions, IslandBundle, IslandEntry } from "./islands/bundle.js";
 export { ISLAND_ELEMENT, island, islandsUsed } from "./islands/island.js";
 export { mountIslands } from "./islands/mount.js";
@@ -73,3 +73,25 @@ export type {
 export * as galleryFixtures from "./gallery/fixtures.js";
 export { galleryPages } from "./gallery/pages.js";
 export type { GalleryPage } from "./gallery/pages.js";
+export { LEAD_SECTION_ID, renderMarkdown } from "./markdown/render.js";
+export type { MarkdownOptions, RenderedMarkdown } from "./markdown/render.js";
+export {
+  ASSETS_DIRECTORY,
+  FRAGMENTS_DIRECTORY,
+  HOME_PAGE,
+  INDEX_PAGE,
+  SEARCH_INDEX,
+  TODO_PAGE,
+  assetsBaseOf,
+  entityHref,
+  fragmentPath,
+  relativeHref,
+} from "./build/paths.js";
+export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
+export type { EntityFragment, FragmentPassage } from "./build/fragments.js";
+export { defaultThemeConfig } from "./build/default-theme.js";
+export { assemblePages, assemblySummary } from "./build/assemble.js";
+export type { Assembled, AssembleOptions, PageReport, WrittenDocument } from "./build/assemble.js";
+export { SITE_PAGE_BUDGET, buildSite, searchIndexOf, siteDocuments } from "./build/site.js";
+export type { SiteInput, SiteOptions, SiteReport } from "./build/site.js";
+export type { SiteNames } from "./build/context.js";

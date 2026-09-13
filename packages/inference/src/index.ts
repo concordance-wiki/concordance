@@ -33,7 +33,8 @@ export type {
   DuplicateSignal,
   DuplicateStats,
 } from "./duplicates/types.js";
-export { explicitLinks } from "./explicit/links.js";
+export { explicitLinks, locateLink } from "./explicit/links.js";
+export type { LocatedLink, SourceFiles } from "./explicit/links.js";
 export type {
   ExplicitLinksInput,
   ExplicitLinksResult,
