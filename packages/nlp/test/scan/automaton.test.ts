@@ -93,20 +93,43 @@ describe("buildAutomaton and scan", () => {
 describe("longestMatches", () => {
   const match = (key: string, start: number, end: number): RawMatch => ({ key, start, end });
 
-  it("keeps the longest match on overlap: list mention beats mention", () => {
+  it("keeps the longest match among those sharing a start: list mention beats mention", () => {
     const automaton = automatonOf("list mention", "mention", "list");
     const matches = scan(automaton, words("a list mention"));
     expect(longestMatches(matches)).toEqual([match("list mention", 1, 3)]);
   });
 
-  it("drops a match that overlaps a longer one without being contained in it", () => {
+  it("keeps a match that starts inside a longer one and ends after it: build log and log summary", () => {
+    const automaton = automatonOf("build log", "log summary", "log");
+    const matches = scan(automaton, words("the build log summary"));
+    expect(longestMatches(matches)).toEqual([match("build log", 1, 3), match("log summary", 2, 4)]);
     expect(longestMatches([match("a b", 0, 2), match("b c d", 1, 4)])).toEqual([
+      match("a b", 0, 2),
       match("b c d", 1, 4),
     ]);
   });
 
-  it("keeps the earlier start between equal lengths", () => {
-    expect(longestMatches([match("b c", 1, 3), match("a b", 0, 2)])).toEqual([match("a b", 0, 2)]);
+  it("keeps both partly overlapping matches of equal length, in text order", () => {
+    expect(longestMatches([match("b c", 1, 3), match("a b", 0, 2)])).toEqual([
+      match("a b", 0, 2),
+      match("b c", 1, 3),
+    ]);
+  });
+
+  it("drops a match contained in a longer one, whether it ends with it or inside it", () => {
+    expect(longestMatches([match("c d", 2, 4), match("b c d", 1, 4), match("c", 2, 3)])).toEqual([
+      match("b c d", 1, 4),
+    ]);
+  });
+
+  it("drops a match contained in a match that started earlier than the previous one", () => {
+    const matches = [
+      match("a b c d", 0, 4),
+      match("b", 1, 2),
+      match("c d", 2, 4),
+      match("d", 3, 4),
+    ];
+    expect(longestMatches(matches)).toEqual([match("a b c d", 0, 4)]);
   });
 
   it("keeps adjacent matches and two keys on the same span, in text order", () => {
@@ -126,6 +149,12 @@ describe("longestMatches", () => {
     expect(matches).toHaveLength(5);
   });
 
+  it("drops two keys on the same span together when a longer match contains them", () => {
+    expect(longestMatches([match("a b c", 0, 3), match("b c", 1, 3), match("b-c", 1, 3)])).toEqual([
+      match("a b c", 0, 3),
+    ]);
+  });
+
   it("keeps a shorter match that ends where a longer one starts", () => {
     expect(longestMatches([match("a b", 0, 2), match("c d e", 2, 5)])).toEqual([
       match("a b", 0, 2),
@@ -135,10 +164,11 @@ describe("longestMatches", () => {
 
   it("returns the winners in text order whatever their length", () => {
     expect(longestMatches([match("a", 0, 1), match("a b", 0, 2)])).toEqual([match("a b", 0, 2)]);
-    expect(longestMatches([match("x", 0, 1), match("a b", 2, 4), match("y", 5, 6)])).toEqual([
+    expect(longestMatches([match("y", 5, 6), match("a b", 2, 4), match("x", 0, 1)])).toEqual([
       match("x", 0, 1),
       match("a b", 2, 4),
       match("y", 5, 6),
     ]);
+    expect(longestMatches([])).toEqual([]);
   });
 });

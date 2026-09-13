@@ -216,7 +216,7 @@ Combination of several methods on the same triple: `1 − Π(1 − cᵢ)`, cappe
 
 ## 7. Inference
 
-- Directed term recognition: dictionary from titles and aliases, normalisation per locale, Aho-Corasick automaton, word boundaries, longest pattern wins, configurable type prefixes, code blocks and URLs excluded.
+- Directed term recognition: dictionary from titles and aliases, normalisation per locale, Aho-Corasick automaton, word boundaries, an expression contained in a longer one is not counted twice, configurable type prefixes, code blocks and URLs excluded.
 - Undirected discovery: 1 to 4-word n-grams, stopword filters, C-value × IDF scoring, thresholds of three occurrences and two documents, exclusion of the lock's `rejected_terms`.
 - Lock file: `links.accepted` re-injected at 1.0 (`lock_promoted`), `links.rejected` removed on every build, `duplicates.merged` and `duplicates.separated`, `rejected_terms`. The service will generate lock changes as merge requests.
 - Confidence propagation for multi-hop impact analysis: product of the edges; the interface will filter by depth and threshold.
