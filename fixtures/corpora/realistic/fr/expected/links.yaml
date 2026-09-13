@@ -1,79 +1,79 @@
-# Links the engine must produce, with the method of their strongest provenance. Same entries as the English corpus under French identifiers.
+# Links the engine must produce, with the method of their strongest provenance.
 # A representative minimum, not an exhaustive list: every listed link must exist with at least this confidence;
 # `from` is the note that carries the link and `inverse: true` says the relation reads from `to` to `from`.
 # Applications are containers identified by their configured id; their `composes` links come from the folder zone.
 
 # Markdown links written in the notes, same source and across sources (relative climb and `source:` prefix).
-- { from: specs/ecrans/saisie-versement-libre, to: specs/regles/plafond-annuel, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/ecrans/saisie-versement-libre, to: specs/api/versements, relation: serves, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/ecrans/portail/paiement-en-ligne, to: decisions/paiement-en-ligne-sur-le-portail, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/versements, to: decisions/plafond-controle-cote-serveur, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/objets/versement, to: specs/tables/versement, relation: represents, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/operations/creer-versement, to: specs/objets/versement, relation: accesses, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/processus/enregistrer-un-versement, to: specs/roles/gestionnaire, relation: assigned_to, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: decisions/plafond-mensuel-introduit, to: reunions/2026-04-23-revue-plafonds, relation: documents, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: decisions/resiliation-par-le-portail-planifiee, to: decisions/resiliation-par-le-portail-reportee, relation: supersedes, method: explicit_link, min_confidence: 1.0 }
-- { from: reunions/2026-03-12-atelier-versements, to: decisions/plafond-controle-cote-serveur, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: reunions/2026-03-12-atelier-versements, to: specs/batchs/reglement-nocturne, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: cadrage/etude-eligibilite-sinistres, to: specs/api/sinistres, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/contrats/sinistres, to: specs/api/sinistres, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/contrats/versements-openapi, to: specs/api/versements, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/ecrans/page-mot-cle, to: specs/regles/seuil-de-publication, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/ecrans/page-mot-cle, to: specs/api/modele-canonique, relation: serves, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/ecrans/service/piste-epinglee, to: decisions/piste-epinglee-dans-le-service, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/modele-canonique, to: decisions/seuil-applique-dans-le-modele, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/objets/entite, to: specs/tables/entites, relation: represents, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/operations/lister-les-entites, to: specs/objets/entite, relation: accesses, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/processus/pipeline-de-build, to: specs/roles/mainteneur, relation: assigned_to, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: decisions/relation-liee-plafonnee, to: reunions/2026-04-23-revue-du-plafond-de-voisinage, relation: documents, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: decisions/suggestions-dans-le-service-planifiees, to: decisions/suggestions-dans-le-service-reportees, relation: supersedes, method: explicit_link, min_confidence: 1.0 }
+- { from: reunions/2026-03-12-revue-du-seuil-de-page-mot-cle, to: decisions/seuil-applique-dans-le-modele, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: reunions/2026-03-12-revue-du-seuil-de-page-mot-cle, to: specs/batchs/build-nocturne, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: cadrage/etude-du-rapport-de-lint, to: specs/api/pont-de-forge, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/contrats/pont-de-forge, to: specs/api/pont-de-forge, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/contrats/requete-du-modele-openapi, to: specs/api/requete-du-modele, relation: documents, method: explicit_link, min_confidence: 1.0 }
 
 # Operations imported from the contracts and matched to their notes on the operation identifier.
 # The profile does not name the relation between an API and its operations yet: the contract import story names it and updates these lines.
-- { from: specs/api/versements, to: specs/operations/creer-versement, relation: related, method: contract_import, min_confidence: 0.95, operation: createPayment }
-- { from: specs/api/versements, to: specs/operations/lister-versements, relation: related, method: contract_import, min_confidence: 0.95, operation: listPayments }
-- { from: specs/api/sinistres, to: specs/operations/declarer-sinistre, relation: related, method: contract_import, min_confidence: 0.95, operation: DeclareClaim }
+- { from: specs/api/requete-du-modele, to: specs/operations/lister-les-entites, relation: related, method: contract_import, min_confidence: 0.95, operation: listEntities }
+- { from: specs/api/requete-du-modele, to: specs/operations/lire-une-entite, relation: related, method: contract_import, min_confidence: 0.95, operation: getEntity }
+- { from: specs/api/pont-de-forge, to: specs/operations/notifier-un-build, relation: related, method: contract_import, min_confidence: 0.95, operation: notifyBuild }
 
 # Typed frontmatter attributes.
-- { from: specs/roles/gestionnaire, to: specs/ecrans/saisie-versement-libre, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/roles/gestionnaire-sinistres, to: specs/ecrans/instruction-sinistre, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/ecrans/fiche-adherent, to: specs/objets/adherent, relation: accesses, attributes: { mode: write }, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/ecrans/synthese-contrat, to: specs/objets/garantie, relation: accesses, attributes: { mode: read }, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/api/sinistres, to: specs/ecrans/instruction-sinistre, relation: serves, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/tables/versement, to: specs/objets/versement, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/tables/sinistre, to: specs/objets/sinistre, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/batchs/reglement-nocturne, to: specs/batchs/appel-de-cotisation, relation: flows_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: glossaire/versement-libre, to: glossaire/versement, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: glossaire/plafond-annuel, to: glossaire/plafond, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: reunions/2026-04-02-revue-portail, to: decisions/paiement-en-ligne-sur-le-portail, relation: documents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/roles/mainteneur, to: specs/ecrans/page-mot-cle, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/roles/responsable-qualite, to: specs/ecrans/page-a-faire, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/ecrans/page-a-faire, to: specs/objets/constat, relation: accesses, attributes: { mode: write }, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/ecrans/page-entite, to: specs/objets/lien, relation: accesses, attributes: { mode: read }, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/api/requete-du-modele, to: specs/ecrans/service/revue-des-suggestions, relation: serves, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/tables/entites, to: specs/objets/entite, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/tables/constats, to: specs/objets/constat, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/batchs/build-nocturne, to: specs/batchs/rapport-d-obsolescence, relation: flows_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossaire/lien-explicite, to: glossaire/lien, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossaire/mention-de-section, to: glossaire/mention, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: reunions/2026-04-02-revue-du-perimetre-du-service, to: decisions/piste-epinglee-dans-le-service, relation: documents, method: frontmatter_ref, min_confidence: 0.9 }
 
 # Applications composing the notes of their zone.
-- { from: gestion-contrats, to: specs/ecrans/recherche-adherent, relation: composes, method: folder_zone, min_confidence: 0.9 }
-- { from: gestion-contrats, to: specs/api/versements, relation: composes, method: folder_zone, min_confidence: 0.9 }
-- { from: portail-adherent, to: specs/ecrans/portail/mes-contrats, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-cli, to: specs/ecrans/resultats-de-recherche, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-cli, to: specs/api/modele-canonique, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-service, to: specs/ecrans/service/visionneuse-de-document, relation: composes, method: folder_zone, min_confidence: 0.9 }
 
 # Mentions under a mapped section heading.
-- { from: specs/ecrans/saisie-versement-libre, to: specs/objets/contrat, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/ecrans/saisie-versement-libre, to: specs/objets/versement, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/ecrans/saisie-versement-libre, to: specs/ecrans/recapitulatif-versement, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/ecrans/saisie-versement-libre, to: specs/ecrans/recherche-adherent, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/ecrans/instruction-sinistre, to: specs/objets/indemnite, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/ecrans/portail/mes-contrats, to: specs/ecrans/portail/paiement-en-ligne, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/versements, to: specs/ecrans/saisie-versement-libre, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/versements, to: specs/batchs/reglement-nocturne, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/versements, to: specs/processus/enregistrer-un-versement, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/sinistres, to: specs/ecrans/portail/suivi-sinistre, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/sinistres, to: specs/objets/sinistre, relation: accesses, method: section_mention, min_confidence: 0.7 }
-- { from: specs/operations/creer-versement, to: specs/ecrans/portail/paiement-en-ligne, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/operations/declarer-sinistre, to: specs/regles/delai-de-declaration-sinistre, relation: constrains, inverse: true, method: section_mention, min_confidence: 0.7 }
-- { from: specs/regles/plafond-annuel, to: specs/api/versements, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/regles/delai-de-declaration-sinistre, to: specs/processus/declarer-un-sinistre, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/regles/limite-d-age-adherent, to: specs/objets/adherent, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batchs/reglement-nocturne, to: specs/tables/versement, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batchs/appel-de-cotisation, to: specs/objets/cotisation, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batchs/mise-a-jour-des-provisions-sinistre, to: specs/tables/sinistre, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/plafond-controle-cote-serveur, to: specs/api/versements, relation: affects, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/resiliation-par-le-portail-planifiee, to: specs/regles/preavis-de-resiliation, relation: affects, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/annuaire-adherents-expose, to: specs/api/annuaire-adherents, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/page-mot-cle, to: specs/objets/occurrence, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/page-mot-cle, to: specs/objets/candidat, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/page-mot-cle, to: specs/ecrans/page-entite, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/page-mot-cle, to: specs/ecrans/resultats-de-recherche, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/page-a-faire, to: specs/objets/constat, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/ecrans/service/visionneuse-de-document, to: specs/ecrans/service/piste-epinglee, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/modele-canonique, to: specs/ecrans/page-mot-cle, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/modele-canonique, to: specs/batchs/rapport-d-obsolescence, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/modele-canonique, to: specs/processus/pipeline-de-build, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/requete-du-modele, to: specs/ecrans/service/visionneuse-de-document, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/requete-du-modele, to: specs/objets/entite, relation: accesses, method: section_mention, min_confidence: 0.7 }
+- { from: specs/operations/lister-les-entites, to: specs/ecrans/service/piste-epinglee, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/operations/notifier-un-build, to: specs/regles/politique-fail-on, relation: constrains, inverse: true, method: section_mention, min_confidence: 0.7 }
+- { from: specs/regles/seuil-de-publication, to: specs/api/modele-canonique, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/regles/politique-fail-on, to: specs/processus/lint-dans-une-demande-de-fusion, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/regles/motif-d-identifiant, to: specs/objets/entite, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batchs/build-nocturne, to: specs/tables/liens, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batchs/purge-du-cache, to: specs/objets/ressource, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batchs/rapport-d-obsolescence, to: specs/tables/constats, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/seuil-applique-dans-le-modele, to: specs/api/modele-canonique, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/suggestions-dans-le-service-planifiees, to: specs/regles/termes-rejetes-jamais-proposes, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/pont-de-forge-expose, to: specs/api/pont-de-forge, relation: affects, method: section_mention, min_confidence: 0.7 }
 
 # Occurrences of glossary titles and aliases in prose; the type prefix "screen" adds 0.1.
-- { from: glossaire/versement-libre, to: specs/ecrans/saisie-versement-libre, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossaire/dossier-sinistre, to: specs/ecrans/instruction-sinistre, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossaire/plafond-annuel, to: reunions/2026-03-12-atelier-versements, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossaire/cotisation, to: specs/objets/cotisation, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: reunions/2026-03-12-atelier-versements, to: specs/ecrans/saisie-versement-libre, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "écran Saisie de versement libre: recognised type prefix" }
+- { from: glossaire/page-mot-cle, to: specs/ecrans/page-mot-cle, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossaire/constat, to: specs/ecrans/page-a-faire, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossaire/seuil-de-publication, to: reunions/2026-03-12-revue-du-seuil-de-page-mot-cle, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossaire/occurrence, to: specs/objets/occurrence, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: reunions/2026-04-23-revue-du-plafond-de-voisinage, to: specs/ecrans/carte-du-voisinage, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "écran Carte du voisinage: recognised type prefix" }
 
 # Entities named in the same paragraph.
-- { from: glossaire/plafond-annuel, to: specs/api/versements, relation: related, method: cooccurrence, min_confidence: 0.4 }
-- { from: glossaire/versement-programme, to: glossaire/versement-libre, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossaire/seuil-de-publication, to: specs/api/modele-canonique, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossaire/mention-de-section, to: glossaire/lien-explicite, relation: related, method: cooccurrence, min_confidence: 0.4 }

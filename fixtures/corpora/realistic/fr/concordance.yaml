@@ -3,57 +3,92 @@ project:
   name: Corpus réaliste
   locale: fr
 applications:
-  - id: gestion-contrats
-    title: Gestion des contrats
+  - id: concordance-cli
+    title: Ligne de commande Concordance
     status: active
-  - id: portail-adherent
-    title: Portail adhérent
+  - id: concordance-service
+    title: Service Concordance
     status: target
 domains:
-  - id: adhesion
-    title: Adhésion
-    match: ["**/*adherent*", "**/*adhesion*", "**/*foyer*"]
-  - id: versements
-    title: Versements
+  - id: ingestion
+    title: Ingestion
     match:
-      - "**/*versement*"
-      - "**/*paiement*"
-      - "**/*cotisation*"
-      - "**/*rembourse*"
-      - "**/*prelevement*"
-      - "**/*reglement*"
-      - "**/*date-de-valeur*"
-      - "**/*solde*"
-      - "**/releve*"
-      - "**/*taux-d-interet*"
-      - "**/*delai-de-grace*"
-      - "**/*plafond*"
-    subdomains:
-      - id: plafonds
-        title: Plafonds
-        match: ["**/*plafond*"]
-  - id: sinistres
-    title: Sinistres
-    match: ["**/*sinistre*", "**/*indemnit*", "**/*franchise*", "**/*expert*", "**/*provision*"]
-  - id: contrats
-    title: Contrats
+      - "**/*source*"
+      - "**/*ressource*"
+      - "**/*lecteur*"
+      - "**/*convert*"
+      - "**/*transcription*"
+      - "**/*jumel*"
+      - "**/*depot*"
+      - "**/*identifiant*"
+      - "**/*cache*"
+      - "**/*pseudonym*"
+      - "**/*donnees-personnelles*"
+      - "**/*vie-privee*"
+      - "**/*document*"
+      - "**/*representation*"
+      - "**/*clone*"
+  - id: inference
+    title: Inférence
     match:
+      - "**/*lien*"
+      - "**/*mention*"
+      - "**/*provenance*"
+      - "**/*confiance*"
+      - "**/*voisin*"
+      - "**/*relation*"
+      - "**/*frontmatter*"
+      - "**/*cooccurrence*"
+      - "**/*lock*"
       - "**/*contrat*"
-      - "**/*garantie*"
-      - "**/*beneficiaire*"
-      - "**/*devis*"
-      - "**/*avenant*"
-      - "**/*souscription*"
-      - "**/*renouvellement*"
-      - "**/*resiliation*"
-      - "**/*retractation*"
-      - "**/echeance*"
-      - "**/*suspension*"
-      - "**/decheance*"
-      - "**/*exclusion*"
-      - "**/*date-d-effet*"
-      - "**/*conditions-particulieres*"
-      - "**/*conditions-generales*"
+      - "**/*suggest*"
+      - "**/*section*"
+      - "**/*infer*"
+    subdomains:
+      - id: reconnaissance
+        title: Reconnaissance
+        match:
+          - "**/*mot-cle*"
+          - "**/occurrence*"
+          - "**/*diction*"
+          - "**/*alias*"
+          - "**/*homonym*"
+          - "**/*pack-de-langue*"
+          - "**/*comparaison*"
+          - "**/*seuil*"
+          - "**/*candidat*"
+          - "**/*rejet*"
+          - "**/*reconnaiss*"
+  - id: publication
+    title: Publication
+    match:
+      - "**/*modele*"
+      - "**/*site*"
+      - "**/*page*"
+      - "**/*theme*"
+      - "**/*recherche*"
+      - "**/*index*"
+      - "**/*entit*"
+      - "**/*profil*"
+      - "**/*ilot*"
+      - "**/*piste*"
+      - "**/*accueil*"
+      - "**/*locale*"
+      - "**/*rendu*"
+      - "**/*export*"
+  - id: qualite
+    title: Qualité
+    match:
+      - "**/*controle*"
+      - "**/*constat*"
+      - "**/*lint*"
+      - "**/*build*"
+      - "**/*determinis*"
+      - "**/*fail-on*"
+      - "**/*forge*"
+      - "**/*obsole*"
+      - "**/*a-faire*"
+      - "**/*qualite*"
 privacy:
   exclude: ["**/prive/**"]
 sources:
@@ -62,11 +97,11 @@ sources:
     locale: fr
     type: term
     glossary: true
-    application: gestion-contrats
+    application: concordance-cli
   - name: specs
     path: ./specs
     locale: fr
-    application: gestion-contrats
+    application: concordance-cli
     rules:
       - match: { path: "ecrans/**" }
         set: { type: screen }
@@ -86,18 +121,18 @@ sources:
         set: { type: rule }
       - match: { suffix: ".table.md" }
         set: { type: data_object }
-      - match: { path: "ecrans/portail/**" }
-        set: { type: screen, application: portail-adherent }
+      - match: { path: "ecrans/service/**" }
+        set: { type: screen, application: concordance-service }
   - name: decisions
     path: ./decisions
     locale: fr
     type: decision
-    application: gestion-contrats
+    application: concordance-cli
   - name: reunions
     path: ./reunions
     locale: fr
     default_type: meeting
-    application: gestion-contrats
+    application: concordance-cli
   - name: cadrage
     path: ./cadrage
     locale: fr

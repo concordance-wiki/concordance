@@ -1,0 +1,35 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "API Requête du modèle", "version": "0.1.0" },
+  "paths": {
+    "/entities": {
+      "get": {
+        "operationId": "listEntities",
+        "summary": "Lister les entités du modèle",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/entities/{id}": {
+      "get": {
+        "operationId": "getEntity",
+        "summary": "Lire une entité",
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Identifiant inconnu" } }
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "searchModel",
+        "summary": "Chercher dans le modèle",
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Entity": { "type": "object", "properties": { "id": { "type": "string" }, "type": { "type": "string" }, "title": { "type": "string" } } },
+      "Link": { "type": "object", "properties": { "from": { "type": "string" }, "to": { "type": "string" }, "relation": { "type": "string" }, "confidence": { "type": "number" } } },
+      "Finding": { "type": "object", "properties": { "check": { "type": "string" }, "severity": { "type": "string" }, "path": { "type": "string" } } },
+      "SearchHit": { "type": "object", "properties": { "id": { "type": "string" }, "score": { "type": "number" } } }
+    }
+  }
+}

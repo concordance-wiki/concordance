@@ -4,76 +4,76 @@
 # Applications are containers identified by their configured id; their `composes` links come from the folder zone.
 
 # Markdown links written in the notes, same source and across sources (relative climb and `source:` prefix).
-- { from: specs/screens/free-payment-entry, to: specs/rules/annual-cap, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/screens/free-payment-entry, to: specs/api/payments, relation: serves, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/screens/portal/online-payment, to: decisions/online-payment-in-portal, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/payments, to: decisions/cap-checked-server-side, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/objects/payment, to: specs/tables/payment, relation: represents, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/endpoints/create-payment, to: specs/objects/payment, relation: accesses, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/processes/record-a-payment, to: specs/roles/account-manager, relation: assigned_to, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: decisions/monthly-cap-introduced, to: meetings/2026-04-23-caps-review, relation: documents, inverse: true, method: explicit_link, min_confidence: 1.0 }
-- { from: decisions/termination-by-portal-planned, to: decisions/termination-by-portal-deferred, relation: supersedes, method: explicit_link, min_confidence: 1.0 }
-- { from: meetings/2026-03-12-payments-workshop, to: decisions/cap-checked-server-side, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: meetings/2026-03-12-payments-workshop, to: specs/batches/nightly-settlement, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: framing/claims-eligibility-study, to: specs/api/claims, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/contracts/claims, to: specs/api/claims, relation: documents, method: explicit_link, min_confidence: 1.0 }
-- { from: specs/api/contracts/payments-openapi, to: specs/api/payments, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/screens/keyword-page, to: specs/rules/publication-threshold, relation: constrains, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/screens/keyword-page, to: specs/api/canonical-model, relation: serves, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/screens/service/pinned-trail, to: decisions/pinned-trail-in-service, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/canonical-model, to: decisions/threshold-applied-in-model, relation: affects, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/objects/entity, to: specs/tables/entities, relation: represents, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/endpoints/list-entities, to: specs/objects/entity, relation: accesses, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/processes/build-pipeline, to: specs/roles/maintainer, relation: assigned_to, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: decisions/related-relation-capped, to: meetings/2026-04-23-neighbourhood-cap-review, relation: documents, inverse: true, method: explicit_link, min_confidence: 1.0 }
+- { from: decisions/suggestions-in-service-planned, to: decisions/suggestions-in-service-deferred, relation: supersedes, method: explicit_link, min_confidence: 1.0 }
+- { from: meetings/2026-03-12-keyword-page-threshold-review, to: decisions/threshold-applied-in-model, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: meetings/2026-03-12-keyword-page-threshold-review, to: specs/batches/nightly-build, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: framing/lint-report-study, to: specs/api/forge-bridge, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/contracts/forge-bridge, to: specs/api/forge-bridge, relation: documents, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/api/contracts/model-query-openapi, to: specs/api/model-query, relation: documents, method: explicit_link, min_confidence: 1.0 }
 
 # Operations imported from the contracts and matched to their notes on the operation identifier.
 # The profile does not name the relation between an API and its operations yet: the contract import story names it and updates these lines.
-- { from: specs/api/payments, to: specs/endpoints/create-payment, relation: related, method: contract_import, min_confidence: 0.95, operation: createPayment }
-- { from: specs/api/payments, to: specs/endpoints/list-payments, relation: related, method: contract_import, min_confidence: 0.95, operation: listPayments }
-- { from: specs/api/claims, to: specs/endpoints/declare-claim, relation: related, method: contract_import, min_confidence: 0.95, operation: DeclareClaim }
+- { from: specs/api/model-query, to: specs/endpoints/list-entities, relation: related, method: contract_import, min_confidence: 0.95, operation: listEntities }
+- { from: specs/api/model-query, to: specs/endpoints/get-entity, relation: related, method: contract_import, min_confidence: 0.95, operation: getEntity }
+- { from: specs/api/forge-bridge, to: specs/endpoints/notify-build, relation: related, method: contract_import, min_confidence: 0.95, operation: notifyBuild }
 
 # Typed frontmatter attributes.
-- { from: specs/roles/account-manager, to: specs/screens/free-payment-entry, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/roles/claims-handler, to: specs/screens/claim-review, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/screens/member-file, to: specs/objects/member, relation: accesses, attributes: { mode: write }, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/screens/contract-overview, to: specs/objects/cover, relation: accesses, attributes: { mode: read }, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/api/claims, to: specs/screens/claim-review, relation: serves, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/tables/payment, to: specs/objects/payment, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/tables/claim, to: specs/objects/claim, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: specs/batches/nightly-settlement, to: specs/batches/premium-call, relation: flows_to, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: glossary/free-payment, to: glossary/payment, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: glossary/annual-cap, to: glossary/cap, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
-- { from: meetings/2026-04-02-portal-review, to: decisions/online-payment-in-portal, relation: documents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/roles/maintainer, to: specs/screens/keyword-page, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/roles/quality-owner, to: specs/screens/to-do-page, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/screens/to-do-page, to: specs/objects/finding, relation: accesses, attributes: { mode: write }, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/screens/entity-page, to: specs/objects/link, relation: accesses, attributes: { mode: read }, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/api/model-query, to: specs/screens/service/suggestion-review, relation: serves, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/tables/entities, to: specs/objects/entity, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/tables/findings, to: specs/objects/finding, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: specs/batches/nightly-build, to: specs/batches/staleness-report, relation: flows_to, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossary/explicit-link, to: glossary/link, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: glossary/section-mention, to: glossary/mention, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }
+- { from: meetings/2026-04-02-service-scope-review, to: decisions/pinned-trail-in-service, relation: documents, method: frontmatter_ref, min_confidence: 0.9 }
 
 # Applications composing the notes of their zone.
-- { from: policy-admin, to: specs/screens/member-search, relation: composes, method: folder_zone, min_confidence: 0.9 }
-- { from: policy-admin, to: specs/api/payments, relation: composes, method: folder_zone, min_confidence: 0.9 }
-- { from: member-portal, to: specs/screens/portal/my-contracts, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-cli, to: specs/screens/search-results, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-cli, to: specs/api/canonical-model, relation: composes, method: folder_zone, min_confidence: 0.9 }
+- { from: concordance-service, to: specs/screens/service/document-viewer, relation: composes, method: folder_zone, min_confidence: 0.9 }
 
 # Mentions under a mapped section heading.
-- { from: specs/screens/free-payment-entry, to: specs/objects/contract, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/objects/payment, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/screens/payment-summary, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/free-payment-entry, to: specs/screens/member-search, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/claim-review, to: specs/objects/indemnity, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/screens/portal/my-contracts, to: specs/screens/portal/online-payment, relation: triggers, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/payments, to: specs/screens/free-payment-entry, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/payments, to: specs/batches/nightly-settlement, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/payments, to: specs/processes/record-a-payment, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/claims, to: specs/screens/portal/claim-tracking, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/api/claims, to: specs/objects/claim, relation: accesses, method: section_mention, min_confidence: 0.7 }
-- { from: specs/endpoints/create-payment, to: specs/screens/portal/online-payment, relation: serves, method: section_mention, min_confidence: 0.7 }
-- { from: specs/endpoints/declare-claim, to: specs/rules/claim-deadline, relation: constrains, inverse: true, method: section_mention, min_confidence: 0.7 }
-- { from: specs/rules/annual-cap, to: specs/api/payments, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/rules/claim-deadline, to: specs/processes/declare-a-claim, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/rules/member-age-limit, to: specs/objects/member, relation: constrains, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batches/nightly-settlement, to: specs/tables/payment, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batches/premium-call, to: specs/objects/premium, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
-- { from: specs/batches/claim-reserve-update, to: specs/tables/claim, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/cap-checked-server-side, to: specs/api/payments, relation: affects, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/termination-by-portal-planned, to: specs/rules/termination-notice, relation: affects, method: section_mention, min_confidence: 0.7 }
-- { from: decisions/member-directory-exposed, to: specs/api/member-directory, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/keyword-page, to: specs/objects/occurrence, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/keyword-page, to: specs/objects/candidate, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/keyword-page, to: specs/screens/entity-page, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/keyword-page, to: specs/screens/search-results, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/to-do-page, to: specs/objects/finding, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/screens/service/document-viewer, to: specs/screens/service/pinned-trail, relation: triggers, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/canonical-model, to: specs/screens/keyword-page, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/canonical-model, to: specs/batches/staleness-report, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/canonical-model, to: specs/processes/build-pipeline, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/model-query, to: specs/screens/service/document-viewer, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/api/model-query, to: specs/objects/entity, relation: accesses, method: section_mention, min_confidence: 0.7 }
+- { from: specs/endpoints/list-entities, to: specs/screens/service/pinned-trail, relation: serves, method: section_mention, min_confidence: 0.7 }
+- { from: specs/endpoints/notify-build, to: specs/rules/fail-on-policy, relation: constrains, inverse: true, method: section_mention, min_confidence: 0.7 }
+- { from: specs/rules/publication-threshold, to: specs/api/canonical-model, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/rules/fail-on-policy, to: specs/processes/lint-in-merge-request, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/rules/identifier-pattern, to: specs/objects/entity, relation: constrains, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batches/nightly-build, to: specs/tables/links, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batches/cache-pruning, to: specs/objects/resource, relation: accesses, attributes: { mode: read }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/batches/staleness-report, to: specs/tables/findings, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/threshold-applied-in-model, to: specs/api/canonical-model, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/suggestions-in-service-planned, to: specs/rules/rejected-terms-never-proposed, relation: affects, method: section_mention, min_confidence: 0.7 }
+- { from: decisions/forge-bridge-exposed, to: specs/api/forge-bridge, relation: affects, method: section_mention, min_confidence: 0.7 }
 
 # Occurrences of glossary titles and aliases in prose; the type prefix "screen" adds 0.1.
-- { from: glossary/free-payment, to: specs/screens/free-payment-entry, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossary/claim-file, to: specs/screens/claim-review, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossary/annual-cap, to: meetings/2026-03-12-payments-workshop, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: glossary/premium, to: specs/objects/premium, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
-- { from: meetings/2026-03-12-payments-workshop, to: specs/screens/free-payment-entry, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "screen Free payment entry: recognised type prefix" }
+- { from: glossary/keyword-page, to: specs/screens/keyword-page, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossary/finding, to: specs/screens/to-do-page, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossary/publication-threshold, to: meetings/2026-03-12-keyword-page-threshold-review, relation: related, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: glossary/occurrence, to: specs/objects/occurrence, relation: represents, method: glossary_occurrence, min_confidence: 0.6 }
+- { from: meetings/2026-04-23-neighbourhood-cap-review, to: specs/screens/neighbourhood-map, relation: documents, method: glossary_occurrence, min_confidence: 0.7, note: "screen Neighbourhood map: recognised type prefix" }
 
 # Entities named in the same paragraph.
-- { from: glossary/annual-cap, to: specs/api/payments, relation: related, method: cooccurrence, min_confidence: 0.4 }
-- { from: glossary/scheduled-payment, to: glossary/free-payment, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossary/publication-threshold, to: specs/api/canonical-model, relation: related, method: cooccurrence, min_confidence: 0.4 }
+- { from: glossary/section-mention, to: glossary/explicit-link, relation: related, method: cooccurrence, min_confidence: 0.4 }

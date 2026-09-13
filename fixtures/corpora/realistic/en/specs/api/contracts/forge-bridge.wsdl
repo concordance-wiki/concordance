@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="ForgeBridgeService"
+  targetNamespace="urn:example:forge-bridge"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:tns="urn:example:forge-bridge"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <types>
+    <xsd:schema targetNamespace="urn:example:forge-bridge">
+      <xsd:element name="notifyBuildRequest" type="xsd:string"/>
+      <xsd:element name="notifyBuildResponse" type="xsd:string"/>
+      <xsd:element name="fetchFindingsRequest" type="xsd:string"/>
+      <xsd:element name="fetchFindingsResponse" type="xsd:string"/>
+    </xsd:schema>
+  </types>
+  <message name="notifyBuildInput"><part name="body" element="tns:notifyBuildRequest"/></message>
+  <message name="notifyBuildOutput"><part name="body" element="tns:notifyBuildResponse"/></message>
+  <message name="fetchFindingsInput"><part name="body" element="tns:fetchFindingsRequest"/></message>
+  <message name="fetchFindingsOutput"><part name="body" element="tns:fetchFindingsResponse"/></message>
+  <portType name="ForgeBridgePortType">
+    <operation name="notifyBuild">
+      <input message="tns:notifyBuildInput"/>
+      <output message="tns:notifyBuildOutput"/>
+    </operation>
+    <operation name="fetchFindings">
+      <input message="tns:fetchFindingsInput"/>
+      <output message="tns:fetchFindingsOutput"/>
+    </operation>
+  </portType>
+  <binding name="ForgeBridgeBinding" type="tns:ForgeBridgePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="notifyBuild">
+      <soap:operation soapAction="urn:example:forge-bridge:notifyBuild"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="fetchFindings">
+      <soap:operation soapAction="urn:example:forge-bridge:fetchFindings"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="ForgeBridgeService">
+    <port name="ForgeBridgePort" binding="tns:ForgeBridgeBinding">
+      <soap:address location="http://forge-bridge.example.invalid/soap"/>
+    </port>
+  </service>
+</definitions>
