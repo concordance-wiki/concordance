@@ -68,10 +68,11 @@ describe("The accent colour never carries information on its own", () => {
       ".space-current > span",
       ".markdown .written",
       ".legend-written::before,\n.legend-recognised::before",
-      ".banner",
       ".related-clear",
       ".related-mark",
       CONTRACT_BUTTONS,
+      ".keyword-notice",
+      ".passage-at",
     ]);
   });
 
@@ -114,11 +115,13 @@ describe("The accent colour never carries information on its own", () => {
     expect(page).toContain('<span class="legend-recognised">word recognised at indexing</span>');
   });
 
-  it("gives the accent-bordered banner a text of its own", () => {
+  it("gives the accent-bordered notice of a keyword page a text of its own, and underlines the position of a passage", () => {
     const keyword = pages.get("keyword-page.html") ?? "";
     expect(keyword).toMatch(
-      /<p class="banner" role="note">Expression without a note\. \d+ passages recorded\. <a class="create-note" [^>]*>Create a note<\/a><\/p>/,
+      /<aside class="keyword-notice" role="note"><p class="keyword-notice-lead">Nobody has written a definition, but \d+ passages use this word\.<\/p><a class="create-note" [^>]*>Propose a definition<\/a><\/aside>/,
     );
+    expect(ruleFor(components, ".passage-at").body).toContain("text-decoration: underline;");
+    expect(keyword).toContain('<a class="passage-at" href="../build-pipeline/#L12">line 12</a>');
   });
 
   it("names the colour scheme in the mode switch instead of showing a coloured state alone", () => {

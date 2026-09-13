@@ -136,8 +136,8 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");
     const keyword = io.fs.readText("/work/dist/keywords/build-summary/index.html");
-    expect(keyword).toContain("<h1>build summary</h1>");
-    expect(keyword).toContain("<q>");
+    expect(keyword).toContain('<h1 class="keyword-title">build summary</h1>');
+    expect(keyword).toContain('<q class="passage-text">');
     const todo = io.fs.readText("/work/dist/todo/index.html");
     expect(todo).toContain('<a href="../keywords/build-summary/index.html">build summary</a>');
   });

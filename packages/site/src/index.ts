@@ -226,6 +226,7 @@ export {
   breadcrumbOf,
   initialsOf,
   spaceOf,
+  spaceWithPageOf,
 } from "./build/space.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {

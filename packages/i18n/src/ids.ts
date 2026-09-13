@@ -14,8 +14,12 @@ export interface MessageArguments {
   "entity.neighbourPages": { count: number };
   "entity.otherPages": { count: number };
   "keyword.documents": { count: number };
+  "keyword.filesSummary": { count: number };
+  "keyword.noticeLead": { count: number };
   "keyword.occurrences": { count: number };
-  "keyword.passages": { count: number };
+  "keyword.pageAt": { number: number };
+  "keyword.slideAt": { number: number };
+  "keyword.usedSince": { month: string };
   "mentions.atLine": { line: number };
   "mentions.inSection": { section: string };
   "search.results": { count: number };
@@ -59,14 +63,31 @@ export const messageArguments = {
   "home.tree": {},
   "index.empty": {},
   "index.letters": {},
+  "keyword.companions": {},
   "keyword.createNote": {},
   "keyword.documents": { count: "plural" },
+  "keyword.factFiles": {},
+  "keyword.factOccurrences": {},
+  "keyword.factSpaces": {},
+  "keyword.filesSummary": { count: "plural" },
+  "keyword.maybeSame": {},
+  "keyword.noCompanion": {},
+  "keyword.noDefinition": {},
+  "keyword.noProperty": {},
   "keyword.noteWritten": {},
+  "keyword.noticeDetail": {},
+  "keyword.noticeLead": { count: "plural" },
   "keyword.occurrences": { count: "plural" },
-  "keyword.passages": { count: "plural" },
+  "keyword.pageAt": { number: "number" },
+  "keyword.passagesTitle": {},
+  "keyword.relatedNote": {},
   "keyword.similarLead": {},
+  "keyword.slideAt": { number: "number" },
+  "keyword.terms": {},
   "keyword.title": {},
   "keyword.undefinedExpression": {},
+  "keyword.usedSince": { month: "argument" },
+  "keyword.whatWeKnow": {},
   "mentions.atLine": { line: "number" },
   "mentions.inSection": { section: "argument" },
   "nav.applications": {},

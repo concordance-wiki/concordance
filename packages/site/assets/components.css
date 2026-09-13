@@ -811,36 +811,6 @@ concordance-island[data-island="search"] {
   text-decoration: underline;
 }
 
-.banner {
-  padding: var(--space-2) var(--space-3);
-  border-inline-start: 3px solid var(--color-accent);
-  background: var(--color-surface);
-}
-
-.counts {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.counts dt {
-  color: var(--color-label);
-  font-size: 0.8125rem;
-}
-
-.counts dd {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.keyword-panel {
-  padding-block: var(--space-2) var(--space-3);
-}
-
-.keyword-panel h2 {
-  margin-block-start: var(--space-2);
-}
-
 .companions {
   display: flex;
   flex-wrap: wrap;
@@ -850,23 +820,23 @@ concordance-island[data-island="search"] {
 }
 
 .companion[data-weight="1"] {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .companion[data-weight="2"] {
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .companion[data-weight="3"] {
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
 }
 
 .companion[data-weight="4"] {
-  font-size: 1.25rem;
+  font-size: 1.0625rem;
 }
 
 .companion[data-weight="5"] {
-  font-size: 1.5rem;
+  font-size: 1.1875rem;
 }
 
 /* Related pages: one entry per page that evokes the entity, most passages first. */
@@ -1624,4 +1594,204 @@ concordance-island[data-island="search"] {
 .document-text summary {
   color: var(--color-muted);
   cursor: pointer;
+}
+
+/* Keyword page: the word nobody defined, its passages in the centre, what is known of it in the panel. */
+
+/* The title of a word without a note is dotted, the way the word is drawn on the map and in the results. */
+
+.keyword-title {
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+/* The "no definition" mark: a dashed chip, hollow, so that it does not read as a type. */
+
+.badge-noteless {
+  border: 1px dashed var(--color-label);
+  background: var(--color-surface);
+}
+
+/* The notice stands where the note would: a rule on its side in the accent, the position of the current thing, and a text of its own. */
+
+.keyword-notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent);
+  border-start-end-radius: var(--radius-large);
+  border-end-end-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.keyword-notice p {
+  margin: 0;
+}
+
+.keyword-notice-lead {
+  font-weight: 600;
+}
+
+.keyword-notice-detail {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.keyword-notice .create-note {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-block-size: 2.5rem;
+  margin-block-start: var(--space-1);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.keyword-notice a.create-note:hover {
+  text-decoration: underline;
+}
+
+.keyword-body > h2 {
+  margin-block: 0 var(--space-1);
+  font-size: 1.1875rem;
+}
+
+.keyword-summary {
+  margin: 0 0 var(--space-3);
+  color: var(--color-label);
+  font-size: 0.875rem;
+}
+
+/* One file: its head on the soft surface, then its passages, each one a row with where it stands, a timecode, a page or a line in the accent and underlined, and its text. */
+
+.passage-group {
+  margin-block-end: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.passage-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-soft);
+  background: var(--color-soft);
+  font-size: 0.875rem;
+}
+
+.passage-file .badge {
+  flex: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.passage-title {
+  flex: 1;
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.passage-title:hover {
+  text-decoration: underline;
+}
+
+.passage-count {
+  flex: none;
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.passage-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.passage {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-soft);
+  line-height: 1.7;
+}
+
+.passage:last-child {
+  border-block-end: 0;
+}
+
+.passage-at {
+  flex: none;
+  min-inline-size: 2.75rem;
+  padding-block-start: 0.15em;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.passage-text {
+  quotes: none;
+}
+
+/* The three blocks of the panel: what we know, maybe the same thing, the accompanying words. */
+
+.keyword-facts .attributes dt {
+  inline-size: 6.75rem;
+}
+
+.similar-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.similar-lead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding-block: var(--space-1);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.similar-lead:hover {
+  text-decoration: underline;
+}
+
+.similar-label {
+  flex: 1;
+}
+
+.similar-count {
+  color: var(--color-label);
+  font-family: var(--font-mono);
+}
+
+.keyword-panel .companions {
+  margin: 0 0 var(--space-3);
 }

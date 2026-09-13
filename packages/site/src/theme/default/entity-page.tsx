@@ -89,7 +89,13 @@ function NoteSection({ entity, section }: { entity: EntityRef; section: Section 
 }
 
 /** Space › folder › page: the space links to its place on the home page, the page is where the reader stands. */
-function Breadcrumb({ items, label }: { items: BreadcrumbItem[]; label: string }): JSX.Element {
+export function Breadcrumb({
+  items,
+  label,
+}: {
+  items: BreadcrumbItem[];
+  label: string;
+}): JSX.Element {
   const last = items.length - 1;
   return (
     <nav class="breadcrumbs" aria-label={label}>
@@ -114,7 +120,7 @@ function Breadcrumb({ items, label }: { items: BreadcrumbItem[]; label: string }
  * A block of the right panel: a disclosure whose summary is the heading, served closed and
  * unfolded by the stylesheet where the layout has room for the panel.
  */
-function PanelBlock({
+export function PanelBlock({
   id,
   className,
   heading,

@@ -125,6 +125,12 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
     const monospace = [
       ...components.matchAll(/^([^{}]+)\{[^}]*font-family: var\(--font-mono\)/gm),
     ].map((match) => (match[1] ?? "").trim());
-    expect(monospace).toEqual([".count", ".related-count"]);
+    expect(monospace).toEqual([
+      ".count",
+      ".related-count",
+      ".passage-count",
+      ".passage-at",
+      ".similar-count",
+    ]);
   });
 });

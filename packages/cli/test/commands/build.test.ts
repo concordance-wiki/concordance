@@ -1390,7 +1390,7 @@ describe("concordance build", () => {
         expect(page).toContain('<div class="markdown">');
         expect(page).not.toMatch(/href="[^"]*\.md"/);
         const keyword = built.model.entities.find((entity) => entity.keyword === true);
-        expect(built.pages.get(pagePath(keyword?.id ?? ""))).toContain("<q>");
+        expect(built.pages.get(pagePath(keyword?.id ?? ""))).toContain('<q class="passage-text">');
       });
 
       it("counts entities per type, links per method, keywords, duplicates and findings alike in the log and on stdout", () => {

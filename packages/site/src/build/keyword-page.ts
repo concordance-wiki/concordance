@@ -1,13 +1,21 @@
 import { pagePath, type Entity } from "@concordance-wiki/core";
-import { formatMessage } from "@concordance-wiki/i18n";
+import { formatMessage, formatMonth } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
-import type { Companion, KeywordPageProps, Link, PassageGroup } from "../slots.js";
-import { createNoteHref, fileKey, message, type SiteContext } from "./context.js";
+import type {
+  ChangeDate,
+  Companion,
+  KeywordPageLabels,
+  KeywordPageProps,
+  PassageGroup,
+  SimilarExpression,
+} from "../slots.js";
+import { createNoteHref, fileKey, message, typeLabel, type SiteContext } from "./context.js";
 import { neighbourhoodOf, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
 import { mentionsPanelOf } from "./mentions.js";
-import { entityHref } from "./paths.js";
+import { entityHref, HOME_PAGE, relativeHref } from "./paths.js";
+import { HOME_TREE_ANCHOR, spaceWithPageOf } from "./space.js";
 
 /** The heaviest companions weigh 5, the lightest 1, by rank of their count. */
 const COMPANION_WEIGHTS = 5;
@@ -25,15 +33,53 @@ function sourceRank(context: SiteContext, source: string): number {
 }
 
 /**
- * Passages grouped by file in corpus order, sources in declaration order then paths, the
- * passages of a file by line; a file that is no page of the site is left out.
+ * Where a passage stands, worded in the site language: in a document of the citing page, the
+ * timecode of the cue, the page or the slide the scan counted as the line, as the fragment of
+ * that page records it; in a note, the line.
  */
-export function passageGroupsOf(
+export function passageLocationOf(
+  context: SiteContext,
+  note: Entity,
+  passage: FragmentPassage,
+): string {
+  const document = context.fragments
+    .get(note.id)
+    ?.documents?.find(
+      (candidate) => candidate.source === passage.source && candidate.path === passage.path,
+    );
+  const position = document?.pages.find((candidate) => candidate.number === passage.line);
+  if (document === undefined || position === undefined) {
+    return formatMessage(context.catalogue, "mentions.atLine", { line: passage.line });
+  }
+  switch (document.unit) {
+    case "cue":
+      // A timecode under the hour reads as minutes and seconds.
+      return position.label.replace(/^00:/, "");
+    case "page":
+      return formatMessage(context.catalogue, "keyword.pageAt", { number: position.number });
+    case "slide":
+      return formatMessage(context.catalogue, "keyword.slideAt", { number: position.number });
+  }
+}
+
+/** A group of passages with the source it comes from, which orders the groups and names the spaces. */
+export interface LocatedGroup {
+  source: string;
+  path: string;
+  group: PassageGroup;
+}
+
+/**
+ * Passages grouped by file in corpus order, sources in declaration order then paths, the
+ * passages of a file by line, each group carrying the title and the type of its page and each
+ * passage where it stands; a file that is no page of the site is left out.
+ */
+export function locatedGroupsOf(
   context: SiteContext,
   page: string,
   passages: readonly FragmentPassage[],
-): PassageGroup[] {
-  const groups = new Map<string, { source: string; path: string; group: PassageGroup }>();
+): LocatedGroup[] {
+  const groups = new Map<string, LocatedGroup>();
   for (const passage of passages) {
     const key = fileKey(passage.source, passage.path);
     const note = context.byFile.get(key);
@@ -44,7 +90,12 @@ export function passageGroupsOf(
       entry = {
         source: passage.source,
         path: passage.path,
-        group: { file: { label: passage.path, href }, passages: [] },
+        group: {
+          file: { label: passage.path, href },
+          title: note.title,
+          typeLabel: typeLabel(context, note.type),
+          passages: [],
+        },
       };
       groups.set(key, entry);
     }
@@ -53,6 +104,7 @@ export function passageGroupsOf(
       ...(passage.text === undefined ? {} : { text: passage.text }),
       line: passage.line,
       href: `${entry.group.file.href}#L${String(passage.line)}`,
+      location: passageLocationOf(context, note, passage),
     });
   }
   return [...groups.values()]
@@ -62,10 +114,55 @@ export function passageGroupsOf(
         byCodeUnit(a.source, b.source) ||
         byCodeUnit(a.path, b.path),
     )
-    .map(({ group }) => ({
-      file: group.file,
-      passages: group.passages.sort((a, b) => a.line - b.line),
+    .map((entry) => ({
+      ...entry,
+      group: { ...entry.group, passages: entry.group.passages.sort((a, b) => a.line - b.line) },
     }));
+}
+
+/** The passages grouped by file in corpus order, as the page lists them. */
+export function passageGroupsOf(
+  context: SiteContext,
+  page: string,
+  passages: readonly FragmentPassage[],
+): PassageGroup[] {
+  return locatedGroupsOf(context, page, passages).map((entry) => entry.group);
+}
+
+/**
+ * The space a word is filed in: the first glossary source the model knows, where its note would
+ * be written, else the source of its first passage; none for a word without either.
+ */
+export function keywordSpaceOf(
+  context: SiteContext,
+  groups: readonly LocatedGroup[],
+): string | undefined {
+  const known = new Set(context.model.build.sources.map((source) => source.name));
+  return context.glossarySources?.find((name) => known.has(name)) ?? groups[0]?.source;
+}
+
+/**
+ * Since when the word is used: the oldest git date among the files of its passages, worded by
+ * month; none when no file carries a date.
+ */
+export function usedSinceOf(
+  context: SiteContext,
+  passages: readonly FragmentPassage[],
+): ChangeDate | undefined {
+  let earliest: string | undefined;
+  for (const passage of passages) {
+    const date = context.byFile.get(fileKey(passage.source, passage.path))?.source.last_modified;
+    if (date !== undefined && (earliest === undefined || Date.parse(date) < Date.parse(earliest))) {
+      earliest = date;
+    }
+  }
+  if (earliest === undefined) return undefined;
+  return {
+    date: earliest.slice(0, 10),
+    label: formatMessage(context.catalogue, "keyword.usedSince", {
+      month: formatMonth(context.locale ?? context.language, new Date(earliest)),
+    }),
+  };
 }
 
 /**
@@ -101,11 +198,44 @@ export function companionsOf(context: SiteContext, page: string, entity: Entity)
   });
 }
 
-/** The leads of the fragment as links, a lead to a page the model lost being left out. */
-export function similarOf(context: SiteContext, page: string, entity: Entity): Link[] {
-  return (context.fragments.get(entity.id)?.leads ?? []).flatMap((lead) =>
-    context.entities.has(lead.id) ? [{ label: lead.title, href: entityHref(page, lead.id) }] : [],
-  );
+/**
+ * The leads of the fragment as links, a keyword page among them carrying its occurrence count;
+ * a lead to a page the model lost is left out.
+ */
+export function similarOf(context: SiteContext, page: string, entity: Entity): SimilarExpression[] {
+  return (context.fragments.get(entity.id)?.leads ?? []).flatMap((lead) => {
+    const target = context.entities.get(lead.id);
+    if (target === undefined) return [];
+    return [
+      {
+        label: lead.title,
+        href: entityHref(page, lead.id),
+        ...(target.keyword === true ? { count: numberOf(target.attributes["occurrences"]) } : {}),
+      },
+    ];
+  });
+}
+
+/** The headings and notes of the page in the site language. */
+export function keywordPageLabels(context: SiteContext, neighbours: number): KeywordPageLabels {
+  return {
+    spaceTree: message(context, "entity.spaceTree"),
+    breadcrumb: message(context, "entity.breadcrumb"),
+    noDefinition: message(context, "keyword.noDefinition"),
+    passages: message(context, "keyword.passagesTitle"),
+    whatWeKnow: message(context, "keyword.whatWeKnow"),
+    occurrences: message(context, "keyword.factOccurrences"),
+    files: message(context, "keyword.factFiles"),
+    spaces: message(context, "keyword.factSpaces"),
+    noProperty: message(context, "keyword.noProperty"),
+    maybeSame: message(context, "keyword.maybeSame"),
+    companions: message(context, "keyword.companions"),
+    noCompanion: message(context, "keyword.noCompanion"),
+    seeNeighbourhood: message(context, "entity.seeNeighbourhood"),
+    neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
+      count: neighbours,
+    }),
+  };
 }
 
 export interface KeywordPageOptions {
@@ -113,9 +243,11 @@ export interface KeywordPageOptions {
 }
 
 /**
- * The view model of a keyword page: the counts from the entity, the passages and the leads from
- * its fragment, the companions from the model, the banner from the catalogue with the lead to
- * write the note on the glossary's forge when it is known.
+ * The view model of a keyword page: the space the word is filed in and its breadcrumb, since
+ * when it is used, the notice from the catalogue with the lead to propose a definition on the
+ * glossary's forge when it is known, the counts from the entity, the passages and the leads
+ * from its fragment, the companions from the model, the related pages with the note that none
+ * is cited, and the labels of the page in the site language.
  */
 export function keywordPageOf(
   context: SiteContext,
@@ -125,9 +257,14 @@ export function keywordPageOf(
   const page = pagePath(entity.id);
   const neighbourhood = neighbourhoodOf(context, page, entity);
   const passages = context.fragments.get(entity.id)?.passages ?? [];
+  const groups = locatedGroupsOf(context, page, passages);
   const occurrences = numberOf(entity.attributes["occurrences"]);
+  const files = numberOf(entity.attributes["documents"]);
   const slug = entity.id.replace(/^.*\//, "");
   const createHref = createNoteHref(context, slug);
+  const space = keywordSpaceOf(context, groups);
+  const usedSince = usedSinceOf(context, passages);
+  const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);
   return {
     entity: {
       id: entity.id,
@@ -135,8 +272,20 @@ export function keywordPageOf(
       locale: entity.locale,
       typeLabel: message(context, "keyword.title"),
     },
+    ...(space === undefined
+      ? {}
+      : {
+          space: spaceWithPageOf(context, page, entity, space),
+          breadcrumb: [
+            { label: space, href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}` },
+            { label: message(context, "keyword.terms") },
+            { label: entity.title },
+          ],
+        }),
+    ...(usedSince === undefined ? {} : { usedSince }),
     banner: {
-      text: `${message(context, "keyword.undefinedExpression")}. ${formatMessage(context.catalogue, "keyword.passages", { count: occurrences })}.`,
+      text: formatMessage(context.catalogue, "keyword.noticeLead", { count: occurrences }),
+      detail: message(context, "keyword.noticeDetail"),
       createNote: {
         label: message(context, "keyword.createNote"),
         ...(createHref === undefined ? {} : { href: createHref }),
@@ -144,20 +293,20 @@ export function keywordPageOf(
     },
     counts: {
       occurrences,
-      files: numberOf(entity.attributes["documents"]),
+      files,
       sources: new Set(passages.map((passage) => passage.source)).size,
     },
-    passages: passageGroupsOf(context, page, passages),
+    spaces: [...new Set(groups.map((group) => group.source))],
+    summary: formatMessage(context.catalogue, "keyword.filesSummary", { count: files }),
+    passages: groups.map((group) => group.group),
     companions: companionsOf(context, page, entity),
     similar: similarOf(context, page, entity),
     similarLead: message(context, "keyword.similarLead"),
     neighbours: neighbourhood,
-    mentions: mentionsPanelOf(context, page, entity, options.mentionsInline),
-    labels: {
-      seeNeighbourhood: message(context, "entity.seeNeighbourhood"),
-      neighbourPages: formatMessage(context.catalogue, "entity.neighbourPages", {
-        count: neighbourPages(neighbourhood),
-      }),
+    mentions: {
+      ...mentions,
+      labels: { ...mentions.labels, orderNote: message(context, "keyword.relatedNote") },
     },
+    labels: keywordPageLabels(context, neighbourPages(neighbourhood)),
   };
 }

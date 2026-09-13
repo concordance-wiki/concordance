@@ -198,6 +198,7 @@ describe("@concordance-wiki/site", () => {
       "siteRootOf",
       "siteStylesheet",
       "spaceOf",
+      "spaceWithPageOf",
       "toggleValue",
       "tokensStylesheet",
       "trailHash",

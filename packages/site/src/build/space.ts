@@ -130,6 +130,26 @@ export function spaceOf(context: SiteContext, page: string, entity: Entity): Spa
   };
 }
 
+/**
+ * The tree of a space for a page that has no file in it: the keyword page of an expression,
+ * filed at the root of the space under `<slug>.md`, so that the word stands among the notes as
+ * the current page, at the place a note of that name would take.
+ */
+export function spaceWithPageOf(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+  source: string,
+): SpaceTree {
+  const root = treeOf(context, source);
+  root.pages.push({ file: `${entity.id.slice(entity.id.lastIndexOf("/") + 1)}.md`, entity });
+  return {
+    name: source,
+    initials: initialsOf(source),
+    nodes: nodesOf(context, page, entity, root, []),
+  };
+}
+
 /** Space › folders › page: the space links to the file tree of the home page, a folder has no page, the page is the current one. */
 export function breadcrumbOf(page: string, entity: Entity): BreadcrumbItem[] {
   return [
