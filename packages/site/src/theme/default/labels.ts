@@ -130,9 +130,9 @@ export const labels = {
   homeQuestion: "What are you looking for?",
   homeExplanation:
     "Type a word of the business. If it is used anywhere in the documentation, it has a page \u2014 even if nobody has defined it yet.",
-  frequent: "Frequently consulted",
+  mostCited: "Most cited",
   spacesLead: "fed by your repositories",
-  moreSpaces: "more spaces, less consulted",
+  moreSpaces: "more spaces, less cited",
   datesNote: "The dates come from the history of the repositories, so they are always right.",
   recentlyChanged: "Recently changed",
   browse: "browse",

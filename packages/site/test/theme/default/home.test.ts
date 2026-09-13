@@ -44,13 +44,13 @@ describe("Home", () => {
     expect(renderSlot("Home", rest, defaultTheme)).not.toContain("concordance-island");
   });
 
-  it("offers the most cited pages as chips led by the frequent lead, and nothing when there is none", () => {
+  it("offers the most cited pages as chips led by the most cited lead, and nothing when there is none", () => {
     const html = renderSlot("Home", home, defaultTheme);
     expect(html).toContain(
-      '<nav class="home-frequent" aria-label="Frequently consulted"><span class="home-frequent-lead">Frequently consulted</span><ul class="home-shortcuts"><li><a class="chip" href="glossary/entity/">entity</a></li><li><a class="chip" href="glossary/source/">source</a></li></ul></nav>',
+      '<nav class="home-most-cited" aria-label="Most cited"><span class="home-most-cited-lead">Most cited</span><ul class="home-shortcuts"><li><a class="chip" href="glossary/entity/">entity</a></li><li><a class="chip" href="glossary/source/">source</a></li></ul></nav>',
     );
     expect(renderSlot("Home", { ...home, shortcuts: [] }, defaultTheme)).not.toContain(
-      "home-frequent",
+      "home-most-cited",
     );
   });
 
@@ -86,15 +86,15 @@ describe("Home", () => {
     const html = renderSlot("Home", corporateHome, defaultTheme);
     expect(count(html, '<li class="home-space')).toBe(7);
     expect(html).toContain(
-      '</ul><details class="home-more-spaces"><summary>2 more spaces, less consulted</summary><ul class="home-space-list"><li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">BR</span>',
+      '</ul><details class="home-more-spaces"><summary>2 more spaces, less cited</summary><ul class="home-space-list"><li class="home-space"><details class="home-space-fold"><summary class="home-space-row"><span class="space-initials" aria-hidden="true">BR</span>',
     );
     expect(html).toContain("12 documents · <time");
     const { labels, ...unlabelled } = corporateHome;
     expect(labels).toBeDefined();
     expect(renderSlot("Home", unlabelled, defaultTheme)).toContain(
-      "<summary>2 more spaces, less consulted</summary>",
+      "<summary>2 more spaces, less cited</summary>",
     );
-    expect(defaultHomeLabels(3).moreSpaces).toBe("3 more spaces, less consulted");
+    expect(defaultHomeLabels(3).moreSpaces).toBe("3 more spaces, less cited");
   });
 
   it("lists the pages changed last with their space and their date under the heading the top bar links to, then the alert on every dormant space", () => {
@@ -118,7 +118,7 @@ describe("Home", () => {
         labels: {
           question: "Que cherchez-vous ?",
           explanation: "Tapez un mot du métier.",
-          frequent: "Fréquemment consulté",
+          mostCited: "Les plus citées",
           spaces: "Espaces",
           spacesLead: "alimentés par vos dépôts",
           moreSpaces: "aucun",
@@ -130,7 +130,7 @@ describe("Home", () => {
     );
     expect(html).toContain('<h1 id="home-question">Que cherchez-vous ?</h1>');
     expect(html).toContain('<p class="home-explanation">Tapez un mot du métier.</p>');
-    expect(html).toContain('aria-label="Fréquemment consulté"');
+    expect(html).toContain('aria-label="Les plus citées"');
     expect(html).toContain(
       '<h2 id="home-tree">Espaces <span class="home-lead">alimentés par vos dépôts</span></h2>',
     );

@@ -183,7 +183,7 @@ export function homeLabels(context: SiteContext, folded: number): HomeLabels {
   return {
     question: message(context, "home.question"),
     explanation: message(context, "home.explanation"),
-    frequent: message(context, "home.frequent"),
+    mostCited: message(context, "home.mostCited"),
     spaces: message(context, "site.spaces"),
     spacesLead: message(context, "home.spacesLead"),
     moreSpaces: formatMessage(context.catalogue, "home.moreSpaces", { count: folded }),

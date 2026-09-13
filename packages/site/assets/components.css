@@ -1647,7 +1647,7 @@ concordance-island[data-island="search"] {
 
 /* The most cited pages as chips, led by a word. */
 
-.home-frequent {
+.home-most-cited {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1655,7 +1655,7 @@ concordance-island[data-island="search"] {
   margin-block: var(--space-3) var(--space-5);
 }
 
-.home-frequent-lead {
+.home-most-cited-lead {
   color: var(--color-label);
   font-size: 0.8125rem;
 }
