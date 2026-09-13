@@ -40,6 +40,7 @@ export function defaultEntityPageLabels(neighbours: number, declared = 0): Entit
     neighbourPages: `${String(neighbours)} ${labels.neighbourPages}`,
     legendWritten: labels.legendWritten,
     legendRecognised: labels.legendRecognised,
+    legendKeyword: labels.legendKeyword,
     imageNote: labels.imageNote,
   };
 }
@@ -360,6 +361,7 @@ export function EntityPage({
             <p class="legend">
               <span class="legend-written">{text.legendWritten}</span>
               <span class="legend-recognised">{text.legendRecognised}</span>
+              <span class="legend-keyword">{text.legendKeyword}</span>
             </p>
           )}
           {sources.map((source) => (

@@ -4,6 +4,7 @@ import { withImageNotes } from "../../src/markdown/figures.js";
 import {
   LEAD_SECTION_ID,
   RECOGNISED_CLASS,
+  RECOGNISED_KEYWORD_CLASS,
   WRITTEN_CLASS,
   renderMarkdown,
   type RecognisedSpan,
@@ -365,7 +366,7 @@ describe("renderMarkdown", () => {
     const anchor = (text: string): string =>
       `<a href="../${text.replaceAll(" ", "-")}/index.html" class="${RECOGNISED_CLASS}">${text}</a>`;
 
-    it("wraps every recognised word of a paragraph in a marked anchor, in text order, the same word twice included", () => {
+    it("wraps every recognised word of a paragraph in a marked anchor, in text order, a page marked once", () => {
       const text =
         "# Note\n\nAn entity is typed, then an entity is linked; the entity page shows it.\n";
       const html =
@@ -373,9 +374,24 @@ describe("renderMarkdown", () => {
           recognised: [span(3, "entity"), span(3, "entity"), span(3, "entity page")],
         }).sections[0]?.html ?? "";
       expect(html).toBe(
-        `<p>An ${anchor("entity")} is typed, then an ${anchor("entity")} is linked; the ${anchor("entity page")} shows it.</p>`,
+        `<p>An ${anchor("entity")} is typed, then an entity is linked; the ${anchor("entity page")} shows it.</p>`,
       );
       expect(RECOGNISED_CLASS).toBe("recognised");
+    });
+
+    it("marks an expression without a note with the keyword class, its title on the anchor and again as hidden text that the plain text leaves out", () => {
+      const text = "# Note\n\nThe build summary is posted, then the entity is typed.\n";
+      const rendered = renderMarkdown(text, {
+        recognised: [
+          { ...span(3, "build summary"), keyword: true, title: "7 passages, no note" },
+          { ...span(3, "entity"), title: "note: Entity" },
+        ],
+      });
+      expect(rendered.sections[0]?.html).toBe(
+        `<p>The <a href="../build-summary/index.html" class="${RECOGNISED_KEYWORD_CLASS}" title="7 passages, no note">build summary<span class="visually-hidden"> (7 passages, no note)</span></a> is posted, then the <a href="../entity/index.html" class="${RECOGNISED_CLASS}" title="note: Entity">entity<span class="visually-hidden"> (note: Entity)</span></a> is typed.</p>`,
+      );
+      expect(rendered.text).toBe("The build summary is posted, then the entity is typed.");
+      expect(RECOGNISED_KEYWORD_CLASS).toBe("recognised-keyword");
     });
 
     it("finds the words of list items, nested lists, quotes, footnotes and lower headings by their line", () => {
@@ -410,9 +426,7 @@ describe("renderMarkdown", () => {
           ],
         }).sections[0]?.html ?? "";
       expect(html).toContain(`<h3>The ${anchor("entity")}</h3>`);
-      expect(html).toContain(
-        `<li>\n<p>an ${anchor("entity")}</p>\n<ul>\n<li>a ${anchor("link")}</li>\n</ul>`,
-      );
+      expect(html).toContain(`<li>\n<p>an entity</p>\n<ul>\n<li>a ${anchor("link")}</li>\n</ul>`);
       expect(html).toContain('<code class="language-yaml">entity: none\n</code>');
       expect(html).toContain(`<blockquote>\n<p>a ${anchor("finding")}</p>\n</blockquote>`);
       expect(html).toContain(`<p>a ${anchor("note")}<sup>`);
@@ -420,11 +434,11 @@ describe("renderMarkdown", () => {
     });
 
     it("searches the cells of a table row in turn, as they share a line", () => {
-      const text = ["# Note", "", "| a | b |", "|---|---|", "| entity | entity |", ""].join("\n");
+      const text = ["# Note", "", "| a | b |", "|---|---|", "| entity | link |", ""].join("\n");
       const html =
-        renderMarkdown(text, { recognised: [span(5, "entity"), span(5, "entity")] }).sections[0]
+        renderMarkdown(text, { recognised: [span(5, "entity"), span(5, "link")] }).sections[0]
           ?.html ?? "";
-      expect(html).toContain(`<td>${anchor("entity")}</td>\n<td>${anchor("entity")}</td>`);
+      expect(html).toContain(`<td>${anchor("entity")}</td>\n<td>${anchor("link")}</td>`);
     });
 
     it("leaves a word inside a link, one split by inline markup or one on a line without text unmarked, and goes on with the next", () => {
@@ -444,6 +458,16 @@ describe("renderMarkdown", () => {
       );
     });
 
+    it("marks the next occurrence of a page when the first is not found as written", () => {
+      const text = "# Note\n\nThe *entity* **page** and the entity page.\n";
+      const html =
+        renderMarkdown(text, { recognised: [span(3, "entity page"), span(3, "entity page")] })
+          .sections[0]?.html ?? "";
+      expect(html).toBe(
+        `<p>The <em>entity</em> <strong>page</strong> and the ${anchor("entity page")}.</p>`,
+      );
+    });
+
     it("passes over a span without href, the page's own name, so that the words after it stay in step", () => {
       const text = "# Note\n\nAn entity page, which a page of the site links to.\n";
       const html =
@@ -454,11 +478,70 @@ describe("renderMarkdown", () => {
     });
 
     it("marks a word that opens or fills its text node without leaving empty text around it", () => {
-      const text = "# Note\n\nentity *is* entity\n";
+      const text = "# Note\n\nentity *is* link\n";
       const tree =
-        renderMarkdown(text, { recognised: [span(3, "entity"), span(3, "entity")] }).sections[0]
+        renderMarkdown(text, { recognised: [span(3, "entity"), span(3, "link")] }).sections[0]
           ?.html ?? "";
-      expect(tree).toBe(`<p>${anchor("entity")} <em>is</em> ${anchor("entity")}</p>`);
+      expect(tree).toBe(`<p>${anchor("entity")} <em>is</em> ${anchor("link")}</p>`);
+    });
+
+    it("leaves a word plain when a written link leads to its page on the same line or above, whatever the anchor, not below", () => {
+      const text = [
+        "# Note",
+        "",
+        "The entity is read by the [entity page](entity-page.md#lead).",
+        "",
+        "An entity page shows an entity; see [the rule][rule].",
+        "",
+        "A rule applies.",
+        "",
+        "[rule]: rule.md",
+        "",
+      ].join("\n");
+      const html =
+        renderMarkdown(text, {
+          resolveHref: (target) => target.replace(/^(.*)\.md(#.*)?$/, "../$1/index.html$2"),
+          recognised: [
+            span(3, "entity"),
+            span(5, "entity page"),
+            span(5, "entity"),
+            span(7, "rule"),
+          ],
+        }).sections[0]?.html ?? "";
+      expect(html).toBe(
+        [
+          `<p>The ${anchor("entity")} is read by the <a href="../entity-page/index.html#lead" class="written">entity page</a>.</p>`,
+          '<p>An entity page shows an entity; see <a href="../rule/index.html" class="written">the rule</a>.</p>',
+          "<p>A rule applies.</p>",
+        ].join("\n"),
+      );
+    });
+
+    it("counts no mark in the title or in a section heading, which the page renders as text", () => {
+      const text = [
+        "# The entity",
+        "",
+        "## An [entity page](entity-page.md) and [a rule][rule]",
+        "",
+        "The entity page reads the entity and the rule.",
+        "",
+        "[rule]: rule.md",
+        "",
+      ].join("\n");
+      const rendered = renderMarkdown(text, {
+        resolveHref: (target) => `../${target.replace(".md", "")}/index.html`,
+        recognised: [
+          span(1, "entity"),
+          span(3, "rule"),
+          span(5, "entity page"),
+          span(5, "entity"),
+          span(5, "rule"),
+        ],
+      });
+      expect(rendered.sections[0]?.heading).toBe("An entity page and a rule");
+      expect(rendered.sections[0]?.html).toBe(
+        `<p>The ${anchor("entity page")} reads the ${anchor("entity")} and the ${anchor("rule")}.</p>`,
+      );
     });
   });
 });

@@ -1,7 +1,8 @@
 # Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
 # A minimum: other everyday expressions may cross the threshold, none of the unpublished ones may.
+# `marked_once_in` names a note that uses the expression more than once: its page marks the first occurrence only.
 published:
-  - { text: build summary, min_occurrences: 7, min_files: 3 }
+  - { text: build summary, min_occurrences: 7, min_files: 3, marked_once_in: { source: framing, path: lint-report-study.md } }
 unpublished:
   - { text: cold start, reason: "2 occurrences in 1 file" }
   - { text: incremental rebuild, reason: "1 occurrence" }

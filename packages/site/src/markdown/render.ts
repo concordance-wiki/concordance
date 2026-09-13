@@ -24,8 +24,12 @@ import { FIGURE_CAPTION_CLASS, FIGURE_CLASS, FIGURE_PATH_CLASS } from "./figures
 
 /** Class of an anchor the author wrote whose target is a page of the site. */
 export const WRITTEN_CLASS = "written";
-/** Class of an anchor the build added around a word the scan recognised. */
+/** Class of an anchor the build added around a word the scan recognised, whose entity has a note. */
 export const RECOGNISED_CLASS = "recognised";
+/** Class of an anchor the build added around a recognised expression that has no note, only a keyword page. */
+export const RECOGNISED_KEYWORD_CLASS = "recognised-keyword";
+/** Class of the text a mark carries for assistive technology, hidden from sight; the base stylesheet defines it. */
+const HIDDEN_CLASS = "visually-hidden";
 
 /** What kind of node a target was written on. */
 export type TargetKind = "link" | "image" | "definition";
@@ -41,6 +45,13 @@ export interface RecognisedSpan {
    * link, the page's own name for instance, so that the words after it stay in step.
    */
   href?: string;
+  /**
+   * What the mark tells on hover and to assistive technology, worded in the site language: the
+   * title of the note, or the number of passages of an expression without one.
+   */
+  title?: string;
+  /** True for an expression that has no note, only a keyword page: its mark is the keyword one. */
+  keyword?: boolean;
 }
 
 export interface MarkdownOptions {
@@ -52,7 +63,8 @@ export interface MarkdownOptions {
   resolveHref?: (target: string, kind: TargetKind) => string | null | undefined;
   /**
    * The recognised words of the note, in text order: each one is wrapped in a marked anchor where
-   * its text is found in its unit, unless it sits inside a link already.
+   * its text is found in its unit, unless it sits inside a link already or its page was marked
+   * higher up on the page, by a written link or by a recognised word.
    */
   recognised?: readonly RecognisedSpan[];
   /**
@@ -98,10 +110,10 @@ const schema: SanitizeSchema = {
   tagNames: [...defaultTags, "figure", "figcaption"],
   attributes: {
     ...defaultSchema.attributes,
-    a: withClasses(defaultRules.a, WRITTEN_CLASS, RECOGNISED_CLASS),
+    a: withClasses(defaultRules.a, WRITTEN_CLASS, RECOGNISED_CLASS, RECOGNISED_KEYWORD_CLASS),
     code: withClasses(defaultRules.code, FIGURE_PATH_CLASS),
     figure: [["className", FIGURE_CLASS]],
-    span: [["className", FIGURE_CAPTION_CLASS]],
+    span: [["className", FIGURE_CAPTION_CLASS, HIDDEN_CLASS]],
   },
 };
 
@@ -164,42 +176,68 @@ function markAs(node: Link | LinkReference, className: string): void {
   node.data = { ...node.data, hProperties: { className: [className] } };
 }
 
+/** The page a href leads to, its anchor left out: what the first-occurrence rule counts a mark under. */
+function pageOf(href: string): string {
+  const hash = href.indexOf("#");
+  return hash === -1 ? href : href.slice(0, hash);
+}
+
+/** A written link the page shows: the line it stands on and the page it leads to. */
+interface WrittenMark {
+  line: number;
+  page: string;
+}
+
+/** The first H1 titles the page and every H1 or H2 heads a section as text: a mark in one never shows. */
+function isTitleHeading(node: RootContent): boolean {
+  return node.type === "heading" && node.depth <= 2;
+}
+
+interface Rewriting {
+  resolveHref: NonNullable<MarkdownOptions["resolveHref"]>;
+  /** The href of every definition rewritten, by identifier, for the references to it. */
+  definitions: Map<string, string>;
+  /** The written links the page shows, in document order. */
+  written: WrittenMark[];
+}
+
 /**
  * Rewrites the targets under a node, depth first; a dropped link leaves its children in its
- * place. Returns the identifiers of the definitions that were rewritten.
+ * place. A rewritten link that shows on the page is recorded as a written mark.
  */
-function rewriteTargets(
-  parent: Parent,
-  resolveHref: NonNullable<MarkdownOptions["resolveHref"]>,
-  rewritten = new Set<string>(),
-): Set<string> {
+function rewriteTargets(parent: Parent, rewriting: Rewriting, shown = true): void {
   parent.children = parent.children.flatMap((child): RootContent[] => {
     if (child.type === "link" || child.type === "image" || child.type === "definition") {
-      const resolved = resolveHref(child.url, child.type);
+      const resolved = rewriting.resolveHref(child.url, child.type);
       if (resolved === null) {
         return replacement(child);
       }
       if (resolved !== undefined) {
         child.url = resolved;
-        if (child.type === "link") markAs(child, WRITTEN_CLASS);
-        if (child.type === "definition") rewritten.add(child.identifier);
+        if (child.type === "link") {
+          markAs(child, WRITTEN_CLASS);
+          if (shown) rewriting.written.push({ line: lineOf(child), page: pageOf(resolved) });
+        }
+        if (child.type === "definition") rewriting.definitions.set(child.identifier, resolved);
       }
     }
     if ("children" in child) {
-      rewriteTargets(child, resolveHref, rewritten);
+      rewriteTargets(child, rewriting, shown && !isTitleHeading(child));
     }
     return [child];
   });
-  return rewritten;
 }
 
-function markReferences(parent: Parent, rewritten: ReadonlySet<string>): void {
+function markReferences(parent: Parent, rewriting: Rewriting, shown = true): void {
   for (const child of parent.children) {
-    if (child.type === "linkReference" && rewritten.has(child.identifier)) {
+    const href =
+      child.type === "linkReference" ? rewriting.definitions.get(child.identifier) : undefined;
+    if (child.type === "linkReference" && href !== undefined) {
       markAs(child, WRITTEN_CLASS);
+      if (shown) rewriting.written.push({ line: lineOf(child), page: pageOf(href) });
     }
     if ("children" in child) {
-      markReferences(child, rewritten);
+      markReferences(child, rewriting, shown && !isTitleHeading(child));
     }
   }
 }
@@ -235,8 +273,11 @@ function textSlots(parent: Parent, slots: TextSlot[] = []): TextSlot[] {
   return slots;
 }
 
-/** The units of a block in document order, cut as the scan cuts them so that lines match. */
+/** The units of a block in document order, cut as the scan cuts them so that lines match; the headings rendered as text are not read. */
 function unitsOf(block: RootContent): TextUnit[] {
+  if (isTitleHeading(block)) {
+    return [];
+  }
   switch (block.type) {
     case "heading":
     case "paragraph":
@@ -264,19 +305,38 @@ function unitsOf(block: RootContent): TextUnit[] {
 }
 
 function recognisedLink(span: RecognisedSpan, href: string): Link {
+  const className = span.keyword === true ? RECOGNISED_KEYWORD_CLASS : RECOGNISED_CLASS;
+  const text: HastChild = { type: "text", value: span.text };
   return {
     type: "link",
     url: href,
-    data: { hProperties: { className: [RECOGNISED_CLASS] } },
+    data: {
+      hProperties: {
+        className: [className],
+        ...(span.title === undefined ? {} : { title: span.title }),
+      },
+      // The title again as hidden text, so that the dots and dashes never carry the information
+      // alone; given as markup so that the plain text of the note does not read it.
+      ...(span.title === undefined
+        ? {}
+        : {
+            hChildren: [
+              text,
+              hastElement("span", { className: [HIDDEN_CLASS] }, [
+                { type: "text", value: ` (${span.title})` },
+              ]),
+            ],
+          }),
+    },
     children: [{ type: "text", value: span.text }],
   };
 }
 
 /**
  * Wraps the span in the first slot from `cursor` whose text holds it and returns where the next
- * search starts: past the mark, or where it was when the text is not found.
+ * search starts, past the mark; undefined when the text is not found.
  */
-function wrap(slots: TextSlot[], cursor: number, span: RecognisedSpan): number {
+function wrap(slots: TextSlot[], cursor: number, span: RecognisedSpan): number | undefined {
   for (const [index, slot] of slots.entries()) {
     if (index < cursor) continue;
     const at = slot.node.value.indexOf(span.text);
@@ -303,24 +363,46 @@ function wrap(slots: TextSlot[], cursor: number, span: RecognisedSpan): number {
     slots[index] = { parent: slot.parent, node: after };
     return index;
   }
-  return cursor;
+  return undefined;
 }
 
 /**
  * Marks every recognised word in the text of its line, in order: the cells of a table row share
  * a line and are searched in turn; a word that is not found as written (split by inline markup,
- * or inside a link) is left unmarked.
+ * or inside a link) is left unmarked. A page is marked once: a word whose page a written link
+ * on the same line or above, or a recognised word above, already leads to stays plain text.
  */
-function markRecognised(tree: Root, spans: readonly RecognisedSpan[]): void {
+function markRecognised(
+  tree: Root,
+  spans: readonly RecognisedSpan[],
+  written: readonly WrittenMark[],
+): void {
   const lines = new Map<number, TextSlot[]>();
   for (const unit of tree.children.flatMap(unitsOf)) {
     lines.set(unit.line, [...(lines.get(unit.line) ?? []), ...unit.slots]);
   }
   const cursors = new Map<number, number>();
+  const pending = written.toSorted((a, b) => a.line - b.line);
+  const marked = new Set<string>();
+  let next = 0;
   for (const span of spans) {
+    for (
+      let mark = pending.at(next);
+      mark !== undefined && mark.line <= span.line;
+      mark = pending.at(next)
+    ) {
+      marked.add(mark.page);
+      next += 1;
+    }
     const slots = lines.get(span.line);
     if (slots === undefined) continue;
-    cursors.set(span.line, wrap(slots, cursors.get(span.line) ?? 0, span));
+    const page = span.href === undefined ? undefined : pageOf(span.href);
+    const once =
+      page !== undefined && marked.has(page) ? { line: span.line, text: span.text } : span;
+    const cursor = wrap(slots, cursors.get(span.line) ?? 0, once);
+    if (cursor === undefined) continue;
+    if (page !== undefined) marked.add(page);
+    cursors.set(span.line, cursor);
   }
 }
 
@@ -422,11 +504,18 @@ export function renderMarkdown(text: string, options: MarkdownOptions = {}): Ren
   const tree = parser.parse(text);
   // The paths are looked up before the targets are rewritten, the figures built after: the image keeps its page href.
   const figures = options.imagePath === undefined ? [] : figuresOf(tree, options.imagePath);
+  const written: WrittenMark[] = [];
   if (options.resolveHref !== undefined) {
-    markReferences(tree, rewriteTargets(tree, options.resolveHref));
+    const rewriting: Rewriting = {
+      resolveHref: options.resolveHref,
+      definitions: new Map(),
+      written,
+    };
+    rewriteTargets(tree, rewriting);
+    markReferences(tree, rewriting);
   }
   if (options.recognised !== undefined) {
-    markRecognised(tree, options.recognised);
+    markRecognised(tree, options.recognised, written);
   }
   for (const figure of figures) {
     wrapFigure(figure);

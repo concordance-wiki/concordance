@@ -267,18 +267,24 @@ describe("EntityPage", () => {
     );
   });
 
-  it("distinguishes written links and recognised words in the text, with a legend at the foot of the article, before the path", () => {
+  it("distinguishes written links and recognised words in the text, with a legend of the three marks at the foot of the article, before the path", () => {
     const html = render();
     expect(html).toContain('<a href="../page/" class="written">page</a>');
     expect(html).toContain('<a href="../occurrence/" class="recognised">occurrence</a>');
     const legend =
-      '</article><footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></p><p class="entity-source">';
+      '</article><footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></p><p class="entity-source">';
     expect(html).toContain(legend);
     expect(html.indexOf(legend)).toBeGreaterThan(html.indexOf("<p>An entity page.</p>"));
     expect(
-      render({ labels: { legendWritten: "lien écrit", legendRecognised: "mot reconnu" } }),
+      render({
+        labels: {
+          legendWritten: "lien écrit",
+          legendRecognised: "mot reconnu, fiche existante",
+          legendKeyword: "mot reconnu, sans fiche",
+        },
+      }),
     ).toContain(
-      '<p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu</span></p>',
+      '<p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu, fiche existante</span><span class="legend-keyword">mot reconnu, sans fiche</span></p>',
     );
     const without = render({ sections: [] });
     expect(without).toContain('<article class="entity-body"></article>');

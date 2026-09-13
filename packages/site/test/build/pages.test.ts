@@ -357,7 +357,8 @@ describe("entityPageOf", () => {
       seeNeighbourhood: "See the neighbourhood map",
       neighbourPages: "3 pages",
       legendWritten: "written link",
-      legendRecognised: "recognised word",
+      legendRecognised: "recognised word, existing note",
+      legendKeyword: "recognised word, no note",
       imageNote: "Image of the repository, shown in the flow of the text",
     });
     expect(stranger.attributes).toHaveLength(3);

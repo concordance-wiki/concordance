@@ -33,6 +33,7 @@ const WHOLE = [
   "gallery/pages.js",
   "gallery/types.js",
   "markdown/figures.js",
+  "markdown/marks.js",
   "markdown/render.js",
   "build/paths.js",
   "build/spaces.js",

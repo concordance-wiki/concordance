@@ -393,9 +393,10 @@ export interface EntityPageLabels {
   seeNeighbourhood: string;
   /** How many pages the neighbourhood holds, already worded: "5 pages". */
   neighbourPages: string;
-  /** The legend of the two marks of the text: a written link, a recognised word. */
+  /** The legend of the three marks of the text: a written link, a recognised word with a note, one without. */
   legendWritten: string;
   legendRecognised: string;
+  legendKeyword: string;
   /** Under an image of the sources, before the path of its file. */
   imageNote: string;
 }

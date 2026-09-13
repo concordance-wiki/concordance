@@ -127,13 +127,18 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const page = io.fs.readText("/work/dist/notes/a/index.html");
     expect(page).toContain("<h1>Screen A</h1>");
     expect(page).toContain('<a href="../b/index.html" class="written">B</a>');
-    expect(page).toContain('<a href="../b/index.html" class="recognised">Term B</a>');
+    // The longest expression wins its position over the words it holds; a written link to B stands
+    // higher on the line, so the recognised name of B stays plain text.
+    expect(page).toContain(
+      '<a href="../../keywords/build-summary/index.html" class="recognised-keyword" title="4 passages, no note">build summary<span class="visually-hidden"> (4 passages, no note)</span></a>; Term B is recognised.</p>',
+    );
+    expect(page).toContain("<li>The build summary is printed.</li>");
     expect(page).toContain(
       '<figure class="figure"><img src="figures/a.svg" alt="the screen"><figcaption><span class="figure-caption">the screen</span><span class="figure-note">Image of the repository, shown in the flow of the text</span><code class="figure-path">figures/a.svg</code></figcaption></figure>',
     );
     expect(io.fs.readText("/work/dist/notes/a/figures/a.svg")).toBe("<svg/>");
     expect(page).toContain(
-      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word</span></p><p class="entity-source"><code>notes/a.md</code></p></footer>',
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></p><p class="entity-source"><code>notes/a.md</code></p></footer>',
     );
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");

@@ -124,7 +124,7 @@ export const corporateEntityPage: SlotProps["EntityPage"] = {
   sections: [
     {
       id: "definition",
-      html: '<p>A <a href="../../../glossary/candidate-expression/" class="recognised">candidate expression</a> gets a <a href="../../../glossary/keyword-page/" class="recognised">keyword page</a> when it occurs at least three times across at least two files. The count happens when the <a href="../../api/canonical-model/" class="written">Canonical model API</a> is written, as recorded in <a href="../../../decisions/threshold-applied-in-model/" class="written">threshold applied in model</a>.</p>',
+      html: '<p>A <a href="../../../glossary/candidate-expression/" class="recognised" title="note: Candidate expression">candidate expression<span class="visually-hidden"> (note: Candidate expression)</span></a> gets a <a href="../../../glossary/keyword-page/" class="recognised" title="note: Keyword page">keyword page<span class="visually-hidden"> (note: Keyword page)</span></a> when it occurs at least three times across at least two files; the <a href="../../../keywords/build-summary/" class="recognised-keyword" title="7 passages, no note">build summary<span class="visually-hidden"> (7 passages, no note)</span></a> counts the pages. The count happens when the <a href="../../api/canonical-model/" class="written">Canonical model API</a> is written, as recorded in <a href="../../../decisions/threshold-applied-in-model/" class="written">threshold applied in model</a>.</p>',
     },
     {
       id: "applies-to",
@@ -135,7 +135,7 @@ export const corporateEntityPage: SlotProps["EntityPage"] = {
     {
       id: "history",
       heading: "History of the rule",
-      html: "<p>The threshold was first applied by every page that counted occurrences, which produced counts that disagreed between the site and the linter. Applying it once, when the model is written, was decided at the review of March 2026.</p>",
+      html: "<p>The threshold was first applied by every page that counted occurrences, which produced counts that disagreed between the site, the linter and the build summary. Applying it once, when the model is written, was decided at the review of March 2026.</p>",
     },
   ],
   attributes: [

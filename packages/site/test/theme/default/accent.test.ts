@@ -85,7 +85,8 @@ describe("The accent colour never carries information on its own", () => {
     expect(components.map((rule) => rule.selector)).toEqual([
       ".space-current > span",
       ".markdown .written",
-      ".legend-written::before,\n.legend-recognised::before",
+      ".markdown .recognised,\n.markdown .recognised-keyword",
+      ".legend-written::before,\n.legend-recognised::before,\n.legend-keyword::before",
       ".related-clear",
       ".related-mark",
       CONTRACT_BUTTONS,
@@ -123,20 +124,27 @@ describe("The accent colour never carries information on its own", () => {
     expect(body).toContain("outline-offset: 2px;");
   });
 
-  it("marks a written link by its underline and a recognised word by a dotted one, the legend saying so in words", () => {
+  it("marks a written link by its underline, a recognised word by a dotted accent one and a word without a note by grey dashes, the legend saying so in words", () => {
     const written = ruleFor(components, ".markdown .written").body;
     expect(written).not.toContain("text-decoration: none");
-    expect(
-      rulesOf(componentsStylesheet()).find((rule) => rule.selector === ".markdown .recognised")
-        ?.body,
-    ).toContain("text-decoration: underline dotted;");
+    const rules = rulesOf(componentsStylesheet());
+    const recognised = rules.find(
+      (rule) => rule.selector === ".markdown .recognised,\n.markdown .recognised-keyword",
+    )?.body;
+    expect(recognised).toContain("text-decoration-style: dotted;");
+    expect(recognised).toContain("text-decoration-color: var(--color-accent);");
+    const keyword = rules.find((rule) => rule.selector === ".markdown .recognised-keyword")?.body;
+    expect(keyword).toContain("text-decoration-style: dashed;");
+    expect(keyword).toContain("text-decoration-color: var(--color-label);");
+    expect(keyword).not.toContain("accent");
     const page = pages.get("entity-page.html") ?? "";
     for (const match of page.matchAll(/<(\w+)[^>]*class="written"/g)) {
       expect(match[1]).toBe("a");
     }
     expect(count(page, 'class="written"')).toBeGreaterThan(0);
     expect(page).toContain('<span class="legend-written">written link</span>');
-    expect(page).toContain('<span class="legend-recognised">recognised word</span>');
+    expect(page).toContain('<span class="legend-recognised">recognised word, existing note</span>');
+    expect(page).toContain('<span class="legend-keyword">recognised word, no note</span>');
   });
 
   it("gives the accent-bordered notice of a keyword page a text of its own, and underlines the position of a passage", () => {

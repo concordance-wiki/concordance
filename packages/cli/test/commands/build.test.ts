@@ -17,7 +17,12 @@ import {
 } from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
-import { fragmentPath, searchFilePath, type EntityPageProps } from "@concordance-wiki/site";
+import {
+  entityHref,
+  fragmentPath,
+  searchFilePath,
+  type EntityPageProps,
+} from "@concordance-wiki/site";
 import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
@@ -1027,6 +1032,8 @@ describe("concordance build", () => {
       text: string;
       min_occurrences?: number;
       min_files?: number;
+      /** A note that uses the expression more than once, whose page marks the first occurrence only. */
+      marked_once_in?: { source: string; path: string };
     }
     interface Built {
       exit: number;
@@ -1286,6 +1293,40 @@ describe("concordance build", () => {
           expect(pageOf(keyword.text), keyword.text).toBeUndefined();
         }
         expect(built.log.summary.keywords?.published).toBe(pages.length);
+      });
+
+      it("marks the expression of a keyword page once per note, on its first occurrence, as a keyword link telling its passages, the other occurrences plain", () => {
+        const { published } = expected(corpus, "keywords.yaml") as { published: ExpectedKeyword[] };
+        const listed = published.filter((keyword) => keyword.marked_once_in !== undefined);
+        expect(listed.length).toBeGreaterThan(0);
+        for (const keyword of listed) {
+          const note = built.model.entities.find(
+            (entity) =>
+              entity.keyword !== true &&
+              entity.source.name === keyword.marked_once_in?.source &&
+              entity.source.path === keyword.marked_once_in.path,
+          );
+          expect(note, keyword.text).toBeDefined();
+          const page = built.model.entities.find(
+            (entity) => entity.keyword === true && entity.title.toLowerCase() === keyword.text,
+          );
+          const fragment = JSON.parse(
+            built.fragments.get(fragmentPath(note?.id ?? "")) ?? "{}",
+          ) as {
+            sections: { html: string }[];
+            text: string;
+          };
+          const html = fragment.sections.map((section) => section.html).join("\n");
+          const href = entityHref(pagePath(note?.id ?? ""), page?.id ?? "");
+          const marks = [
+            ...html.matchAll(/<a href="([^"]*)" class="recognised-keyword" title="([^"]*)">/g),
+          ].filter((mark) => mark[1] === href);
+          expect(marks.map((mark) => mark[2])).toEqual([
+            `${String(page?.attributes["occurrences"])} passages, ${corpus.endsWith("/fr") ? "sans fiche" : "no note"}`,
+          ]);
+          expect(fragment.text.toLowerCase().split(keyword.text).length - 1).toBeGreaterThan(1);
+          expect(html.toLowerCase().split(`>${keyword.text}<`).length - 1).toBe(1);
+        }
       });
 
       it("publishes no keyword page named after a mapped section heading: headings and list labels are titles, not usage", () => {

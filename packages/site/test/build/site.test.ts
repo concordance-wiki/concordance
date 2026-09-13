@@ -780,7 +780,7 @@ describe("The labels of the site come from the message catalogue of the project 
       '<p class="panel-note">4 clés déclarées. Le reste du fichier est du texte libre.</p>',
     );
     expect(entity).toContain(
-      '<footer class="entity-footer"><p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu</span></p>',
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">lien écrit</span><span class="legend-recognised">mot reconnu, fiche existante</span><span class="legend-keyword">mot reconnu, sans fiche</span></p>',
     );
     expect(entity).toContain(
       '<h2 id="mentions-title">Pages en relation <span class="count">3</span></h2>',

@@ -707,6 +707,7 @@ export function entityPageLabels(
     }),
     legendWritten: message(context, "entity.legendWritten"),
     legendRecognised: message(context, "entity.legendRecognised"),
+    legendKeyword: message(context, "entity.legendKeyword"),
     imageNote: message(context, "entity.imageNote"),
   };
 }
