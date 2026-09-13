@@ -330,7 +330,7 @@ describe("entityPageOf", () => {
       "weight",
     ]);
     expect(stranger.labels).toEqual({
-      properties: "Attributes",
+      properties: "Properties",
       declaredAtTop: "Declared at the top of the file.",
       otherAttributes: "Other attributes",
       onThisPage: "On this page",
