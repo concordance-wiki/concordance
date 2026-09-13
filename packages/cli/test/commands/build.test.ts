@@ -1148,6 +1148,11 @@ describe("concordance build", () => {
       return [...result.pages].filter(([, html]) => html.includes('http-equiv="refresh"'));
     }
 
+    /** The pages of the letters of a segmented index, `index/a/index.html`; none while the whole index fits one page. */
+    function letterPagesOf(result: Built): string[] {
+      return [...result.pages.keys()].filter((path) => /^index\/[^/]+\/index\.html$/.test(path));
+    }
+
     /** Whether a finding of the model is the one an expected entry describes. */
     function matches(finding: Finding, entry: ExpectedFinding): boolean {
       if (finding.check !== entry.check) return false;
@@ -1174,10 +1179,12 @@ describe("concordance build", () => {
         expect(built.exit).toBe(0);
         expectSiteSummary(
           built.stdout,
-          built.model.entities.length + 3 + redirectsOf(built).length,
+          built.model.entities.length + 3 + redirectsOf(built).length + letterPagesOf(built).length,
           built.output,
           redirectsOf(built).length,
         );
+        // The realistic corpus is the one whose index outweighs one page: a page per letter.
+        expect(letterPagesOf(built).length > 0).toBe(corpus === "realistic/en");
         expect(built.stderr.some((line) => line.includes("build stopped"))).toBe(false);
         expect(built.stderr.some((line) => line.startsWith("warning: accessibility"))).toBe(false);
       });
@@ -1295,7 +1302,9 @@ describe("concordance build", () => {
         expect(
           built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
-        expect(built.pages.size).toBe(built.model.entities.length + 4 + redirectsOf(built).length);
+        expect(built.pages.size).toBe(
+          built.model.entities.length + 4 + redirectsOf(built).length + letterPagesOf(built).length,
+        );
       });
 
       it("keeps a keyword address for every recurring expression a note defines, forwarding to the note", () => {
