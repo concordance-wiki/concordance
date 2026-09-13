@@ -4,7 +4,7 @@
 
 A link between two entities fell back to the generic `related` relation.
 
-No mapped section, no typed frontmatter attribute, and the profile allows more than one relation between these two types. The link is kept at a confidence capped at 0.6 and displayed as "related".
+No mapped section, no typed frontmatter attribute, and the profile allows none or several relations between these two types, so the type pair cannot name the relation either. The link is kept at a confidence capped at 0.6, whatever the methods behind it, and displayed with the label of `related`. The finding is raised once per link by the relation typing step, on the file and line of the link's first provenance that names a file (a co-occurrence names none).
 
 ## Before
 

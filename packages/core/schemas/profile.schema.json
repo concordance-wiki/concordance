@@ -292,6 +292,19 @@
               }
             }
           },
+          "inverse_label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["en"],
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              }
+            }
+          },
           "directed": {
             "type": "boolean"
           },

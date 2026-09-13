@@ -4,14 +4,15 @@ import { describe, expect, it } from "vitest";
 import { catalogue } from "../src/catalogue.js";
 import type { CheckDefinition } from "../src/definition.js";
 import { CheckRegistryError, createRegistry } from "../src/registry.js";
-import { entity, filed, input, link } from "./fixtures.js";
+import { filed, input, link } from "./fixtures.js";
 
+/** An API without any consumer and one whose declared consumer never cites it: both model checks fire. */
 const api = filed("specs/api/model-query", "api");
-const orphan = entity("specs/rules/related-cap", "rule", { application: "apps/concordance-cli" });
-const related = link("specs/rules/related-cap", "specs/api/model-query", "related");
-const model = input({ entities: [api, orphan], links: [related] });
+const mismatched = filed("specs/api/forge-bridge", "api", { consumers: ["specs/screens/search"] });
+const constrains = link("specs/rules/related-cap", "specs/api/model-query", "constrains");
+const model = input({ entities: [api, mismatched], links: [constrains] });
 
-const expectedChecks = ["I-REL-AMBIGUOUS", "W-API-NOCONSUMER"];
+const expectedChecks = ["W-API-CONSUMER-MISMATCH", "W-API-NOCONSUMER"];
 
 const stale: Finding = {
   check: "W-STALE",
@@ -141,7 +142,7 @@ describe("run", () => {
 
   it("skips a check disabled through configuration", () => {
     const findings = createRegistry().run(model, { "W-API-NOCONSUMER": { enabled: false } });
-    expect(findings.map((f) => f.check)).toEqual(["I-REL-AMBIGUOUS"]);
+    expect(findings.map((f) => f.check)).toEqual(["W-API-CONSUMER-MISMATCH"]);
   });
 
   it("keeps a check explicitly enabled through configuration", () => {
@@ -152,7 +153,7 @@ describe("run", () => {
   it("replaces the default severity on every finding of a re-severitised check", () => {
     const findings = createRegistry().run(model, { "W-API-NOCONSUMER": { severity: "error" } });
     expect(findings.map((f) => [f.check, f.severity])).toEqual([
-      ["I-REL-AMBIGUOUS", "info"],
+      ["W-API-CONSUMER-MISMATCH", "warning"],
       ["W-API-NOCONSUMER", "error"],
     ]);
   });

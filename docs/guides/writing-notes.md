@@ -107,6 +107,17 @@ A heading is matched against the labels of every locale of the profile and again
 
 Under a mapped section, every recognised mention of another note gives the declared relation from the note to the mentioned entity, or the other way round when the profile marks the section `inverse` (a rule listed under `## Rules` of a screen constrains the screen), with the attributes of the section (`## Writes` of a batch gives `accesses` in `write` mode). A mention whose two types the relation does not join, such as a glossary term listed under `## Objects`, counts as a plain mention. A note that mentions itself gives no link. Outside a mapped section, or when the section relation does not apply, the mention gives a `related` link at 0.60 until the relation typing step refines it; `related` being undirected, that link goes from the smaller identifier to the larger, so that two notes mentioning each other share one link. Several mentions of the same note in the same relation make one link with one provenance per mention.
 
+## How a relation gets its name
+
+Every link between two notes ends up with a relation of the profile, decided on four rungs, the first that applies winning:
+
+1. a mapped section: the mention of a business object under `## Objects` of a screen is `accesses`;
+2. a typed frontmatter attribute: `reads: [objects/entity]` is `accesses` in `read` mode, `roles: [roles/maintainer]` is `assigned_to` from the role;
+3. a type pair admitting a single relation: a markdown link or a plain mention between a rule and a screen is `constrains`, because the profile allows nothing else between these two types besides `related`; the link carries `relation_origin: pair` so that a reader can tell a guess from a declaration, and it is turned around when the profile only allows the relation the other way (the screen that links to the rule ends up constrained by it);
+4. `related`, when the pair admits no relation or several: the link is kept, its confidence capped at 0.60 whatever the methods behind it, and an `I-REL-AMBIGUOUS` finding points at the file and line of its first provenance that names a file.
+
+The first two rungs are decided by what you wrote and the tool never overturns them; when a section or a frontmatter attribute names a relation the profile does not allow between the two types, the link is dropped with an `E-META-REL` finding rather than replaced. A pair-named link and a declared link that say the same thing merge into one, with every provenance and without the marker. The labels the site shows for a relation, read from the source (`accesses`) or from the target (`is accessed by`), come from the profile alone (`label`, `inverse_label`).
+
 ## What is not read
 
 Fenced and indented code blocks, inline code, URLs (bare, autolinked or written as `www.`), raw HTML, frontmatter values, link targets and images are never scanned for words: a variable name in a code block never becomes a business mention. Everything else is read, one unit at a time: headings of every level (the H1 title included), paragraphs, list items (nested items separately), table cells and the paragraphs of block quotes. The visible text of a markdown link stays subject to recognition: in a link written as "publication threshold" pointing to the rule note, "publication threshold" is read and the target path is not. Every mention keeps the line where its unit starts and the H2 section that encloses it.
@@ -137,7 +148,7 @@ Two entities with the same title or alias, once spellings are compared, are homo
 
 ## Profile
 
-A project profile (`profile.yaml`) adds types, attributes, relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../packages/profile/default.yaml) is the reference; [`profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
+A project profile (`profile.yaml`) adds types, attributes, relations with their labels in both directions (`label`, `inverse_label`), relation pairs and mapped sections on top of the default profile, key by key, without any code change. The [default profile](../../packages/profile/default.yaml) is the reference; [`profile.schema.json`](../../packages/core/schemas/profile.schema.json) validates it.
 
 ```yaml
 types:

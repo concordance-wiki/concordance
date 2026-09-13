@@ -144,8 +144,8 @@ describe("the minimal corpus", () => {
         .filter((link) => link.from.startsWith("decisions/"))
         .map((link) => [link.to, link.relation]),
     ).toEqual([
-      ["specs/api/model-query", "affects"],
-      ["specs/screens/mentions-panel", "affects"],
+      ["specs/api/model-query", "related"],
+      ["specs/screens/mentions-panel", "related"],
     ]);
   });
 });
@@ -158,8 +158,8 @@ describe("the realistic corpus", () => {
         .filter((link) => link.from === "meetings/2026-03-12-keyword-page-threshold-review")
         .map((link) => [link.to, link.relation]),
     ).toEqual([
-      ["decisions/threshold-applied-in-model", "documents"],
-      ["specs/batches/nightly-build", "documents"],
+      ["decisions/threshold-applied-in-model", "related"],
+      ["specs/batches/nightly-build", "related"],
     ]);
     expect(
       links.filter((link) => link.from.startsWith("specs/api/contracts/")).map((link) => link.to),

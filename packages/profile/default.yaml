@@ -487,6 +487,7 @@ types:
 relations:
   composes:
     label: { en: composes, fr: compose }
+    inverse_label: { en: is part of, fr: fait partie de }
     directed: true
     allowed:
       - [application, screen]
@@ -496,6 +497,7 @@ relations:
       - [application, channel]
   assigned_to:
     label: { en: is assigned to, fr: est affecté à }
+    inverse_label: { en: involves, fr: mobilise }
     directed: true
     allowed:
       - [role, process]
@@ -503,6 +505,7 @@ relations:
       - [actor, role]
   realizes:
     label: { en: realizes, fr: réalise }
+    inverse_label: { en: is realized by, fr: est réalisé par }
     directed: true
     status: planned
     allowed:
@@ -510,6 +513,7 @@ relations:
       - [function, business_service]
   serves:
     label: { en: serves, fr: sert }
+    inverse_label: { en: is served by, fr: est servi par }
     directed: true
     allowed:
       - [api, screen]
@@ -519,11 +523,13 @@ relations:
       - [screen, process]
   exposes:
     label: { en: exposes, fr: expose }
+    inverse_label: { en: is exposed by, fr: est exposé par }
     directed: true
     allowed:
       - [api, endpoint]
   accesses:
     label: { en: accesses, fr: accède à }
+    inverse_label: { en: is accessed by, fr: est accédé par }
     directed: true
     attributes:
       mode: { type: enum, values: [read, write, create, delete] }
@@ -539,6 +545,7 @@ relations:
       - [function, data_object]
   triggers:
     label: { en: triggers, fr: déclenche }
+    inverse_label: { en: is triggered by, fr: est déclenché par }
     directed: true
     attributes:
       condition: { type: string }
@@ -549,6 +556,7 @@ relations:
       - [milestone, work_package]
   flows_to:
     label: { en: flows to, fr: enchaîne vers }
+    inverse_label: { en: follows, fr: fait suite à }
     directed: true
     attributes:
       object: { type: string }
@@ -557,6 +565,7 @@ relations:
       - [batch, batch]
   publishes:
     label: { en: publishes, fr: publie }
+    inverse_label: { en: is published by, fr: est publié par }
     directed: true
     status: planned
     attributes:
@@ -568,6 +577,7 @@ relations:
       - [function, channel]
   subscribes:
     label: { en: subscribes to, fr: souscrit à }
+    inverse_label: { en: has subscriber, fr: a pour abonné }
     directed: true
     status: planned
     attributes:
@@ -579,6 +589,7 @@ relations:
       - [function, channel]
   carries:
     label: { en: carries, fr: porte }
+    inverse_label: { en: is carried by, fr: est porté par }
     directed: true
     status: planned
     allowed:
@@ -586,6 +597,7 @@ relations:
       - [representation, business_object]
   constrains:
     label: { en: constrains, fr: contraint }
+    inverse_label: { en: is constrained by, fr: est contraint par }
     directed: true
     allowed:
       - [rule, screen]
@@ -596,29 +608,34 @@ relations:
       - [constraint, requirement]
   represents:
     label: { en: represents, fr: représente }
+    inverse_label: { en: is represented by, fr: est représenté par }
     directed: true
     allowed:
       - [data_object, business_object]
       - [term, business_object]
   specializes:
     label: { en: specializes, fr: spécialise }
+    inverse_label: { en: generalizes, fr: généralise }
     directed: true
     allowed:
       - [term, term]
       - [business_object, business_object]
   affects:
     label: { en: affects, fr: affecte }
+    inverse_label: { en: is affected by, fr: est affecté par }
     directed: true
     allowed:
       - [decision, any]
   documents:
     label: { en: documents, fr: documente }
+    inverse_label: { en: is documented by, fr: est documenté par }
     directed: true
     allowed:
       - [document, any]
       - [meeting, any]
   covers:
     label: { en: covers, fr: couvre }
+    inverse_label: { en: is covered by, fr: est couvert par }
     directed: true
     status: planned
     attributes:
@@ -631,6 +648,7 @@ relations:
       - [test, requirement]
   implements:
     label: { en: implements, fr: réalise }
+    inverse_label: { en: is implemented by, fr: est réalisé par }
     directed: true
     status: planned
     allowed:
@@ -640,6 +658,7 @@ relations:
       - [backlog_item, api]
   applies_to:
     label: { en: applies to, fr: s'applique à }
+    inverse_label: { en: is subject to, fr: est soumis à }
     directed: true
     status: planned
     target_kind: type
@@ -647,6 +666,7 @@ relations:
       - [standard, type]
   supersedes:
     label: { en: supersedes, fr: remplace }
+    inverse_label: { en: is superseded by, fr: est remplacé par }
     directed: true
     attributes:
       date: { type: date }

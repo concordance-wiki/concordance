@@ -66,6 +66,8 @@ export type AllowedPair = [string, string];
 
 export interface RelationDefinition {
   label: Label;
+  /** How the relation reads from its target; undirected relations have none. */
+  inverse_label?: Label;
   directed: boolean;
   status?: ProfileStatus;
   cap?: number;

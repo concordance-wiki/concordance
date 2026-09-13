@@ -8,7 +8,6 @@ import {
   type Provenance,
 } from "@concordance-wiki/core";
 import { resolveLink, type MarkdownLink } from "@concordance-wiki/ingest";
-import { singleRelation } from "@concordance-wiki/profile";
 
 import type { ExplicitLinksInput, ExplicitLinksResult, LinkableEntity } from "./types.js";
 
@@ -122,7 +121,9 @@ function crossSourceLink(entity: LinkableEntity, link: MarkdownLink, source: str
 
 /**
  * Markdown links are the strongest relation the tool knows: every link written in a note gives a
- * link at the confidence of `explicit_link`, with the file, the line and the text as provenance.
+ * link at the confidence of `explicit_link`, with the file, the line and the text as provenance. A
+ * link to another note is `related` until the relation typing step names it from the type pair; a
+ * link to a non-markdown file is `documents`, from the resource to the note.
  */
 export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
   const confidence = input.profile.confidence.explicit_link ?? 1;
@@ -183,10 +184,8 @@ export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
       }
       const to = entities.get(fileKey(target.source, target.path));
       if (to === undefined || to.id === entity.id) continue;
-      // The relation typing step refines this later: a type pair admitting a single relation names it,
-      // anything else stays `related` for now.
-      const relation = singleRelation(input.profile, entity.type, to.type) ?? "related";
-      record(entity.id, to.id, relation, provenance);
+      // A written link says that two notes are related, not how: the relation typing step names it.
+      record(entity.id, to.id, "related", provenance);
     }
   }
 

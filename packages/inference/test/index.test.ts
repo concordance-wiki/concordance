@@ -7,7 +7,9 @@ describe("@concordance-wiki/inference", () => {
     expect(Object.keys(entry).sort()).toEqual([
       "DUPLICATE_CHECK",
       "DUPLICATE_DEFAULTS",
+      "FALLBACK_RELATION",
       "MAX_DISPLAYED_NEIGHBOURS",
+      "RELATION_ORIGIN",
       "accumulateCooccurrences",
       "combineConfidences",
       "combineLinks",
@@ -27,8 +29,10 @@ describe("@concordance-wiki/inference", () => {
       "mentionLinks",
       "neighbourhoodOptions",
       "neighbourhoodToModel",
+      "relationLabel",
       "resolveDuplicateResources",
       "resolveReference",
+      "typeRelations",
     ]);
   });
 });
