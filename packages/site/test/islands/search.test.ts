@@ -3,6 +3,9 @@ import { renderToString } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 
 import {
+  citedDetail,
+  closestOf,
+  factsOf,
   hitsOf,
   isEditable,
   keywordDetail,
@@ -24,6 +27,7 @@ import {
   type Focusable,
   type KeyEvent,
   type ScriptInjector,
+  type SearchClear,
   type SearchInput,
   type SearchIslandElement,
   type Defer,
@@ -50,6 +54,10 @@ const meta: SearchMeta = {
       domain: "publication",
       status: "active",
       source: "glossary",
+      summary: "The page built for a word above the threshold.",
+      aliases: ["word page"],
+      broader: "Page",
+      cited: 4,
     },
     {
       id: "specs/screens/search-results",
@@ -59,6 +67,7 @@ const meta: SearchMeta = {
       application: "concordance-cli",
       status: "active",
       source: "specs",
+      cited: 1,
     },
     {
       id: "keywords/build-summary",
@@ -163,7 +172,7 @@ describe("Search works over file://", () => {
 });
 
 describe("hitsOf and resultOf", () => {
-  it("turns the ranked entities into results with the title, the type badge, the breadcrumb and the href from the page", () => {
+  it("turns the ranked entities into results with the type chip, the title, the citations, the summary, the facts and the href from the page", () => {
     const loaded = new Map(Object.entries(shards));
     const hits = hitsOf("key", meta, loaded);
     expect(hits.map((hit) => [hit.entry.id, hit.score])).toEqual([
@@ -175,33 +184,71 @@ describe("hitsOf and resultOf", () => {
         title: "Keyword page",
         href: "../glossary/keyword-page/index.html",
         typeLabel: "Term",
-        breadcrumb: ["Command line", "Publication"],
+        cited: "cited in 4 pages",
+        snippet: "The page built for a word above the threshold.",
+        facts: ["glossary", "Also called: word page", "Broader term: Page"],
       },
       {
         title: "build summary",
         href: "../keywords/build-summary/index.html",
         typeLabel: "Keyword",
         keyword: true,
-        subtitle: "Expression without a note",
-        detail: "17 occurrences · 6 documents",
+        detail: "Used in 6 documents, never defined in the glossary",
       },
     ]);
     expect(hitsOf("search", meta, loaded).map((hit) => resultOf(hit.entry, meta, ""))).toEqual([
       {
         title: "Search results",
         href: "specs/screens/search-results/index.html",
-        breadcrumb: ["Command line"],
+        cited: "cited in 1 page",
+        facts: ["specs"],
       },
     ]);
+    const unlabelled: SearchMeta = { ...meta, sources: {} };
+    const elsewhere: SearchEntry = {
+      id: "elsewhere/note",
+      title: "Note",
+      type: "screen",
+      url: "elsewhere/note/index.html",
+      status: "active",
+      source: "elsewhere",
+    };
+    expect(factsOf(elsewhere, unlabelled)).toEqual(["elsewhere"]);
+    expect(factsOf({ ...elsewhere, aliases: [] }, unlabelled)).toEqual(["elsewhere"]);
+    expect(citedDetail(elsewhere, meta)).toBe("cited in 0 pages");
   });
 
-  it("lists the whole table, scored 0, for a query without a word, so that the facets alone browse the site", () => {
+  it("lists the whole table, scored 0, for a query without a word, the most cited first, so that the facets alone browse the site", () => {
     expect(hitsOf("", meta, new Map()).map((hit) => [hit.entry.id, hit.score])).toEqual([
       ["glossary/keyword-page", 0],
       ["specs/screens/search-results", 0],
       ["keywords/build-summary", 0],
     ]);
     expect(hitsOf(" a ", meta, new Map())).toHaveLength(3);
+    const reversed: SearchMeta = {
+      ...meta,
+      entities: [meta.entities[2], meta.entities[1], meta.entities[0]].filter(
+        (entry): entry is SearchEntry => entry !== undefined,
+      ),
+    };
+    expect(hitsOf("", reversed, new Map()).map((hit) => hit.entry.id)).toEqual([
+      "glossary/keyword-page",
+      "specs/screens/search-results",
+      "keywords/build-summary",
+    ]);
+    const uncited: SearchMeta = {
+      ...meta,
+      entities: meta.entities.map((entry) => {
+        const { cited, ...rest } = entry;
+        expect(cited === undefined || cited >= 0).toBe(true);
+        return rest;
+      }),
+    };
+    expect(hitsOf("", uncited, new Map()).map((hit) => hit.entry.id)).toEqual([
+      "glossary/keyword-page",
+      "specs/screens/search-results",
+      "keywords/build-summary",
+    ]);
   });
 
   it("leaves out an entity index the table does not have", () => {
@@ -417,10 +464,30 @@ function fakeLink(): FakeLink {
   return link;
 }
 
+interface FakeClear extends SearchClear {
+  clicks: (() => void)[];
+  click(): void;
+}
+
+function fakeClear(): FakeClear {
+  const clear: FakeClear = {
+    hidden: true,
+    clicks: [],
+    addEventListener(_type, listener) {
+      clear.clicks.push(listener);
+    },
+    click() {
+      for (const listener of clear.clicks) listener();
+    },
+  };
+  return clear;
+}
+
 function island(
   props: Record<string, unknown>,
   parts: {
     input?: FakeInput;
+    clear?: FakeClear;
     panel?: Panel;
     container: Panel;
     links?: () => FakeLink[];
@@ -430,6 +497,7 @@ function island(
   return {
     getAttribute: (name) => (name === "data-props" ? JSON.stringify(props) : null),
     input: () => parts.input ?? null,
+    clear: () => parts.clear ?? null,
     panel: () => parts.panel ?? null,
     links: () => parts.links?.() ?? [],
     counter: () => parts.counter ?? null,
@@ -811,9 +879,11 @@ describe("mountSearch", () => {
     answer("pa", shards["pa"]);
     await settled();
     expect(results.html).toContain('<div class="search-results"><h1>Search</h1>');
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
     expect(results.html).toContain(
-      '<a href="../glossary/keyword-page/index.html">Keyword page</a>',
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
+    expect(results.html).toContain(
+      '<a class="result-title" href="../glossary/keyword-page/index.html">Keyword page</a>',
     );
     expect(panel.html).toBe("");
     expect(panel.hidden).toBe(true);
@@ -822,13 +892,17 @@ describe("mountSearch", () => {
     await settled();
     answer("se", shards["se"]);
     await settled();
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("Search results");
     expect(results.html).not.toContain("Keyword page");
     input.value = "zebra";
     input.fire("input");
     await settled();
-    expect(results.html).toContain('<p class="search-summary">No result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">No result for “zebra”</p>',
+    );
   });
 
   it("keeps the latest query when an earlier one answers later", async () => {
@@ -872,16 +946,17 @@ describe("mountSearch", () => {
     expect(results.html).not.toContain("Keyword page");
   });
 
-  it("wires the shortcuts alone for a field without an index, and does nothing for a page without a field", () => {
+  it("wires the shortcuts and the clear button alone for a field without an index, and does nothing for a page without a field", () => {
     const { host, inject, injected } = page();
     const input = fakeInput();
+    const clear = fakeClear();
     const document = fakeDocument();
     const { render, calls } = rendered();
     const mounted = mountSearch({
       islands: [
         island(
           { search: { action: "search/", placeholder: "" } },
-          { input, container: fakePanel(false) },
+          { input, clear, container: fakePanel(false) },
         ),
       ],
       document,
@@ -897,7 +972,14 @@ describe("mountSearch", () => {
     document.press(keyEvent("/"));
     expect(input.focused).toBe(true);
     input.fire("focus");
+    input.value = "key";
     input.fire("input");
+    expect(clear.hidden).toBe(false);
+    input.blur();
+    clear.click();
+    expect(input.value).toBe("");
+    expect(clear.hidden).toBe(true);
+    expect(input.focused).toBe(true);
     expect(injected).toEqual([]);
     expect(calls).toBe(0);
     const results = fakePanel(false);
@@ -1007,6 +1089,7 @@ describe("mountSearch", () => {
     const element: SearchIslandElement<Panel> = {
       getAttribute: () => null,
       input: () => null,
+      clear: () => null,
       panel: () => null,
       links: () => [],
       counter: () => null,
@@ -1195,11 +1278,13 @@ describe("Facets on type, source, domain and application, with counts frozen at 
   it("shows the four facets with the count of every value over the results of the query, computed from the frozen table", async () => {
     const { results, view, injected } = await resultsPage("");
     expect(injected.map((script) => script.src)).toEqual(["../search/meta.js"]);
-    expect(results.html).toContain('<p class="search-summary">3 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">3 results, most cited first</p>',
+    );
     expect(view.props().facets).toEqual([
       {
         name: "type",
-        label: "Type",
+        label: "Page type",
         values: [
           {
             value: "keyword",
@@ -1208,6 +1293,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
             href: "?type=keyword",
             active: false,
             disabled: false,
+            keyword: true,
           },
           {
             value: "term",
@@ -1221,7 +1307,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       },
       {
         name: "source",
-        label: "Source",
+        label: "Space",
         values: [
           {
             value: "glossary",
@@ -1244,6 +1330,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       {
         name: "domain",
         label: "Domain",
+        folded: true,
         values: [
           {
             value: "publication",
@@ -1258,6 +1345,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       {
         name: "application",
         label: "Application",
+        folded: true,
         values: [
           {
             value: "concordance-cli",
@@ -1272,6 +1360,7 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       {
         name: "nonote",
         label: "Without a note",
+        folded: true,
         values: [
           { value: "any", label: "Included", count: 3, href: "?", active: true, disabled: false },
           {
@@ -1294,7 +1383,16 @@ describe("Facets on type, source, domain and application, with counts frozen at 
       },
     ]);
     expect(results.html).toContain(
-      '<nav class="facets" aria-label="Filters"><section class="facet"><h2>Type</h2><ul><li><a href="?type=keyword">Keyword <span class="count">1</span></a></li>',
+      '<nav class="facets" aria-label="Filters"><details class="facets-fold"><summary class="facets-head">Filters</summary><div class="facet-groups"><details class="facet" open><summary><h2>Page type</h2></summary><ul class="facet-values"><li class="facet-value facet-keyword"><input type="checkbox" id="facet-type-keyword" name="type" value="keyword"/><label for="facet-type-keyword"><span class="facet-label">Keyword</span><span class="count">1</span></label></li>',
+    );
+    expect(results.html).toContain(
+      '<details class="facet"><summary><h2>Domain</h2></summary><ul class="facet-values">',
+    );
+    expect(results.html).toContain(
+      '<p class="facets-note">The counters are set when the site is published. Filtering happens in the browser, without a round trip.</p></div></details></nav>',
+    );
+    expect(results.html).toContain(
+      '<p class="results-note">Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.</p>',
     );
   });
 
@@ -1302,7 +1400,9 @@ describe("Facets on type, source, domain and application, with counts frozen at 
     const { results, view, answer } = await resultsPage("?q=key");
     answer("ke", shards["ke"]);
     await settled();
-    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">2 results, most cited first</p>',
+    );
     expect(
       view
         .props()
@@ -1334,19 +1434,21 @@ describe("Facets combine, and filtering happens in the browser", () => {
       {
         name: "type",
         value: "term",
-        facetLabel: "Type",
+        facetLabel: "Page type",
         label: "Term",
         href: "?q=key&source=specs",
       },
       {
         name: "source",
         value: "specs",
-        facetLabel: "Source",
+        facetLabel: "Space",
         label: "specs",
         href: "?q=key&type=term",
       },
     ]);
-    expect(results.html).toContain('<p class="search-summary">No result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">No result for “key”</p>',
+    );
     expect(results.html).toContain('<ol class="results"></ol>');
   });
 
@@ -1355,13 +1457,19 @@ describe("Facets combine, and filtering happens in the browser", () => {
     answer("ke", shards["ke"]);
     await settled();
     await follow("?q=key&source=specs");
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("build summary");
     expect(results.html).not.toContain("Keyword page");
     await follow("?q=key&source=glossary,specs");
-    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">2 results, most cited first</p>',
+    );
     await follow("?q=key&type=term&source=glossary,specs");
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("Keyword page");
     expect(
       view.props().facets[1]?.values.map((value) => [value.value, value.count, value.active]),
@@ -1373,12 +1481,13 @@ describe("Facets combine, and filtering happens in the browser", () => {
 });
 
 describe("A facet with no result under the current filters is disabled, not hidden", () => {
-  it("lists a value nothing would come of with its count at 0, aria-disabled and no link", async () => {
+  it("lists a value nothing would come of with its count at 0, its box disabled", async () => {
     const { results, view, follow, location } = await resultsPage("");
     await follow("?type=keyword");
     expect(view.props().facets[2]).toEqual({
       name: "domain",
       label: "Domain",
+      folded: true,
       values: [
         {
           value: "publication",
@@ -1391,23 +1500,25 @@ describe("A facet with no result under the current filters is disabled, not hidd
       ],
     });
     expect(results.html).toContain(
-      '<section class="facet"><h2>Domain</h2><ul><li><a class="facet-value" role="link" aria-disabled="true">Publication <span class="count">0</span></a></li></ul></section>',
+      '<details class="facet"><summary><h2>Domain</h2></summary><ul class="facet-values"><li class="facet-value facet-disabled"><input type="checkbox" id="facet-domain-publication" name="domain" value="publication" disabled/><label for="facet-domain-publication"><span class="facet-label">Publication</span><span class="count">0</span></label></li></ul></details>',
     );
     expect(results.html).toContain(
-      '<a href="?" class="facet-value" aria-current="true">Keyword <span class="count">1</span></a>',
+      '<li class="facet-value facet-active facet-keyword"><input type="checkbox" id="facet-type-keyword" name="type" value="keyword" checked/><label for="facet-type-keyword"><span class="facet-label">Keyword</span><span class="count">1</span></label></li>',
     );
     expect(results.html).toContain('<li class="clear-filters"><a href="?">Clear filters</a></li>');
     expect(results.html).toContain(
-      '<a href="?type=keyword,term">Term <span class="count">1</span></a>',
+      '<li class="facet-value"><input type="checkbox" id="facet-type-term" name="type" value="term"/><label for="facet-type-term"><span class="facet-label">Term</span><span class="count">1</span></label></li>',
     );
     await follow("?");
     expect(location.pushed).toEqual(["?type=keyword", ""]);
-    expect(results.html).toContain('<p class="search-summary">3 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">3 results, most cited first</p>',
+    );
   });
 });
 
 describe("Active filters are recalled above the results and removable one by one", () => {
-  it("draws every selected value with its facet, a link lifting it, and a link clearing them all", async () => {
+  it("draws every selected value as a chip lifting it, and a link clearing them all", async () => {
     const { results, view, follow, location, input, answer } = await resultsPage(
       "?q=key&type=keyword,term&source=specs",
     );
@@ -1415,7 +1526,7 @@ describe("Active filters are recalled above the results and removable one by one
     answer("ke", shards["ke"]);
     await settled();
     expect(results.html).toContain(
-      '<ul class="active-filters" aria-label="Active filters"><li class="active-filter"><span class="facet-name">Type</span> Keyword <a href="?q=key&amp;type=term&amp;source=specs" class="remove-filter"><span aria-hidden="true">×</span><span class="visually-hidden">Remove this filter</span></a></li><li class="active-filter"><span class="facet-name">Type</span> Term <a href="?q=key&amp;type=keyword&amp;source=specs" class="remove-filter">',
+      '<ul class="active-filters" aria-label="Active filters"><li class="active-filter"><a href="?q=key&amp;type=term&amp;source=specs" class="remove-filter"><span class="visually-hidden">Remove this filter Page type: </span>Keyword <span aria-hidden="true">✕</span></a></li><li class="active-filter"><a href="?q=key&amp;type=keyword&amp;source=specs" class="remove-filter"><span class="visually-hidden">Remove this filter Page type: </span>Term <span aria-hidden="true">✕</span></a></li>',
     );
     expect(results.html).toContain(
       '<li class="clear-filters"><a href="?q=key">Clear filters</a></li></ul>',
@@ -1441,6 +1552,148 @@ describe("Active filters are recalled above the results and removable one by one
       results: [],
       facets: [],
     });
+  });
+});
+
+describe("The bar shows the query in the field with a clear button", () => {
+  it("shows the button while the field holds a query, on the address, as the reader types and as a facet is followed, and hides it otherwise", async () => {
+    const { host, inject, answer } = page();
+    const input = fakeInput();
+    const clear = fakeClear();
+    const results = fakePanel(false);
+    const location = fakeLocation("?q=key&type=term");
+    const view = rendered();
+    mountSearch({
+      islands: [
+        island(
+          { root: "../", search: { action: "index.html", placeholder: "" } },
+          { input, clear, container: results },
+        ),
+        island(
+          { root: "../", results: { query: "", total: 0, results: [], facets: [] } },
+          { container: results },
+        ),
+      ],
+      document: fakeDocument(),
+      location,
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
+      inject,
+      host,
+      render: view.render,
+    });
+    expect(input.value).toBe("key");
+    expect(clear.hidden).toBe(false);
+    answer("meta", meta);
+    await settled();
+    answer("ke", shards["ke"]);
+    await settled();
+    view.props().onNavigate?.("?type=term");
+    await settled();
+    expect(input.value).toBe("");
+    expect(clear.hidden).toBe(true);
+    input.value = "se";
+    input.fire("input");
+    expect(clear.hidden).toBe(false);
+    location.pop("?q=key");
+    await settled();
+    expect(input.value).toBe("key");
+    expect(clear.hidden).toBe(false);
+    location.pop("");
+    await settled();
+    expect(clear.hidden).toBe(true);
+  });
+
+  it("clears the field on click, rewrites the address at once, lists the whole table and gives the focus back to the field", async () => {
+    const { host, inject, answer } = page();
+    const input = fakeInput();
+    const clear = fakeClear();
+    const results = fakePanel(false);
+    const location = fakeLocation("?q=key&source=glossary");
+    const timers = fakeDefer();
+    const view = rendered();
+    mountSearch({
+      islands: [
+        island(
+          { root: "../", search: { action: "index.html", placeholder: "" } },
+          { input, clear, container: results },
+        ),
+        island(
+          { root: "../", results: { query: "", total: 0, results: [], facets: [] } },
+          { container: results },
+        ),
+      ],
+      document: fakeDocument(),
+      location,
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: timers.defer,
+      inject,
+      host,
+      render: view.render,
+    });
+    answer("meta", meta);
+    await settled();
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
+    input.value = "keyw";
+    input.fire("input");
+    expect(timers.pending).toHaveLength(1);
+    clear.click();
+    expect(timers.cancelled).toBe(1);
+    expect(input.value).toBe("");
+    expect(input.focused).toBe(true);
+    expect(clear.hidden).toBe(true);
+    expect(location.replaced).toEqual(["?source=glossary"]);
+    await settled();
+    expect(view.props().query).toBe("");
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
+    expect(results.html).toContain("Keyword page");
+    expect(view.props().active?.map((filter) => filter.value)).toEqual(["glossary"]);
+  });
+
+  it("clears the field under the header of any page, the suggestions hidden, without touching the address", async () => {
+    const { host, inject, answer } = page();
+    const input = fakeInput();
+    const clear = fakeClear();
+    const panel = fakePanel(true);
+    const location = fakeLocation("");
+    mountSearch({
+      islands: [
+        island(
+          { root: "../", search: { action: "search/index.html", placeholder: "" } },
+          { input, clear, panel, container: panel },
+        ),
+      ],
+      document: fakeDocument(),
+      location,
+      scroll: fakeScroll(),
+      clipboard: undefined,
+      defer: fakeDefer().defer,
+      inject,
+      host,
+      render: rendered().render,
+    });
+    input.fire("focus");
+    answer("meta", meta);
+    input.value = "key";
+    input.fire("input");
+    await settled();
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(panel.hidden).toBe(false);
+    clear.click();
+    await settled();
+    expect(input.value).toBe("");
+    expect(panel.hidden).toBe(true);
+    expect(location.replaced).toEqual([]);
+    expect(location.pushed).toEqual([]);
   });
 });
 
@@ -1490,7 +1743,9 @@ describe("Opening the URL restores the query, the filters and the scroll positio
     expect(scroll.scrolledTo).toEqual([]);
     answer("ke", shards["ke"]);
     await settled();
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("Keyword page");
     expect(view.props().active?.map((filter) => filter.value)).toEqual(["term"]);
     expect(scroll.scrolledTo).toEqual([480]);
@@ -1583,7 +1838,9 @@ describe("The browser's back navigation returns to the previous state", () => {
     answer("ke", shards["ke"]);
     await settled();
     await follow("?q=key&type=term");
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     input.value = "keyw";
     input.fire("input");
     expect(timers.pending).toHaveLength(1);
@@ -1592,13 +1849,17 @@ describe("The browser's back navigation returns to the previous state", () => {
     expect(timers.pending).toEqual([]);
     expect(input.value).toBe("key");
     expect(view.props().active).toBeUndefined();
-    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">2 results, most cited first</p>',
+    );
     expect(scroll.scrolledTo).toEqual([200, 200]);
     expect(location.pushed).toEqual(["?q=key&type=term"]);
     location.pop("");
     await settled();
     expect(input.value).toBe("");
-    expect(results.html).toContain('<p class="search-summary">3 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">3 results, most cited first</p>',
+    );
     expect(scroll.scrolledTo).toEqual([200, 200]);
   });
 });
@@ -1673,38 +1934,91 @@ describe("Recurring expressions without a note appear among the results, with a 
     answer("ke", shards["ke"]);
     await settled();
     expect(results.html).toContain(
-      '<li class="result result-keyword"><a href="../keywords/build-summary/index.html">build summary</a><span class="badge">Keyword</span><span class="result-subtitle">Expression without a note</span>',
+      '<li class="result result-keyword"><p class="result-head"><span class="badge">Keyword</span><a class="result-title" href="../keywords/build-summary/index.html">build summary</a></p><p class="result-detail">Used in 6 documents, never defined in the glossary</p></li>',
     );
     expect(results.html).toContain(
-      '<li class="result"><a href="../glossary/keyword-page/index.html">',
+      '<li class="result"><p class="result-head"><span class="badge">Term</span><a class="result-title" href="../glossary/keyword-page/index.html">',
     );
   });
 });
 
-describe("Their row states the number of occurrences and files", () => {
-  it("words the counts of the table in the site language, 0 for a page without them", () => {
+describe("Their row states the number of files, and that no note defines the expression", () => {
+  it("words the documents of the table in the site language, 0 for a page without them", () => {
     const summary = meta.entities[2];
     expect(summary === undefined ? "" : keywordDetail(summary, meta)).toBe(
-      "17 occurrences · 6 documents",
+      "Used in 6 documents, never defined in the glossary",
     );
-    expect(keywordDetail({ ...(summary as SearchEntry), occurrences: 1, documents: 1 }, meta)).toBe(
-      "1 occurrence · 1 document",
+    const bare: SearchEntry = {
+      id: "k",
+      title: "k",
+      type: "keyword",
+      url: "k/",
+      status: "valid",
+      source: "specs",
+      keyword: true,
+    };
+    expect(keywordDetail({ ...bare, occurrences: 1, documents: 1 }, meta)).toBe(
+      "Used in 1 document, never defined in the glossary",
     );
-    expect(
-      keywordDetail(
-        {
-          id: "k",
-          title: "k",
-          type: "keyword",
-          url: "k/",
-          status: "valid",
-          source: "specs",
-          keyword: true,
-        },
-        meta,
-      ),
-    ).toBe("0 occurrences · 0 documents");
-    expect(resultOf(summary as SearchEntry, meta, "").detail).toBe("17 occurrences · 6 documents");
+    expect(keywordDetail(bare, meta)).toBe("Used in 0 documents, never defined in the glossary");
+    expect(resultOf(bare, meta, "").detail).toBe(
+      "Used in 0 documents, never defined in the glossary",
+    );
+  });
+});
+
+describe("No result: the closest form of the dictionary is proposed, and the empty state names the query", () => {
+  it("proposes the title or alias sharing the longest prefix with the query, with its citations or its occurrences, under the same filters", async () => {
+    const { results, view, answer } = await resultsPage("?q=keywort&source=glossary");
+    answer("ke", shards["ke"]);
+    await settled();
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">No result for “keywort”</p>',
+    );
+    expect(view.props().closest).toEqual({
+      form: "Keyword page",
+      href: "?q=Keyword+page&source=glossary",
+      detail: "cited in 4 pages",
+    });
+    expect(results.html).toContain(
+      '<p class="search-closest">Closest form: <a href="?q=Keyword+page&amp;source=glossary">Keyword page</a>, cited in 4 pages</p><ol class="results"></ol>',
+    );
+    expect(results.html).not.toContain("results-note");
+    expect(closestOf(parseSearchState("?q=build+sum"), meta)).toEqual({
+      form: "build summary",
+      href: "?q=build+summary",
+      detail: "17 occurrences",
+    });
+    expect(closestOf(parseSearchState("?q=zebra"), meta)).toBeUndefined();
+    expect(closestOf(parseSearchState("?q=word"), { ...meta, entities: [] })).toBeUndefined();
+    const bare: SearchEntry = {
+      id: "keywords/cold-start",
+      title: "cold start",
+      type: "keyword",
+      url: "keywords/cold-start/index.html",
+      status: "valid",
+      source: "specs",
+      keyword: true,
+    };
+    expect(closestOf(parseSearchState("?q=cold"), { ...meta, entities: [bare] })).toEqual({
+      form: "cold start",
+      href: "?q=cold+start",
+      detail: "0 occurrences",
+    });
+  });
+
+  it("proposes nothing when the query matched and the filters alone emptied the list, or when the query has no word", async () => {
+    const { results, view, follow, answer } = await resultsPage("?q=key");
+    answer("ke", shards["ke"]);
+    await settled();
+    await follow("?q=key&type=term&nonote=only");
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">No result for “key”</p>',
+    );
+    expect(view.props().closest).toBeUndefined();
+    await follow("?nonote=only&source=glossary");
+    expect(results.html).toContain('<p class="search-summary" role="status">No result</p>');
+    expect(view.props().closest).toBeUndefined();
   });
 });
 
@@ -1713,10 +2027,14 @@ describe("A no-note facet isolates or excludes them", () => {
     const { results, view, follow, answer, location } = await resultsPage("?q=key");
     answer("ke", shards["ke"]);
     await settled();
-    expect(results.html).toContain('<p class="search-summary">2 results</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">2 results, most cited first</p>',
+    );
     await follow("?q=key&nonote=only");
     expect(location.current).toBe("?q=key&nonote=only");
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("build summary");
     expect(results.html).not.toContain("Keyword page");
     expect(view.props().active).toEqual([
@@ -1742,11 +2060,15 @@ describe("A no-note facet isolates or excludes them", () => {
       ["term", 0],
     ]);
     await follow("?q=key&nonote=exclude");
-    expect(results.html).toContain('<p class="search-summary">1 result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">1 result, most cited first</p>',
+    );
     expect(results.html).toContain("Keyword page");
     expect(results.html).not.toContain("build summary");
     await follow("?q=key&type=term&nonote=only");
-    expect(results.html).toContain('<p class="search-summary">No result</p>');
+    expect(results.html).toContain(
+      '<p class="search-summary" role="status">No result for “key”</p>',
+    );
     expect(
       view.props().facets[4]?.values.map((value) => [value.value, value.count, value.disabled]),
     ).toEqual([

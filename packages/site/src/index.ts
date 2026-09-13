@@ -255,8 +255,10 @@ export type {
 export {
   DEFAULT_BODY_MAX_CHARS,
   FIELD_WEIGHTS,
+  SUMMARY_MAX_CHARS,
   buildSearchIndex,
   compactJson,
+  excerptOf,
   pluralForms,
   searchFields,
   searchFilePath,
@@ -272,13 +274,16 @@ export type {
   SearchTokenizer,
 } from "./search/build.js";
 export {
+  CLEAR_CLASS,
   FACET_NAMES,
+  KEYWORD_TYPE,
   SEARCH_DIRECTORY,
   SEARCH_GLOBAL,
   SEARCH_ISLAND,
   SEARCH_META,
   SHARD_PREFIX_LENGTH,
   SUGGESTIONS_CLASS,
+  closestForm,
   normalizeQuery,
   plural,
   queryWords,
@@ -290,9 +295,11 @@ export {
   trimEdges,
 } from "./search/shared.js";
 export type {
+  ClosestForm,
   FacetCounts,
   FacetName,
   PluralForms,
+  RankOrder,
   Ranked,
   SearchEntry,
   SearchIslandProps,
@@ -313,6 +320,7 @@ export {
 } from "./search/state.js";
 export type { SearchState } from "./search/state.js";
 export {
+  PRIMARY_FACETS,
   activeFiltersOf,
   countFacets,
   facetLabels,
@@ -323,6 +331,9 @@ export {
 } from "./search/facets.js";
 export {
   SUGGESTIONS,
+  citedDetail,
+  closestOf,
+  factsOf,
   hitsOf,
   isEditable,
   mountSearch,
@@ -342,6 +353,7 @@ export type {
   Focusable,
   KeyEvent,
   ScriptInjector,
+  SearchClear,
   SearchDocument,
   SearchHit,
   SearchInput,

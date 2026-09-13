@@ -130,13 +130,15 @@ describe("the search entry", () => {
       },
     };
     const panel = { hidden: true, addEventListener: () => undefined };
+    const clear = { hidden: true, addEventListener: () => undefined };
     const element = {
       getAttribute: () =>
         JSON.stringify({
           root: "../../",
           search: { action: "../../search/index.html", placeholder: "Search" },
         }),
-      querySelector: (selector: string) => (selector === "input" ? input : panel),
+      querySelector: (selector: string) =>
+        selector === "input" ? input : selector === ".search-clear" ? clear : panel,
       querySelectorAll: () => [],
     };
     vi.stubGlobal("document", {

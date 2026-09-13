@@ -13,6 +13,7 @@ import type { EntityFragment } from "../build/fragments.js";
 import { byCodeUnit } from "../order.js";
 import { countFacets } from "./facets.js";
 import {
+  KEYWORD_TYPE,
   SEARCH_DIRECTORY,
   SEARCH_META,
   shardFile,
@@ -43,6 +44,18 @@ export type SearchFieldName = keyof typeof FIELD_WEIGHTS;
 
 /** `build.extracted_text_max_chars` when the configuration does not set it. */
 export const DEFAULT_BODY_MAX_CHARS = 20_000;
+
+/** Characters of the summary a row of the results shows; a first paragraph standing in for a summary is cut there, at a word. */
+export const SUMMARY_MAX_CHARS = 200;
+
+/** A text cut at the last word boundary before the limit, an ellipsis marking the cut; whole when it fits. */
+export function excerptOf(text: string, maxChars: number): string {
+  const characters = Array.from(text);
+  if (characters.length <= maxChars) return text;
+  const head = characters.slice(0, maxChars).join("");
+  const boundary = head.search(/\s+\S*$/);
+  return `${(boundary > 0 ? head.slice(0, boundary) : head).trimEnd()}…`;
+}
 
 /**
  * The tokens of a text in a locale, as the index stores them: the pipeline gives the tokeniser
@@ -84,7 +97,7 @@ export interface SearchIndexFiles {
 
 /** The type stored for an entity: `keyword` for a keyword page, which has no type of its own. */
 export function searchType(entity: Entity): string {
-  return entity.keyword === true ? "keyword" : entity.type;
+  return entity.keyword === true ? KEYWORD_TYPE : entity.type;
 }
 
 /** The text of every indexed field of an entity; the body cut at `bodyMaxChars` characters. */
@@ -112,7 +125,46 @@ function countOf(value: unknown): number {
   return typeof value === "number" ? value : 0;
 }
 
-function entryOf(entity: Entity): SearchEntry {
+/** What the rows read of the model beyond the entity: the titles by identifier and by file, and the pages citing each entity. */
+interface EntryContext {
+  titles: ReadonlyMap<string, string>;
+  /** Titles by `<source>/<path>`, for a reference written as a path relative to the source root. */
+  titlesByFile: ReadonlyMap<string, string>;
+  cited: ReadonlyMap<string, number>;
+}
+
+function entryContextOf(model: CanonicalModel): EntryContext {
+  const titles = new Map(model.entities.map((entity) => [entity.id, entity.title]));
+  // A keyword page is located on the file of its first mention, which is not its own.
+  const titlesByFile = new Map(
+    model.entities
+      .filter((entity) => entity.keyword !== true)
+      .map((entity) => [`${entity.source.name}/${entity.source.path}`, entity.title]),
+  );
+  const citing = new Map<string, Set<string>>();
+  for (const link of model.links) {
+    const pages = citing.get(link.to) ?? new Set<string>();
+    pages.add(link.from);
+    citing.set(link.to, pages);
+  }
+  return {
+    titles,
+    titlesByFile,
+    cited: new Map([...citing].map(([id, pages]) => [id, pages.size])),
+  };
+}
+
+/** The broader term a note declares, by the title of its page when the value is its identifier or its path in the same source, as written otherwise. */
+function broaderOf(entity: Entity, context: EntryContext): string | undefined {
+  const value = entity.attributes["broader"];
+  if (typeof value !== "string") return undefined;
+  return (
+    context.titles.get(value) ?? context.titlesByFile.get(`${entity.source.name}/${value}`) ?? value
+  );
+}
+
+function entryOf(entity: Entity, context: EntryContext): SearchEntry {
+  const broader = broaderOf(entity, context);
   return {
     id: entity.id,
     title: entity.title,
@@ -122,13 +174,18 @@ function entryOf(entity: Entity): SearchEntry {
     ...(entity.domain === undefined ? {} : { domain: entity.domain }),
     status: entity.status,
     source: entity.source.name,
+    ...(entity.summary === undefined
+      ? {}
+      : { summary: excerptOf(entity.summary, SUMMARY_MAX_CHARS) }),
+    ...(entity.aliases.length === 0 ? {} : { aliases: entity.aliases }),
+    ...(broader === undefined ? {} : { broader }),
     ...(entity.keyword === true
       ? {
           keyword: true,
           occurrences: countOf(entity.attributes["occurrences"]),
           documents: countOf(entity.attributes["documents"]),
         }
-      : {}),
+      : { cited: context.cited.get(entity.id) ?? 0 }),
   };
 }
 
@@ -190,7 +247,9 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     removeFilter: plain(catalogue, "search.removeFilter"),
     clear: plain(catalogue, "search.clear"),
     noResult: plain(catalogue, "search.noResult"),
+    noResultFor: plain(catalogue, "results.noResultFor"),
     results: pluralForms(catalogue, "search.results"),
+    countersNote: plain(catalogue, "results.countersNote"),
     address: plain(catalogue, "search.address"),
     copyAddress: plain(catalogue, "search.copyAddress"),
     copied: plain(catalogue, "search.copied"),
@@ -200,9 +259,13 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
       only: plain(catalogue, "search.noNote.only"),
       exclude: plain(catalogue, "search.noNote.exclude"),
     },
-    undefinedExpression: plain(catalogue, "keyword.undefinedExpression"),
+    cited: pluralForms(catalogue, "results.cited"),
+    alsoCalled: plain(catalogue, "results.alsoCalled"),
+    broader: plain(catalogue, "results.broader"),
+    usedIn: pluralForms(catalogue, "results.usedIn"),
+    notelessNote: plain(catalogue, "results.notelessNote"),
+    closestForm: plain(catalogue, "results.closestForm"),
     occurrences: pluralForms(catalogue, "keyword.occurrences"),
-    documents: pluralForms(catalogue, "keyword.documents"),
   };
 }
 
@@ -245,7 +308,8 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
     shard[token] = [...byEntity];
     shards.set(name, shard);
   }
-  const entries = entities.map(entryOf);
+  const context = entryContextOf(input.model);
+  const entries = entities.map((entity) => entryOf(entity, context));
   const names = input.names ?? {};
   let bytes = 0;
   for (const [name, shard] of shards) {

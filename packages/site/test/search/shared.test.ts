@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CLEAR_CLASS,
+  closestForm,
   FACET_NAMES,
+  KEYWORD_TYPE,
   normalizeQuery,
   NOTELESS_FACET,
   NOTELESS_FILTERS,
@@ -13,6 +16,7 @@ import {
   shardOf,
   shardScript,
   trimEdges,
+  type SearchEntry,
   type ShardData,
 } from "../../src/search/shared.js";
 
@@ -112,7 +116,7 @@ describe("rank", () => {
 
   it("never puts a keyword page before an entity of the same score, the table order deciding otherwise", () => {
     const keyword = (entity: number): boolean => entity === 1;
-    expect(rank(["key"], shards, keyword)).toEqual([
+    expect(rank(["key"], shards, { keyword })).toEqual([
       { entity: 1, score: 5 },
       { entity: 2, score: 4 },
       { entity: 3, score: 1 },
@@ -129,12 +133,12 @@ describe("rank", () => {
         },
       ],
     ]);
-    expect(rank(["ke"], tied, keyword)).toEqual([
+    expect(rank(["ke"], tied, { keyword })).toEqual([
       { entity: 2, score: 5 },
       { entity: 3, score: 5 },
       { entity: 1, score: 5 },
     ]);
-    expect(rank(["ke"], tied, (entity) => entity !== 1)).toEqual([
+    expect(rank(["ke"], tied, { keyword: (entity) => entity !== 1 })).toEqual([
       { entity: 1, score: 5 },
       { entity: 2, score: 5 },
       { entity: 3, score: 5 },
@@ -144,6 +148,37 @@ describe("rank", () => {
       { entity: 2, score: 5 },
       { entity: 3, score: 5 },
     ]);
+  });
+
+  it("puts the most cited first among entities of the same score, the keyword pages still after them, and the score before the citations", () => {
+    const tied = new Map<string, ShardData>([
+      [
+        "ke",
+        {
+          keyword: [
+            [1, 5],
+            [2, 5],
+            [3, 5],
+          ],
+          keywords: [[4, 6]],
+        },
+      ],
+    ]);
+    const cited = (entity: number): number => ({ 1: 2, 2: 9, 3: 4 })[entity] ?? 0;
+    expect(rank(["ke"], tied, { cited })).toEqual([
+      { entity: 4, score: 6 },
+      { entity: 2, score: 5 },
+      { entity: 3, score: 5 },
+      { entity: 1, score: 5 },
+    ]);
+    expect(rank(["ke"], tied, { cited, keyword: (entity) => entity === 2 })).toEqual([
+      { entity: 4, score: 6 },
+      { entity: 3, score: 5 },
+      { entity: 1, score: 5 },
+      { entity: 2, score: 5 },
+    ]);
+    expect(KEYWORD_TYPE).toBe("keyword");
+    expect(CLEAR_CLASS).toBe("search-clear");
   });
 
   it("matches nothing without a word, for a word without a shard, and without typo correction", () => {
@@ -172,5 +207,43 @@ describe("plural", () => {
     expect(FACET_NAMES).toEqual(["type", "source", "domain", "application"]);
     expect(NOTELESS_FACET).toBe("nonote");
     expect(NOTELESS_FILTERS).toEqual(["any", "only", "exclude"]);
+  });
+});
+
+describe("closestForm", () => {
+  const entry = (title: string, aliases?: string[]): SearchEntry => ({
+    id: title,
+    title,
+    type: "term",
+    url: `${title}/index.html`,
+    status: "active",
+    source: "glossary",
+    ...(aliases === undefined ? {} : { aliases }),
+  });
+  const entries = [
+    entry("Publication threshold", ["threshold"]),
+    entry("Threshold review"),
+    entry("Keyword page", ["word page"]),
+    entry("Plafond de versement"),
+    entry("Plafond"),
+  ];
+
+  it("proposes the title or alias sharing the longest prefix with the query, case and accents folded", () => {
+    expect(closestForm("thresold", entries)).toEqual({ entity: 0, form: "threshold" });
+    expect(closestForm("Thresh", entries)).toEqual({ entity: 0, form: "threshold" });
+    expect(closestForm("wor", entries)).toEqual({ entity: 2, form: "word page" });
+    expect(closestForm("KEYW", entries)).toEqual({ entity: 2, form: "Keyword page" });
+  });
+
+  it("prefers the shortest form among equal prefixes, so that a word beats the expressions starting with it", () => {
+    expect(closestForm("plafon", entries)).toEqual({ entity: 4, form: "Plafond" });
+    expect(closestForm("plafond de", entries)).toEqual({ entity: 3, form: "Plafond de versement" });
+  });
+
+  it("proposes nothing under two characters in common, or over an empty table", () => {
+    expect(closestForm("zebra", entries)).toBeUndefined();
+    expect(closestForm("p", entries)).toBeUndefined();
+    expect(closestForm("", entries)).toBeUndefined();
+    expect(closestForm("threshold", [])).toBeUndefined();
   });
 });

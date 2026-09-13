@@ -155,6 +155,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       domain: "publication",
       status: "active",
       source: "glossary",
+      aliases: ["word page"],
+      broader: "Page",
+      cited: 4,
     });
     expect(meta.types).toEqual({
       document: "Document",
@@ -226,7 +229,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       'data-props="{&quot;root&quot;:&quot;../../&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;../../search/index.html&quot;',
     );
     expect(entity).toContain('placeholder="Search the documentation"');
-    expect(entity).toContain('<kbd class="search-shortcut" aria-hidden="true">/</kbd>');
+    expect(entity).toContain(
+      '<button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button><kbd class="search-shortcut" aria-hidden="true">/</kbd>',
+    );
     expect(entity).toContain('<div class="search-suggestions" hidden></div>');
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
@@ -237,10 +242,10 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
   it("heads the home page with the same field as the header, drawn large and submitting to the results page, the strings of its live results travelling with the island", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain(
-      '<h1 id="home-question">What are you looking for?</h1><p class="home-explanation">Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.</p><concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;,&quot;label&quot;:&quot;Search&quot;,&quot;root&quot;:&quot;&quot;,&quot;suggestions&quot;:{&quot;matches&quot;:{&quot;one&quot;:&quot;# match&quot;,&quot;other&quot;:&quot;# matches&quot;},&quot;usedIn&quot;:{&quot;one&quot;:&quot;Used in # document, never defined&quot;,&quot;other&quot;:&quot;Used in # documents, never defined&quot;},&quot;browse&quot;:&quot;browse&quot;,&quot;enter&quot;:&quot;Enter&quot;,&quot;open&quot;:&quot;open&quot;,&quot;seeResults&quot;:{&quot;one&quot;:&quot;See the # result&quot;,&quot;other&quot;:&quot;See the # results&quot;}}},&quot;home&quot;:true}"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
+      '<h1 id="home-question">What are you looking for?</h1><p class="home-explanation">Type a word of the business. If it is used anywhere in the documentation, it has a page — even if nobody has defined it yet.</p><concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;&quot;,&quot;search&quot;:{&quot;action&quot;:&quot;search/index.html&quot;,&quot;placeholder&quot;:&quot;Search the documentation&quot;,&quot;label&quot;:&quot;Search&quot;,&quot;clearLabel&quot;:&quot;Clear the search&quot;,&quot;root&quot;:&quot;&quot;,&quot;suggestions&quot;:{&quot;matches&quot;:{&quot;one&quot;:&quot;# match&quot;,&quot;other&quot;:&quot;# matches&quot;},&quot;usedIn&quot;:{&quot;one&quot;:&quot;Used in # document, never defined&quot;,&quot;other&quot;:&quot;Used in # documents, never defined&quot;},&quot;browse&quot;:&quot;browse&quot;,&quot;enter&quot;:&quot;Enter&quot;,&quot;open&quot;:&quot;open&quot;,&quot;seeResults&quot;:{&quot;one&quot;:&quot;See the # result&quot;,&quot;other&quot;:&quot;See the # results&quot;}}},&quot;home&quot;:true}"><form class="home-search" role="search" aria-label="Search" action="search/index.html" method="get">',
     );
     expect(home).toContain(
-      '<input id="home-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><span class="search-count" aria-live="polite"></span>',
+      '<input id="home-search" type="search" name="q" placeholder="Search the documentation" autocomplete="off"/><span class="search-count" aria-live="polite"></span><button type="button" class="search-clear" hidden><span aria-hidden="true">✕</span><span class="visually-hidden">Clear the search</span></button>',
     );
     expect(home).toContain('<div class="search-suggestions home-suggestions" hidden></div>');
     expect(home).toContain(

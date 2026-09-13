@@ -1,6 +1,6 @@
 import { render, type JSX } from "preact";
 
-import { SEARCH_ISLAND, SUGGESTIONS_CLASS } from "../search/shared.js";
+import { CLEAR_CLASS, SEARCH_ISLAND, SUGGESTIONS_CLASS } from "../search/shared.js";
 import { ISLAND_ELEMENT } from "./element.js";
 import { mountSearch, scrollMemory, storageOf, type SearchIslandElement } from "./search.js";
 
@@ -8,6 +8,7 @@ function adapt(element: HTMLElement): SearchIslandElement<HTMLElement> {
   return {
     getAttribute: (name) => element.getAttribute(name),
     input: () => element.querySelector("input"),
+    clear: () => element.querySelector<HTMLButtonElement>(`.${CLEAR_CLASS}`),
     panel: () => element.querySelector<HTMLElement>(`.${SUGGESTIONS_CLASS}`),
     links: () => [...element.querySelectorAll<HTMLAnchorElement>(".suggestion > a")],
     counter: () => element.querySelector<HTMLElement>(".search-count"),

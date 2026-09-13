@@ -6,6 +6,7 @@ import {
   buildSearchIndex,
   compactJson,
   DEFAULT_BODY_MAX_CHARS,
+  excerptOf,
   FIELD_WEIGHTS,
   pluralForms,
   searchFields,
@@ -13,10 +14,11 @@ import {
   searchIndexFiles,
   searchLabels,
   searchType,
+  SUMMARY_MAX_CHARS,
   type SearchIndexInput,
 } from "../../src/search/build.js";
 import { SEARCH_META, shardScript, type ShardData } from "../../src/search/shared.js";
-import { entity, model, tokenize } from "../build/fixture.js";
+import { entity, model, page, term, tokenize } from "../build/fixture.js";
 import { searchLabels as labels } from "../helpers/search.js";
 
 /** One entity per indexed field, the field alone carrying the token `probe`. */
@@ -168,7 +170,10 @@ describe("buildSearchIndex", () => {
       url: "specs/title/index.html",
       status: "active",
       source: "specs",
+      cited: 0,
     });
+    expect(meta.entities[1]?.aliases).toEqual(["probe alias"]);
+    expect(meta.entities[2]?.summary).toBe("A probe.");
     expect(meta.types).toEqual({
       probe: "Label of probe",
       screen: "Label of screen",
@@ -182,6 +187,79 @@ describe("buildSearchIndex", () => {
     expect(meta.shards).toEqual([...meta.shards].sort());
     expect(meta.shards).toContain("pr");
     expect(meta.bytes).toBeGreaterThan(0);
+  });
+
+  it("carries what a row shows beyond the title: the summary, the other names, the broader term by its title, and the pages citing the entity", () => {
+    const { meta } = buildSearchIndex(
+      input({
+        model: model({
+          entities: [
+            term,
+            page,
+            entity({
+              id: "glossary/alias",
+              type: "term",
+              title: "Alias",
+              summary: "Another name of a note.",
+              attributes: { broader: "a term nobody wrote" },
+            }),
+            entity({
+              id: "glossary/homonym",
+              type: "term",
+              title: "Homonym",
+              attributes: { broader: "page.md" },
+            }),
+            entity({
+              id: "specs/objects/entity",
+              type: "business_object",
+              title: "Entity",
+              attributes: { broader: "page.md", cited: 9 },
+            }),
+            entity({
+              id: "keywords/page",
+              type: "term",
+              title: "page",
+              keyword: true,
+              source: { name: "glossary", path: "page.md", line: 3 },
+            }),
+          ],
+        }),
+      }),
+    );
+    expect(
+      meta.entities.map(({ id, summary, aliases, broader, cited }) => [
+        id,
+        summary,
+        aliases,
+        broader,
+        cited,
+      ]),
+    ).toEqual([
+      ["glossary/keyword-page", undefined, ["word page"], "Page", 4],
+      ["glossary/page", undefined, undefined, undefined, 1],
+      ["glossary/alias", "Another name of a note.", undefined, "a term nobody wrote", 0],
+      ["glossary/homonym", undefined, undefined, "Page", 0],
+      ["specs/objects/entity", undefined, undefined, "page.md", 0],
+      ["keywords/page", undefined, undefined, undefined, undefined],
+    ]);
+  });
+
+  it("cuts a long summary at a word before two hundred characters, so that a first paragraph standing in for one keeps the table light", () => {
+    const long = `${"word ".repeat(60)}end.`;
+    const { meta } = buildSearchIndex(
+      input({
+        model: model({
+          entities: [entity({ id: "specs/long", type: "term", title: "Long", summary: long })],
+        }),
+      }),
+    );
+    expect(meta.entities[0]?.summary).toBe(`${"word ".repeat(39)}word…`);
+    expect(SUMMARY_MAX_CHARS).toBe(200);
+    expect(excerptOf("A short summary.", 200)).toBe("A short summary.");
+    expect(excerptOf("Twelve chars", 12)).toBe("Twelve chars");
+    expect(excerptOf("Thirteen char.", 13)).toBe("Thirteen…");
+    expect(excerptOf("Unbrokenwordlongerthanthelimit", 10)).toBe("Unbrokenwo…");
+    expect(excerptOf("Été très long été", 8)).toBe("Été…");
   });
 
   it("freezes the counts of every facet value over the whole table, for the results page before any query", () => {
@@ -213,11 +291,16 @@ describe("buildSearchIndex", () => {
       input({ model: model({ entities: [summary, bare, probes.title] }) }),
     );
     expect(
-      meta.entities.map((entry) => [entry.keyword, entry.occurrences, entry.documents]),
+      meta.entities.map((entry) => [
+        entry.keyword,
+        entry.occurrences,
+        entry.documents,
+        entry.cited,
+      ]),
     ).toEqual([
-      [true, 17, 6],
-      [true, 0, 0],
-      [undefined, undefined, undefined],
+      [true, 17, 6, undefined],
+      [true, 0, 0, undefined],
+      [undefined, undefined, undefined, 0],
     ]);
     expect(meta.counts.nonote).toEqual({ only: 2, exclude: 1 });
   });
@@ -301,31 +384,54 @@ describe("searchLabels and pluralForms", () => {
   it("formats the strings of the results page in the language of the catalogue, plurals by category with # for the count", () => {
     expect(searchLabels(loadCatalogue("en"))).toEqual({
       facets: "Filters",
-      facet: { type: "Type", source: "Source", domain: "Domain", application: "Application" },
+      facet: { type: "Page type", source: "Space", domain: "Domain", application: "Application" },
       activeFilters: "Active filters",
       removeFilter: "Remove this filter",
       clear: "Clear filters",
       noResult: "No result",
-      results: { one: "# result", other: "# results" },
+      noResultFor: "No result for “{query}”",
+      results: { one: "# result, most cited first", other: "# results, most cited first" },
+      countersNote:
+        "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
       address: "Address of this search",
       copyAddress: "Copy",
       copied: "Address copied",
       noteless: { label: "Without a note", any: "Included", only: "Only", exclude: "Excluded" },
-      undefinedExpression: "Expression without a note",
+      cited: { one: "cited in # page", other: "cited in # pages" },
+      alsoCalled: "Also called: {aliases}",
+      broader: "Broader term: {term}",
+      usedIn: {
+        one: "Used in # document, never defined in the glossary",
+        other: "Used in # documents, never defined in the glossary",
+      },
+      notelessNote:
+        "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
+      closestForm: "Closest form:",
       occurrences: { one: "# occurrence", other: "# occurrences" },
-      documents: { one: "# document", other: "# documents" },
     });
     const fr = searchLabels(loadCatalogue("fr"));
     expect(fr.facets).toBe("Filtres");
-    expect(fr.results).toEqual({
-      many: "# résultats",
-      one: "# résultat",
-      other: "# résultats",
+    expect(fr.facet).toEqual({
+      type: "Type de page",
+      source: "Espace",
+      domain: "Domaine",
+      application: "Application",
     });
+    expect(fr.results).toEqual({
+      many: "# résultats, les plus cités en premier",
+      one: "# résultat, les plus cités en premier",
+      other: "# résultats, les plus cités en premier",
+    });
+    expect(fr.usedIn).toEqual({
+      many: "Employé dans # documents, jamais défini dans le glossaire",
+      one: "Employé dans # document, jamais défini dans le glossaire",
+      other: "Employé dans # documents, jamais défini dans le glossaire",
+    });
+    expect(fr.noResultFor).toBe("Aucun résultat pour « {query} »");
   });
 
   it("gives a form to every plural category of the locale the samples reach, sorted", () => {
-    expect(Object.keys(pluralForms(loadCatalogue("fr"), "keyword.documents"))).toEqual([
+    expect(Object.keys(pluralForms(loadCatalogue("fr"), "results.usedIn"))).toEqual([
       "many",
       "one",
       "other",
@@ -339,12 +445,12 @@ describe("searchLabels and pluralForms", () => {
   it("leaves out a category no sample reaches, the browser then falling back on the other form", () => {
     // Welsh gives "many" to 6 alone among the small numbers, which the samples skip.
     const welsh = { ...loadCatalogue("en"), locale: "cy" };
-    expect(pluralForms(welsh, "search.results")).toEqual({
-      few: "# results",
-      one: "# result",
-      other: "# results",
-      two: "# results",
-      zero: "# results",
+    expect(pluralForms(welsh, "results.cited")).toEqual({
+      few: "cited in # pages",
+      one: "cited in # page",
+      other: "cited in # pages",
+      two: "cited in # pages",
+      zero: "cited in # pages",
     });
   });
 });

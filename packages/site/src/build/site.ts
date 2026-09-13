@@ -235,6 +235,7 @@ function searchFieldOf(context: SiteContext, page: string): SearchField {
     action: relativeHref(page, SEARCH_PAGE),
     placeholder: message(context, "site.searchPlaceholder"),
     label: message(context, "site.search"),
+    clearLabel: message(context, "results.clearQuery"),
     root: siteRootOf(page),
     suggestions: suggestionLabels(context.catalogue),
   };

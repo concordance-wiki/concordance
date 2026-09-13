@@ -21,6 +21,8 @@ import {
   neighbourhoodFull,
   neighbourhoodOverflow,
   searchResults,
+  searchResultsCorporate,
+  searchResultsEmpty,
   todo,
 } from "./fixtures.js";
 
@@ -285,7 +287,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "SearchResults",
     state: "default",
     description:
-      "three results, one with a type and a snippet and one a word without a note, the address of the search, an active filter recalled above them, and three facets with a selected value and a disabled one",
+      "three results, one with a type, a summary and its facts, one a word without a note, the address of the search, an active filter recalled above them, and three facets with a selected value, a disabled one and the keyword type dashed",
     ...chrome,
     props: searchResults,
   },
@@ -294,9 +296,10 @@ export const galleryPages: readonly GalleryPage[] = [
     slot: "SearchResults",
     rendered: "SearchResults",
     state: "empty",
-    description: "a query without any result or facet",
+    description:
+      "a query without any result or facet: the empty state names it and proposes the closest form of the dictionary",
     ...chrome,
-    props: { query: "nothing", total: 0, results: [], facets: [] },
+    props: searchResultsEmpty,
   },
   {
     file: "index-page.html",
@@ -349,5 +352,17 @@ export const galleryPages: readonly GalleryPage[] = [
     header: corporateHeader,
     footer: corporateFooter,
     props: corporateHome,
+  },
+  {
+    file: "search-results-corporate.html",
+    slot: "SearchResults",
+    rendered: "SearchResults",
+    state: "corporate",
+    description:
+      "the results of a query in the corporate chrome: the page type and the space as open checkbox groups on the left with their counts and the note on the counters, the other facets folded under them, the selected space as a chip above the summary, two notes of the fixtures corpus with their type chip, their citations, their summary and the line of their space, other names and broader term, and a word without a note dotted among them, the note on such words under the list",
+    ...chrome,
+    header: corporateHeader,
+    footer: corporateFooter,
+    props: searchResultsCorporate,
   },
 ];

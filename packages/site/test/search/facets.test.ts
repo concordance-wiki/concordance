@@ -10,6 +10,7 @@ import {
   matchesOthers,
   notelessCount,
   notelessFacetOf,
+  PRIMARY_FACETS,
 } from "../../src/search/facets.js";
 import type { SearchEntry, SearchMeta } from "../../src/search/shared.js";
 import { emptyState, parseSearchState, searchQueryString } from "../../src/search/state.js";
@@ -121,13 +122,14 @@ describe("facetsOf and activeFiltersOf", () => {
   it("lists every value the table knows, labelled, with its count, its state and the address of the toggled state", () => {
     const state = parseSearchState("?q=page&source=specs");
     const facets = facetsOf(meta, state, countFacets(entries, state), searchQueryString);
-    expect(facets.map((facet) => [facet.name, facet.label])).toEqual([
-      ["type", "Type"],
-      ["source", "Source"],
-      ["domain", "Domain"],
-      ["application", "Application"],
-      ["nonote", "Without a note"],
+    expect(facets.map((facet) => [facet.name, facet.label, facet.folded])).toEqual([
+      ["type", "Page type", undefined],
+      ["source", "Space", undefined],
+      ["domain", "Domain", true],
+      ["application", "Application", true],
+      ["nonote", "Without a note", true],
     ]);
+    expect(PRIMARY_FACETS).toEqual(["type", "source"]);
     expect(facets[0]?.values).toEqual([
       {
         value: "rule",
@@ -168,6 +170,18 @@ describe("facetsOf and activeFiltersOf", () => {
     expect(facetLabels(meta, "domain")).toBe(meta.domains);
   });
 
+  it("flags the keyword type among the page types, so that the page draws it dotted", () => {
+    const table: SearchMeta = { ...meta, types: { ...meta.types, keyword: "Keyword" } };
+    const facets = facetsOf(table, emptyState(), meta.counts, searchQueryString);
+    expect(facets[0]?.values.map((value) => [value.value, value.keyword])).toEqual([
+      ["rule", undefined],
+      ["screen", undefined],
+      ["term", undefined],
+      ["keyword", true],
+    ]);
+    expect(facets[1]?.values.map((value) => value.keyword)).toEqual([undefined, undefined]);
+  });
+
   it("keeps a selected value enabled even at 0, so that it can be lifted", () => {
     const state = parseSearchState("?type=term&source=specs");
     const facets = facetsOf(meta, state, countFacets(entries, state), searchQueryString);
@@ -192,21 +206,21 @@ describe("facetsOf and activeFiltersOf", () => {
       {
         name: "type",
         value: "term",
-        facetLabel: "Type",
+        facetLabel: "Page type",
         label: "Term",
         href: "?q=x&type=unknown&source=specs",
       },
       {
         name: "type",
         value: "unknown",
-        facetLabel: "Type",
+        facetLabel: "Page type",
         label: "unknown",
         href: "?q=x&type=term&source=specs",
       },
       {
         name: "source",
         value: "specs",
-        facetLabel: "Source",
+        facetLabel: "Space",
         label: "specs",
         href: "?q=x&type=term,unknown",
       },
@@ -254,6 +268,7 @@ describe("The no-note facet over the entries", () => {
     expect(notelessFacetOf(meta, state, counts, searchQueryString)).toEqual({
       name: "nonote",
       label: "Without a note",
+      folded: true,
       values: [
         {
           value: "any",
@@ -318,7 +333,13 @@ describe("The no-note facet over the entries", () => {
     expect(
       activeFiltersOf(meta, parseSearchState("?type=term&nonote=exclude"), searchQueryString),
     ).toEqual([
-      { name: "type", value: "term", facetLabel: "Type", label: "Term", href: "?nonote=exclude" },
+      {
+        name: "type",
+        value: "term",
+        facetLabel: "Page type",
+        label: "Term",
+        href: "?nonote=exclude",
+      },
       {
         name: "nonote",
         value: "exclude",
