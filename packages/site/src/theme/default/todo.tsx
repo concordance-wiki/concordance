@@ -6,10 +6,13 @@ import { labels } from "./labels.js";
 function TodoSection({
   id,
   title,
+  unit,
   entries,
 }: {
   id: string;
   title: string;
+  /** What the count of every entry counts. */
+  unit: string;
   entries: TodoEntry[];
 }): JSX.Element {
   return (
@@ -20,14 +23,22 @@ function TodoSection({
       {entries.length === 0 ? (
         <p class="empty">{labels.nothingToDo}</p>
       ) : (
-        <ul>
+        <ul aria-describedby={`${id}-unit`}>
           {entries.map((entry) => (
             <li key={entry.href}>
               <a href={entry.href}>{entry.label}</a> <span class="count">{entry.count}</span>
+              {entry.files !== undefined && (
+                <span class="todo-files">
+                  {entry.files} {labels.files}
+                </span>
+              )}
             </li>
           ))}
         </ul>
       )}
+      <p class="todo-unit" id={`${id}-unit`}>
+        {unit}
+      </p>
     </section>
   );
 }
@@ -39,9 +50,15 @@ export function Todo({ documents, terms }: TodoProps): JSX.Element {
       <TodoSection
         id="todo-documents"
         title={labels.documentsWithoutMarkdown}
+        unit={labels.filesWithoutMarkdown}
         entries={documents}
       />
-      <TodoSection id="todo-terms" title={labels.termsWithoutNote} entries={terms} />
+      <TodoSection
+        id="todo-terms"
+        title={labels.termsWithoutNote}
+        unit={labels.occurrencesUnit}
+        entries={terms}
+      />
     </div>
   );
 }

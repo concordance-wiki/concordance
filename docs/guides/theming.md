@@ -36,7 +36,7 @@ Every slot receives one object, typed in `@concordance-wiki/site` as `SlotProps[
 | `Neighbourhood` | `centre`, `neighbours: { id, label, href, typeLabel?, relation?, weight }[]` |
 | `SearchResults` | `query`, `total`, `results: { title, href, typeLabel?, snippet? }[]`, `facets: { name, label, values: { value, count, href }[] }[]` |
 | `Index` | `letters: { letter, href?, count }[]` (no `href`: the letter is inactive), `current?` (the letter of a segment page), `entries: { label, href, glyph?, anchor?, count }[]` (no `glyph`: a word without a note; `anchor`, the `id` to give the first entry of a letter when the whole index is one page, which the letters link to) |
-| `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count }[]` (occurrences) |
+| `Todo` | `documents: { label, href, count }[]` (files), `terms: { label, href, count, files? }[]` (occurrences, and the files they spread over) |
 
 An `Attribute` is `{ name, label, values: { text, href? }[] }`. A `HomeTreeNode` is `{ label, href?, count?, children? }`: a source or a folder has `children` and a `count` of notes, a note has an `href`; the `tree` entry carries the nodes, the `index` entry one item per letter with entries, the `recent` entry the latest changes as items and every source under `sources`. The `builtAtLabel` and `dateLabel` strings are the instants spelled in the project locale; a component shows the ISO value when they are absent. The `html` of a section is the markdown already rendered by the build; a theme inserts it as is. Every list arrives in its final order; a component never sorts.
 

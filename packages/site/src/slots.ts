@@ -321,13 +321,16 @@ export interface IndexProps {
 }
 
 export interface TodoEntry extends Link {
+  /** Files without markdown for a document, occurrences for a word. */
   count: number;
+  /** How many files a word occurs in. */
+  files?: number;
 }
 
 export interface TodoProps {
   /** Documents without a markdown representation, with their file count. */
   documents: TodoEntry[];
-  /** Words above the threshold without a note, with their occurrence count. */
+  /** Words above the threshold without a note, with their occurrence and file counts. */
   terms: TodoEntry[];
 }
 
