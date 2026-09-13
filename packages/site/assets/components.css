@@ -358,15 +358,14 @@ concordance-island[data-island="search"] {
 .entity-main {
   grid-area: main;
   min-inline-size: 0;
+  padding: var(--space-4) var(--space-4) var(--space-5);
 }
 
 .entity-side {
   grid-area: side;
   min-inline-size: 0;
-}
-
-.entity-main {
-  padding: var(--space-4) var(--space-4) var(--space-5);
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 
 .entity-main > * {
@@ -599,11 +598,6 @@ concordance-island[data-island="search"] {
 }
 
 /* The right panel: stacked blocks, never tabs; each one a disclosure whose summary is its heading. */
-
-.entity-side {
-  border-block-start: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
 
 .panel-block {
   margin: 0;
