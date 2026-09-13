@@ -13,7 +13,6 @@ describe("@concordance-wiki/checks", () => {
       "createRegistry",
       "documentationUrl",
       "isCheckId",
-      "relationAmbiguous",
     ]);
   });
 });

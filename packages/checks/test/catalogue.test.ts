@@ -101,7 +101,7 @@ describe("catalogue", () => {
 
   it("computes from the model exactly the checks whose data the model carries today", () => {
     const computed = catalogue.filter((d) => d.kind === "model").map((d) => d.id);
-    expect(computed).toEqual(["I-REL-AMBIGUOUS", "W-API-NOCONSUMER", "W-API-CONSUMER-MISMATCH"]);
+    expect(computed).toEqual(["W-API-NOCONSUMER", "W-API-CONSUMER-MISMATCH"]);
     const others = catalogue.filter((d) => !computed.includes(d.id));
     expect(others.map((d) => d.kind)).toEqual(others.map(() => "step"));
   });

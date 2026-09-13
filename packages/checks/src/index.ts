@@ -1,6 +1,5 @@
 export { catalogue } from "./catalogue.js";
 export { apiConsumerMismatch, apiWithoutConsumer } from "./checks/api-consumers.js";
-export { relationAmbiguous } from "./checks/relations.js";
 export {
   DOCUMENTATION_BASE_URL,
   documentationUrl,

@@ -69,3 +69,13 @@ export {
   type MentionOccurrence,
 } from "./mentions/links.js";
 export { foldHeading, mappedSection, type MappedSection } from "./mentions/sections.js";
+export {
+  FALLBACK_RELATION,
+  RELATION_ORIGIN,
+  relationLabel,
+  typeRelations,
+  type RelationLabelOptions,
+  type TypedEntity,
+  type TypeRelationsInput,
+  type TypeRelationsResult,
+} from "./relations/index.js";

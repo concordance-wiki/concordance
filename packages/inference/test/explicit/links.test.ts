@@ -233,7 +233,7 @@ describe("explicitLinks", () => {
     ]);
   });
 
-  it("names the relation of a type pair admitting a single relation, as a screen linking an object gives accesses", () => {
+  it("leaves every link between two notes as related, whatever their types, for the relation typing step to name", () => {
     const object: Note = {
       source: "specs",
       path: "objects/link.md",
@@ -242,15 +242,13 @@ describe("explicitLinks", () => {
     };
     const note: Note = {
       ...screen,
-      text: "# Entry\n\nWrites a [link](../objects/link.md).\n",
+      text: "# Entry\n\nWrites a [link](../objects/link.md) under the [cap](../rules/cap.rule.md).\n",
     };
-    const { links } = run(corpus([note, object]));
-    expect(links.map((link) => link.relation)).toEqual(["accesses"]);
-  });
-
-  it("falls back to related for a screen linking a rule, since the default profile only allows constrains from rule to screen", () => {
-    const { links } = run(corpus([screen, rule]));
-    expect(links.map((link) => link.relation)).toEqual(["related"]);
+    const { links } = run(corpus([note, object, rule]));
+    expect(links.map((link) => [link.to, link.relation])).toEqual([
+      ["specs/objects/link", "related"],
+      ["specs/rules/cap.rule", "related"],
+    ]);
   });
 
   it("orders the provenances of one link by path when two notes share its identifier", () => {
@@ -306,7 +304,7 @@ describe("explicitLinks", () => {
         {
           from: "meetings/2026-03-12-workshop",
           to: "decisions/cap-server-side",
-          relation: "documents",
+          relation: "related",
           attributes: {},
           confidence: 1,
           provenance: [
@@ -379,7 +377,7 @@ describe("explicitLinks", () => {
       const { links, findings } = run(corpus([note, decision]), { cross_source_links: true });
       expect(findings).toEqual([]);
       expect(links.map((link) => [link.from, link.to, link.relation])).toEqual([
-        ["meetings/2026-03-12-workshop", "decisions/cap-server-side", "documents"],
+        ["meetings/2026-03-12-workshop", "decisions/cap-server-side", "related"],
       ]);
       expect(links[0]?.provenance[0]?.anchor).toBe("why");
     });

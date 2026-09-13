@@ -1,7 +1,6 @@
 import type { Severity } from "@concordance-wiki/core";
 
 import { apiConsumerMismatch, apiWithoutConsumer } from "./checks/api-consumers.js";
-import { relationAmbiguous } from "./checks/relations.js";
 import type { CheckDefinition, CheckFamily, CheckId } from "./definition.js";
 import type { Check } from "./model.js";
 
@@ -197,13 +196,12 @@ export const catalogue: readonly CheckDefinition[] = [
     "A source or a note has not changed for longer than the configured threshold.",
     "Review the content, mark obsolete notes as such, or raise staleness.warn_after_days for sources that legitimately change rarely.",
   ),
-  model(
+  step(
     "I-REL-AMBIGUOUS",
     "info",
     "vocabulary-and-filing",
     "A link between two entities fell back to the generic related relation.",
     "Move the mention under a mapped section, or declare the reference in frontmatter.",
-    relationAmbiguous,
   ),
   step(
     "I-PII-DETECTED",
