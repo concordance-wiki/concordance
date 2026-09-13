@@ -201,7 +201,7 @@ build:
 
 `--output` on the command line overrides `output`; the folder receives `build.log.json` with the summary and every finding, sorted.
 
-`mentions_inline` bounds what the mentions panel of an entity page carries in the served HTML: that many mentions, readable without JavaScript, grouped by citing file. The others stay in the JSON fragment of the entity, one file per entity, which the panel loads on demand; under two hundred mentions in all they also travel in the page, inside a script block, so that no request is needed. `0` serves no mention inline and leaves everything to the fragment; a large value trades page weight against requests. The [theming guide](theming.md#mentions-panel) describes the three regimes.
+`mentions_inline` bounds what the mentions panel of an entity page carries in the served HTML: that many mentions, readable without JavaScript, grouped by related page, the first passage of each of the six pages listed first so that a small value still serves six entries. The others stay in the JSON fragment of the entity, one file per entity, which the panel loads on demand; under two hundred mentions in all they also travel in the page, inside a script block, so that no request is needed. `0` serves no mention inline and leaves everything to the fragment; a large value trades page weight against requests. The [theming guide](theming.md#mentions-panel) describes the three regimes.
 
 ## `site`
 

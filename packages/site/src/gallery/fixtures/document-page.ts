@@ -149,6 +149,34 @@ const documentMentions: Mention[] = [
     },
     "The viewer never serves an original binary, as the transcript publication framing states.",
   ),
+  // Two slides of the deck itself evoke pages: the excerpt leads to the slide on this page.
+  {
+    kind: "recognised",
+    file: { label: "pseudonymisation.md", href: "../../../glossary/pseudonymisation/" },
+    title: "Pseudonymisation",
+    type: "term",
+    typeLabel: "Term",
+    context: "Pseudonymisation before indexing, never after.",
+    surface: "Pseudonymisation",
+    line: 2,
+    href: "#L2",
+    location: "slide 2",
+  },
+  {
+    kind: "recognised",
+    file: {
+      label: "screens/service/document-viewer.md",
+      href: "../../../specs/screens/service/document-viewer/",
+    },
+    title: "Document viewer",
+    type: "screen",
+    typeLabel: "Screen",
+    context: "The document viewer shows the PDF, the original stays a download.",
+    surface: "document viewer",
+    line: 4,
+    href: "#L4",
+    location: "slide 4",
+  },
 ];
 
 /** A deck of the framing space, merged with its notes: what the document page shows, in the corporate chrome. */
@@ -231,6 +259,11 @@ export const documentPageCorporate: SlotProps["EntityPage"] = {
     ...corporateEntityPage.mentions,
     mentions: documentMentions,
     pages: 5,
+    labels: {
+      ...corporateEntityPage.mentions.labels,
+      orderNote:
+        "A document does not enter the model: its pages bring passages, and the note that describes it stands among its files.",
+    },
     fragmentHref: "../../../fragments/framing/2026/transcript-publication-framing.mentions.json",
   },
   sources: [

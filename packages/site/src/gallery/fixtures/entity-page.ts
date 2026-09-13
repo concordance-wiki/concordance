@@ -50,7 +50,7 @@ export const entityPage: SlotProps["EntityPage"] = {
   ],
 };
 
-/** The pages of the fixtures corpus that evoke the rule, written links first, then recognised mentions, each in corpus order. */
+/** The pages of the fixtures corpus that evoke the rule, the mentions of a page together, the pages by number of passages, written links and recognised mentions counted alike. */
 export const corporateMentions: Mention[] = [
   relatedMention(
     14,
@@ -240,7 +240,8 @@ export const corporateEntityPage: SlotProps["EntityPage"] = {
       loadingOthers: "Loading the other pages…",
       othersUnavailable: "The other pages could not be loaded.",
       fullList: "Open the full list (JSON)",
-      orderNote: "From the surest to the weakest: written links first, then recognised mentions.",
+      orderNote:
+        "Ordered by number of passages, written and recognised together. “Cited” marks a link present in the text.",
       noRelated: "No other page evokes this one yet.",
       noMatch: "No page matches the filter.",
     },
