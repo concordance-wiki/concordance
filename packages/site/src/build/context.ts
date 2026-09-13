@@ -25,6 +25,8 @@ export interface SiteContextInput {
   editUrl?: string;
   /** The `ref` every source declares, by name; `main` is assumed for the others. */
   sourceRefs?: Record<string, string>;
+  /** The `description` every source declares, by name: the content of its space on the spaces page. */
+  sourceDescriptions?: Record<string, string>;
   /** The project locale, for the dates the pages spell out; the catalogue language when absent. */
   locale?: Locale;
   /** `staleness` of the configuration, which the home page reads to flag dormant sources. */

@@ -51,11 +51,17 @@ const modelLines = (stdout: string[]): string[] =>
 /**
  * The site summary the rendering appends to stdout; the island sizes vary with the code, so their
  * lines are matched. `pages` counts the pages of the model, the redirects and the fixed ones, the
- * search page apart.
+ * search page, the spaces page and the page of every space apart.
  */
-function expectSiteSummary(stdout: string[], pages: number, output: string, redirects = 0): void {
+function expectSiteSummary(
+  stdout: string[],
+  pages: number,
+  output: string,
+  redirects = 0,
+  spaces = 1,
+): void {
   const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
-  const total = pages + 1;
+  const total = pages + 2 + spaces;
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
@@ -173,7 +179,8 @@ describe("concordance build", () => {
       "findings: error 0, warning 1, info 0",
       "  W-SOURCE-UNREACHABLE: 1",
     ]);
-    expectSiteSummary(io.stdout, 3, "/work/dist");
+    // An unreachable source is in no block of the model: no space page stands for it.
+    expectSiteSummary(io.stdout, 3, "/work/dist", 0, 0);
   });
 
   it("reads a local source without touching git", async () => {
@@ -1182,6 +1189,7 @@ describe("concordance build", () => {
           built.model.entities.length + 3 + redirectsOf(built).length + letterPagesOf(built).length,
           built.output,
           redirectsOf(built).length,
+          built.model.build.sources.length,
         );
         // The realistic corpus is the one whose index outweighs one page: a page per letter.
         expect(letterPagesOf(built).length > 0).toBe(corpus === "realistic/en");
@@ -1294,6 +1302,10 @@ describe("concordance build", () => {
         expect(built.files).toContain("index/index.html");
         expect(built.files).toContain("todo/index.html");
         expect(built.files).toContain("search/index.html");
+        expect(built.files).toContain("spaces/index.html");
+        for (const source of built.model.build.sources) {
+          expect(built.files).toContain(`${source.name}/index.html`);
+        }
         expect(built.files).toContain("search/meta.js");
         expect(built.files).toContain("assets/site.css");
         expect(
@@ -1303,7 +1315,11 @@ describe("concordance build", () => {
           built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
         expect(built.pages.size).toBe(
-          built.model.entities.length + 4 + redirectsOf(built).length + letterPagesOf(built).length,
+          built.model.entities.length +
+            5 +
+            built.model.build.sources.length +
+            redirectsOf(built).length +
+            letterPagesOf(built).length,
         );
       });
 

@@ -8,6 +8,8 @@ export const INDEX_PAGE = "index/index.html";
 export const TODO_PAGE = "todo/index.html";
 /** The results page; the files of the index sit next to it under `search/`. */
 export const SEARCH_PAGE = "search/index.html";
+/** The page listing every space. */
+export const SPACES_PAGE = "spaces/index.html";
 export const ASSETS_DIRECTORY = "assets";
 export const FRAGMENTS_DIRECTORY = "fragments";
 
@@ -50,6 +52,16 @@ export function mentionsFragmentPath(id: string): string {
  */
 export function relativeHref(from: string, to: string): string {
   return posix.relative(posix.dirname(from), to);
+}
+
+/** The page of a space, at the root of the source: `<source>/index.html`, where no entity page stands since an identifier has two segments at least. */
+export function spacePagePath(source: string): string {
+  return `${source}/index.html`;
+}
+
+/** The href of the page of a space from another page. */
+export function spaceHref(from: string, source: string): string {
+  return relativeHref(from, spacePagePath(source));
 }
 
 /** The href of an entity page from another page. */

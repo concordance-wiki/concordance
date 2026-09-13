@@ -106,6 +106,7 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | `type` | string | — | pattern `^[a-z][a-z0-9_]*$` | Type given to every markdown file of the source, above default_type and below the rules and the frontmatter. |
 | `default_type` | string | `"document"` | pattern `^[a-z][a-z0-9_]*$` | Type of a note when nothing else applies. |
 | `application` | string | — | pattern `^[a-z][a-z0-9-]*$` | Application every entity of the source belongs to, unless a rule or the frontmatter says otherwise. |
+| `description` | string | — | non-empty | One sentence saying what the source holds, shown as the content of its space on the spaces page; without it, the dominant types of the space stand in. |
 | `glossary` | boolean | `false` | — | Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary. |
 | `convert` | boolean | `false` | — | Whether the office documents of the source are converted, for preview and text extraction. |
 | `previews` | boolean | `true` | — | Whether the previews of the converted documents of the source are published with the site; false keeps them out of the artefact. |

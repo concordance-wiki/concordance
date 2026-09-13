@@ -397,7 +397,7 @@ describe("entityPageOf", () => {
     ).toBe(1);
   });
 
-  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to the home tree", () => {
+  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to its page", () => {
     const props = entityPageOf(context(), screen);
     expect(props.space).toEqual({
       name: "specs",
@@ -412,7 +412,7 @@ describe("entityPageOf", () => {
       ],
     });
     expect(props.breadcrumb).toEqual([
-      { label: "specs", href: "../../../index.html#home-tree" },
+      { label: "specs", href: "../../index.html" },
       { label: "screens" },
       { label: "Mentions panel" },
     ]);
@@ -426,7 +426,7 @@ describe("entityPageOf", () => {
       ],
     });
     expect(breadcrumbOf(pagePath, term)).toEqual([
-      { label: "glossary", href: "../../index.html#home-tree" },
+      { label: "glossary", href: "../index.html" },
       { label: "Keyword page" },
     ]);
     // A page two folders deep opens both, its siblings listed at every level.
@@ -470,7 +470,7 @@ describe("entityPageOf", () => {
     expect(initialsOf("--")).toBe("--");
   });
 
-  it("counts the notes of every space for the drawer, a declared source without any at zero, a source met on a note alone counted too, all linked to the home tree", () => {
+  it("counts the notes of every space for the drawer, a declared source without any at zero, a source met on a note alone counted too, each linked to its page", () => {
     expect(spaceCountsOf(context())).toEqual([
       { name: "framing", initials: "FR", count: 1 },
       { name: "glossary", initials: "GL", count: 2 },
@@ -501,8 +501,8 @@ describe("entityPageOf", () => {
       "specs:2",
     ]);
     expect(spaceLinksOf(pagePath, spaceCountsOf(context()).slice(1))).toEqual([
-      { label: "glossary", href: "../../index.html#home-tree", initials: "GL", count: 2 },
-      { label: "specs", href: "../../index.html#home-tree", initials: "SP", count: 2 },
+      { label: "glossary", href: "../index.html", initials: "GL", count: 2 },
+      { label: "specs", href: "../../specs/index.html", initials: "SP", count: 2 },
     ]);
   });
 
@@ -1089,7 +1089,7 @@ describe("keywordPageOf", () => {
     const glossary = context({ glossarySources: ["nowhere", "glossary"] });
     const props = keywordPageOf(glossary, keyword);
     expect(props.breadcrumb).toEqual([
-      { label: "glossary", href: "../../index.html#home-tree" },
+      { label: "glossary", href: "../../glossary/index.html" },
       { label: "Terms" },
       { label: "build summary" },
     ]);
@@ -1113,7 +1113,7 @@ describe("keywordPageOf", () => {
     const props = keywordPageOf(context(), keyword);
     expect(props.breadcrumb?.[0]).toEqual({
       label: "glossary",
-      href: "../../index.html#home-tree",
+      href: "../../glossary/index.html",
     });
     expect(props.space?.name).toBe("glossary");
     const build = model().build;

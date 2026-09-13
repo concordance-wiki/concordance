@@ -204,6 +204,7 @@ export {
   HOME_PAGE,
   INDEX_PAGE,
   SEARCH_PAGE,
+  SPACES_PAGE,
   TODO_PAGE,
   assetsBaseOf,
   contractFileTarget,
@@ -215,6 +216,8 @@ export {
   mentionsFragmentPath,
   relativeHref,
   siteRootOf,
+  spaceHref,
+  spacePagePath,
 } from "./build/paths.js";
 export {
   DEFAULT_MENTIONS_INLINE,
@@ -228,17 +231,33 @@ export { RELATED_CONDENSED, groupByPage, typeCounts } from "./theme/default/ment
 export type { RelatedPage } from "./theme/default/mention-list.js";
 export {
   HOME_RECENT_ANCHOR,
-  HOME_TREE_ANCHOR,
   SPACE_PAGES_MAX,
   breadcrumbOf,
+  categoryOf,
   initialsOf,
   spaceCountsOf,
   spaceLinksOf,
   spaceOf,
   spaceWithPageOf,
-  wholeTreeOf,
+  topFoldersOf,
 } from "./build/space.js";
-export type { SpaceCount } from "./build/space.js";
+export type { FolderCount, SpaceCount } from "./build/space.js";
+export {
+  SPACE_CONTENT_TYPES,
+  SPACE_RECENT,
+  SPACE_WORDS,
+  categoriesOf,
+  citedInSpace,
+  contentOf,
+  repositoryOf,
+  spaceLabels,
+  spacePageOf,
+  spaceRecentOf,
+  spaceRowsOf,
+  spaceWordsOf,
+  spacesLabels,
+  spacesPageOf,
+} from "./build/spaces.js";
 export { FragmentError, parseFragment, serializeFragment } from "./build/fragments.js";
 export type {
   EntityFragment,

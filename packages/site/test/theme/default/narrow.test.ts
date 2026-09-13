@@ -26,16 +26,16 @@ describe("Phone: the bar shows the mark, the site name and a menu button opening
     expectBalanced(html);
   });
 
-  it("lists the spaces in the drawer with their initials badges and their page counts, under the link to their place on the home page", () => {
+  it("lists the spaces in the drawer with their initials badges and their page counts, each leading to its page, under the link to the spaces page", () => {
     const html = renderSlot("Header", corporateHeader, defaultTheme);
     expect(html).toContain(
-      '<div class="drawer-spaces"><a class="drawer-spaces-title" href="../#home-tree">Spaces</a><ul class="drawer-space-list"><li><a href="../#home-tree"><span class="space-initials" aria-hidden="true">GL</span><span class="drawer-space-name">glossary</span><span class="count">48</span></a></li><li><a href="../#home-tree"><span class="space-initials" aria-hidden="true">SP</span><span class="drawer-space-name">specs</span><span class="count">57</span></a></li></ul></div>',
+      '<div class="drawer-spaces"><a class="drawer-spaces-title" href="../spaces/">Spaces</a><ul class="drawer-space-list"><li><a href="../glossary/"><span class="space-initials" aria-hidden="true">GL</span><span class="drawer-space-name">glossary</span><span class="count">48</span></a></li><li><a href="../specs/"><span class="space-initials" aria-hidden="true">SP</span><span class="drawer-space-name">specs</span><span class="count">57</span></a></li></ul></div>',
     );
     // A header without spaces lists none and keeps its links.
     const plain = renderSlot("Header", header, defaultTheme);
     expect(plain).not.toContain("drawer-spaces");
     expect(plain).toContain(
-      '<div class="drawer"><ul class="site-links"><li><a href="../#home-tree">Spaces</a></li>',
+      '<div class="drawer"><ul class="site-links"><li><a href="../spaces/">Spaces</a></li>',
     );
   });
 

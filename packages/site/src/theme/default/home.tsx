@@ -3,7 +3,6 @@ import type { JSX } from "preact";
 import type { HomeAlert, HomeChange, HomeLabels, HomeProps, HomeSpace } from "../../slots.js";
 import { labels } from "./labels.js";
 import { SearchIsland } from "./search-island.js";
-import { Nodes } from "./space-tree.js";
 
 /** The labels of the default theme for every label the page does not receive; the folded spaces are counted from the page. */
 export function defaultHomeLabels(folded: number): HomeLabels {
@@ -25,32 +24,29 @@ function When({ date, label }: { date: string; label: string | undefined }): JSX
 }
 
 /**
- * The row of a space: its initials badge, its name, its count and its freshness; the whole
- * tree of the space folds behind it, drawn as the tree of the entity page.
+ * The row of a space: its initials badge, its name, its count and its freshness; the row leads
+ * to the page of the space, never unfolds a tree.
  */
 function Space({ space }: { space: HomeSpace }): JSX.Element {
   return (
     <li class={space.stale ? "home-space stale" : "home-space"}>
-      <details class="home-space-fold">
-        <summary class="home-space-row">
-          <span class="space-initials" aria-hidden="true">
-            {space.initials}
+      <a class="home-space-row" href={space.href}>
+        <span class="space-initials" aria-hidden="true">
+          {space.initials}
+        </span>
+        <span class="home-space-text">
+          <span class="home-space-name">{space.name}</span>
+          <span class="home-space-meta">
+            {space.countLabel ?? `${String(space.count)} ${space.unit}`}
+            {space.date !== undefined && (
+              <>
+                {" · "}
+                <When date={space.date} label={space.dateLabel} />
+              </>
+            )}
           </span>
-          <span class="home-space-text">
-            <span class="home-space-name">{space.name}</span>
-            <span class="home-space-meta">
-              {space.countLabel ?? `${String(space.count)} ${space.unit}`}
-              {space.date !== undefined && (
-                <>
-                  {" · "}
-                  <When date={space.date} label={space.dateLabel} />
-                </>
-              )}
-            </span>
-          </span>
-        </summary>
-        <Nodes nodes={space.nodes} />
-      </details>
+        </span>
+      </a>
     </li>
   );
 }
@@ -81,7 +77,7 @@ function Alert({ alert }: { alert: HomeAlert }): JSX.Element {
 
 /**
  * The home page: the question, the field with its live results in the flow of the page and
- * the most cited pages as shortcuts; then the spaces, each row folding the tree of its
+ * the most cited pages as shortcuts; then the spaces, each row leading to the page of its
  * source, the less cited ones folded behind a line counting them, and the pages changed last
  * with the alert on every dormant space. The letters of the index live on the index page and
  * the to-do link in the footer.

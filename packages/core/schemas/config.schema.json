@@ -207,6 +207,11 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           },
+          "description": {
+            "description": "One sentence saying what the source holds, shown as the content of its space on the spaces page; without it, the dominant types of the space stand in.",
+            "type": "string",
+            "minLength": 1
+          },
           "glossary": {
             "description": "Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary.",
             "type": "boolean",

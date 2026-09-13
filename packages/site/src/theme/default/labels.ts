@@ -171,4 +171,21 @@ export const labels = {
     "Words without a definition sit in the index like the others, dotted, with the passage that uses them most in place of a definition. That is the working list of a glossary owner.",
   indexWord1: "word",
   indexWords: "words",
+  spacesLeadAll:
+    "spaces, fed by the repositories declared in the configuration. A repository may carry several spaces, and a space may spread over several repositories.",
+  spaceColumn: "Space",
+  contentColumn: "Content",
+  lastUpdate: "Last update",
+  spacesDatesNote:
+    "The dates come from the git history, so they are always exact. A space past the freshness threshold is marked in accent, the only case where colour carries an alert, doubled by the value in days.",
+  pagesUnit: "pages",
+  repository: "repository",
+  browseHeading: "Browse",
+  categoriesLead: "categories, as filed in the repository",
+  categoriesNote:
+    "Each category opens its own list. The tree on the left appears only once in a page, so that nothing has to be unfolded from the home page.",
+  mostCitedHere: "The most cited words here",
+  wordsNote: "Counted in this space only, which gives its own vocabulary.",
+  spaceFooter:
+    "A space reads like a small wiki within the wiki: its own search, its own vocabulary, its own news.",
 } as const;

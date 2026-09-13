@@ -14,8 +14,8 @@ import { createNoteHref, fileKey, message, typeLabel, type SiteContext } from ".
 import { neighbourhoodOf, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
 import { mentionsPanelOf } from "./mentions.js";
-import { entityHref, HOME_PAGE, relativeHref } from "./paths.js";
-import { HOME_TREE_ANCHOR, spaceWithPageOf } from "./space.js";
+import { entityHref, spaceHref } from "./paths.js";
+import { spaceWithPageOf } from "./space.js";
 
 /** The heaviest companions weigh 5, the lightest 1, by rank of their count. */
 const COMPANION_WEIGHTS = 5;
@@ -277,7 +277,7 @@ export function keywordPageOf(
       : {
           space: spaceWithPageOf(context, page, entity, space),
           breadcrumb: [
-            { label: space, href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}` },
+            { label: space, href: spaceHref(page, space) },
             { label: message(context, "keyword.terms") },
             { label: entity.title },
           ],

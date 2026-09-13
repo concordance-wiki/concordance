@@ -4,10 +4,8 @@ import { formatMessage } from "@concordance-wiki/i18n";
 import { byCodeUnit } from "../order.js";
 import type { BreadcrumbItem, SpaceLink, SpaceNode, SpaceTree } from "../slots.js";
 import type { SiteContext } from "./context.js";
-import { entityHref, HOME_PAGE, relativeHref } from "./paths.js";
+import { entityHref, spaceHref } from "./paths.js";
 
-/** The id of the file tree entry of the home page, where the spaces are listed. */
-export const HOME_TREE_ANCHOR = "home-tree";
 /** The id of the latest changes entry of the home page. */
 export const HOME_RECENT_ANCHOR = "home-recent";
 /** How many pages of one folder the tree lists at most: a window around the current page, the rest counted on one node. */
@@ -48,6 +46,37 @@ function pagesIn(folder: Folder): number {
 function foldersOf(path: string): string[] {
   const cut = path.lastIndexOf("/");
   return cut < 0 ? [] : path.slice(0, cut).split("/");
+}
+
+/** The category of a path, its top-level folder; none for a file at the root of the source. */
+export function categoryOf(path: string): string | undefined {
+  return foldersOf(path)[0];
+}
+
+/** A top-level folder of a source with how many pages it holds, folders included, and the page the tree lists first under it. */
+export interface FolderCount {
+  name: string;
+  count: number;
+  /** The first page of the folder in tree order: its first folder's first page, else its first file. */
+  first: Entity;
+}
+
+/** The first page of a folder in the order the tree draws it: folders before pages, each sorted by name. A folder exists because a note lies under it. */
+function firstPageOf(folder: Folder): Entity {
+  const [child] = [...folder.folders.entries()].sort(([a], [b]) => byCodeUnit(a, b));
+  if (child !== undefined) return firstPageOf(child[1]);
+  const [page] = [...folder.pages].sort(
+    (a, b) => byCodeUnit(a.file, b.file) || byCodeUnit(a.entity.id, b.entity.id),
+  );
+  // A folder of the tree holds a page or a folder, never nothing: the recursion ends on a page.
+  return (page as { entity: Entity }).entity;
+}
+
+/** The top-level folders of a source, sorted by name, each with its page count: the categories of the space. */
+export function topFoldersOf(context: SiteContext, source: string): FolderCount[] {
+  return [...treeOf(context, source).folders.entries()]
+    .sort(([a], [b]) => byCodeUnit(a, b))
+    .map(([name, folder]) => ({ name, count: pagesIn(folder), first: firstPageOf(folder) }));
 }
 
 /** The notes of one source, folded into its folders. */
@@ -172,37 +201,21 @@ export function spaceCountsOf(context: SiteContext): SpaceCount[] {
     .map(([name, count]) => ({ name, initials: initialsOf(name), count }));
 }
 
-/** The spaces as the drawer of a page links them: each to the file tree of the home page. */
+/** The spaces as the drawer of a page links them: each to its own page. */
 export function spaceLinksOf(page: string, spaces: readonly SpaceCount[]): SpaceLink[] {
-  const href = `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}`;
-  return spaces.map(({ name, initials, count }) => ({ label: name, href, initials, count }));
+  return spaces.map(({ name, initials, count }) => ({
+    label: name,
+    href: spaceHref(page, name),
+    initials,
+    count,
+  }));
 }
 
-/** Space › folders › page: the space links to the file tree of the home page, a folder has no page, the page is the current one. */
+/** Space › folders › page: the space links to its page, a folder has no page, the page is the current one. */
 export function breadcrumbOf(page: string, entity: Entity): BreadcrumbItem[] {
   return [
-    { label: entity.source.name, href: `${relativeHref(page, HOME_PAGE)}#${HOME_TREE_ANCHOR}` },
+    { label: entity.source.name, href: spaceHref(page, entity.source.name) },
     ...foldersOf(entity.source.path).map((label) => ({ label })),
     { label: entity.title },
   ];
-}
-
-/** The nodes of a folder with every folder open and every page a link: the folders first, then the pages by file name and identifier. */
-function openNodesOf(page: string, folder: Folder): SpaceNode[] {
-  const folders = [...folder.folders.entries()]
-    .sort(([a], [b]) => byCodeUnit(a, b))
-    .map(([name, child]): SpaceNode => ({
-      label: name,
-      count: pagesIn(child),
-      children: openNodesOf(page, child),
-    }));
-  const pages = [...folder.pages]
-    .sort((a, b) => byCodeUnit(a.file, b.file) || byCodeUnit(a.entity.id, b.entity.id))
-    .map(({ entity }): SpaceNode => ({ label: entity.title, href: entityHref(page, entity.id) }));
-  return [...folders, ...pages];
-}
-
-/** The whole tree of a source from `page`, every folder open and every page listed: what the home page folds behind the row of a space. */
-export function wholeTreeOf(context: SiteContext, page: string, source: string): SpaceNode[] {
-  return openNodesOf(page, treeOf(context, source));
 }

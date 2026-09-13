@@ -54,7 +54,7 @@ export const header: SlotProps["Header"] = {
   siteTitle: "My wiki",
   homeHref: "../",
   navigation: [
-    { label: "Spaces", href: "../#home-tree" },
+    { label: "Spaces", href: "../spaces/" },
     { label: "A–Z index", href: "../index/" },
     { label: "Recent", href: "../#home-recent" },
   ],
@@ -226,7 +226,7 @@ export const entityPage: SlotProps["EntityPage"] = {
 };
 
 /** The mark of the tool, inlined so that the top bar of the corporate state carries a mark next to the name. */
-const MARK_SVG =
+export const MARK_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22"><rect x="7" y="11" width="27" height="6" rx="3" fill="currentColor"/><rect x="5" y="21" width="31" height="6" rx="3" fill="currentColor"/><rect x="11" y="31" width="26" height="6" rx="3" fill="currentColor"/><rect x="20" y="5" width="8" height="38" rx="4" fill="var(--color-accent)"/></svg>';
 
 /** The tree of the specifications space as the rule sees it: the folders with their counts, the current folder open, the current page marked. */
@@ -268,10 +268,10 @@ export const corporateHeader: SlotProps["Header"] = {
   logo: { svg: MARK_SVG },
   spaces: {
     label: "Spaces",
-    href: "../#home-tree",
+    href: "../spaces/",
     items: [
-      { label: "glossary", href: "../#home-tree", initials: "GL", count: 48 },
-      { label: "specs", href: "../#home-tree", initials: "SP", count: 57 },
+      { label: "glossary", href: "../glossary/", initials: "GL", count: 48 },
+      { label: "specs", href: "../specs/", initials: "SP", count: 57 },
     ],
   },
   navigation: [
@@ -1182,6 +1182,7 @@ export const home: SlotProps["Home"] = {
   spaces: [
     {
       name: "glossary",
+      href: "glossary/",
       initials: "GL",
       count: 2,
       unit: "pages",
@@ -1189,37 +1190,27 @@ export const home: SlotProps["Home"] = {
       date: "2024-04-30",
       dateLabel: "yesterday",
       stale: false,
-      nodes: [
-        { label: "Keyword page", href: "glossary/keyword-page/" },
-        { label: "Source", href: "glossary/source/" },
-      ],
     },
     {
       name: "specs",
+      href: "specs/",
       initials: "SP",
       count: 1,
       unit: "pages",
       date: "2024-04-20",
       dateLabel: "11 days ago",
       stale: false,
-      nodes: [
-        {
-          label: "screens",
-          count: 1,
-          children: [{ label: "Home page", href: "specs/screens/home-page/" }],
-        },
-      ],
     },
     {
       name: "rules",
+      href: "rules/",
       initials: "RU",
       count: 1,
       unit: "pages",
       date: "2023-01-01",
       stale: true,
-      nodes: [{ label: "Old rule", href: "rules/old-rule/" }],
     },
-    { name: "framing", initials: "FR", count: 0, unit: "pages", stale: false, nodes: [] },
+    { name: "framing", href: "framing/", initials: "FR", count: 0, unit: "pages", stale: false },
   ],
   recent: [
     {
@@ -1240,7 +1231,7 @@ export const home: SlotProps["Home"] = {
   ],
 };
 
-/** A space of the corporate home: its tree lists a few pages under one folder, enough to fold behind the row. */
+/** A space of the corporate home: its row leads to its page. */
 function corporateSpace(
   name: string,
   initials: string,
@@ -1248,12 +1239,11 @@ function corporateSpace(
   unit: "pages" | "documents",
   date: string,
   dateLabel: string,
-  folder: string,
-  pages: string[],
   stale = false,
 ): HomeSpace {
   return {
     name,
+    href: `${name}/`,
     initials,
     count,
     unit,
@@ -1261,16 +1251,6 @@ function corporateSpace(
     date,
     dateLabel,
     stale,
-    nodes: [
-      {
-        label: folder,
-        count: pages.length,
-        children: pages.map((title) => ({
-          label: title,
-          href: `${name}/${folder}/${title.toLowerCase().replaceAll(" ", "-")}/`,
-        })),
-      },
-    ],
   };
 }
 
@@ -1290,46 +1270,15 @@ export const corporateHome: SlotProps["Home"] = {
     { label: "build summary", href: "keywords/build-summary/" },
   ],
   spaces: [
-    corporateSpace("glossary", "GL", 48, "pages", "2026-09-11", "2 days ago", "inference", [
-      "Confidence",
-      "Entity",
-      "Link",
-      "Neighbourhood",
-    ]),
-    corporateSpace("specs", "SP", 57, "pages", "2026-09-09", "4 days ago", "rules", [
-      "Fail-on policy",
-      "Publication threshold",
-      "Twin size ratio",
-    ]),
-    corporateSpace("meetings", "ME", 12, "documents", "2026-09-12", "yesterday", "2026", [
-      "Keyword page threshold review",
-      "Neighbourhood cap",
-      "Theme override model",
-    ]),
-    corporateSpace("decisions", "DE", 8, "pages", "2026-09-01", "12 days ago", "publication", [
-      "Static site with islands",
-      "Self-hosted fonts",
-    ]),
-    corporateSpace(
-      "framing",
-      "FR",
-      4,
-      "pages",
-      "2026-03-03",
-      "6 months ago",
-      "public",
-      ["Vision", "Non-goals", "Roadmap outline"],
-      true,
-    ),
+    corporateSpace("glossary", "GL", 48, "pages", "2026-09-11", "2 days ago"),
+    corporateSpace("specs", "SP", 57, "pages", "2026-09-09", "4 days ago"),
+    corporateSpace("meetings", "ME", 12, "documents", "2026-09-12", "yesterday"),
+    corporateSpace("decisions", "DE", 8, "pages", "2026-09-01", "12 days ago"),
+    corporateSpace("framing", "FR", 4, "pages", "2026-03-03", "6 months ago", true),
   ],
   moreSpaces: [
-    corporateSpace("briefs", "BR", 3, "documents", "2026-08-20", "3 weeks ago", "2026", [
-      "Language pack brief",
-    ]),
-    corporateSpace("runbooks", "RU", 2, "pages", "2026-07-30", "last month", "operations", [
-      "Nightly build",
-      "Cache pruning",
-    ]),
+    corporateSpace("briefs", "BR", 3, "documents", "2026-08-20", "3 weeks ago"),
+    corporateSpace("runbooks", "RU", 2, "pages", "2026-07-30", "last month"),
   ],
   recent: [
     {

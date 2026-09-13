@@ -60,6 +60,8 @@ export interface SourceConfig {
   type?: string;
   default_type?: string;
   application?: string;
+  /** One sentence saying what the source holds, the content of its space on the spaces page. */
+  description?: string;
   glossary?: boolean;
   convert?: boolean;
   previews?: boolean;

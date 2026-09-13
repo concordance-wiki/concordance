@@ -41,6 +41,10 @@ export interface MessageArguments {
   "neighbourhood.total": { count: number };
   "search.results": { count: number };
   "site.generatedAt": { date: Date };
+  "space.categoriesLead": { count: number };
+  "space.updated": { when: string };
+  "spaces.datesNote": { count: number };
+  "spaces.lead": { count: number };
   "time.updatedAgo": { when: string };
   "todo.findings": { count: number };
 }
@@ -208,6 +212,21 @@ export const messageArguments = {
   "site.spaces": {},
   "site.todo": {},
   "site.version": {},
+  "space.browse": {},
+  "space.categoriesLead": { count: "plural" },
+  "space.categoriesNote": {},
+  "space.footer": {},
+  "space.mostCited": {},
+  "space.repository": {},
+  "space.searchPlaceholder": {},
+  "space.updated": { when: "argument" },
+  "space.wordsNote": {},
+  "spaces.content": {},
+  "spaces.datesNote": { count: "plural" },
+  "spaces.lastUpdate": {},
+  "spaces.lead": { count: "plural" },
+  "spaces.pages": {},
+  "spaces.space": {},
   "time.updatedAgo": { when: "argument" },
   "todo.findings": { count: "plural" },
   "todo.severity.error": {},
