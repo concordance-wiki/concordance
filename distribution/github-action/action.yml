@@ -58,7 +58,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
       with:
         node-version: ${{ inputs.node-version }}
     - id: lint
@@ -86,7 +86,7 @@ runs:
         # 2 means the lint could not run; 1 is reported after the upload so that the findings reach the diff.
         if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then exit "$status"; fi
     - if: inputs.upload == 'true' && inputs.format == 'sarif'
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
       with:
         sarif_file: ${{ steps.lint.outputs.report }}
         category: concordance-lint
