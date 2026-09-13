@@ -295,7 +295,8 @@ export const corporateScreenPage: SlotProps["EntityPage"] = {
     pages: 7,
     labels: {
       ...corporateEntityPage.mentions.labels,
-      orderNote: "From the surest to the weakest: written links first, then recognised mentions.",
+      orderNote:
+        "Ordered by number of passages, written and recognised together. “Cited” marks a link present in the text.",
     },
     fragmentHref: "../../../fragments/specs/screens/entity-page.mentions.json",
   },

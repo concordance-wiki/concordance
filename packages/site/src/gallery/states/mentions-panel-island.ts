@@ -7,7 +7,7 @@ export const mentionsPanelIslandState: GalleryPage = {
   rendered: "MentionsPanel",
   state: "island",
   description:
-    "twenty-five mentions in nine notes: the seven pages of the first twenty inline, the rest embedded for the island, the link to the fragment standing meanwhile, readable without JavaScript",
+    "twenty-five mentions in nine notes: six entries in view, the seventh page of the first twenty behind the disclosure worded as the button, the rest embedded for the island, the link to the fragment standing meanwhile, readable without JavaScript",
   ...chrome,
   props: {
     mentions: mentions(25),
