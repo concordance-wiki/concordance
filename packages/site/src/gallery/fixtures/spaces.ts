@@ -1,5 +1,5 @@
-import type { SlotProps, SpaceRow } from "../slots.js";
-import { MARK_SVG } from "./fixtures.js";
+import type { SlotProps, SpaceRow } from "../../slots.js";
+import { MARK_SVG } from "./chrome.js";
 
 /** A row of the spaces page of the corporate state; the content is what the configuration declares, or the dominant types. */
 function row(
