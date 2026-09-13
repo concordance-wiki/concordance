@@ -82,3 +82,11 @@
   color: var(--color-ink);
   text-decoration: underline;
 }
+
+/* The entry of the section being read: the accent on its rule and the ink, moved by the island as the reader scrolls. */
+
+.toc-list a[aria-current] {
+  border-inline-start-color: var(--color-accent);
+  color: var(--color-ink);
+  font-weight: 500;
+}

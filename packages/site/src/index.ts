@@ -30,6 +30,7 @@ export type { BundleOptions, IslandBundle, IslandEntry } from "./islands/bundle.
 export * from "./islands/island.js";
 export * from "./islands/mount.js";
 export * from "./islands/mode-switch.js";
+export * from "./islands/toc.js";
 export * from "./islands/trail.js";
 export * from "./mode.js";
 export * from "./render.js";
@@ -44,6 +45,7 @@ export * from "./theme/default/contract-viewer.js";
 export * from "./theme/default/contract-section.js";
 export { DocumentPage, defaultDocumentPageLabels } from "./theme/default/document-page.js";
 export * from "./theme/default/plugin.js";
+export * from "./theme/default/toc.js";
 export * from "./theme/default/trail.js";
 export * from "./theme/load.js";
 export * from "./theme/chrome.js";

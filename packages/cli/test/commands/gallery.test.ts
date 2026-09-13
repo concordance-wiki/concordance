@@ -278,7 +278,9 @@ describe("Every theme override is visible there", () => {
     expect(io.fs.readText("/out/assets/site.css")).toContain("--radius: 2px;");
     for (const file of io.fs.listFiles("/out").filter((path) => path.endsWith(".html"))) {
       const html = io.fs.readText(`/out/${file}`);
-      expect(html, file).toContain("</svg></span>Pipeline notes</a>");
+      expect(html, file).toContain(
+        '</svg></span><span class="site-name">Pipeline notes</span></a>',
+      );
       expect(html, file).toContain('<link rel="stylesheet" href="assets/project.css"/>');
       // The type pages render the note templates, a corpus whose subject is the tool itself.
       if (file.startsWith("type-")) continue;

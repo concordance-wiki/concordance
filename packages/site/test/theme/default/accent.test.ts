@@ -87,6 +87,7 @@ describe("The accent colour never carries information on its own", () => {
       ".markdown .written",
       ".markdown .recognised,\n.markdown .recognised-keyword",
       ".legend-written::before,\n.legend-recognised::before,\n.legend-keyword::before",
+      ".toc-list a[aria-current]",
       ".related-clear",
       ".related-mark",
       ".neighbourhood-icon-centre",
@@ -109,10 +110,14 @@ describe("The accent colour never carries information on its own", () => {
     expect(ruleFor(components, CONTRACT_BUTTONS).body).toContain("text-decoration: underline;");
   });
 
-  it("marks the current page of the tree by a rule and the bold weight, and a cited page by a word, never by the colour alone", () => {
+  it("marks the current page of the tree and the current section of the table of contents by a rule and a heavier weight, and a cited page by a word, never by the colour alone", () => {
     const current = ruleFor(components, ".space-current > span").body;
     expect(current).toContain("border-inline-start: 3px solid var(--color-accent);");
     expect(current).toContain("font-weight: 600;");
+    const section = ruleFor(components, ".toc-list a[aria-current]").body;
+    expect(section).toContain("border-inline-start-color: var(--color-accent);");
+    expect(section).toContain("color: var(--color-ink);");
+    expect(section).toContain("font-weight: 500;");
     const page = pages.get("entity-page-corporate.html") ?? "";
     expect(page).toContain(
       '<li class="space-page space-current"><span aria-current="page">Publication threshold</span></li>',
