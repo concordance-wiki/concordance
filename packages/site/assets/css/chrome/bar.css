@@ -1,0 +1,37 @@
+/* Top bar: the drawer button, mark and site name, the search field, three links, the mode switch; no statistic. Served for the phone: the wider layouts are added at the end of the sheet. */
+
+.site-header {
+  background: var(--color-surface);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-block-size: 3.5rem;
+  padding: var(--space-2) var(--space-4);
+}
+
+.site-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  color: var(--color-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.site-logo {
+  block-size: 1.375rem;
+}
+
+.site-logo svg {
+  display: block;
+  block-size: 1.375rem;
+  inline-size: auto;
+}

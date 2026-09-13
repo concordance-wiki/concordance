@@ -1,0 +1,45 @@
+/* Components layer: one block per slot of the default theme. Text never under 13 px, targets of 40 px. */
+
+concordance-island {
+  display: block;
+}
+
+.count {
+  display: inline-block;
+  min-inline-size: 1.5em;
+  margin-inline-start: var(--space-1);
+  padding-inline: var(--space-1);
+  border-radius: 1em;
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* The type of a page: a chip in the soft colour, read in the secondary text colour. */
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.625em;
+  border-radius: calc(var(--radius) * 0.625);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.empty {
+  color: var(--color-label);
+}
+
+/* A small capital label above a block of the panel. */
+.panel-block h2,
+.section-label {
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

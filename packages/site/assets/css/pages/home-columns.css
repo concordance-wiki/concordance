@@ -1,0 +1,148 @@
+/* The spaces on the left, the recent changes on the right, from 48 rem. */
+
+.home-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .home-columns {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+}
+
+.home-spaces h2,
+.home-recent h2 {
+  margin-block: 0 var(--space-2);
+  font-size: 1.0625rem;
+}
+
+.home-lead {
+  margin-inline-start: var(--space-1);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.home-space-list,
+.home-change-list {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  list-style: none;
+  overflow: hidden;
+}
+
+.home-space + .home-space,
+.home-change + .home-change {
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* A row of a space: the badge, the name and the count; the row is a link to the page of the space. */
+
+.home-space-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 3.75rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.home-space-row:hover .home-space-name {
+  text-decoration: underline;
+}
+
+.home-space-row .space-initials {
+  flex: none;
+  inline-size: 2.125rem;
+  block-size: 2.125rem;
+}
+
+.home-space-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-inline-size: 0;
+}
+
+.home-space-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.home-space-meta,
+.home-change-meta {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.home-space.stale .home-space-meta {
+  color: var(--color-muted);
+}
+
+.home-more-spaces {
+  margin-block-start: var(--space-2);
+}
+
+.home-more-spaces > summary {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.home-more-spaces > .home-space-list {
+  margin-block-start: var(--space-2);
+}
+
+.home-note {
+  margin-block: var(--space-2) 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+/* A recent change: the title, then its space and its date. */
+
+.home-change > a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.home-change > a:hover .home-change-title {
+  text-decoration: underline;
+}
+
+.home-change-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* The alert on a dormant space: a card in the ink, never in the accent. */
+
+.home-alert {
+  margin-block-start: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+}
+
+.home-alert h3 {
+  margin-block: 0 var(--space-1);
+  font-size: 0.875rem;
+}
+
+.home-alert p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}

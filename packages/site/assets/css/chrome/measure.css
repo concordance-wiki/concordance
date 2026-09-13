@@ -1,0 +1,13 @@
+/* Every page but the entity page reads in one measured column. */
+
+.home,
+.index,
+.todo,
+.search-results,
+.redirect,
+.gallery,
+.gallery-panel {
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+}

@@ -1,0 +1,302 @@
+/* Index: the title and its sentence with the filters button beside them, the letter bar ruled above and below, then the entries of every letter of the page in a table of four columns, and the note on the words without a definition at the foot. */
+
+.index {
+  max-inline-size: 71.25rem;
+  padding: 2.125rem 2.5rem var(--space-5);
+}
+
+.index-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) 1.25rem;
+  margin-block-end: 1.125rem;
+}
+
+.index-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.index h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.024em;
+}
+
+.index-lead {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* The filters: a button folding a menu of links, each leading to the results page filtered by its value; the marker of the summary reads ▾ after the word. */
+
+.index-filters {
+  position: relative;
+  flex: none;
+}
+
+.index-filters-button {
+  gap: 0.4375rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.index-filters-button::before {
+  content: "▾" / "";
+  order: 1;
+}
+
+.index-filters[open] > .index-filters-button::before {
+  content: "▴" / "";
+}
+
+.index-filters-glyph {
+  flex: none;
+}
+
+.index-filters-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 2;
+  min-inline-size: 16rem;
+  margin-block-start: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  overflow: hidden;
+}
+
+.index-filter + .index-filter {
+  border-block-start: 1px solid var(--color-border);
+}
+
+.index-filter h2 {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.index-filter-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.index-filter-list a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-3);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.index-filter-list a:hover {
+  background: var(--color-soft);
+  text-decoration: underline;
+}
+
+.index-filter-list .count {
+  margin-inline-start: auto;
+}
+
+/* The letter bar: every letter in the monospace family, the current one on the ink, a letter without an entry struck through and inert, the count of those at the end of the row. */
+
+.letters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-block-end: 1.25rem;
+  padding-block: 0.625rem;
+  border-block: 1px solid var(--color-border);
+}
+
+/* The letters stay on one line where the bar is wide enough, the count after them or under them at the end of the bar. */
+.letters ul {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 0.1875rem;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.25rem;
+  min-block-size: 2.5rem;
+  border-radius: var(--radius);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+a.letter:hover {
+  background: var(--color-soft);
+  color: var(--color-ink);
+}
+
+.letter[aria-current="page"] {
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-weight: 600;
+}
+
+.letter.inactive {
+  color: var(--color-label);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-border);
+}
+
+.letters-without {
+  flex: none;
+  margin: 0;
+  margin-inline-start: auto;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+/* One letter: its mark and its count on one line, then the table, the headings in small capitals; the rows are ruled, the word bold, the summary cut on its line with an ellipsis. */
+
+.index-letter {
+  margin-block-end: var(--space-4);
+  overflow-x: auto;
+}
+
+.index-letter-heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-1);
+}
+
+.index-letter-mark {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.index-letter-count {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.index-table {
+  inline-size: 100%;
+  min-inline-size: 40rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.index-table th,
+.index-table td {
+  padding: 0.8125rem 0.875rem 0.8125rem 0;
+  border: 0;
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: baseline;
+}
+
+.index-table thead th {
+  padding-block: 0.5625rem;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.index-table tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.index-table .index-word {
+  inline-size: 15rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.index-word a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.index-word a:hover {
+  text-decoration: underline;
+}
+
+.index-table .index-type {
+  inline-size: 6.5rem;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.index-table td.index-summary {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.84375rem;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.index-table .index-pages {
+  inline-size: 3.875rem;
+  padding-inline-end: 0;
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-align: end;
+}
+
+/* A word without a definition: read in the secondary colour and dotted, the way its page titles it; its mark dashed, hollow. */
+
+.index-entry-noteless .index-word a {
+  color: var(--color-muted);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.index-no-definition {
+  border-block-end: 1px dashed var(--color-label);
+}
+
+.index-note {
+  margin: 0;
+  padding: 0.875rem 0 1.125rem;
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}

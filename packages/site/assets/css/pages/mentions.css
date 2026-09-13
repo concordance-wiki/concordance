@@ -1,0 +1,225 @@
+/* Related pages: one entry per page that evokes the entity, most passages first. */
+
+.mentions .panel-fold > summary .count {
+  margin-inline-start: var(--space-2);
+}
+
+.mentions-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+  font-size: 0.8125rem;
+}
+
+.related-filter {
+  flex: 1 1 10rem;
+  display: flex;
+}
+
+.mentions-controls input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+}
+
+.mentions-controls input::placeholder {
+  color: var(--color-label);
+  opacity: 1;
+}
+
+.related-types {
+  position: relative;
+  flex: none;
+}
+
+.related-types > summary {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.related-types > summary::before {
+  order: 1;
+}
+
+.related-types > summary .count {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.related-type-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 2;
+  min-inline-size: 14rem;
+  margin-block-start: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  overflow: hidden;
+}
+
+.related-type-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related-type-list label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+  cursor: pointer;
+}
+
+.related-type-list .count {
+  margin-inline-start: auto;
+}
+
+.related-type-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-soft);
+  color: var(--color-label);
+}
+
+.related-clear {
+  margin-inline-start: auto;
+  min-block-size: 2rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.related-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.related-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.related-title {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-title:hover {
+  text-decoration: underline;
+}
+
+.related-type,
+.related-count {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.related-count {
+  min-inline-size: 1.5em;
+  font-family: var(--font-mono);
+  text-align: end;
+}
+
+.related-excerpt {
+  display: block;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-excerpt:hover {
+  text-decoration: underline;
+}
+
+/* The mark of a page that writes a link to this one: a word in the accent, never the colour alone. */
+
+.related-mark {
+  color: var(--color-accent);
+}
+
+.mention-context {
+  quotes: none;
+}
+
+/* The words naming the entity: the same weight as a recognised word in the note, no colour of their own. */
+.mention-context mark {
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+}
+
+.mentions-more {
+  margin: var(--space-2) 0 0;
+}
+
+.mentions-more button {
+  inline-size: 100%;
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mentions-more button[disabled] {
+  cursor: progress;
+  color: var(--color-label);
+}
+
+.mentions-more a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  font-size: 0.8125rem;
+}

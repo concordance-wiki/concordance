@@ -1,7 +1,11 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { FONT_FACES, fontFiles, readFontFile } from "../../src/css/fonts.js";
 import {
+  CSS_FILES,
   CSS_LAYERS,
   baseStylesheet,
   componentsStylesheet,
@@ -91,5 +95,28 @@ describe("siteStylesheet", () => {
     expect(baseStylesheet()).toContain("box-sizing: border-box;");
     expect(componentsStylesheet()).toContain(".mentions-more");
     expect(componentsStylesheet()).not.toMatch(/style="/);
+  });
+
+  it("assembles each layer from its listed files, one per concept, in the listed order", () => {
+    const assets = new URL("../../assets/css/", import.meta.url);
+    const files = [...CSS_FILES.base, ...CSS_FILES.components];
+    expect(new Set(files).size).toBe(files.length);
+    const contents = files.map((file) => readFileSync(new URL(file, assets), "utf8"));
+    for (const [index, content] of contents.entries()) {
+      expect(content.endsWith("}\n"), files[index]).toBe(true);
+      expect(content.endsWith("\n\n"), files[index]).toBe(false);
+    }
+    expect(baseStylesheet()).toBe(contents.slice(0, CSS_FILES.base.length).join("\n"));
+    expect(componentsStylesheet()).toBe(contents.slice(CSS_FILES.base.length).join("\n"));
+  });
+
+  it("assembles the two layers into the very bytes of the sheets the files replaced", () => {
+    const digest = (css: string): string => createHash("sha256").update(css).digest("hex");
+    expect(digest(baseStylesheet())).toBe(
+      "02b6181b31f87e19640a5b919866208bec9577581c89f25d32c3dcdf80df773b",
+    );
+    expect(digest(componentsStylesheet())).toBe(
+      "1c51760b55e92e05ed3c56fae27c9a2cafde7814a09bed23e7070a5ab870bf7a",
+    );
   });
 });

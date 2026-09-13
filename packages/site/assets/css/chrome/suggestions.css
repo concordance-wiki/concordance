@@ -1,0 +1,88 @@
+/* The rows of the live results, under the field of the header and the field of the home page alike. */
+
+.suggestions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion > a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-block-size: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.suggestion > a:hover,
+.suggestion > a:focus-visible {
+  background: var(--color-soft);
+}
+
+.suggestion-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.suggestion-detail {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-space {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.suggestion-keyword .suggestion-title {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.suggestions-help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.suggestions-help kbd {
+  padding: 0.25em 0.4em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.suggestions-all {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  margin-inline-start: auto;
+}
+
+/* The panel of the header keeps its width and its shadow; its rows read the same. */
+
+.search-suggestions {
+  padding: 0;
+}
+
+.suggestion:last-child > a {
+  border-block-end: none;
+}

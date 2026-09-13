@@ -1,0 +1,251 @@
+/* Space page: the breadcrumb from the spaces page, the badge and the title, then the categories on the left, the recent changes and the vocabulary on the right; no tree. */
+
+.space-overview {
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+}
+
+.space-overview .breadcrumbs-list {
+  margin-inline: 0;
+}
+
+/* Two steps only: the first one carries no separator, whatever the width restores on the entity page. */
+
+.space-overview .breadcrumbs-list > li:first-child::before {
+  content: none;
+}
+
+.space-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-block-end: var(--space-4);
+}
+
+.space-header .space-initials {
+  flex: none;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  border-radius: calc(var(--radius) * 1.375);
+  font-size: 1rem;
+}
+
+.space-heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.space-heading h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.024em;
+}
+
+.space-description {
+  max-inline-size: 41rem;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.space-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.space-meta > * + *::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-2);
+}
+
+.space-meta code {
+  font-size: 0.8125rem;
+}
+
+.space-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .space-columns {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  }
+}
+
+.space-browse h2,
+.space-recent h2,
+.space-words h2 {
+  margin-block: 0 var(--space-2);
+  font-size: 1.0625rem;
+}
+
+.space-lead {
+  margin-inline-start: var(--space-1);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+/* A category: the folder, its sentence when something declares one, its count and the arrow to its list. */
+
+.space-categories,
+.space-changes {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  list-style: none;
+  overflow: hidden;
+}
+
+.space-category + .space-category,
+.space-change + .space-change {
+  border-block-start: 1px solid var(--color-border);
+}
+
+.space-category > a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.space-category > a:hover .space-category-name {
+  text-decoration: underline;
+}
+
+.space-category-name {
+  flex: none;
+  inline-size: 12.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.space-category-text {
+  flex: 1;
+  min-inline-size: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-category-count {
+  flex: none;
+  inline-size: 3.25rem;
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-align: end;
+}
+
+.space-category-arrow {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+@media (width < 48rem) {
+  .space-category-name {
+    inline-size: auto;
+  }
+
+  .space-category-text {
+    display: none;
+  }
+}
+
+.space-note {
+  margin-block: var(--space-2) 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.space-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* A recent change: the title, then its category and its date. */
+
+.space-change > a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.space-change > a:hover .space-change-title {
+  text-decoration: underline;
+}
+
+.space-change-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.space-change-meta {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+/* The vocabulary of the space: chips with their counts, dashed for a word without a note. */
+
+.space-word-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.space-word-list .chip {
+  gap: var(--space-2);
+  min-block-size: 2.25rem;
+  padding-inline: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.chip-keyword {
+  border-style: dashed;
+  color: var(--color-muted);
+}
+
+.chip-count {
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.space-footer {
+  margin-block: auto 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}

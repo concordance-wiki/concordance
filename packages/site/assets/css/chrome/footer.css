@@ -1,0 +1,26 @@
+/* Footer: the project text and links, the to-do page with its count, the build line. */
+
+.site-footer {
+  padding: var(--space-3) var(--space-4);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+}
+
+.site-footer-credit {
+  font-size: 0.8125rem;
+}

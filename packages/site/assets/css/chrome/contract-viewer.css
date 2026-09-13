@@ -1,0 +1,87 @@
+/* Contract viewer of an API page; the block around it is styled with the API page at the end of the sheet. */
+
+.contract {
+  margin-block: var(--space-4);
+}
+
+.contract-summary,
+.contract-description {
+  color: var(--color-muted);
+}
+
+.contract-data button,
+.contract-operation > button,
+.contract-schema-list button {
+  cursor: pointer;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.contract-data button[disabled] {
+  cursor: progress;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.contract-operation-list,
+.contract-schema-list {
+  padding: 0;
+  list-style: none;
+}
+
+.contract-operation {
+  margin-block-end: var(--space-2);
+}
+
+.contract-operation-details {
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--color-border);
+}
+
+.contract-schema-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.contract-schema-list button[aria-pressed="true"] {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.contract-table {
+  inline-size: 100%;
+  margin-block: var(--space-2);
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.contract-table caption {
+  text-align: start;
+  font-weight: bold;
+}
+
+.contract-table th,
+.contract-table td {
+  padding: var(--space-1) var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.contract-required {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.contract-empty {
+  color: var(--color-muted);
+}

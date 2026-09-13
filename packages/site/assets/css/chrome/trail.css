@@ -1,0 +1,59 @@
+/* Trail: served empty; its script lists the pages visited, carried in the URL fragment. */
+
+.trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  padding: 0 var(--space-4) var(--space-2);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.trail-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trail-list > li + li::before {
+  content: "›" / "";
+  margin-inline-end: var(--space-2);
+}
+
+.trail-list a {
+  color: var(--color-muted);
+}
+
+.trail-list a[aria-current="page"] {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.trail-earlier[open] .trail-list {
+  margin-block: var(--space-1);
+  padding-inline-start: var(--space-3);
+}
+
+.trail-empty {
+  margin: 0;
+}
+
+.trail-pin {
+  min-block-size: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.trail-pin[aria-pressed="true"] {
+  color: var(--color-ink);
+}

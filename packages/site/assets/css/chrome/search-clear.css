@@ -1,0 +1,28 @@
+/* The button clearing a field, shown by the island while the field holds a query; in the header the shortcut hint yields to it. */
+.search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-inline-size: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.search-clear[hidden] {
+  display: none;
+}
+
+.site-search-field:has(.search-clear:not([hidden])) .search-shortcut {
+  display: none;
+}
+
+.site-search input::-webkit-search-cancel-button,
+.home-search input::-webkit-search-cancel-button {
+  appearance: none;
+}

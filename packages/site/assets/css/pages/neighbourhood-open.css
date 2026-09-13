@@ -1,0 +1,267 @@
+/* Neighbourhood map, unfolded. Closed, the line of the fold reads its lead and the count of pages; open, it reads a back control, the title of the map and the name of the page. Where the panel has a column, the open map replaces the blocks of the panel and never the text; without any script the disclosure simply unfolds under them. */
+
+.neighbourhood-head,
+.neighbourhood-page,
+.neighbourhood-fold[open] > summary > .neighbourhood-lead,
+.neighbourhood-fold[open] > summary > .neighbourhood-count {
+  display: none;
+}
+
+.neighbourhood-fold[open] > summary > .neighbourhood-head {
+  display: inline;
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.neighbourhood-fold[open] > summary > .neighbourhood-page {
+  display: inline;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-label);
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Open, the marker of the fold is the back control: a bordered square at the start of the line. */
+.neighbourhood-fold[open] > summary::before {
+  content: "◂" / "";
+  order: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-ink);
+}
+
+/* The summary of the fold carries the title: the heading of the section stays for assistive technology only. */
+.neighbourhood-fold .neighbourhood > h2 {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The controls: the distance the model records, the type filter at the end of the line. */
+.neighbourhood-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-3);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+  font-size: 0.8125rem;
+}
+
+.neighbourhood-distance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-label);
+}
+
+.neighbourhood-hop {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-weight: 600;
+}
+
+.neighbourhood-types {
+  margin-inline-start: auto;
+}
+
+.neighbourhood-type-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.neighbourhood-type {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  padding: 0 var(--space-2);
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.neighbourhood-type > label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.5rem;
+  cursor: pointer;
+}
+
+.neighbourhood-type .count {
+  margin-inline-start: auto;
+}
+
+/* An unticked type hides its nodes, their edges and their rows: the checkbox and the elements share the rank of the type, so that the filter needs no script; twelve ranks, as the map holds twelve nodes at most. */
+.neighbourhood:has(.neighbourhood-type:nth-child(1) > input:not(:checked)) [data-type="1"],
+.neighbourhood:has(.neighbourhood-type:nth-child(2) > input:not(:checked)) [data-type="2"],
+.neighbourhood:has(.neighbourhood-type:nth-child(3) > input:not(:checked)) [data-type="3"],
+.neighbourhood:has(.neighbourhood-type:nth-child(4) > input:not(:checked)) [data-type="4"],
+.neighbourhood:has(.neighbourhood-type:nth-child(5) > input:not(:checked)) [data-type="5"],
+.neighbourhood:has(.neighbourhood-type:nth-child(6) > input:not(:checked)) [data-type="6"],
+.neighbourhood:has(.neighbourhood-type:nth-child(7) > input:not(:checked)) [data-type="7"],
+.neighbourhood:has(.neighbourhood-type:nth-child(8) > input:not(:checked)) [data-type="8"],
+.neighbourhood:has(.neighbourhood-type:nth-child(9) > input:not(:checked)) [data-type="9"],
+.neighbourhood:has(.neighbourhood-type:nth-child(10) > input:not(:checked)) [data-type="10"],
+.neighbourhood:has(.neighbourhood-type:nth-child(11) > input:not(:checked)) [data-type="11"],
+.neighbourhood:has(.neighbourhood-type:nth-child(12) > input:not(:checked)) [data-type="12"] {
+  display: none;
+}
+
+/* The map in a frame on the soft surface, no wider than the panel wherever the fold spans the page; the page at its centre drawn in the accent: it is the current position. */
+.neighbourhood-map {
+  max-inline-size: 28rem;
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-soft);
+}
+
+.neighbourhood-graph .map-centre .map-shape {
+  fill: var(--color-accent);
+  stroke: var(--color-soft);
+  stroke-width: 3;
+}
+
+/* The legend under the map: a plain rule for a page that has a note, a dashed one for a word without one. */
+.neighbourhood-map figcaption {
+  margin-block-start: var(--space-2);
+  color: var(--color-label);
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.map-legend-entity::before,
+.map-legend-keyword::before {
+  content: "";
+  display: inline-block;
+  inline-size: 1rem;
+  margin-inline-end: var(--space-1);
+  vertical-align: middle;
+  border-block-end: 2px solid var(--color-border);
+}
+
+.map-legend-keyword::before {
+  border-block-end-style: dashed;
+}
+
+/* The textual equivalent: its head, then one row per neighbour, a mark, the title, the type and the count. */
+.neighbourhood-list-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-block-end: var(--space-1);
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.neighbourhood-list-head > .section-label {
+  flex: 1;
+}
+
+.neighbourhood-equivalent {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.neighbour-list {
+  margin: 0;
+}
+
+.neighbour {
+  flex-wrap: nowrap;
+  min-block-size: 2.5rem;
+  padding-block: var(--space-1);
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.neighbour::before {
+  content: "●" / "";
+  flex: none;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+}
+
+.neighbour-noteless::before {
+  content: "◌" / "";
+}
+
+.neighbour > a {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neighbour > a:hover {
+  text-decoration: underline;
+}
+
+.neighbour > .badge,
+.neighbour > .relation {
+  flex: none;
+  padding: 0;
+  background: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.neighbour > .weight {
+  flex: none;
+  min-inline-size: 1.5em;
+  margin-inline-start: 0;
+  color: var(--color-label);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-align: end;
+}
+
+.neighbourhood-note {
+  margin: var(--space-3) 0 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+/* Where the panel has a column, the open map takes it: the blocks of the panel go until the fold closes. */
+@media (min-width: 73.75rem) {
+  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {
+    display: none;
+  }
+}

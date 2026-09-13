@@ -1,0 +1,30 @@
+/* Every control is a target of at least 40 px. */
+
+button,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+summary {
+  min-block-size: 2.5rem;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: "▸" / "";
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+details[open] > summary::before {
+  content: "▾" / "";
+}

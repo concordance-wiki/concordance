@@ -1,0 +1,173 @@
+/* Spaces page: every space in one table, the most cited first; a row leads to the page of the space. */
+
+.spaces {
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+}
+
+.spaces h1 {
+  margin-block: 0 var(--space-2);
+  font-size: 2rem;
+  letter-spacing: -0.024em;
+}
+
+.spaces-lead {
+  margin-block: 0 var(--space-4);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.spaces-table {
+  inline-size: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  border-spacing: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.spaces-table th,
+.spaces-table td {
+  padding: 0.9375rem var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.spaces-table th:first-child,
+.spaces-table td:first-child {
+  padding-inline-start: var(--space-4);
+}
+
+.spaces-table th:last-child,
+.spaces-table td:last-child {
+  padding-inline-end: var(--space-4);
+}
+
+.spaces-table thead th {
+  padding-block: 0.75rem;
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.spaces-table tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+/* The badge and the name: a link to the page of the space, the whole row reading as one entry. */
+
+.spaces-name {
+  inline-size: 16rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+tbody .spaces-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.spaces-name .space-initials {
+  flex: none;
+  inline-size: 2.875rem;
+  block-size: 2.125rem;
+}
+
+.spaces-name a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.spaces-name a:hover {
+  text-decoration: underline;
+}
+
+.spaces-content {
+  max-inline-size: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spaces-table .spaces-count,
+.spaces-table .spaces-date {
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.spaces-table .spaces-count {
+  inline-size: 5.5rem;
+  font-family: var(--font-mono);
+}
+
+.spaces-table .spaces-date {
+  inline-size: 7.5rem;
+}
+
+/* A dormant space: its date in the accent, the only place where a colour carries an alert, and worded in days. */
+
+.spaces-row.stale .spaces-date {
+  color: var(--color-accent);
+}
+
+.spaces-note {
+  margin-block: var(--space-3) 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+/* Under 48 rem the table gives up its content column and its heading row: a row reads the badge and the name, then the count and the date on one line. */
+
+@media (width < 48rem) {
+  .spaces-table thead,
+  .spaces-table .spaces-content {
+    display: none;
+  }
+
+  .spaces-table,
+  .spaces-table tbody {
+    display: block;
+  }
+
+  .spaces-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .spaces-table tr:last-child {
+    border-block-end: 0;
+  }
+
+  .spaces-table tbody .spaces-name,
+  .spaces-table td {
+    display: flex;
+    inline-size: auto;
+    padding: 0;
+    border-block-end: 0;
+  }
+
+  .spaces-table tbody .spaces-name {
+    flex: 1 1 100%;
+    min-block-size: 2.75rem;
+  }
+
+  .spaces-table .spaces-count {
+    margin-inline-start: calc(2.875rem + var(--space-3));
+  }
+}
