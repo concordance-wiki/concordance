@@ -128,7 +128,7 @@ npx concordance lint
 The command reads every markdown file under the current directory, one file at a time, and prints one line per finding, sorted by check, path and line, then a count:
 
 ```
-error: screens/entity-page.md:3: E-LINK-BROKEN: link "threshold.md" in screens/entity-page.md points to screens/threshold.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
+error: screens/entity-page.md:3: E-LINK-BROKEN: link "threshold.md" in screens/entity-page.md points to no file of source repo (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
 1 finding: 1 error, 0 warnings, 0 info
 ```
 
@@ -145,7 +145,13 @@ Options:
 | `--fix` | | applies the safe corrections before the check, after printing each of them; see [Safe fixes](#safe-fixes) |
 | `--dry-run` | | lists the corrections `--fix` would apply, prefixed with `would fix`, and writes nothing; implies `--fix` |
 
-What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package.
+What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is not checked locally. The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package. Without `--source`, the repository is the source named `repo`: that name prefixes the identifiers and appears in the messages.
+
+### Parity with the build
+
+The local lint says the same thing as the build. For the five checks above, `concordance lint` on a repository and `concordance build` on a configuration that declares it as a source produce the same findings: same check, source, path, line and entity, same severity, message and remediation. The build reports more, never less: the checks that need the whole model (types, filing, cross-source links, vocabulary) only exist there. A finding fixed because the linter reported it never comes back in the pipeline under another wording.
+
+The list of the local checks is exported as `LOCAL_CHECKS` by `@concordance-wiki/lint`, and the JSON report repeats it (see [Reports for forges](#reports-for-forges)). The repository holds the guarantee with a parity test that runs the linter, source by source, and the build on a copy of each fixture corpus, the golden ones and the faulty ones, and compares the findings of the local checks one by one; any divergence fails continuous integration.
 
 In this mode the command never opens a network connection, and it writes nothing but the report named by `--output` and, under `--fix`, the corrected files. A `concordance-lint.yaml` at the root of the repository overrides severities locally; see the [configuration guide](configuration.md#concordance-lintyaml).
 
@@ -180,7 +186,7 @@ The linter uses the same checks as the build. See the [check pages](../checks/RE
 
 | Format | Content | Use it for |
 |---|---|---|
-| `json` | `{ version: 1, tool, findings, summary }`; each finding carries its check, severity, source, path, line, entity, message, remediation and documentation URL; `summary` counts errors, warnings and info | scripts and dashboards |
+| `json` | `{ version: 1, tool, scope, checks, findings, summary }`; `scope` is `repo` and `checks` lists the identifiers of the checks the run covers (the `LOCAL_CHECKS` of the [parity guarantee](#parity-with-the-build)), so that a report says what was checked; each finding carries its check, severity, source, path, line, entity, message, remediation and documentation URL; `summary` counts errors, warnings and info | scripts and dashboards |
 | `sarif` | a SARIF 2.1.0 log with one run: one rule per check met (description, documentation URL, default level) and one result per finding pointing at the file relative to the repository (`%SRCROOT%`) and the line; `info` findings are `note` results | the code-scanning upload of GitHub, the SARIF viewers of editors |
 | `junit` | one `concordance lint` test suite with one test case per finding, named `<check>` and `<path>:<line>`; errors and warnings fail their case, an info finding is only reported in its output; a clean repository gives one passing case named `no finding` | the test report of GitLab and of most pipeline runners |
 

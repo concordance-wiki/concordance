@@ -17,7 +17,12 @@ export {
 export { formatJson, type JsonReport } from "./formats/json.js";
 export { formatJunit, JUNIT_CLEAN_CASE, JUNIT_SUITE_NAME } from "./formats/junit.js";
 export { formatSarif, SARIF_SCHEMA_URL, SOURCE_ROOT_ID, type SarifLog } from "./formats/sarif.js";
-export { DEFAULT_SOURCE_NAME, lintRepository, type LintRepositoryInput } from "./local.js";
+export {
+  DEFAULT_SOURCE_NAME,
+  lintRepository,
+  LOCAL_CHECKS,
+  type LintRepositoryInput,
+} from "./local.js";
 export {
   LINT_CONFIG_FILE,
   LintConfigError,

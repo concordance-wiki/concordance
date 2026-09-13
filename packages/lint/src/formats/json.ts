@@ -1,5 +1,6 @@
 import type { Finding, Severity } from "@concordance-wiki/core";
 
+import { LOCAL_CHECKS } from "../local.js";
 import { countBySeverity, documentationOf } from "../report.js";
 import { sortFindings, TOOL_NAME, type FormatContext } from "./context.js";
 
@@ -19,6 +20,9 @@ interface JsonFinding {
 export interface JsonReport {
   version: 1;
   tool: { name: string; version: string };
+  /** The scope of the run and the checks it covers, so that a forge report says what was checked. */
+  scope: "repo";
+  checks: string[];
   findings: JsonFinding[];
   summary: Record<Severity, number>;
 }
@@ -41,6 +45,9 @@ export function formatJson(findings: readonly Finding[], context: FormatContext)
   const report: JsonReport = {
     version: 1,
     tool: { name: TOOL_NAME, version: context.version },
+    // Only the local scope exists in this version; its checks are the ones the build agrees with.
+    scope: "repo",
+    checks: [...LOCAL_CHECKS],
     findings: sortFindings(findings).map(toJson),
     summary: countBySeverity(findings),
   };

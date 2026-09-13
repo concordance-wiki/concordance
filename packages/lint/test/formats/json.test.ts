@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { formatJson, type JsonReport } from "../../src/formats/json.js";
+import { LOCAL_CHECKS } from "../../src/local.js";
 import { broken, context, DOCUMENTATION, duplicate, findings, unreachable } from "./fixture.js";
 
 describe("formatJson", () => {
-  it("prints the tool, the sorted findings with their documentation URL and the counts, two-space indented", () => {
+  it("prints the tool, the scope and its checks, the sorted findings with their documentation URL and the counts, two-space indented", () => {
     expect(formatJson(findings, context)).toBe(
       `${JSON.stringify(
         {
           version: 1,
           tool: { name: "concordance", version: "1.2.3" },
+          scope: "repo",
+          checks: ["E-ENCODING", "E-FM-INVALID", "E-ID-DUP", "E-ID-INVALID", "E-LINK-BROKEN"],
           findings: [
             {
               check: "E-ID-DUP",
@@ -27,6 +30,7 @@ describe("formatJson", () => {
               source: "notes",
               path: "specs/entry.md",
               line: 3,
+              entity: "notes/specs/entry",
               message: broken.message,
               remediation: "Fix the path.",
               documentation: `${DOCUMENTATION}/E-LINK-BROKEN.md`,
@@ -58,7 +62,14 @@ describe("formatJson", () => {
     const document = formatJson([reordered, { ...reordered, path: "a.md" }], context);
     // The formatter just produced the document: it has the report's shape.
     const parsed = JSON.parse(document) as JsonReport;
-    expect(Object.keys(parsed)).toEqual(["version", "tool", "findings", "summary"]);
+    expect(Object.keys(parsed)).toEqual([
+      "version",
+      "tool",
+      "scope",
+      "checks",
+      "findings",
+      "summary",
+    ]);
     expect(parsed.findings.map((finding) => finding.path)).toEqual(["a.md", "b.md"]);
     expect(parsed.findings.map((finding) => Object.keys(finding))).toEqual([
       ["check", "severity", "path", "message", "remediation", "documentation"],
@@ -77,8 +88,18 @@ describe("formatJson", () => {
     expect(JSON.parse(formatJson([], context))).toEqual({
       version: 1,
       tool: { name: "concordance", version: "1.2.3" },
+      scope: "repo",
+      checks: [...LOCAL_CHECKS],
       findings: [],
       summary: { error: 0, warning: 0, info: 0 },
     });
+  });
+
+  it("says what was checked with the checks of the local scope, whatever the findings", () => {
+    // The formatter just produced the document: it has the report's shape.
+    const parsed = JSON.parse(formatJson([unreachable], context)) as JsonReport;
+    expect(parsed.scope).toBe("repo");
+    expect(parsed.checks).toEqual(LOCAL_CHECKS);
+    expect(parsed.checks).not.toContain("W-SOURCE-UNREACHABLE");
   });
 });

@@ -17,7 +17,7 @@ describe("formatJunit", () => {
         "Remediation: Rename one of the files.</failure>",
         "  </testcase>",
         '  <testcase classname="E-LINK-BROKEN" name="specs/entry.md:3">',
-        `    <failure message="link &quot;gone.md&quot; in specs/entry.md points to specs/gone.md, which does not exist" type="error">link &quot;gone.md&quot; in specs/entry.md points to specs/gone.md, which does not exist (${DOCUMENTATION}/E-LINK-BROKEN.md)`,
+        `    <failure message="link &quot;gone.md&quot; in specs/entry.md points to no file of source notes" type="error">link &quot;gone.md&quot; in specs/entry.md points to no file of source notes (${DOCUMENTATION}/E-LINK-BROKEN.md)`,
         "Remediation: Fix the path.</failure>",
         "  </testcase>",
         '  <testcase classname="W-SOURCE-UNREACHABLE" name="W-SOURCE-UNREACHABLE">',

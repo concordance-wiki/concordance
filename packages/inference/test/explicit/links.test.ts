@@ -142,7 +142,7 @@ describe("explicitLinks", () => {
         message:
           'link "../rules/anual-cap.rule.md" in screens/entry.md points to no file of source specs',
         remediation:
-          "Fix the path so that it points to an existing file; the linter rewrites it when exactly one file matches the old name.",
+          "Fix the path; the linter rewrites the link under --fix when exactly one file matches the old name.",
       },
     ]);
   });
