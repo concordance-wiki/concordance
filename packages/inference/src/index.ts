@@ -88,6 +88,7 @@ export {
   matchOperations,
   mergeOperation,
   OPERATION_AMBIGUOUS,
+  OPERATION_UNMATCHED,
   operationNotes,
   redirectLinks,
   type Ambiguity,

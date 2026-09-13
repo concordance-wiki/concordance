@@ -606,6 +606,19 @@ concordance-island[data-island="search"] {
   color: var(--color-muted);
 }
 
+.contract-gap,
+.contract-flag {
+  margin-inline-start: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-style: italic;
+  font-weight: normal;
+}
+
+.contract-flag::before {
+  content: "— ";
+}
+
 .contract-data button,
 .contract-operation > button,
 .contract-schema-list button {

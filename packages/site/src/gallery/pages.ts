@@ -123,7 +123,7 @@ export const galleryPages: readonly GalleryPage[] = [
     rendered: "EntityPage",
     state: "contract",
     description:
-      "an API whose contract was imported: the contract section after the note, its operations as a plain list, the viewer behind its button",
+      "an API whose contract was imported: the contract section after the note, its operations as a plain list with one flagged as having no note yet, the viewer behind its button",
     ...chrome,
     props: apiPage,
   },

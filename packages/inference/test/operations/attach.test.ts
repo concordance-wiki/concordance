@@ -27,7 +27,11 @@ import { describe, expect, it } from "vitest";
 import { explicitLinks } from "../../src/explicit/links.js";
 import { frontmatterLinks } from "../../src/frontmatter/links.js";
 import { mentionLinks } from "../../src/mentions/links.js";
-import { attachOperations, OPERATION_AMBIGUOUS } from "../../src/operations/index.js";
+import {
+  attachOperations,
+  OPERATION_AMBIGUOUS,
+  OPERATION_UNMATCHED,
+} from "../../src/operations/index.js";
 import { typeRelations } from "../../src/relations/index.js";
 import {
   CONTRACT,
@@ -211,6 +215,119 @@ describe("attachOperations", () => {
         line: 1,
         entity: "specs/endpoints/notify",
       },
+    ]);
+  });
+
+  it("an operation note with no match in the contract yields a finding: either the operation disappeared or the note is ahead", () => {
+    const ahead = note("specs/endpoints/delete-entity", {
+      title: "Delete an entity",
+      attributes: { api: "api/model-query", operation_id: "deleteEntity", method: "DELETE" },
+    });
+    const linked = note("specs/endpoints/purge", { title: "Purge the cache" });
+    const matched = note("specs/endpoints/list-entities", {
+      attributes: { api: "api/model-query", operation_id: "listEntities" },
+    });
+    const undeclared = note("specs/endpoints/read-model", {
+      title: "Read the model",
+      attributes: { method: "GET", path: "/model.json" },
+    });
+    const links: Link[] = [
+      ...exposed,
+      {
+        from: "specs/endpoints/purge",
+        to: "specs/api/forge-bridge",
+        relation: "related",
+        confidence: 0.5,
+        provenance: [{ method: "explicit_link", confidence: 0.5, path: "endpoints/purge.md" }],
+      },
+      {
+        from: "specs/api/model-query",
+        to: "specs/endpoints/purge",
+        relation: "related",
+        confidence: 0.5,
+        provenance: [{ method: "explicit_link", confidence: 0.5, path: "api/model-query.md" }],
+      },
+    ];
+    const result = attach(
+      [modelQuery, forgeBridge, ahead, linked, matched, undeclared, ...operations],
+      links,
+    );
+    expect(attachments(result.entities)).toEqual([
+      ["specs/api/forge-bridge/fetchfindings", undefined, undefined],
+      ["specs/api/forge-bridge/notifybuild", undefined, undefined],
+      ["specs/api/model-query/getentity", undefined, undefined],
+      ["specs/api/model-query/searchmodel", undefined, undefined],
+      ["specs/endpoints/delete-entity", undefined, undefined],
+      ["specs/endpoints/list-entities", "operation_id", "listEntities"],
+      ["specs/endpoints/purge", undefined, undefined],
+      ["specs/endpoints/read-model", undefined, undefined],
+    ]);
+    expect(OPERATION_UNMATCHED).toBe("W-OPERATION-UNMATCHED");
+    const remediation =
+      "Compare the note with the contract: when the operation is gone, retire the note or point it at the operation that replaced it; when the note is ahead of the contract, keep it and give it the operation_id the next version will declare, so that it attaches then.";
+    expect(result.findings).toEqual([
+      {
+        check: "W-OPERATION-UNMATCHED",
+        severity: "warning",
+        message: `operation note specs/endpoints/delete-entity matches no operation of specs/api/model-query (${CONTRACT}): the operation disappeared from the contract, or the note is ahead of it`,
+        remediation,
+        source: "specs",
+        path: "endpoints/delete-entity.md",
+        line: 1,
+        entity: "specs/endpoints/delete-entity",
+      },
+      {
+        check: "W-OPERATION-UNMATCHED",
+        severity: "warning",
+        message: `operation note specs/endpoints/purge matches no operation of specs/api/forge-bridge (${WSDL}), specs/api/model-query (${CONTRACT}): the operation disappeared from the contract, or the note is ahead of it`,
+        remediation,
+        source: "specs",
+        path: "endpoints/purge.md",
+        line: 1,
+        entity: "specs/endpoints/purge",
+      },
+    ]);
+  });
+
+  it("sorts the unmatched findings by path, whatever the identifier order of the notes", () => {
+    const later = note("specs/endpoints/a-note", {
+      attributes: { api: "api/model-query", operation_id: "purgeCache" },
+      source: { name: "specs", path: "endpoints/z.md", line: 1 },
+    });
+    const earlier = note("specs/endpoints/b-note", {
+      attributes: { api: "api/model-query", operation_id: "dropCache" },
+      source: { name: "specs", path: "endpoints/a.md", line: 1 },
+    });
+    const result = attach([modelQuery, later, earlier, listEntities], [exposes(listEntities)]);
+    expect(result.findings.map((finding) => finding.path)).toEqual([
+      "endpoints/a.md",
+      "endpoints/z.md",
+    ]);
+  });
+
+  it("reports neither an ambiguous note as unmatched nor a note whose API has no contract", () => {
+    const first = note("specs/endpoints/list-entities", {
+      attributes: { api: "api/model-query", operation_id: "listEntities" },
+    });
+    const second = note("specs/endpoints/entities", {
+      attributes: { api: "api/model-query", operation_id: "listEntities" },
+    });
+    const hesitant = note("specs/endpoints/search", {
+      title: "Search model",
+      attributes: { api: "api/model-query" },
+    });
+    const twin = operation("search-model", { path: "/search-model" });
+    const elsewhere = note("specs/endpoints/read-model", {
+      attributes: { api: "api/canonical-model", operation_id: "readModel" },
+    });
+    const canonical = api("specs/api/canonical-model", { attributes: {} });
+    const result = attach(
+      [modelQuery, forgeBridge, canonical, first, second, hesitant, elsewhere, ...operations, twin],
+      [...exposed, exposes(twin)],
+    );
+    expect(result.findings.map((finding) => [finding.check, finding.entity])).toEqual([
+      ["W-OPERATION-AMBIGUOUS", "specs/api/model-query/listentities"],
+      ["W-OPERATION-AMBIGUOUS", "specs/endpoints/search"],
     ]);
   });
 

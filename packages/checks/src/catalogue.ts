@@ -224,6 +224,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "Two operation notes claim the same imported operation, or one note matches several operations of its API; nothing is attached.",
     "Give each operation note the operation_id of exactly one operation of its API, name the API in the api attribute when the source declares several contracts, or remove the note that duplicates another.",
   ),
+  step(
+    "W-OPERATION-UNMATCHED",
+    "warning",
+    "contracts",
+    "An operation note names an API whose contract was imported and matches none of its operations: the operation left the contract, or the note is ahead of it.",
+    "Compare the note with the contract: when the operation is gone, retire the note or point it at the operation that replaced it; when the note is ahead of the contract, keep it and give it the operation_id the next version will declare, so that it attaches then.",
+  ),
   model(
     "W-API-NOCONSUMER",
     "warning",

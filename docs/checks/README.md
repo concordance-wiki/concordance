@@ -63,6 +63,7 @@ Every check listed here is registered once, with its default severity, descripti
 |---|---|---|
 | [`W-CONTRACT-UNREACHABLE`](W-CONTRACT-UNREACHABLE.md) | warning | The contract an API note declares could not be fetched, read or parsed; the note keeps its manual operations. |
 | [`W-OPERATION-AMBIGUOUS`](W-OPERATION-AMBIGUOUS.md) | warning | Two operation notes claim the same imported operation, or one note matches several operations of its API; nothing is attached. |
+| [`W-OPERATION-UNMATCHED`](W-OPERATION-UNMATCHED.md) | warning | An operation note names an API whose contract was imported and matches none of its operations: the operation left the contract, or the note is ahead of it. |
 | [`W-API-NOCONSUMER`](W-API-NOCONSUMER.md) | warning | An API has no consumer, declared or inferred. |
 | [`W-API-CONSUMER-MISMATCH`](W-API-CONSUMER-MISMATCH.md) | warning | An API declares a consumer that never cites it, or a note cites an API that does not list it. |
 
