@@ -201,7 +201,8 @@ export const galleryPages: readonly GalleryPage[] = [
     slot: "SearchResults",
     rendered: "SearchResults",
     state: "default",
-    description: "two results, one with a type and a snippet, and one facet",
+    description:
+      "two results, one with a type and a snippet, an active filter recalled above them, and two facets with a selected value and a disabled one",
     ...chrome,
     props: searchResults,
   },

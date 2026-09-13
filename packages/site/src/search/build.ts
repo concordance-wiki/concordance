@@ -1,19 +1,30 @@
-import { pagePath, type CanonicalModel, type Entity } from "@concordance-wiki/core";
+import { pagePath, type CanonicalModel, type Entity, type Locale } from "@concordance-wiki/core";
+import {
+  formatMessage,
+  formatNumber,
+  type Catalogue,
+  type MessageArguments,
+  type MessageId,
+} from "@concordance-wiki/i18n";
 
 import type { WrittenDocument } from "../build/assemble.js";
 import type { SiteNames } from "../build/context.js";
 import type { EntityFragment } from "../build/fragments.js";
 import { byCodeUnit } from "../order.js";
+import { countFacets } from "./facets.js";
 import {
   SEARCH_DIRECTORY,
   SEARCH_META,
   shardFile,
   shardOf,
   shardScript,
+  type PluralForms,
   type SearchEntry,
+  type SearchLabels,
   type SearchMeta,
   type ShardData,
 } from "./shared.js";
+import { emptyState } from "./state.js";
 
 /** What a query word prefixing a token of the field adds to the score of the entity. */
 export const FIELD_WEIGHTS = {
@@ -48,6 +59,10 @@ export interface SearchIndexInput {
   tokenize: SearchTokenizer;
   /** The label of a type in the site language, `keyword` included. */
   typeLabel: (type: string) => string;
+  /** The strings of the results page, from `searchLabels`. */
+  labels: SearchLabels;
+  /** The locale the counts are pluralised in. */
+  locale: Locale;
   names?: SiteNames;
   /** Characters of the body text indexed per entity, the rest being cut. */
   bodyMaxChars?: number;
@@ -117,6 +132,57 @@ function labelled(
   return table;
 }
 
+/** A message taking a `count`, whose plural forms the table freezes. */
+type CountMessage = {
+  [Id in keyof MessageArguments]: MessageArguments[Id] extends { count: number } ? Id : never;
+}[keyof MessageArguments];
+
+/**
+ * Counts whose plural categories, together, reach every category a language declares: the
+ * first of them in a category is formatted, the second is what the browser sees as `#`.
+ */
+const PLURAL_SAMPLES = [1, 2, 0, 3, 5, 11, 100, 1_000_000];
+
+/**
+ * The plural forms of a message: one text per category of the locale, formatted with a count of
+ * that category, the count then replaced by `#` for the browser to fill in with its own.
+ */
+export function pluralForms(catalogue: Catalogue, id: CountMessage): PluralForms {
+  const rules = new Intl.PluralRules(catalogue.locale);
+  const forms: PluralForms = {};
+  for (const category of [...rules.resolvedOptions().pluralCategories].sort(byCodeUnit)) {
+    const sample = PLURAL_SAMPLES.find((count) => rules.select(count) === category);
+    if (sample === undefined) continue;
+    forms[category] = formatMessage(catalogue, id, { count: sample }).replaceAll(
+      formatNumber(catalogue.locale, sample),
+      "#",
+    );
+  }
+  return forms;
+}
+
+function plain(catalogue: Catalogue, id: Exclude<MessageId, keyof MessageArguments>): string {
+  return formatMessage(catalogue, id);
+}
+
+/** The strings of the results page in the language of the catalogue, as the table freezes them. */
+export function searchLabels(catalogue: Catalogue): SearchLabels {
+  return {
+    facets: plain(catalogue, "search.facets"),
+    facet: {
+      type: plain(catalogue, "search.facet.type"),
+      source: plain(catalogue, "search.facet.source"),
+      domain: plain(catalogue, "search.facet.domain"),
+      application: plain(catalogue, "search.facet.application"),
+    },
+    activeFilters: plain(catalogue, "search.activeFilters"),
+    removeFilter: plain(catalogue, "search.removeFilter"),
+    clear: plain(catalogue, "search.clear"),
+    noResult: plain(catalogue, "search.noResult"),
+    results: pluralForms(catalogue, "search.results"),
+  };
+}
+
 /** The compact JSON of an object, keys in code-unit order, so that two builds write the same bytes. */
 export function compactJson(value: Record<string, unknown>): string {
   const sorted: Record<string, unknown> = {};
@@ -178,6 +244,13 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
         entries.map((entry) => entry.domain),
         (id) => names.domains?.[id] ?? id,
       ),
+      sources: labelled(
+        entries.map((entry) => entry.source),
+        (name) => name,
+      ),
+      counts: countFacets(entries, emptyState()),
+      labels: input.labels,
+      locale: input.locale,
       bytes,
     },
     shards,

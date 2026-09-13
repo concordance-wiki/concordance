@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  FACET_NAMES,
   normalizeQuery,
+  plural,
   queryWords,
   rank,
   shardFile,
@@ -111,5 +113,24 @@ describe("rank", () => {
     expect(rank(["zz"], shards)).toEqual([]);
     expect(rank(["keywrod"], shards)).toEqual([]);
     expect(rank(["eyword"], shards)).toEqual([]);
+  });
+});
+
+describe("plural", () => {
+  it("picks the text of the plural category of the count in the locale and writes the number in it", () => {
+    const forms = { one: "# result", other: "# results" };
+    expect(plural(forms, 1, "en")).toBe("1 result");
+    expect(plural(forms, 0, "en")).toBe("0 results");
+    expect(plural(forms, 1234, "en")).toBe("1,234 results");
+    expect(
+      plural({ one: "# résultat", many: "# résultats (many)", other: "# résultats" }, 1, "fr"),
+    ).toBe("1 résultat");
+    expect(plural({ one: "# résultat", other: "# résultats" }, 0, "fr")).toBe("0 résultat");
+  });
+
+  it("falls back on the other form for a category the forms lack, and on nothing at all without it", () => {
+    expect(plural({ other: "# results" }, 1, "en")).toBe("1 results");
+    expect(plural({}, 2, "en")).toBe("");
+    expect(FACET_NAMES).toEqual(["type", "source", "domain", "application"]);
   });
 });

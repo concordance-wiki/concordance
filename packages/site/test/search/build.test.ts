@@ -1,3 +1,4 @@
+import { loadCatalogue } from "@concordance-wiki/i18n";
 import { describe, expect, it } from "vitest";
 
 import type { EntityFragment } from "../../src/build/fragments.js";
@@ -6,14 +7,17 @@ import {
   compactJson,
   DEFAULT_BODY_MAX_CHARS,
   FIELD_WEIGHTS,
+  pluralForms,
   searchFields,
   searchFilePath,
   searchIndexFiles,
+  searchLabels,
   searchType,
   type SearchIndexInput,
 } from "../../src/search/build.js";
 import { SEARCH_META, shardScript, type ShardData } from "../../src/search/shared.js";
 import { entity, model, tokenize } from "../build/fixture.js";
+import { searchLabels as labels } from "../helpers/search.js";
 
 /** One entity per indexed field, the field alone carrying the token `probe`. */
 const probes = {
@@ -55,6 +59,8 @@ function input(overrides: Partial<SearchIndexInput> = {}): SearchIndexInput {
     fragments: new Map([[bodyFragment.id, bodyFragment]]),
     tokenize,
     typeLabel: (type) => `Label of ${type}`,
+    labels,
+    locale: "en",
     ...overrides,
   };
 }
@@ -170,9 +176,22 @@ describe("buildSearchIndex", () => {
     });
     expect(meta.applications).toEqual({ probe: "Probe application" });
     expect(meta.domains).toEqual({ probe: "probe" });
+    expect(meta.sources).toEqual({ probe: "probe", specs: "specs" });
+    expect(meta.labels).toBe(labels);
+    expect(meta.locale).toBe("en");
     expect(meta.shards).toEqual([...meta.shards].sort());
     expect(meta.shards).toContain("pr");
     expect(meta.bytes).toBeGreaterThan(0);
+  });
+
+  it("freezes the counts of every facet value over the whole table, for the results page before any query", () => {
+    const { meta } = buildSearchIndex(input());
+    expect(meta.counts).toEqual({
+      type: { probe: 1, screen: 1, term: 7 },
+      source: { probe: 1, specs: 8 },
+      domain: { probe: 1 },
+      application: { probe: 1 },
+    });
   });
 
   it("shards the tokens by their first two characters, tokens sorted within a shard, shards sorted", () => {
@@ -247,5 +266,50 @@ describe("searchIndexFiles", () => {
     const a = searchIndexFiles(buildSearchIndex(input()));
     const b = searchIndexFiles(buildSearchIndex(input()));
     expect(a).toEqual(b);
+  });
+});
+
+describe("searchLabels and pluralForms", () => {
+  it("formats the strings of the results page in the language of the catalogue, plurals by category with # for the count", () => {
+    expect(searchLabels(loadCatalogue("en"))).toEqual({
+      facets: "Filters",
+      facet: { type: "Type", source: "Source", domain: "Domain", application: "Application" },
+      activeFilters: "Active filters",
+      removeFilter: "Remove this filter",
+      clear: "Clear filters",
+      noResult: "No result",
+      results: { one: "# result", other: "# results" },
+    });
+    const fr = searchLabels(loadCatalogue("fr"));
+    expect(fr.facets).toBe("Filtres");
+    expect(fr.results).toEqual({
+      many: "# résultats",
+      one: "# résultat",
+      other: "# résultats",
+    });
+  });
+
+  it("gives a form to every plural category of the locale the samples reach, sorted", () => {
+    expect(Object.keys(pluralForms(loadCatalogue("fr"), "keyword.documents"))).toEqual([
+      "many",
+      "one",
+      "other",
+    ]);
+    expect(pluralForms(loadCatalogue("en"), "keyword.occurrences")).toEqual({
+      one: "# occurrence",
+      other: "# occurrences",
+    });
+  });
+
+  it("leaves out a category no sample reaches, the browser then falling back on the other form", () => {
+    // Welsh gives "many" to 6 alone among the small numbers, which the samples skip.
+    const welsh = { ...loadCatalogue("en"), locale: "cy" };
+    expect(pluralForms(welsh, "search.results")).toEqual({
+      few: "# results",
+      one: "# result",
+      other: "# results",
+      two: "# results",
+      zero: "# results",
+    });
   });
 });

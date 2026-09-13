@@ -18,7 +18,13 @@ mountSearch({
     ...document.querySelectorAll<HTMLElement>(`${ISLAND_ELEMENT}[data-island="${SEARCH_ISLAND}"]`),
   ].map(adapt),
   document,
-  initialQuery: new URLSearchParams(location.search).get("q") ?? "",
+  location: {
+    search: () => location.search,
+    // A query string alone keeps the page; an empty one names the page so that the parameters go.
+    push: (search) => {
+      history.pushState(null, "", search === "" ? location.pathname : search);
+    },
+  },
   // A classic script, not a module: browsers load it from a file:// page, which they refuse to modules.
   inject: (src, done) => {
     const script = document.createElement("script");

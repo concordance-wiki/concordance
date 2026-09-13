@@ -328,6 +328,7 @@ export const home: SlotProps["Home"] = {
 export const searchResults: SlotProps["SearchResults"] = {
   query: "threshold",
   total: 2,
+  summary: "2 results",
   results: [
     {
       title: "Publication threshold",
@@ -337,11 +338,38 @@ export const searchResults: SlotProps["SearchResults"] = {
     },
     { title: "Keyword page threshold review", href: "../meetings/threshold-review/" },
   ],
+  active: [
+    {
+      name: "source",
+      value: "glossary",
+      facetLabel: "Source",
+      label: "glossary",
+      href: "?q=threshold",
+    },
+  ],
+  clearHref: "?q=threshold",
   facets: [
     {
       name: "type",
       label: "Type",
-      values: [{ value: "term", count: 1, href: "?q=threshold&type=term" }],
+      values: [
+        { value: "term", count: 1, href: "?q=threshold&type=term" },
+        {
+          value: "meeting",
+          label: "Meeting",
+          count: 1,
+          href: "?q=threshold&type=meeting&source=glossary",
+        },
+        { value: "screen", label: "Screen", count: 0, href: "", disabled: true },
+      ],
+    },
+    {
+      name: "source",
+      label: "Source",
+      values: [
+        { value: "glossary", count: 2, href: "?q=threshold", active: true },
+        { value: "specs", count: 1, href: "?q=threshold&source=glossary,specs" },
+      ],
     },
   ],
 };

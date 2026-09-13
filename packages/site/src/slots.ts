@@ -327,8 +327,15 @@ export interface SearchResult {
 
 export interface FacetValue {
   value: string;
+  /** What the value is called; the value itself when absent. */
+  label?: string;
   count: number;
+  /** The address of the search with this value selected, or lifted when it is active. */
   href: string;
+  /** Whether the value is selected. */
+  active?: boolean;
+  /** Whether selecting the value would keep no result: it is shown, but not followed. */
+  disabled?: boolean;
 }
 
 export interface Facet {
@@ -337,11 +344,40 @@ export interface Facet {
   values: FacetValue[];
 }
 
+/** A selected facet value recalled above the results, with the address of the search without it. */
+export interface ActiveFilter {
+  name: string;
+  value: string;
+  /** The facet's own heading, "Type" for instance. */
+  facetLabel: string;
+  label: string;
+  href: string;
+}
+
+/** The strings of the results page in the site language; the theme's own when absent. */
+export interface SearchResultsLabels {
+  facets: string;
+  activeFilters: string;
+  removeFilter: string;
+  clear: string;
+}
+
 export interface SearchResultsProps {
   query: string;
   total: number;
   results: SearchResult[];
   facets: Facet[];
+  /** "218 results", or the no-result notice, already worded in the site language; the theme counts itself when absent. */
+  summary?: string;
+  active?: ActiveFilter[];
+  /** The address of the search with every facet open again; shown with the active filters. */
+  clearHref?: string;
+  labels?: Partial<SearchResultsLabels>;
+  /**
+   * What a facet, an active filter or the clear link does once the search island runs: it
+   * follows the address without leaving the page. Never serialised; the served page has links.
+   */
+  onNavigate?: (href: string) => void;
 }
 
 export interface IndexLetter {
