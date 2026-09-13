@@ -53,9 +53,6 @@ jobs:
           name: coverage
           path: coverage/lcov.info
           if-no-files-found: error
-      - name: Mutation testing
-        # A pull request mutates only the files it changed; main mutates everything.
-        run: ${{ github.event_name == 'pull_request' && format('node scripts/mutation.mjs --since origin/{0}', github.event.pull_request.base.ref) || 'pnpm mutation' }}
       - name: Determinism
         run: node scripts/determinism.mjs
       - name: Hygiene
@@ -72,3 +69,21 @@ jobs:
             git clone --quiet --depth 1 --branch main "https://github.com/concordance-wiki/$name.git" "$RUNNER_TEMP/demo/$name"
           done
           DEMO_ROOT="$RUNNER_TEMP/demo" node scripts/parity.mjs
+  mutation:
+    # A pull request mutates only the source files it changed, next to the other checks rather
+    # than after them; the whole tree is mutated every night by the mutation workflow.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Mutation testing of the changed files
+        run: node scripts/mutation.mjs --since origin/${{ github.event.pull_request.base.ref }}

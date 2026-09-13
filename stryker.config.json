@@ -17,6 +17,9 @@
     "low": 90,
     "break": 85
   },
-  "reporters": ["clear-text", "progress"],
-  "tempDirName": ".stryker-tmp"
+  "reporters": ["clear-text", "progress", "html"],
+  "tempDirName": ".stryker-tmp",
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  }
 }
