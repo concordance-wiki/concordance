@@ -8,7 +8,7 @@ The examples install the published `concordance` package with npm; the [containe
 
 ### GitHub Pages
 
-`.github/workflows/wiki.yml` of the configuration repository. Once, in the settings of the repository, set Pages → Source to "GitHub Actions"; nothing else to configure. The `build` job writes `dist/` and hands it to the `deploy` job, which needs the `pages` and `id-token` permissions and nothing more.
+`.github/workflows/wiki.yml` of the configuration repository. Once, in the settings of the repository, set Pages → Source to "GitHub Actions"; nothing else to configure. The examples name the actions by their major tag for legibility; a repository that must stay reproducible pins each action to a commit (`actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`), as the pipelines of the tool itself do. The `build` job writes `dist/` and hands it to the `deploy` job, which needs the `pages` and `id-token` permissions and nothing more.
 
 ```yaml
 name: wiki
