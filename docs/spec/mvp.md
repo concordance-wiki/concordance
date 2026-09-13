@@ -423,7 +423,7 @@ As the pipeline owner, I want the proximity computation to stay tractable on a l
 
 Depends on: L1-03.
 
-The output feeds the mini-map (L7) and the accompanying-words panel (L2-05).
+The output feeds the mini-map (L7), which a keyword page draws from its own row (L2-05).
 
 #### L1-11 Recurring unreferenced expressions
 
@@ -501,7 +501,7 @@ As a reader, I want a page for a word nobody has defined so that I still underst
 - A banner explains that no note exists and states the number of passages recorded.
 - Three numbers only: occurrences, files, sources.
 - Passages are listed grouped by file, in corpus order, with their context.
-- Accompanying words are shown, sized by co-occurrence frequency.
+- The words that accompany the expression are its neighbourhood map, drawn from its co-occurrences, six at most.
 - Expressions with a similar form are offered as a lead, worded so as to assert nothing.
 - If a note is created later, the page keeps its URL and fills in.
 
@@ -976,7 +976,7 @@ As a reader, I want to read the name of every node so that the map teaches me so
 - Labels are positioned without overlap; verified by a rendering test on six-node cases.
 - The type is carried by shape and glyph, not by colour alone.
 - Links to noteless words are dashed.
-- Beyond the node cap, the map is not shown: a pointer to the mentions panel replaces it.
+- Beyond the node cap, the map draws the nodes kept and says how many neighbours the model holds in total; a page without any neighbour points at the mentions panel instead.
 
 Depends on: L7-01.
 
@@ -1130,7 +1130,7 @@ As a reader, I want the page of a word nobody defined to look like every other p
 
 - The breadcrumb "Space › Terms › word", the space being the glossary when there is one, else the space of the first passage, and the tree of that space on the left with the word at its place as the current page; the title dotted, the "no note" mark; the line "No definition · Used since <month year>", the month of the earliest git date among the citing files as the model carries it, "Used since" omitted when no date is known; the box "Nobody has written a definition, but N passages use this word. This page is built from those passages alone. If someone creates the note in the glossary, its text will take its place here and the rest of the page will not change." and the button "Propose a definition", the existing lead to the forge of the glossary.
 - "The passages, in corpus order" with the summary sentence "N files.", grouped by file with the type chip, the title and the count; each passage with its timestamp (`12:04`, transcripts), its page (`p. 12`, converted documents) or its line, read from the fragment of the citing page, and the text with the word marked.
-- Panel: "What we know" (Occurrences, Files, Spaces, then "No declared property: there is no file for this word."), "Maybe the same thing" (the similar expressions with their counts and the note "Expressions close in form and context. A lead, not a claim."), the accompanying words, "Related pages" with the note "Ordered by number of passages. None is “cited”: this word has no note to carry links.", then the neighbourhood map folded.
+- Panel: "What we know" (Occurrences, Files, Spaces, then "No declared property: there is no file for this word."), "Maybe the same thing" (the similar expressions with their counts and the note "Expressions close in form and context. A lead, not a claim."), "Related pages" with the note "Ordered by number of passages. None is “cited”: this word has no note to carry links.", then the neighbourhood map folded.
 - Gallery state `keyword-page-corporate` on an expression of the fixtures corpus; the accessibility checker and the contrast checker pass on it.
 
 Depends on: L9-01, L2-04, L3-04.
