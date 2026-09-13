@@ -67,8 +67,8 @@ function byTitle(value: string, context: ResolveContext): ReferenceResolution {
 }
 
 /**
- * A reference is an identifier (`specs/roles/account-manager`, or `roles/account-manager` within the
- * source of the note), a path relative to the source root (`roles/account-manager.md`), or the exact
+ * A reference is an identifier (`specs/roles/maintainer`, or `roles/maintainer` within the
+ * source of the note), a path relative to the source root (`roles/maintainer.md`), or the exact
  * title of a note, compared after trimming and case-sensitively. Identifiers and paths are unique; a
  * title shared by several notes resolves nothing.
  */

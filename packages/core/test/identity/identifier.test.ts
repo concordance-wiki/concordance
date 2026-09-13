@@ -118,7 +118,7 @@ describe("identifierFor", () => {
         message:
           'frontmatter id "Related Cap" of rules/related-cap.rule.md is not a valid identifier; using specs/rules/related-cap',
         remediation:
-          "Use lowercase letters, digits and hyphens with at least one '/', such as specs/rules/annual-cap, or remove the id key to derive it from the path.",
+          "Use lowercase letters, digits and hyphens with at least one '/', such as specs/rules/publication-threshold, or remove the id key to derive it from the path.",
       },
     });
   });

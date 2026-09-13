@@ -59,7 +59,7 @@ export function identifierFor(input: IdentifierInput): IdentifierResult {
       entity: id,
       message: `frontmatter id "${frontmatterId}" of ${path} is not a valid identifier; using ${id}`,
       remediation:
-        "Use lowercase letters, digits and hyphens with at least one '/', such as specs/rules/annual-cap, or remove the id key to derive it from the path.",
+        "Use lowercase letters, digits and hyphens with at least one '/', such as specs/rules/publication-threshold, or remove the id key to derive it from the path.",
     },
   };
 }
