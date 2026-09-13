@@ -47,6 +47,7 @@ function registryWith(
     projections: () => [],
     uiComponents: () => [],
     themes: () => [],
+    types: () => [],
   };
 }
 

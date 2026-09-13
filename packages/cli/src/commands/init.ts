@@ -1,8 +1,20 @@
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import {
+  formatIssue,
+  loadPlugins,
+  parseConfig,
+  type PluginLoaderDependencies,
+} from "@concordance-wiki/core";
+import type { TypeModule } from "@concordance-wiki/profile";
+import { defaultThemeManifest } from "@concordance-wiki/site";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { templatesDirectory } from "../templates.js";
+import { formatFinding } from "./findings.js";
+import { nodeThemeDependencies, specifier } from "./theme.js";
+import { pluginTypeModules, type TypeModuleDependencies } from "./types.js";
 import { defaultConfigFile } from "./validate-config.js";
 
 export const initialConfig = `# Concordance configuration. Reference: docs/guides/configuration.md
@@ -38,27 +50,85 @@ build:
 /** Folder of the configuration repository that receives the note templates under `--templates`. */
 export const templatesFolder = "templates";
 
-/** Copies every shipped template that does not exist yet; an existing file is kept and reported. */
-function writeTemplates(directory: string, io: CommandIo, templates: string): ExitCode {
+/** Module loading, injected so that tests read the type modules of the plugins against doubles. */
+export type InitDependencies = PluginLoaderDependencies & TypeModuleDependencies;
+
+/** One template to write: its file name under `templates/` and its content. */
+interface Template {
+  name: string;
+  content: string;
+}
+
+/** The shipped templates in name order, then the template of every type the plugins contribute. */
+function templatesToWrite(
+  io: CommandIo,
+  templates: string,
+  modules: readonly TypeModule[],
+): Template[] {
+  const shipped = io.fs
+    .listFiles(templates)
+    .map((name) => ({ name, content: io.fs.readText(resolve(templates, name)) }));
+  const contributed = modules.flatMap((module) =>
+    module.template === undefined ? [] : [{ name: `${module.slug}.md`, content: module.template }],
+  );
+  return [...shipped, ...contributed];
+}
+
+/** Writes every template that does not exist yet; an existing file is kept and reported. */
+function writeTemplates(directory: string, io: CommandIo, templates: Template[]): ExitCode {
   let code: ExitCode = exitCodes.ok;
-  for (const name of io.fs.listFiles(templates)) {
+  for (const { name, content } of templates) {
     const file = resolve(directory, templatesFolder, name);
     if (io.fs.exists(file)) {
       io.err(`${file}: already exists, kept`);
       code = exitCodes.failure;
       continue;
     }
-    io.fs.writeText(file, io.fs.readText(resolve(templates, name)));
+    io.fs.writeText(file, content);
     io.out(`${file}: written`);
   }
   return code;
 }
 
-export function initCommand(
+/**
+ * The type modules of the plugins the configuration file declares, read from their packages;
+ * undefined, with the reasons printed, when the configuration or a module is invalid.
+ */
+async function contributedModules(
+  io: CommandIo,
+  file: string,
+  deps: InitDependencies,
+): Promise<TypeModule[] | undefined> {
+  const validation = parseConfig(io.fs.readText(file));
+  if (!validation.ok) {
+    for (const issue of validation.issues) {
+      io.err(formatIssue(issue, file));
+    }
+    return undefined;
+  }
+  const { registry, findings } = await loadPlugins(validation.config.plugins ?? [], {
+    load: (name) => deps.load(specifier(name, io.cwd)),
+    commandAvailable: deps.commandAvailable,
+    builtin: [defaultThemeManifest()],
+  });
+  for (const finding of findings) {
+    io.err(formatFinding(finding));
+  }
+  return pluginTypeModules(io, registry, deps);
+}
+
+/**
+ * `concordance init [directory] [--templates]`: writes a minimal configuration, and with
+ * `--templates` the note templates of the core types and of the types contributed by the plugins
+ * the configuration declares. An existing configuration is kept; without `--templates` nothing
+ * else is written then.
+ */
+export async function initCommand(
   argv: string[],
   io: CommandIo,
   templates: string = templatesDirectory(),
-): ExitCode {
+  deps: InitDependencies = nodeThemeDependencies,
+): Promise<ExitCode> {
   const { values, positionals } = parseArgs({
     args: argv,
     options: { templates: { type: "boolean", default: false } },
@@ -66,11 +136,25 @@ export function initCommand(
   });
   const directory = resolve(io.cwd, positionals[0] ?? ".");
   const file = resolve(directory, defaultConfigFile);
+  let code: ExitCode = exitCodes.ok;
   if (io.fs.exists(file)) {
-    io.err(`${file}: already exists, nothing written`);
+    if (!values.templates) {
+      io.err(`${file}: already exists, nothing written`);
+      return exitCodes.failure;
+    }
+    io.err(`${file}: already exists, kept`);
+    code = exitCodes.failure;
+  } else {
+    io.fs.writeText(file, initialConfig);
+    io.out(`${file}: written`);
+  }
+  if (!values.templates) {
+    return code;
+  }
+  const modules = await contributedModules(io, file, deps);
+  if (modules === undefined) {
     return exitCodes.failure;
   }
-  io.fs.writeText(file, initialConfig);
-  io.out(`${file}: written`);
-  return values.templates ? writeTemplates(directory, io, templates) : exitCodes.ok;
+  const written = writeTemplates(directory, io, templatesToWrite(io, templates, modules));
+  return written === exitCodes.ok ? code : written;
 }

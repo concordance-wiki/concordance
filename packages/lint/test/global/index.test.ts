@@ -108,6 +108,48 @@ describe("--scope global downloads the latest published model.json and checks cr
     });
     expect(result.findings.filter((finding) => finding.check === "E-META-REL")).toHaveLength(1);
   });
+
+  it("merges the type modules of the types_dir the project profile names before its own keys", async () => {
+    const fs = repository({
+      [`${root}/profile.yaml`]: "types_dir: ./types\n",
+      [`${root}/types/runbook/type.yaml`]:
+        "group: quality\nattributes:\n  reads: { type: 'ref[]', target: term, relation: accesses }\n",
+      [`${root}/types/runbook/messages/en.json`]: JSON.stringify({ label: "Runbook" }),
+      [`${root}/screens/rebuild.md`]:
+        "---\ntype: runbook\nreads: [glossary/scope]\n---\n# Rebuild\n",
+    });
+    const result = await run({
+      fs,
+      fetch: stubFetch([{ body: modelText() }]).fetch,
+      overrides: { checks: {}, global: { model: MODEL_URL, profile: "profile.yaml" } },
+    });
+    expect(result.degraded).toBeUndefined();
+    const meta = result.findings.filter((finding) => finding.check === "E-META-REL");
+    expect(meta.map((finding) => finding.path)).toContain("screens/rebuild.md");
+  });
+
+  it("degrades on a types_dir that is missing or holds an invalid module", async () => {
+    const overrides = { checks: {}, global: { model: MODEL_URL, profile: "profile.yaml" } };
+    expect(
+      await run({
+        fs: repository({ [`${root}/profile.yaml`]: "types_dir: ./types\n" }),
+        overrides,
+      }),
+    ).toEqual({
+      findings: [],
+      degraded: { reason: "profile /work/profile.yaml: types_dir: folder not found" },
+    });
+    const fs = repository({
+      [`${root}/profile.yaml`]: "types_dir: ./types\n",
+      [`${root}/types/runbook/type.yaml`]: "glyph: runbook\n",
+    });
+    expect(await run({ fs, overrides })).toEqual({
+      findings: [],
+      degraded: {
+        reason: "types /work/types: runbook: type.yaml: group: required key is missing",
+      },
+    });
+  });
 });
 
 describe("An unreachable remote model degrades the check to local mode and says so, without failing", () => {

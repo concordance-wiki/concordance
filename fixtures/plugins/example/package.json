@@ -7,6 +7,7 @@
   "type": "module",
   "exports": "./index.mjs",
   "dependencies": {
-    "@concordance-wiki/core": "workspace:*"
+    "@concordance-wiki/core": "workspace:*",
+    "preact": "10.29.8"
   }
 }

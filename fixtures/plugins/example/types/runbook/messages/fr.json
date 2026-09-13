@@ -1,0 +1,9 @@
+{
+  "attributes.owner": "Responsable",
+  "attributes.rules": "Règles",
+  "attributes.steps": "Étapes",
+  "attributes.trigger": "Déclencheur",
+  "label": "Procédure",
+  "sections.rules": "Règles",
+  "sections.steps": "Étapes"
+}

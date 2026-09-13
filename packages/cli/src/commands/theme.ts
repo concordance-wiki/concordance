@@ -8,7 +8,6 @@ import {
   loadPlugins,
   nodeFileSystem,
   type Config,
-  type FileSystem,
   type PluginConfig,
   type PluginLoaderDependencies,
   type PluginRegistry,
@@ -26,16 +25,17 @@ import {
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { formatFinding } from "./findings.js";
+import type { TypeModuleDependencies } from "./types.js";
 
 export const defaultThemeFile = "theme.yaml";
 
-/** Module loading, injected so that tests resolve themes without touching the package graph. */
-export interface ThemeDependencies extends PluginLoaderDependencies {
+/**
+ * Module loading, injected so that tests resolve themes without touching the package graph;
+ * `rootOf` and `pluginFiles` locate the `tokens` of the themes and the type modules of the
+ * plugins, which are left aside without them.
+ */
+export interface ThemeDependencies extends PluginLoaderDependencies, TypeModuleDependencies {
   loadTheme: ThemeLoader["load"];
-  /** Absolute folder of a plugin package, for the `tokens` of its themes; absent, plugin tokens are left aside. */
-  rootOf?: ThemeLoader["rootOf"];
-  /** Reads the files of plugin packages, which live where their modules are imported from. */
-  pluginFiles?: FileSystem;
 }
 
 export const nodeThemeDependencies: ThemeDependencies = {
@@ -111,8 +111,8 @@ export interface SiteThemeInput {
   file: string;
   /** Who stops on a faulty theme, `build` or `render`. */
   command: string;
-  /** The plugins already loaded by the command; without it the plugins of the configuration are loaded here. */
-  registry?: PluginRegistry;
+  /** The plugins of the configuration, already loaded by the command. */
+  registry: PluginRegistry;
 }
 
 /**
@@ -131,10 +131,7 @@ export async function siteTheme(
   }
   let theme: ResolvedTheme;
   try {
-    theme =
-      input.registry === undefined
-        ? await themeOf(config.plugins ?? [], io, deps)
-        : await resolveTheme(input.registry, loaderOf(deps));
+    theme = await resolveTheme(input.registry, loaderOf(deps));
   } catch (error) {
     io.err(
       `${command}: cannot resolve the theme: ${error instanceof Error ? error.message : String(error)}`,

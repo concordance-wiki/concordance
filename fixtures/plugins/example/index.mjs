@@ -66,5 +66,6 @@ export default definePlugin({
         components: { Footer: "./theme/footer.js" },
       },
     ],
+    types: [{ path: "./types/runbook" }],
   },
 });

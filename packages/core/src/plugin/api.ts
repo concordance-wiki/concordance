@@ -197,6 +197,15 @@ export interface ThemeContribution {
   components?: Record<string, string>;
 }
 
+/**
+ * A type module a plugin ships: the folder of the module, relative to the plugin package, whose
+ * name is the slug of the type (`./types/runbook` declares `runbook`). The folder holds what the
+ * type-module schema describes: `type.yaml`, `messages/`, `template.md`, `schema.json`, `components/`.
+ */
+export interface TypeContribution {
+  path: string;
+}
+
 export interface Contributions {
   readers?: Reader[];
   converters?: Converter[];
@@ -206,6 +215,7 @@ export interface Contributions {
   projections?: Projection[];
   uiComponents?: UiComponent[];
   themes?: ThemeContribution[];
+  types?: TypeContribution[];
 }
 
 export interface PluginManifest {

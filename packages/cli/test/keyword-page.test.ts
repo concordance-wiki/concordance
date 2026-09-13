@@ -30,6 +30,7 @@ const noPlugins: PluginRegistry = {
   projections: () => [],
   uiComponents: () => [],
   themes: () => [],
+  types: () => [],
 };
 
 const config = [

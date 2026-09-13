@@ -1,0 +1,10 @@
+{
+  "steps": {
+    "type": "object",
+    "required": ["action"],
+    "properties": {
+      "action": { "type": "string" },
+      "check": { "type": "string" }
+    }
+  }
+}

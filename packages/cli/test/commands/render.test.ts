@@ -470,6 +470,28 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(io.stderr).toEqual(["render: cannot resolve the theme: gone"]);
   });
 
+  it("loads the plugins of the configuration before the profile and prints their findings", async () => {
+    const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
+    const disabled = definePlugin({
+      name: "@example/theme",
+      version: "1.0.0",
+      apiVersion: "1",
+      systemDependencies: [{ name: "a tool", check: "a-tool" }],
+      contributes: { themes: [{ name: "custom", tokens: "./theme.yaml" }] },
+    });
+    const deps: ThemeDependencies = {
+      load: () => Promise.resolve(disabled),
+      commandAvailable: () => Promise.resolve(false),
+      loadTheme: () => Promise.resolve(undefined),
+    };
+    expect(await buildCommand([], io, deps)).toBe(0);
+    io.stderr.length = 0;
+    expect(await renderCommand([], io, deps)).toBe(0);
+    expect(io.stderr).toEqual([
+      "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency a tool is missing, command a-tool is not available",
+    ]);
+  });
+
   it("reports an accessibility finding of a page as a warning on stderr and in the summary, without failing", async () => {
     const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
     expect(await renderCommand([], io, fakeDependencies(BareFooter)).catch(() => 2)).toBe(2);

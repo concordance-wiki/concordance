@@ -2,6 +2,7 @@ import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import {
+  loadPlugins,
   parseModel,
   type ModelError,
   type CanonicalModel,
@@ -15,6 +16,7 @@ import type { Profile } from "@concordance-wiki/profile";
 import {
   buildSite,
   contractFileTarget,
+  defaultThemeManifest,
   contractFragmentPath,
   fragmentImagePath,
   fragmentPath,
@@ -26,7 +28,8 @@ import {
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { defaultOutputDirectory, loadProfile, modelFile } from "./build.js";
-import { nodeThemeDependencies, siteTheme, type ThemeDependencies } from "./theme.js";
+import { formatFinding } from "./findings.js";
+import { nodeThemeDependencies, siteTheme, specifier, type ThemeDependencies } from "./theme.js";
 import { loadConfigFile } from "./validate-config.js";
 
 export interface SiteRenderInput {
@@ -40,8 +43,8 @@ export interface SiteRenderInput {
   output: string;
   /** Who renders, `build` or `render`, for the messages. */
   command: string;
-  /** The plugins the command already loaded, when it did. */
-  registry?: PluginRegistry;
+  /** The plugins of the configuration, loaded by the command. */
+  registry: PluginRegistry;
 }
 
 /** The titles the configuration gives to applications and domains, subdomains keyed by their id path. */
@@ -186,7 +189,7 @@ export async function renderSite(
     config,
     file: input.configFile,
     command,
-    ...(input.registry === undefined ? {} : { registry: input.registry }),
+    registry: input.registry,
   });
   if ("exit" in theme) {
     return theme.exit;
@@ -257,7 +260,20 @@ export async function renderCommand(
   }
   const config = loaded.validation.config;
   const configDirectory = dirname(loaded.file);
-  const resolved = loadProfile(io, config, configDirectory);
+  // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
+  const plugins = await loadPlugins(config.plugins ?? [], {
+    load: (name) => deps.load(specifier(name, io.cwd)),
+    commandAvailable: deps.commandAvailable,
+    builtin: [defaultThemeManifest()],
+  });
+  for (const finding of plugins.findings) {
+    io.err(formatFinding(finding));
+  }
+  const resolved = loadProfile(io, config, configDirectory, {
+    registry: plugins.registry,
+    ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
+    ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
+  });
   if (resolved === undefined) {
     io.err("render stopped: fix the profile first");
     return exitCodes.invalid;
@@ -290,5 +306,6 @@ export async function renderCommand(
     modelDirectory: dirname(file),
     output,
     command: "render",
+    registry: plugins.registry,
   });
 }

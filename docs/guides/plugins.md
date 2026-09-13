@@ -37,7 +37,7 @@ Before a plugin is registered, the build runs `<command> --version` for every sy
 | the package has no default export returned by `definePlugin` | configuration error naming the package; the build stops |
 | the manifest targets another `apiVersion` than the installed core | configuration error naming both versions; the build stops |
 | the same plugin is declared twice | configuration error; the build stops |
-| two plugins contribute the same reader extension, converter extension, source kind, inference method, check identifier, projection identifier or UI slot | configuration error naming both plugins; nothing is overridden silently |
+| two plugins contribute the same reader extension, converter extension, source kind, inference method, check identifier, projection identifier, UI slot, theme name or type slug | configuration error naming both plugins; nothing is overridden silently |
 
 Configuration errors are raised as `PluginLoadError`; a manifest that fails its schema is a `PluginDefinitionError` raised by `definePlugin` when the package is imported. Both carry a message that names the plugin and what is wrong.
 
@@ -73,6 +73,7 @@ A manifest names at least one contribution point. `definePlugin` throws when the
 | `projection` | `projections` | `id`, lowercase identifier | `render(input) → { html, json }` |
 | `ui component` | `uiComponents` | `slot`, `bundle` | none: the site bundles the entry as an island named after the slot and loads it on demand |
 | `theme` | `themes` | `name`, `tokens` (a `theme.yaml`), optional `stylesheet`, `assets` folder and `components` overrides by slot | none: the site copies the assets, loads the stylesheet in the `project` layer and renders the overridden slots with the theme's components |
+| `type` | `types` | `path`, the folder of a type module relative to the package, whose name is the type slug | none: the build reads the module and merges it into the profile before the project profile; `init --templates` copies its template; the site renders its components |
 
 The input of each runtime part carries a `payload` whose shape is fixed by the story that consumes the contribution (a reader receives the raw bytes of the file as a `Uint8Array` and returns the metadata it extracted plus the full text, the material of recognition and search); the types exported by `@concordance-wiki/core` (`Reader`, `Converter`, `SourceProvider`, `InferenceMethod`, `CheckContribution`, `Projection`, `UiComponent`, `ThemeContribution`) say what is known today. Every contribution is a pure function of its inputs plus the injected context: a `PluginContext` carries the file system, the clock and, when the build has network access, a `fetch` function; a contribution never reads the clock or the network on its own. A plugin never writes into a source repository. Checks contributed by a plugin obey the same identifier convention as the core checks and need a documentation page.
 
@@ -152,6 +153,10 @@ export default function Footer({ version, generatedAt, links }) {
 ```
 
 The example under [`fixtures/plugins/theme-example`](../../fixtures/plugins/theme-example/index.mjs) overrides the footer alone and is rendered end to end by the site tests. An override for a name that is not a slot, or a module whose default export is not a function, is a `ThemeResolutionError` naming the plugin and the theme.
+
+#### Types
+
+A plugin declares the types it brings as type modules, one folder each (`types: [{ path: "./types/runbook" }]`), in the format the [adding a type guide](adding-a-type.md) describes: `type.yaml`, `messages/<language>.json`, `template.md`, optionally `schema.json` and `components/`. The registry lists them in declaration order (`types()`, each with its plugin and slug) and refuses two plugins bringing the same slug. The build reads every module from its package once the plugins are loaded and merges them into the profile before the project's own `types_dir` modules and before the keys of `profile.yaml`; a module of a type the default profile declares is a configuration error, since a core type is extended through `profile.yaml`, and a module that does not validate stops the build with the file and the key at fault. `concordance init --templates` copies the template of every type the declared plugins contribute next to the core ones, and the site renders the pages of the type with the components the module ships, as the [theming guide](theming.md#rendering-per-type) says. The example plugin contributes a `runbook` type, a procedure for operating Concordance, with a page of its own.
 
 ### System dependencies
 

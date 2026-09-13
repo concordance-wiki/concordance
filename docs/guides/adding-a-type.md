@@ -129,3 +129,25 @@ The `## Steps` section produces `related` links to every note it mentions, `## R
 ## The core types
 
 The types the engine ships are modules under `packages/profile/types/`, and [`packages/profile/default.yaml`](../../packages/profile/default.yaml) is assembled from them and from `base.yaml` (the groups, the common attributes, the relations, the confidence scale and the type prefixes) by `node scripts/assemble-profile.mjs`; `pnpm lint` fails when the committed profile differs from the assembly, and the profile package tests check that its own reader assembles the same profile. The note templates of [`docs/templates`](../templates/README.md) and of the command line are copied from the modules by `node scripts/sync-templates.mjs`. To change a core type, edit its module and run both scripts.
+
+## Shipping the module
+
+A module is read from one of two places, and merged the same way in both cases:
+
+- **A folder of the configuration repository.** `types_dir` in `profile.yaml` names a folder of modules, relative to the profile file (`types_dir: ./types`); every sub-folder holding a `type.yaml` is a module. The linter reads it too when `global.profile` names the profile, so that the global checks know the types.
+- **A plugin.** The manifest lists its modules under `types`, each by the path of its folder relative to the package, and every project that declares the plugin gets the types:
+
+  ```js
+  import { definePlugin } from "@concordance-wiki/core";
+
+  export default definePlugin({
+    name: "@example/plugin-runbooks",
+    version: "0.1.0",
+    apiVersion: "1",
+    contributes: { types: [{ path: "./types/runbook" }] },
+  });
+  ```
+
+  The registry refuses two plugins bringing the same slug, and `concordance init --templates` copies the template of every plugin type next to the core ones. The [plugins guide](plugins.md#types) has the rest.
+
+In both cases the order of the merge is fixed: the default profile, the modules of the plugins in declaration order, the modules of `types_dir`, then the keys of `profile.yaml`, which may complete a module's type (`types.runbook.display.highlight: [owner]`) as it completes a core type. A module of a type the default profile declares is refused, with the folder at fault: a core type is extended through `profile.yaml`, never replaced. Whatever its origin, a module that does not validate stops the build and the linter, naming the file and the key.

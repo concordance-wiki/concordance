@@ -10,7 +10,7 @@ import { memoryFileSystem } from "../../src/io/file-system.js";
 import type { Contributions, PluginManifest } from "../../src/plugin/api.js";
 import { definePlugin } from "../../src/plugin/define.js";
 import { importPlugin } from "../../src/plugin/node-loader.js";
-import { PluginLoadError, loadPlugins } from "../../src/plugin/registry.js";
+import { PluginLoadError, loadPlugins, typeSlugOf } from "../../src/plugin/registry.js";
 
 const examplePlugin = pathToFileURL(
   resolve(fileURLToPath(import.meta.url), "../../../../../fixtures/plugins/example/index.mjs"),
@@ -157,6 +157,7 @@ describe("loadPlugins", () => {
     expect(registry.uiComponents()).toEqual([
       { slot: "contract-viewer", bundle: "/site/viewer.client" },
     ]);
+    expect(registry.types()).toEqual([]);
     expect(findings).toEqual([]);
   });
 
@@ -392,6 +393,11 @@ describe("loadPlugins", () => {
       { themes: [{ name: "slate", tokens: "./a.yaml" }] },
       { themes: [{ name: "slate", tokens: "./b.yaml" }] },
     ],
+    [
+      "type runbook",
+      { types: [{ path: "./types/runbook" }] },
+      { types: [{ path: "modules/runbook/" }] },
+    ],
   ] satisfies [string, Contributions, Contributions][])(
     "rejects two plugins contributing the same %s instead of overriding silently",
     async (label, first, second) => {
@@ -443,6 +449,7 @@ describe("loadPlugins", () => {
         ],
         projections: [{ id: "one", render: () => ({ html: "", json: null }) }],
         uiComponents: [{ slot: "one", bundle: "./one.js" }],
+        types: [{ path: "./types/one" }],
       }),
       two: contributing("two", {
         readers: [{ extensions: [".two"], read: () => ({ metadata: {}, text: "" }) }],
@@ -479,6 +486,7 @@ describe("loadPlugins", () => {
         ],
         projections: [{ id: "two", render: () => ({ html: "", json: null }) }],
         uiComponents: [{ slot: "two", bundle: "./two.js" }],
+        types: [{ path: "./types/two" }, { path: "./types/two_bis" }],
       }),
     };
     const { registry } = await loadPlugins(["two", "one"], loader(modules));
@@ -489,6 +497,17 @@ describe("loadPlugins", () => {
     expect(registry.checks().map((c) => c.id)).toEqual(["I-TWO", "I-ONE"]);
     expect(registry.projections().map((p) => p.id)).toEqual(["two", "one"]);
     expect(registry.uiComponents().map((u) => u.slot)).toEqual(["two", "one"]);
+    expect(registry.types()).toEqual([
+      { plugin: "two", slug: "two", path: "./types/two" },
+      { plugin: "two", slug: "two_bis", path: "./types/two_bis" },
+      { plugin: "one", slug: "one", path: "./types/one" },
+    ]);
+  });
+
+  it("names a type contribution after its folder, whatever the path around it", () => {
+    expect(typeSlugOf({ path: "./types/runbook" })).toBe("runbook");
+    expect(typeSlugOf({ path: "runbook/" })).toBe("runbook");
+    expect(typeSlugOf({ path: "runbook" })).toBe("runbook");
   });
 
   it("loads the example plugin, which exercises every contribution point", async () => {
@@ -544,6 +563,13 @@ describe("loadPlugins", () => {
         stylesheet: "./theme/theme.css",
         assets: "./theme/assets",
         components: { Footer: "./theme/footer.js" },
+      },
+    ]);
+    expect(registry.types()).toEqual([
+      {
+        plugin: "@concordance-wiki/fixture-plugin-example",
+        slug: "runbook",
+        path: "./types/runbook",
       },
     ]);
   });

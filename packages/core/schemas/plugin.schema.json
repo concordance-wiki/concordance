@@ -192,6 +192,21 @@
               }
             }
           }
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "folder of the type module, relative to the plugin package; its name is the type slug",
+                "pattern": "(^|/)[a-z][a-z0-9_]*/?$"
+              }
+            }
+          }
         }
       }
     }

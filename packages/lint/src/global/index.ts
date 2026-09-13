@@ -1,3 +1,5 @@
+import { dirname, resolve } from "node:path";
+
 import { createRegistry } from "@concordance-wiki/checks";
 import {
   compareFindings,
@@ -7,7 +9,14 @@ import {
   type Finding,
   type SourceConfig,
 } from "@concordance-wiki/core";
-import { resolveProfile, type Profile, type ProfileIssue } from "@concordance-wiki/profile";
+import {
+  readTypeModules,
+  resolveProfile,
+  typesDirectoryOf,
+  type Profile,
+  type ProfileIssue,
+  type TypeModule,
+} from "@concordance-wiki/profile";
 
 import type { LintOverrides } from "../overrides.js";
 import { loadPublishedModel, type LoadedModel } from "./cache.js";
@@ -42,7 +51,11 @@ export interface LintGlobalResult {
 
 type ProfileResolution = { ok: true; profile: Profile } | { ok: false; reason: string };
 
-/** The default profile, or the project profile `global.profile` names, merged over it. */
+/**
+ * The default profile, or the project profile `global.profile` names, merged over it with the
+ * type modules of its `types_dir`; the types the plugins of the wiki contribute are not read
+ * here, the linter loading no plugin.
+ */
 function profileFor(input: LintGlobalInput, config: ResolvedGlobalConfig): ProfileResolution {
   if (config.profile === undefined) {
     return { ok: true, profile: input.profile };
@@ -50,7 +63,22 @@ function profileFor(input: LintGlobalInput, config: ResolvedGlobalConfig): Profi
   if (!input.fs.exists(config.profile)) {
     return { ok: false, reason: `profile ${config.profile}: file not found` };
   }
-  const resolved = resolveProfile(input.fs.readText(config.profile));
+  const text = input.fs.readText(config.profile);
+  const typesDirectory = typesDirectoryOf(text);
+  let modules: TypeModule[] = [];
+  if (typesDirectory !== undefined) {
+    const directory = resolve(dirname(config.profile), typesDirectory);
+    if (!input.fs.exists(directory)) {
+      return { ok: false, reason: `profile ${config.profile}: types_dir: folder not found` };
+    }
+    const read = readTypeModules(input.fs, directory);
+    const first = read.issues[0];
+    if (first !== undefined) {
+      return { ok: false, reason: `types ${directory}: ${first.path}: ${first.message}` };
+    }
+    modules = read.modules;
+  }
+  const resolved = resolveProfile(text, { modules });
   if (resolved.ok) {
     return { ok: true, profile: resolved.profile };
   }

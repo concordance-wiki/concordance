@@ -15,15 +15,11 @@ import {
   type Config,
   type ModelSource,
   type PluginLoaderDependencies,
+  type PluginRegistry,
 } from "@concordance-wiki/core";
 import { formatDuplicateStats } from "@concordance-wiki/inference";
 import { ingestSources, type IngestedSource } from "@concordance-wiki/ingest";
-import {
-  fingerprintProfile,
-  loadDefaultProfile,
-  resolveProfile,
-  type Profile,
-} from "@concordance-wiki/profile";
+import { resolveProfile, type Profile, type TypeModule } from "@concordance-wiki/profile";
 
 import { defaultThemeManifest } from "@concordance-wiki/site";
 
@@ -35,6 +31,7 @@ import { runPipeline } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
 import { renderSite } from "./render.js";
 import { nodeThemeDependencies, type ThemeDependencies } from "./theme.js";
+import { pluginTypeModules, projectTypeModules, type TypeModuleDependencies } from "./types.js";
 import { loadConfigFile } from "./validate-config.js";
 
 export const defaultCacheDirectory = ".concordance-cache";
@@ -101,26 +98,56 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
   ];
 }
 
-/** The merged profile and its fingerprint; undefined, with the issues printed, when the project profile is invalid. */
+/** Where the type modules of a build come from: the plugins already loaded, and their packages. */
+export interface ProfileSources extends TypeModuleDependencies {
+  /** The plugins of the configuration, whose type modules are merged first. */
+  registry: PluginRegistry;
+}
+
+export interface LoadedProfile {
+  profile: Profile;
+  fingerprint: string;
+  /** The modules merged into the profile: those of the plugins, then those of `types_dir`. */
+  modules: TypeModule[];
+}
+
+/**
+ * The merged profile and its fingerprint: the default profile, the type modules of the plugins,
+ * those of the project's `types_dir`, then the project profile; undefined, with the issues
+ * printed, when a module or the project profile is invalid.
+ */
 export function loadProfile(
   io: CommandIo,
   config: Config,
   configDirectory: string,
-): { profile: Profile; fingerprint: string } | undefined {
-  if (config.profile === undefined) {
-    const profile = loadDefaultProfile();
-    return { profile, fingerprint: fingerprintProfile(profile) };
-  }
-  const file = resolve(configDirectory, config.profile);
-  if (!io.fs.exists(file)) {
-    io.err(`${file}: profile file not found`);
+  sources: ProfileSources,
+): LoadedProfile | undefined {
+  const fromPlugins = pluginTypeModules(io, sources.registry, sources);
+  if (fromPlugins === undefined) {
     return undefined;
   }
-  const resolution = resolveProfile(io.fs.readText(file));
-  for (const issue of resolution.issues) {
-    io.err(formatIssue(issue, file));
+  let file: string | undefined;
+  let text: string | undefined;
+  let fromProject: TypeModule[] = [];
+  if (config.profile !== undefined) {
+    file = resolve(configDirectory, config.profile);
+    if (!io.fs.exists(file)) {
+      io.err(`${file}: profile file not found`);
+      return undefined;
+    }
+    text = io.fs.readText(file);
+    const read = projectTypeModules(io, file, text);
+    if (read === undefined) {
+      return undefined;
+    }
+    fromProject = read;
   }
-  return resolution.ok ? resolution : undefined;
+  const modules = [...fromPlugins, ...fromProject];
+  const resolution = resolveProfile(text, { modules });
+  for (const issue of resolution.issues) {
+    io.err(formatIssue(issue, file ?? "profile"));
+  }
+  return resolution.ok ? { ...resolution, modules } : undefined;
 }
 
 /** What the `build` block records about each source: the name, the file count, and the commit and URL of a git source. */
@@ -155,7 +182,16 @@ export async function buildCommand(
   }
   const config = loaded.validation.config;
   const configDirectory = dirname(loaded.file);
-  const resolved = loadProfile(io, config, configDirectory);
+  // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
+  const plugins = await loadPlugins(config.plugins ?? [], {
+    ...deps,
+    builtin: [defaultThemeManifest()],
+  });
+  const resolved = loadProfile(io, config, configDirectory, {
+    registry: plugins.registry,
+    ...(deps.rootOf === undefined ? {} : { rootOf: deps.rootOf }),
+    ...(deps.pluginFiles === undefined ? {} : { pluginFiles: deps.pluginFiles }),
+  });
   if (resolved === undefined) {
     io.err("build stopped: fix the profile first");
     return exitCodes.invalid;
@@ -168,12 +204,6 @@ export async function buildCommand(
     configDirectory,
     config.conversion?.cache ?? defaultCacheDirectory,
   );
-
-  // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
-  const plugins = await loadPlugins(config.plugins ?? [], {
-    ...deps,
-    builtin: [defaultThemeManifest()],
-  });
   const checks = createRegistry(catalogue, plugins.registry.checks());
   const ingested = await ingestSources(config, {
     fs: io.fs,

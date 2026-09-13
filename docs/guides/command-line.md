@@ -29,7 +29,7 @@ concordance init            # writes concordance.yaml in the current folder
 concordance init my-wiki --templates
 ```
 
-Writes a minimal, commented `concordance.yaml` in the folder given (the current one by default) and refuses to overwrite one that exists (exit code 2, nothing written). `--templates` also copies the [note templates](../templates/README.md), one per type, under `templates/`; a template that already exists is kept and reported. The written configuration declares one local source, `./notes`, so that a first build works on a folder of markdown files before any repository is declared.
+Writes a minimal, commented `concordance.yaml` in the folder given (the current one by default) and refuses to overwrite one that exists (exit code 2; without `--templates` nothing is written then). `--templates` also copies the [note templates](../templates/README.md) under `templates/`: one per core type, then the template of every type contributed by the plugins declared in the `concordance.yaml` of the folder, the plugins being loaded for that (a plugin that cannot be loaded, or a type module that does not validate, stops the command); a template that already exists is kept and reported, the exit code being 2 whenever a file was kept. The written configuration declares one local source, `./notes`, so that a first build works on a folder of markdown files before any repository is declared.
 
 ## `validate-config`
 

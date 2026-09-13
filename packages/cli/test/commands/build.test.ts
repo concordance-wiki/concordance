@@ -769,6 +769,119 @@ describe("concordance build", () => {
       ]);
     });
 
+    /** The runbook module of a plugin or of a project folder, written under `root`. */
+    function runbookModule(io: RecordedIo, root: string): void {
+      io.fs.writeText(
+        `${root}/runbook/type.yaml`,
+        "group: quality\nglyph: runbook\nattributes:\n  trigger: { type: string }\ndisplay:\n  highlight: [trigger]\n",
+      );
+      io.fs.writeText(
+        `${root}/runbook/messages/en.json`,
+        JSON.stringify({ label: "Runbook", "attributes.trigger": "Trigger" }),
+      );
+      io.fs.writeText(`${root}/runbook/messages/fr.json`, JSON.stringify({ label: "Procédure" }));
+    }
+
+    /** A corpus with a runbook note, typed by a plugin module or a project module. */
+    function runbookCorpus(config: string): RecordedIo {
+      const io = linkedCorpus(config);
+      io.fs.writeText(
+        "/work/notes/rebuild.md",
+        "---\ntype: runbook\ntrigger: a red build\n---\n# Rebuild the site\n\nAfter [A](a.md) fails.\n",
+      );
+      return io;
+    }
+
+    const typesPlugin = definePlugin({
+      name: "types-plugin",
+      version: "0.0.0",
+      apiVersion: "1",
+      contributes: { types: [{ path: "./types/runbook" }] },
+    });
+
+    function withTypesPlugin(io: RecordedIo, path = "./types/runbook") {
+      return {
+        load: () =>
+          Promise.resolve(
+            path === "./types/runbook"
+              ? typesPlugin
+              : definePlugin({ ...typesPlugin, contributes: { types: [{ path }] } }),
+          ),
+        commandAvailable: () => Promise.resolve(true),
+        rootOf: () => "/plugins/types-plugin",
+        pluginFiles: io.fs,
+      };
+    }
+
+    it("merges the type modules of the plugins into the profile, so that their notes are typed and labelled", async () => {
+      const io = runbookCorpus(`${validConfig}plugins: [types-plugin]\n`);
+      runbookModule(io, "/plugins/types-plugin/types");
+      expect(await buildCommand([], io, withTypesPlugin(io))).toBe(0);
+      expect(io.stderr.filter((line) => line.includes("W-TYPE-UNKNOWN"))).toEqual([]);
+      const model = readModel(io);
+      expect(model.entities.find((entity) => entity.id === "notes/rebuild")?.type).toBe("runbook");
+      expect(model.build.profile_hash).not.toBe(fingerprintProfile(loadDefaultProfile()));
+      const page = io.fs.readText(`/work/dist/${pagePath("notes/rebuild")}`);
+      expect(page).toContain('<span class="badge">Runbook</span>');
+      expect(page).toContain("a red build");
+    });
+
+    it("stops with exit code 1 on an invalid plugin module, naming the plugin, the folder and the file", async () => {
+      const io = runbookCorpus(`${validConfig}plugins: [types-plugin]\n`);
+      io.fs.writeText("/plugins/types-plugin/types/runbook/type.yaml", "glyph: runbook\n");
+      expect(await buildCommand([], io, withTypesPlugin(io))).toBe(1);
+      expect(io.stderr).toEqual([
+        "error: plugin types-plugin, /plugins/types-plugin/types/runbook: type.yaml: group: required key is missing",
+        "build stopped: fix the profile first",
+      ]);
+    });
+
+    it("refuses a plugin module of a type the default profile declares", async () => {
+      const io = runbookCorpus(`${validConfig}plugins: [types-plugin]\n`);
+      io.fs.writeText("/plugins/types-plugin/types/screen/type.yaml", "group: application\n");
+      io.fs.writeText(
+        "/plugins/types-plugin/types/screen/messages/en.json",
+        JSON.stringify({ label: "Screen" }),
+      );
+      expect(await buildCommand([], io, withTypesPlugin(io, "./types/screen"))).toBe(1);
+      expect(io.stderr).toEqual([
+        'error: profile: types.screen: type is declared by the default profile; extend it through the project profile; received "/plugins/types-plugin/types/screen"',
+        "build stopped: fix the profile first",
+      ]);
+    });
+
+    it("merges the modules of the types_dir a project profile names, resolved against the profile file", async () => {
+      const io = runbookCorpus(`${validConfig}profile: config/profile.yaml\n`);
+      io.fs.writeText(
+        "/work/config/profile.yaml",
+        "types_dir: ../types\ntypes:\n  runbook: { glyph: procedure }\n",
+      );
+      runbookModule(io, "/work/types");
+      expect(await buildCommand([], io)).toBe(0);
+      expect(io.stderr.filter((line) => line.includes("W-TYPE-UNKNOWN"))).toEqual([]);
+      expect(readModel(io).entities.find((entity) => entity.id === "notes/rebuild")?.type).toBe(
+        "runbook",
+      );
+    });
+
+    it("stops with exit code 1 on a types_dir that is missing or holds an invalid module", async () => {
+      const missing = runbookCorpus(`${validConfig}profile: profile.yaml\n`);
+      missing.fs.writeText("/work/profile.yaml", "types_dir: ./types\n");
+      expect(await buildCommand([], missing)).toBe(1);
+      expect(missing.stderr).toEqual([
+        "/work/profile.yaml: types_dir: folder not found: /work/types",
+        "build stopped: fix the profile first",
+      ]);
+      const invalid = runbookCorpus(`${validConfig}profile: profile.yaml\n`);
+      invalid.fs.writeText("/work/profile.yaml", "types_dir: ./types\n");
+      invalid.fs.writeText("/work/types/runbook/type.yaml", "group: quality\n");
+      expect(await buildCommand([], invalid)).toBe(1);
+      expect(invalid.stderr).toEqual([
+        "error: /work/types: runbook: messages/en.json: file not found",
+        "build stopped: fix the profile first",
+      ]);
+    });
+
     it("lists the sources in the order ingestion gives them with their file count, git fields only when present", () => {
       const config = {
         version: 1 as const,

@@ -1,0 +1,19 @@
+# A runbook: a procedure for operating Concordance, the type the example plugin contributes.
+group: quality
+glyph: runbook
+attributes:
+  trigger: { type: string }
+  owner: { type: ref, target: role, relation: assigned_to, inverse: true }
+  steps: { type: list }
+  rules: { type: "ref[]", target: rule, relation: constrains, inverse: true }
+sections:
+  steps:
+    parse: ordered-list
+    produces: related
+  rules:
+    parse: bullet-list
+    produces: constrains
+    inverse: true
+display:
+  highlight: [trigger, owner]
+  neighbours_order: [rule, screen, batch, process]
