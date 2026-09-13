@@ -89,6 +89,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
   it("builds the viewer and its worker as separate bundles, announced in the summary with their size, and never loads them with the page", () => {
     const names = report.budget.islands.map((island) => island.name);
     expect(names).toEqual([
+      "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
@@ -104,7 +105,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(viewer?.bytes).toBeGreaterThan(300_000);
     expect(worker?.bytes).toBeGreaterThan(1_000_000);
     expect(opener?.bytes).toBeLessThan(3_000);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(8);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(9);
     // The page loads the opener as any island; the viewer bundles are only named in its props.
     const loaded = references(html).filter((reference) => reference.includes("/assets/"));
     expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(2);
@@ -186,6 +187,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
     const site = options({ fragments: withoutPreview });
     const report = await buildSite(site);
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",

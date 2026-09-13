@@ -11,6 +11,14 @@
     "defaultMessage": "Version",
     "description": "Label of the version attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# standard described} other {# standards described}}",
+    "description": "Number of standards a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A standard is an external norm the solution complies with.",
+    "description": "One sentence saying what a standard is, shown under the count of a category of standards."
+  },
   "label": {
     "defaultMessage": "Standard",
     "description": "Label of the standard type."

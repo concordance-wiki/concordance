@@ -4,6 +4,8 @@
   "attributes.schedule": "Planification",
   "attributes.window": "Fenêtre",
   "attributes.writes": "Écrit",
+  "counted": "{count, plural, one {# batch décrit} other {# batchs décrits}}",
+  "description": "Un batch est un traitement qui s'exécute à heure fixe, avec ce qu'il lit, ce qu'il écrit et ce dont il dépend.",
   "label": "Batch",
   "sections.reads": "Lit",
   "sections.writes": "Écrit"

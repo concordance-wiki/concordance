@@ -6,6 +6,7 @@ import { nodeFileSystem, type FileSystem, type UiComponent } from "@concordance-
 import { build } from "esbuild";
 
 import { byCodeUnit } from "../order.js";
+import { CATEGORY_ISLAND } from "../theme/default/category-island.js";
 import { DOCUMENT_VIEWER_ISLAND } from "../theme/default/document-viewer.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
@@ -53,6 +54,10 @@ export function islandOf(component: UiComponent): IslandEntry {
 export function defaultIslands(): IslandEntry[] {
   // No extension: the bundler picks the compiled module in a build and the source under test.
   return [
+    {
+      name: CATEGORY_ISLAND,
+      entry: fileURLToPath(new URL("./category-list.client", import.meta.url)),
+    },
     {
       name: DOCUMENT_VIEWER_ISLAND,
       entry: fileURLToPath(new URL("./document-viewer.client", import.meta.url)),

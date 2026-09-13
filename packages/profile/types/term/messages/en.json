@@ -15,6 +15,14 @@
     "defaultMessage": "Synonyms",
     "description": "Label of the synonyms attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# term described} other {# terms described}}",
+    "description": "Number of terms a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A term is a word of the business with its definition, its aliases and the words it relates to.",
+    "description": "One sentence saying what a term is, shown under the count of a category of terms."
+  },
   "label": {
     "defaultMessage": "Term",
     "description": "Label of the term type."

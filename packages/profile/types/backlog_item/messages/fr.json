@@ -5,5 +5,7 @@
   "attributes.status": "Statut",
   "attributes.tool": "Outil",
   "attributes.work_package": "Lot",
+  "counted": "{count, plural, one {# item de backlog décrit} other {# items de backlog décrits}}",
+  "description": "Un item de backlog est un travail en attente, avec ce qu'il change.",
   "label": "Item de backlog"
 }

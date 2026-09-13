@@ -3,6 +3,14 @@
     "defaultMessage": "Parent",
     "description": "Label of the parent attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# domain described} other {# domains described}}",
+    "description": "Number of domains a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A domain is an area of the business that groups the objects, rules and processes about one subject.",
+    "description": "One sentence saying what a domain is, shown under the count of a category of domains."
+  },
   "label": {
     "defaultMessage": "Domain",
     "description": "Label of the domain type."

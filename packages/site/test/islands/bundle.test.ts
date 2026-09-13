@@ -16,9 +16,10 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
+  it("declares the category list, document viewer, mentions panel, mode switch, search and trail islands with their entries next to the bundler, the search one classic, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
+      "category-list",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
@@ -26,14 +27,16 @@ describe("defaultIslands", () => {
       "trail",
       "contract-viewer",
     ]);
-    expect(islands[0]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
-    expect(islands[1]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
-    expect(islands[2]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
-    expect(islands[3]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands[4]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
-    expect(islands[5]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
-    expect(islands[5]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
+    expect(islands[0]?.entry.endsWith("/src/islands/category-list.client")).toBe(true);
+    expect(islands[1]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
+    expect(islands[2]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
+    expect(islands[3]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
+    expect(islands[4]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands[5]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
+    expect(islands[6]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
+    expect(islands[6]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
     expect(islands.map((island) => island.classic)).toEqual([
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -102,9 +105,10 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(6);
+    expect(bundles).toHaveLength(7);
     const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
     expect(bundles.map((candidate) => candidate.name)).toEqual([
+      "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",

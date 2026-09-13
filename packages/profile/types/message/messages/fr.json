@@ -2,5 +2,7 @@
   "attributes.carries": "Porte",
   "attributes.objects": "Objets",
   "attributes.schema": "Schéma",
+  "counted": "{count, plural, one {# message décrit} other {# messages décrits}}",
+  "description": "Un message est une information échangée entre deux parties du système, avec son format.",
   "label": "Message"
 }

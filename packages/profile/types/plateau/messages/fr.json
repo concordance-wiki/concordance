@@ -1,5 +1,7 @@
 {
   "attributes.applications": "Applications",
   "attributes.date": "Date",
+  "counted": "{count, plural, one {# plateau décrit} other {# plateaux décrits}}",
+  "description": "Un plateau est un état stable de l'architecture entre deux transitions.",
   "label": "Plateau"
 }

@@ -11,6 +11,14 @@
     "defaultMessage": "Triggers",
     "description": "Label of the triggers attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# process described} other {# processes described}}",
+    "description": "Number of processes a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A process is a sequence of steps the business or the tool follows, with the roles, screens and rules each step involves.",
+    "description": "One sentence saying what a process is, shown under the count of a category of processes."
+  },
   "label": {
     "defaultMessage": "Process",
     "description": "Label of the process type."

@@ -75,6 +75,25 @@ function inlineMentions(html: string): number {
 /** The entities of the fixture model that another note cites: those whose mentions fragment the build writes. */
 const cited = ["framing/vision", "glossary/keyword-page", "glossary/page"];
 
+/**
+ * The pages of the lists of the folders at the top of the fixture model: the whole list by
+ * title, then the one value of the highlighted attribute of each folder, the sort by links
+ * on both; the value is written as the frontmatter has it, the model of the tests carrying no
+ * frontmatter link.
+ */
+function categoryPages(folders: readonly string[]): string[] {
+  const values: Record<string, string> = {
+    "specs/rules": "severity-error",
+    "specs/screens": "roles-roles-reader",
+  };
+  return folders.flatMap((folder) => [
+    `${folder}/index.html`,
+    `${folder}/-/${values[folder] ?? ""}/index.html`,
+    `${folder}/-/links/index.html`,
+    `${folder}/-/${values[folder] ?? ""}-links/index.html`,
+  ]);
+}
+
 describe("concordance render reads model.json and writes dist/: one HTML page per entity and per keyword, the JSON fragments, the search index, the previews and the static assets", () => {
   let fileSystem: ReturnType<typeof memoryFileSystem>;
   let report: SiteReport;
@@ -86,6 +105,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
   it("writes the home, the index, the to-do page, the search page, the spaces page and one page per space, one page per entity and per keyword, the search index and the assets", () => {
     const entities = model().entities.map((entity) => pagePath(entity.id));
     const spaces = ["framing", "glossary", "specs"].map(spacePagePath);
+    const categories = categoryPages(["specs/rules", "specs/screens"]);
     const index = fileSystem.listFiles("/dist").filter((file) => /^search\/.*\.js$/.test(file));
     expect(index).toContain(searchFilePath(SEARCH_META));
     expect(index.length).toBeGreaterThan(10);
@@ -98,6 +118,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         SPACES_PAGE,
         ...spaces,
         ...entities,
+        ...categories,
         ...index,
         ...cited.map(mentionsFragmentPath),
         "assets/site.css",
@@ -108,9 +129,19 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
 
     expect(report.files).toEqual(fileSystem.listFiles("/dist"));
     expect(report.pages.map((page) => page.path)).toEqual(
-      [HOME_PAGE, ...entities, ...spaces, INDEX_PAGE, SEARCH_PAGE, SPACES_PAGE, TODO_PAGE].sort(),
+      [
+        HOME_PAGE,
+        ...entities,
+        ...spaces,
+        ...categories,
+        INDEX_PAGE,
+        SEARCH_PAGE,
+        SPACES_PAGE,
+        TODO_PAGE,
+      ].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
@@ -553,12 +584,12 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.maxPageBytes).toBe(SITE_PAGE_BUDGET);
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.summary[0]).toBe("site: 15 pages written to /dist");
+    expect(report.summary[0]).toBe("site: 23 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(6);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(7);
     expect(
-      report.summary.some((line) => /^pages: 15, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
+      report.summary.some((line) => /^pages: 23, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
@@ -576,6 +607,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
       },
     });
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
@@ -834,6 +866,7 @@ describe("siteDocuments", () => {
 
   it("renders the same documents as the build, in a fixed order, from the bundles it is given", () => {
     const { documents, search } = siteDocuments(options(), bundles);
+    const categories = categoryPages(["specs/rules", "specs/screens"]);
     const index = documents.filter(
       (document) => document.path.startsWith("search/") && document.path.endsWith(".js"),
     );
@@ -845,6 +878,7 @@ describe("siteDocuments", () => {
       ...["framing", "glossary", "specs"].map(spacePagePath),
       SEARCH_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),
+      ...categories,
       ...index.map((document) => document.path),
       ...cited.map(mentionsFragmentPath),
     ]);

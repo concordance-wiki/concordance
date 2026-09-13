@@ -1,4 +1,6 @@
 {
   "attributes.origin": "Origine",
+  "counted": "{count, plural, one {# contrainte décrite} other {# contraintes décrites}}",
+  "description": "Une contrainte est une limite que la solution doit respecter, imposée de l'extérieur.",
   "label": "Contrainte"
 }

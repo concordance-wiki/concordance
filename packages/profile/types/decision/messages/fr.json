@@ -4,6 +4,8 @@
   "attributes.nature": "Nature",
   "attributes.status": "Statut",
   "attributes.supersedes": "Remplace",
+  "counted": "{count, plural, one {# décision décrite} other {# décisions décrites}}",
+  "description": "Une décision est un choix fait pour le projet, avec son contexte, ses options et ce qu'elle affecte.",
   "label": "Décision",
   "sections.affects": "Affecte"
 }

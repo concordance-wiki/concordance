@@ -7,6 +7,14 @@
     "defaultMessage": "To",
     "description": "Label of the to attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# gap described} other {# gaps described}}",
+    "description": "Number of gaps a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A gap is a difference between what exists and what is wanted, to be closed by a work package.",
+    "description": "One sentence saying what a gap is, shown under the count of a category of gaps."
+  },
   "label": {
     "defaultMessage": "Gap",
     "description": "Label of the gap type."

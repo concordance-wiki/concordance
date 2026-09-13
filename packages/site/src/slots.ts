@@ -15,6 +15,7 @@ export const SLOT_NAMES = [
   "Todo",
   "Spaces",
   "Space",
+  "CategoryList",
 ] as const;
 
 export type SlotName = (typeof SLOT_NAMES)[number];
@@ -116,6 +117,12 @@ export interface SearchField {
   suggestions?: SuggestionLabels;
   /** The space the field is confined to: the form submits it as the source facet, and the live results keep to it. */
   source?: string;
+  /**
+   * Facet values the form submits with the query, as hidden fields, by parameter name, which the
+   * live results keep to as well: the space and the type of a category list, so that the results
+   * open on that category.
+   */
+  filters?: Readonly<Record<string, string>>;
 }
 
 /** A message by plural category of the locale, `#` standing for the number, as the island words a count. */
@@ -402,13 +409,13 @@ export interface BreadcrumbItem {
 /** A node of the tree of the current space: a folder with its page count, a page, or the pages a long folder leaves out. */
 export interface SpaceNode {
   label: string;
-  /** Where a page leads; a folder has none. */
+  /** Where a page leads; where the list of a folder opens, for a folder at the top of the space; a deeper folder has none. */
   href?: string;
-  /** How many pages a folder holds. */
+  /** How many pages a folder holds: what tells a folder from a page. */
   count?: number;
   /** The folders on the way to the current page open, their contents listed; a closed folder shows its count alone. */
   children?: SpaceNode[];
-  /** The page of the tree that is the current one. */
+  /** The page of the tree that is the current one, or the folder whose list is the current page. */
   current?: boolean;
   /** A node standing for the pages of a long folder the tree leaves out, its label saying how many. */
   omitted?: boolean;
@@ -1171,6 +1178,103 @@ export interface SpaceProps {
   labels?: Partial<SpaceLabels>;
 }
 
+/** A row of a category list: a page of the folder, the value of the highlighted attribute, its first line and how many pages relate to it. */
+export interface CategoryRow {
+  title: string;
+  href: string;
+  /** The values of the highlighted attribute, linked when they name a page; empty when the page sets none. */
+  values: AttributeValue[];
+  /** The keys of those values, what the attribute filter matches; empty with the values. */
+  keys: string[];
+  /** The first line of the page, its summary; absent when the note has none. */
+  summary?: string;
+  /** How many pages relate to the page: its one-hop neighbours in the model. */
+  links: number;
+}
+
+/** What a category list is ordered by: the title, or the number of related pages, most first. */
+export type CategorySort = "title" | "links";
+
+/** An entry of a selector of the list: a link to the pre-rendered variant, or a choice the island applies in place when it has no address. */
+export interface CategoryChoice {
+  label: string;
+  /** The key of the choice: the sort, or the key of an attribute value; absent for the entry lifting the filter. */
+  key?: string;
+  href?: string;
+  active: boolean;
+}
+
+/** The attribute filter of the list: the first highlighted attribute of the type, its values as choices. */
+export interface CategoryFilter {
+  /** The label of the attribute, heading the selector and the column. */
+  label: string;
+  /** The entry lifting the filter first, then every distinct value in collation order. */
+  choices: CategoryChoice[];
+}
+
+/** A page of the list among its pages of twenty, the current one without an address. */
+export interface CategoryPage {
+  number: number;
+  href?: string;
+}
+
+/** The strings the list adds itself, in the site language; the theme's own English when absent. */
+export interface CategoryListLabels {
+  /** Accessible name of the tree of the space. */
+  spaceTree: string;
+  /** Accessible name of the breadcrumb. */
+  breadcrumb: string;
+  /** Accessible name of the sort selector. */
+  sort: string;
+  /** The two entries of the sort selector. */
+  sortTitle: string;
+  sortLinks: string;
+  /** The entry of the attribute selector lifting the filter. */
+  all: string;
+  /** Heading of the summary column. */
+  firstLine: string;
+  /** Heading of the column counting the related pages. */
+  links: string;
+  /** Accessible name of the page links. */
+  pagination: string;
+  /** "{shown} screens of {total} — pagination by twenty", the two placeholders replaced by the list. */
+  shownOf: string;
+  /** The note under the list on what the links column counts. */
+  note: string;
+}
+
+export interface CategoryListProps {
+  /** The folder name, capitalised. */
+  title: string;
+  /** The space of the folder and its tree: the folders of the space with their counts, this one marked. */
+  space: SpaceTree;
+  /** Spaces › space › folder. */
+  breadcrumb: BreadcrumbItem[];
+  /** "64 screens described. A screen is a page of the application, with what it shows and what it allows.", or "64 pages." for a folder mapping to no type. */
+  lead: string;
+  /** Heading of the first column: the label of the type, or "Page". */
+  unit: string;
+  /** The attribute filter; absent when the folder maps to no type or the type highlights no attribute. */
+  filter?: CategoryFilter;
+  /** The sort of the list, and the two choices of its selector. */
+  sort: CategorySort;
+  sorts: CategoryChoice[];
+  /** The rows of the page of the list shown; every row of the list when the island sorts and filters. */
+  rows: CategoryRow[];
+  /** The current page among the pages of the list. */
+  page: number;
+  pages: CategoryPage[];
+  /** How many rows the whole list holds under the filter; the rows given when absent. */
+  total?: number;
+  /**
+   * Whether the sort and the filter are applied in place by the island, which then receives every
+   * row; the served page shows the rows of `page` in the order of `sort`, and the selectors only
+   * once the island runs. Otherwise every choice links to a pre-rendered variant.
+   */
+  island?: boolean;
+  labels?: Partial<CategoryListLabels>;
+}
+
 /** The view model of every slot, the contract between the site generator and a theme. */
 export interface SlotProps {
   Shell: ShellProps;
@@ -1186,4 +1290,5 @@ export interface SlotProps {
   Todo: TodoProps;
   Spaces: SpacesProps;
   Space: SpaceProps;
+  CategoryList: CategoryListProps;
 }

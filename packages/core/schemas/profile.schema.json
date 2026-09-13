@@ -66,6 +66,14 @@
             "$ref": "#/$defs/label",
             "description": "Display label of the type, per interface language."
           },
+          "description": {
+            "$ref": "#/$defs/label",
+            "description": "One sentence saying what an entity of the type is, per interface language; the list of a category shows it under its count."
+          },
+          "counted": {
+            "$ref": "#/$defs/label",
+            "description": "The count of a category of the type as an ICU message with a count argument, per interface language: \"{count, plural, one {# screen described} other {# screens described}}\"."
+          },
           "group": {
             "description": "Slug of the group the type belongs to.",
             "type": "string",

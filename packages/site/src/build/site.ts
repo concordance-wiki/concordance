@@ -36,6 +36,7 @@ import {
   type PageReport,
   type WrittenDocument,
 } from "./assemble.js";
+import { categoryDocumentsOf, categorySearchField, listedCategoriesOf } from "./category.js";
 import { message, siteContext, typeLabel, type SiteContext, type SiteNames } from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf, type ViewerBundles } from "./entity-page.js";
@@ -160,6 +161,16 @@ interface PageChrome {
   space?: SpaceTree;
   /** The space a space page confines the search field to. */
   searchSource?: string;
+  /** The search field of the page when it is not the one of every page: the field of a category list. */
+  search?: (field: SearchField) => SearchField;
+}
+
+/** What a page tells its chrome beyond the site: its place in the trail, its space, its search field. */
+interface PageExtras {
+  current?: TrailPage;
+  space?: SpaceTree;
+  searchSource?: string;
+  search?: (field: SearchField) => SearchField;
 }
 
 /** The header and footer of one page, every href relative to it. */
@@ -167,13 +178,14 @@ function chromeFor(
   input: SiteInput,
   context: SiteContext,
   page: string,
-  { todoCount, spaces, current, space, searchSource }: PageChrome,
+  { todoCount, spaces, current, space, searchSource, search }: PageChrome,
 ): SiteChrome {
   const chrome = themeChrome(input, assetsBaseOf(page));
+  const field = searchFieldOf(context, page, searchSource);
   const header: SlotProps["Header"] = {
     siteTitle: chrome.siteTitle,
     homeHref: relativeHref(page, HOME_PAGE),
-    search: searchFieldOf(context, page, searchSource),
+    search: search === undefined ? field : search(field),
     spaces: {
       label: message(context, "site.spaces"),
       href: relativeHref(page, SPACES_PAGE),
@@ -308,17 +320,9 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     page: string,
     title: string,
     locale: string,
-    current?: TrailPage,
-    space?: SpaceTree,
-    searchSource?: string,
+    extras: PageExtras = {},
   ): RenderOptions => {
-    const chrome = chromeFor(input, context, page, {
-      todoCount,
-      spaces,
-      ...(current === undefined ? {} : { current }),
-      ...(space === undefined ? {} : { space }),
-      ...(searchSource === undefined ? {} : { searchSource }),
-    });
+    const chrome = chromeFor(input, context, page, { todoCount, spaces, ...extras });
     return {
       theme: input.theme,
       locale,
@@ -336,11 +340,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     body: JSX.Element,
     title: string,
     locale: string,
-    current?: TrailPage,
-    space?: SpaceTree,
+    extras: PageExtras = {},
   ): WrittenDocument => ({
     path: page,
-    content: renderDocument(body, optionsFor(page, title, locale, current, space)),
+    content: renderDocument(body, optionsFor(page, title, locale, extras)),
   });
   const render = <S extends PageSlot>(
     page: string,
@@ -348,10 +351,9 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     props: SlotProps[S],
     title: string,
     locale: string,
-    current?: TrailPage,
-    space?: SpaceTree,
+    extras: PageExtras = {},
   ): WrittenDocument =>
-    document(page, h(input.theme.components[slot], props), title, locale, current, space);
+    document(page, h(input.theme.components[slot], props), title, locale, extras);
   const mentionsOptions =
     input.mentionsInline === undefined ? {} : { mentionsInline: input.mentionsInline };
   const viewer = viewerBundlesOf(islands);
@@ -361,7 +363,10 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     // The drawer of the page carries the same tree as its left column.
     if (entity.keyword === true) {
       const props = keywordPageOf(context, entity, mentionsOptions);
-      return render(page, "KeywordPage", props, entity.title, entity.locale, current, props.space);
+      return render(page, "KeywordPage", props, entity.title, entity.locale, {
+        current,
+        ...(props.space === undefined ? {} : { space: props.space }),
+      });
     }
     const props = entityPageOf(context, entity, {
       ...mentionsOptions,
@@ -372,10 +377,18 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       h(pageComponentFor(input.theme, entity.type), props),
       entity.title,
       entity.locale,
-      current,
-      props.space,
+      { current, ...(props.space === undefined ? {} : { space: props.space }) },
     );
   };
+  // The list of every folder at the top of a space, in every state a reader can reach by a link.
+  const categoryPages = listedCategoriesOf(context).flatMap((category) =>
+    categoryDocumentsOf(context, category).map(({ path, props }) =>
+      render(path, "CategoryList", props, props.title, input.locale, {
+        space: props.space,
+        search: (field) => categorySearchField(context, field, category),
+      }),
+    ),
+  );
   // An entity without a mention gets no fragment.
   const mentionsFragment = (entity: Entity): WrittenDocument[] => {
     const fragment = mentionsFragmentOf(context, entity);
@@ -409,7 +422,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       path: page,
       content: renderDocument(
         h(input.theme.components.Space, spacePageOf(context, source)),
-        optionsFor(page, source, input.locale, undefined, undefined, source),
+        optionsFor(page, source, input.locale, { searchSource: source }),
       ),
     };
   };
@@ -463,6 +476,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       ...spaces.map((space) => spacePage(space.name)),
       searchPage,
       ...input.model.entities.map(entityPage),
+      ...categoryPages,
       ...redirects,
       ...searchIndex.documents,
       ...input.model.entities.flatMap(mentionsFragment),

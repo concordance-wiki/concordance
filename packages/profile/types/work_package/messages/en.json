@@ -11,6 +11,14 @@
     "defaultMessage": "Start",
     "description": "Label of the start attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# work package described} other {# work packages described}}",
+    "description": "Number of work packages a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A work package is a bounded set of work that closes gaps and moves the project to its next plateau.",
+    "description": "One sentence saying what a work package is, shown under the count of a category of work packages."
+  },
   "label": {
     "defaultMessage": "Work package",
     "description": "Label of the work_package type."

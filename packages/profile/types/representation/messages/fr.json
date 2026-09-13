@@ -1,5 +1,7 @@
 {
   "attributes.channel": "Canal",
   "attributes.format": "Format",
+  "counted": "{count, plural, one {# représentation décrite} other {# représentations décrites}}",
+  "description": "Une représentation est une forme d'une chose que la documentation conserve : une note, un diaporama, une transcription.",
   "label": "Représentation"
 }

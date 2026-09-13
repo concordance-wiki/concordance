@@ -2,7 +2,13 @@ import { readdirSync, readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { CatalogueError, formatMessage, loadCatalogue, resolveLanguage } from "../src/catalogue.js";
+import {
+  CatalogueError,
+  formatMessage,
+  formatText,
+  loadCatalogue,
+  resolveLanguage,
+} from "../src/catalogue.js";
 import { messageIds } from "../src/ids.js";
 import { shipped } from "../src/shipped.js";
 
@@ -146,6 +152,22 @@ describe("formatMessage", () => {
     expect(formatMessage(en, "search.results", { count: 1 })).toBe("1 result, most cited first");
     expect(formatMessage(en, "search.results", { count: 2 })).toBe("2 results, most cited first");
     expect(formatMessage(en, "search.noResult")).toBe("No result");
+  });
+});
+
+describe("formatText", () => {
+  it("resolves a message outside the catalogues with the locale of the catalogue", () => {
+    const en = loadCatalogue("en");
+    const fr = loadCatalogue("fr");
+    const message = "{count, plural, one {# screen described} other {# screens described}}";
+    expect(formatText(en, message, { count: 1 })).toBe("1 screen described");
+    expect(formatText(en, message, { count: 1234 })).toBe("1,234 screens described");
+    expect(
+      formatText(fr, "{count, plural, one {# écran décrit} other {# écrans décrits}}", {
+        count: 1234,
+      }),
+    ).toBe("1\u202f234 écrans décrits");
+    expect(formatText(en, "No argument")).toBe("No argument");
   });
 });
 

@@ -38,6 +38,12 @@ common_attributes:
 types:
   actor:
     label: { en: Actor, fr: Acteur }
+    description:
+      en: An actor is a person, a team or a system that takes part in a process from outside the application.
+      fr: Un acteur est une personne, une équipe ou un système qui prend part à un processus depuis l'extérieur de l'application.
+    counted:
+      en: "{count, plural, one {# actor described} other {# actors described}}"
+      fr: "{count, plural, one {# acteur décrit} other {# acteurs décrits}}"
     group: business
     status: planned
     glyph: actor
@@ -46,6 +52,12 @@ types:
 
   api:
     label: { en: API, fr: API }
+    description:
+      en: An API is a service the application exposes, with the operations its contract declares.
+      fr: Une API est un service que l'application expose, avec les opérations que son contrat déclare.
+    counted:
+      en: "{count, plural, one {# API described} other {# APIs described}}"
+      fr: "{count, plural, one {# API décrite} other {# API décrites}}"
     group: application
     status: active
     glyph: api
@@ -71,6 +83,12 @@ types:
 
   application:
     label: { en: Application, fr: Application }
+    description:
+      en: An application is a system the documentation describes, which files its screens, APIs and batches under it.
+      fr: Une application est un système que la documentation décrit, qui range sous elle ses écrans, ses API et ses batchs.
+    counted:
+      en: "{count, plural, one {# application described} other {# applications described}}"
+      fr: "{count, plural, one {# application décrite} other {# applications décrites}}"
     group: container
     status: active
     glyph: application
@@ -85,6 +103,12 @@ types:
 
   application_event:
     label: { en: Application event, fr: Événement applicatif }
+    description:
+      en: An application event is something that happens inside the application and that other parts react to.
+      fr: Un événement applicatif est quelque chose qui se produit dans l'application et auquel d'autres parties réagissent.
+    counted:
+      en: "{count, plural, one {# application event described} other {# application events described}}"
+      fr: "{count, plural, one {# événement applicatif décrit} other {# événements applicatifs décrits}}"
     group: application
     status: planned
     glyph: event
@@ -93,6 +117,12 @@ types:
 
   backlog_item:
     label: { en: Backlog item, fr: Item de backlog }
+    description:
+      en: A backlog item is a piece of work waiting to be done, with what it changes.
+      fr: Un item de backlog est un travail en attente, avec ce qu'il change.
+    counted:
+      en: "{count, plural, one {# backlog item described} other {# backlog items described}}"
+      fr: "{count, plural, one {# item de backlog décrit} other {# items de backlog décrits}}"
     group: implementation
     status: planned
     glyph: item
@@ -106,6 +136,12 @@ types:
 
   batch:
     label: { en: Batch, fr: Batch }
+    description:
+      en: A batch is a treatment that runs on a schedule, with what it reads, what it writes and what it depends on.
+      fr: Un batch est un traitement qui s'exécute à heure fixe, avec ce qu'il lit, ce qu'il écrit et ce dont il dépend.
+    counted:
+      en: "{count, plural, one {# batch described} other {# batches described}}"
+      fr: "{count, plural, one {# batch décrit} other {# batchs décrits}}"
     group: application
     status: active
     glyph: batch
@@ -132,6 +168,12 @@ types:
 
   business_event:
     label: { en: Business event, fr: Événement métier }
+    description:
+      en: A business event is something that happens in the business and that a process answers.
+      fr: Un événement métier est quelque chose qui se produit dans le métier et auquel un processus répond.
+    counted:
+      en: "{count, plural, one {# business event described} other {# business events described}}"
+      fr: "{count, plural, one {# événement métier décrit} other {# événements métier décrits}}"
     group: business
     status: planned
     glyph: event
@@ -140,6 +182,12 @@ types:
 
   business_object:
     label: { en: Business object, fr: Objet métier }
+    description:
+      en: A business object is a thing the business names and handles, with its attributes and its lifecycle.
+      fr: Un objet métier est une chose que le métier nomme et manipule, avec ses attributs et son cycle de vie.
+    counted:
+      en: "{count, plural, one {# business object described} other {# business objects described}}"
+      fr: "{count, plural, one {# objet métier décrit} other {# objets métier décrits}}"
     group: business
     status: active
     glyph: object
@@ -152,12 +200,24 @@ types:
 
   business_service:
     label: { en: Business service, fr: Service métier }
+    description:
+      en: A business service is what the business offers to its users, delivered by processes and applications.
+      fr: Un service métier est ce que le métier offre à ses utilisateurs, rendu par des processus et des applications.
+    counted:
+      en: "{count, plural, one {# business service described} other {# business services described}}"
+      fr: "{count, plural, one {# service métier décrit} other {# services métier décrits}}"
     group: business
     status: planned
     glyph: service
 
   channel:
     label: { en: Channel, fr: Canal }
+    description:
+      en: "A channel is a way users reach the application: a website, a counter, a letter."
+      fr: "Un canal est un moyen par lequel les utilisateurs atteignent l'application : un site, un guichet, un courrier."
+    counted:
+      en: "{count, plural, one {# channel described} other {# channels described}}"
+      fr: "{count, plural, one {# canal décrit} other {# canaux décrits}}"
     group: application
     status: planned
     glyph: channel
@@ -168,6 +228,12 @@ types:
 
   constraint:
     label: { en: Constraint, fr: Contrainte }
+    description:
+      en: A constraint is a limit the solution must respect, imposed from outside it.
+      fr: Une contrainte est une limite que la solution doit respecter, imposée de l'extérieur.
+    counted:
+      en: "{count, plural, one {# constraint described} other {# constraints described}}"
+      fr: "{count, plural, one {# contrainte décrite} other {# contraintes décrites}}"
     group: motivation
     status: planned
     glyph: constraint
@@ -176,6 +242,12 @@ types:
 
   data_object:
     label: { en: Data object, fr: Objet de données }
+    description:
+      en: A data object is a table or a record as it is stored, with its columns and their meaning.
+      fr: Un objet de données est une table ou un enregistrement tel qu'il est stocké, avec ses colonnes et leur sens.
+    counted:
+      en: "{count, plural, one {# data object described} other {# data objects described}}"
+      fr: "{count, plural, one {# objet de données décrit} other {# objets de données décrits}}"
     group: application
     status: active
     glyph: table
@@ -189,6 +261,12 @@ types:
 
   decision:
     label: { en: Decision, fr: Décision }
+    description:
+      en: A decision is a choice made for the project, with its context, its options and what it affects.
+      fr: Une décision est un choix fait pour le projet, avec son contexte, ses options et ce qu'elle affecte.
+    counted:
+      en: "{count, plural, one {# decision described} other {# decisions described}}"
+      fr: "{count, plural, one {# décision décrite} other {# décisions décrites}}"
     group: motivation
     status: active
     glyph: decision
@@ -209,6 +287,12 @@ types:
 
   document:
     label: { en: Document, fr: Document }
+    description:
+      en: "A document is a file that frames the project without describing one of its parts: a vision, a roadmap, a note."
+      fr: "Un document est un fichier qui cadre le projet sans en décrire une partie : une vision, une feuille de route, une note."
+    counted:
+      en: "{count, plural, one {# document described} other {# documents described}}"
+      fr: "{count, plural, one {# document décrit} other {# documents décrits}}"
     group: raw
     status: active
     glyph: document
@@ -227,6 +311,12 @@ types:
 
   domain:
     label: { en: Domain, fr: Domaine }
+    description:
+      en: A domain is an area of the business that groups the objects, rules and processes about one subject.
+      fr: Un domaine est une zone du métier qui regroupe les objets, les règles et les processus d'un même sujet.
+    counted:
+      en: "{count, plural, one {# domain described} other {# domains described}}"
+      fr: "{count, plural, one {# domaine décrit} other {# domaines décrits}}"
     group: container
     status: active
     glyph: domain
@@ -237,6 +327,12 @@ types:
 
   endpoint:
     label: { en: Operation, fr: Opération }
+    description:
+      en: An operation is one call of an API, with its parameters and its responses as the contract declares them.
+      fr: Une opération est un appel d'une API, avec ses paramètres et ses réponses tels que le contrat les déclare.
+    counted:
+      en: "{count, plural, one {# operation described} other {# operations described}}"
+      fr: "{count, plural, one {# opération décrite} other {# opérations décrites}}"
     group: application
     status: active
     glyph: endpoint
@@ -265,6 +361,12 @@ types:
 
   function:
     label: { en: Application function, fr: Fonction applicative }
+    description:
+      en: An application function is a capability the application provides, whatever the screen or API that exposes it.
+      fr: Une fonction applicative est une capacité que l'application fournit, quel que soit l'écran ou l'API qui l'expose.
+    counted:
+      en: "{count, plural, one {# application function described} other {# application functions described}}"
+      fr: "{count, plural, one {# fonction applicative décrite} other {# fonctions applicatives décrites}}"
     group: application
     status: planned
     glyph: function
@@ -274,6 +376,12 @@ types:
 
   gap:
     label: { en: Gap, fr: Écart }
+    description:
+      en: A gap is a difference between what exists and what is wanted, to be closed by a work package.
+      fr: Un écart est une différence entre ce qui existe et ce qui est voulu, à combler par un lot.
+    counted:
+      en: "{count, plural, one {# gap described} other {# gaps described}}"
+      fr: "{count, plural, one {# écart décrit} other {# écarts décrits}}"
     group: implementation
     status: planned
     glyph: gap
@@ -283,12 +391,24 @@ types:
 
   goal:
     label: { en: Goal, fr: Objectif }
+    description:
+      en: A goal is an outcome the project or the business aims at, which principles and requirements serve.
+      fr: Un objectif est un résultat que le projet ou le métier vise, que servent les principes et les exigences.
+    counted:
+      en: "{count, plural, one {# goal described} other {# goals described}}"
+      fr: "{count, plural, one {# objectif décrit} other {# objectifs décrits}}"
     group: motivation
     status: planned
     glyph: goal
 
   meeting:
     label: { en: Meeting, fr: Réunion }
+    description:
+      en: A meeting is a session whose notes or transcript the documentation keeps, with its participants and what was decided.
+      fr: Une réunion est une séance dont la documentation garde les notes ou la transcription, avec ses participants et ce qui a été décidé.
+    counted:
+      en: "{count, plural, one {# meeting described} other {# meetings described}}"
+      fr: "{count, plural, one {# réunion décrite} other {# réunions décrites}}"
     group: raw
     status: active
     glyph: meeting
@@ -304,6 +424,12 @@ types:
 
   message:
     label: { en: Message, fr: Message }
+    description:
+      en: A message is a piece of information exchanged between two parts of the system, with its format.
+      fr: Un message est une information échangée entre deux parties du système, avec son format.
+    counted:
+      en: "{count, plural, one {# message described} other {# messages described}}"
+      fr: "{count, plural, one {# message décrit} other {# messages décrits}}"
     group: application
     status: planned
     glyph: message
@@ -314,6 +440,12 @@ types:
 
   milestone:
     label: { en: Milestone, fr: Jalon }
+    description:
+      en: A milestone is a date the project commits to, with what is delivered by then.
+      fr: Un jalon est une date à laquelle le projet s'engage, avec ce qui est livré à cette échéance.
+    counted:
+      en: "{count, plural, one {# milestone described} other {# milestones described}}"
+      fr: "{count, plural, one {# jalon décrit} other {# jalons décrits}}"
     group: implementation
     status: planned
     glyph: milestone
@@ -322,6 +454,12 @@ types:
 
   plateau:
     label: { en: Plateau, fr: Plateau }
+    description:
+      en: A plateau is a stable state of the architecture between two transitions.
+      fr: Un plateau est un état stable de l'architecture entre deux transitions.
+    counted:
+      en: "{count, plural, one {# plateau described} other {# plateaus described}}"
+      fr: "{count, plural, one {# plateau décrit} other {# plateaux décrits}}"
     group: implementation
     status: planned
     glyph: plateau
@@ -331,12 +469,24 @@ types:
 
   principle:
     label: { en: Principle, fr: Principe }
+    description:
+      en: A principle is a rule of conduct the project follows in its choices, which decisions refer to.
+      fr: Un principe est une règle de conduite que le projet suit dans ses choix, à laquelle les décisions se réfèrent.
+    counted:
+      en: "{count, plural, one {# principle described} other {# principles described}}"
+      fr: "{count, plural, one {# principe décrit} other {# principes décrits}}"
     group: motivation
     status: planned
     glyph: principle
 
   process:
     label: { en: Process, fr: Processus }
+    description:
+      en: A process is a sequence of steps the business or the tool follows, with the roles, screens and rules each step involves.
+      fr: Un processus est une suite d'étapes que le métier ou l'outil suit, avec les rôles, les écrans et les règles que chaque étape engage.
+    counted:
+      en: "{count, plural, one {# process described} other {# processes described}}"
+      fr: "{count, plural, one {# processus décrit} other {# processus décrits}}"
     group: business
     status: active
     glyph: process
@@ -355,6 +505,12 @@ types:
 
   representation:
     label: { en: Representation, fr: Représentation }
+    description:
+      en: "A representation is one form of a thing the documentation keeps: a note, a deck, a transcript."
+      fr: "Une représentation est une forme d'une chose que la documentation conserve : une note, un diaporama, une transcription."
+    counted:
+      en: "{count, plural, one {# representation described} other {# representations described}}"
+      fr: "{count, plural, one {# représentation décrite} other {# représentations décrites}}"
     group: business
     status: planned
     glyph: document
@@ -364,6 +520,12 @@ types:
 
   requirement:
     label: { en: Requirement, fr: Exigence }
+    description:
+      en: A requirement is something the solution must do or be, stated so that it can be checked.
+      fr: Une exigence est quelque chose que la solution doit faire ou être, formulé pour pouvoir être vérifié.
+    counted:
+      en: "{count, plural, one {# requirement described} other {# requirements described}}"
+      fr: "{count, plural, one {# exigence décrite} other {# exigences décrites}}"
     group: motivation
     status: planned
     glyph: requirement
@@ -373,6 +535,12 @@ types:
 
   role:
     label: { en: Role, fr: Rôle }
+    description:
+      en: A role is a kind of user, with the screens it uses and the processes it takes part in.
+      fr: Un rôle est un type d'utilisateur, avec les écrans qu'il utilise et les processus auxquels il prend part.
+    counted:
+      en: "{count, plural, one {# role described} other {# roles described}}"
+      fr: "{count, plural, one {# rôle décrit} other {# rôles décrits}}"
     group: business
     status: active
     glyph: role
@@ -384,6 +552,12 @@ types:
 
   rule:
     label: { en: Business rule, fr: Règle de gestion }
+    description:
+      en: A business rule is a condition the business imposes, with what it constrains and what happens when it is broken.
+      fr: Une règle de gestion est une condition que le métier impose, avec ce qu'elle contraint et ce qui se passe quand elle est enfreinte.
+    counted:
+      en: "{count, plural, one {# business rule described} other {# business rules described}}"
+      fr: "{count, plural, one {# règle de gestion décrite} other {# règles de gestion décrites}}"
     group: business
     status: active
     glyph: rule
@@ -402,6 +576,12 @@ types:
 
   screen:
     label: { en: Screen, fr: Écran }
+    description:
+      en: A screen is a page of the application, with what it shows and what it allows.
+      fr: Un écran est une page de l'application, avec ce qu'elle affiche et ce qu'elle permet.
+    counted:
+      en: "{count, plural, one {# screen described} other {# screens described}}"
+      fr: "{count, plural, one {# écran décrit} other {# écrans décrits}}"
     group: application
     status: active
     glyph: screen
@@ -432,6 +612,12 @@ types:
 
   standard:
     label: { en: Standard, fr: Norme }
+    description:
+      en: A standard is an external norm the solution complies with.
+      fr: Une norme est une référence externe à laquelle la solution se conforme.
+    counted:
+      en: "{count, plural, one {# standard described} other {# standards described}}"
+      fr: "{count, plural, one {# norme décrite} other {# normes décrites}}"
     group: motivation
     status: planned
     glyph: standard
@@ -442,6 +628,12 @@ types:
 
   term:
     label: { en: Term, fr: Terme }
+    description:
+      en: A term is a word of the business with its definition, its aliases and the words it relates to.
+      fr: Un terme est un mot du métier avec sa définition, ses alias et les mots auxquels il se rapporte.
+    counted:
+      en: "{count, plural, one {# term described} other {# terms described}}"
+      fr: "{count, plural, one {# terme décrit} other {# termes décrits}}"
     group: business
     status: active
     glyph: term
@@ -456,6 +648,12 @@ types:
 
   test:
     label: { en: Test, fr: Test }
+    description:
+      en: A test is a check of one behaviour of the solution, with what it exercises and what it expects.
+      fr: Un test est une vérification d'un comportement de la solution, avec ce qu'il exerce et ce qu'il attend.
+    counted:
+      en: "{count, plural, one {# test described} other {# tests described}}"
+      fr: "{count, plural, one {# test décrit} other {# tests décrits}}"
     group: quality
     status: planned
     glyph: test
@@ -467,6 +665,12 @@ types:
 
   test_strategy:
     label: { en: Test strategy, fr: Stratégie de test }
+    description:
+      en: A test strategy says which tests cover which parts of the solution and why.
+      fr: Une stratégie de test dit quels tests couvrent quelles parties de la solution et pourquoi.
+    counted:
+      en: "{count, plural, one {# test strategy described} other {# test strategies described}}"
+      fr: "{count, plural, one {# stratégie de test décrite} other {# stratégies de test décrites}}"
     group: quality
     status: planned
     glyph: strategy
@@ -476,6 +680,12 @@ types:
 
   work_package:
     label: { en: Work package, fr: Lot }
+    description:
+      en: A work package is a bounded set of work that closes gaps and moves the project to its next plateau.
+      fr: Un lot est un ensemble borné de travaux qui comble des écarts et mène le projet à son plateau suivant.
+    counted:
+      en: "{count, plural, one {# work package described} other {# work packages described}}"
+      fr: "{count, plural, one {# lot décrit} other {# lots décrits}}"
     group: implementation
     status: planned
     glyph: package

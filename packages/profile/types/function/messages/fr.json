@@ -1,5 +1,7 @@
 {
   "attributes.execution": "Exécution",
   "attributes.triggers": "Déclencheurs",
+  "counted": "{count, plural, one {# fonction applicative décrite} other {# fonctions applicatives décrites}}",
+  "description": "Une fonction applicative est une capacité que l'application fournit, quel que soit l'écran ou l'API qui l'expose.",
   "label": "Fonction applicative"
 }

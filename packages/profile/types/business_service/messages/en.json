@@ -1,4 +1,12 @@
 {
+  "counted": {
+    "defaultMessage": "{count, plural, one {# business service described} other {# business services described}}",
+    "description": "Number of business services a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A business service is what the business offers to its users, delivered by processes and applications.",
+    "description": "One sentence saying what a business service is, shown under the count of a category of business services."
+  },
   "label": {
     "defaultMessage": "Business service",
     "description": "Label of the business_service type."

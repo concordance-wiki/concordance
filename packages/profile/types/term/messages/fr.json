@@ -3,5 +3,7 @@
   "attributes.definition": "Définition",
   "attributes.narrower": "Termes spécifiques",
   "attributes.synonyms": "Synonymes",
+  "counted": "{count, plural, one {# terme décrit} other {# termes décrits}}",
+  "description": "Un terme est un mot du métier avec sa définition, ses alias et les mots auxquels il se rapporte.",
   "label": "Terme"
 }

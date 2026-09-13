@@ -11,6 +11,14 @@
     "defaultMessage": "Technology",
     "description": "Label of the technology attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# channel described} other {# channels described}}",
+    "description": "Number of channels a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A channel is a way users reach the application: a website, a counter, a letter.",
+    "description": "One sentence saying what a channel is, shown under the count of a category of channels."
+  },
   "label": {
     "defaultMessage": "Channel",
     "description": "Label of the channel type."

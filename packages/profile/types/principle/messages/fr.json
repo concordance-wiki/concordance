@@ -1,3 +1,5 @@
 {
+  "counted": "{count, plural, one {# principe décrit} other {# principes décrits}}",
+  "description": "Un principe est une règle de conduite que le projet suit dans ses choix, à laquelle les décisions se réfèrent.",
   "label": "Principe"
 }

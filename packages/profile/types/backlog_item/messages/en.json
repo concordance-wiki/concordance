@@ -23,6 +23,14 @@
     "defaultMessage": "Work package",
     "description": "Label of the work_package attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# backlog item described} other {# backlog items described}}",
+    "description": "Number of backlog items a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A backlog item is a piece of work waiting to be done, with what it changes.",
+    "description": "One sentence saying what a backlog item is, shown under the count of a category of backlog items."
+  },
   "label": {
     "defaultMessage": "Backlog item",
     "description": "Label of the backlog_item type."

@@ -3,6 +3,14 @@
     "defaultMessage": "External",
     "description": "Label of the external attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# actor described} other {# actors described}}",
+    "description": "Number of actors a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An actor is a person, a team or a system that takes part in a process from outside the application.",
+    "description": "One sentence saying what a actor is, shown under the count of a category of actors."
+  },
   "label": {
     "defaultMessage": "Actor",
     "description": "Label of the actor type."

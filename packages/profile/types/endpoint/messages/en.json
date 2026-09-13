@@ -31,6 +31,14 @@
     "defaultMessage": "Style",
     "description": "Label of the style attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# operation described} other {# operations described}}",
+    "description": "Number of operations a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "An operation is one call of an API, with its parameters and its responses as the contract declares them.",
+    "description": "One sentence saying what a operation is, shown under the count of a category of operations."
+  },
   "label": {
     "defaultMessage": "Operation",
     "description": "Label of the endpoint type."

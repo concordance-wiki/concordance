@@ -1,4 +1,6 @@
 {
   "attributes.channel": "Canal",
+  "counted": "{count, plural, one {# événement applicatif décrit} other {# événements applicatifs décrits}}",
+  "description": "Un événement applicatif est quelque chose qui se produit dans l'application et auquel d'autres parties réagissent.",
   "label": "Événement applicatif"
 }

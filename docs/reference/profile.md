@@ -60,6 +60,8 @@ The types a note can have, by slug: the ones the cascade may yield and a frontma
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `label` (required) | object | — | — | Display label of the type, per interface language. Same shape as [`groups.*.label`](#groupslabel). |
+| `description` | object | — | — | One sentence saying what an entity of the type is, per interface language; the list of a category shows it under its count. Same shape as [`groups.*.label`](#groupslabel). |
+| `counted` | object | — | — | The count of a category of the type as an ICU message with a count argument, per interface language: "{count, plural, one {# screen described} other {# screens described}}". Same shape as [`groups.*.label`](#groupslabel). |
 | `group` (required) | string | — | pattern `^[a-z][a-z0-9_]*$` | Slug of the group the type belongs to. |
 | `status` | enum | `"active"` | `active`, `planned` | active types are rendered; planned types belong to the meta-model but are not rendered by this version, and a project may activate them. |
 | `glyph` | string | — | — | Name of the glyph of the type; the site derives the one-letter mark of the type from its first letter. |

@@ -62,7 +62,11 @@ export function typeOf(directory) {
   const messages = messagesOf(directory);
   const schemaFile = join(directory, "schema.json");
   const schema = existsSync(schemaFile) ? JSON.parse(readFileSync(schemaFile, "utf8")) : {};
-  const type = { label: labelOf(messages, "label"), group: declaration.group };
+  const type = { label: labelOf(messages, "label") };
+  for (const key of ["description", "counted"]) {
+    if (messages.en?.[key] !== undefined) type[key] = labelOf(messages, key);
+  }
+  type.group = declaration.group;
   for (const key of ["status", "glyph", "graph"]) {
     if (declaration[key] !== undefined) type[key] = declaration[key];
   }

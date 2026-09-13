@@ -501,9 +501,13 @@ describe("The neighbourhood map in the panel", () => {
 
   it("replaces the blocks of the panel by the open map where the panel has a column, and leaves the phone and the tablet as they are", () => {
     const css = componentsStylesheet();
-    const desktop = css.slice(css.lastIndexOf("@media (min-width: 73.75rem) {"));
-    expect(desktop).toContain(
-      ".entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }",
+    const desktopStart = css.indexOf(
+      "@media (min-width: 73.75rem) {",
+      css.indexOf("/* Neighbourhood map, unfolded."),
+    );
+    const desktop = css.slice(desktopStart, css.indexOf("}\n}\n", desktopStart) + 4);
+    expect(desktop).toBe(
+      "@media (min-width: 73.75rem) {\n  .entity-side:has(> .neighbourhood-fold[open]) > .panel-block {\n    display: none;\n  }\n}\n",
     );
     expect(count(css, ".neighbourhood-fold[open]) > .panel-block")).toBe(1);
     const tabletStart = css.indexOf("@media (48rem <= width < 73.75rem) {");

@@ -1,4 +1,6 @@
 {
   "attributes.actors": "Acteurs",
+  "counted": "{count, plural, one {# rôle décrit} other {# rôles décrits}}",
+  "description": "Un rôle est un type d'utilisateur, avec les écrans qu'il utilise et les processus auxquels il prend part.",
   "label": "Rôle"
 }

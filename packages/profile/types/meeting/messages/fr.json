@@ -3,5 +3,7 @@
   "attributes.decisions": "Décisions",
   "attributes.duration": "Durée",
   "attributes.participants": "Participants",
+  "counted": "{count, plural, one {# réunion décrite} other {# réunions décrites}}",
+  "description": "Une réunion est une séance dont la documentation garde les notes ou la transcription, avec ses participants et ce qui a été décidé.",
   "label": "Réunion"
 }

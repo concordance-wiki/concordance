@@ -1,10 +1,10 @@
-import type { Entity } from "@concordance-wiki/core";
+import { pagePath, slugify, type Entity } from "@concordance-wiki/core";
 import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type { BreadcrumbItem, SpaceLink, SpaceNode, SpaceTree } from "../slots.js";
 import type { SiteContext } from "./context.js";
-import { entityHref, spaceHref } from "./paths.js";
+import { entityHref, relativeHref, spaceHref } from "./paths.js";
 
 /** The id of the latest changes entry of the home page. */
 export const HOME_RECENT_ANCHOR = "home-recent";
@@ -149,13 +149,45 @@ function windowOf(context: SiteContext, pages: SpaceNode[]): SpaceNode[] {
   return [...omitted(start), ...pages.slice(start, end), ...omitted(pages.length - end)];
 }
 
-/** The tree of the space of an entity: its source, the folders on the way to the page open, the page marked as current. */
+/**
+ * Where the list of a folder at the top of a space lands: `<source>/<folder slug>/index.html`,
+ * the address a note of that identifier would take; none when a note takes it.
+ */
+export function categoryPagePathOf(
+  context: SiteContext,
+  source: string,
+  folder: string,
+): string | undefined {
+  const id = `${source}/${slugify(folder)}`;
+  return context.entities.has(id) ? undefined : pagePath(id);
+}
+
+/** The folders at the top of the space linked to their lists, from `page`; the rest of the nodes as given. */
+function withCategoryLinks(
+  context: SiteContext,
+  page: string,
+  source: string,
+  nodes: SpaceNode[],
+): SpaceNode[] {
+  return nodes.map((node) => {
+    if (node.count === undefined) return node;
+    const target = categoryPagePathOf(context, source, node.label);
+    return target === undefined ? node : { ...node, href: relativeHref(page, target) };
+  });
+}
+
+/** The tree of the space of an entity: its source, the folders on the way to the page open, the page marked as current, every folder at the top linked to its list. */
 export function spaceOf(context: SiteContext, page: string, entity: Entity): SpaceTree {
   const source = entity.source.name;
   return {
     name: source,
     initials: initialsOf(source),
-    nodes: nodesOf(context, page, entity, treeOf(context, source), foldersOf(entity.source.path)),
+    nodes: withCategoryLinks(
+      context,
+      page,
+      source,
+      nodesOf(context, page, entity, treeOf(context, source), foldersOf(entity.source.path)),
+    ),
   };
 }
 
@@ -175,7 +207,7 @@ export function spaceWithPageOf(
   return {
     name: source,
     initials: initialsOf(source),
-    nodes: nodesOf(context, page, entity, root, []),
+    nodes: withCategoryLinks(context, page, source, nodesOf(context, page, entity, root, [])),
   };
 }
 
@@ -211,11 +243,15 @@ export function spaceLinksOf(page: string, spaces: readonly SpaceCount[]): Space
   }));
 }
 
-/** Space › folders › page: the space links to its page, a folder has no page, the page is the current one. */
-export function breadcrumbOf(page: string, entity: Entity): BreadcrumbItem[] {
+/** Space › folders › page: the space links to its page, the folder at the top to its list, a deeper folder has no page, the page is the current one. */
+export function breadcrumbOf(context: SiteContext, page: string, entity: Entity): BreadcrumbItem[] {
+  const source = entity.source.name;
   return [
-    { label: entity.source.name, href: spaceHref(page, entity.source.name) },
-    ...foldersOf(entity.source.path).map((label) => ({ label })),
+    { label: source, href: spaceHref(page, source) },
+    ...foldersOf(entity.source.path).map((label, index): BreadcrumbItem => {
+      const target = index === 0 ? categoryPagePathOf(context, source, label) : undefined;
+      return target === undefined ? { label } : { label, href: relativeHref(page, target) };
+    }),
     { label: entity.title },
   ];
 }

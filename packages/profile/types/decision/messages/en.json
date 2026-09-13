@@ -19,6 +19,14 @@
     "defaultMessage": "Supersedes",
     "description": "Label of the supersedes attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# decision described} other {# decisions described}}",
+    "description": "Number of decisions a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A decision is a choice made for the project, with its context, its options and what it affects.",
+    "description": "One sentence saying what a decision is, shown under the count of a category of decisions."
+  },
   "label": {
     "defaultMessage": "Decision",
     "description": "Label of the decision type."

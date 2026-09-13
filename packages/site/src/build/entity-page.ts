@@ -92,7 +92,8 @@ function valuesOf(context: SiteContext, page: string, value: unknown): Attribute
   return [];
 }
 
-function attributeOf(
+/** One attribute of an entity as the page shows it, common or declared, labelled by the profile; none when the entity sets no value for it. */
+export function attributeOf(
   context: SiteContext,
   page: string,
   entity: Entity,
@@ -251,7 +252,7 @@ export function sectionsOf(context: SiteContext, entity: Entity): Section[] {
  * entities of the model, a link looping on its node counting for none, the way the displayed
  * neighbourhood was computed before its truncation.
  */
-function neighbourCount(context: SiteContext, entity: Entity): number {
+export function neighbourCount(context: SiteContext, entity: Entity): number {
   const others = new Set<string>();
   for (const link of context.touching.get(entity.id) ?? []) {
     const other = link.from === entity.id ? link.to : link.from;
@@ -520,7 +521,9 @@ export function entityPageOf(
     },
     ...(declaration === undefined ? {} : { declaration }),
     space: dated ? datedSpaceOf(context, page, entity) : spaceOf(context, page, entity),
-    breadcrumb: dated ? datedBreadcrumbOf(context, page, entity) : breadcrumbOf(page, entity),
+    breadcrumb: dated
+      ? datedBreadcrumbOf(context, page, entity)
+      : breadcrumbOf(context, page, entity),
     ...(changed === undefined ? {} : { changed }),
     highlights: highlightsOf(context, page, entity),
     sections: sectionsOf(context, entity),

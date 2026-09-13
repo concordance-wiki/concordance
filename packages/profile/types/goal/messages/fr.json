@@ -1,3 +1,5 @@
 {
+  "counted": "{count, plural, one {# objectif décrit} other {# objectifs décrits}}",
+  "description": "Un objectif est un résultat que le projet ou le métier vise, que servent les principes et les exigences.",
   "label": "Objectif"
 }

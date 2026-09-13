@@ -397,23 +397,24 @@ describe("entityPageOf", () => {
     ).toBe(1);
   });
 
-  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to its page", () => {
+  it("gives every page the tree of its space and its breadcrumb: the folders on the way open, the page marked current, the space linked to its page, the folders at the top and the first step to their lists", () => {
     const props = entityPageOf(context(), screen);
     expect(props.space).toEqual({
       name: "specs",
       initials: "SP",
       nodes: [
-        { label: "rules", count: 1 },
+        { label: "rules", count: 1, href: "../../rules/index.html" },
         {
           label: "screens",
           count: 1,
           children: [{ label: "Mentions panel", current: true }],
+          href: "../index.html",
         },
       ],
     });
     expect(props.breadcrumb).toEqual([
       { label: "specs", href: "../../index.html" },
-      { label: "screens" },
+      { label: "screens", href: "../index.html" },
       { label: "Mentions panel" },
     ]);
     const glossary = spaceOf(context(), pagePath, term);
@@ -425,7 +426,7 @@ describe("entityPageOf", () => {
         { label: "Page", href: "../page/index.html" },
       ],
     });
-    expect(breadcrumbOf(pagePath, term)).toEqual([
+    expect(breadcrumbOf(context(), pagePath, term)).toEqual([
       { label: "glossary", href: "../index.html" },
       { label: "Keyword page" },
     ]);
@@ -446,10 +447,11 @@ describe("entityPageOf", () => {
     });
     const nested = context({ model: model({ entities: [...model().entities, deep, sibling] }) });
     expect(spaceOf(nested, "specs/screens/service/query/index.html", deep).nodes).toEqual([
-      { label: "rules", count: 1 },
+      { label: "rules", count: 1, href: "../../../rules/index.html" },
       {
         label: "screens",
         count: 3,
+        href: "../../index.html",
         children: [
           {
             label: "service",
@@ -1124,8 +1126,8 @@ describe("keywordPageOf", () => {
     const specs = keywordPageOf(reversed, keyword);
     expect(specs.space?.name).toBe("specs");
     expect(specs.space?.nodes).toEqual([
-      { label: "rules", count: 1 },
-      { label: "screens", count: 1 },
+      { label: "rules", count: 1, href: "../../specs/rules/index.html" },
+      { label: "screens", count: 1, href: "../../specs/screens/index.html" },
       { label: "build summary", current: true },
     ]);
     const orphan = keywordPageOf(context(), orphanKeyword);

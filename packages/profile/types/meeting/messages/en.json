@@ -15,6 +15,14 @@
     "defaultMessage": "Participants",
     "description": "Label of the participants attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# meeting described} other {# meetings described}}",
+    "description": "Number of meetings a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A meeting is a session whose notes or transcript the documentation keeps, with its participants and what was decided.",
+    "description": "One sentence saying what a meeting is, shown under the count of a category of meetings."
+  },
   "label": {
     "defaultMessage": "Meeting",
     "description": "Label of the meeting type."

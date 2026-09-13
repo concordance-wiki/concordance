@@ -31,6 +31,14 @@
     "defaultMessage": "Source",
     "description": "Label of the source attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# document described} other {# documents described}}",
+    "description": "Number of documents a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A document is a file that frames the project without describing one of its parts: a vision, a roadmap, a note.",
+    "description": "One sentence saying what a document is, shown under the count of a category of documents."
+  },
   "label": {
     "defaultMessage": "Document",
     "description": "Label of the document type."

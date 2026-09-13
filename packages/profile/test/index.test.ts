@@ -13,6 +13,7 @@ describe("@concordance-wiki/profile", () => {
       "MODULE_SOURCE_LANGUAGE",
       "MODULE_TEMPLATE_FILE",
       "TYPES_DIRECTORY_KEY",
+      "TYPE_MESSAGE_KEYS",
       "allowedRelations",
       "defaultTypesDirectory",
       "fingerprintProfile",

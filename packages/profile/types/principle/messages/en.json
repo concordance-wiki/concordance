@@ -1,4 +1,12 @@
 {
+  "counted": {
+    "defaultMessage": "{count, plural, one {# principle described} other {# principles described}}",
+    "description": "Number of principles a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A principle is a rule of conduct the project follows in its choices, which decisions refer to.",
+    "description": "One sentence saying what a principle is, shown under the count of a category of principles."
+  },
   "label": {
     "defaultMessage": "Principle",
     "description": "Label of the principle type."

@@ -2,5 +2,7 @@
   "attributes.business_object": "Objet métier",
   "attributes.fields": "Champs",
   "attributes.schema": "Schéma",
+  "counted": "{count, plural, one {# objet de données décrit} other {# objets de données décrits}}",
+  "description": "Un objet de données est une table ou un enregistrement tel qu'il est stocké, avec ses colonnes et leur sens.",
   "label": "Objet de données"
 }

@@ -3,6 +3,14 @@
     "defaultMessage": "Actors",
     "description": "Label of the actors attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# role described} other {# roles described}}",
+    "description": "Number of roles a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A role is a kind of user, with the screens it uses and the processes it takes part in.",
+    "description": "One sentence saying what a role is, shown under the count of a category of roles."
+  },
   "label": {
     "defaultMessage": "Role",
     "description": "Label of the role type."

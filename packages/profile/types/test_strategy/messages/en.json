@@ -7,6 +7,14 @@
     "defaultMessage": "Levels",
     "description": "Label of the levels attribute."
   },
+  "counted": {
+    "defaultMessage": "{count, plural, one {# test strategy described} other {# test strategies described}}",
+    "description": "Number of test strategies a category holds, above the description of the type."
+  },
+  "description": {
+    "defaultMessage": "A test strategy says which tests cover which parts of the solution and why.",
+    "description": "One sentence saying what a test strategy is, shown under the count of a category of test strategies."
+  },
   "label": {
     "defaultMessage": "Test strategy",
     "description": "Label of the test_strategy type."

@@ -44,6 +44,17 @@ function ClearButton({ search }: { search: SearchField }): JSX.Element {
   );
 }
 
+/** The facet values a field submits with its query, as hidden fields: the space and the type of a category list. */
+function HiddenFilters({ search }: { search: SearchField }): JSX.Element {
+  return (
+    <>
+      {Object.entries(search.filters ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+    </>
+  );
+}
+
 /**
  * The form of the header: a plain `GET` to the results page, so that it works before any
  * script runs; the field shows the shortcut that reaches it once the search island runs, and
@@ -63,6 +74,7 @@ export function SearchForm({ search }: { search: SearchField }): JSX.Element {
         {search.label ?? labels.search}
       </label>
       {search.source !== undefined && <input type="hidden" name="source" value={search.source} />}
+      <HiddenFilters search={search} />
       <span class="site-search-field">
         <SearchGlyph />
         <input
@@ -93,6 +105,7 @@ export function HomeSearchForm({ search }: { search: SearchField }): JSX.Element
       <label class="visually-hidden" for="home-search">
         {name}
       </label>
+      <HiddenFilters search={search} />
       <span class="home-search-field">
         <SearchGlyph size={20} />
         <input
