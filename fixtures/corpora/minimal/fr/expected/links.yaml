@@ -9,6 +9,8 @@
 - { from: specs/regles/plafond-du-lien-connexe, to: specs/api/requete-de-modele, relation: constrains, method: section_mention, min_confidence: 0.7 }
 - { from: specs/tables/liens, to: specs/objets/lien, relation: represents, method: frontmatter_ref, min_confidence: 0.9 }
 - { from: specs/batchs/build-nocturne, to: specs/tables/liens, relation: accesses, attributes: { mode: write }, method: section_mention, min_confidence: 0.7 }
+- { from: specs/qualite/politique-fail-on, to: specs/objets/build, relation: constrains, method: explicit_link, min_confidence: 1.0 }
+- { from: specs/qualite/determinisme/deux-builds-compares, to: specs/ecrans/page-entite, relation: constrains, method: explicit_link, min_confidence: 1.0 }
 - { from: decisions/plafond-controle-en-amont, to: specs/api/requete-de-modele, relation: affects, method: section_mention, min_confidence: 0.7 }
 - { from: reunions/2026-03-12-atelier-liens, to: decisions/plafond-controle-en-amont, relation: documents, method: explicit_link, min_confidence: 1.0 }
 - { from: glossaire/lien-explicite, to: glossaire/lien, relation: specializes, method: frontmatter_ref, min_confidence: 0.9 }

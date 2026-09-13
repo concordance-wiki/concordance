@@ -82,7 +82,7 @@ function domainFindings(input: FilingInput, filed: boolean): Finding[] {
       "W-DOMAIN-UNCLASSIFIED",
       "info",
       `${input.id} matches no declared domain`,
-      "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
+      "Add a folder or a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
     ),
   ];
 }

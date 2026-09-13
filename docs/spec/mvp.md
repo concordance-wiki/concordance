@@ -294,6 +294,19 @@ As the integrator of a mixed corpus, I want to declare the language of each sour
 
 Depends on: L0-02, L0-11.
 
+#### L0-14 Folder domains
+
+As an integrator, I want a domain to be recognised by the name of a folder of the corpus, without listing its files or writing one glob per source, so that the structure of the repositories carries the filing.
+
+- A domain accepts `folder: true` or `folder: <name>`: it claims every file one of whose directory segments, the file name excluded, equals its identifier or the given name, in any source.
+- A subdomain declared by folder claims only the files whose segment lies under its parent's folder; when the parent is declared by globs, the segment may sit anywhere on a path the parent's globs match.
+- `folder` and `match` combine on the same domain; the precedence stays the frontmatter `domain`, then the deepest claiming domain, then the last declared. The origin `folder` is recorded next to `frontmatter`, `glob` and `unclassified`.
+- A domain with neither `match` nor `folder` stays a frontmatter-only domain.
+- A `folder` name that is not a single path segment is a configuration error reported by `validate-config`.
+- The golden corpus declares a domain by folder and a folder subdomain.
+
+Depends on: L0-07.
+
 ### L1 — Word and occurrence index
 
 The heart of the product. This batch is what makes an unprepared corpus browsable. Exit criterion: on the golden corpus, every expected occurrence is recorded with its line and context, and no stray occurrence appears inside a code block.

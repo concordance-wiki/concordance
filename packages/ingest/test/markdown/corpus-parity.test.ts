@@ -66,7 +66,7 @@ describe("the same corpus yields the same occurrences in both languages", () => 
       return english ?? heading;
     });
     expect(translated).toEqual(sectionHeadings(en, (heading) => heading));
-    expect(translated).toHaveLength(14);
+    expect(translated).toHaveLength(16);
   });
 
   it("has the same frontmatter key sets note for note", () => {

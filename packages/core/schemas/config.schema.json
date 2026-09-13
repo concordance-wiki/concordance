@@ -96,7 +96,7 @@
       }
     },
     "domains": {
-      "description": "Global business domains, orthogonal to the sources, resolved by globs on the path of every file relative to its source root. A frontmatter domain overrides the globs; a note no domain claims goes to unclassified.",
+      "description": "Global business domains, orthogonal to the sources, resolved by the folders and the globs on the path of every file relative to its source root. A frontmatter domain overrides them; a note no domain claims goes to unclassified.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/domain"
@@ -644,8 +644,13 @@
             "minLength": 1
           }
         },
+        "folder": {
+          "description": "Claims every file with a folder of that name on its path, in any source: true for a folder named after the identifier, a string for another folder name (one path segment, no slash). A subdomain's folder must lie under its parent's. Combines with match.",
+          "type": ["boolean", "string"],
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
         "subdomains": {
-          "description": "Domains nested under this one, with the same shape; their globs are evaluated after their parent's.",
+          "description": "Domains nested under this one, with the same shape; their globs are evaluated after their parent's, their folder is looked for under their parent's folder.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/domain"

@@ -23,6 +23,23 @@ describe("compileDomains", () => {
     expect([c?.matcher("c/note.md"), c?.matcher("d/note.md")]).toEqual([true, false]);
     expect(compileDomains([])).toEqual([]);
   });
+
+  it("records the folder of a domain and the parent of a subdomain, and nothing for the others", () => {
+    const [ingestion, readers, quality, publication] = compileDomains([
+      { id: "ingestion", folder: true, subdomains: [{ id: "readers", folder: "reader" }] },
+      { id: "quality", folder: false },
+      { id: "publication", match: ["**/*page*"] },
+    ]);
+    const bare = ["id", "path", "depth", "matcher", "globs"];
+    expect(Object.keys(ingestion ?? {})).toEqual([...bare, "folder"]);
+    expect([ingestion?.folder, ingestion?.globs]).toEqual(["ingestion", false]);
+    expect(Object.keys(readers ?? {})).toEqual([...bare, "folder", "parent"]);
+    expect(readers?.folder).toBe("reader");
+    expect(readers?.parent).toBe(ingestion);
+    expect(Object.keys(quality ?? {})).toEqual(bare);
+    expect(Object.keys(publication ?? {})).toEqual(bare);
+    expect(publication?.globs).toBe(true);
+  });
 });
 
 describe("resolveDomain", () => {
@@ -64,6 +81,162 @@ describe("resolveDomain", () => {
       { id: "third", match: ["elsewhere/**"] },
     ]);
     expect(resolveDomain("shared/note.md", undefined, siblings).domain).toBe("second");
+  });
+
+  describe("declared by folder", () => {
+    const byFolder = compileDomains([
+      {
+        id: "ingestion",
+        folder: true,
+        subdomains: [
+          { id: "recognition", folder: true },
+          { id: "readers", folder: "reader" },
+        ],
+      },
+      { id: "quality", folder: "checks" },
+      { id: "publication", folder: false, match: ["**/*page*"] },
+    ]);
+
+    it("claims every file with a directory segment named after the identifier, in any depth", () => {
+      expect(resolveDomain("ingestion/clone.md", undefined, byFolder)).toEqual({
+        domain: "ingestion",
+        origin: "folder",
+        declared: true,
+      });
+      expect(resolveDomain("specs/ingestion/twins/clone.md", undefined, byFolder).domain).toBe(
+        "ingestion",
+      );
+    });
+
+    it("claims files under a folder of the given name, not the identifier", () => {
+      expect(resolveDomain("checks/determinism.md", undefined, byFolder).domain).toBe("quality");
+      expect(resolveDomain("quality/determinism.md", undefined, byFolder).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+    });
+
+    it("never reads the file name as a folder", () => {
+      expect(resolveDomain("ingestion", undefined, byFolder).domain).toBe(UNCLASSIFIED_DOMAIN);
+      expect(resolveDomain("notes/ingestion.md", undefined, byFolder).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+      expect(resolveDomain("notes/ingestion-log.md", undefined, byFolder).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+    });
+
+    it("treats folder: false as no folder at all", () => {
+      expect(resolveDomain("publication/theme.md", undefined, byFolder).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+      expect(resolveDomain("publication/home-page.md", undefined, byFolder)).toEqual({
+        domain: "publication",
+        origin: "glob",
+        declared: true,
+      });
+    });
+
+    it("claims a folder subdomain only under its parent's folder", () => {
+      expect(resolveDomain("ingestion/recognition/scan.md", undefined, byFolder)).toEqual({
+        domain: "ingestion/recognition",
+        origin: "folder",
+        declared: true,
+      });
+      expect(resolveDomain("specs/ingestion/steps/reader/vtt.md", undefined, byFolder).domain).toBe(
+        "ingestion/readers",
+      );
+      expect(resolveDomain("recognition/scan.md", undefined, byFolder).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+      expect(resolveDomain("recognition/ingestion/scan.md", undefined, byFolder).domain).toBe(
+        "ingestion",
+      );
+    });
+
+    it("requires a subdomain folder named like its parent's to be nested, not the same segment", () => {
+      const nested = compileDomains([
+        { id: "checks", folder: true, subdomains: [{ id: "inner", folder: "checks" }] },
+      ]);
+      expect(resolveDomain("checks/lint.md", undefined, nested).domain).toBe("checks");
+      expect(resolveDomain("checks/checks/lint.md", undefined, nested).domain).toBe("checks/inner");
+    });
+
+    it("lets a folder subdomain sit anywhere on a path the globs of its parent match", () => {
+      const globParent = compileDomains([
+        {
+          id: "inference",
+          match: ["**/specs/**"],
+          subdomains: [{ id: "recognition", folder: true }],
+        },
+      ]);
+      expect(resolveDomain("specs/recognition/scan.md", undefined, globParent)).toEqual({
+        domain: "inference/recognition",
+        origin: "folder",
+        declared: true,
+      });
+      expect(resolveDomain("recognition/specs/scan.md", undefined, globParent).domain).toBe(
+        "inference/recognition",
+      );
+      expect(resolveDomain("glossary/recognition/scan.md", undefined, globParent).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+    });
+
+    it("lets a folder subdomain of a frontmatter-only parent sit anywhere", () => {
+      const bareParent = compileDomains([
+        { id: "inference", subdomains: [{ id: "recognition", folder: true }] },
+      ]);
+      expect(resolveDomain("glossary/recognition/scan.md", undefined, bareParent).domain).toBe(
+        "inference/recognition",
+      );
+      expect(resolveDomain("glossary/scan.md", undefined, bareParent).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+    });
+
+    it("follows a chain of folders down to the deepest one", () => {
+      const chain = compileDomains([
+        {
+          id: "inference",
+          folder: true,
+          subdomains: [
+            { id: "recognition", folder: true, subdomains: [{ id: "scan", folder: true }] },
+          ],
+        },
+      ]);
+      expect(resolveDomain("inference/recognition/scan/note.md", undefined, chain).domain).toBe(
+        "inference/recognition/scan",
+      );
+      expect(resolveDomain("inference/scan/recognition/note.md", undefined, chain).domain).toBe(
+        "inference/recognition",
+      );
+      expect(resolveDomain("recognition/scan/note.md", undefined, chain).domain).toBe(
+        UNCLASSIFIED_DOMAIN,
+      );
+    });
+
+    it("combines folder and globs on one domain, the folder claim recorded first", () => {
+      const both = compileDomains([{ id: "quality", folder: true, match: ["**/*check*"] }]);
+      expect(resolveDomain("quality/check-page.md", undefined, both).origin).toBe("folder");
+      expect(resolveDomain("specs/check-page.md", undefined, both)).toEqual({
+        domain: "quality",
+        origin: "glob",
+        declared: true,
+      });
+      expect(resolveDomain("quality/lint.md", undefined, both).origin).toBe("folder");
+    });
+
+    it("keeps the precedence between folders and globs: the deepest domain, then the last declared", () => {
+      const mixed = compileDomains([
+        { id: "quality", folder: true, subdomains: [{ id: "checks", match: ["**/*check*"] }] },
+        { id: "publication", match: ["quality/**"] },
+      ]);
+      expect(resolveDomain("quality/check-page.md", undefined, mixed).domain).toBe(
+        "quality/checks",
+      );
+      expect(resolveDomain("quality/theme.md", undefined, mixed).domain).toBe("publication");
+      expect(resolveDomain("quality/theme.md", "quality", mixed).origin).toBe("frontmatter");
+    });
   });
 
   it("lets a domain declared in frontmatter take precedence over globs", () => {

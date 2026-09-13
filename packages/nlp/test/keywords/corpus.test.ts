@@ -5,8 +5,8 @@ import { discover, readCorpus } from "./minimal-corpus.js";
 
 /** The published expression of each corpus: two words in English, three around a preposition in French. */
 const shape: Readonly<Record<string, { words: number; score: number }>> = {
-  en: { words: 2, score: 13.8621 },
-  fr: { words: 3, score: 17.492 },
+  en: { words: 2, score: 14.5229 },
+  fr: { words: 3, score: 18.3258 },
 };
 
 describe.each(["en", "fr"])("the recurring expressions of the minimal %s corpus", (locale) => {

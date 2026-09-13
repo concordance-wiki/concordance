@@ -166,7 +166,7 @@ export const catalogue: readonly CheckDefinition[] = [
     "info",
     "vocabulary-and-filing",
     "A note matches no declared domain.",
-    "Add a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
+    "Add a folder or a glob to the domain in concordance.yaml, or set domain in the note's frontmatter.",
   ),
   step(
     "W-DOMAIN-UNKNOWN",

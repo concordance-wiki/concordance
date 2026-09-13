@@ -4,7 +4,7 @@
 
 A frontmatter `domain` names no declared domain.
 
-The frontmatter wins over the domain globs, so a value that matches neither the identifier nor the identifier path (`inference/recognition`) of a domain declared under `domains:` is most often a typo, or a domain the configuration has yet to declare. The value is kept as written on the entity, so the site shows what the author meant; nothing files the note under a declared domain.
+The frontmatter wins over the domain folders and globs, so a value that matches neither the identifier nor the identifier path (`inference/recognition`) of a domain declared under `domains:` is most often a typo, or a domain the configuration has yet to declare. The value is kept as written on the entity, so the site shows what the author meant; nothing files the note under a declared domain.
 
 ## Before
 

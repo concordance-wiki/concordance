@@ -38,8 +38,8 @@ function readCorpus(locale: string): Map<string, ParsedMarkdown> {
 describe("the minimal corpus parses through the real file system", () => {
   it("reads every English note with a title, valid frontmatter and resolvable links", () => {
     const documents = readCorpus("en");
-    expect(documents.size).toBe(19);
-    expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(32);
+    expect(documents.size).toBe(21);
+    expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(35);
 
     const entry = documents.get("specs/screens/mentions-panel.md");
     expect(entry?.title).toBe("Mentions panel");
@@ -82,8 +82,8 @@ describe("the minimal corpus parses through the real file system", () => {
 
   it("reads every French note with a title, valid frontmatter and resolvable links", () => {
     const documents = readCorpus("fr");
-    expect(documents.size).toBe(19);
-    expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(32);
+    expect(documents.size).toBe(21);
+    expect([...documents.values()].flatMap((document) => document.links)).toHaveLength(35);
 
     const entry = documents.get("specs/ecrans/panneau-des-mentions.md");
     expect(entry?.title).toBe("Panneau des mentions");
