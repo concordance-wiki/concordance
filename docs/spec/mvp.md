@@ -135,7 +135,7 @@ Four families, plus the contract checks and the plugin checks. Each check is a p
 | Identifiers and types | `E-ID-DUP`, `E-ID-INVALID`, `E-TYPE-CONFLICT`, `E-FM-INVALID`, `E-META-REL`, `E-ENCODING`, `W-TYPE-UNKNOWN`, `W-ATTRIBUTE-UNKNOWN` |
 | Documents | `W-CONV-FAILED`, `W-CONV-SUSPECT`, `W-DOC-NOMD`, `W-DUP-CANDIDATE` |
 | Vocabulary and filing | `W-TERM-UNDEFINED`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`, `W-DOMAIN-UNKNOWN`, `W-APP-MISSING`, `W-APP-UNKNOWN`, `W-STALE`, `I-REL-AMBIGUOUS`, `I-TERM-HOMONYM`, `I-PII-DETECTED` |
-| Contracts | `W-CONTRACT-UNREACHABLE`, `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
+| Contracts | `W-CONTRACT-UNREACHABLE`, `W-OPERATION-AMBIGUOUS`, `W-API-NOCONSUMER`, `W-API-CONSUMER-MISMATCH` |
 | Plugins | `W-PLUGIN-DISABLED` |
 
 ## 4. Batches and stories
@@ -792,7 +792,7 @@ As an author, I want to write one note per operation and have it attach automati
 - A matched operation shows its note's markdown and its own declared properties.
 - An operation note carries its own links: consumers, applied rules, handled objects.
 - Links written in an operation's markdown are processed like anywhere else.
-- An ambiguous match (two candidate notes) yields a finding and no attachment.
+- An ambiguous match (two candidate notes) yields a `W-OPERATION-AMBIGUOUS` finding and no attachment.
 
 Depends on: L5-01.
 

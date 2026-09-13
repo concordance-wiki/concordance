@@ -147,6 +147,12 @@ importers:
       '@concordance-wiki/nlp':
         specifier: workspace:*
         version: link:../nlp
+      '@concordance-wiki/plugin-contract-openapi':
+        specifier: workspace:*
+        version: link:../../plugins/contract-openapi
+      '@concordance-wiki/plugin-contract-wsdl':
+        specifier: workspace:*
+        version: link:../../plugins/contract-wsdl
       '@concordance-wiki/typing':
         specifier: workspace:*
         version: link:../typing

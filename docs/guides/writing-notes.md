@@ -90,6 +90,35 @@ contract: https://legacy.example.invalid/forge-bridge?wsdl
 
 With the `contract-wsdl` plugin declared, the build reads the WSDL 1.1 or 2.0 document and produces one operation per port type operation, titled `operation (port)`, with its port, binding and SOAP action; the XSD elements and types its messages reference are offered as candidate objects. The plugins tell the two formats apart by content, not by extension: an XML document whose root is `definitions` or `description` goes to the WSDL plugin, anything else to the OpenAPI plugin. An operation imported from either carries `operation_id`, `summary` and `style` (`http` or `soap`) and is handled the same way afterwards.
 
+## Operation notes
+
+An operation deserves a note when there is business to explain where it happens: write one `endpoint` note per operation and let the build attach it to the operation imported from the contract. The note names its API in the `api` attribute (an identifier, a path relative to the source root or the exact title of the API note) and the operation it describes:
+
+```markdown
+---
+type: endpoint
+api: api/model-query
+operation_id: listEntities
+---
+# List the entities
+
+Returns the [entities](../objects/entity.md) of the last build, in identifier order.
+
+## Consumers
+
+- [Pinned trail](../screens/pinned-trail.md)
+
+## Rules
+
+- [Identifier pattern](../rules/identifier-pattern.rule.md)
+```
+
+The matching tries three rungs in order and stops at the first that matches: the `operation_id` of the frontmatter against the operation identifier of the contract; then the `method` and `path` pair (the method compared without case) against the operation's, or `port` and the title against the port and operation name of a SOAP operation; then the title of the note in comparison form, spaces and punctuation ignored, against the operation title or its identifier (`List entities` matches `listEntities`). A note without `api` is a candidate for every API of its source that declares a contract; a markdown link to the API note also names it. The first rung is the one to rely on: it survives a renamed path and a retitled note.
+
+A matched note absorbs the operation. The page shows the note's markdown and the properties the contract declares: `method`, `path`, `summary` and `style` for an HTTP operation, `port`, `binding` and `soap_action` for a SOAP one, added under the note's own frontmatter when the note does not set them. The contract appears as a representation of the note next to its markdown, `grouped_by` names the rung, and the `exposes` link of the API points at the note; the imported operation no longer exists as a separate entity. Everything else works as for any note: the frontmatter references, the `## Consumers` and `## Rules` sections, the markdown links in the text and the mentions of glossary terms produce the note's own links (`serves`, `constrains`, `accesses`, `explicit_link`).
+
+Two notes claiming the same operation, or one note matching several operations of its API, is an ambiguity: the build reports [`W-OPERATION-AMBIGUOUS`](../checks/W-OPERATION-AMBIGUOUS.md) naming every candidate and attaches nothing. A note that matches no operation stays an ordinary `endpoint` note; a later story reports it as a gap between the contract and the notes.
+
 ## Sections that mean something
 
 Some section headings are mapped to relations in the profile. A mention under such a heading counts more (0.70, method `section_mention`, with the section and the line as provenance) than a mention in a paragraph (0.60, method `glossary_occurrence`, with the line as provenance).
@@ -99,6 +128,7 @@ Some section headings are mapped to relations in the profile. A mention under su
 | screen | `## Objects` (accesses), `## Actions` (triggers), `## Rules` (constrains) |
 | process | `## Steps` (ordered list of steps) |
 | api | `## Consumers` (serves), `## Objects` (accesses) |
+| endpoint | `## Consumers` (serves), `## Rules` (constrains) |
 | batch | `## Reads`, `## Writes` (accesses) |
 | rule | `## Applies to` (constrains) |
 | decision | `## Affects` (affects) |

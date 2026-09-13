@@ -19,11 +19,11 @@
 - { from: specs/api/contrats/pont-de-forge, to: specs/api/pont-de-forge, relation: documents, method: explicit_link, min_confidence: 1.0 }
 - { from: specs/api/contrats/requete-du-modele-openapi, to: specs/api/requete-du-modele, relation: documents, method: explicit_link, min_confidence: 1.0 }
 
-# Operations imported from the contracts and matched to their notes on the operation identifier.
-# The profile does not name the relation between an API and its operations yet: the contract import story names it and updates these lines.
-- { from: specs/api/requete-du-modele, to: specs/operations/lister-les-entites, relation: related, method: contract_import, min_confidence: 0.95, operation: listEntities }
-- { from: specs/api/requete-du-modele, to: specs/operations/lire-une-entite, relation: related, method: contract_import, min_confidence: 0.95, operation: getEntity }
-- { from: specs/api/pont-de-forge, to: specs/operations/notifier-un-build, relation: related, method: contract_import, min_confidence: 0.95, operation: notifyBuild }
+# Operations imported from the contracts and matched to their notes on the operation identifier: the note absorbs the
+# operation, so the `exposes` link of the API points at the note and the operation never appears as a separate entity.
+- { from: specs/api/requete-du-modele, to: specs/operations/lister-les-entites, relation: exposes, method: contract_import, min_confidence: 0.95, operation: listEntities }
+- { from: specs/api/requete-du-modele, to: specs/operations/lire-une-entite, relation: exposes, method: contract_import, min_confidence: 0.95, operation: getEntity }
+- { from: specs/api/pont-de-forge, to: specs/operations/notifier-un-build, relation: exposes, method: contract_import, min_confidence: 0.95, operation: notifyBuild }
 
 # Typed frontmatter attributes.
 - { from: specs/roles/mainteneur, to: specs/ecrans/page-mot-cle, relation: assigned_to, method: frontmatter_ref, min_confidence: 0.9 }

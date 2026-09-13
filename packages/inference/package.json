@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@concordance-wiki/nlp": "workspace:*",
+    "@concordance-wiki/plugin-contract-openapi": "workspace:*",
+    "@concordance-wiki/plugin-contract-wsdl": "workspace:*",
     "@concordance-wiki/typing": "workspace:*"
   }
 }

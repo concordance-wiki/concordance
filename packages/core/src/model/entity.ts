@@ -24,6 +24,10 @@ export interface EntityRepresentation {
   /** `markdown` for a note, otherwise the lowercase extension. */
   format: string;
   preview?: string;
+  /** `contract` when the representation is an operation of an imported contract; absent for a file of the source. */
+  kind?: string;
+  /** The operation name as the contract writes it, for a `contract` representation. */
+  operation?: string;
 }
 
 /** One node of the model, as serialised under `entities` in `model.json`. */

@@ -22,6 +22,12 @@
     },
     {
       "path": "../typing/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/contract-openapi/tsconfig.build.json"
+    },
+    {
+      "path": "../../plugins/contract-wsdl/tsconfig.build.json"
     }
   ]
 }
