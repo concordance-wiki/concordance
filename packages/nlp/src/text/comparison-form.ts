@@ -2,7 +2,7 @@ import type { LanguagePack } from "../locale/pack.js";
 import { singularize } from "./singular.js";
 
 // Hyphens and apostrophes stay inside a word; each part they join is singularised on its own,
-// so that "couts-benefices" gives "cout-benefice" and "member's" keeps its "s".
+// so that "couts-benefices" gives "cout-benefice" and "author's" keeps its "s".
 const parts = /[^-']+/gu;
 
 function singularizeWord(word: string, pack: LanguagePack): string {
