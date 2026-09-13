@@ -18,8 +18,9 @@ function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
 
 /**
  * The bar: the drawer button, the mark and the site name, the search field folded behind a
- * button where the bar is too narrow for it, the mode switch; the links stand in the drawer,
- * which the stylesheet keeps in view in the bar where it has room.
+ * button where the bar is too narrow for it, the trail folded behind its button once its script
+ * lists a page, the mode switch; the links stand in the drawer, which the stylesheet keeps in
+ * view in the bar where it has room.
  */
 export function Header({
   siteTitle,
@@ -60,9 +61,9 @@ export function Header({
             />
           </details>
         )}
+        <Trail {...(trail === undefined ? {} : { trail })} />
         <ModeSwitch />
       </nav>
-      <Trail {...(trail === undefined ? {} : { trail })} />
     </header>
   );
 }

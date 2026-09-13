@@ -155,12 +155,10 @@ export interface NavigationItem extends Link {
 export type HeaderLogo = { src: string; alt: string } | { svg: string };
 
 export interface TrailLabels {
-  /** Accessible name of the trail region. */
+  /** Accessible name of the trail region and of the button unfolding it. */
   title: string;
   pin: string;
   unpin: string;
-  /** Shown when the trail holds no page. */
-  empty: string;
   /** Follows the number of condensed entries: "… 5 earlier pages". */
   earlier: string;
 }
@@ -170,7 +168,7 @@ export interface TrailPage {
   title: string;
 }
 
-/** The navigation trail under the header: the pages the reader visited, carried in the URL fragment. */
+/** The navigation trail folded behind a button of the bar: the pages the reader visited, carried in the URL fragment. */
 export interface TrailProps {
   /** Prefix of the hrefs from the page to the site root, `../../` for instance; empty at the root. */
   base: string;

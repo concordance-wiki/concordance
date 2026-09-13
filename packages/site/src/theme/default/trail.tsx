@@ -11,13 +11,12 @@ export const defaultTrailLabels: TrailLabels = {
   title: labels.trailTitle,
   pin: labels.trailPin,
   unpin: labels.trailUnpin,
-  empty: labels.trailEmpty,
   earlier: labels.trailEarlier,
 };
 
 /**
  * The island is served empty: the trail lives in the URL fragment and in the reader's storage,
- * which only a script can read, so without JavaScript the region holds nothing and takes no space.
+ * which only a script can read, so without JavaScript the bar shows no button for it.
  */
 function TrailRegion(): null {
   return null;

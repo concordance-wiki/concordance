@@ -271,11 +271,25 @@ function trailList(doc: Doc, props: TrailProps, entries: TrailPage[]): HTMLOList
   return nodes;
 }
 
+/** The bookmark drawn on the button that unfolds the trail, in the current colour. */
+export const TRAIL_GLYPH =
+  '<svg class="trail-glyph" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>';
+
+/** The disclosure folding the trail behind a square button of the bar, named for assistive technology. */
+function trailFold(doc: Doc, props: TrailProps, nav: HTMLElement): HTMLDetailsElement {
+  const summary = element(doc, "summary", { class: "trail-button", title: props.labels.title }, [
+    element(doc, "span", { class: "visually-hidden" }, [props.labels.title]),
+  ]);
+  summary.insertAdjacentHTML("afterbegin", TRAIL_GLYPH);
+  return element(doc, "details", { class: "trail-fold" }, [summary, nav]);
+}
+
 /**
- * Fills one island with the trail: the pages visited as an ordered list of links, the current one
- * marked, and the pin button; remembers the trail in the tab, in the URL fragment when the page has
- * no fragment of its own, and in the pinned storage when the trail is the pinned one; makes every
- * internal link of the page carry it.
+ * Fills one island with the trail, folded behind a button of the bar: the pages visited as an
+ * ordered list of links, the current one marked, and the pin button; remembers the trail in the
+ * tab, in the URL fragment when the page has no fragment of its own, and in the pinned storage
+ * when the trail is the pinned one; makes every internal link of the page carry it. An empty
+ * trail leaves the island empty, so that the bar shows no button for it.
  */
 export function wireTrail(target: TrailElement, env: TrailEnvironment): boolean {
   // Written by island() at build: the attribute carries the props of the trail.
@@ -292,10 +306,8 @@ export function wireTrail(target: TrailElement, env: TrailEnvironment): boolean 
   );
   const { entries } = resolved;
   let pinned = resolved.pinned;
-  const nav = element(doc, "nav", { class: "trail", "aria-label": props.labels.title }, []);
   if (entries.length === 0) {
-    nav.append(element(doc, "p", { class: "trail-empty" }, [props.labels.empty]));
-    target.replaceChildren(nav);
+    target.replaceChildren();
     return true;
   }
   const ids = entries.map((entry) => entry.id);
@@ -323,8 +335,11 @@ export function wireTrail(target: TrailElement, env: TrailEnvironment): boolean 
     showPin();
   });
   showPin();
-  nav.append(trailList(doc, props, entries), button);
-  target.replaceChildren(nav);
+  const nav = element(doc, "nav", { class: "trail", "aria-label": props.labels.title }, [
+    trailList(doc, props, entries),
+    button,
+  ]);
+  target.replaceChildren(trailFold(doc, props, nav));
   doc.addEventListener("click", (event) => {
     // The target is an element, which has `closest`, or the document, which has not; `a[href]` only yields anchors.
     const origin = event.target as { closest?: (selector: string) => TrailAnchor | null };

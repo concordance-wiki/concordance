@@ -16,7 +16,6 @@ export const labels = {
   trailTitle: "Trail",
   trailPin: "Pin",
   trailUnpin: "Unpin",
-  trailEmpty: "No page pinned yet",
   trailEarlier: "earlier pages",
   files: "files",
   properties: "Properties",

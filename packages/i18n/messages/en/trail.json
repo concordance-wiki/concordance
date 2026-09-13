@@ -3,10 +3,6 @@
     "defaultMessage": "earlier pages",
     "description": "Follows the number of oldest trail entries folded into one expandable entry."
   },
-  "trail.empty": {
-    "defaultMessage": "No page pinned yet",
-    "description": "Notice shown when the trail holds no page."
-  },
   "trail.pin": {
     "defaultMessage": "Pin",
     "description": "Button that keeps the current page in the trail."
