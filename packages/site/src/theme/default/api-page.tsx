@@ -137,7 +137,7 @@ export function ApiPage({
         <MentionsPanel
           {...mentions}
           leadType={OPERATION_TYPE}
-          labels={{ ...mentions.labels, leadNote: contractText.operationsFirst }}
+          labels={{ ...mentions.labels, orderNote: contractText.operationsFirst }}
         />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
       </div>

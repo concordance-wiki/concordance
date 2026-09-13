@@ -21,7 +21,7 @@ import {
 } from "./context.js";
 import { neighbourhoodLabels, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
-import { mentionsPanelOf } from "./mentions.js";
+import { mentionsPanelOf, passageLocationOf } from "./mentions.js";
 import { entityHref, spaceHref } from "./paths.js";
 import { spaceWithPageOf } from "./space.js";
 
@@ -38,35 +38,7 @@ function sourceRank(context: SiteContext, source: string): number {
   return index === -1 ? context.model.build.sources.length : index;
 }
 
-/**
- * Where a passage stands, worded in the site language: in a document of the citing page, the
- * timecode of the cue, the page or the slide the scan counted as the line, as the fragment of
- * that page records it; in a note, the line.
- */
-export function passageLocationOf(
-  context: SiteContext,
-  note: Entity,
-  passage: FragmentPassage,
-): string {
-  const document = context.fragments
-    .get(note.id)
-    ?.documents?.find(
-      (candidate) => candidate.source === passage.source && candidate.path === passage.path,
-    );
-  const position = document?.pages.find((candidate) => candidate.number === passage.line);
-  if (document === undefined || position === undefined) {
-    return formatMessage(context.catalogue, "mentions.atLine", { line: passage.line });
-  }
-  switch (document.unit) {
-    case "cue":
-      // A timecode under the hour reads as minutes and seconds.
-      return position.label.replace(/^00:/, "");
-    case "page":
-      return formatMessage(context.catalogue, "keyword.pageAt", { number: position.number });
-    case "slide":
-      return formatMessage(context.catalogue, "keyword.slideAt", { number: position.number });
-  }
-}
+export { passageLocationOf } from "./mentions.js";
 
 /** A group of passages with the source it comes from, which orders the groups and names the spaces. */
 export interface LocatedGroup {
@@ -256,8 +228,9 @@ export interface KeywordPageOptions {
  * The view model of a keyword page: the space the word is filed in and its breadcrumb, since
  * when it is used, the notice from the catalogue with the lead to propose a definition on the
  * glossary's forge when it is known, the counts from the entity, the passages and the leads
- * from its fragment, the neighbourhood from its co-occurrences, the related pages with the note
- * that none is cited, and the labels of the page in the site language.
+ * from its fragment, the neighbourhood from its co-occurrences, the related pages — the pages
+ * where the word is used — with the note that none is cited, and the labels of the page in the
+ * site language.
  */
 export function keywordPageOf(
   context: SiteContext,
@@ -312,10 +285,7 @@ export function keywordPageOf(
     similar: similarOf(context, page, entity),
     similarLead: message(context, "keyword.similarLead"),
     neighbours: neighbourhood,
-    mentions: {
-      ...mentions,
-      labels: { ...mentions.labels, orderNote: message(context, "keyword.relatedNote") },
-    },
+    mentions,
     labels: keywordPageLabels(context, neighbourPages(neighbourhood)),
   };
 }

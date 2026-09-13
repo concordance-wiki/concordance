@@ -6,7 +6,7 @@
   "related.loadingOthers": "Chargement des autres pages…",
   "related.noMatch": "Aucune page ne correspond au filtre.",
   "related.none": "Aucune autre page n’évoque encore celle-ci.",
-  "related.orderNote": "Du plus sûr au plus faible : les liens écrits d’abord, les mentions relevées ensuite.",
+  "related.orderNote": "Ordonnées par nombre de passages, écrits et relevés confondus. « Cité » signale un lien présent dans le texte.",
   "related.other": "'{count}' autre",
   "related.others": "'{count}' autres",
   "related.othersUnavailable": "Les autres pages n’ont pas pu être chargées.",

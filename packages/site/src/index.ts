@@ -63,13 +63,26 @@ export * from "./build/paths.js";
 export {
   DEFAULT_MENTIONS_INLINE,
   citingPages,
+  evokedMentionsOf,
   mentionsOf,
   mentionsPanelOf,
   relatedLabels,
+  relatedMentionsOf,
+  relatedViewOf,
 } from "./build/mentions.js";
-export type { MentionsFragment } from "./build/mentions.js";
-export { MENTIONS_EMBEDDED_MAX, MENTIONS_ISLAND } from "./theme/default/mentions-island.js";
-export { RELATED_CONDENSED, groupByPage, typeCounts } from "./theme/default/mention-list.js";
+export type { MentionsFragment, RelatedView } from "./build/mentions.js";
+export {
+  MENTIONS_EMBEDDED_MAX,
+  MENTIONS_ISLAND,
+  PHONE_QUERY,
+  RELATED_PHONE,
+} from "./theme/default/mentions-island.js";
+export {
+  RELATED_CONDENSED,
+  RELATED_INLINE,
+  groupByPage,
+  typeCounts,
+} from "./theme/default/mention-list.js";
 export type { RelatedPage } from "./theme/default/mention-list.js";
 export {
   HOME_RECENT_ANCHOR,

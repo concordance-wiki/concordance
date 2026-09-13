@@ -78,12 +78,25 @@ const PART: Readonly<Record<string, readonly string[]>> = {
   "build/mentions.js": [
     "DEFAULT_MENTIONS_INLINE",
     "citingPages",
+    "evokedMentionsOf",
     "mentionsOf",
     "mentionsPanelOf",
     "relatedLabels",
+    "relatedMentionsOf",
+    "relatedViewOf",
   ],
-  "theme/default/mentions-island.js": ["MENTIONS_EMBEDDED_MAX", "MENTIONS_ISLAND"],
-  "theme/default/mention-list.js": ["RELATED_CONDENSED", "groupByPage", "typeCounts"],
+  "theme/default/mentions-island.js": [
+    "MENTIONS_EMBEDDED_MAX",
+    "MENTIONS_ISLAND",
+    "PHONE_QUERY",
+    "RELATED_PHONE",
+  ],
+  "theme/default/mention-list.js": [
+    "RELATED_CONDENSED",
+    "RELATED_INLINE",
+    "groupByPage",
+    "typeCounts",
+  ],
   "build/space.js": [
     "HOME_RECENT_ANCHOR",
     "SPACE_PAGES_MAX",

@@ -11,6 +11,8 @@ export interface RelatedPage {
   type?: string;
   typeLabel?: string;
   mentions: Mention[];
+  /** How many passages the page holds: the mentions held, or the count the build gave when it served fewer. */
+  count: number;
   /** Whether the page writes a link to the entity, the "cited" mark. */
   cited: boolean;
   /** The passage the entry quotes: the first written mention when there is one, else the first of all. */
@@ -19,11 +21,10 @@ export interface RelatedPage {
 
 /**
  * Groups mentions by the page they come from, in the order the pages first appear, then orders
- * the pages from the surest to the weakest: the pages that write a link to the entity first,
- * then by number of passages, written and recognised counted alike; the first appearance
- * breaks ties, so that the corpus order holds among equals. The pages of the lead type, when
- * one is given, come before every other whatever their count or their link: the operations on
- * an API page.
+ * the pages by number of passages, written links and recognised mentions counted alike; the
+ * first appearance breaks ties, so that the corpus order holds among equals. A written link
+ * marks its page "cited" without lifting it. The pages of the lead type, when one is given,
+ * come before every other whatever their count: the operations on an API page.
  */
 export function groupByPage(mentions: readonly Mention[], leadType?: string): RelatedPage[] {
   const pages = new Map<string, RelatedPage>();
@@ -38,11 +39,13 @@ export function groupByPage(mentions: readonly Mention[], leadType?: string): Re
         ...(mention.type === undefined ? {} : { type: mention.type }),
         ...(mention.typeLabel === undefined ? {} : { typeLabel: mention.typeLabel }),
         mentions: [mention],
+        count: Math.max(1, mention.passages ?? 0),
         cited: mention.kind === "written",
         excerpt: mention,
       });
     } else {
       page.mentions.push(mention);
+      page.count = Math.max(page.count, page.mentions.length, mention.passages ?? 0);
       if (mention.kind === "written" && !page.cited) {
         page.cited = true;
         page.excerpt = mention;
@@ -50,12 +53,7 @@ export function groupByPage(mentions: readonly Mention[], leadType?: string): Re
     }
   }
   const lead = (page: RelatedPage): number => (page.type === leadType ? 0 : 1);
-  return [...pages.values()].sort(
-    (a, b) =>
-      lead(a) - lead(b) ||
-      Number(b.cited) - Number(a.cited) ||
-      b.mentions.length - a.mentions.length,
-  );
+  return [...pages.values()].sort((a, b) => lead(a) - lead(b) || b.count - a.count);
 }
 
 /** Whether a page matches a filter typed by the reader: on its title, its type and its passages, without regard to case. */
@@ -111,14 +109,28 @@ export function Context({ mention }: { mention: Mention }): JSX.Element {
 }
 
 export interface RelatedListProps {
+  /** The pages the filters keep, in the order of the panel. */
   pages: readonly RelatedPage[];
   labels: RelatedLabels;
+  /** How many entries stand in view; every one when absent. */
+  limit?: number;
+  /** How many pages there are in all, the ones not yet held included; what the folds count. `pages.length` when absent. */
+  total?: number;
+  /**
+   * Whether the entries beyond `limit` are served in a disclosure of their own, worded as the
+   * button that shows them: the served markup, readable without any script; the island renders
+   * its button instead once it runs.
+   */
+  beyond?: boolean;
 }
 
 /** How many entries stay in view where the panel is condensed; the others fold behind their count. */
 export const RELATED_CONDENSED = 3;
 
-function Entries({ pages, labels }: RelatedListProps): JSX.Element {
+/** How many entries the panel lists before the button that shows the others. */
+export const RELATED_INLINE = 6;
+
+function Entries({ pages, labels }: Pick<RelatedListProps, "pages" | "labels">): JSX.Element {
   return (
     <ol class="related-list">
       {pages.map((page) => (
@@ -129,10 +141,10 @@ function Entries({ pages, labels }: RelatedListProps): JSX.Element {
             </a>
             {page.typeLabel !== undefined && <span class="related-type">{page.typeLabel}</span>}
             <span class="related-count">
-              {page.mentions.length}
+              {page.count}
               <span class="visually-hidden">
                 {" "}
-                {page.mentions.length === 1 ? labels.passage : labels.passages}
+                {page.count === 1 ? labels.passage : labels.passages}
               </span>
             </span>
           </span>
@@ -153,19 +165,34 @@ function Entries({ pages, labels }: RelatedListProps): JSX.Element {
  * One entry per page: its title linking to it, its type, its number of passages, then the
  * excerpt linking to the passage, prefixed "cited" when the page writes a link to the entity
  * and by the page, slide or timecode when the passage was read from a document. The entries
- * beyond the first three stand in a disclosure of their own, closed only where the stylesheet
- * condenses the panel, so that a narrow page shows three titles and the count of the others.
+ * beyond the first three, up to the limit, stand in a disclosure counting every page beyond
+ * the three, closed only where the stylesheet condenses the panel, so that a narrow page shows
+ * three titles and the count of the others; the entries beyond the limit, when served, stand in
+ * a second disclosure worded as the button that shows them.
  */
-export function RelatedList({ pages, labels }: RelatedListProps): JSX.Element {
-  const rest = pages.slice(RELATED_CONDENSED);
+export function RelatedList({
+  pages,
+  labels,
+  limit,
+  total = pages.length,
+  beyond = false,
+}: RelatedListProps): JSX.Element {
+  const inView = limit === undefined ? pages : pages.slice(0, limit);
+  const fold = inView.slice(RELATED_CONDENSED);
+  const rest = limit === undefined ? [] : pages.slice(limit);
+  const others = total - RELATED_CONDENSED;
   return (
     <>
-      <Entries pages={pages.slice(0, RELATED_CONDENSED)} labels={labels} />
-      {rest.length > 0 && (
+      <Entries pages={inView.slice(0, RELATED_CONDENSED)} labels={labels} />
+      {fold.length > 0 && (
         <details class="related-others">
-          <summary>
-            {fill(rest.length === 1 ? labels.other : labels.others, { count: rest.length })}
-          </summary>
+          <summary>{fill(others === 1 ? labels.other : labels.others, { count: others })}</summary>
+          <Entries pages={fold} labels={labels} />
+        </details>
+      )}
+      {beyond && limit !== undefined && rest.length > 0 && (
+        <details class="related-beyond">
+          <summary>{fill(labels.showOthers, { count: total - limit })}</summary>
           <Entries pages={rest} labels={labels} />
         </details>
       )}

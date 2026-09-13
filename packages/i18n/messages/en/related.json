@@ -28,8 +28,8 @@
     "description": "Notice shown when no page cites the current one."
   },
   "related.orderNote": {
-    "defaultMessage": "From the surest to the weakest: written links first, then recognised mentions.",
-    "description": "Note under the related pages saying how they are ordered, the pages that write a link before the ones the scan found."
+    "defaultMessage": "Ordered by number of passages, written and recognised together. “Cited” marks a link present in the text.",
+    "description": "Note under the related pages saying how they are ordered, written links and recognised mentions counted alike, and what the cited mark means."
   },
   "related.other": {
     "defaultMessage": "'{count}' other",

@@ -9,6 +9,8 @@ import { renderSlot } from "../../src/render.js";
 import type { Mention } from "../../src/slots.js";
 import {
   MentionsIsland,
+  PHONE_QUERY,
+  RELATED_PHONE,
   type MentionsIslandProps,
   type MentionsRest,
 } from "../../src/theme/default/mentions-island.js";
@@ -115,7 +117,7 @@ describe("The related pages offer a text filter and a type filter once the islan
     expect(entries(host)).toEqual(["Note 1 Term 3", "Note 2 Screen 3", "Note 3 Term 1"]);
   });
 
-  it("orders the pages that write a link first, then by number of passages, written and recognised alike, the corpus order breaking ties", async () => {
+  it("orders the pages by number of passages, written and recognised alike, the corpus order breaking ties, a written link marking its page without lifting it", async () => {
     const all = [
       mention(1, "written"),
       mention(4),
@@ -126,21 +128,16 @@ describe("The related pages offer a text filter and a type filter once the islan
       mention(2),
     ];
     const host = await mount(props(all));
-    expect(entries(host)).toEqual(["Note 1 Term 2", "Note 2 Screen 3", "Note 3 Term 2"]);
+    expect(entries(host)).toEqual(["Note 2 Screen 3", "Note 1 Term 2", "Note 3 Term 2"]);
+    expect(q(host, ".related-cited .related-title").textContent).toBe("Note 1");
+    expect(q(host, ".related-note").textContent).toBe(defaultRelatedLabels.orderNote);
   });
 
-  it("lifts the pages of the lead type to the top whatever their count, the written link then the passage count ordering the rest, and says why under the list", async () => {
+  it("lifts the pages of the lead type to the top whatever their count, the passage count ordering the rest", async () => {
     const all = [mention(1, "written"), mention(4), mention(5), mention(6), mention(7), mention(8)];
-    const host = await mount({
-      ...props(all),
-      leadType: "term",
-      labels: { ...defaultRelatedLabels, leadNote: "The terms come first." },
-    });
-    expect(entries(host)).toEqual(["Note 1 Term 1", "Note 3 Term 2", "Note 2 Screen 3"]);
-    expect(q(host, ".related-lead-note").textContent).toBe("The terms come first.");
-    expect(host.querySelectorAll(".related-note")).toHaveLength(2);
-    const plain = await mount({ ...props(all), leadType: "term" });
-    expect(plain.querySelectorAll(".related-note")).toHaveLength(1);
+    const host = await mount({ ...props(all), leadType: "term" });
+    expect(entries(host)).toEqual(["Note 3 Term 2", "Note 1 Term 1", "Note 2 Screen 3"]);
+    expect(host.querySelectorAll(".related-note")).toHaveLength(1);
   });
 
   it("filters on the title, the type and the passages without regard to case, the counts and a status line following", async () => {
@@ -215,13 +212,68 @@ describe("The related pages offer a text filter and a type filter once the islan
   });
 });
 
+describe("Six entries, then the button naming the other pages", () => {
+  it("lists six entries once mounted, the served pages beyond them behind the button until it is pressed, which lists every page held", async () => {
+    const all = mentions(25);
+    const input = props(all);
+    const served = renderToString(h(MentionsIsland, input));
+    expect(served).toContain(
+      '<details class="related-beyond"><summary>Show the 3 others</summary>',
+    );
+    expect(served).not.toContain("<button");
+    const host = await mount(input);
+    expect(host.querySelector(".related-beyond")).toBeNull();
+    expect(host.querySelectorAll(".related-page")).toHaveLength(6);
+    expect(q(host, ".related-others > summary").textContent).toBe("6 others");
+    expect(q(host, ".mentions-body").className).toBe("mentions-body");
+    button(host, "Show the 3 others").click();
+    await settle();
+    expect(host.querySelectorAll(".related-page")).toHaveLength(7);
+    expect(q(host, ".mentions-body").className).toBe("mentions-body related-expanded");
+    // Nothing is left to obtain: the link to the fragment stands alone, the button is gone.
+    expect(host.querySelector(".mentions-more button")).toBeNull();
+    expect(q(host, ".mentions-more a").getAttribute("href")).toBe(fragmentHref);
+  });
+
+  it("shows no button when the pages fit in six, and names the pages the filter keeps beyond six", async () => {
+    const six = await mount(props(mentions(18)));
+    expect(six.querySelectorAll(".related-page")).toHaveLength(6);
+    expect(six.querySelector(".mentions-more")).toBeNull();
+    const host = await mount(props(mentions(21), 21));
+    expect(button(host, "Show the 1 others")).toBeDefined();
+    const input = searchOf(host);
+    input.value = "screen";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await settle();
+    expect(entries(host)).toEqual(["Note 2 Screen 3", "Note 4 Screen 3", "Note 6 Screen 3"]);
+    expect(host.querySelector(".mentions-more")).toBeNull();
+  });
+
+  it("lists two entries on a phone, read from the stylesheet's own query when it mounts", async () => {
+    expect(RELATED_PHONE).toBe(2);
+    expect(PHONE_QUERY).toBe("(width < 48rem)");
+    const matchMedia = vi
+      .spyOn(window, "matchMedia")
+      .mockImplementation(
+        (query: string) => ({ matches: query === PHONE_QUERY }) as MediaQueryList,
+      );
+    const host = await mount(props(mentions(25)));
+    expect(matchMedia).toHaveBeenCalledWith(PHONE_QUERY);
+    expect(host.querySelectorAll(".related-page")).toHaveLength(2);
+    expect(host.querySelector(".related-others")).toBeNull();
+    button(host, "Show the 7 others").click();
+    await settle();
+    expect(host.querySelectorAll(".related-page")).toHaveLength(7);
+  });
+});
+
 describe("The rest is loaded on demand", () => {
   it("shows the embedded pages on request, the link to the fragment giving way to the button naming the other pages", async () => {
     const all = mentions(25);
     const host = await mount(props(all, 20, { kind: "embedded", mentions: all.slice(20) }));
     expect(host.querySelector(".mentions-more a")).toBeNull();
-    const more = button(host, "Show the 2 others");
-    expect(host.querySelectorAll(".related-page")).toHaveLength(7);
+    const more = button(host, "Show the 3 others");
+    expect(host.querySelectorAll(".related-page")).toHaveLength(6);
     more.click();
     await settle();
     expect(host.querySelectorAll(".related-page")).toHaveLength(9);
@@ -229,12 +281,16 @@ describe("The rest is loaded on demand", () => {
     expect(entries(host).at(-1)).toBe("Note 9 Term 1");
   });
 
-  it("names at least one other page while the served pages are not all shown", async () => {
+  it("names at least one other page while the served pages are not all shown, and gives the link to the fragment once every page held is listed", async () => {
     const all = [...mentions(20), mention(21)];
     const host = await mount(props(all, 20, { kind: "embedded", mentions: all.slice(20) }));
     expect(button(host, "Show the 1 others")).toBeDefined();
     const partial = await mount(props([...mentions(3), mention(4)], 3, { kind: "link" }));
-    expect(partial.querySelector(".mentions-more a")).not.toBeNull();
+    expect(partial.querySelector(".mentions-more a")).toBeNull();
+    button(partial, "Show the 1 others").click();
+    await settle();
+    expect(partial.querySelector(".mentions-more button")).toBeNull();
+    expect(q(partial, ".mentions-more a").getAttribute("href")).toBe(fragmentHref);
   });
 
   it("fetches the fragment on request, says so while loading, then shows every page", async () => {
@@ -247,7 +303,7 @@ describe("The rest is loaded on demand", () => {
         }),
     );
     const host = await mount(props(all, 20, { kind: "fetch", load }));
-    button(host, "Show the 2 others").click();
+    button(host, "Show the 3 others").click();
     await settle();
     const loading = button(host, "Loading the other pages");
     expect(loading.disabled).toBe(true);
@@ -263,7 +319,7 @@ describe("The rest is loaded on demand", () => {
     const host = await mount(
       props(mentions(25), 20, { kind: "fetch", load: () => Promise.reject(new Error("offline")) }),
     );
-    button(host, "Show the 2 others").click();
+    button(host, "Show the 3 others").click();
     await settle();
     const status = q(host, '.mentions-more[role="status"]');
     expect(status.textContent).toBe(
@@ -273,11 +329,16 @@ describe("The rest is loaded on demand", () => {
     expect(host.querySelector("button[disabled]")).toBeNull();
   });
 
-  it("keeps the link to the fragment over file://, where nothing can be fetched, and when the entry gave no source", async () => {
+  it("keeps the link to the fragment over file://, where nothing can be fetched, and when the entry gave no source, once the pages held are listed", async () => {
     const linked = await mount(props(mentions(25), 20, { kind: "link" }));
+    expect(linked.querySelector(".mentions-more a")).toBeNull();
+    button(linked, "Show the 3 others").click();
+    await settle();
     expect(q(linked, ".mentions-more a").getAttribute("href")).toBe(fragmentHref);
     expect(linked.querySelector(".mentions-more button")).toBeNull();
     const sourceless = await mount(props(mentions(25)));
+    button(sourceless, "Show the 3 others").click();
+    await settle();
     expect(q(sourceless, ".mentions-more a").getAttribute("href")).toBe(fragmentHref);
     const island = new MentionsIsland(props(mentions(25), 20, { kind: "link" }));
     const setState = vi.spyOn(island, "setState");
@@ -285,12 +346,15 @@ describe("The rest is loaded on demand", () => {
     expect(setState).not.toHaveBeenCalled();
   });
 
-  it("shows neither link nor button when every mention is inline or when no fragment was written", async () => {
+  it("shows neither link nor button when every mention is inline and fits in six, and no link when no fragment was written", async () => {
     const complete = await mount(props(mentions(5)));
     expect(complete.querySelector(".mentions-more")).toBeNull();
     const unwritten = props(mentions(25));
     delete unwritten.fragmentHref;
     const host = await mount(unwritten);
+    button(host, "Show the 3 others").click();
+    await settle();
+    expect(host.querySelectorAll(".related-page")).toHaveLength(7);
     expect(host.querySelector(".mentions-more")).toBeNull();
   });
 });
@@ -307,7 +371,7 @@ describe("the mentions-panel hydration entry", () => {
     await settle();
     const host = document.body;
     expect(host.querySelector(".mentions-controls")).not.toBeNull();
-    button(host, "Show the 2 others").click();
+    button(host, "Show the 3 others").click();
     await settle();
     expect(host.querySelectorAll(".related-page")).toHaveLength(9);
   });
@@ -347,7 +411,7 @@ describe("the mentions-panel hydration entry behind a server", () => {
     vi.resetModules();
     await import("../../src/islands/mentions-panel.client.js");
     await settle();
-    button(document.body, "Show the 60 others").click();
+    button(document.body, "Show the 61 others").click();
     await settle();
     expect(fetched).toHaveBeenCalledWith(fragmentHref);
     expect(document.body.querySelectorAll(".related-page")).toHaveLength(67);

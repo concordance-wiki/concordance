@@ -5,6 +5,7 @@ import {
   fill,
   groupByPage,
   matchesFilter,
+  RELATED_INLINE,
   RelatedList,
   typeCounts,
   type RelatedPage,
@@ -21,6 +22,12 @@ export const MENTIONS_EMBEDDED_MAX = 200;
 /** The id of the JSON script block holding the embedded mentions; one panel per page, so one id. */
 export const MENTIONS_EMBEDDED = "mentions-embedded";
 
+/** How many entries the panel lists on a phone before the button that shows the others. */
+export const RELATED_PHONE = 2;
+
+/** The phone layout of the stylesheet, under which the island lists two entries: the same width as its breakpoint. */
+export const PHONE_QUERY = "(width < 48rem)";
+
 /** Where the mentions beyond the inline ones come from once the island runs; never serialised. */
 export type MentionsRest =
   | { kind: "embedded"; mentions: Mention[] }
@@ -29,7 +36,7 @@ export type MentionsRest =
   | { kind: "link" };
 
 export interface MentionsIslandProps {
-  /** The inline mentions, written links first, then recognised ones, each in corpus order. */
+  /** The inline mentions, in the order of the panel: page by page, most passages first. */
   mentions: Mention[];
   /** How many mentions the entity has in all, the inline ones included. */
   total: number;
@@ -53,6 +60,15 @@ export interface MentionsIslandState {
   /** Every mention once the rest was obtained; the inline ones until then. */
   loaded?: Mention[];
   loading: Loading;
+  /** Whether the reader asked for the entries beyond the first ones; every page held is listed then. */
+  expanded: boolean;
+  /** Whether the page is laid out for a phone, where the panel lists two entries before its button. */
+  phone: boolean;
+}
+
+/** Whether the phone layout applies, read from the stylesheet's own query once the island runs; never on the server. */
+function phoneLayout(): boolean {
+  return typeof window !== "undefined" && window.matchMedia(PHONE_QUERY).matches;
 }
 
 /**
@@ -62,11 +78,25 @@ export interface MentionsIslandState {
 export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslandState> {
   constructor(props: MentionsIslandProps) {
     super(props);
-    this.state = { hydrated: false, filter: "", hidden: [], loading: "idle" };
+    this.state = {
+      hydrated: false,
+      filter: "",
+      hidden: [],
+      loading: "idle",
+      expanded: false,
+      phone: false,
+    };
   }
 
   override componentDidMount(): void {
-    this.setState({ hydrated: true });
+    this.setState({ hydrated: true, phone: phoneLayout() });
+  }
+
+  /** How many entries stand in view: two on a phone, six elsewhere, every one once the reader asked for the others. */
+  limit(): number | undefined {
+    const { expanded, phone } = this.state;
+    if (expanded) return undefined;
+    return phone ? RELATED_PHONE : RELATED_INLINE;
   }
 
   /** Every mention the island currently holds. */
@@ -102,6 +132,12 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
   receive(mentions: Mention[]): void {
     this.setState({ loaded: mentions, loading: "idle" });
   }
+
+  /** Lists every page held and obtains the rest when there is one to obtain. */
+  showOthers = (): void => {
+    this.setState({ expanded: true });
+    this.loadRest();
+  };
 
   loadRest = (): void => {
     const { rest } = this.props;
@@ -178,9 +214,21 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
     );
   }
 
+  /** Whether every mention of the entity is held: nothing is left to obtain. */
+  private complete(): boolean {
+    const { total, mentions } = this.props;
+    return total <= mentions.length || this.state.loaded !== undefined;
+  }
+
+  /** How many pages there are in all: the pages held once they are all held, else what the build counted. */
+  private known(shown: RelatedPage[]): number {
+    return this.complete() ? shown.length : Math.max(this.props.pages, shown.length);
+  }
+
   /** The related pages, or the reason none is listed: nothing related, or nothing left by the filter. */
   private list(all: RelatedPage[], shown: RelatedPage[]): JSX.Element {
     const { labels } = this.props;
+    const { hydrated } = this.state;
     if (all.length === 0) return <p class="empty">{labels.noRelated}</p>;
     if (shown.length === 0) {
       return (
@@ -189,23 +237,35 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
         </p>
       );
     }
-    return <RelatedList pages={shown} labels={labels} />;
+    const limit = this.limit();
+    return (
+      <RelatedList
+        pages={shown}
+        labels={labels}
+        {...(limit === undefined ? {} : { limit })}
+        total={this.known(shown)}
+        beyond={!hydrated}
+      />
+    );
   }
 
-  /** The way to the pages beyond the inline mentions: a link to the fragment until the island runs, a button once it can load them. */
-  private more(shownPages: number): JSX.Element | null {
-    const { total, mentions, pages, fragmentHref, rest, labels } = this.props;
-    const { hydrated, loaded, loading } = this.state;
-    if (total <= mentions.length || loaded !== undefined) return null;
+  /**
+   * The way to the pages beyond the entries in view: a link to the fragment until the island
+   * runs, when some mentions are not held; then a button naming the other pages, which lists
+   * the pages held and obtains the rest; the link again where nothing can be fetched.
+   */
+  private more(shown: RelatedPage[]): JSX.Element | null {
+    const { total, fragmentHref, rest, labels } = this.props;
+    const { hydrated, loading, expanded } = this.state;
+    const complete = this.complete();
     const link =
-      fragmentHref === undefined ? null : (
+      fragmentHref === undefined || complete ? null : (
         <a href={fragmentHref}>
           {labels.fullList} ({total})
         </a>
       );
-    if (!hydrated || rest === undefined || rest.kind === "link") {
-      return link === null ? null : <p class="mentions-more">{link}</p>;
-    }
+    const linkAlone = link === null ? null : <p class="mentions-more">{link}</p>;
+    if (!hydrated) return linkAlone;
     if (loading === "failed") {
       return (
         <p class="mentions-more" role="status">
@@ -213,12 +273,17 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
         </p>
       );
     }
+    const limit = this.limit();
+    const displayed = limit === undefined ? shown.length : Math.min(limit, shown.length);
+    const others = this.known(shown) - displayed;
+    const loadable = rest !== undefined && rest.kind !== "link";
+    if (others <= 0 || (expanded && !loadable)) return linkAlone;
     return (
       <p class="mentions-more">
-        <button type="button" disabled={loading === "loading"} onClick={this.loadRest}>
+        <button type="button" disabled={loading === "loading"} onClick={this.showOthers}>
           {loading === "loading"
             ? labels.loadingOthers
-            : fill(labels.showOthers, { count: Math.max(pages - shownPages, 1) })}
+            : fill(labels.showOthers, { count: others })}
         </button>
       </p>
     );
@@ -228,14 +293,12 @@ export class MentionsIsland extends Component<MentionsIslandProps, MentionsIslan
     const { labels } = this.props;
     const { hydrated } = this.state;
     const { all, shown } = this.pages();
+    const expanded = this.limit() === undefined;
     return (
-      <div class="mentions-body">
+      <div class={expanded ? "mentions-body related-expanded" : "mentions-body"}>
         {hydrated && this.controls(all, shown)}
         {this.list(all, shown)}
-        {this.more(all.length)}
-        {all.length > 0 && labels.leadNote !== undefined && (
-          <p class="related-note related-lead-note">{labels.leadNote}</p>
-        )}
+        {this.more(shown)}
         {all.length > 0 && <p class="related-note">{labels.orderNote}</p>}
       </div>
     );

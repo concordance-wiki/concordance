@@ -876,6 +876,8 @@ export interface Mention {
   surface?: string;
   /** How the position is named when the file is not a note: `page 3`, `slide 3`, a timecode; the panel shows it instead of the line. */
   location?: string;
+  /** How many passages the citing page holds in all, when a served slice may not carry them all; the passages held count otherwise. */
+  passages?: number;
 }
 
 /** The strings of the related pages block in the language of the site; the theme's own English when absent. */
@@ -906,18 +908,16 @@ export interface RelatedLabels {
   /** "{count} other" and "{count} others": the line unfolding the entries beyond the first three where the panel is condensed, the placeholder replaced by the island. */
   other: string;
   others: string;
-  /** Under the list: how it is ordered and what "cited" marks. */
+  /** Under the list: how it is ordered and what "cited" marks, or how the page relates to the model. */
   orderNote: string;
   /** When no page evokes the entity. */
   noRelated: string;
   /** When no page matches the filters. */
   noMatch: string;
-  /** Before the order note, when a `leadType` lifts its pages to the top: why they come first. */
-  leadNote?: string;
 }
 
 export interface MentionsPanelProps {
-  /** Written links first, then recognised mentions, each group in corpus order. */
+  /** In the order of the panel: page by page, most passages first, the passages of a page in corpus order. */
   mentions: Mention[];
   /** How many mentions are in the served HTML; the rest is revealed on demand. */
   initial: number;

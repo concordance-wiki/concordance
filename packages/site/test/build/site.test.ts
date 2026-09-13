@@ -73,7 +73,13 @@ function inlineMentions(html: string): number {
 }
 
 /** The entities of the fixture model that another note cites: those whose mentions fragment the build writes. */
-const cited = ["framing/vision", "glossary/keyword-page", "glossary/page"];
+/** The entities with a related page: the notes another note cites, and the keyword whose passages name the pages using it. */
+const cited = [
+  "framing/vision",
+  "glossary/keyword-page",
+  "glossary/page",
+  "keywords/build-summary",
+];
 
 /**
  * The pages of the lists of the folders at the top of the fixture model: the whole list by
@@ -631,7 +637,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
 });
 
 describe("One mentions fragment per entity, never a global index", () => {
-  it("writes fragments/<id>.mentions.json for every entity another note cites, holding all its mentions with hrefs relative to its page", async () => {
+  it("writes fragments/<id>.mentions.json for every entity with a related page, holding all its mentions with hrefs relative to its page", async () => {
     const { fileSystem } = await build();
     const written = fileSystem.listFiles("/dist").filter((file) => file.endsWith(".mentions.json"));
     expect(written).toEqual(cited.map(mentionsFragmentPath));
@@ -697,12 +703,13 @@ describe("Without JavaScript, the first twenty mentions remain readable and the 
     const html = fileSystem.readText(`/dist/${path}`).replace(/<script[\s\S]*?<\/script>/g, "");
     expect(html).not.toContain("<script");
     expect(inlineMentions(html)).toBe(3);
+    // The three mentions served are the first passages of the three pages, each counting what it holds in all.
     expect(count(html, '<li class="related-page')).toBe(3);
     expect(html).toContain(
-      '<a class="related-title" href="../../specs/rules/publication-threshold/index.html">Épreuve du seuil</a><span class="related-type">Business rule</span>',
+      '<a class="related-title" href="../../specs/screens/mentions-panel/index.html">Mentions panel</a><span class="related-type">Screen</span><span class="related-count">3<span class="visually-hidden"> passages</span></span>',
     );
     expect(html).toContain(
-      '<a class="related-excerpt mention-passage" href="../../specs/rules/publication-threshold/index.html#L1"><span class="related-mark">Cited · </span>',
+      '<a class="related-excerpt mention-passage" href="../../specs/screens/mentions-panel/index.html#L7"><span class="related-mark">Cited · </span>',
     );
     expect(html).toContain('<a href="../../fragments/glossary/keyword-page.mentions.json">');
     // The header carries the mode switch button on every page: only the main landmark is inspected.
