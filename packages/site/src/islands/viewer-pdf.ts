@@ -49,59 +49,87 @@ export function nextZoom(current: number, direction: 1 | -1): number {
 }
 
 interface Controls {
-  previous: HTMLButtonElement;
-  next: HTMLButtonElement;
   counter: HTMLElement;
   zoomOut: HTMLButtonElement;
+  /** The zoom as a percentage, between its two buttons. */
+  zoom: HTMLElement;
   zoomIn: HTMLButtonElement;
   find: HTMLInputElement;
   status: HTMLElement;
   canvas: HTMLCanvasElement;
 }
 
-function button(doc: Document, label: string, className: string): HTMLButtonElement {
+/** A button drawn as a glyph, named for assistive technology. */
+function button(doc: Document, glyph: string, label: string, className: string): HTMLButtonElement {
   const element = doc.createElement("button");
   element.type = "button";
   element.className = className;
-  element.textContent = label;
+  element.textContent = glyph;
+  element.setAttribute("aria-label", label);
   return element;
 }
 
-/** The toolbar and the canvas of the viewer, appended to the host. */
+function span(doc: Document, className: string, text = ""): HTMLElement {
+  const element = doc.createElement("span");
+  element.className = className;
+  element.textContent = text;
+  return element;
+}
+
+function separator(doc: Document): HTMLElement {
+  const element = span(doc, "viewer-separator", "|");
+  element.setAttribute("aria-hidden", "true");
+  return element;
+}
+
+/** The zoom as the toolbar shows it, a percentage with a space before its sign. */
+export function zoomLabel(zoom: number): string {
+  return `${String(Math.round(zoom * 100))} %`;
+}
+
+/**
+ * The toolbar and the stage of the viewer, appended to the host: the counter of the position
+ * shown, the zoom between its two buttons, the find field over the extracted text with its
+ * status, then the canvas on its stage. The pages are reached through the strip of the page,
+ * which drives the viewer.
+ */
 function buildControls(host: HTMLElement, options: ViewerOptions): Controls {
   const doc = host.ownerDocument;
   const { labels } = options;
   const toolbar = doc.createElement("div");
   toolbar.className = "viewer-toolbar";
   toolbar.setAttribute("role", "toolbar");
-  const previous = button(doc, labels.previousPage, "viewer-previous");
-  const next = button(doc, labels.nextPage, "viewer-next");
-  const counter = doc.createElement("span");
-  counter.className = "viewer-counter";
+  const counter = span(doc, "viewer-counter");
   counter.setAttribute("aria-live", "polite");
-  const zoomOut = button(doc, labels.zoomOut, "viewer-zoom-out");
-  const zoomIn = button(doc, labels.zoomIn, "viewer-zoom-in");
+  const zoomOut = button(doc, "\u2212", labels.zoomOut, "viewer-zoom-out");
+  const zoom = span(doc, "viewer-zoom");
+  const zoomIn = button(doc, "+", labels.zoomIn, "viewer-zoom-in");
   const findLabel = doc.createElement("label");
   findLabel.className = "viewer-find";
-  findLabel.append(`${labels.findInDocument} `);
+  const glyph = span(doc, "viewer-find-glyph", "\u2315");
+  glyph.setAttribute("aria-hidden", "true");
+  findLabel.append(glyph, span(doc, "visually-hidden", labels.findInDocument));
   const find = doc.createElement("input");
   find.type = "search";
+  find.placeholder = labels.inTheDocument;
   findLabel.append(find);
-  const status = doc.createElement("span");
-  status.className = "viewer-status";
+  const status = span(doc, "viewer-status");
   status.setAttribute("role", "status");
-  toolbar.append(previous, counter, next, zoomOut, zoomIn, findLabel, status);
+  toolbar.append(counter, separator(doc), zoomOut, zoom, zoomIn, separator(doc), findLabel, status);
+  const stage = doc.createElement("div");
+  stage.className = "viewer-stage";
   const canvas = doc.createElement("canvas");
   canvas.className = "viewer-page";
-  host.replaceChildren(toolbar, canvas);
-  return { previous, next, counter, zoomOut, zoomIn, find, status, canvas };
+  stage.append(canvas);
+  host.replaceChildren(toolbar, stage);
+  return { counter, zoomOut, zoom, zoomIn, find, status, canvas };
 }
 
 /**
- * Opens the PDF in the host with pdf.js: one page drawn on a canvas at a time, previous and next,
- * zoom in and out over fixed steps, and a find box over the extracted text of the positions that
- * jumps to the first matching page and counts the others. The rail of the page follows through
- * `onPage`.
+ * Opens the PDF in the host with pdf.js: one page drawn on a canvas at a time, reached through
+ * `goTo` as the strip of the page asks, zoom in and out over fixed steps, and a find box over
+ * the extracted text of the positions that jumps to the first matching page and counts the
+ * others. The rail of the page follows through `onPage`.
  */
 export async function createViewer<V extends PdfViewport>(
   pdf: PdfLibrary<V>,
@@ -129,9 +157,11 @@ export async function createViewer<V extends PdfViewport>(
     await page.render({ canvas: controls.canvas, viewport }).promise;
   };
   const refresh = (): void => {
-    controls.counter.textContent = `${options.labels.unit} ${String(current)} / ${String(document.numPages)}`;
-    controls.previous.disabled = current <= 1;
-    controls.next.disabled = current >= document.numPages;
+    controls.counter.replaceChildren(
+      span(host.ownerDocument, "visually-hidden", `${options.labels.unit} `),
+      `${String(current)} / ${String(document.numPages)}`,
+    );
+    controls.zoom.textContent = zoomLabel(zoom);
     controls.zoomOut.disabled = nextZoom(zoom, -1) === zoom;
     controls.zoomIn.disabled = nextZoom(zoom, 1) === zoom;
     // Renders queue up so that a fast reader never sees two pages race for the canvas, and a
@@ -158,12 +188,6 @@ export async function createViewer<V extends PdfViewport>(
         : `${String(matches.length)} ${options.labels.matchesOn} ${matches.map((match) => `${options.labels.unit} ${String(match)}`).join(", ")}`;
   };
 
-  controls.previous.addEventListener("click", () => {
-    goTo(current - 1);
-  });
-  controls.next.addEventListener("click", () => {
-    goTo(current + 1);
-  });
   controls.zoomOut.addEventListener("click", () => {
     zoom = nextZoom(zoom, -1);
     refresh();

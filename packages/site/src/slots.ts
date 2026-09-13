@@ -497,6 +497,94 @@ export interface DocumentView {
   /** How the positions are named: the pages of a PDF, the slides of a deck, the cues of a transcript. */
   unit: "page" | "slide" | "cue";
   positions: DocumentPosition[];
+  /** The size of the original file in bytes, when the build recorded it. */
+  size?: number;
+  /** The author the file states, as its reader read it. */
+  author?: string;
+  /** ISO 8601 date the file states, its last modification else its creation; distinct from the commit date. */
+  date?: string;
+  /** The page or slide count the file states, when its reader read one. */
+  pageCount?: number;
+}
+
+/** One file of the document as the panel of the document page lists it: the original, its preview, the note. */
+export interface DocumentTwinFile {
+  /** `.pptx` for the original, `.pdf` for the preview, the file name of the note. */
+  label: string;
+  /** What the file is, worded in the site language: "original", "preview", "session notes". */
+  role: string;
+  href?: string;
+}
+
+/** The headings, notes and names the document page adds, in the language of the site; the theme's own English when absent. */
+export interface DocumentPageLabels {
+  /** The tab of the rendered document. */
+  document: string;
+  /** The tab of the extracted text. */
+  extractedText: string;
+  /** The tab of the note merged with the document. */
+  relatedNotes: string;
+  /** Accessible name of the tab bar. */
+  views: string;
+  /** The button that downloads the original file. */
+  downloadOriginal: string;
+  /** The heading of the strip of pages. */
+  pages: string;
+  /** Accessible name of the embedded PDF, shown without JavaScript. */
+  preview: string;
+  /** The link to the PDF inside the embedded PDF, for a browser that shows none. */
+  openPdf: string;
+  /** Note under the rendered page: converted at publication, cached by fingerprint. */
+  convertedNote: string;
+  /** Note under the rendered page: the original stays downloadable. */
+  originalNote: string;
+  /** Heading of the properties block. */
+  properties: string;
+  /** Row of the properties block: the kind of the document. */
+  type: string;
+  author: string;
+  /** Row of the properties block: the page count. */
+  pageCount: string;
+  date: string;
+  /** Note under the properties: read from the file, distinct from the repository date. */
+  dateNote: string;
+  /** Heading of the block listing the files of the document, the count worded: "Same document, three files". */
+  sameDocument: string;
+  /** Note under the files: grouped by folder, date and textual overlap, one entry in the index. */
+  groupedNote: string;
+  /** What the notes tab says when no note is merged with the document. */
+  noNote: string;
+}
+
+/**
+ * What the page of an office document, a deck or a report, shows beyond the generic entity page:
+ * the kind, count, size and date of the line under the title and of the properties, the files
+ * that make the document. Its presence makes the default theme lay the page out as a document
+ * page; the generic entity page is rendered without it.
+ */
+export interface DocumentPageView {
+  /** The kind of the document from its extension, worded: "Presentation". */
+  kind: string;
+  /** How many pages the document has; absent when nothing counted them. */
+  pages?: number;
+  /** The count worded in the site language: "24 pages"; the theme words it itself when absent. */
+  pagesLabel?: string;
+  /** The size of the original worded in the site language: "4.2 MB"; absent when the build did not record it. */
+  size?: string;
+  /** The date of the document: the one the file states when its reader read one, else the last change in the repository. */
+  date?: {
+    /** ISO 8601 date. */
+    date: string;
+    /** Worded in the site language: "12 March 2026". */
+    label: string;
+    /** Whether the date was read from the file rather than from the repository. */
+    fromFile: boolean;
+  };
+  /** The author the file states; absent when it states none. */
+  author?: string;
+  /** The files that make the document: the original, its preview when there is one, the note when there is one. */
+  files: DocumentTwinFile[];
+  labels?: Partial<DocumentPageLabels>;
 }
 
 /** One operation of an imported contract, as the operations table of the API page lists it. */
@@ -672,6 +760,8 @@ export interface EntityPageProps {
   mapOpen?: boolean;
   /** What the page of a `meeting` entity lays out beyond the generic template; absent for every other page. */
   meeting?: MeetingProps;
+  /** What lays the page out as the page of an office document; absent for every other page. */
+  document?: DocumentPageView;
 }
 
 export interface Passage {

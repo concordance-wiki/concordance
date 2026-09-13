@@ -8,6 +8,7 @@ import {
   matchingPositions,
   nextZoom,
   ZOOM_STEPS,
+  zoomLabel,
   type PdfLibrary,
   type PdfViewport,
 } from "../../src/islands/viewer-pdf.js";
@@ -111,32 +112,65 @@ async function open(numPages = 4, withRail = true) {
 }
 
 describe("The viewer-pdf plugin renders the PDF through pdf.js, with page navigation, zoom and internal search", () => {
-  it("opens the PDF of the page, draws its first page on a canvas at the default zoom and tells the rail", async () => {
+  it("opens the PDF of the page, draws its first page on a canvas on its stage at the default zoom and tells the rail", async () => {
     const viewer = await open();
     expect(viewer.requested).toEqual(["meetings/threshold-review.pdf"]);
     expect(viewer.rendered).toEqual([{ page: 1, scale: 1, width: 100, height: 50 }]);
     expect(viewer.query("canvas.viewer-page").getAttribute("aria-label")).toBe("slide 1 / 4");
-    expect(viewer.query(".viewer-counter").textContent).toBe("slide 1 / 4");
+    expect(viewer.query(".viewer-stage > canvas.viewer-page")).toBeDefined();
     expect(viewer.query(".viewer-toolbar").getAttribute("role")).toBe("toolbar");
-    expect(viewer.query(".viewer-previous").disabled).toBe(true);
-    expect(viewer.query(".viewer-next").disabled).toBe(false);
     expect(viewer.opts.shown).toEqual([1]);
     expect(DEFAULT_ZOOM).toBe(1);
   });
 
-  it("navigates with previous and next, the ends disabled, and jumps to a page the rail names", async () => {
+  it("lays the toolbar out as the counter, the zoom between its two signs and the find field after its glyph, the unit and the names kept for assistive technology", async () => {
     const viewer = await open();
-    viewer.query(".viewer-next").click();
+    const toolbar = viewer.query(".viewer-toolbar");
+    expect([...toolbar.children].map((child) => child.className)).toEqual([
+      "viewer-counter",
+      "viewer-separator",
+      "viewer-zoom-out",
+      "viewer-zoom",
+      "viewer-zoom-in",
+      "viewer-separator",
+      "viewer-find",
+      "viewer-status",
+    ]);
+    expect(viewer.query(".viewer-counter").textContent).toBe("slide 1 / 4");
+    expect(viewer.query(".viewer-counter .visually-hidden").textContent).toBe("slide ");
+    expect(viewer.query(".viewer-counter").getAttribute("aria-live")).toBe("polite");
+    expect(viewer.query(".viewer-zoom").textContent).toBe("100 %");
+    expect(viewer.query(".viewer-zoom-out").textContent).toBe("\u2212");
+    expect(viewer.query(".viewer-zoom-out").getAttribute("aria-label")).toBe("Zoom out");
+    expect(viewer.query(".viewer-zoom-in").textContent).toBe("+");
+    expect(viewer.query(".viewer-zoom-in").getAttribute("aria-label")).toBe("Zoom in");
+    for (const separator of toolbar.querySelectorAll(".viewer-separator")) {
+      expect(separator.textContent).toBe("|");
+      expect(separator.getAttribute("aria-hidden")).toBe("true");
+    }
+    expect(viewer.query(".viewer-find-glyph").textContent).toBe("\u2315");
+    expect(viewer.query(".viewer-find-glyph").getAttribute("aria-hidden")).toBe("true");
+    expect(viewer.query(".viewer-find .visually-hidden").textContent).toBe("Find in the document");
+    expect(viewer.query(".viewer-find input").placeholder).toBe("in the document");
+    expect(viewer.query(".viewer-find input").type).toBe("search");
+    expect(viewer.query(".viewer-status").getAttribute("role")).toBe("status");
+    expect(toolbar.querySelector(".viewer-previous, .viewer-next")).toBeNull();
+    expect(zoomLabel(1.25)).toBe("125 %");
+    expect(zoomLabel(0.5)).toBe("50 %");
+  });
+
+  it("jumps to a page the strip names, the counter following, and stays put on anything that is not a page", async () => {
+    const viewer = await open();
+    viewer.handle.goTo(2);
     await viewer.paint();
     expect(viewer.rendered.at(-1)?.page).toBe(2);
     expect(viewer.query(".viewer-counter").textContent).toBe("slide 2 / 4");
-    viewer.query(".viewer-previous").click();
+    viewer.handle.goTo(1);
     await viewer.paint();
     expect(viewer.rendered.at(-1)?.page).toBe(1);
     viewer.handle.goTo(4);
     await viewer.paint();
-    expect(viewer.query(".viewer-next").disabled).toBe(true);
-    expect(viewer.query(".viewer-previous").disabled).toBe(false);
+    expect(viewer.query(".viewer-counter").textContent).toBe("slide 4 / 4");
     // Out of range or not a page: nothing moves.
     viewer.handle.goTo(5);
     viewer.handle.goTo(0);
@@ -147,11 +181,12 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
     expect(viewer.opts.shown).toEqual([1, 2, 1, 4]);
   });
 
-  it("zooms in and out over fixed steps, the canvas resized with the viewport, the ends disabled", async () => {
+  it("zooms in and out over fixed steps, the canvas resized with the viewport, the percentage shown, the ends disabled", async () => {
     const viewer = await open();
     viewer.query(".viewer-zoom-in").click();
     await viewer.paint();
     expect(viewer.rendered.at(-1)).toEqual({ page: 1, scale: 1.25, width: 125, height: 63 });
+    expect(viewer.query(".viewer-zoom").textContent).toBe("125 %");
     viewer.query(".viewer-zoom-out").click();
     await viewer.paint();
     viewer.query(".viewer-zoom-out").click();
@@ -159,6 +194,7 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
     viewer.query(".viewer-zoom-out").click();
     await viewer.paint();
     expect(viewer.rendered.at(-1)?.scale).toBe(0.5);
+    expect(viewer.query(".viewer-zoom").textContent).toBe("50 %");
     expect(viewer.query(".viewer-zoom-out").disabled).toBe(true);
     expect(viewer.query(".viewer-zoom-in").disabled).toBe(false);
     expect(nextZoom(3, 1)).toBe(3);
@@ -195,8 +231,8 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
 
   it("queues the renders so that two pages never race for the canvas, and skips the one a later request made stale", async () => {
     const viewer = await open();
-    viewer.query(".viewer-next").click();
-    viewer.query(".viewer-next").click();
+    viewer.handle.goTo(2);
+    viewer.handle.goTo(3);
     expect(viewer.rendered.map((render) => render.page)).toEqual([1]);
     await viewer.paint();
     await viewer.paint();
@@ -206,6 +242,7 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
 
   it("draws again after a render that failed instead of stalling", async () => {
     const fake = fakeLibrary(2);
+    let failed = false;
     const failing: PdfLibrary<PdfViewport> = {
       getDocument: (params) => {
         const task = fake.library.getDocument(params);
@@ -213,8 +250,12 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
           ...task,
           promise: task.promise.then((pdf) => ({
             numPages: pdf.numPages,
-            getPage: (number) =>
-              number === 1 ? Promise.reject(new Error("broken page")) : pdf.getPage(number),
+            // The first page fails once, as a corrupt object does, then draws.
+            getPage: (number) => {
+              if (failed) return pdf.getPage(number);
+              failed = true;
+              return Promise.reject(new Error("broken page"));
+            },
           })),
         };
       },
@@ -222,14 +263,15 @@ describe("The viewer-pdf plugin renders the PDF through pdf.js, with page naviga
     const host = document.createElement("div");
     const opening = createViewer(failing, host, options());
     await expect(opening).rejects.toThrow("broken page");
-    host.querySelector<HTMLButtonElement>(".viewer-next")?.click();
+    host.querySelector<HTMLButtonElement>(".viewer-zoom-in")?.click();
     await fake.paint();
-    expect(fake.rendered.map((render) => render.page)).toEqual([2]);
+    expect(fake.rendered.map((render) => render.page)).toEqual([1]);
+    expect(fake.rendered.at(-1)?.scale).toBe(1.25);
   });
 
   it("closes by emptying the host and releasing the document", async () => {
     const viewer = await open(1, false);
-    expect(viewer.query(".viewer-next").disabled).toBe(true);
+    expect(viewer.query(".viewer-counter").textContent).toBe("slide 1 / 1");
     viewer.handle.close();
     expect(viewer.host.innerHTML).toBe("");
     expect(viewer.destroyed()).toBe(1);
