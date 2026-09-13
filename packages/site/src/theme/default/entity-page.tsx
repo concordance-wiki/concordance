@@ -270,7 +270,8 @@ export function Source({
 
 /**
  * The neighbourhood folded behind its line at the foot of the panel, a decorative mark before
- * the lead and the number of pages the map draws worded after it. Open, the summary turns into
+ * the lead and the number of pages the map draws worded after it, then as a bare count for the
+ * phone, where the line reads as the other folded sections. Open, the summary turns into
  * the head of the map, a back control before the title of the map and the name of the page: the
  * stylesheet swaps the two wordings on the state of the disclosure, and where the panel has a
  * column it hides the other blocks, so that the map takes the panel and never the page; without
@@ -297,6 +298,7 @@ export function NeighbourhoodFold({
         <NeighbourhoodIcon />
         <span class="neighbourhood-lead">{text.seeNeighbourhood}</span>
         <span class="neighbourhood-count">{text.neighbourPages}</span>
+        <span class="count panel-count neighbourhood-number">{neighbours.neighbours.length}</span>
         <span class="neighbourhood-head">{neighbours.labels?.map ?? labels.neighbourhoodMap}</span>
         <span class="neighbourhood-page">{neighbours.centre}</span>
       </summary>

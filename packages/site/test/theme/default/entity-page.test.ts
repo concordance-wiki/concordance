@@ -195,7 +195,7 @@ describe("EntityPage", () => {
   it("folds the neighbourhood behind its line at the foot of the panel, the number of pages worded, the head of the map in the same summary", () => {
     const html = render();
     expect(html).toContain(
-      `<details class="neighbourhood-fold"><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"`,
+      `<details class="neighbourhood-fold"><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="count panel-count neighbourhood-number">2</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"`,
     );
     expect(html.indexOf('<aside class="mentions')).toBeLessThan(
       html.indexOf('<details class="neighbourhood-fold">'),

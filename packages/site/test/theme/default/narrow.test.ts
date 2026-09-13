@@ -59,7 +59,9 @@ describe("Phone: the bar shows the mark, the site name and a menu button opening
     expect(html).toContain(
       '<details class="site-search-fold"><summary class="site-search-button"><svg class="search-glyph"',
     );
-    expect(html).toContain('</svg>Search</summary><concordance-island data-island="search"');
+    expect(html).toContain(
+      '</svg><span class="site-search-label">Search</span></summary><concordance-island data-island="search"',
+    );
     expect(html.indexOf('<details class="site-search-fold">')).toBeLessThan(
       html.indexOf('<concordance-island data-island="mode-switch"'),
     );
@@ -77,7 +79,7 @@ describe("Phone: the bar shows the mark, the site name and a menu button opening
     expect(html).toContain(
       '<details class="site-drawer" aria-label="Menu principal"><summary class="site-menu"><span class="visually-hidden">Menu principal</span></summary>',
     );
-    expect(html).toContain("</svg>Rechercher</summary>");
+    expect(html).toContain('</svg><span class="site-search-label">Rechercher</span></summary>');
   });
 
   it("serves the drawer open when asked to preview it", () => {

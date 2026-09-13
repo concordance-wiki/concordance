@@ -8,7 +8,7 @@ export const entityPageTabletState: GalleryPage = {
   rendered: "EntityPage",
   state: "tablet",
   description:
-    "the corporate page between 700 and 1099 px: the bar with the menu button, the name, the search button that unfolds the field and the mode switch; the tree in the drawer; the panel beside the text, condensed, the properties as values alone, the related pages as three titles and the count of the others behind a disclosure; the neighbourhood at the foot of the page",
+    "the corporate page between 700 and 1099 px: the bar with the menu button, the name, the search button reading as a small field that unfolds the field and the mode switch; the tree in the drawer; the panel in a narrow column beside the text, condensed, the properties as values alone, the table of contents left out, the related pages as three titles and the count of the others behind a disclosure; the neighbourhood at the foot of the page",
   ...chrome,
   header: corporateHeader,
   footer: corporateFooter,

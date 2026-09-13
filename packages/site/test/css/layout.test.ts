@@ -150,15 +150,58 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
 });
 
 describe("Mobile first: the base layer is the phone's, the tablet and the desktop add their columns", () => {
-  it("reduces the bar to the menu button and the name: the search field and the mode switch are folded away, the button is a 48 px target drawn as ☰, as ✕ once open", () => {
+  it("reduces the bar to the menu button, the name and the magnifier: the mode switch is folded away, the menu button is a 48 px bordered square drawn as ☰, as ✕ in the ink once open, the search button a 40 px square whose word is hidden", () => {
     expect(components).toContain(
-      '.site-search-fold,\n.site-nav > concordance-island[data-island="mode-switch"] {\n  display: none;\n}',
+      '.site-nav > concordance-island[data-island="mode-switch"] {\n  display: none;\n}',
     );
     expect(components).toContain(
-      ".site-menu {\n  flex: none;\n  justify-content: center;\n  inline-size: 3rem;\n  min-block-size: 3rem;",
+      ".site-menu {\n  flex: none;\n  justify-content: center;\n  inline-size: 3rem;\n  min-block-size: 3rem;\n  margin-inline-start: calc(-1 * var(--space-2));\n  border: 1px solid var(--color-border);\n  border-radius: var(--radius);\n  background: var(--color-bg);",
     );
     expect(components).toContain('.site-menu::before {\n  content: "☰" / "";');
-    expect(components).toContain('.site-drawer[open] > .site-menu::before {\n  content: "✕" / "";');
+    expect(components).toContain(
+      ".site-drawer[open] > .site-menu {\n  border-color: var(--color-ink);\n  background: var(--color-ink);\n}",
+    );
+    expect(components).toContain(
+      '.site-drawer[open] > .site-menu::before {\n  content: "✕" / "";\n  color: var(--color-bg);\n}',
+    );
+    expect(components).toContain(".site-title {\n  flex: 1;\n  min-inline-size: 0;\n}");
+    expect(components).toContain(
+      ".site-name {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}",
+    );
+    expect(components).toContain(".site-search-fold {\n  position: relative;\n  flex: none;\n}");
+    expect(components).toContain(
+      ".site-search-button {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  inline-size: 2.5rem;\n  block-size: 2.5rem;\n  padding: 0;\n  border: 1px solid var(--color-border);",
+    );
+    expect(components).toContain(".site-search-button::before {\n  content: none;\n}");
+    expect(components).toContain(
+      ".site-search-label {\n  position: absolute;\n  inline-size: 1px;\n  block-size: 1px;",
+    );
+  });
+
+  it("orders the folded sections of the phone with the table of contents first, reads the neighbourhood line as the others with the bare count, and leaves the legend out of the foot", () => {
+    const phone = media(components, "(width < 43.75rem)");
+    expect(phone).toContain(".entity-side {\n    display: flex;\n    flex-direction: column;\n  }");
+    expect(phone).toContain(".entity-toc {\n    order: -1;\n  }");
+    expect(phone).toContain(
+      ".panel-fold > summary h2 {\n    color: var(--color-ink);\n    letter-spacing: 0;\n    text-transform: none;\n  }",
+    );
+    expect(phone).toContain(
+      ".mentions-controls,\n  .related-type,\n  .related-note {\n    display: none;\n  }",
+    );
+    expect(phone).toContain(".neighbourhood-fold > summary {\n    font-weight: 600;\n  }");
+    expect(phone).toContain(
+      ".neighbourhood-fold:not([open]) > summary > .neighbourhood-icon,\n  .neighbourhood-fold:not([open]) > summary > .neighbourhood-lead,\n  .neighbourhood-fold:not([open]) > summary > .neighbourhood-count {\n    display: none;\n  }",
+    );
+    expect(phone).toContain(
+      ".neighbourhood-fold:not([open]) > summary > .neighbourhood-head {\n    display: inline;\n    flex: 1;\n  }",
+    );
+    expect(phone).toContain(
+      ".neighbourhood-fold:not([open]) > summary > .neighbourhood-number {\n    order: 1;\n  }",
+    );
+    expect(phone).toContain(
+      ".neighbourhood-fold[open] > summary > .neighbourhood-number {\n    display: none;\n  }",
+    );
+    expect(phone).toContain(".entity-footer > .legend {\n    display: none;\n  }");
   });
 
   it("folds the trail behind a square button of the bar, the island hidden while its script lists no page, the list unfolded under the bar", () => {
@@ -191,9 +234,9 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(components).toContain(
       ".entity-badge > .entity-space,\n.entity-changed-long {\n  display: none;\n}",
     );
-    // The related pages beyond the first three are only folded where the panel is condensed.
+    // The related pages beyond the first three are folded behind their count wherever the panel has no full column.
     expect(components).toContain(
-      ".related-others::details-content {\n  display: block;\n  content-visibility: visible;\n}\n\n.related-others > summary {\n  display: none;\n}",
+      ".related-others > summary {\n  display: flex;\n  min-block-size: 2.5rem;\n  color: var(--color-muted);\n  font-size: 0.8125rem;\n  font-weight: 500;\n  list-style: none;\n}",
     );
   });
 
@@ -219,14 +262,22 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(narrow).toContain(
       '.site-drawer[open] ~ concordance-island[data-island="trail"] {\n    display: none;\n  }',
     );
+    // The magnifier of a closed drawer unfolds the field under itself, on the phone as on the tablet.
+    expect(narrow).toContain(
+      '.site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {\n    position: absolute;',
+    );
   });
 
-  it("adds the search button and the mode switch to the bar from 700 px, and restores the breadcrumb, the space and the long date", () => {
+  it("reads the search button as a small field after the name from 700 px, adds the mode switch to the bar, and restores the breadcrumb, the space and the long date", () => {
     const medium = media(components, "(min-width: 43.75rem)");
+    expect(medium).toContain(".site-title {\n    flex: none;\n  }");
     expect(medium).toContain(
-      ".site-search-fold {\n    display: block;\n    position: relative;\n    margin-inline-start: auto;\n  }",
+      ".site-search-fold {\n    flex: 1;\n    max-inline-size: 9.375rem;\n    margin-inline-end: auto;\n  }",
     );
-    expect(medium).toContain(".site-search-button {\n    display: inline-flex;");
+    expect(medium).toContain(
+      ".site-search-button {\n    inline-size: 100%;\n    justify-content: flex-start;\n    gap: var(--space-2);\n    padding-inline: var(--space-2);\n    border: 0;\n    background: var(--color-soft);",
+    );
+    expect(medium).toContain(".site-search-label {\n    position: static;");
     expect(medium).toContain(
       '.site-nav > concordance-island[data-island="mode-switch"] {\n    display: block;\n  }',
     );
@@ -236,12 +287,12 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(medium).toContain(".entity-changed-short,\n  .panel-count {\n    display: none;\n  }");
   });
 
-  it("condenses the panel between 700 and 1099 px: the values of the properties alone, three related titles and the others folded, the neighbourhood at the foot of the page, the search field unfolded under its button", () => {
+  it("condenses the panel between 700 and 1099 px: the values of the properties alone, three related titles and the others folded, the neighbourhood at the foot of the page", () => {
     const tablet = media(components, "(43.75rem <= width < 68.75rem)");
     expect(tablet).toContain(
-      '.site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {\n    position: absolute;',
+      ".entity {\n    grid-template-columns: minmax(0, 1fr) 11.625rem;\n    grid-template-areas: none;\n  }",
     );
-    expect(tablet).toContain(".entity {\n    grid-template-areas: none;\n  }");
+    expect(tablet).toContain(".entity-side > .entity-toc {\n    display: none;\n  }");
     expect(tablet).toContain(".entity-main {\n    grid-area: 1 / 1 / 7 / 2;");
     expect(tablet).toContain(".entity-side {\n    display: contents;\n  }");
     expect(tablet).toContain(".entity-side > .panel-block {\n    grid-column: 2;");
@@ -252,11 +303,10 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(tablet).toContain(
       ".mentions-controls,\n  .related-type,\n  .related-count,\n  .related-excerpt,\n  .related-note {\n    display: none;\n  }",
     );
+    expect(tablet).not.toContain(".related-others > summary");
+    expect(tablet).not.toContain(".related-others:not([open])::details-content");
     expect(tablet).toContain(
-      ".related-others:not([open])::details-content {\n    display: none;\n  }",
-    );
-    expect(tablet).toContain(
-      ".related-others > summary {\n    display: flex;\n    min-block-size: 2.5rem;",
+      ".related-others:not([open]) ~ .related-beyond,\n  .related-others:not([open]) ~ .mentions-more {\n    display: none;\n  }",
     );
   });
 
@@ -273,6 +323,9 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(wide).toContain(".site-search-button {\n    display: none;\n  }");
     expect(wide).toContain(
       ".site-search-fold::details-content {\n    display: block;\n    content-visibility: visible;\n  }",
+    );
+    expect(wide).toContain(
+      ".related-others::details-content {\n    display: block;\n    content-visibility: visible;\n  }\n\n  .related-others > summary {\n    display: none;\n  }",
     );
     expect(wide).toContain(".entity > .space {\n    display: block;\n  }");
   });

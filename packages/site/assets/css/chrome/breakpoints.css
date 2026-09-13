@@ -17,41 +17,100 @@
   display: none;
 }
 
-/* The related pages beyond the first three: a disclosure of their own, kept in view wherever the panel is not condensed. */
-
-.related-others::details-content {
-  display: block;
-  content-visibility: visible;
-}
+/* The related pages beyond the first three: a disclosure of their own behind their count, unfolded where the panel has its full column. */
 
 .related-others > summary {
-  display: none;
+  display: flex;
+  min-block-size: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  list-style: none;
 }
 
-/* Tablet: the bar gains the search button and the mode switch, the panel stands beside the text, condensed; the tree stays in the drawer. */
+/* Phone: the folded sections in the order of importance, the table of contents first, their headings in the sentence case of the text; the related pages as their titles, counts and excerpts alone; the neighbourhood line reads as the others, its short label and the number of pages the map draws; the legend of the marks left out of the foot. */
+
+@media (width < 43.75rem) {
+  .entity-side {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .entity-toc {
+    order: -1;
+  }
+
+  .panel-fold > summary h2 {
+    color: var(--color-ink);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .mentions-controls,
+  .related-type,
+  .related-note {
+    display: none;
+  }
+
+  .neighbourhood-fold > summary {
+    font-weight: 600;
+  }
+
+  .neighbourhood-fold:not([open]) > summary > .neighbourhood-icon,
+  .neighbourhood-fold:not([open]) > summary > .neighbourhood-lead,
+  .neighbourhood-fold:not([open]) > summary > .neighbourhood-count {
+    display: none;
+  }
+
+  .neighbourhood-fold:not([open]) > summary > .neighbourhood-head {
+    display: inline;
+    flex: 1;
+  }
+
+  .neighbourhood-fold:not([open]) > summary > .neighbourhood-number {
+    order: 1;
+  }
+
+  .neighbourhood-fold[open] > summary > .neighbourhood-number {
+    display: none;
+  }
+
+  .entity-footer > .legend {
+    display: none;
+  }
+}
+
+/* Tablet: the search button reads as a small field after the name, the mode switch joins the bar, the panel stands beside the text, condensed; the tree stays in the drawer. */
 
 @media (min-width: 43.75rem) {
+  .site-title {
+    flex: none;
+  }
+
   .site-search-fold {
-    display: block;
-    position: relative;
-    margin-inline-start: auto;
+    flex: 1;
+    max-inline-size: 9.375rem;
+    margin-inline-end: auto;
   }
 
   .site-search-button {
-    display: inline-flex;
+    inline-size: 100%;
+    justify-content: flex-start;
     gap: var(--space-2);
-    min-block-size: 2.5rem;
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    padding-inline: var(--space-2);
+    border: 0;
     background: var(--color-soft);
-    color: var(--color-muted);
+    color: var(--color-label);
     font-size: 0.8125rem;
-    font-weight: 500;
   }
 
-  .site-search-button::before {
-    content: none;
+  .site-search-label {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
   }
 
   .site-nav > concordance-island[data-island="mode-switch"] {
@@ -81,24 +140,14 @@
 }
 
 @media (43.75rem <= width < 68.75rem) {
-  /* The search button unfolds the field under itself, at the end of the bar, while the drawer is closed. */
-  .site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {
-    position: absolute;
-    inset-inline-end: 0;
-    inset-block-start: calc(100% + var(--space-1));
-    z-index: 3;
-    inline-size: min(22rem, calc(100vw - 2 * var(--space-4)));
-    max-inline-size: none;
-    padding: var(--space-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
-    box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
+  /* The blocks of the panel are placed one under the other in a narrow right column, the table of contents left out, and the neighbourhood spans the foot of the page under the text and the blocks. */
+  .entity {
+    grid-template-columns: minmax(0, 1fr) 11.625rem;
+    grid-template-areas: none;
   }
 
-  /* The blocks of the panel are placed one under the other in the right column, and the neighbourhood spans the foot of the page under the text and the blocks. */
-  .entity {
-    grid-template-areas: none;
+  .entity-side > .entity-toc {
+    display: none;
   }
 
   .entity-main {
@@ -152,19 +201,6 @@
   .related-excerpt,
   .related-note {
     display: none;
-  }
-
-  .related-others:not([open])::details-content {
-    display: none;
-  }
-
-  .related-others > summary {
-    display: flex;
-    min-block-size: 2.5rem;
-    color: var(--color-muted);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    list-style: none;
   }
 }
 
@@ -224,7 +260,7 @@
   .site-search-fold {
     flex: 1 1 16rem;
     max-inline-size: 26rem;
-    margin-inline-start: 0;
+    margin-inline-end: 0;
   }
 
   .site-search-button {
@@ -234,6 +270,15 @@
   .site-search-fold::details-content {
     display: block;
     content-visibility: visible;
+  }
+
+  .related-others::details-content {
+    display: block;
+    content-visibility: visible;
+  }
+
+  .related-others > summary {
+    display: none;
   }
 
   .site-nav > concordance-island[data-island="trail"],

@@ -18,9 +18,10 @@ function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
 
 /**
  * The bar: the drawer button, the mark and the site name, the search field folded behind a
- * button where the bar is too narrow for it, the trail folded behind its button once its script
- * lists a page, the mode switch; the links stand in the drawer, which the stylesheet keeps in
- * view in the bar where it has room.
+ * button where the bar is too narrow for it (the magnifier alone on the phone, the word with it
+ * on the tablet), the trail folded behind its button once its script lists a page, the mode
+ * switch; the links stand in the drawer, which the stylesheet keeps in view in the bar where it
+ * has room.
  */
 export function Header({
   siteTitle,
@@ -47,13 +48,13 @@ export function Header({
         />
         <a class="site-title" href={homeHref}>
           {logo && <Logo logo={logo} />}
-          {siteTitle}
+          <span class="site-name">{siteTitle}</span>
         </a>
         {search && (
           <details class="site-search-fold">
             <summary class="site-search-button">
               <SearchGlyph />
-              {text.search}
+              <span class="site-search-label">{text.search}</span>
             </summary>
             <SearchIsland
               {...(search.root === undefined ? {} : { root: search.root })}

@@ -543,7 +543,7 @@ describe("The neighbourhood map in the panel", () => {
     const html = fileSystem.readText("/out/entity-page-map.html");
     expect(html).toContain("<title>EntityPage, map</title>");
     expect(html).toContain(
-      `<details class="neighbourhood-fold" open><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">6 pages</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Publication threshold</span></summary>`,
+      `<details class="neighbourhood-fold" open><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">6 pages</span><span class="count panel-count neighbourhood-number">6</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Publication threshold</span></summary>`,
     );
     expect(count(html, '<g class="map-node')).toBe(6);
     expect(count(html, '<g class="map-node map-node-keyword"')).toBe(1);

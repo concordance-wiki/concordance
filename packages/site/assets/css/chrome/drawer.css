@@ -1,6 +1,6 @@
-/* Phone and tablet: the same page at three widths. The base layer is the phone's: the bar reduced to the drawer button and the name, the panel as folded blocks under the text; the tablet and the desktop add their columns. */
+/* Phone and tablet: the same page at three widths. The base layer is the phone's: the bar reduced to the drawer button, the name and the search button, the panel as folded blocks under the text; the tablet and the desktop add their columns. */
 
-/* The drawer button: the summary of the drawer, a 48 px target drawn as ☰, as ✕ once open; its name is written for assistive technology. */
+/* The drawer button: the summary of the drawer, a 48 px bordered square drawn as ☰, as ✕ in the ink once open; its name is written for assistive technology. */
 
 .site-menu {
   flex: none;
@@ -8,7 +8,9 @@
   inline-size: 3rem;
   min-block-size: 3rem;
   margin-inline-start: calc(-1 * var(--space-2));
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
+  background: var(--color-bg);
   list-style: none;
 }
 
@@ -18,19 +20,67 @@
   font-size: 1.25rem;
 }
 
-.site-drawer[open] > .site-menu::before {
-  content: "✕" / "";
+.site-drawer[open] > .site-menu {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
 }
 
-/* Closed, the drawer keeps the search field, the links and the mode switch: the bar shows the button and the name alone. */
+.site-drawer[open] > .site-menu::before {
+  content: "✕" / "";
+  color: var(--color-bg);
+}
 
-.site-search-fold,
+/* The name takes the room between the buttons, cut with an ellipsis where it does not fit. */
+
+.site-title {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.site-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Closed, the drawer keeps the links and the mode switch; the bar shows the button, the name and the search button, a 40 px square drawing the magnifier alone, which unfolds the field under the bar. */
+
 .site-nav > concordance-island[data-island="mode-switch"] {
   display: none;
 }
 
+.site-search-fold {
+  position: relative;
+  flex: none;
+}
+
 .site-search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-ink);
   list-style: none;
+}
+
+.site-search-button::before {
+  content: none;
+}
+
+.site-search-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* The drawer: the spaces with their initials and counts, the tree of the current space unfolded, the links, every entry a 48 px target. */
@@ -145,5 +195,20 @@
     display: block;
     flex-basis: 100%;
     order: 3;
+  }
+
+  /* The search button unfolds the field under itself, at the end of the bar, while the drawer is closed. */
+  .site-drawer:not([open]) ~ .site-search-fold[open] > concordance-island[data-island="search"] {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + var(--space-1));
+    z-index: 3;
+    inline-size: min(22rem, calc(100vw - 2 * var(--space-4)));
+    max-inline-size: none;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 10%);
   }
 }

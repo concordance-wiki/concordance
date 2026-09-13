@@ -87,7 +87,9 @@ describe("Header", () => {
   it("renders the site title as a link home, the search field with its shortcut, the three links and the mode switch, no statistic", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain('<nav class="site-nav" aria-label="Site">');
-    expect(html).toContain('<a class="site-title" href="../">My wiki</a>');
+    expect(html).toContain(
+      '<a class="site-title" href="../"><span class="site-name">My wiki</span></a>',
+    );
     expect(html).toContain(
       '<form class="site-search" role="search" aria-label="Site search" action="../search/" method="get">',
     );
@@ -146,7 +148,7 @@ describe("Header", () => {
       defaultTheme,
     );
     expect(html).toContain(
-      '<a class="site-title" href="../"><span class="site-logo" aria-hidden="true"><svg viewBox="0 0 1 1"><path fill="currentColor" d="M0 0h1v1z"/></svg></span>Pipeline notes</a>',
+      '<a class="site-title" href="../"><span class="site-logo" aria-hidden="true"><svg viewBox="0 0 1 1"><path fill="currentColor" d="M0 0h1v1z"/></svg></span><span class="site-name">Pipeline notes</span></a>',
     );
   });
 
@@ -162,7 +164,7 @@ describe("Header", () => {
       defaultTheme,
     );
     expect(html).toContain(
-      '<a class="site-title" href="../"><img class="site-logo" src="../assets/mark.svg" alt/>My wiki</a>',
+      '<a class="site-title" href="../"><img class="site-logo" src="../assets/mark.svg" alt/><span class="site-name">My wiki</span></a>',
     );
     expect(html).not.toContain("<form");
   });
