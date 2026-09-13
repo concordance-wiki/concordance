@@ -78,8 +78,14 @@ function declares(from: DuplicateResource, to: DuplicateResource): boolean {
   return target?.source === to.source && target.path === to.path;
 }
 
+/** The resource whose frontmatter declares the other, when one does. */
+function declaringOf(a: DuplicateResource, b: DuplicateResource): DuplicateResource | undefined {
+  if (declares(a, b)) return a;
+  return declares(b, a) ? b : undefined;
+}
+
 function declaredSignal(a: DuplicateResource, b: DuplicateResource): DuplicateSignal | undefined {
-  const declaring = declares(a, b) ? a : declares(b, a) ? b : undefined;
+  const declaring = declaringOf(a, b);
   return declaring === undefined
     ? undefined
     : {
@@ -115,11 +121,7 @@ function nameSignal(a: DuplicateResource, b: DuplicateResource): DuplicateSignal
   if (similarity === undefined) return undefined;
   const sameFolder = a.source === b.source && a.folder === b.folder;
   const weight = sameFolder ? WEIGHTS.sameNameSameFolder : WEIGHTS.sameNameElsewhere;
-  const where = sameFolder
-    ? "in the same folder"
-    : a.source === b.source
-      ? "in another folder"
-      : "across sources";
+  const where = whereOf(a, b, sameFolder);
   if (keyA === keyB) {
     return { name: "same_name", weight, detail: `same base name ${where}` };
   }
@@ -128,6 +130,12 @@ function nameSignal(a: DuplicateResource, b: DuplicateResource): DuplicateSignal
     weight: round(weight * WEIGHTS.similarNameFactor),
     detail: `similar base names ${where} (Jaro-Winkler ${similarity.toFixed(2)})`,
   };
+}
+
+/** How far apart the two resources are filed, for the detail of a name signal. */
+function whereOf(a: DuplicateResource, b: DuplicateResource, sameFolder: boolean): string {
+  if (sameFolder) return "in the same folder";
+  return a.source === b.source ? "in another folder" : "across sources";
 }
 
 function titleMatchesHeading(titled: DuplicateResource, headed: DuplicateResource): boolean {

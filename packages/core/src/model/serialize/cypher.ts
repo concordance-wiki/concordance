@@ -87,5 +87,6 @@ export function toCypher(model: CanonicalModel): string {
     "// One MERGE per entity, then one per link; nested attributes are not exported.",
   ];
   const statements = [...model.entities.map(entityStatement), ...model.links.map(linkStatement)];
-  return `${[...header, ...statements.map((statement) => `${statement};`)].join("\n")}\n`;
+  const lines = [...header, ...statements.map((statement) => `${statement};`)];
+  return `${lines.join("\n")}\n`;
 }

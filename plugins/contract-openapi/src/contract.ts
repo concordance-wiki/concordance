@@ -164,20 +164,24 @@ function fieldsOf(document: Json, schema: unknown, seen: Set<string>): ContractF
   if (Array.isArray(parts)) {
     for (const part of parts) fields.push(...fieldsOf(document, part, seen));
   }
-  const properties = schema["properties"];
-  const required = Array.isArray(schema["required"]) ? schema["required"] : [];
-  if (isObject(properties)) {
-    for (const [name, property] of Object.entries(properties)) {
-      const description = isObject(property) ? stringOf(property["description"]) : undefined;
-      fields.push({
-        name,
-        type: typeOf(property),
-        required: required.includes(name),
-        ...(description === undefined ? {} : { description }),
-      });
-    }
-  }
+  fields.push(...ownFieldsOf(schema));
   return fields;
+}
+
+/** The fields the `properties` of a schema declare, in declaration order. */
+function ownFieldsOf(schema: Record<string, unknown>): ContractField[] {
+  const properties = schema["properties"];
+  if (!isObject(properties)) return [];
+  const required = Array.isArray(schema["required"]) ? schema["required"] : [];
+  return Object.entries(properties).map(([name, property]) => {
+    const description = isObject(property) ? stringOf(property["description"]) : undefined;
+    return {
+      name,
+      type: typeOf(property),
+      required: required.includes(name),
+      ...(description === undefined ? {} : { description }),
+    };
+  });
 }
 
 function schemaOf(document: Json, name: string, schema: Json): ContractSchema {

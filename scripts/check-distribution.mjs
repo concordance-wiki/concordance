@@ -59,14 +59,7 @@ function checkAction(root, version, fail) {
     fail(`${file}: no step runs npx --yes ${packageName}@<version>`);
 }
 
-function checkComponent(root, version, fail) {
-  const file = files.component;
-  const documents = parseAllDocuments(readFileSync(join(root, file), "utf8")).map((d) => d.toJS());
-  if (documents.length !== 2) {
-    fail(`${file}: expected the spec document and the jobs document`);
-    return;
-  }
-  const [spec, jobs] = documents;
+function checkComponentInputs(file, spec, version, fail) {
   const inputs = isObject(spec?.spec?.inputs) ? spec.spec.inputs : {};
   for (const name of ["version", "fail_on", "source", "config"]) {
     if (!isObject(inputs[name]) || !("default" in inputs[name]))
@@ -79,6 +72,17 @@ function checkComponent(root, version, fail) {
   const failOn = inputs.fail_on ?? {};
   if (failOn.default !== "error" || String(failOn.options) !== "error,warning,info")
     fail(`${file}: spec input fail_on must default to error among error, warning and info`);
+}
+
+function checkComponent(root, version, fail) {
+  const file = files.component;
+  const documents = parseAllDocuments(readFileSync(join(root, file), "utf8")).map((d) => d.toJS());
+  if (documents.length !== 2) {
+    fail(`${file}: expected the spec document and the jobs document`);
+    return;
+  }
+  const [spec, jobs] = documents;
+  checkComponentInputs(file, spec, version, fail);
   const job = isObject(jobs) ? jobs["concordance-lint"] : undefined;
   if (!isObject(job)) {
     fail(`${file}: no concordance-lint job`);

@@ -6,6 +6,7 @@ import {
   formatValidation,
   parseConfig,
   type Config,
+  type Finding,
   type Severity,
   type SourceConfig,
 } from "@concordance-wiki/core";
@@ -20,6 +21,8 @@ import {
   OUTPUT_FORMATS,
   readLintConfig,
   type FixRefusal,
+  type LintRepositoryInput,
+  type OutputFormat,
   type ReportScope,
 } from "@concordance-wiki/lint";
 import { loadDefaultProfile } from "@concordance-wiki/profile";
@@ -67,12 +70,19 @@ function where(change: FixRefusal): string {
     .join(":");
 }
 
-/**
- * The local scope fetches nothing; the global scope only reads the published model, from its cache
- * when it is fresh, and falls back to the local checks when it cannot. `--fix` writes after
- * announcing every change, and `--output` writes the report.
- */
-export async function lintCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
+interface LintOptions {
+  scope: ReportScope["name"];
+  failOn: Severity;
+  format: OutputFormat;
+  config?: string;
+  source?: string;
+  output?: string;
+  fix: boolean;
+  dryRun: boolean;
+}
+
+/** The options of the command line, or nothing once an invalid value has been reported. */
+function optionsOf(argv: string[], io: CommandIo): LintOptions | undefined {
   const { values } = parseArgs({
     args: argv,
     options: {
@@ -86,87 +96,127 @@ export async function lintCommand(argv: string[], io: CommandIo): Promise<ExitCo
       "dry-run": { type: "boolean", default: false },
     },
   });
-  if (!isScope(values.scope)) {
-    io.err(`--scope ${values.scope} is not a scope; expected ${listed(scopes)}`);
-    return exitCodes.failure;
-  }
+  const { scope, format } = values;
   const failOn = values["fail-on"];
+  if (!isScope(scope)) {
+    io.err(`--scope ${scope} is not a scope; expected ${listed(scopes)}`);
+    return undefined;
+  }
   if (!isSeverity(failOn)) {
     io.err(`--fail-on ${failOn} is not a severity; expected ${listed(severities)}`);
-    return exitCodes.failure;
+    return undefined;
   }
-  const format = values.format;
   if (!isOutputFormat(format)) {
     io.err(`--format ${format} is not a format; expected ${listed(OUTPUT_FORMATS)}`);
-    return exitCodes.failure;
+    return undefined;
   }
-  let config: Config | undefined;
-  if (values.config !== undefined) {
-    config = readConfig(io, values.config);
-    if (config === undefined) return exitCodes.failure;
-  }
-  let source: SourceConfig | undefined;
-  if (values.source !== undefined) {
-    const name = values.source;
-    // Without a configuration the name only prefixes the identifiers: no rule applies.
-    source =
-      config === undefined ? { name } : config.sources.find((candidate) => candidate.name === name);
-    if (source === undefined) {
-      io.err(`source "${name}" is not declared in the configuration`);
-      return exitCodes.failure;
-    }
-  }
-  const repository = {
+  return {
+    scope,
+    failOn,
+    format,
+    ...(values.config === undefined ? {} : { config: values.config }),
+    ...(values.source === undefined ? {} : { source: values.source }),
+    ...(values.output === undefined ? {} : { output: values.output }),
+    fix: values.fix,
+    dryRun: values["dry-run"],
+  };
+}
+
+/** The source the repository is declared as: by name in the configuration, or by name alone without one. */
+function sourceOf(
+  io: CommandIo,
+  config: Config | undefined,
+  name: string,
+): SourceConfig | undefined {
+  // Without a configuration the name only prefixes the identifiers: no rule applies.
+  const source =
+    config === undefined ? { name } : config.sources.find((candidate) => candidate.name === name);
+  if (source === undefined) io.err(`source "${name}" is not declared in the configuration`);
+  return source;
+}
+
+/** The repository to check, with its configuration and source when named; nothing once a problem has been reported. */
+function repositoryOf(io: CommandIo, options: LintOptions): LintRepositoryInput | undefined {
+  const config = options.config === undefined ? undefined : readConfig(io, options.config);
+  if (options.config !== undefined && config === undefined) return undefined;
+  const source = options.source === undefined ? undefined : sourceOf(io, config, options.source);
+  if (options.source !== undefined && source === undefined) return undefined;
+  return {
     root: io.cwd,
     ...(source === undefined ? {} : { source }),
     ...(config === undefined ? {} : { config }),
     fs: io.fs,
   };
-  const dryRun = values["dry-run"];
-  if (values.fix || dryRun) {
-    const prefix = dryRun ? "would fix" : "fix";
-    const fixes = fixRepository({
-      ...repository,
-      dryRun,
-      announce: (change) => {
-        io.out(`${prefix}: ${where(change)}: ${change.description}`);
-      },
-    });
-    for (const refusal of fixes.refused) {
-      io.out(`refused: ${where(refusal)}: ${refusal.description}`);
-    }
+}
+
+/** Applies or rehearses the fixes, announcing every change and every refusal. */
+function fix(io: CommandIo, repository: LintRepositoryInput, dryRun: boolean): void {
+  const prefix = dryRun ? "would fix" : "fix";
+  const fixes = fixRepository({
+    ...repository,
+    dryRun,
+    announce: (change) => {
+      io.out(`${prefix}: ${where(change)}: ${change.description}`);
+    },
+  });
+  for (const refusal of fixes.refused) {
+    io.out(`refused: ${where(refusal)}: ${refusal.description}`);
   }
-  let findings = lintRepository(repository);
-  let scope: ReportScope = { name: values.scope };
-  if (values.scope === "global") {
-    const global = await lintGlobal({
-      ...repository,
-      overrides: readLintConfig(io.fs, io.cwd),
-      clock: io.clock,
-      ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
-      profile: loadDefaultProfile(),
-    });
-    if (global.degraded !== undefined) {
-      io.err(`global: ${global.degraded.reason}; local checks only`);
-      scope = { name: "global", degraded: global.degraded.reason };
-    } else if (global.model?.stale !== undefined) {
-      const { stale } = global.model;
-      io.err(
-        `global: ${stale.reason}; using the copy of ${global.model.source} fetched ${global.model.fetchedAt}, ${String(stale.ageHours)} hours old`,
-      );
-    }
-    findings = mergeFindings(findings, global.findings);
+}
+
+/** The global checks over the published model, degraded to the local ones when the model cannot be read. */
+async function lintGlobally(
+  io: CommandIo,
+  repository: LintRepositoryInput,
+  local: Finding[],
+): Promise<{ findings: Finding[]; scope: ReportScope }> {
+  const global = await lintGlobal({
+    ...repository,
+    overrides: readLintConfig(io.fs, io.cwd),
+    clock: io.clock,
+    ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
+    profile: loadDefaultProfile(),
+  });
+  const findings = mergeFindings(local, global.findings);
+  if (global.degraded !== undefined) {
+    io.err(`global: ${global.degraded.reason}; local checks only`);
+    return { findings, scope: { name: "global", degraded: global.degraded.reason } };
   }
-  const document = formatFindingsAs(format, findings, {
+  if (global.model?.stale !== undefined) {
+    const { stale } = global.model;
+    io.err(
+      `global: ${stale.reason}; using the copy of ${global.model.source} fetched ${global.model.fetchedAt}, ${String(stale.ageHours)} hours old`,
+    );
+  }
+  return { findings, scope: { name: "global" } };
+}
+
+/**
+ * The local scope fetches nothing; the global scope only reads the published model, from its cache
+ * when it is fresh, and falls back to the local checks when it cannot. `--fix` writes after
+ * announcing every change, and `--output` writes the report.
+ */
+export async function lintCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
+  const options = optionsOf(argv, io);
+  if (options === undefined) return exitCodes.failure;
+  const repository = repositoryOf(io, options);
+  if (repository === undefined) return exitCodes.failure;
+  if (options.fix || options.dryRun) fix(io, repository, options.dryRun);
+  const local = lintRepository(repository);
+  const { findings, scope } =
+    options.scope === "global"
+      ? await lintGlobally(io, repository, local)
+      : { findings: local, scope: { name: options.scope } };
+  const document = formatFindingsAs(options.format, findings, {
     root: io.cwd,
     version: toolVersion(),
     registry: createRegistry(),
     scope,
   });
-  if (values.output === undefined) {
+  if (options.output === undefined) {
     for (const line of document.replace(/\n$/u, "").split("\n")) io.out(line);
   } else {
-    io.fs.writeText(resolve(io.cwd, values.output), document);
+    io.fs.writeText(resolve(io.cwd, options.output), document);
   }
-  return hasFindingAtOrAbove(findings, failOn) ? exitCodes.invalid : exitCodes.ok;
+  return hasFindingAtOrAbove(findings, options.failOn) ? exitCodes.invalid : exitCodes.ok;
 }

@@ -149,9 +149,10 @@ function checkHeadings(root: Element): A11yFinding[] {
   for (const heading of headings) {
     const level = Number(heading.tag.slice(1));
     if (level > previous + 1) {
+      const before = previous === 0 ? "no heading" : `h${String(previous)}`;
       findings.push({
         rule: "heading-order",
-        message: `${heading.tag} "${textOf(heading)}" follows ${previous === 0 ? "no heading" : `h${String(previous)}`}`,
+        message: `${heading.tag} "${textOf(heading)}" follows ${before}`,
       });
     }
     previous = level;
@@ -331,16 +332,18 @@ function checkDetails(root: Element): A11yFinding[] {
   return findings;
 }
 
-/** Tabs follow the tablist pattern: tabs inside a tablist, each selected or not and controlling a labelled panel. */
-function checkTabs(root: Element): A11yFinding[] {
-  const findings: A11yFinding[] = [];
-  const all = [...walk(root)];
+/** The tab panels by id. */
+function tabPanels(all: readonly Element[]): Map<string, Element> {
   const panels = new Map<string, Element>();
   for (const panel of all) {
     const id = panel.attributes["id"];
     if (role(panel) === "tabpanel" && id !== undefined) panels.set(id, panel);
   }
-  const controlled = new Set<Element>();
+  return panels;
+}
+
+/** The tabs of every tablist, a list without any being reported. */
+function tabsInLists(all: readonly Element[], findings: A11yFinding[]): Set<Element> {
   const inLists = new Set<Element>();
   for (const list of all.filter((element) => role(element) === "tablist")) {
     const tabs = [...walk(list)].filter((element) => role(element) === "tab");
@@ -349,27 +352,48 @@ function checkTabs(root: Element): A11yFinding[] {
     }
     for (const tab of tabs) inLists.add(tab);
   }
+  return inLists;
+}
+
+/** One tab: in a tablist, with a selected state, controlling a panel that the tab labels; the panel it controls. */
+function checkTab(
+  tab: Element,
+  inLists: ReadonlySet<Element>,
+  panels: ReadonlyMap<string, Element>,
+  findings: A11yFinding[],
+): Element | undefined {
+  if (!inLists.has(tab)) {
+    findings.push({ rule: "tab-roles", message: `${label(tab)} is a tab outside any tablist` });
+  }
+  if (!BOOLEAN_STATE.has(tab.attributes["aria-selected"] ?? "")) {
+    findings.push({ rule: "tab-roles", message: `${label(tab)} has no aria-selected state` });
+  }
+  const controls = tab.attributes["aria-controls"];
+  const panel = controls === undefined ? undefined : panels.get(controls);
+  if (panel === undefined) {
+    findings.push({ rule: "tab-roles", message: `${label(tab)} controls no tabpanel` });
+    return undefined;
+  }
+  const id = tab.attributes["id"];
+  if (id === undefined || panel.attributes["aria-labelledby"] !== id) {
+    findings.push({
+      rule: "tab-roles",
+      message: `${label(panel)} is not labelled by the tab that controls it`,
+    });
+  }
+  return panel;
+}
+
+/** Tabs follow the tablist pattern: tabs inside a tablist, each selected or not and controlling a labelled panel. */
+function checkTabs(root: Element): A11yFinding[] {
+  const findings: A11yFinding[] = [];
+  const all = [...walk(root)];
+  const panels = tabPanels(all);
+  const inLists = tabsInLists(all, findings);
+  const controlled = new Set<Element>();
   for (const tab of all.filter((element) => role(element) === "tab")) {
-    if (!inLists.has(tab)) {
-      findings.push({ rule: "tab-roles", message: `${label(tab)} is a tab outside any tablist` });
-    }
-    if (!BOOLEAN_STATE.has(tab.attributes["aria-selected"] ?? "")) {
-      findings.push({ rule: "tab-roles", message: `${label(tab)} has no aria-selected state` });
-    }
-    const controls = tab.attributes["aria-controls"];
-    const panel = controls === undefined ? undefined : panels.get(controls);
-    if (panel === undefined) {
-      findings.push({ rule: "tab-roles", message: `${label(tab)} controls no tabpanel` });
-      continue;
-    }
-    controlled.add(panel);
-    const id = tab.attributes["id"];
-    if (id === undefined || panel.attributes["aria-labelledby"] !== id) {
-      findings.push({
-        rule: "tab-roles",
-        message: `${label(panel)} is not labelled by the tab that controls it`,
-      });
-    }
+    const panel = checkTab(tab, inLists, panels, findings);
+    if (panel !== undefined) controlled.add(panel);
   }
   for (const panel of panels.values()) {
     if (!controlled.has(panel)) {

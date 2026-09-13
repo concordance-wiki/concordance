@@ -184,6 +184,61 @@ async function componentOf(
   return component as ComponentType<never>;
 }
 
+/** What the resolution accumulates over the modules and the themes. */
+interface Resolution {
+  placement: Placement;
+  islands: IslandEntry[];
+  config?: ResolvedThemeConfig;
+  /** Whether any component was placed per type, which is when the typed components are returned. */
+  anyTyped: boolean;
+}
+
+/** The components of the type modules, for their own type, when the loader can import a file. */
+async function placeModules(
+  resolution: Resolution,
+  modules: readonly TypeModule[],
+  loadFile: (path: string) => Promise<unknown>,
+): Promise<void> {
+  for (const module of modules) {
+    const origin = { plugin: module.origin ?? "types_dir", theme: "type module" };
+    const entries = Object.entries(module.components).sort(([a], [b]) => byCodeUnit(a, b));
+    for (const [name, path] of entries) {
+      const label = `type module ${module.slug}`;
+      const component = await componentOf(() => loadFile(path), label, path);
+      const parsed = moduleComponentName(name, module.slug);
+      place(resolution.placement, parsed, component, origin, module.slug);
+      resolution.anyTyped = true;
+    }
+  }
+}
+
+/** The components of one theme of a plugin, which win over the modules. */
+async function placeTheme(
+  resolution: Resolution,
+  plugin: string,
+  theme: ThemeContribution,
+  loader: ThemeLoader,
+): Promise<void> {
+  const label = `plugin ${plugin}, theme ${theme.name}`;
+  if (loader.rootOf !== undefined) {
+    const root = loader.rootOf(plugin);
+    resolution.config = configOf(root, theme, label, loader.fileSystem ?? nodeFileSystem);
+  }
+  const origin = { plugin, theme: theme.name };
+  const entries = Object.entries(theme.components ?? {}).sort(([a], [b]) => byCodeUnit(a, b));
+  for (const [name, path] of entries) {
+    const parsed = parseComponentName(name);
+    if (parsed === undefined) {
+      throw new ThemeResolutionError(
+        `${label}: ${name} is not a slot; slots are ${SLOT_NAMES.join(", ")}, EntityPage@<type>, Attribute@<attribute> or Section@<section>`,
+      );
+    }
+    const component = await componentOf(() => loader.load(plugin, path), label, path);
+    place(resolution.placement, parsed, component, origin);
+    resolution.anyTyped = resolution.anyTyped || parsed.kind !== "slot";
+  }
+}
+
 /**
  * The default components, each replaced by the last theme of the registry that provides it,
  * the `tokens` of the last theme when the loader can locate the plugin packages, the UI
@@ -197,56 +252,23 @@ export async function resolveTheme(
   loader: ThemeLoader,
   modules: readonly TypeModule[] = [],
 ): Promise<ResolvedTheme> {
-  const placement: Placement = {
-    slots: {},
-    typed: { pages: {}, parts: { attributes: {}, sections: {} }, typeParts: {} },
-    overrides: new Map(),
+  const resolution: Resolution = {
+    placement: {
+      slots: {},
+      typed: { pages: {}, parts: { attributes: {}, sections: {} }, typeParts: {} },
+      overrides: new Map(),
+    },
+    islands: [],
+    anyTyped: false,
   };
-  const islands: IslandEntry[] = [];
-  let config: ResolvedThemeConfig | undefined;
-  let anyTyped = false;
-  const { loadFile } = loader;
-  if (loadFile !== undefined) {
-    for (const module of modules) {
-      const origin = { plugin: module.origin ?? "types_dir", theme: "type module" };
-      for (const [name, path] of Object.entries(module.components).sort(([a], [b]) =>
-        byCodeUnit(a, b),
-      )) {
-        const label = `type module ${module.slug}`;
-        const component = await componentOf(() => loadFile(path), label, path);
-        place(placement, moduleComponentName(name, module.slug), component, origin, module.slug);
-        anyTyped = true;
-      }
-    }
-  }
+  if (loader.loadFile !== undefined) await placeModules(resolution, modules, loader.loadFile);
   for (const registration of registry.registrations()) {
-    islands.push(...islandsOf(registration, loader));
+    resolution.islands.push(...islandsOf(registration, loader));
     for (const theme of registration.manifest.contributes.themes ?? []) {
-      const label = `plugin ${registration.name}, theme ${theme.name}`;
-      if (loader.rootOf !== undefined) {
-        const root = loader.rootOf(registration.name);
-        config = configOf(root, theme, label, loader.fileSystem ?? nodeFileSystem);
-      }
-      const origin = { plugin: registration.name, theme: theme.name };
-      for (const [name, path] of Object.entries(theme.components ?? {}).sort(([a], [b]) =>
-        byCodeUnit(a, b),
-      )) {
-        const parsed = parseComponentName(name);
-        if (parsed === undefined) {
-          throw new ThemeResolutionError(
-            `${label}: ${name} is not a slot; slots are ${SLOT_NAMES.join(", ")}, EntityPage@<type>, Attribute@<attribute> or Section@<section>`,
-          );
-        }
-        const component = await componentOf(
-          () => loader.load(registration.name, path),
-          label,
-          path,
-        );
-        place(placement, parsed, component, origin);
-        anyTyped = anyTyped || parsed.kind !== "slot";
-      }
+      await placeTheme(resolution, registration.name, theme, loader);
     }
   }
+  const { placement, islands, config, anyTyped } = resolution;
   // A loaded component is a function; the contract of its slot says which props it receives.
   const components: SlotComponents = {
     ...defaultComponents,

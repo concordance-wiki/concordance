@@ -301,6 +301,22 @@ function annotationOf(element: XmlElement): string | undefined {
 const FIELD_ELEMENTS = new Set(["element", "attribute"]);
 const DERIVATIONS = new Set(["extension", "restriction"]);
 
+/** An `element` or `attribute` as a field: an attribute is required by `use`, an element unless `minOccurs` is 0. */
+function fieldOf(child: XmlElement): ContractField {
+  const reference = child.attributes["type"] ?? child.attributes["ref"];
+  const description = annotationOf(child);
+  const required =
+    child.name === "attribute"
+      ? child.attributes["use"] === "required"
+      : child.attributes["minOccurs"] !== "0";
+  return {
+    name: nameOf(child) || localName(child.attributes["ref"] ?? ""),
+    type: reference === undefined ? "anonymous" : localName(reference),
+    required,
+    ...(description === undefined ? {} : { description }),
+  };
+}
+
 /**
  * The fields of a type: every `element` and `attribute` below it, the derivation base's first when
  * the base is a complex type declared inline; a child element's own content is a type of its own
@@ -314,17 +330,7 @@ function fieldsOf(
   const fields: ContractField[] = [];
   for (const child of node.children) {
     if (FIELD_ELEMENTS.has(child.name)) {
-      const reference = child.attributes["type"] ?? child.attributes["ref"];
-      const description = annotationOf(child);
-      fields.push({
-        name: nameOf(child) || localName(child.attributes["ref"] ?? ""),
-        type: reference === undefined ? "anonymous" : localName(reference),
-        required:
-          child.name === "attribute"
-            ? child.attributes["use"] === "required"
-            : child.attributes["minOccurs"] !== "0",
-        ...(description === undefined ? {} : { description }),
-      });
+      fields.push(fieldOf(child));
       continue;
     }
     if (DERIVATIONS.has(child.name)) {
@@ -400,41 +406,62 @@ function exchangeOf(
   };
 }
 
+/** What the document declares around its operations: messages, bindings, ports and the types they reference. */
+interface Declarations {
+  messages: Map<string, string[]>;
+  contents: Map<string, string>;
+  bindings: Map<string, Binding>;
+  ports: Port[];
+  declared: Map<string, XmlElement>;
+}
+
+/** The XSD names an operation's messages reference, each with the names its inline definition leads to. */
+function referencedTypes(operation: XmlElement, declarations: Declarations): string[] {
+  const names = new Set<string>();
+  // A name a message references is kept as written, declared inline or imported; its definition is walked when inline.
+  for (const reference of referencedNames(operation, declarations.messages)) {
+    walkTypes(declarations.declared, reference, names);
+    names.add(reference);
+  }
+  return [...names].sort(byCodeUnit);
+}
+
+/** The operations of one port type or interface, with the port and binding exposing it when one does. */
+function interfaceOperations(portType: XmlElement, declarations: Declarations): WsdlOperation[] {
+  const { bindings, ports, contents } = declarations;
+  const port = ports.find((p) => bindings.get(p.binding)?.interface === nameOf(portType));
+  const binding = port === undefined ? undefined : bindings.get(port.binding);
+  return sortedByName(childrenNamed(portType, "operation")).map((operation) => {
+    const name = nameOf(operation);
+    const soapAction = binding?.actions.get(name);
+    const documentation = documentationOf(operation);
+    return {
+      name,
+      interface: nameOf(portType),
+      ...(port === undefined ? {} : { port: port.name, binding: port.binding }),
+      ...(soapAction === undefined ? {} : { soapAction }),
+      ...(documentation === undefined ? {} : { documentation }),
+      types: referencedTypes(operation, declarations),
+      ...exchangeOf(operation, contents),
+    };
+  });
+}
+
 function operationsOf(
   root: XmlElement,
   dialect: Dialect,
   declared: Map<string, XmlElement>,
 ): WsdlOperation[] {
-  const messages = messageParts(root);
-  const contents = messageContents(root);
-  const bindings = bindingsOf(root, dialect);
-  const ports = portsOf(root, dialect);
-  const operations: WsdlOperation[] = [];
-  for (const portType of sortedByName(childrenNamed(root, dialect.interface))) {
-    const port = ports.find((p) => bindings.get(p.binding)?.interface === nameOf(portType));
-    const binding = port === undefined ? undefined : bindings.get(port.binding);
-    for (const operation of sortedByName(childrenNamed(portType, "operation"))) {
-      const name = nameOf(operation);
-      const names = new Set<string>();
-      // A name a message references is kept as written, declared inline or imported; its definition is walked when inline.
-      for (const reference of referencedNames(operation, messages)) {
-        walkTypes(declared, reference, names);
-        names.add(reference);
-      }
-      const soapAction = binding?.actions.get(name);
-      const documentation = documentationOf(operation);
-      operations.push({
-        name,
-        interface: nameOf(portType),
-        ...(port === undefined ? {} : { port: port.name, binding: port.binding }),
-        ...(soapAction === undefined ? {} : { soapAction }),
-        ...(documentation === undefined ? {} : { documentation }),
-        types: [...names].sort(byCodeUnit),
-        ...exchangeOf(operation, contents),
-      });
-    }
-  }
-  return operations;
+  const declarations: Declarations = {
+    messages: messageParts(root),
+    contents: messageContents(root),
+    bindings: bindingsOf(root, dialect),
+    ports: portsOf(root, dialect),
+    declared,
+  };
+  return sortedByName(childrenNamed(root, dialect.interface)).flatMap((portType) =>
+    interfaceOperations(portType, declarations),
+  );
 }
 
 /**

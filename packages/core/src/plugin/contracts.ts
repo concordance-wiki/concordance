@@ -235,7 +235,8 @@ function identified(api: Entity, operations: readonly ContractOperation[]): Iden
     const slug = slugify(operation.name);
     const count = (taken.get(slug) ?? 0) + 1;
     taken.set(slug, count);
-    return { operation, id: `${api.id}/${count === 1 ? slug : `${slug}-${String(count)}`}` };
+    const distinct = count === 1 ? slug : `${slug}-${String(count)}`;
+    return { operation, id: `${api.id}/${distinct}` };
   });
 }
 

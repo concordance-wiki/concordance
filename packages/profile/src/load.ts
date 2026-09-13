@@ -13,6 +13,7 @@ import type {
   ProfileIssue,
   ProfileResolution,
   ProfileValidation,
+  TypeDefinition,
 } from "./types.js";
 
 const defaultProfileUrl = new URL("../default.yaml", import.meta.url);
@@ -112,45 +113,67 @@ function undeclaredRelation(path: string, received: string, relations: string[])
   };
 }
 
+/** The slugs a profile declares, which its definitions may name. */
+interface Declared {
+  types: string[];
+  relations: string[];
+  groups: string[] | undefined;
+}
+
+/** What a type names that the profile does not declare: its group, the relations of its attributes and sections, the types of its display order. */
+function typeReferenceIssues(
+  slug: string,
+  type: TypeDefinition,
+  declared: Declared,
+): ProfileIssue[] {
+  const issues: ProfileIssue[] = [];
+  const { types, relations, groups } = declared;
+  if (groups !== undefined && !groups.includes(type.group)) {
+    issues.push({
+      severity: "error",
+      path: `types.${slug}.group`,
+      message: "group is not declared",
+      received: type.group,
+      expected: listOf(groups),
+    });
+  }
+  for (const [name, attribute] of Object.entries(type.attributes ?? {})) {
+    if (attribute.relation !== undefined && !relations.includes(attribute.relation)) {
+      const path = `types.${slug}.attributes.${name}.relation`;
+      issues.push(undeclaredRelation(path, attribute.relation, relations));
+    }
+  }
+  for (const [name, section] of Object.entries(type.sections ?? {})) {
+    if (!relations.includes(section.produces)) {
+      const path = `types.${slug}.sections.${name}.produces`;
+      issues.push(undeclaredRelation(path, section.produces, relations));
+    }
+  }
+  (type.display?.neighbours_order ?? []).forEach((neighbour, index) => {
+    if (!types.includes(neighbour)) {
+      issues.push({
+        severity: "error",
+        path: `types.${slug}.display.neighbours_order[${String(index)}]`,
+        message: "type is not declared",
+        received: neighbour,
+        expected: listOf(types),
+      });
+    }
+  });
+  return issues;
+}
+
 /** The schema checks shapes; this checks that every slug a definition names is declared. */
 function referenceIssues(profile: Profile): ProfileIssue[] {
   const issues: ProfileIssue[] = [];
   const types = Object.keys(profile.types);
-  const relations = Object.keys(profile.relations);
-  const groups = profile.groups === undefined ? undefined : Object.keys(profile.groups);
+  const declared: Declared = {
+    types,
+    relations: Object.keys(profile.relations),
+    groups: profile.groups === undefined ? undefined : Object.keys(profile.groups),
+  };
   for (const [slug, type] of Object.entries(profile.types)) {
-    if (groups !== undefined && !groups.includes(type.group)) {
-      issues.push({
-        severity: "error",
-        path: `types.${slug}.group`,
-        message: "group is not declared",
-        received: type.group,
-        expected: listOf(groups),
-      });
-    }
-    for (const [name, attribute] of Object.entries(type.attributes ?? {})) {
-      if (attribute.relation !== undefined && !relations.includes(attribute.relation)) {
-        const path = `types.${slug}.attributes.${name}.relation`;
-        issues.push(undeclaredRelation(path, attribute.relation, relations));
-      }
-    }
-    for (const [name, section] of Object.entries(type.sections ?? {})) {
-      if (!relations.includes(section.produces)) {
-        const path = `types.${slug}.sections.${name}.produces`;
-        issues.push(undeclaredRelation(path, section.produces, relations));
-      }
-    }
-    (type.display?.neighbours_order ?? []).forEach((neighbour, index) => {
-      if (!types.includes(neighbour)) {
-        issues.push({
-          severity: "error",
-          path: `types.${slug}.display.neighbours_order[${String(index)}]`,
-          message: "type is not declared",
-          received: neighbour,
-          expected: listOf(types),
-        });
-      }
-    });
+    issues.push(...typeReferenceIssues(slug, type, declared));
   }
   for (const [slug, relation] of Object.entries(profile.relations)) {
     relation.allowed.forEach((pair, index) => {

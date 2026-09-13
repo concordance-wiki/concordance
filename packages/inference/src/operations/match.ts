@@ -221,12 +221,12 @@ interface Claims {
   byOperation: Map<string, Entity[]>;
 }
 
-function claimsAt(
-  rung: MatchRung,
-  notes: readonly OperationNote[],
+/** The operations by API and key at the rung; an operation with several keys sits under each. */
+function keyedOperations(
   operations: readonly ImportedOperation[],
+  rung: MatchRung,
   normalize: Normalize,
-): Claims {
+): Map<string, ImportedOperation[]> {
   const keyed = new Map<string, ImportedOperation[]>();
   for (const operation of operations) {
     for (const key of operationKeys(operation, rung, normalize)) {
@@ -235,19 +235,39 @@ function claimsAt(
       keyed.set(`${operation.api}\n${key}`, bucket);
     }
   }
+  return keyed;
+}
+
+/** The operations of the note's candidate APIs whose key equals one of the note's, in entity order. */
+function claimedBy(
+  note: OperationNote,
+  keyed: ReadonlyMap<string, ImportedOperation[]>,
+  rung: MatchRung,
+  normalize: Normalize,
+): ImportedOperation[] {
+  const claimed = new Map<string, ImportedOperation>();
+  for (const api of note.apis) {
+    for (const key of noteKeys(note.entity, rung, normalize)) {
+      for (const operation of keyed.get(`${api}\n${key}`) ?? []) {
+        claimed.set(operation.entity.id, operation);
+      }
+    }
+  }
+  return [...claimed.values()].sort((a, b) => compareEntities(a.entity, b.entity));
+}
+
+function claimsAt(
+  rung: MatchRung,
+  notes: readonly OperationNote[],
+  operations: readonly ImportedOperation[],
+  normalize: Normalize,
+): Claims {
+  const keyed = keyedOperations(operations, rung, normalize);
   const byNote = new Map<string, ImportedOperation[]>();
   const byOperation = new Map<string, Entity[]>();
   for (const note of notes) {
-    const claimed = new Map<string, ImportedOperation>();
-    for (const api of note.apis) {
-      for (const key of noteKeys(note.entity, rung, normalize)) {
-        for (const operation of keyed.get(`${api}\n${key}`) ?? []) {
-          claimed.set(operation.entity.id, operation);
-        }
-      }
-    }
-    if (claimed.size === 0) continue;
-    const found = [...claimed.values()].sort((a, b) => compareEntities(a.entity, b.entity));
+    const found = claimedBy(note, keyed, rung, normalize);
+    if (found.length === 0) continue;
     byNote.set(note.entity.id, found);
     for (const operation of found) {
       const claimants = byOperation.get(operation.entity.id) ?? [];
@@ -256,6 +276,66 @@ function claimsAt(
     }
   }
   return { byNote, byOperation };
+}
+
+/** What one rung settles: the entities it takes out of the later rungs, with their matches and ambiguities. */
+interface Settled {
+  ids: Set<string>;
+  matches: OperationMatch[];
+  ambiguities: Ambiguity[];
+}
+
+/** A note claiming several operations is an ambiguity that settles the note and every operation it claims. */
+function hesitantNotes(
+  rung: MatchRung,
+  notes: readonly OperationNote[],
+  claims: Claims,
+  out: Settled,
+): void {
+  for (const note of notes) {
+    const claimed = claims.byNote.get(note.entity.id);
+    if (claimed !== undefined && claimed.length > 1) {
+      out.ids.add(note.entity.id);
+      for (const operation of claimed) out.ids.add(operation.entity.id);
+      out.ambiguities.push({ kind: "note", rung, note: note.entity, operations: claimed });
+    }
+  }
+}
+
+/** An operation claimed by several notes is an ambiguity that settles the operation and every claimant. */
+function contestedOperations(
+  rung: MatchRung,
+  operations: readonly ImportedOperation[],
+  claims: Claims,
+  out: Settled,
+): void {
+  for (const operation of operations) {
+    const claimants = claims.byOperation.get(operation.entity.id);
+    if (claimants !== undefined && claimants.length > 1) {
+      out.ids.add(operation.entity.id);
+      for (const note of claimants) out.ids.add(note.id);
+      out.ambiguities.push({ kind: "operation", rung, operation, notes: claimants });
+    }
+  }
+}
+
+/**
+ * A note left unsettled claims exactly one operation, which nobody else claims: the ambiguities
+ * settled every note of a contested operation and every operation of a hesitant note.
+ */
+function oneToOne(
+  rung: MatchRung,
+  notes: readonly OperationNote[],
+  claims: Claims,
+  out: Settled,
+): void {
+  for (const note of notes) {
+    const [operation] = claims.byNote.get(note.entity.id) ?? [];
+    if (operation === undefined || out.ids.has(note.entity.id)) continue;
+    out.ids.add(note.entity.id);
+    out.ids.add(operation.entity.id);
+    out.matches.push({ note: note.entity, operation, rung });
+  }
 }
 
 /**
@@ -276,35 +356,13 @@ export function matchOperations(
   let freeNotes = [...notes];
   let freeOperations = [...operations];
   for (const rung of MATCH_RUNGS) {
-    const { byNote, byOperation } = claimsAt(rung, freeNotes, freeOperations, normalize);
-    const settled = new Set<string>();
-    for (const note of freeNotes) {
-      const claimed = byNote.get(note.entity.id);
-      if (claimed !== undefined && claimed.length > 1) {
-        settled.add(note.entity.id);
-        for (const operation of claimed) settled.add(operation.entity.id);
-        ambiguities.push({ kind: "note", rung, note: note.entity, operations: claimed });
-      }
-    }
-    for (const operation of freeOperations) {
-      const claimants = byOperation.get(operation.entity.id);
-      if (claimants !== undefined && claimants.length > 1) {
-        settled.add(operation.entity.id);
-        for (const note of claimants) settled.add(note.id);
-        ambiguities.push({ kind: "operation", rung, operation, notes: claimants });
-      }
-    }
-    // A note left unsettled claims exactly one operation, which nobody else claims: the ambiguities
-    // above settled every note of a contested operation and every operation of a hesitant note.
-    for (const note of freeNotes) {
-      const [operation] = byNote.get(note.entity.id) ?? [];
-      if (operation === undefined || settled.has(note.entity.id)) continue;
-      settled.add(note.entity.id);
-      settled.add(operation.entity.id);
-      matches.push({ note: note.entity, operation, rung });
-    }
-    freeNotes = freeNotes.filter((note) => !settled.has(note.entity.id));
-    freeOperations = freeOperations.filter((operation) => !settled.has(operation.entity.id));
+    const claims = claimsAt(rung, freeNotes, freeOperations, normalize);
+    const settled: Settled = { ids: new Set<string>(), matches, ambiguities };
+    hesitantNotes(rung, freeNotes, claims, settled);
+    contestedOperations(rung, freeOperations, claims, settled);
+    oneToOne(rung, freeNotes, claims, settled);
+    freeNotes = freeNotes.filter((note) => !settled.ids.has(note.entity.id));
+    freeOperations = freeOperations.filter((operation) => !settled.ids.has(operation.entity.id));
   }
   return { matches, ambiguities };
 }

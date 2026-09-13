@@ -64,7 +64,8 @@ const HOUR = 3_600_000;
 function invalidModel(error: unknown): string {
   // parseModel only throws ModelError, which always carries at least one issue.
   const issue = (error as ModelError).issues[0] as ConfigIssue;
-  return `invalid model: ${issue.path === "" ? "" : `${issue.path}: `}${issue.message}`;
+  const at = issue.path === "" ? "" : `${issue.path}: `;
+  return `invalid model: ${at}${issue.message}`;
 }
 
 function readModelText(text: string, file: string): ReadModel {

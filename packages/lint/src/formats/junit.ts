@@ -45,6 +45,7 @@ function testCase(finding: Finding): string[] {
 export function formatJunit(findings: readonly Finding[], context: FormatContext): string {
   const sorted = sortFindings(findings);
   const failures = sorted.filter((finding) => finding.severity !== "info").length;
+  const tool = `${TOOL_NAME} ${context.version}`;
   const cases =
     sorted.length === 0
       ? [
@@ -61,7 +62,7 @@ export function formatJunit(findings: readonly Finding[], context: FormatContext
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<testsuite ${suite}>`,
     "  <properties>",
-    `    <property ${attribute("name", "tool")} ${attribute("value", `${TOOL_NAME} ${context.version}`)}/>`,
+    `    <property ${attribute("name", "tool")} ${attribute("value", tool)}/>`,
     "  </properties>",
     ...cases,
     "</testsuite>",

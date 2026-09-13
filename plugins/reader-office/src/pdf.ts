@@ -41,6 +41,15 @@ function decodeString(bytes: number[]): string {
   return String.fromCharCode(...bytes);
 }
 
+/** The escape a backslash at `at` starts: the bytes it stands for and how many characters follow the backslash. */
+function escapeAt(text: string, at: number): { bytes: number[]; length: number } {
+  const octal = /^[0-7]{1,3}/.exec(text.slice(at + 1, at + 4));
+  if (octal !== null) return { bytes: [Number.parseInt(octal[0], 8)], length: octal[0].length };
+  // An escaped line break continues the string; any other character stands for itself.
+  const next = text.charAt(at + 1);
+  return { bytes: next === "\n" ? [] : [escapes[next] ?? next.charCodeAt(0)], length: 1 };
+}
+
 /** Reads a literal string `(...)` starting at `start`; parentheses nest, backslash escapes. */
 function literalString(text: string, start: number): string {
   const bytes: number[] = [];
@@ -48,16 +57,9 @@ function literalString(text: string, start: number): string {
   for (let i = start; i < text.length; i += 1) {
     const char = text.charAt(i);
     if (char === "\\") {
-      const next = text.charAt(i + 1);
-      const octal = /^[0-7]{1,3}/.exec(text.slice(i + 1, i + 4));
-      if (octal !== null) {
-        bytes.push(Number.parseInt(octal[0], 8));
-        i += octal[0].length;
-      } else {
-        // An escaped line break continues the string; any other character stands for itself.
-        if (next !== "\n") bytes.push(escapes[next] ?? next.charCodeAt(0));
-        i += 1;
-      }
+      const escape = escapeAt(text, i);
+      bytes.push(...escape.bytes);
+      i += escape.length;
     } else if (char === "(") {
       if (depth > 0) bytes.push(40);
       depth += 1;

@@ -125,6 +125,58 @@ function crossSourceLink(entity: LinkableEntity, link: MarkdownLink, source: str
   };
 }
 
+/** What the notes are looked up by, and how far a link may reach. */
+interface LinkContext {
+  entities: ReadonlyMap<string, LinkableEntity>;
+  files: SourceFiles;
+  crossSource: boolean;
+  confidence: number;
+}
+
+/** What one written link yields: a finding, a link with its provenance, or nothing for an external address. */
+type LinkOutcome =
+  | { finding: Finding }
+  | { from: string; to: string; relation: string; provenance: Provenance }
+  | undefined;
+
+function outcomeOf(entity: LinkableEntity, link: MarkdownLink, context: LinkContext): LinkOutcome {
+  const target = locateLink(link.target, entity.source, context.files, context.crossSource);
+  if (target.kind === "denied") return { finding: crossSourceLink(entity, link, target.source) };
+  if (target.kind === "missing") return { finding: brokenLink(entity, link) };
+  if (target.kind === "external") return undefined;
+  const provenance: Provenance = {
+    method: "explicit_link",
+    confidence: context.confidence,
+    path: entity.source.path,
+    line: link.line,
+    text: link.text,
+    ...anchorOf(target.anchor),
+  };
+  if (!target.path.endsWith(".md")) {
+    // The resource entities are named from their path alone, so the same derivation finds them.
+    const resource = identifierFor({ source: target.source, path: target.path, typeSuffixes: [] });
+    return { from: resource.id, to: entity.id, relation: "documents", provenance };
+  }
+  const to = context.entities.get(fileKey(target.source, target.path));
+  if (to === undefined || to.id === entity.id) return undefined;
+  // A written link says that two notes are related, not how: the relation typing step names it.
+  return { from: entity.id, to: to.id, relation: "related", provenance };
+}
+
+type FoundLink = Exclude<LinkOutcome, undefined | { finding: Finding }>;
+
+/** Several links to the same target keep every provenance; combining their confidences is a later step. */
+function record(merged: Map<string, Link>, found: FoundLink, confidence: number): void {
+  const { from, to, relation, provenance } = found;
+  const key = `${from} ${to} ${relation}`;
+  const existing = merged.get(key);
+  if (existing === undefined) {
+    merged.set(key, { from, to, relation, attributes: {}, confidence, provenance: [provenance] });
+  } else {
+    existing.provenance.push(provenance);
+  }
+}
+
 /**
  * Markdown links are the strongest relation the tool knows: every link written in a note gives a
  * link at the confidence of `explicit_link`, with the file, the line and the text as provenance. A
@@ -133,7 +185,6 @@ function crossSourceLink(entity: LinkableEntity, link: MarkdownLink, source: str
  */
 export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
   const confidence = input.profile.confidence.explicit_link ?? 1;
-  const crossSource = input.inference?.cross_source_links ?? false;
   const files = new Map<string, Set<string>>();
   for (const resource of input.resources) {
     const paths = files.get(resource.source) ?? new Set<string>();
@@ -143,55 +194,25 @@ export function explicitLinks(input: ExplicitLinksInput): ExplicitLinksResult {
   const entities = new Map(
     input.entities.map((entity) => [fileKey(entity.source.name, entity.source.path), entity]),
   );
+  const context: LinkContext = {
+    entities,
+    files,
+    crossSource: input.inference?.cross_source_links ?? false,
+    confidence,
+  };
   const merged = new Map<string, Link>();
   const findings: Finding[] = [];
-
-  const record = (from: string, to: string, relation: string, provenance: Provenance): void => {
-    const key = `${from} ${to} ${relation}`;
-    const existing = merged.get(key);
-    if (existing === undefined) {
-      merged.set(key, { from, to, relation, attributes: {}, confidence, provenance: [provenance] });
-    } else {
-      // Several links to the same target keep every provenance; combining their confidences is a later step.
-      existing.provenance.push(provenance);
-    }
-  };
-
   for (const [key, document] of input.documents) {
     const entity = entities.get(key);
     if (entity === undefined) continue;
     for (const link of document.links) {
-      const target = locateLink(link.target, entity.source, files, crossSource);
-      if (target.kind !== "file") {
-        if (target.kind === "denied") {
-          findings.push(crossSourceLink(entity, link, target.source));
-        } else if (target.kind === "missing") {
-          findings.push(brokenLink(entity, link));
-        }
+      const outcome = outcomeOf(entity, link, context);
+      if (outcome === undefined) continue;
+      if ("finding" in outcome) {
+        findings.push(outcome.finding);
         continue;
       }
-      const provenance: Provenance = {
-        method: "explicit_link",
-        confidence,
-        path: entity.source.path,
-        line: link.line,
-        text: link.text,
-        ...anchorOf(target.anchor),
-      };
-      if (!target.path.endsWith(".md")) {
-        // The resource entities are named from their path alone, so the same derivation finds them.
-        const resource = identifierFor({
-          source: target.source,
-          path: target.path,
-          typeSuffixes: [],
-        }).id;
-        record(resource, entity.id, "documents", provenance);
-        continue;
-      }
-      const to = entities.get(fileKey(target.source, target.path));
-      if (to === undefined || to.id === entity.id) continue;
-      // A written link says that two notes are related, not how: the relation typing step names it.
-      record(entity.id, to.id, "related", provenance);
+      record(merged, outcome, confidence);
     }
   }
 

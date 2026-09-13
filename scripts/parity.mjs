@@ -75,17 +75,20 @@ function globToRegExp(glob) {
   return new RegExp(`^${pattern}$`);
 }
 
+// Whether a rule of a source applies to a file: every criterion it names must hold.
+function ruleMatches(match, path, frontmatter) {
+  if (match.path !== undefined && !globToRegExp(match.path).test(path)) return false;
+  if (match.suffix !== undefined && !path.endsWith(match.suffix)) return false;
+  if (match.ext !== undefined && !match.ext.some((ext) => path.endsWith(ext))) return false;
+  return match.frontmatter === undefined || Object.hasOwn(frontmatter, match.frontmatter);
+}
+
 // The type cascade of the tool, on paths: the source's default type, its forced
 // type, its rules in order (the last match winning), then the frontmatter.
 function resolveType(source, path, frontmatter) {
   let type = source.type ?? source.default_type ?? FALLBACK_TYPE;
-  for (const rule of source.rules ?? []) {
-    const { match, set } = rule;
-    if (match.path !== undefined && !globToRegExp(match.path).test(path)) continue;
-    if (match.suffix !== undefined && !path.endsWith(match.suffix)) continue;
-    if (match.ext !== undefined && !match.ext.some((ext) => path.endsWith(ext))) continue;
-    if (match.frontmatter !== undefined && !Object.hasOwn(frontmatter, match.frontmatter)) continue;
-    if (set.type !== undefined) type = String(set.type);
+  for (const { match, set } of source.rules ?? []) {
+    if (ruleMatches(match, path, frontmatter) && set.type !== undefined) type = String(set.type);
   }
   return typeof frontmatter.type === "string" ? frontmatter.type : type;
 }

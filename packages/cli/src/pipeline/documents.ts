@@ -168,6 +168,12 @@ interface ReadOutcome {
   unconverted: boolean;
 }
 
+/** Slides for a presentation, pages for any other paged document, cues for a transcript. */
+function unitOf(format: string, paged: boolean): PositionUnit {
+  if (!paged) return "cue";
+  return format === "pptx" ? "slide" : "page";
+}
+
 async function readOne(
   input: ReadDocumentsInput,
   source: IngestedSource,
@@ -190,7 +196,7 @@ async function readOne(
     format,
     size: bytes.byteLength,
     metadata: output.metadata,
-    unit: converted || output.units === undefined ? (format === "pptx" ? "slide" : "page") : "cue",
+    unit: unitOf(format, converted || output.units === undefined),
     pages: converted ? [] : pagesOfReader(output),
   };
   let unconverted = false;
@@ -234,6 +240,41 @@ export async function inParallel<Input, Output>(
   return results;
 }
 
+interface ReadJob {
+  source: IngestedSource;
+  file: IngestedFile;
+  reader?: Reader;
+  converter?: Converter;
+}
+
+/** The job of a file a reader or a converter takes; a note, or a file nobody accepts, has none. */
+function jobOf(
+  input: ReadDocumentsInput,
+  source: IngestedSource,
+  file: IngestedFile,
+): ReadJob | undefined {
+  const extension = extensionOf(file.path);
+  if (extension === ".md") return undefined;
+  const reader = byExtension(input.readers, extension);
+  const converter = byExtension(input.converters, extension);
+  if (reader === undefined && converter === undefined) return undefined;
+  return {
+    source,
+    file,
+    ...(reader === undefined ? {} : { reader }),
+    ...(converter === undefined ? {} : { converter }),
+  };
+}
+
+function jobsOf(input: ReadDocumentsInput): ReadJob[] {
+  return input.sources.flatMap((source) =>
+    source.files.flatMap((file) => {
+      const job = jobOf(input, source, file);
+      return job === undefined ? [] : [job];
+    }),
+  );
+}
+
 /**
  * Reads every file of the sources that is not a note and that a reader or a converter accepts:
  * the reader gives its metadata and, for a transcript, its cues; the converter gives its PDF
@@ -242,28 +283,7 @@ export async function inParallel<Input, Output>(
  * parallel; the documents come back in source and path order whatever the scheduling.
  */
 export async function readDocuments(input: ReadDocumentsInput): Promise<ReadDocumentsOutput> {
-  const jobs: {
-    source: IngestedSource;
-    file: IngestedFile;
-    reader?: Reader;
-    converter?: Converter;
-  }[] = [];
-  for (const source of input.sources) {
-    for (const file of source.files) {
-      const extension = extensionOf(file.path);
-      if (extension === ".md") continue;
-      const reader = byExtension(input.readers, extension);
-      const converter = byExtension(input.converters, extension);
-      if (reader === undefined && converter === undefined) continue;
-      jobs.push({
-        source,
-        file,
-        ...(reader === undefined ? {} : { reader }),
-        ...(converter === undefined ? {} : { converter }),
-      });
-    }
-  }
-  const outcomes = await inParallel(jobs, input.parallelism, (job) =>
+  const outcomes = await inParallel(jobsOf(input), input.parallelism, (job) =>
     readOne(input, job.source, job.file, job.reader, job.converter),
   );
   const documents = outcomes

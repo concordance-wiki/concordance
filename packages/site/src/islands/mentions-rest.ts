@@ -16,13 +16,16 @@ function isMention(value: unknown): value is Mention {
   return typeof value === "object" && value !== null && "kind" in value && "href" in value;
 }
 
+/** What an embedded block lists under `mentions`, when it is such a block. */
+function embeddedList(value: unknown): unknown {
+  return typeof value === "object" && value !== null && "mentions" in value
+    ? value.mentions
+    : undefined;
+}
+
 /** The mentions of a fragment or of the embedded block, refusing anything but a list of mentions. */
 export function parseMentions(value: unknown): Mention[] {
-  const list = Array.isArray(value)
-    ? value
-    : typeof value === "object" && value !== null && "mentions" in value
-      ? value.mentions
-      : undefined;
+  const list = Array.isArray(value) ? value : embeddedList(value);
   if (!Array.isArray(list) || !list.every(isMention)) {
     throw new Error("not a list of mentions");
   }
