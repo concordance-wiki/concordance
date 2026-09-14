@@ -28,8 +28,51 @@ describe("scannableText", () => {
       ]);
     });
 
-    it("drops inline code from the text of a paragraph", () => {
-      expect(texts("Reads the `resource` table.\n")).toEqual(["Reads the  table."]);
+    it("drops inline code from the text of a paragraph and keeps it aside at its offset", () => {
+      expect(units("Reads the `resource` table.\n")).toEqual([
+        {
+          line: 1,
+          text: "Reads the  table.",
+          kind: "paragraph",
+          code: [{ at: 10, text: "resource" }],
+        },
+      ]);
+    });
+
+    it("keeps every code span of a unit in order, two adjacent ones at the same offset", () => {
+      expect(units("Set [`a`](x.md)`b` then `c`.\n")[0]?.code).toEqual([
+        { at: 4, text: "a" },
+        { at: 4, text: "b" },
+        { at: 10, text: "c" },
+      ]);
+      expect(units("- Item `x`\n\n  more `y`\n")).toEqual([
+        {
+          line: 1,
+          text: "Item \nmore ",
+          kind: "list-item",
+          code: [
+            { at: 5, text: "x" },
+            { at: 11, text: "y" },
+          ],
+        },
+      ]);
+    });
+
+    it("offsets a code span by the URLs removed before it, one inside a URL landing at its cut", () => {
+      expect(units("See https://example.test/a `x` and www.example.test/b `y`.\n")).toEqual([
+        {
+          line: 1,
+          text: "See   and  .",
+          kind: "paragraph",
+          code: [
+            { at: 5, text: "x" },
+            { at: 11, text: "y" },
+          ],
+        },
+      ]);
+      expect(units("At [https://example.test/`z`rest](x.md) end.\n")).toEqual([
+        { line: 1, text: "At  end.", kind: "paragraph", code: [{ at: 3, text: "z" }] },
+      ]);
     });
 
     it("gives no unit for a paragraph made only of inline code", () => {
@@ -161,13 +204,16 @@ describe("scannableText", () => {
       expect(texts("First  \nsecond.\n")).toEqual(["First\nsecond."]);
     });
 
-    it("returns copies that leave the document untouched", () => {
-      const document = parseMarkdown("Text.\n", { path: "a.md" });
+    it("returns copies that leave the document untouched, code spans included", () => {
+      const document = parseMarkdown("Text `code`.\n", { path: "a.md" });
       const first = scannableText(document)[0];
       if (first !== undefined) {
         first.text = "changed";
+        first.code?.splice(0, 1, { at: 0, text: "changed" });
       }
-      expect(scannableText(document)).toEqual([{ line: 1, text: "Text.", kind: "paragraph" }]);
+      expect(scannableText(document)).toEqual([
+        { line: 1, text: "Text .", kind: "paragraph", code: [{ at: 5, text: "code" }] },
+      ]);
     });
   });
 });

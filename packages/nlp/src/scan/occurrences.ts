@@ -1,6 +1,5 @@
 import type { Dictionary, DictionaryEntry, DictionaryTarget } from "../dictionary/types.js";
 import type { LanguagePack } from "../locale/pack.js";
-import { contextAround } from "../text/context.js";
 import {
   buildAutomaton,
   longestMatches,
@@ -8,6 +7,7 @@ import {
   type Automaton,
   type RawMatch,
 } from "./automaton.js";
+import { occurrenceContext, type ElidedCode } from "./context.js";
 import { tokenize, type Token } from "./tokens.js";
 
 /** The `confidence.glossary_occurrence` block of the profile, every key resolved. */
@@ -21,9 +21,12 @@ export interface OccurrenceScale {
 
 export interface ScannedParagraph {
   line: number;
+  /** The text the scan reads, inline code left out. */
   text: string;
   /** Heading of the enclosing section, when any. */
   section?: string;
+  /** The inline code the text leaves out, in text order, quoted back in the context of an occurrence. */
+  code?: readonly ElidedCode[];
 }
 
 /** A document reduced to the text units the scan reads, excluded zones already removed. */
@@ -44,7 +47,7 @@ export interface Occurrence {
   /** The match as written, from its first to its last token. */
   text: string;
   section?: string;
-  /** 80 characters of the original text centred on the match, an ellipsis marking each cut. */
+  /** 80 characters of the text as written, inline code included, centred on the match, an ellipsis marking each cut. */
   context: string;
   /** The type slug announced by the word right before the match, when it is a type prefix. */
   expectedType?: string;
@@ -60,8 +63,6 @@ export interface ScanDocumentInput {
   typePrefixes: Readonly<Record<string, readonly string[]>>;
   scale: OccurrenceScale;
 }
-
-const contextWidth = 80;
 
 function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
@@ -157,7 +158,7 @@ function occurrencesOf(scan: ParagraphScan, match: RawMatch<DictionaryEntry>): O
     position: span.start,
     text: paragraph.text.slice(span.start, span.end),
     ...(paragraph.section === undefined ? {} : { section: paragraph.section }),
-    context: contextAround(paragraph.text, span.start, span.end, contextWidth),
+    context: occurrenceContext(paragraph, span.start, span.end),
     ...(expectedType === undefined ? {} : { expectedType }),
     confidence: (scale.base + announced) * factor,
   };

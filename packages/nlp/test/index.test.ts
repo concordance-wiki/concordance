@@ -5,6 +5,7 @@ import * as entry from "../src/index.js";
 describe("@concordance-wiki/nlp", () => {
   it("exposes the language pack registry, the stopword file reader, text normalisation, the search tokens, the dictionary, the occurrence scan, the keyword discovery and its publication", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "CONTEXT_WIDTH",
       "HOMONYM_CHECK",
       "KEYWORD_TYPE",
       "LanguagePackError",
@@ -35,6 +36,7 @@ describe("@concordance-wiki/nlp", () => {
       "loadStopwords",
       "longestMatches",
       "occurrenceConfidence",
+      "occurrenceContext",
       "publishKeywords",
       "registerLanguagePack",
       "resolveLocale",
