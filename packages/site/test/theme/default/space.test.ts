@@ -55,7 +55,26 @@ describe("Space", () => {
       '<section class="space-words" aria-labelledby="space-words"><h2 id="space-words">The most cited words here</h2><ul class="space-word-list"><li><a class="chip" href="../glossary/inference/entity/">Entity<span class="chip-count">42</span></a></li>',
     );
     expect(html).toContain(
-      '<li><a class="chip chip-keyword" href="../keywords/build-summary/">build summary<span class="chip-count">6</span></a></li></ul><p class="space-note">Counted in this space only, which gives its own vocabulary.</p></section>',
+      '<li><a class="chip chip-keyword" href="../keywords/build-summary/" title="no note">build summary<span class="visually-hidden"> (no note)</span><span class="chip-count">6</span></a></li></ul><p class="space-note">Counted in this space only, which gives its own vocabulary.</p></section>',
+    );
+    const worded = renderSlot(
+      "Space",
+      {
+        ...corporateSpace,
+        words: [
+          {
+            label: "build summary",
+            href: "../keywords/build-summary/",
+            count: 6,
+            keyword: true,
+            title: "6 passages, no note",
+          },
+        ],
+      },
+      defaultTheme,
+    );
+    expect(worded).toContain(
+      '<a class="chip chip-keyword" href="../keywords/build-summary/" title="6 passages, no note">build summary<span class="visually-hidden"> (6 passages, no note)</span><span class="chip-count">6</span></a>',
     );
     expect(html).toContain(
       '<p class="space-footer">A space reads like a small wiki within the wiki: its own search, its own vocabulary, its own news.</p></div></div></div>',

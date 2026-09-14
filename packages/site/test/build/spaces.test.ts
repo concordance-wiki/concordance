@@ -148,10 +148,13 @@ describe("spacesPageOf", () => {
       lastUpdate: "Last update",
       datesNote:
         "The dates come from the git history, so they are always exact. A space past the freshness threshold — 180 days by default — is marked in accent, the only case where colour carries an alert, doubled by the value in days.",
+      stale: "past the freshness threshold",
     });
-    expect(spacesLabels(context({ catalogue: loadCatalogue("fr") }), 1).lead).toBe(
+    const french = spacesLabels(context({ catalogue: loadCatalogue("fr") }), 1);
+    expect(french.lead).toBe(
       "1 espace, alimenté par les dépôts déclarés dans la configuration. Un dépôt peut porter plusieurs espaces, et un espace se répartir sur plusieurs dépôts.",
     );
+    expect(french.stale).toBe("au-delà du seuil de fraîcheur");
   });
 });
 
@@ -318,6 +321,7 @@ describe("spaceWordsOf", () => {
         href: "../keywords/build-summary/index.html",
         count: 3,
         keyword: true,
+        title: "3 passages, no note",
       },
       { label: "Keyword page", href: "../glossary/keyword-page/index.html", count: 2 },
     ]);
@@ -330,6 +334,7 @@ describe("spaceWordsOf", () => {
         href: "../keywords/build-summary/index.html",
         count: 1,
         keyword: true,
+        title: "1 passage, no note",
       },
     ]);
     const targets = Array.from({ length: 7 }, (_, index) =>
@@ -427,6 +432,7 @@ describe("spacePageOf", () => {
           href: "../keywords/build-summary/index.html",
           count: 3,
           keyword: true,
+          title: "3 passages, no note",
         },
         { label: "Keyword page", href: "../glossary/keyword-page/index.html", count: 2 },
       ],

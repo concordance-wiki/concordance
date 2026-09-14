@@ -22,5 +22,9 @@
   "spaces.space": {
     "defaultMessage": "Space",
     "description": "Column of the spaces page: the badge and the name of a space."
+  },
+  "spaces.stale": {
+    "defaultMessage": "past the freshness threshold",
+    "description": "Read after the date of a dormant space by assistive technology, which sees no accent colour."
   }
 }

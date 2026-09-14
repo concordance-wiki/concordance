@@ -428,7 +428,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const spaces = plain.fs.readText("/work/dist/spaces/index.html");
     expect(spaces).toContain("<title>Spaces – Wiki</title>");
     expect(spaces).toContain(
-      '<a href="../notes/index.html">notes</a></th><td class="spaces-content">Document, Screen, Term</td><td class="spaces-count">3</td><td class="spaces-date"><time datetime="1970-01-01">20,708 days ago</time></td>',
+      '<a href="../notes/index.html">notes</a></th><td class="spaces-content">Document, Screen, Term</td><td class="spaces-count">3</td><td class="spaces-date"><time datetime="1970-01-01">20,708 days ago</time><span class="visually-hidden">, past the freshness threshold</span></td>',
     );
     const space = plain.fs.readText("/work/dist/notes/index.html");
     expect(space).toContain("<title>notes – Wiki</title>");

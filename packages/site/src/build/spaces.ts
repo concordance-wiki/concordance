@@ -105,6 +105,7 @@ export function spacesLabels(context: SiteContext, count: number): SpacesLabels 
     datesNote: formatMessage(context.catalogue, "spaces.datesNote", {
       count: DEFAULT_WARN_AFTER_DAYS,
     }),
+    stale: message(context, "spaces.stale"),
   };
 }
 
@@ -195,7 +196,12 @@ export function spaceWordsOf(context: SiteContext, page: string, source: string)
       label: entity.title,
       href: entityHref(page, entity.id),
       count,
-      ...(entity.keyword === true ? { keyword: true } : {}),
+      ...(entity.keyword === true
+        ? {
+            keyword: true,
+            title: formatMessage(context.catalogue, "entity.markNoNote", { count }),
+          }
+        : {}),
     }));
 }
 

@@ -1318,6 +1318,8 @@ export interface SpacesLabels {
   lastUpdate: string;
   /** Under the table, the threshold already worded: where the dates come from and what the accent means. */
   datesNote: string;
+  /** After the date of a dormant space, for assistive technology: the alert in words, since the accent is a colour. */
+  stale: string;
 }
 
 export interface SpacesProps {
@@ -1349,6 +1351,8 @@ export interface SpaceWord extends Link {
   count: number;
   /** `true` for a keyword page, the page of a recurring expression nobody defined: the chip is dashed. */
   keyword?: boolean;
+  /** What the dashed chip tells on hover and to assistive technology, "6 passages, no note"; the theme words "no note" when absent. */
+  title?: string;
 }
 
 /** The strings of a space page in the language of the site; the theme's own English when absent. */

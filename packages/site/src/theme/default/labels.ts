@@ -28,6 +28,7 @@ export const labels = {
   legendWritten: "written link",
   legendRecognised: "recognised word, existing note",
   legendKeyword: "recognised word, no note",
+  noNoteMark: "no note",
   imageNote: "Image of the repository, shown in the flow of the text",
   correction: "Something to correct?",
   edit: "Edit this page",
@@ -165,6 +166,7 @@ export const labels = {
   lastUpdate: "Last update",
   spacesDatesNote:
     "The dates come from the git history, so they are always exact. A space past the freshness threshold is marked in accent, the only case where colour carries an alert, doubled by the value in days.",
+  staleSpace: "past the freshness threshold",
   pagesUnit: "pages",
   repository: "repository",
   browseHeading: "Browse",
