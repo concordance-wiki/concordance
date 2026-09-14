@@ -1,8 +1,31 @@
-# @concordance-wiki/plugin-contract-openapi
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-A source plugin for Concordance that imports the OpenAPI 3.x contract an `api` note declares, so that the operations of the API come from the contract instead of being copied by hand into a note that would go stale. An integrator installs it next to `@concordance-wiki/cli` and declares it in `concordance.yaml`; it is not part of `@concordance-wiki/concordance`.
+<h1 align="center">@concordance-wiki/plugin-contract-openapi</h1>
 
-## Install
+<p align="center"><strong>Reads the OpenAPI contract an API note declares, so the operations come from the contract and never go stale.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/plugin-contract-openapi"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/plugin-contract-openapi?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/writing-notes.md">Writing notes</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/plugins/contract-openapi/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+The list of operations copied by hand into an API note is wrong the week after. This plugin imports the OpenAPI 3.x contract an `api` note declares, JSON or YAML, from a path or a URL, and the wiki shows the API as the contract describes it: one page per operation, linked to the API with evidence, the schemas as candidate business objects, and the contract itself in a viewer on the page of the API. Write the note about the API; leave the operations to the contract. Install it next to [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli); it is not part of [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance). No system dependency.
+
+## Quick start
 
 ```bash
 npm install --save-dev @concordance-wiki/plugin-contract-openapi
@@ -14,8 +37,6 @@ Then declare it in `concordance.yaml`:
 plugins:
   - "@concordance-wiki/plugin-contract-openapi"
 ```
-
-## Use
 
 An `api` note names its contract, as a path relative to the note or as a URL:
 
@@ -29,14 +50,15 @@ contract: ./model-query.openapi.json
 # Model query API
 ```
 
-The build then produces one `endpoint` entity per operation, an `exposes` link from the API to each at confidence 0.95, and the schemas the operations reference as candidate objects; the page of the API shows the contract viewer. A contract that cannot be fetched, read or parsed is reported as `W-CONTRACT-UNREACHABLE` and the build goes on.
+## What you get
 
-## What it contains
-
-- The plugin manifest, as the default export: one `source` contribution of kind `openapi`, no system dependency.
-- `readOpenApi`: an OpenAPI 3.x document, JSON or YAML, read into its operations, referenced schemas and the view of the contract viewer.
-- `openApiReader`, `loadContracts`: the `ContractReader` handed to the loader the core shares between the contract plugins, and that loader bound to it.
-- `HTTP_METHODS`, `SOURCE_KIND`, `STYLE`: the fixed method order, `openapi` and `http`.
+- **One `endpoint` page per operation**, produced by the build from the contract, never from a note.
+- **Links with evidence**: an `exposes` link from the API to each operation at confidence 0.95, shown on both pages.
+- **Business objects surfaced**: the schemas the operations reference become candidate objects of the wiki.
+- **The contract on the page**: the page of the API shows the contract viewer, loaded on demand.
+- **Notes and contract joined**: a hand-written `endpoint` note is matched to the operation it describes, so the human text and the contract sit on one page.
+- **A build that goes on**: a contract that cannot be fetched, read or parsed is a `W-CONTRACT-UNREACHABLE` finding, not a failure.
+- **Side by side with WSDL**: with the WSDL plugin declared too, the two tell their formats apart by content.
 
 ## Documentation
 
@@ -45,7 +67,10 @@ The build then produces one `endpoint` entity per operation, an `exposes` link f
 - [W-CONTRACT-UNREACHABLE](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONTRACT-UNREACHABLE.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/plugins/contract-openapi/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 ### Contribution
 
@@ -79,4 +104,4 @@ JSON and YAML documents are both accepted. The YAML parser is the `yaml` package
 
 Unit tests run the source through the plugin registry with an in-memory file system, a fixed clock and a `fetch` double; no test touches the network. A golden test imports the example contract of the API note template, `docs/templates/openapi.example.json` in the repository.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>
