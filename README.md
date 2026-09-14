@@ -107,6 +107,7 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 - [What the tool does not do](docs/guides/limits.md): the limits, one line each.
 - [Publishing transcripts](docs/guides/publishing-transcripts.md): what the build hides, what it cannot decide, what to settle first.
 - [Theming](docs/guides/theming.md): the slots of the site, their view models, overriding one from a plugin, rendering per type, the stylesheet layers.
+- [Accessibility](docs/guides/accessibility.md): what is verified on every page, criterion by criterion, and what a theme author must keep.
 - [Adding a type](docs/guides/adding-a-type.md): the type module format, a complete example, publishing a type in a plugin.
 - [Distributing the linter](docs/guides/lint-distribution.md): `npx`, binary, GitHub action, GitLab component, container image, pre-commit hook.
 - [Architecture](docs/guides/architecture.md): the decisions behind the tool, for contributors.

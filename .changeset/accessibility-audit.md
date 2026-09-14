@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+Accessibility, what is verified and how: six test files under `test/accessibility/` verify every page of the component gallery, the type pages included, on the contrasts of both palettes with their reference ratios pinned, colour never carrying information alone, targets of 40 px read from the stylesheet rules for every interactive selector, the main content served without JavaScript, the headings, the skip link, the focus ring, the tab order and a clickable equivalent to every keyboard shortcut, and the audit on every gallery state; what they revealed is fixed: the clear link of the related pages filter, the word chips of a space page, the title of a page among the passages of a keyword page, the name of a space in the spaces table, the positions rail of a document and the skip link reach 40 px, a dormant space of the spaces page reads a hidden phrase after its date (the new `spaces.stale` message), and the dashed chip of a word without a note on a space page carries a title and hidden text (`SpaceWord.title`, worded by the build from `entity.markNoNote`); the guide `docs/guides/accessibility.md` says what each criterion checks and what a theme author must keep.

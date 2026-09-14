@@ -1170,6 +1170,20 @@ As a reader who opened the line of the panel, I want the map to take the panel a
 
 Depends on: L9-01, L7-01, L7-02, L7-03.
 
+#### L9-08 Accessibility: what is verified, and how
+
+As the person answerable for quality, I want every board verified on the accessibility points the default theme settled, so that the public site is conformant without a manual audit.
+
+- Contrasts: the existing checker measures both palettes, the default theme's and the palette of a project publishing its own documentation, kept as a fixture copy next to the test; no text under 4.5:1, the light grounds (`--color-soft`, the highlight of a `mark`) included; five reference ratios of each palette are pinned in both schemes (ink on the page, secondary text on the page, label on a surface, accent on the page, ink on the highlight).
+- Colour never carries information alone: a word without a note is a dashed underline with a title and hidden text; the current page a rule, the bold weight and `aria-current`; a cited page the word "Cited ·"; the freshness alert worded, a card on the home page and, on the spaces page, the date in days with a hidden phrase after it; the chip of a noteless word on a space page titled and worded the same way; a structural test on the rendered fixtures, and the list of every rule that draws the accent.
+- Targets of 40 to 44 px on the filters, the tabs, the links of the spaces, the buttons and the checkboxes whose hit area covers the label: a rendering test reads the height each interactive selector is guaranteed from the stylesheet rules (`min-block-size`, `block-size`, the base rule of the controls, or the padding and the lines of text), for every interactive selector, listed explicitly, at every width.
+- Text first: the main content of every page in the served HTML, readable without JavaScript, the passages beyond twenty loaded on demand; every state of the gallery verified with the scripts removed and the islands left unmounted, a marker naming the content of each.
+- Headings: one H1 per page, the H2s from the markdown and the table of contents mirroring them; the skip link, the `:focus-visible` rules pinned, the tab order (interactive elements in DOM order, no `tabindex`, the `order` rules of the stylesheet listed), and a clickable equivalent to every keyboard shortcut (`/`, `Escape`, the arrows of the live results and of the tablist); tests on the gallery states.
+- Audit on every gallery state: every state file listed in the page list; the static checker and the contrast measure pass on every document the gallery command writes, the type pages and the index included; the automated audit runs over every state. The two points the default theme left open, the panel beyond two hundred passages and the length of space labels, are noted as open decisions in the screen notes of the entity page and the spaces page.
+- Documentation: `docs/guides/accessibility.md`, "What is verified, and how", one section per criterion with the test file that enforces it and what a theme author must keep, linked from the theming guide and the README of the site package; the glossary term "accessibility audit". What the tests revealed is fixed in the stylesheet and the components concerned: five targets under 40 px raised, the freshness alert and the noteless chips worded for assistive technology.
+
+Depends on: L9-01 to L9-07, L9-09 to L9-13.
+
 #### L9-09 A–Z index
 
 As a glossary owner, I want the index to list every word the documentation uses, defined or not, with what is known of each, so that the words without a definition stand out as my working list without being set apart.
