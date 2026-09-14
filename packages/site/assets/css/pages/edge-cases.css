@@ -118,15 +118,20 @@ summary.button-secondary::before {
   margin: 0;
 }
 
-/* The empty results: one card in the column of the results, the exits as rows. */
+/* The empty results: one card on the soft surface in the column of the results, the exits as rows on the surface; the column takes the whole width when the page has no facet to draw. */
+
+.results-layout > .results-main:first-child {
+  grid-column: 1 / -1;
+}
 
 .results-empty {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-inline-size: 47.5rem;
   padding: var(--space-3);
   border-radius: var(--radius-large);
-  background: var(--color-bg);
+  background: var(--color-soft);
 }
 
 .results-empty p {

@@ -49,16 +49,23 @@ export function editDistance(a: string, b: string): number {
   return distance;
 }
 
-/** How far an address may stand from the missing one to be proposed: half its length, three characters at least. */
-export function nearbyThreshold(missing: string): number {
-  return Math.max(3, Math.floor(missing.length / 2));
+/** The last segment of an address, the name of the page: `publication-threshold` for `glossary/publication-threshold`. */
+export function lastSegment(address: string): string {
+  return address.slice(address.lastIndexOf("/") + 1);
+}
+
+/** How far the name of a page may stand from the last segment of the missing address to be proposed: half its length, three characters at least. */
+export function nearbyThreshold(name: string): number {
+  return Math.max(3, Math.floor(name.length / 2));
 }
 
 /**
- * The pages whose address is closest to the missing one, by edit distance on the path, the
- * closest first and the earliest in the table among equals, at most `NEARBY_LIMIT` of them
- * and none beyond the threshold; each with its address under the site and its href from the
- * root of the site.
+ * The pages whose address is closest to the missing one, by edit distance on the path: the
+ * name of the page, its last segment, against the last segment of the missing address first,
+ * so that a renamed file stands a character away and a moved file none, then the whole path,
+ * so that the nearest folder comes first among namesakes, then the order of the table; at most
+ * `NEARBY_LIMIT` of them and none whose name lies beyond the threshold. Each comes with its
+ * address under the site and its href from the root of the site.
  */
 export function nearbyOf(
   missing: string,
@@ -66,15 +73,20 @@ export function nearbyOf(
   root: string,
 ): NearbyPage[] {
   if (missing === "") return [];
-  const threshold = nearbyThreshold(missing);
+  const name = lastSegment(missing);
+  const threshold = nearbyThreshold(name);
   return entries
-    .map((entry, index) => ({
-      entry,
-      index,
-      distance: editDistance(missing, pageAddress(entry.url)),
-    }))
-    .filter(({ distance }) => distance <= threshold)
-    .sort((a, b) => a.distance - b.distance || a.index - b.index)
+    .map((entry, index) => {
+      const address = pageAddress(entry.url);
+      return {
+        entry,
+        index,
+        name: editDistance(name, lastSegment(address)),
+        path: editDistance(missing, address),
+      };
+    })
+    .filter((candidate) => candidate.name <= threshold)
+    .sort((a, b) => a.name - b.name || a.path - b.path || a.index - b.index)
     .slice(0, NEARBY_LIMIT)
     .map(({ entry }) => ({
       title: entry.title,
@@ -85,10 +97,7 @@ export function nearbyOf(
 
 /** The query the missing address suggests: its last segment, the hyphens and underscores as spaces. */
 export function queryOf(missing: string): string {
-  return missing
-    .slice(missing.lastIndexOf("/") + 1)
-    .replace(/[-_]+/g, " ")
-    .trim();
+  return lastSegment(missing).replace(/[-_]+/g, " ").trim();
 }
 
 /** What the island needs from the window: the address asked for and the base the page resolves against. */

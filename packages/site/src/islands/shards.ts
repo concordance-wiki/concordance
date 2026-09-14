@@ -26,13 +26,17 @@ export type ShardLoader = (name: string) => Promise<unknown>;
  * The loader of the index files of one page: each file is a classic script calling
  * `window.__concordanceSearch.shard(name, data)`, so the loader exposes that global, injects
  * the script, and resolves when the callback comes; a script that fails to load resolves to
- * nothing. Loaded files are kept, so that a prefix typed again costs no request.
+ * nothing. Loaded files are kept, so that a prefix typed again costs no request. Two loaders
+ * on one page, the search and the page served for a missing address, share the global: each
+ * receiver passes the callback on to the one it found, so that every loader hears its files.
  */
 export function shardLoader(index: string, inject: ScriptInjector, host: ShardHost): ShardLoader {
   const loaded = new Map<string, Promise<unknown>>();
   const pending = new Map<string, (data: unknown) => void>();
+  const earlier = host.__concordanceSearch;
   host.__concordanceSearch = {
     shard: (name, data) => {
+      earlier?.shard(name, data);
       pending.get(name)?.(data);
       pending.delete(name);
     },
