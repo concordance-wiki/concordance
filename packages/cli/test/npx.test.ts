@@ -106,7 +106,7 @@ describe.skipIf(!tooling)(
       rmSync(temporary, { recursive: true, force: true });
     });
 
-    it("packs dist, the shipped templates and package.json alone: no source, no test", () => {
+    it("packs dist, the shipped templates, the manifest, the README and the licence alone", () => {
       const run = runTool(pnpm, ["pack", "--json", "--pack-destination", temporary], cli);
       expectSuccess(run);
       // pnpm's own JSON, printed for this very listing.
@@ -117,7 +117,7 @@ describe.skipIf(!tooling)(
       expect(paths).toContain("templates/README.md");
       expect(
         paths.filter((path) => !path.startsWith("dist/") && !path.startsWith("templates/")).sort(),
-      ).toEqual(["README.md", "package.json"]);
+      ).toEqual(["LICENSE", "README.md", "package.json"]);
     });
 
     it("installs the concordance and conc executables", () => {
