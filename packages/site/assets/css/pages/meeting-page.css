@@ -1,91 +1,14 @@
-/* Meeting page: the representations as tabs, the transcript as timestamped lines, the decisions the meeting produced, the properties of the meeting. */
+/* Meeting page: the representations behind the tabs of the theme, the transcript as timestamped lines, the decisions the meeting produced, the properties of the meeting. */
 
-.meeting-representations {
-  margin-block-start: var(--space-4);
-}
-
-/* The tabs: anchors to the panels, the build grouping named at the end of the row. */
-.meeting-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  border-block-end: 1px solid var(--color-border);
-}
-
-.meeting-tab {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 2.75rem;
-  margin-block-end: -1px;
-  padding-inline: var(--space-3);
-  border-block-end: 2px solid transparent;
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.meeting-tab:hover {
-  color: var(--color-ink);
-  text-decoration: underline;
-}
-
+/* The tabs of the representations: the mention that the build grouped the files at the end of the row; the notes and the deck lose the rule the entity page puts over them. */
 .meeting-grouped {
-  margin-inline-start: auto;
   padding-inline-start: var(--space-3);
   color: var(--color-label);
   font-size: 0.8125rem;
 }
 
-/* One panel in view at a time, without any script: the targeted one, the one holding the targeted anchor, else the first; a browser without `:has()` shows them all, one under the other. */
-@supports selector(:has(a)) {
-  .meeting-panel {
-    display: none;
-  }
-
-  .meeting-panels:not(:has(.meeting-panel:target, .meeting-panel :target))
-    > .meeting-panel:first-child,
-  .meeting-panel:target,
-  .meeting-panel:has(:target) {
-    display: block;
-  }
-
-  /* The current tab, the one whose panel is shown: a rule under it and the bold weight, never the colour alone. */
-
-  .meeting-representations:not(:has(.meeting-panel:target, .meeting-panel :target))
-    .meeting-tab:nth-child(1),
-  .meeting-representations:has(
-      .meeting-panel:nth-child(1):target,
-      .meeting-panel:nth-child(1) :target
-    )
-    .meeting-tab:nth-child(1),
-  .meeting-representations:has(
-      .meeting-panel:nth-child(2):target,
-      .meeting-panel:nth-child(2) :target
-    )
-    .meeting-tab:nth-child(2),
-  .meeting-representations:has(
-      .meeting-panel:nth-child(3):target,
-      .meeting-panel:nth-child(3) :target
-    )
-    .meeting-tab:nth-child(3),
-  .meeting-representations:has(
-      .meeting-panel:nth-child(4):target,
-      .meeting-panel:nth-child(4) :target
-    )
-    .meeting-tab:nth-child(4) {
-    border-block-end-color: var(--color-accent);
-    color: var(--color-ink);
-    font-weight: 600;
-  }
-}
-
-.meeting-panel {
-  padding-block-start: var(--space-3);
-}
-
-.meeting-panel > .entity-body,
-.meeting-panel > .document {
+.meeting-representations .tabs-panel > .entity-body,
+.meeting-representations .tabs-panel > .document {
   margin-block-start: 0;
   padding-block-start: 0;
   border-block-start: 0;
@@ -132,7 +55,7 @@
   font-weight: 600;
 }
 
-.meeting-panel > .document-files {
+.meeting-representations .tabs-panel > .document-files {
   margin-block: var(--space-3) 0;
   font-size: 0.875rem;
 }
@@ -173,7 +96,7 @@
   margin-block-start: 0.625rem;
 }
 
-.meeting-panel > .meeting-decision {
+.meeting-representations .tabs-panel > .meeting-decision {
   margin-block-end: var(--space-3);
 }
 

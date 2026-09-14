@@ -8,9 +8,23 @@ import {
   type ViewerModule,
   type ViewerOptions,
 } from "../../src/islands/document-viewer.js";
-import { documentEntityPage, documentPageCorporate } from "../../src/gallery/fixtures.js";
+import { wireTabs } from "../../src/islands/tabs.js";
+import {
+  corporateMeetingPage,
+  documentEntityPage,
+  documentPageCorporate,
+} from "../../src/gallery/fixtures.js";
 import { renderSlot } from "../../src/render.js";
+import { ViewerIsland, viewerPropsOf } from "../../src/theme/default/document-viewer.js";
+import type { DocumentView } from "../../src/slots.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
+import { h } from "preact";
+import { renderToString } from "preact-render-to-string";
+
+// The deck of the meeting page, whose preview names the viewer bundles.
+const deckDocument = corporateMeetingPage.documents?.find(
+  (document) => document.unit === "slide",
+) as DocumentView;
 
 /** The document page as served, mounted in the test document. */
 function mount(): { island: HTMLElement; section: HTMLElement } {
@@ -136,15 +150,26 @@ describe("the document viewer island", () => {
     expect(entries[1]?.classList.contains("current")).toBe(false);
   });
 
-  it("opens the viewer at once on the document page, the button never shown, the strip of pages driving it", async () => {
-    document.body.innerHTML = renderSlot("EntityPage", documentPageCorporate, defaultTheme);
+  /** The document island of the page served, and the row of tabs it stands under. */
+  function served(page: typeof documentPageCorporate): { island: HTMLElement; tabs: Element } {
+    // The rail entries followed by earlier tests left their anchor in the address.
+    window.location.hash = "";
+    document.body.innerHTML = renderSlot("EntityPage", page, defaultTheme);
     const island = document.querySelector<HTMLElement>(
       'concordance-island[data-island="document-viewer"]',
     );
-    const page = island?.closest<HTMLElement>(".document-page");
-    if (island === null || page === null || page === undefined) {
-      throw new Error("the document page carries one document island");
+    const tabs = document.querySelector('concordance-island[data-island="tabs"]');
+    if (island === null || tabs === null) {
+      throw new Error("the page carries one document island under its tabs");
     }
+    return { island, tabs };
+  }
+
+  it("opens the viewer at once on the document page once its tabs are driven and its panel shown, the button never shown, the strip of pages driving it", async () => {
+    const { island, tabs } = served(documentPageCorporate);
+    const page = island.closest<HTMLElement>(".document-page");
+    if (page === null) throw new Error("the island stands in the document page");
+    expect(wireTabs(tabs, document, window)).toBe(true);
     const imported: string[] = [];
     const fake = fakeModule();
     expect(
@@ -175,12 +200,76 @@ describe("the document viewer island", () => {
     expect(entries[0]?.getAttribute("aria-current")).toBeNull();
   });
 
-  it("falls back to the link to the PDF on the document page too when the bundle cannot be imported", async () => {
-    document.body.innerHTML = renderSlot("EntityPage", documentPageCorporate, defaultTheme);
+  it("waits for its panel to be shown before opening: the tabs not driven yet, then the panel hidden by them, then the tab followed", async () => {
+    const { island, tabs } = served(corporateMeetingPage);
+    const imported: string[] = [];
+    const fake = fakeModule();
+    expect(
+      wireDocumentViewer(island, {
+        importViewer: (href) => {
+          imported.push(href);
+          return Promise.resolve(fake.module);
+        },
+      }),
+    ).toBe(true);
+    expect(island.querySelector<HTMLButtonElement>("button.document-open")?.hidden).toBe(true);
+    expect(imported).toEqual([]);
+    // The transcript is the first tab: driving the tabs hides the deck.
+    expect(wireTabs(tabs, document, window)).toBe(true);
+    expect(island.closest<HTMLElement>('[role="tabpanel"]')?.hidden).toBe(true);
+    expect(imported).toEqual([]);
+    tabs.querySelector<HTMLElement>('[aria-controls="representation-deck"]')?.click();
+    expect(imported).toEqual(["../../assets/viewer-pdf-00000000.js"]);
+    await tick();
+    expect(island.querySelector<HTMLElement>(".document-viewer")?.hidden).toBe(false);
+    expect(fake.opened[0]?.options.positions).toHaveLength(4);
+    // Shown again, the panel wakes nothing up twice.
+    tabs.querySelector<HTMLElement>('[aria-controls="representation-transcript"]')?.click();
+    tabs.querySelector<HTMLElement>('[aria-controls="representation-deck"]')?.click();
+    expect(imported).toHaveLength(1);
+  });
+
+  it("opens at once in a panel the tabs already show, and waits in one they hide", () => {
+    const { island, tabs } = served(corporateMeetingPage);
+    window.location.hash = "#representation-deck";
+    expect(wireTabs(tabs, document, window)).toBe(true);
+    const imported: string[] = [];
+    const importViewer = (href: string): Promise<ViewerModule> => {
+      imported.push(href);
+      return Promise.resolve(fakeModule().module);
+    };
+    wireDocumentViewer(island, { importViewer });
+    expect(imported).toHaveLength(1);
+    window.location.hash = "";
+    const again = served(corporateMeetingPage);
+    wireTabs(again.tabs, document, window);
+    wireDocumentViewer(again.island, { importViewer });
+    expect(imported).toHaveLength(1);
+  });
+
+  it("opens at once outside any row of tabs when served open", () => {
+    const viewer = viewerPropsOf(deckDocument);
+    if (viewer === undefined) throw new Error("the deck of the fixture names the viewer bundles");
+    document.body.innerHTML = `<section class="document">${renderToString(
+      h(ViewerIsland, { ...viewer, open: true }),
+    )}</section>`;
     const island = document.querySelector<HTMLElement>(
       'concordance-island[data-island="document-viewer"]',
     );
-    if (island === null) throw new Error("the document page carries one document island");
+    if (island === null) throw new Error("the island is served");
+    const imported: string[] = [];
+    wireDocumentViewer(island, {
+      importViewer: (href) => {
+        imported.push(href);
+        return Promise.resolve(fakeModule().module);
+      },
+    });
+    expect(imported).toEqual(["../../assets/viewer-pdf-00000000.js"]);
+  });
+
+  it("falls back to the link to the PDF on the document page too when the bundle cannot be imported", async () => {
+    const { island, tabs } = served(documentPageCorporate);
+    wireTabs(tabs, document, window);
     wireDocumentViewer(island, { importViewer: () => Promise.reject(new Error("file://")) });
     await tick();
     expect(island.querySelector<HTMLButtonElement>("button.document-open")?.hidden).toBe(true);

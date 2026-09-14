@@ -46,6 +46,7 @@ export const CSS_FILES = {
     "pages/neighbourhood-open.css",
     "pages/search-results.css",
     "chrome/search-clear.css",
+    "chrome/tabs.css",
     "pages/meeting-page.css",
     "pages/spaces.css",
     "pages/space.css",

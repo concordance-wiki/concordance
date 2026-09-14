@@ -13,6 +13,7 @@ import { DocumentText, positionAnchor, ViewerIsland, viewerPropsOf } from "./doc
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
+import { Tabs } from "./tabs.js";
 
 /** The labels of the default theme for every label the page does not receive; the file count is worded from the page. */
 export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
@@ -193,11 +194,11 @@ function TwinFiles({ files }: { files: DocumentTwinFile[] }): JSX.Element {
 /**
  * The page of an office document, a deck or a report: the tree of its space on the left, folded
  * by year and month when every page of the space is dated; in the centre the breadcrumb, the title,
- * the line naming the kind, the page count, the size and the date, then three views behind a
- * tab bar that works without any script, each an anchored section the stylesheet shows one at a
- * time: the document (the strip of pages, the rendering of the current page with the viewer and
- * its notes), the extracted text, the note merged with the document; the download of the
- * original next to the tabs; then the path of the file with its edit link. On the right the
+ * the line naming the kind, the page count, the size and the date, then three views behind the
+ * tabs of the theme: the document (the strip of pages, the rendering of the current page with
+ * the viewer and its notes), the extracted text, the note merged with the document; the
+ * download of the original at the end of the tab bar; then the path of the file with its edit
+ * link. On the right the
  * properties read from the file, the files that make the document, the related pages, then the
  * neighbourhood folded behind its line.
  */
@@ -238,52 +239,54 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
             )}
           </p>
         </header>
-        <nav class="document-tabs" aria-label={text.views}>
-          <a class="document-tab document-tab-view" href="#document-view">
-            {text.document}
-          </a>
-          <a class="document-tab document-tab-text" href="#document-text">
-            {text.extractedText}
-          </a>
-          <a class="document-tab document-tab-notes" href="#document-notes">
-            {text.relatedNotes}
-          </a>
-          {document !== undefined && (
-            <a class="document-download" href={document.file.href} download={document.file.label}>
-              {text.downloadOriginal}
-            </a>
-          )}
-        </nav>
-        <div class="document-panels">
-          <section
-            id="document-view"
-            class="document-panel document-view"
-            aria-label={text.document}
-          >
-            {document !== undefined && (
-              <div class="document-stage">
-                {document.positions.length > 0 && (
-                  <PageStrip document={document} heading={text.pages} />
-                )}
-                <Rendering document={document} text={text} />
-              </div>
-            )}
-          </section>
-          <section
-            id="document-text"
-            class="document-panel document-text"
-            aria-label={text.extractedText}
-          >
-            <DocumentText positions={document?.positions ?? []} index={1} />
-          </section>
-          <section
-            id="document-notes"
-            class="document-panel document-notes"
-            aria-label={text.relatedNotes}
-          >
-            <Notes sections={sections} text={text} />
-          </section>
-        </div>
+        <Tabs
+          label={text.views}
+          className="document-views"
+          tabs={[
+            {
+              id: "document-view",
+              label: text.document,
+              content:
+                document === undefined ? (
+                  <></>
+                ) : (
+                  <div class="document-stage">
+                    {document.positions.length > 0 && (
+                      <PageStrip document={document} heading={text.pages} />
+                    )}
+                    <Rendering document={document} text={text} />
+                  </div>
+                ),
+            },
+            {
+              id: "document-text",
+              label: text.extractedText,
+              content: (
+                <div class="document-text">
+                  <DocumentText positions={document?.positions ?? []} index={1} />
+                </div>
+              ),
+            },
+            {
+              id: "document-notes",
+              label: text.relatedNotes,
+              content: <Notes sections={sections} text={text} />,
+            },
+          ]}
+          {...(document === undefined
+            ? {}
+            : {
+                trailing: (
+                  <a
+                    class="document-download"
+                    href={document.file.href}
+                    download={document.file.label}
+                  >
+                    {text.downloadOriginal}
+                  </a>
+                ),
+              })}
+        />
         <footer class="entity-footer">
           {sources.map((source) => (
             <p key={source.path} class="entity-source">

@@ -54,7 +54,7 @@ describe("MeetingPage", () => {
       '<li><a href="../../#home-tree">meetings</a></li><li><span>March 2026</span></li><li><span aria-current="page">Keyword page threshold review</span></li>',
       "<h1>Keyword page threshold review</h1>",
       '<p class="entity-badge"><span class="badge">Meeting</span><span class="meeting-duration">1 h 12</span><span class="meeting-participants">Pseudonymised participants</span></p>',
-      '<div class="meeting-representations">',
+      '<div class="tabs meeting-representations">',
       '<aside class="meeting-decision" role="note">',
       '<footer class="entity-footer">',
       '<code><span class="entity-source-folders">meetings/</span>2026-03-12-keyword-page-threshold-review.vtt</code>',
@@ -68,17 +68,17 @@ describe("MeetingPage", () => {
     expectBalanced(html);
   });
 
-  it("offers one tab per representation, the transcript first, then the notes, then the deck, each an anchor to its panel, the panels labelled by their tabs, the grouping named at the end of the row", () => {
+  it("offers one tab per representation through the tabs of the theme, the transcript first, then the notes, then the deck, the panels labelled by their tabs, the grouping named at the end of the row", () => {
     const html = render();
     expect(html).toContain(
-      '<nav class="meeting-tabs" aria-label="Representations"><a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-notes" href="#representation-notes">Notes</a><a class="meeting-tab" id="tab-representation-deck" href="#representation-deck">Deck</a><span class="meeting-grouped">Grouped automatically</span></nav>',
+      '<div class="tabs meeting-representations"><div class="tabs-bar"><concordance-island data-island="tabs" data-props="{&quot;label&quot;:&quot;Representations&quot;,&quot;tabs&quot;:[{&quot;id&quot;:&quot;representation-transcript&quot;,&quot;label&quot;:&quot;Transcript&quot;},{&quot;id&quot;:&quot;representation-notes&quot;,&quot;label&quot;:&quot;Notes&quot;},{&quot;id&quot;:&quot;representation-deck&quot;,&quot;label&quot;:&quot;Deck&quot;}]}"><div class="tabs-list" role="tablist" aria-label="Representations"><a class="tab" role="tab" id="tab-representation-transcript" href="#representation-transcript" aria-controls="representation-transcript" aria-selected="true">Transcript</a><a class="tab" role="tab" id="tab-representation-notes" href="#representation-notes" aria-controls="representation-notes" aria-selected="false">Notes</a><a class="tab" role="tab" id="tab-representation-deck" href="#representation-deck" aria-controls="representation-deck" aria-selected="false">Deck</a></div></concordance-island><span class="meeting-grouped">Grouped automatically</span></div>',
     );
     expectInOrder(html, [
-      '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript">',
-      '<section class="meeting-panel" id="representation-notes" aria-labelledby="tab-representation-notes">',
-      '<section class="meeting-panel" id="representation-deck" aria-labelledby="tab-representation-deck">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-transcript" aria-labelledby="tab-representation-transcript">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-notes" aria-labelledby="tab-representation-notes">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-deck" aria-labelledby="tab-representation-deck">',
     ]);
-    expect(count(html, 'class="meeting-panel"')).toBe(3);
+    expect(count(html, 'class="tabs-panel"')).toBe(3);
   });
 
   it("writes the transcript as timestamped lines, each timecode an anchor of the position the mentions cite, the speaker in bold before what was said, the file to download and the note on the pseudonyms under them", () => {
@@ -114,21 +114,22 @@ describe("MeetingPage", () => {
         props.meeting.decisions = [];
       }),
     ).toContain(
-      '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><p class="empty">No text was extracted from this document.</p>',
+      '<section class="tabs-panel" role="tabpanel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><p class="empty">No text was extracted from this document.</p>',
     );
   });
 
   it("renders the notes as the entity page does, with their legend, and the deck through the document block with its rail and its viewer, once for the original and its PDF", () => {
     const html = render();
     expect(html).toContain(
-      '<section class="meeting-panel" id="representation-notes" aria-labelledby="tab-representation-notes"><article class="entity-body"><section id="notes"><div class="markdown">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-notes" aria-labelledby="tab-representation-notes"><article class="entity-body"><section id="notes"><div class="markdown">',
     );
     expect(html).toContain('<footer class="legend">');
     expect(html).toContain(
-      '<section class="meeting-panel" id="representation-deck" aria-labelledby="tab-representation-deck"><section class="document document-slide" aria-labelledby="document-1">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-deck" aria-labelledby="tab-representation-deck"><section class="document document-slide" aria-labelledby="document-1">',
     );
     expect(html).toContain('<nav class="document-rail" aria-label="Slides">');
     expect(count(html, 'data-island="document-viewer"')).toBe(1);
+    expect(html).toContain("&quot;open&quot;:true}");
     expect(count(html, 'class="document-download"')).toBe(2);
   });
 
@@ -143,7 +144,7 @@ describe("MeetingPage", () => {
       props.documents = [transcript, pdf, transcript, pdf];
     });
     expect(html).toContain(
-      '<a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-transcript-2" href="#representation-transcript-2">Transcript</a><a class="meeting-tab" id="tab-representation-document" href="#representation-document">Document</a><a class="meeting-tab" id="tab-representation-document-2" href="#representation-document-2">Document</a>',
+      '<a class="tab" role="tab" id="tab-representation-transcript" href="#representation-transcript" aria-controls="representation-transcript" aria-selected="true">Transcript</a><a class="tab" role="tab" id="tab-representation-transcript-2" href="#representation-transcript-2" aria-controls="representation-transcript-2" aria-selected="false">Transcript</a><a class="tab" role="tab" id="tab-representation-document" href="#representation-document" aria-controls="representation-document" aria-selected="false">Document</a><a class="tab" role="tab" id="tab-representation-document-2" href="#representation-document-2" aria-controls="representation-document-2" aria-selected="false">Document</a>',
     );
     expect(html).not.toContain("representation-notes");
     expect(html).toContain('<li class="cue" id="L1-3">');
@@ -176,7 +177,7 @@ describe("MeetingPage", () => {
       'Threshold applied in model</a>, <a class="meeting-decision-link" href="../../decisions/cap/">Related relation capped</a></aside></li>',
     );
     expect(two).toContain(
-      '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/beyond/">Cue beyond the transcript</a>, <a class="meeting-decision-link" href="../../decisions/elsewhere/">Written elsewhere</a></aside><ol class="transcript">',
+      '<section class="tabs-panel" role="tabpanel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/beyond/">Cue beyond the transcript</a>, <a class="meeting-decision-link" href="../../decisions/elsewhere/">Written elsewhere</a></aside><ol class="transcript">',
     );
     expect(count(two, 'class="meeting-decision"')).toBe(2);
     expect(

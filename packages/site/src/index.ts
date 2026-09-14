@@ -32,6 +32,7 @@ export * from "./islands/mount.js";
 export * from "./islands/mode-switch.js";
 export * from "./islands/toc.js";
 export * from "./islands/trail.js";
+export * from "./islands/tabs.js";
 export * from "./mode.js";
 export * from "./render.js";
 export * from "./slots.js";
@@ -47,6 +48,7 @@ export { DocumentPage, defaultDocumentPageLabels } from "./theme/default/documen
 export * from "./theme/default/plugin.js";
 export * from "./theme/default/toc.js";
 export * from "./theme/default/trail.js";
+export * from "./theme/default/tabs.js";
 export * from "./theme/load.js";
 export * from "./theme/chrome.js";
 export * from "./theme/node-loader.js";

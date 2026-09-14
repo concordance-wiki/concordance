@@ -1,0 +1,85 @@
+/* Tabs: a row of tabs ruled underneath, with what the page adds at its end, over panels shown one at a time. */
+
+.tabs {
+  margin-block-start: var(--space-3);
+}
+
+.tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.tabs-bar > concordance-island {
+  flex: none;
+  align-self: stretch;
+}
+
+.tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  block-size: 100%;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  margin-block-end: -1px;
+  padding: 0 0.875rem;
+  border-block-end: 2px solid transparent;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tab:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* What follows the tabs sits at the end of the row. */
+.tabs-bar > :not(concordance-island) {
+  margin-inline-start: auto;
+}
+
+/* One panel in view at a time, without any script: the targeted one, the one holding the targeted anchor, else the first; the tab of the panel shown marked by a rule and the bold weight, never by the colour alone. A browser without `:has()` shows the panels one under the other. Once the island runs it hides the panels itself and marks the selected tab. */
+@supports selector(:has(a)) {
+  .tabs:not(.tabs-scripted) .tabs-panel {
+    display: none;
+  }
+
+  .tabs:not(.tabs-scripted)
+    .tabs-panels:not(:has(.tabs-panel:target, .tabs-panel :target))
+    > .tabs-panel:first-child,
+  .tabs:not(.tabs-scripted) .tabs-panel:target,
+  .tabs:not(.tabs-scripted) .tabs-panel:has(:target) {
+    display: block;
+  }
+
+  .tabs:not(.tabs-scripted):not(:has(.tabs-panel:target, .tabs-panel :target)) .tab:nth-child(1),
+  .tabs:not(.tabs-scripted):has(.tabs-panel:nth-child(1):target, .tabs-panel:nth-child(1) :target)
+    .tab:nth-child(1),
+  .tabs:not(.tabs-scripted):has(.tabs-panel:nth-child(2):target, .tabs-panel:nth-child(2) :target)
+    .tab:nth-child(2),
+  .tabs:not(.tabs-scripted):has(.tabs-panel:nth-child(3):target, .tabs-panel:nth-child(3) :target)
+    .tab:nth-child(3),
+  .tabs:not(.tabs-scripted):has(.tabs-panel:nth-child(4):target, .tabs-panel:nth-child(4) :target)
+    .tab:nth-child(4),
+  .tabs-scripted .tab[aria-selected="true"] {
+    border-block-end-color: var(--color-accent);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+}
+
+.tabs-panel[hidden] {
+  display: none;
+}
+
+.tabs-panel {
+  padding-block-start: var(--space-3);
+}
