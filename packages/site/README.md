@@ -74,7 +74,7 @@ The page of an office document, a deck or a report, is laid out by `DocumentPage
 
 ### The to-do page
 
-The to-do page lists the entities the `W-DOC-NOMD` findings name and the keyword pages, with their counts, and reads no other finding.
+The to-do page lists the entities the `W-DOC-NOMD` findings name and the keyword pages, with their counts, and reads no other finding. The words are listed a hundred at a time: the first hundred in view, the others behind a disclosure worded "Show the N others" (`todo.showOthers`), served in the HTML without a script (`TODO_VISIBLE_TERMS`). A third section, folded, lists the suspected noise (`todo.noise`, `todo.noiseNote`): the term candidates of the model marked `withheld`, the expressions at the publication threshold whose confidence stayed under `inference.keyword_pages.min_confidence`, best score first, each with its occurrences, its files and its reason worded from its `penalties` and `signals` in the language of the site (`todo.reasonSpread`, `todo.reasonBurst`, `todo.reasonMorphology`: "in 68% of the files, 1.2 per file, verb or adverb form"), none linked since none has a page, and a call to add them to the project's stopwords (`todo.contribute`) leading to `project.contribute_url` when the project declares one (`TodoProps.noise`, `contributeHref`, `labels`; `noiseOf`, `reasonOf`, `todoLabelsOf`).
 
 ### Markdown and fragments
 

@@ -1,8 +1,10 @@
-import type { Entity } from "@concordance-wiki/core";
+import type { Entity, TermCandidate } from "@concordance-wiki/core";
+import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
-import type { TodoEntry, TodoProps } from "../slots.js";
-import type { SiteContext } from "./context.js";
+import type { TodoEntry, TodoLabels, TodoNoiseEntry, TodoProps } from "../slots.js";
+import { TODO_VISIBLE_TERMS } from "../theme/default/todo.js";
+import { message, type SiteContext } from "./context.js";
 import { entityHref, TODO_PAGE } from "./paths.js";
 
 /** The check that reports a document without a markdown representation: the only finding the page reads. */
@@ -49,7 +51,68 @@ export function documentsOf(context: SiteContext): TodoEntry[] {
     }));
 }
 
-/** The two lists of the to-do page, and nothing else: it is not a health report. */
+/** One decimal: "1.2 per file" says enough. */
+function perFile(candidate: TermCandidate): number {
+  return Math.round((candidate.occurrences / candidate.documents) * 10) / 10;
+}
+
+/**
+ * Why the confidence set an expression aside, in the language of the site, one part per
+ * penalty in formula order: "in 68% of the files, 1.2 per file, verb or adverb form".
+ */
+export function reasonOf(context: SiteContext, candidate: TermCandidate): string {
+  const parts: string[] = [];
+  for (const penalty of candidate.penalties ?? []) {
+    if (penalty === "spread") {
+      parts.push(
+        formatMessage(context.catalogue, "todo.reasonSpread", {
+          share: candidate.signals?.spread ?? 0,
+        }),
+      );
+    } else if (penalty === "burst") {
+      parts.push(
+        formatMessage(context.catalogue, "todo.reasonBurst", { count: perFile(candidate) }),
+      );
+    } else {
+      parts.push(message(context, "todo.reasonMorphology"));
+    }
+  }
+  return parts.join(", ");
+}
+
+/** The expressions the confidence withheld, best score first then by text, each with its counts and its worded reason. */
+export function noiseOf(context: SiteContext): TodoNoiseEntry[] {
+  return context.model.candidates.terms
+    .filter((candidate) => candidate.withheld === true)
+    .sort((a, b) => b.score - a.score || byCodeUnit(a.text, b.text))
+    .map((candidate) => ({
+      label: candidate.text,
+      count: candidate.occurrences,
+      files: candidate.documents,
+      reason: reasonOf(context, candidate),
+    }));
+}
+
+/** The strings of the page in the language of the site, the fold line counting the words after the first hundred. */
+export function todoLabelsOf(context: SiteContext, terms: number): TodoLabels {
+  return {
+    showOthers: formatMessage(context.catalogue, "todo.showOthers", {
+      count: Math.max(0, terms - TODO_VISIBLE_TERMS),
+    }),
+    noise: message(context, "todo.noise"),
+    noiseNote: message(context, "todo.noiseNote"),
+    contribute: message(context, "todo.contribute"),
+  };
+}
+
+/** The three lists of the to-do page, and nothing else: it is not a health report. */
 export function todoOf(context: SiteContext): TodoProps {
-  return { documents: documentsOf(context), terms: termsOf(context) };
+  const terms = termsOf(context);
+  return {
+    documents: documentsOf(context),
+    terms,
+    noise: noiseOf(context),
+    ...(context.contributeUrl === undefined ? {} : { contributeHref: context.contributeUrl }),
+    labels: todoLabelsOf(context, terms.length),
+  };
 }

@@ -15,3 +15,30 @@
   color: var(--color-muted);
   font-size: 0.8125rem;
 }
+
+/* The words after the first hundred and the suspected noise: disclosures, no script. */
+
+.todo-fold > summary {
+  cursor: pointer;
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.todo-fold > summary > h2 {
+  display: inline;
+  font-size: inherit;
+}
+
+.todo-noise .todo-word {
+  color: var(--color-ink);
+}
+
+.todo-reason {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.todo-contribute {
+  margin-block-start: var(--space-2);
+}
