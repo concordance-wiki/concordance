@@ -29,17 +29,24 @@ export function missingAddress(pathname: string, baseUri: string): string {
 /** The edit distance between two addresses: insertions, deletions and substitutions of one character. */
 export function editDistance(a: string, b: string): number {
   let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
-  for (let row = 1; row <= a.length; row += 1) {
-    const current = [row];
-    for (let column = 1; column <= b.length; column += 1) {
-      const substitution = (previous[column - 1] ?? 0) + (a[row - 1] === b[column - 1] ? 0 : 1);
-      current.push(
-        Math.min(substitution, (previous[column] ?? 0) + 1, (current[column - 1] ?? 0) + 1),
-      );
+  // Without a character of a, every character of b is an insertion.
+  let distance = b.length;
+  for (const [row, charA] of Array.from(a).entries()) {
+    // The first cell of a row is its index: the cost of deleting every character so far.
+    let diagonal = row;
+    let left = row + 1;
+    const current = [left];
+    for (const [column, charB] of Array.from(b).entries()) {
+      // Within bounds by construction: every row holds one cell per character of b, plus one.
+      const above = previous[column + 1] as number;
+      left = Math.min(diagonal + (charA === charB ? 0 : 1), above + 1, left + 1);
+      current.push(left);
+      diagonal = above;
     }
     previous = current;
+    distance = left;
   }
-  return previous[b.length] ?? 0;
+  return distance;
 }
 
 /** How far an address may stand from the missing one to be proposed: half its length, three characters at least. */
@@ -78,7 +85,10 @@ export function nearbyOf(
 
 /** The query the missing address suggests: its last segment, the hyphens and underscores as spaces. */
 export function queryOf(missing: string): string {
-  return (missing.split("/").pop() ?? "").replace(/[-_]+/g, " ").trim();
+  return missing
+    .slice(missing.lastIndexOf("/") + 1)
+    .replace(/[-_]+/g, " ")
+    .trim();
 }
 
 /** What the island needs from the window: the address asked for and the base the page resolves against. */

@@ -483,3 +483,82 @@ describe("The document page view model", () => {
     expect(formatSize("fr", 4_200_000)).toBe("4,2\u202fMo");
   });
 });
+
+describe("A document whose conversion failed", () => {
+  const failed: FragmentDocument = {
+    source: "framing",
+    path: "transcript-publication-framing.pptx",
+    format: "pptx",
+    target: `${framingDeck.id}/transcript-publication-framing.pptx`,
+    size: 4_200_000,
+    pageCount: 24,
+    unit: "slide",
+    pages: [],
+  };
+  const finding = {
+    check: "W-CONV-FAILED",
+    severity: "warning" as const,
+    source: "framing",
+    path: "transcript-publication-framing.pptx",
+    message: "conversion of transcript-publication-framing.pptx failed: timed out after 120 s",
+    remediation: "reduce the document or raise conversion.timeout_s",
+  };
+  const withDocument = (document: FragmentDocument): Map<string, EntityFragment> =>
+    new Map([...fragments, [framingDeck.id, { ...deckFragment, documents: [document] }]]);
+  const failing = (document: FragmentDocument): SiteContext =>
+    context({
+      fragments: withDocument(document),
+      model: model({ entities: [...others, ...framing], findings: [finding] }),
+    });
+
+  it("carries the finding the build recorded as the cause of the missing preview, on the document and on the page, with the state of every representation", () => {
+    const [document] = documentsOf(failing(failed), page, framingDeck);
+    expect(document?.preview).toBeUndefined();
+    expect(document?.previewFailure).toEqual({ cause: finding.message, check: "W-CONV-FAILED" });
+    const view = documentPageOf(
+      failing(failed),
+      framingDeck,
+      documentsOf(failing(failed), page, framingDeck),
+    );
+    expect(view?.previewFailure).toEqual({ cause: finding.message, check: "W-CONV-FAILED" });
+    expect(view?.representations).toEqual([
+      { label: ".pptx", state: "available" },
+      { label: ".pdf preview", state: "failed", failed: true },
+      { label: "text", state: "missing" },
+    ]);
+    expect(view?.files.map((file) => file.label)).toEqual([
+      ".pptx",
+      "transcript-publication-framing.md",
+    ]);
+    expect(view?.labels?.extractedTextOf).toBe("Extracted text — 24 pages");
+  });
+
+  it("writes the text as extracted when the pages were read all the same", () => {
+    const read = { ...failed, pages: deckDocument.pages };
+    const documents = documentsOf(failing(read), page, framingDeck);
+    expect(documents[0]?.positions).toHaveLength(2);
+    const view = documentPageOf(failing(read), framingDeck, documents);
+    expect(view?.representations?.[2]).toEqual({ label: "text", state: "extracted" });
+    expect(view?.labels?.extractedTextOf).toBe("Extracted text — 2 pages");
+  });
+
+  it("records no failure for a document without a preview when the build recorded no finding for it, nor for one with a preview", () => {
+    const [bare] = documentsOf(context({ fragments: withDocument(failed) }), page, framingDeck);
+    expect(bare?.previewFailure).toBeUndefined();
+    const elsewhere = { ...finding, path: "decks/other.pptx" };
+    const [other] = documentsOf(
+      context({
+        fragments: withDocument(failed),
+        model: model({ entities: [...others, ...framing], findings: [elsewhere] }),
+      }),
+      page,
+      framingDeck,
+    );
+    expect(other?.previewFailure).toBeUndefined();
+    const converted = documentsOf(failing(deckDocument), page, framingDeck);
+    expect(converted[0]?.previewFailure).toBeUndefined();
+    const view = documentPageOf(failing(deckDocument), framingDeck, converted);
+    expect(view?.previewFailure).toBeUndefined();
+    expect(view?.representations).toBeUndefined();
+  });
+});

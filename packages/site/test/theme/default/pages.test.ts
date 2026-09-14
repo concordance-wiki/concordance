@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { renderSlot } from "../../../src/render.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { searchResults, searchResultsEmpty } from "../../../src/gallery/fixtures.js";
+import {
+  searchResults,
+  searchResultsEmpty,
+  searchResultsFiltered,
+} from "../../../src/gallery/fixtures.js";
 import { expectBalanced } from "../../helpers/html.js";
 
 describe("SearchResults", () => {
@@ -89,5 +93,29 @@ describe("SearchResults", () => {
   it("omits the facets navigation when there is no facet", () => {
     const html = renderSlot("SearchResults", { ...searchResults, facets: [] }, defaultTheme);
     expect(html).not.toContain("<nav");
+  });
+
+  it("draws the exits of a filtered word as rows with their counts, the page of the word dashed, and words the notice itself when the page gives none", () => {
+    const html = renderSlot("SearchResults", searchResultsFiltered, defaultTheme);
+    expect(html).toContain(
+      '<p class="results-empty-lead" role="status">No result for “staleness” with the filter Screen.</p><p class="results-empty-cause">The word exists in the documentation, but on none of the pages the filter keeps.</p><ul class="results-exits"><li><a class="results-exit" href="?q=staleness"><span class="results-exit-label">Remove the filter “Screen”</span><span class="results-exit-count">14</span></a></li><li><a class="results-exit results-exit-secondary" href="../glossary/staleness/"><span class="results-exit-label">See the page of the word</span><span class="results-exit-count">9</span></a></li></ul></div>',
+    );
+    expect(html).not.toContain("results-empty-note");
+    expect(html).not.toContain("search-closest");
+    const unworded = { ...searchResultsFiltered };
+    delete unworded.summary;
+    const bare = renderSlot(
+      "SearchResults",
+      {
+        ...unworded,
+        empty: { explanation: "Nothing.", exits: [{ label: "Go", href: "?q=x" }] },
+      },
+      defaultTheme,
+    );
+    expect(bare).toContain('<p class="results-empty-lead" role="status">No result</p>');
+    expect(bare).toContain(
+      '<li><a class="results-exit" href="?q=x"><span class="results-exit-label">Go</span></a></li>',
+    );
+    expectBalanced(bare);
   });
 });
