@@ -1,4 +1,6 @@
 import { execFile } from "node:child_process";
+
+import { requireExecutable } from "./executable.js";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
@@ -17,7 +19,7 @@ function git(cwd: string, args: readonly string[]): Promise<string> {
   // The terminal prompt is disabled so that a private repository fails instead of waiting for credentials.
   const env = { ...process.env, GIT_TERMINAL_PROMPT: "0", LC_ALL: "C" };
   return new Promise((resolve, reject) => {
-    execFile("git", [...args], { cwd, env, maxBuffer }, (error, stdout) => {
+    execFile(requireExecutable("git"), [...args], { cwd, env, maxBuffer }, (error, stdout) => {
       if (error === null) {
         resolve(stdout);
       } else {

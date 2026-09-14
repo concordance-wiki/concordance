@@ -3,6 +3,8 @@
 // file or directory, an uppercase markdown file outside the governance set.
 import { execFileSync } from "node:child_process";
 
+import { systemCommand } from "./executables.mjs";
+
 const failures = [];
 
 const allowedDotPaths = [/^\.github\//, /^\.changeset\//];
@@ -29,7 +31,8 @@ const allowedUppercaseMarkdown = new Set([
 ]);
 const checkPage = /^docs\/checks\/[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*\.md$/;
 
-const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);
+const GIT = systemCommand("git");
+const tracked = execFileSync(GIT, ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);
 for (const path of tracked) {
   const segments = path.split("/");
   const base = segments[segments.length - 1];
@@ -48,7 +51,7 @@ for (const path of tracked) {
 
 const range = process.env.HYGIENE_COMMIT_RANGE ?? "HEAD~20..HEAD";
 const commitMessages = (revisions) =>
-  execFileSync("git", ["log", "--format=%H%n%B%n--end--", ...revisions], {
+  execFileSync(GIT, ["log", "--format=%H%n%B%n--end--", ...revisions], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
   });

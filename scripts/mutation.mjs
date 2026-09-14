@@ -17,6 +17,8 @@ import { createRequire } from "node:module";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
+import { systemCommand } from "./executables.mjs";
+
 const mutatedPackages = ["core", "typing", "nlp", "inference", "checks"];
 const incrementalDir = "reports/mutation/incremental";
 const reportFile = "reports/mutation/mutation.json";
@@ -61,7 +63,7 @@ if (pkg !== undefined) {
 } else if (since !== undefined) {
   incrementalFile = join(incrementalDir, "branch.json");
   const changed = execFileSync(
-    "git",
+    systemCommand("git"),
     [
       "diff",
       "--name-only",

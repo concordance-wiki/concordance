@@ -23,7 +23,7 @@ const FALLBACK_TYPE = "document";
 const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
 function walk(dir, predicate, out = []) {
-  for (const name of readdirSync(dir).sort()) {
+  for (const name of readdirSync(dir).sort(byCodeUnit)) {
     const path = join(dir, name);
     if (name === "node_modules" || name === ".git") continue;
     if (statSync(path).isDirectory()) walk(path, predicate, out);

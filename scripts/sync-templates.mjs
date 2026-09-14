@@ -8,13 +8,16 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:f
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Code-unit order, never the collation of the runtime.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const modules = join(root, "packages/profile/types");
 const source = join(root, "docs/templates");
 const copy = join(root, "packages/cli/templates");
 
 let fromModules = 0;
-for (const slug of readdirSync(modules).sort()) {
+for (const slug of readdirSync(modules).sort(byCodeUnit)) {
   const template = join(modules, slug, "template.md");
   if (!existsSync(template)) continue;
   copyFileSync(template, join(source, `${slug}.md`));
@@ -23,7 +26,6 @@ for (const slug of readdirSync(modules).sort()) {
 
 mkdirSync(copy, { recursive: true });
 // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
 const wanted = new Set(readdirSync(source));
 for (const name of readdirSync(copy)) {

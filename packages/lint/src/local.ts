@@ -15,6 +15,11 @@ import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wik
 
 import { lintedFiles } from "./files.js";
 
+/** Code-unit order, never the collation of the runtime: the same report on every machine. */
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** Identifier prefix of a repository linted without a declared source. */
 export const DEFAULT_SOURCE_NAME = "repo";
 
@@ -45,7 +50,7 @@ export interface LintRepositoryInput {
 function typeSuffixes(source: SourceConfig | undefined): string[] {
   return (source?.rules ?? [])
     .flatMap((rule) => (rule.match.suffix === undefined ? [] : [rule.match.suffix]))
-    .sort();
+    .sort(byCodeUnit);
 }
 
 /** A target that climbs above the repository may exist in another source; only the global mode can tell. */
