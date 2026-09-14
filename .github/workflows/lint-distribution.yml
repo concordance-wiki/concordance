@@ -21,7 +21,7 @@ on:
       - .github/workflows/lint-distribution.yml
   push:
     tags:
-      - "@concordance-wiki/cli@*"
+      - "v*"
 
 permissions:
   contents: read

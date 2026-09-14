@@ -1,0 +1,58 @@
+name: release-pr
+
+# Every push to main that carries a changeset opens or refreshes one pull request,
+# "chore(release): v<x.y.z>", with the bumped versions, the changelogs, the lockfile and
+# the version pins of the distribution manifests. Merging it is the decision to release,
+# taken by a person: the pull request is never merged automatically, and the release
+# workflow tags the merge commit once it lands. Nothing here publishes a package: the
+# action only versions, it has no publish command.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-pr
+  cancel-in-progress: false
+
+jobs:
+  version:
+    # The merge of the version pull request adds no changeset; the release workflow handles it.
+    if: "!startsWith(github.event.head_commit.message, 'chore(release): v')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Next version
+        id: next
+        # The release plan of the pending changesets; the packages form one fixed group, so the
+        # version of the command line is the version of the release. Empty when nothing is pending.
+        run: |
+          pnpm changeset status --output "$RUNNER_TEMP/plan.json"
+          version=$(node -e '
+            const plan = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+            const cli = plan.releases.find((release) => release.name === "@concordance-wiki/cli");
+            console.log(cli === undefined || cli.type === "none" ? "" : cli.newVersion);
+          ' "$RUNNER_TEMP/plan.json")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Open or refresh the version pull request
+        if: steps.next.outputs.version != ''
+        uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          script: pnpm changeset version && pnpm install --lockfile-only && node scripts/sync-distribution-versions.mjs
+          commit-message: "chore(release): v${{ steps.next.outputs.version }}"
+          pr-title: "chore(release): v${{ steps.next.outputs.version }}"
+          # A pull request opened with the workflow token triggers no workflow; the optional
+          # RELEASE_TOKEN secret (a fine-grained token with contents and pull requests write
+          # access) lets the pipeline run on the version pull request without a close and reopen.
+          github-token: ${{ secrets.RELEASE_TOKEN || github.token }}
