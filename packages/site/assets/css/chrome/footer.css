@@ -1,14 +1,12 @@
-/* Footer: a card at the width of the pages, in two columns, what the tool knows of the site then what the organisation declared, the second shown only when something was; under them the build line, in the monospace family on the soft surface, the to-do page with its count at its end. */
+/* Footer: a band at the width of the page, in two columns, what the tool knows of the site then what the organisation declared, the second shown only when something was; under them the build line, in the monospace family on the soft surface, the to-do page with its count at its end. */
 
+/* Flush with the columns above it: a band the width of the page under a rule, no margin and no radius, so that the foot continues the page instead of floating on its ground. */
 .site-footer {
   box-sizing: border-box;
-  padding: 1.625rem var(--space-4) 1.875rem;
   border-block-start: 1px solid var(--color-border);
 }
 
 .site-footer-card {
-  border: 1px solid var(--color-border);
-  border-radius: calc(var(--radius) * 1.25);
   background: var(--color-surface);
   overflow: hidden;
 }
@@ -17,7 +15,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4) 2.25rem;
-  padding: 1.25rem var(--space-4);
+  padding: 1.5rem 2.5rem;
 }
 
 .site-footer-site {
@@ -83,7 +81,7 @@
 
 .site-footer-card > .site-footer-build {
   margin: 0;
-  padding: var(--space-1) var(--space-4);
+  padding: var(--space-1) 2.5rem;
   border-block-start: 1px solid var(--color-border);
   background: var(--color-soft);
   color: var(--color-label);
