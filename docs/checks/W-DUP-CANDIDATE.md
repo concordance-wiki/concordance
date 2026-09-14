@@ -28,6 +28,6 @@ source: ../meetings/threshold-review.pptx
 
 ## How to fix
 
-Declare the twin explicitly in the markdown frontmatter (`source:`), which scores 1.0 and merges the pair, or record the pair under `merged` or `separated` in the lock file. The thresholds and the text comparison are configured under [`inference.duplicates`](../guides/configuration.md#inferenceduplicates).
+Declare the twin explicitly in the markdown frontmatter (`source:`), which scores 1.0 and merges the pair, or record the pair under `merged` or `separated` in the [lock file](../guides/configuration.md#lock): a merged pair becomes one entity whatever its score, grouped by the criterion `lock file`, and a separated pair is neither merged nor reported again. The thresholds and the text comparison are configured under [`inference.duplicates`](../guides/configuration.md#inferenceduplicates).
 
 Severity can be overridden in `concordance.yaml` or in a repository's `concordance-lint.yaml` under `checks:`.

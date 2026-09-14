@@ -24,6 +24,6 @@ The counts a build prints last: entities, links, findings by severity.
 
 ## How to fix
 
-Create a term note in the glossary, or add the expression to `rejected_terms` in the lock file if it is not a business term.
+Create a term note in the glossary, or add the expression to `rejected_terms` in the [lock file](../guides/configuration.md#lock) if it is not a business term: the next build proposes it no more, whatever its case or plural, and neither the finding nor the keyword page comes back.
 
 Severity can be overridden in `concordance.yaml` or in a repository's `concordance-lint.yaml` under `checks:`.

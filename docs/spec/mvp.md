@@ -30,7 +30,7 @@ The confidence score is computed and stored: it orders mentions and decides what
 | Official plugins | `@concordance-wiki/plugin-reader-vtt`, `/plugin-reader-office`, `/plugin-convert-libreoffice`, `/plugin-contract-openapi`, `/plugin-contract-wsdl`, `/plugin-viewer-pdf`; the contract viewer is a UI component of the default theme, in `/site` |
 | Preset | `concordance` (unscoped): depends on the core and every official plugin |
 | Configuration | `concordance.yaml` in a configuration repository, with `profile.yaml`, `theme.yaml`, `stopwords.*.txt`, `pseudonyms.yaml` (never published) |
-| Lock | `concordance.lock.yaml`; only `rejected_terms` is read in the MVP |
+| Lock | `concordance.lock.yaml`; `rejected_terms` and `duplicates` are applied in the MVP, `links` is recorded |
 | Per-repository override | `concordance-lint.yaml` |
 | Outputs | `dist/`, `dist/model.json`, `dist/build.log.json`, `dist/metrics.json` |
 | Published schemas | `schemas/config.schema.json`, `lint.schema.json`, `profile.schema.json`, `model.schema.json`, `lock.schema.json`, `theme.schema.json`, `plugin.schema.json` |
@@ -167,7 +167,7 @@ As an integrator, I want my configuration checked and its errors reported plainl
 - A source declared twice under the same name is an error.
 - `concordance build` runs this validation as its first step and stops when it fails.
 - `concordance init` writes a minimal, commented, valid configuration.
-- The schema covers the MVP subset: `project`, `profile`, `plugins`, `applications`, `domains`, `privacy`, `sources`, `staleness`, `inference`, `conversion`, `build`, `checks`. The `lock` key and `tracker` sources are accepted but ignored with a warning.
+- The schema covers the MVP subset: `project`, `profile`, `plugins`, `applications`, `domains`, `privacy`, `sources`, `staleness`, `inference`, `conversion`, `build`, `checks`. `tracker` sources are accepted but ignored with a warning; the `lock` key names the lock file the build reads, whose `links` block is recorded but not read, with a warning saying so.
 
 Depends on: L0-01.
 
