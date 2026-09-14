@@ -21,6 +21,14 @@
 </p>
 
 <p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=concordance-wiki_concordance"><img alt="Quality gate" src="https://sonarcloud.io/api/project_badges/measure?project=concordance-wiki_concordance&metric=alert_status"></a>
+  <a href="https://sonarcloud.io/component_measures?id=concordance-wiki_concordance&metric=coverage"><img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=concordance-wiki_concordance&metric=coverage"></a>
+  <a href="https://sonarcloud.io/component_measures?id=concordance-wiki_concordance&metric=sqale_rating"><img alt="Maintainability" src="https://sonarcloud.io/api/project_badges/measure?project=concordance-wiki_concordance&metric=sqale_rating"></a>
+  <a href="https://sonarcloud.io/component_measures?id=concordance-wiki_concordance&metric=reliability_rating"><img alt="Reliability" src="https://sonarcloud.io/api/project_badges/measure?project=concordance-wiki_concordance&metric=reliability_rating"></a>
+  <a href="https://sonarcloud.io/component_measures?id=concordance-wiki_concordance&metric=security_rating"><img alt="Security" src="https://sonarcloud.io/api/project_badges/measure?project=concordance-wiki_concordance&metric=security_rating"></a>
+</p>
+
+<p align="center">
   <a href="docs/guides/getting-started.md">Getting started</a> ·
   <a href="docs/guides/writing-notes.md">Writing notes</a> ·
   <a href="docs/guides/configuration.md">Configuration</a> ·
