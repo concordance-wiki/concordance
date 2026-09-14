@@ -1,6 +1,0 @@
----
-"@concordance-wiki/site": minor
-"@concordance-wiki/i18n": minor
----
-
-Meeting and document pages: a converted office file and the PDF kept next to it in the sources are one document of the page, the office file as the original to download and the PDF as its preview, so that the meeting page offers one "Deck" tab (`meeting.deck`, replacing `meeting.slides`) with the original, the viewer and the extracted text once, and the document page names the kind of the original ("Presentation"), gives the original for download and lists the files by their real format; a size or a page count the original does not state is read from the preview and the properties say so (`document.previewNote`). The tabs of both pages go through one component of the theme following the tablist pattern (`role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-selected`), served as anchors that work without any script, driven by the `tabs` island once it runs: arrow keys, Home and End, the address updated without scrolling, a fragment inside a panel showing that panel. The viewer of a deck opens as soon as its tab is shown, as on the document page. The callout "Decision taken here" stands in the transcript, under the last cue the decision was recognised in, at the head of the transcript for a decision no cue names.

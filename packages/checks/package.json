@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/checks",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The check registry shared by the build and the linter.",
   "license": "GPL-3.0-or-later",
   "repository": {
