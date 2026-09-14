@@ -8,6 +8,7 @@
   "entity.declaredAtTop": "{count, plural, one {# clé déclarée} other {# clés déclarées}}. Le reste du fichier est du texte libre.",
   "entity.domain": "Domaine",
   "entity.edit": "Modifier cette page",
+  "entity.editShort": "Modifier",
   "entity.imageNote": "Image du dépôt, affichée dans le flux du texte",
   "entity.inSpace": "Espace {space}",
   "entity.legendKeyword": "mot reconnu, sans fiche",

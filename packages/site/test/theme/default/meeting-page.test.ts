@@ -57,7 +57,7 @@ describe("MeetingPage", () => {
       '<div class="meeting-representations">',
       '<aside class="meeting-decision" role="note">',
       '<footer class="entity-footer">',
-      "<code>meetings/2026-03-12-keyword-page-threshold-review.vtt</code>",
+      '<code><span class="entity-source-folders">meetings/</span>2026-03-12-keyword-page-threshold-review.vtt</code>',
       '<div class="entity-side">',
       '<section class="panel-block entity-panel meeting-properties" aria-labelledby="meeting-properties">',
       '<aside class="mentions panel-block"',

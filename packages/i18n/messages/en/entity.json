@@ -35,6 +35,10 @@
     "defaultMessage": "Edit this page",
     "description": "Link to the edit page of the note on its forge."
   },
+  "entity.editShort": {
+    "defaultMessage": "Edit",
+    "description": "Short edit link of the footer of an entity page, under the phone width, next to the name of the file."
+  },
   "entity.imageNote": {
     "defaultMessage": "Image of the repository, shown in the flow of the text",
     "description": "Note under an image of the sources embedded in a note, before the path of the file."

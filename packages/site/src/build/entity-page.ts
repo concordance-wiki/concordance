@@ -757,6 +757,7 @@ export function entityPageLabels(
     inSpace: formatMessage(context.catalogue, "entity.inSpace", {
       space: spaceTitle(context, source),
     }),
+    editShort: message(context, "entity.editShort"),
   };
 }
 
