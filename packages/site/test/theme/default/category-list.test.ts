@@ -5,6 +5,7 @@ import { renderSlot } from "../../../src/render.js";
 import type { CategoryListProps } from "../../../src/slots.js";
 import { defaultCategoryListLabels } from "../../../src/theme/default/category-list.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
+import { withoutHandles } from "../../helpers/handles.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 /** The view model of the gallery with some of its optional keys left out, then the overrides. */
@@ -71,7 +72,7 @@ describe("CategoryList", () => {
     expect(html).toContain(
       '<details class="category-select category-sort"><summary><span class="visually-hidden">Sort: </span>A–Z<span class="category-select-mark" aria-hidden="true">▾</span></summary><ul class="category-choices"><li><span aria-current="true">A–Z</span></li><li><a href="-/links/">Links</a></li></ul></details>',
     );
-    expect(html).not.toContain("<button");
+    expect(withoutHandles(html)).not.toContain("<button");
   });
 
   it("names the value kept on the summary of the attribute selector, the attribute before it for assistive technology", () => {

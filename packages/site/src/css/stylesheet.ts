@@ -53,6 +53,7 @@ export const CSS_FILES = {
     "pages/screen-page.css",
     "pages/api-page.css",
     "pages/category-list.css",
+    "chrome/panel-handle.css",
     "pages/document-page.css",
     "pages/decision-page.css",
     "pages/about.css",

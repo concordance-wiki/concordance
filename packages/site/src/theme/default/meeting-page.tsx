@@ -20,6 +20,7 @@ import {
   PanelBlock,
   Source,
 } from "./entity-page.js";
+import { SidePanel } from "./panel-handle.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs, type Tab } from "./tabs.js";
@@ -301,7 +302,7 @@ export function MeetingPage({
           ))}
         </footer>
       </div>
-      <div class="entity-side">
+      <SidePanel>
         <PanelBlock
           id="meeting-properties"
           className="entity-panel meeting-properties"
@@ -343,7 +344,7 @@ export function MeetingPage({
         </PanelBlock>
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

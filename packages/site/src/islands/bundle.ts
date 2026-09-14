@@ -10,6 +10,7 @@ import { CATEGORY_ISLAND } from "../theme/default/category-island.js";
 import { DOCUMENT_VIEWER_ISLAND } from "../theme/default/document-viewer.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
+import { PANELS_ISLAND } from "../theme/default/panel-handle.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
 import { defaultUiComponents } from "../theme/default/plugin.js";
 import { TABS_ISLAND } from "../theme/default/tabs.js";
@@ -72,6 +73,10 @@ export function defaultIslands(): IslandEntry[] {
     {
       name: MODE_SWITCH_ISLAND,
       entry: fileURLToPath(new URL("./mode-switch.client", import.meta.url)),
+    },
+    {
+      name: PANELS_ISLAND,
+      entry: fileURLToPath(new URL("./panels.client", import.meta.url)),
     },
     {
       name: SEARCH_ISLAND,

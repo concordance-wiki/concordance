@@ -1303,6 +1303,19 @@ As a reader who wonders whether what I read is current, I want one page saying w
 
 Depends on: L9-01, L9-16.
 
+#### L9-19 Collapsible side panels
+
+As a reader on a desk, I want to fold the tree and the right panel behind a discreet handle so that a wide table, a figure or a code block gets the room, and to find them folded again on the next page.
+
+- From 1100 px, each side panel carries a handle on its edge: a tab half slid behind the panel, of which 13 px show, without any label or border on the panel side, drawing ‹ or › the way the panel goes, standing at the middle of the viewport along the panel; it is a button named after its panel ("Tree of the space", "Right panel"), titled "Fold or unfold", announcing its state through `aria-expanded`, reachable with the keyboard; `[` folds and unfolds the tree, `]` the right panel, outside a field and without a modifier.
+- Folded to 44 px, the tree keeps its initials badge and the name of the space written upwards; the right panel keeps the heading of every block with its count, written the same way, its content hidden and out of the tab order; the reader knows what they reopen.
+- The room goes to the wide content: the children of the centre column widen to 1200 px while the paragraphs, lists and headings of the note keep their measure, so that a table shows the columns it hid and the prose stays readable.
+- The state is remembered per panel and per reader, in the browser's storage and never in the address: an inline script applies it before the first paint on every page, so that a folded panel never opens and folds again; under 1100 px the layout already folds the panels and shows no handle.
+- Without JavaScript every panel stands open and no handle shows; every page laid out as the entity page, the keyword, meeting, API and document pages and the category list, folds the same way.
+- Gallery: a state named `entity-page-panel-folded`, the entity page with both panels served folded, framed at the desktop width; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

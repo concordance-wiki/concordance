@@ -7,7 +7,7 @@ export const SCREEN_NOTES_BASE = "https://concordance-wiki.github.io/demo-wiki/s
  * the panels and the chrome.
  */
 export interface GalleryBoard {
-  /** `B1` to `B20` for the boards; a word for the groups beside them. */
+  /** `B1` to `B22` for the boards; a word for the groups beside them. */
   id: string;
   title: string;
   /** What the board settles, in one sentence. */
@@ -136,6 +136,13 @@ const boards = [
     caption:
       "A second palette, not an inversion: the ground under the surface, the accent raised, no shadow.",
     screen: "panels/colour-scheme",
+  },
+  {
+    id: "B21",
+    title: "Collapsible panels",
+    caption:
+      "The side panels folded behind a handle on their edge, the room going to the wide content of the text.",
+    screen: "panels/side-panel",
   },
   {
     id: "todo",

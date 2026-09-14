@@ -82,7 +82,7 @@ describe("KeywordPage", () => {
       '<p class="entity-badge"><span class="badge badge-noteless">No definition</span></p></header>',
       '<aside class="keyword-notice" role="note">',
       '<section class="keyword-body"',
-      '<div class="entity-side"><section class="panel-block keyword-facts"',
+      '<div class="entity-side"><div class="panel-handle-track"><button type="button" class="panel-handle" data-panel="panel" aria-expanded="true" title="Fold or unfold" hidden><span class="visually-hidden">Right panel</span></button></div><section class="panel-block keyword-facts"',
       '<aside class="mentions panel-block"',
       `<details class="neighbourhood-fold"><summary>${NEIGHBOURHOOD_ICON}<span class="neighbourhood-lead">See the neighbourhood map</span><span class="neighbourhood-count">2 pages</span><span class="count panel-count neighbourhood-number">2</span><span class="neighbourhood-head">Neighbourhood map</span><span class="neighbourhood-page">Keyword page</span></summary><section class="neighbourhood"`,
     ]);

@@ -11,6 +11,8 @@ import { buildGallery, GALLERY_PAGE_BUDGET, type GalleryReport } from "../../src
 import { GALLERY_BOARDS } from "../../src/gallery/boards.js";
 import { galleryTheme } from "../../src/gallery/fixtures.js";
 import { galleryPages } from "../../src/gallery/pages.js";
+import { MODE_SCRIPT } from "../../src/mode.js";
+import { PANELS_SCRIPT } from "../../src/panels.js";
 import { SLOT_NAMES } from "../../src/slots.js";
 import { defaultComponents } from "../../src/theme/default/index.js";
 import { importThemeModule } from "../../src/theme/node-loader.js";
@@ -53,6 +55,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
       "gallery-width",
       "mentions-panel",
       "mode-switch",
+      "panels",
       "search",
       "tabs",
       "toc",
@@ -163,6 +166,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
       "meeting-page-no-script.html",
       "api-page-no-script.html",
       "document-page-no-script.html",
+      "entity-page-panel-folded.html",
     ]);
     for (const page of noScript) {
       const html = fileSystem.readText(`/out/${page.file}`);
@@ -178,11 +182,12 @@ describe("A concordance gallery command renders every slot with fixture view mod
     );
   });
 
-  it("serves the states of the dark board with the dark scheme forced on the root, no boot script overriding it, the switch still bundled", () => {
+  it("serves the states of the dark board with the dark scheme forced on the root, no boot script overriding it, the one of the panels kept, the switch still bundled", () => {
     for (const file of ["entity-page-dark.html", "home-dark.html"]) {
       const html = fileSystem.readText(`/out/${file}`);
       expect(html, file).toContain('<html lang="en" dir="ltr" data-mode="dark"><head>');
-      expect(html, file).not.toContain("<script>(function(){");
+      expect(html, file).not.toContain(MODE_SCRIPT);
+      expect(html, file).toContain(`<script>${PANELS_SCRIPT}</script>`);
       expect(html, file).toMatch(
         /<script defer src="assets\/mode-switch-[A-Z0-9]{8}\.js"><\/script>/,
       );
@@ -223,6 +228,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
       expect.stringMatching(/^island gallery-width: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+      expect.stringMatching(/^island panels: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island tabs: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island toc: \d+\.\d kB$/) as string,

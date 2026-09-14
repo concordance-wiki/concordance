@@ -242,7 +242,7 @@ describe("The trail shows the entities visited in order, each clickable", () => 
       '</details><concordance-island data-island="trail" data-props="{&quot;base&quot;:&quot;../&quot;,&quot;labels&quot;:{&quot;title&quot;:&quot;Trail&quot;,&quot;pin&quot;:&quot;Pin&quot;,&quot;unpin&quot;:&quot;Unpin&quot;,&quot;earlier&quot;:&quot;earlier pages&quot;},&quot;current&quot;:{&quot;id&quot;:&quot;glossary/entity&quot;,&quot;title&quot;:&quot;Entity&quot;}}"></concordance-island><concordance-island data-island="mode-switch"',
     );
     expect(html).not.toContain("trail-list");
-    expect(html).toContain("</concordance-island></nav></header>");
+    expect(html).toContain('</concordance-island></nav><concordance-island data-island="panels"');
   });
 
   it("renders the island with the theme's own labels and no current page when the header receives no trail", () => {
@@ -553,6 +553,7 @@ describe("the trail passes the accessibility audit once rendered", () => {
       islands: [
         { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
         { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+        { name: "panels", file: "panels-00000000.js", bytes: 0 },
         { name: "search", file: "search-00000000.js", bytes: 0 },
         { name: "toc", file: "toc-00000000.js", bytes: 0 },
         { name: "trail", file: "trail-00000000.js", bytes: 0 },

@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 
 import type { SpaceNode, SpaceTree as SpaceTreeModel } from "../../slots.js";
+import { PanelHandle } from "./panel-handle.js";
 
 /** A page of the tree links to itself; the current one is a plain entry marked `aria-current`, bold and ruled by the stylesheet, its passage count after its name when it is a word filed among the notes, the pages hung under it listed after it. */
 function Page({ node }: { node: SpaceNode }): JSX.Element {
@@ -107,11 +108,21 @@ export function SpaceTreeFold({
  * The left column: the initials badge and the name of the space as the link to its page, then
  * its tree, which the stylesheet keeps in view there, the summary of the disclosure hidden;
  * without a page to link, the disclosure heads the column. The badge is decorative: the name
- * follows it.
+ * follows it. The handle on the edge of the column folds it to the badge and the name written
+ * vertically; `folded` serves it so.
  */
-export function SpaceTree({ space, label }: { space: SpaceTreeModel; label: string }): JSX.Element {
+export function SpaceTree({
+  space,
+  label,
+  folded = false,
+}: {
+  space: SpaceTreeModel;
+  label: string;
+  folded?: boolean;
+}): JSX.Element {
   return (
     <nav class="space" aria-label={label}>
+      <PanelHandle panel="tree" name={label} folded={folded} />
       {space.href !== undefined && (
         <a class="space-head space-head-link" href={space.href}>
           <SpaceHead space={space} />

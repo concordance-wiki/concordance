@@ -229,4 +229,6 @@ export const labels = {
   inTheDocument: "in the document",
   inSpace: "Space {space}",
   editShort: "Edit",
+  foldPanel: "Fold or unfold",
+  rightPanel: "Right panel",
 } as const;

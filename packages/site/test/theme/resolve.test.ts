@@ -398,6 +398,7 @@ describe("resolveTheme", () => {
         { name: "mode-switch", file: "mode-switch.js", bytes: 1 },
         { name: "search", file: "search.js", bytes: 1 },
         { name: "toc", file: "toc.js", bytes: 1 },
+        { name: "panels", file: "panels.js", bytes: 1 },
         { name: "trail", file: "trail.js", bytes: 1 },
       ],
       header,

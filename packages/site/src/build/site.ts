@@ -228,6 +228,13 @@ function chromeFor(
   if (space !== undefined) {
     header.space = space;
   }
+  header.panels = {
+    labels: {
+      fold: message(context, "panels.fold"),
+      tree: message(context, "entity.spaceTree"),
+      panel: message(context, "panels.panel"),
+    },
+  };
   header.trail = {
     base: siteRootOf(page),
     labels: {

@@ -180,6 +180,24 @@ export interface TrailProps {
   labels: TrailLabels;
 }
 
+/** The labels the panels island writes on the handles of the side panels once its script runs. */
+export interface PanelsLabels {
+  /** Title of every handle: "Fold or unfold". */
+  fold: string;
+  /** Accessible name of the handle of the tree of the space. */
+  tree: string;
+  /** Accessible name of the handle of the right panel. */
+  panel: string;
+}
+
+/** The island folding the side panels of a page behind their handles; served empty, it only carries the labels. */
+export interface PanelsProps {
+  labels: PanelsLabels;
+}
+
+/** A side panel of the entity page a reader can fold: the tree of the space, the right panel. */
+export type FoldablePanel = "tree" | "panel";
+
 /** A space listed in the drawer of the narrow layouts: a source, its initials and how many notes it holds. */
 export interface SpaceLink extends Link {
   /** Two letters standing for the space in its badge. */
@@ -218,6 +236,8 @@ export interface HeaderProps {
   search?: SearchField;
   /** Absent, the default theme renders the trail with its own English labels and records no page. */
   trail?: TrailProps;
+  /** Absent, the default theme renders the panels island with its own English labels. */
+  panels?: PanelsProps;
   /** Whether the drawer of the narrow layouts is served open, to preview it; a page of the site never is. */
   drawerOpen?: boolean;
   labels?: Partial<HeaderLabels>;
@@ -911,6 +931,8 @@ export interface EntityPageProps {
   contract?: ContractSectionProps;
   /** The neighbourhood map served unfolded, the panel replaced by it; folded behind its line when absent. */
   mapOpen?: boolean;
+  /** The side panels served folded behind their handles, as a reader who folded them sees the page; every panel open when absent. */
+  folded?: FoldablePanel[];
   /** What the page of a `meeting` entity lays out beyond the generic template; absent for every other page. */
   meeting?: MeetingProps;
   /** What lays the page out as the page of an office document; absent for every other page. */
