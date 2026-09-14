@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { importPlugin, loadPlugins, memoryFileSystem } from "@concordance-wiki/core";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { SCREEN_NOTES_BASE } from "../../src/gallery/boards.js";
 import { buildGallery, type GalleryReport } from "../../src/gallery/build.js";
 import { galleryPages } from "../../src/gallery/pages.js";
 import { loadTheme } from "../../src/theme/load.js";
@@ -124,7 +125,9 @@ describe("the gallery renders the white-label fixture theme with --theme", () =>
   it("mentions the tool nowhere a reader can see when the credit is off, and shows the footer of the fixture", () => {
     for (const [file, html] of built.pages) {
       expect(visibleText(html), file).not.toMatch(/concordance/i);
-      expect(html, file).not.toMatch(/href="[^"]*concordance/i);
+      // The index is the workbench itself, not a page of the site: it points at the screen notes of the demonstration.
+      const links = html.replaceAll(`href="${SCREEN_NOTES_BASE}`, 'href="');
+      expect(links, file).not.toMatch(/href="[^"]*concordance/i);
       expect(html, file).not.toContain("site-footer-credit");
       expect(html, file).toContain(
         '<p class="site-footer-text">Notes on the build pipeline, kept by the maintainers of the wiki.</p>',
