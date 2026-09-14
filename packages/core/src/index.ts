@@ -42,6 +42,12 @@ export { slugify } from "./identity/slug.js";
 export { epochClock, fixedClock, systemClock, type Clock } from "./io/clock.js";
 export { commandExists } from "./io/command.js";
 export {
+  locateExecutable,
+  overrideVariable,
+  requireExecutable,
+  TRUSTED_DIRECTORIES,
+} from "./io/executable.js";
+export {
   memoryFileSystem,
   nodeFileSystem,
   type FileSystem,

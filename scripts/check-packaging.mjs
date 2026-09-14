@@ -7,8 +7,9 @@
 // Run through scripts/validate.mjs; the pack itself is injectable for tests.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { join, relative } from "node:path";
 
+import { pnpmCommand } from "./executables.mjs";
 import { publishedPackages } from "./release-notes.mjs";
 
 const repositoryUrl = "git+https://github.com/concordance-wiki/concordance.git";
@@ -33,18 +34,6 @@ const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 
 /** The files `pnpm pack` would put in the tarball of the package at `dir`, as pnpm lists them. */
-/**
- * The command that runs `pnpm`, as an absolute path — never a name looked up on the PATH: the pnpm
- * that runs this script, else the one of `PNPM_HOME`, else the corepack shipped next to node.
- */
-export function pnpmCommand(env = process.env, execPath = process.execPath) {
-  const running = env["npm_execpath"];
-  if (running !== undefined && running.endsWith("pnpm.cjs")) return [execPath, running];
-  const home = env["PNPM_HOME"];
-  if (home !== undefined && existsSync(join(home, "pnpm"))) return [join(home, "pnpm")];
-  return [join(dirname(execPath), "corepack"), "pnpm"];
-}
-
 export function packList(dir) {
   const [command, ...prefix] = pnpmCommand();
   const output = execFileSync(command, [...prefix, "pack", "--dry-run", "--json"], {

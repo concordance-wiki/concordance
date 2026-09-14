@@ -12,6 +12,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isMap, isSeq, parse as parseYaml, parseDocument } from "yaml";
 
+// Code-unit order, never the collation of the runtime: the output is the same on every machine.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const baseFile = join(root, "packages/profile/base.yaml");
 export const typesDirectory = join(root, "packages/profile/types");
@@ -40,7 +43,7 @@ function messagesOf(directory) {
   const folder = join(directory, "messages");
   const messages = {};
   if (!existsSync(folder)) return messages;
-  for (const name of readdirSync(folder).sort()) {
+  for (const name of readdirSync(folder).sort(byCodeUnit)) {
     const language = /^([a-z]{2,3})\.json$/.exec(name)?.[1];
     if (language === undefined) continue;
     const document = JSON.parse(readFileSync(join(folder, name), "utf8"));
@@ -101,7 +104,7 @@ export function typeOf(directory) {
 export function modulesOf(directory) {
   return readdirSync(directory)
     .filter((name) => existsSync(join(directory, name, "type.yaml")))
-    .sort()
+    .sort(byCodeUnit)
     .map((slug) => ({ slug, type: typeOf(join(directory, slug)) }));
 }
 

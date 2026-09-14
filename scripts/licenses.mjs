@@ -21,6 +21,8 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { pnpmCommand } from "./executables.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const inventory = join(root, "docs/licenses.md");
 const check = process.argv.includes("--check");
@@ -67,11 +69,16 @@ function isAllowed(name, license) {
 }
 
 function listLicenses(args) {
-  const output = execFileSync("pnpm", ["licenses", "list", "--json", "--long", ...args], {
-    cwd: root,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "inherit"],
-  });
+  const [command, ...prefix] = pnpmCommand();
+  const output = execFileSync(
+    command,
+    [...prefix, "licenses", "list", "--json", "--long", ...args],
+    {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "inherit"],
+    },
+  );
   return Object.values(JSON.parse(output)).flat();
 }
 

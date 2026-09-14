@@ -14,6 +14,9 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
+// Code-unit order, never the collation of the runtime: the output is the same on every machine.
+const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const bin = resolve(root, "packages/cli/dist/bin.js");
 const { values } = parseArgs({
@@ -25,7 +28,7 @@ const { values } = parseArgs({
 const corpus = resolve(root, values.corpus);
 
 function walk(dir, out = []) {
-  for (const name of readdirSync(dir).sort()) {
+  for (const name of readdirSync(dir).sort(byCodeUnit)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) walk(path, out);
     else out.push(path);

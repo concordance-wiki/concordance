@@ -24,6 +24,8 @@ import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
+import { pnpmCommand } from "./executables.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const { values: options } = parseArgs({
   options: {
@@ -54,12 +56,10 @@ function run(command, args, cwd = root) {
   return result.stdout;
 }
 
-// The script runs under `pnpm build:binary` (pnpm names itself in npm_execpath) or with pnpm on PATH.
+// pnpm is located by path, never on the PATH: the one running the script, else PNPM_HOME, else corepack.
 function pnpm(args, cwd) {
-  const execpath = process.env.npm_execpath;
-  return execpath !== undefined && /pnpm/u.test(execpath)
-    ? run(process.execPath, [execpath, ...args], cwd)
-    : run("pnpm", args, cwd);
+  const [command, ...prefix] = pnpmCommand();
+  return run(command, [...prefix, ...args], cwd);
 }
 
 /** Forward-slash relative path to base64 content, sorted, for every file of the deployed tree the runtime needs. */
