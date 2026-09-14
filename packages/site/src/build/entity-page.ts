@@ -91,17 +91,32 @@ export function attributeLabel(context: SiteContext, type: string, key: string):
   return label === undefined ? key.replaceAll("_", " ") : labelIn(label, context.language);
 }
 
-/** A value of the frontmatter as the page shows it: scalars and lists of scalars, an identifier becoming a link. */
-function valuesOf(context: SiteContext, page: string, value: unknown): AttributeValue[] {
+/**
+ * The note a written value names, the way the pipeline resolves a reference: by its identifier
+ * as written, else by the identifier it takes within the source of the note
+ * (`roles/publication/reader` naming `specs/roles/publication/reader` from a note of `specs`);
+ * none for a value that is no identifier.
+ */
+function referencedOf(context: SiteContext, source: string, value: string): Entity | undefined {
+  return context.entities.get(value) ?? context.entities.get(`${source}/${value}`);
+}
+
+/** A value of the frontmatter as the page shows it: scalars and lists of scalars, an identifier becoming a link titled as its note. */
+function valuesOf(
+  context: SiteContext,
+  page: string,
+  source: string,
+  value: unknown,
+): AttributeValue[] {
   if (Array.isArray(value)) {
-    return value.flatMap((item: unknown) => valuesOf(context, page, item));
+    return value.flatMap((item: unknown) => valuesOf(context, page, source, item));
   }
   if (typeof value === "string") {
-    const target = context.entities.get(value);
+    const target = referencedOf(context, source, value);
     return [
       target === undefined
         ? { text: value }
-        : { text: target.title, href: entityHref(page, value) },
+        : { text: target.title, href: entityHref(page, target.id) },
     ];
   }
   if (typeof value === "number" || typeof value === "boolean") {
@@ -135,7 +150,7 @@ export function attributeOf(
   const values =
     (common === "application" || common === "domain") && typeof raw === "string"
       ? [scopeValue(context, page, common, raw)]
-      : valuesOf(context, page, raw);
+      : valuesOf(context, page, entity.source.name, raw);
   return values.length === 0 ? undefined : { name: key, label, values };
 }
 

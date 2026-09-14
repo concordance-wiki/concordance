@@ -10,11 +10,7 @@ import type {
   SectionProps,
 } from "../../../src/slots.js";
 import { AttributeValues } from "../../../src/theme/default/attributes.js";
-import {
-  EntityPage,
-  HIGHLIGHTS_MAX,
-  HIGHLIGHTS_WITH_BADGE,
-} from "../../../src/theme/default/entity-page.js";
+import { EntityPage } from "../../../src/theme/default/entity-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../../src/theme/types.js";
 import { entityPage } from "../../../src/gallery/fixtures.js";
@@ -44,13 +40,11 @@ function expectInOrder(html: string, markers: string[]): void {
 }
 
 describe("EntityPage", () => {
-  it("imposes the page order: title, the line naming the type with two qualifying properties, the rendered markdown at full column width, then the panel", () => {
+  it("imposes the page order: title, the line naming the type, the rendered markdown at full column width, then the panel", () => {
     const html = render();
     expectInOrder(html, [
       "<h1>Keyword page</h1>",
       '<span class="badge">term</span>',
-      '<span class="highlight-label">aliases</span>',
-      '<span class="highlight-label">broader</span>',
       '<article class="entity-body">',
       '<div class="markdown">',
       '<section class="panel-block entity-panel"',
@@ -65,13 +59,15 @@ describe("EntityPage", () => {
     expectBalanced(html);
   });
 
-  it("renders the highlights on the line under the title, after the badge, linked when they have a target", () => {
+  it("leaves the properties the profile puts forward to the panel: the line under the title names nothing the panel says", () => {
     const html = render();
-    expect(html).toContain(
-      '<p class="entity-badge"><span class="badge">term</span><span class="highlight"><span class="highlight-label">aliases</span> <span class="value">word page</span></span>',
-    );
-    expect(html).toContain('<a class="value" href="../page/">page</a>');
-    expect(html).not.toContain("entity-highlights");
+    expect(html).toContain('<p class="entity-badge"><span class="badge">term</span></p></header>');
+    expect(html).not.toContain("highlight");
+    expect(html).toContain("<dt>Status</dt>");
+    const seven = Array.from({ length: 7 }, (_, index) => highlight(index));
+    const panel = render({ highlights: seven, attributes: seven });
+    expect(panel).toContain('<p class="entity-badge"><span class="badge">term</span></p></header>');
+    expect(count(panel, "<dt>Highlight ")).toBe(7);
   });
 
   it("names the last change and the space on the line under the title when the page has them, the change in full and in short for the narrow line, the space linked to its page when the tree knows it", () => {
@@ -80,7 +76,7 @@ describe("EntityPage", () => {
       space: { name: "glossary", initials: "GL", nodes: [] },
     });
     expect(html).toContain(
-      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">Space glossary</span><span class="highlight">',
+      '<p class="entity-badge"><span class="badge">term</span><time class="entity-changed" datetime="2026-09-04"><span class="entity-changed-long">Changed 9 days ago</span><span class="entity-changed-short">9 days ago</span></time><span class="entity-space">Space glossary</span></p>',
     );
     expect(
       render({
@@ -227,29 +223,7 @@ describe("EntityPage", () => {
     expectBalanced(html);
   });
 
-  it("caps the highlighted properties at five, two with the badge and three under it; beyond that they stay in the panel", () => {
-    const highlights = Array.from({ length: 7 }, (_, index) => highlight(index));
-    const html = render({ highlights, attributes: highlights });
-    expect(HIGHLIGHTS_WITH_BADGE).toBe(2);
-    expect(HIGHLIGHTS_MAX).toBe(5);
-    expect(count(html, '<span class="highlight">')).toBe(5);
-    const badgeLine = html.slice(html.indexOf('<p class="entity-badge">'), html.indexOf("</p>"));
-    expect(count(badgeLine, '<span class="highlight">')).toBe(2);
-    expect(badgeLine).toContain("Highlight 1");
-    expect(badgeLine).not.toContain("Highlight 2");
-    const secondLine = html.slice(
-      html.indexOf('<p class="entity-highlights">'),
-      html.indexOf("</header>"),
-    );
-    expect(count(secondLine, '<span class="highlight">')).toBe(3);
-    expect(secondLine).toContain("Highlight 4");
-    expect(secondLine).not.toContain("Highlight 5");
-    const panel = html.slice(html.indexOf('<section class="panel-block entity-panel"'));
-    expect(panel).toContain("<dt>Highlight 5</dt>");
-    expect(panel).toContain("<dt>Highlight 6</dt>");
-  });
-
-  it("serves every type with a single template: only the badge, the highlights and the neighbour order differ", () => {
+  it("serves every type with a single template: only the badge and the neighbour order differ", () => {
     const term = render();
     const screen = render({
       entity: { ...entityPage.entity, type: "screen", typeLabel: "screen" },
@@ -261,15 +235,13 @@ describe("EntityPage", () => {
     });
     const skeleton = (html: string): string =>
       html
-        .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge-and-highlights/>")
-        .replace(/<p class="entity-highlights">[\s\S]*?<\/p>/, "")
+        .replace(/<p class="entity-badge">[\s\S]*?<\/p>/, "<badge/>")
         .replace(/<figure[\s\S]*?<\/figure>/, "<map/>")
         .replace(/<ul id="neighbourhood-list"[\s\S]*?<\/ul>/, "<neighbours/>")
         .replace(/<summary><svg class="neighbourhood-icon"[\s\S]*?<\/summary>/, "<lead/>");
     expect(skeleton(screen)).toBe(skeleton(term));
     expect(screen).not.toBe(term);
-    expect(screen).toContain('<p class="entity-badge"><span class="badge">screen</span>');
-    expect(screen).toContain('<p class="entity-highlights">');
+    expect(screen).toContain('<p class="entity-badge"><span class="badge">screen</span></p>');
   });
 
   it("keeps the rendered markdown of every section as is, under its heading when it has one", () => {
@@ -441,11 +413,8 @@ describe("EntityPage", () => {
       "EntityPage",
       {
         ...entityPage,
-        highlights: [
-          { name: "steps", label: "Steps", values: [{ text: "rebuild" }, { text: "check" }] },
-        ],
         attributes: [
-          { name: "steps", label: "Steps", values: [{ text: "rebuild" }] },
+          { name: "steps", label: "Steps", values: [{ text: "rebuild" }, { text: "check" }] },
           { name: "owner", label: "Owner", values: [{ text: "maintainers" }] },
         ],
         sections: [
@@ -457,9 +426,8 @@ describe("EntityPage", () => {
       theme,
     );
     expect(html).toContain(
-      '<span class="highlight-label">Steps</span> <ol class="part-steps"><li>rebuild</li><li>check</li></ol>',
+      '<dt>Steps</dt><dd><ol class="part-steps"><li>rebuild</li><li>check</li></ol></dd>',
     );
-    expect(html).toContain('<dt>Steps</dt><dd><ol class="part-steps"><li>rebuild</li></ol></dd>');
     expect(html).toContain('<dt>Owner</dt><dd><p class="module-steps">module</p></dd>');
     expect(html).toContain('<section id="section-rules" class="part-rules">Rules</section>');
     expect(html).toContain(

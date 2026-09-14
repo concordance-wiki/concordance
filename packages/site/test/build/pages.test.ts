@@ -62,6 +62,7 @@ import {
   spaceLinksOf,
   spaceOf,
 } from "../../src/build/space.js";
+import type { AttributeValue } from "../../src/slots.js";
 import {
   entity,
   fragments,
@@ -202,7 +203,7 @@ describe("siteContext", () => {
 });
 
 describe("entityPageOf", () => {
-  it("shows the highlights the profile names for the type, in its order, labelled by the profile, an identifier value becoming a link", () => {
+  it("lists the properties the profile puts forward for the type, in its order, labelled by the profile, an identifier value becoming a link", () => {
     expect(highlightsOf(context(), pagePath, term)).toEqual([
       { name: "aliases", label: "aliases", values: [{ text: "word page" }] },
       {
@@ -281,6 +282,24 @@ describe("entityPageOf", () => {
       "status",
       "roles",
       "url_pattern",
+    ]);
+  });
+
+  it("resolves a written reference as the pipeline does, by its identifier as written, else within the source of the note, and keeps the value as text otherwise", () => {
+    const reader = entity({ id: "specs/roles/reader", type: "role", title: "Reader" });
+    const roles = (ctx: SiteContext): AttributeValue[] | undefined =>
+      panelOf(ctx, "specs/screens/mentions-panel/index.html", screen).find(
+        (attribute) => attribute.name === "roles",
+      )?.values;
+    expect(roles(context())).toEqual([{ text: "roles/reader" }]);
+    const within = context({ model: model({ entities: [...model().entities, reader] }) });
+    expect(roles(within)).toEqual([{ text: "Reader", href: "../../roles/reader/index.html" }]);
+    const absolute = entity({ id: "roles/reader", type: "role", title: "Reader of every space" });
+    const both = context({
+      model: model({ entities: [...model().entities, reader, absolute] }),
+    });
+    expect(roles(both)).toEqual([
+      { text: "Reader of every space", href: "../../../roles/reader/index.html" },
     ]);
   });
 

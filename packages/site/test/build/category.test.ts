@@ -315,9 +315,11 @@ describe("attributeValuesOf", () => {
     ]);
   });
 
-  it("falls back on the values as written when no reference link carries the attribute, or when its other end left the model", () => {
+  it("falls back on the values as the page resolves them when no reference link carries the attribute: an identifier within the source linked, a page the model lost as written", () => {
     const all = screensContext();
-    expect(attributeValuesOf(all, page, screen, "roles")).toEqual([{ text: "roles/reader" }]);
+    expect(attributeValuesOf(all, page, screen, "roles")).toEqual([
+      { text: "Reader", href: "../roles/reader/index.html" },
+    ]);
     expect(attributeValuesOf(all, page, gallery, "roles")).toEqual([
       { text: "specs/roles/theme-author" },
     ]);
@@ -354,8 +356,8 @@ describe("rowsOf", () => {
       {
         title: "Mentions panel",
         href: "mentions-panel/index.html",
-        values: [{ text: "roles/reader" }],
-        keys: ["roles-reader"],
+        values: [{ text: "Reader", href: "../roles/reader/index.html" }],
+        keys: ["reader"],
         links: 1,
       },
       {
@@ -423,7 +425,6 @@ describe("filterValuesOf", () => {
     expect(filterValuesOf(all, rowsOf(all, screens(all)))).toEqual([
       { key: "author", label: "Author" },
       { key: "reader", label: "Reader" },
-      { key: "roles-reader", label: "roles/reader" },
       { key: "specs-roles-theme-author", label: "specs/roles/theme-author" },
     ]);
     expect(
@@ -931,12 +932,10 @@ describe("categoryDocumentsOf", () => {
       "specs/screens/index.html",
       "specs/screens/-/roles-author/index.html",
       "specs/screens/-/roles-reader/index.html",
-      "specs/screens/-/roles-roles-reader/index.html",
       "specs/screens/-/roles-specs-roles-theme-author/index.html",
       "specs/screens/-/links/index.html",
       "specs/screens/-/roles-author-links/index.html",
       "specs/screens/-/roles-reader-links/index.html",
-      "specs/screens/-/roles-roles-reader-links/index.html",
       "specs/screens/-/roles-specs-roles-theme-author-links/index.html",
     ]);
     const [whole] = documents;
@@ -960,12 +959,6 @@ describe("categoryDocumentsOf", () => {
         { label: "All", active: true },
         { label: "Author", key: "author", href: "-/roles-author/index.html", active: false },
         { label: "Reader", key: "reader", href: "-/roles-reader/index.html", active: false },
-        {
-          label: "roles/reader",
-          key: "roles-reader",
-          href: "-/roles-roles-reader/index.html",
-          active: false,
-        },
         {
           label: "specs/roles/theme-author",
           key: "specs-roles-theme-author",
@@ -998,12 +991,13 @@ describe("categoryDocumentsOf", () => {
     expect(byLinks?.props.rows.map((row) => [row.title, row.href, row.links])).toEqual([
       ["Search", "../../search/index.html", 3],
       ["Home", "../../home/index.html", 2],
+      ["Mentions panel", "../../mentions-panel/index.html", 1],
     ]);
     expect(byLinks?.props.rows[0]?.values[0]).toEqual({
       text: "Author",
       href: "../../../roles/author/index.html",
     });
-    expect(byLinks?.props.total).toBe(2);
+    expect(byLinks?.props.total).toBe(3);
     expect(byLinks?.props.sort).toBe("links");
     expect(byLinks?.props.sorts).toEqual([
       { label: "A–Z", key: "title", href: "../roles-reader/index.html", active: false },
@@ -1013,7 +1007,6 @@ describe("categoryDocumentsOf", () => {
       ["All", "../links/index.html"],
       ["Author", "../roles-author-links/index.html"],
       ["Reader", undefined],
-      ["roles/reader", "../roles-roles-reader-links/index.html"],
       ["specs/roles/theme-author", "../roles-specs-roles-theme-author-links/index.html"],
     ]);
     expect(byLinks?.props.space.nodes[0]?.href).toBe("../../../data/index.html");
