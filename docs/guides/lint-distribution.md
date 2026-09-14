@@ -17,7 +17,7 @@ Pin one version and use it in every form: the version of `@concordance-wiki/cli`
 
 ## `npx` package
 
-The package `@concordance-wiki/cli` ships the `concordance` executable (`conc` as a short alias) and its production dependencies; `npx` fetches it once and caches it.
+The package `@concordance-wiki/cli` ships the `concordance` executable (`conc` as a short alias) and its production dependencies; `npx` fetches it once and caches it. It is published to npm by the `release` workflow from the tarball attached to the release of the same version, once the maintainer has enabled that publication ([Releasing](releasing.md#publish)); a version on npm, the tag `v<version>`, the action, the component, the hook and the image of that version all name the same commit.
 
 ```bash
 npx --yes @concordance-wiki/cli@0.1.0 lint --scope repo --fail-on warning
