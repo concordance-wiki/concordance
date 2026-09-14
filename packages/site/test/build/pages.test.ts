@@ -286,6 +286,24 @@ describe("entityPageOf", () => {
     ]);
   });
 
+  it("notes the domain the build proposed, so that the page sets it apart from a declared one", () => {
+    const inferred = entity({ ...term, domain: "quality", domain_origin: "inferred" });
+    const domain = panelOf(context(), pagePath, inferred).find(
+      (attribute) => attribute.name === "domain",
+    );
+    expect(domain?.values).toEqual([
+      {
+        text: "quality",
+        href: "../../search/index.html?domain=quality",
+        note: "Proposed by the build from the notes this page is close to; nothing declares it.",
+      },
+    ]);
+    const french = panelOf(context({ catalogue: loadCatalogue("fr") }), pagePath, inferred);
+    expect(french.find((attribute) => attribute.name === "domain")?.values[0]?.note).toContain(
+      "Proposé par le build",
+    );
+  });
+
   it("resolves a written reference as the pipeline does, by its identifier as written, else within the source of the note, and keeps the value as text otherwise", () => {
     const reader = entity({ id: "specs/roles/reader", type: "role", title: "Reader" });
     const roles = (ctx: SiteContext): AttributeValue[] | undefined =>

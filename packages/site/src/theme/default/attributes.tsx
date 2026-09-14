@@ -6,6 +6,11 @@ import { useAttributePart } from "../context.js";
 /** A separator between two values, so that a list reads as one whatever the stylesheet. */
 export const VALUE_SEPARATOR = ", ";
 
+/** A value with a note stands out, in italics, and says why on hovering. */
+function valueClass(value: AttributeValue): string {
+  return value.note === undefined ? "value" : "value value-noted";
+}
+
 export function Value({
   value,
   separated = false,
@@ -18,9 +23,11 @@ export function Value({
     <>
       {separated && VALUE_SEPARATOR}
       {value.href === undefined ? (
-        <span class="value">{value.text}</span>
+        <span class={valueClass(value)} title={value.note}>
+          {value.text}
+        </span>
       ) : (
-        <a class="value" href={value.href}>
+        <a class={valueClass(value)} href={value.href} title={value.note}>
           {value.text}
         </a>
       )}

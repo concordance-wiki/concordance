@@ -61,6 +61,12 @@
   font-weight: 500;
 }
 
+/* A value the build decided rather than a declaration, the proposed domain: italics, the reason on hovering. */
+.attributes .value-noted {
+  font-style: italic;
+  text-decoration-style: dotted;
+}
+
 .toc-list {
   margin: 0 0 var(--space-3);
   padding: 0;

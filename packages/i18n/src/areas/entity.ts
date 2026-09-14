@@ -16,6 +16,7 @@ export const entityMessages = {
     "entity.correction": {},
     "entity.declaredAtTop": { count: "plural" },
     "entity.domain": {},
+    "entity.domainInferred": {},
     "entity.edit": {},
     "entity.editShort": {},
     "entity.groupedBy.declared": {},

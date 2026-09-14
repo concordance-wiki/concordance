@@ -23,6 +23,7 @@ import {
   domainNamedAfter,
   domainOfPivot,
   proposeDomains,
+  withFoldedTwins,
   withoutAnswered,
   type ProposeDomainsInput,
 } from "../src/pipeline/domains.js";
@@ -383,6 +384,20 @@ describe("withoutAnswered", () => {
       missing,
     ]);
     expect(withoutAnswered(findings, new Set())).toEqual(findings);
+  });
+});
+
+describe("withFoldedTwins", () => {
+  it("files the twins folded into a filed note and leaves the others", () => {
+    const folded = [
+      { entity: entity("briefs/session.vtt"), into: "briefs/session" },
+      { entity: entity("briefs/deck.pdf"), into: "briefs/deck" },
+    ];
+    expect([...withFoldedTwins(new Set(["briefs/session"]), folded)]).toEqual([
+      "briefs/session",
+      "briefs/session.vtt",
+    ]);
+    expect([...withFoldedTwins(new Set(), folded)]).toEqual([]);
   });
 });
 

@@ -135,15 +135,25 @@ function valuesOf(
   return [];
 }
 
-/** The application or the domain of an entity as the page shows it: by the title the configuration gives it, leading to the results filtered on it. */
+/**
+ * The application or the domain of an entity as the page shows it: by the title the
+ * configuration gives it, leading to the results filtered on it. A domain the proposal filed
+ * carries a note, the sign that nothing declares it.
+ */
 function scopeValue(
   context: SiteContext,
   page: string,
   facet: "application" | "domain",
   id: string,
+  entity: Entity,
 ): AttributeValue {
   const titles = facet === "application" ? context.names?.applications : context.names?.domains;
-  return { text: titles?.[id] ?? id, href: searchFilterHref(page, facet, id) };
+  const inferred = facet === "domain" && entity.domain_origin === "inferred";
+  return {
+    text: titles?.[id] ?? id,
+    href: searchFilterHref(page, facet, id),
+    ...(inferred ? { note: message(context, "entity.domainInferred") } : {}),
+  };
 }
 
 /** One attribute of an entity as the page shows it, common or declared, labelled by the profile; none when the entity sets no value for it. */
@@ -159,7 +169,7 @@ export function attributeOf(
   const raw: unknown = common === undefined ? ownValue(entity, key) : commonValue(entity, common);
   const values =
     (common === "application" || common === "domain") && typeof raw === "string"
-      ? [scopeValue(context, page, common, raw)]
+      ? [scopeValue(context, page, common, raw, entity)]
       : valuesOf(context, page, entity.source.name, raw);
   return values.length === 0 ? undefined : { name: key, label, values };
 }
