@@ -1,16 +1,45 @@
-# @concordance-wiki/cli
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-The `concordance` command (alias `conc`) alone: `build`, `render`, `export`, `init`, `validate-config`, `lint` and `gallery`, with the engine packages and none of the plugins. An integrator installs it to run the linter on a knowledge repository, or to build a wiki with exactly the plugins they pick; `@concordance-wiki/concordance` is the same command with every official plugin already installed.
+<h1 align="center">@concordance-wiki/cli</h1>
 
-## Install
+<p align="center"><strong>One command. The wiki and its linter, with exactly the plugins you pick.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/cli"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/cli?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/command-line.md">Command line</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/packages/cli/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+We now spend our days structuring knowledge for assistants: transcripts, specifications, glossaries, decisions, all in markdown, all in git. The AI reads it fine. We don't. It is scattered across repositories, nobody reads it twice, and nothing tells you that the term defined in the glossary is used in two hundred files, or that a decision taken in a meeting affects three screens.
+
+Concordance takes those repositories exactly as they are and builds a wiki where every word your business uses has a page: the note someone wrote, if any, and every passage, in every file, that mentions it. No rewriting. No wikilinks. No frontmatter required. No server to run.
+
+This package is the `concordance` command alone (`conc` for short): `build`, `render`, `export`, `init`, `validate-config`, `lint` and `gallery`, with the engine and none of the plugins. Install it to run the linter on a knowledge repository, or to build a wiki with exactly the plugins you choose. [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) is the same command with every official plugin already installed.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/docs/assets/screenshot-home.png" width="100%" alt="The home page of the wiki Concordance builds from its own repositories: a search field, the most cited words, the spaces fed by three repositories with their page counts and dates, the recently changed pages, and the footer saying where the site comes from">
+</p>
+
+## Quick start
 
 ```bash
 npm install --save-dev @concordance-wiki/cli
 ```
 
-`npx --yes @concordance-wiki/cli@0.1.0 lint` runs a pinned version without installing anything. A plugin declared under `plugins:` in `concordance.yaml` is resolved by its package name from where the command is installed: `npm install --save-dev @concordance-wiki/plugin-reader-vtt` in the same project puts it where the command finds it.
-
-## Use
+`npx --yes @concordance-wiki/cli@0.1.0 lint` runs a pinned version without installing anything.
 
 Check a knowledge repository on its merge requests, without any network access:
 
@@ -27,17 +56,18 @@ concordance build --output dist
 concordance lint --scope repo
 ```
 
-## What it contains
+A plugin declared under `plugins:` in `concordance.yaml` is resolved by its package name from where the command is installed: `npm install --save-dev @concordance-wiki/plugin-reader-vtt` in the same project puts it where the command finds it.
 
-- `build [--config file] [--output dir]`: validates the configuration, fetches the sources, runs the whole inference chain and writes `model.json`, `build.log.json`, the fragments and the site.
-- `render [--model dist/model.json] [--output dir]`: renders the site again from an existing model, without touching a source.
-- `export [--format cypher] [--model dist/model.json] [--output file]`: the model as a Cypher script.
-- `lint [--scope repo|global] [--fail-on error|warning|info] [--format text|json|sarif|junit] [--output file] [--fix] [--dry-run]`: the local checks of one repository, or the global ones against the published model; the safe fixes announced before they are written.
-- `init [directory] [--templates]`: a minimal, commented `concordance.yaml`, and the note templates of every type.
-- `validate-config [--config file]`: every problem of the configuration with its path, received value and expectation.
-- `gallery [--output dir] [--theme plugin]`: every slot of the site in every state, for the author of a theme.
-- Exit codes, whatever the command: 0 done, 1 invalid input or failing findings, 2 execution error.
-- As a library, `main(argv, io)` runs a command over injected effects and `usage` lists them; `exitCodes` names the three codes.
+## What you get
+
+- **`build`**: validates the configuration, fetches the sources, runs the whole inference chain and writes `model.json`, `build.log.json`, the fragments and the site, a static folder that works over `file://`.
+- **`lint`**: the local checks of one repository, or the global ones against the published model; text, JSON, SARIF or JUnit; the safe fixes announced before they are written.
+- **`render`** and **`export`**: the site again from an existing model without touching a source, and the model as a Cypher script.
+- **`init`** and **`validate-config`**: a minimal, commented `concordance.yaml` with the note templates of every type, and every problem of a configuration with its path, received value and expectation.
+- **`gallery`**: every slot of the site in every state, for the author of a theme.
+- **Exit codes you can script on**: 0 done, 1 invalid input or failing findings, 2 execution error, whatever the command.
+- **Reproducible output**: set `SOURCE_DATE_EPOCH` and two builds of unchanged sources are byte-identical.
+- **A library too**: `main(argv, io)` runs a command over injected effects, `usage` lists them, `exitCodes` names the three codes.
 
 ## Documentation
 
@@ -47,7 +77,10 @@ concordance lint --scope repo
 - [Configuration reference](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md) and [pipelines](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/pipelines.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/cli/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 | Command | Effect | Exit codes |
 |---|---|---|
@@ -67,4 +100,4 @@ Set `SOURCE_DATE_EPOCH` (seconds since the epoch) to pin the only timestamp of t
 
 The `templates/` folder of the package is a byte-for-byte copy of `docs/templates` of the repository, refreshed by `node scripts/sync-templates.mjs`; `pnpm lint` fails when the two differ.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>

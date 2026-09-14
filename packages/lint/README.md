@@ -1,14 +1,35 @@
-# @concordance-wiki/lint
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-The linter of Concordance as a library: the local check of one knowledge repository, its global check against the published model, the `concordance-lint.yaml` overrides, the safe fixes and the reports, readable or for forges. Installed by `@concordance-wiki/cli`, whose `concordance lint` command is the way to run it; you need it only to build on the engine, to embed the same checks in another tool for instance.
+<h1 align="center">@concordance-wiki/lint</h1>
 
-## Install
+<p align="center"><strong>The checks of the build, on one repository, before you push.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/lint"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/lint?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/lint-distribution.md">Distributing the linter</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/packages/lint/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+Concordance checks your knowledge repositories the way a compiler checks code: broken links, duplicate identifiers, invalid frontmatter, wrong encoding, annotated in the merge request before a note reaches the wiki. You install [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) or [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli) for that, and run `concordance lint`. This package is the linter as a library: the local check of one repository without any network access, the global check against the published model, the safe fixes, and the reports a forge reads. Install it alone to embed the same checks in another tool.
+
+## Quick start
 
 ```bash
 npm install @concordance-wiki/lint
 ```
-
-## Use
 
 The same findings `concordance lint --scope repo` prints, on a folder of notes:
 
@@ -23,13 +44,14 @@ for (const line of formatFindings(findings)) console.log(line);
 process.exitCode = hasFindingAtOrAbove(findings, "warning") ? 1 : 0;
 ```
 
-## What it contains
+## What you get
 
-- `lintRepository`, `lintedFiles`, `LOCAL_CHECKS`: the local scope, encoding, frontmatter, identifiers and internal links, without any network access, the findings enriched by the check registry and sorted.
-- `lintGlobal`, `globalFindings`, `loadPublishedModel`, `mergeFindings`, `GLOBAL_CHECKS`: the global scope against the published `model.json`, cached, degraded to the local checks when the model is out of reach.
-- `fixRepository`, `normalizeFrontmatter`, `rewriteRenamedLinks`, `deduceType`: the safe fixes, announced before the first write, never a link added or removed.
-- `formatFindings`, `formatFindingsAs`, `formatJson`, `formatSarif`, `formatJunit`, `hasFindingAtOrAbove`: the text, JSON, SARIF 2.1.0 and JUnit reports and the `--fail-on` verdict.
-- `readLintConfig`, `readLintOverrides`, `parseLintConfig`, `resolveGlobalConfig`: the `exclude`, `checks` and `global` blocks of `concordance-lint.yaml`.
+- **The local scope**: `lintRepository` reads one repository, encoding, frontmatter, identifiers and internal links, with no network, and reports exactly what the build would for the same files.
+- **The global scope**: `lintGlobal` also reads the published `model.json`, cached, and checks the links to the other repositories, the frontmatter relations and the homonyms; when the model is out of reach it says so and runs the local checks.
+- **Safe fixes, announced first**: `fixRepository` adds the deduced `type`, orders the frontmatter keys and repairs a link to a renamed file, never adds or removes a link, and runs dry when asked.
+- **Reports a forge reads**: text, JSON, SARIF 2.1.0 for GitHub and JUnit for GitLab, each finding with its documentation URL: `formatFindingsAs`.
+- **A verdict for CI**: `hasFindingAtOrAbove`, the `--fail-on` threshold.
+- **Overrides per repository**: `readLintConfig` and `readLintOverrides` read the `exclude`, `checks` and `global` blocks of `concordance-lint.yaml`.
 
 ## Documentation
 
@@ -39,7 +61,10 @@ process.exitCode = hasFindingAtOrAbove(findings, "warning") ? 1 : 0;
 - [The checks](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/README.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/lint/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 | Export | Effect |
 |---|---|
@@ -59,4 +84,4 @@ process.exitCode = hasFindingAtOrAbove(findings, "warning") ? 1 : 0;
 
 Only `lintGlobal` opens a network connection, through the `fetch` it is given, and only to read the published model; `fixRepository` writes what it announced and `lintGlobal` writes its cache, nothing else writes. The fixers never add or remove a link and never write an inferred relation: a fixed file differs from the original in its frontmatter block and in existing link destinations only, and a second pass changes nothing. The checks that depend on the type cascade join the local lint with the typing package.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>
