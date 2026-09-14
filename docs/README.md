@@ -20,7 +20,7 @@ Everything a reader, an integrator or a contributor needs, in English, next to t
 | [Adding a type](guides/adding-a-type.md) | architect | the type module format, a complete example, how the core types are assembled, publishing a type in a plugin |
 | [Distributing the linter](guides/lint-distribution.md) | integrator | `npx`, standalone binary, GitHub action, GitLab component, container image, pre-commit hook |
 | [Architecture](guides/architecture.md) | contributor | the decisions that shape the tool and the build pipeline step by step |
-| [Releasing](guides/releasing.md) | maintainer | versions, changesets, cutting a release, the container image |
+| [Releasing](guides/releasing.md) | maintainer | versions and their contract, changesets, the version pull request, the tag and the release, the container image |
 
 ## Reference
 
