@@ -67,6 +67,10 @@
     "defaultMessage": "Preview",
     "description": "Link to the rendered preview of a converted document."
   },
+  "document.previewNote": {
+    "defaultMessage": "Size and page count of the PDF preview, the original stating none.",
+    "description": "Note under the properties of a document page when the size or the page count was read from the PDF preview rather than from the original file."
+  },
   "document.relatedNote": {
     "defaultMessage": "A document does not enter the model: its pages bring passages, and the note that describes it stands among its files.",
     "description": "Note under the related pages of a document page, saying that the document itself is not a note of the model."

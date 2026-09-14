@@ -24,6 +24,7 @@ export const documentMessages = {
     "document.pageCount": {},
     "document.pages": { count: "plural" },
     "document.preview": {},
+    "document.previewNote": {},
     "document.relatedNote": {},
     "document.relatedNotes": {},
     "document.roleNotes": {},

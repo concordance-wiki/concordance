@@ -224,6 +224,7 @@ export const labels = {
   type: "Type",
   author: "Author",
   dateNote: "Read from the file, distinct from the repository date.",
+  previewNote: "Size and page count of the PDF preview, the original stating none.",
   sameDocument: "Same document",
   file: "file",
   filesUnit: "files",

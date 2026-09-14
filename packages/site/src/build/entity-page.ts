@@ -578,7 +578,7 @@ export function documentsOf(
     .map((document): DocumentView => {
       const twin = previewTwinOf(document, documents);
       const own = positionsOf(document);
-      const positions = own.length > 0 || twin === undefined ? own : positionsOf(twin);
+      const fromTwin = own.length === 0 && twin !== undefined;
       return {
         file: {
           label: document.path.slice(document.path.lastIndexOf("/") + 1),
@@ -599,9 +599,10 @@ export function documentsOf(
                 ...(twin === undefined ? {} : readOf(twin)),
               },
             }),
-        unit: own.length > 0 || twin === undefined ? document.unit : twin.unit,
-        positions,
+        unit: fromTwin ? twin.unit : document.unit,
+        positions: fromTwin ? positionsOf(twin) : own,
         ...readOf(document),
+        ...(fromTwin ? { positionsFromPreview: true } : {}),
       };
     });
 }
@@ -670,13 +671,14 @@ export function documentPageLabels(context: SiteContext, files: number): Documen
     pageCount: message(context, "document.pageCount"),
     date: message(context, "document.date"),
     dateNote: message(context, "document.dateNote"),
+    previewNote: message(context, "document.previewNote"),
     sameDocument: formatMessage(context.catalogue, "document.sameDocument", { count: files }),
     groupedNote: message(context, "document.groupedNote"),
     noNote: message(context, "document.noNote"),
   };
 }
 
-/** The files that make the document: the original, its PDF when the build kept one, the note when one is merged with it. */
+/** The files that make the document: the original, its PDF when one stands next to it, the note when one is merged with it. */
 function twinFilesOf(
   context: SiteContext,
   entity: Entity,
@@ -689,7 +691,7 @@ function twinFilesOf(
       href: document.file.href,
     },
   ];
-  if (document.preview !== undefined) {
+  if (document.preview !== undefined && document.preview.href !== document.file.href) {
     files.push({
       label: ".pdf",
       role: message(context, "document.rolePreview"),
@@ -713,7 +715,8 @@ function twinFilesOf(
  * What lays the page of an office document out: the kind of the file from its extension, its
  * page count (what the conversion found, else what the file states), its size, its date (the
  * one the file states, else the last change in the repository) and its author, then the files
- * that make the document; none for an entity that is not a document page.
+ * that make the document; none for an entity that is not a document page. A count or a size
+ * the original does not give is read from its PDF preview, and the page says so.
  */
 export function documentPageOf(
   context: SiteContext,
@@ -723,10 +726,17 @@ export function documentPageOf(
   const document = centralDocument(documents);
   if (document === undefined) return undefined;
   const locale = context.locale ?? context.language;
-  const pages =
-    document.positions.length > 0 ? document.positions.length : (document.pageCount ?? 0);
-  const fromFile = document.date !== undefined;
-  const iso = document.date ?? entity.source.last_modified;
+  const preview = document.preview;
+  const converted = document.positions.length > 0 ? document.positions.length : undefined;
+  const own =
+    document.positionsFromPreview === true ? document.pageCount : (converted ?? document.pageCount);
+  const pages = own ?? converted ?? preview?.pageCount ?? 0;
+  const size = document.size ?? preview?.size;
+  const fromPreview =
+    (own === undefined && pages !== 0) || (document.size === undefined && size !== undefined);
+  const fileDate = document.date ?? preview?.date;
+  const iso = fileDate ?? entity.source.last_modified;
+  const author = document.author ?? preview?.author;
   const files = twinFilesOf(context, entity, document);
   return {
     kind: kindOf(context, document.file.format),
@@ -736,17 +746,18 @@ export function documentPageOf(
           pages,
           pagesLabel: formatMessage(context.catalogue, "document.pages", { count: pages }),
         }),
-    ...(document.size === undefined ? {} : { size: formatSize(locale, document.size) }),
+    ...(size === undefined ? {} : { size: formatSize(locale, size) }),
     ...(iso === undefined
       ? {}
       : {
           date: {
             date: iso.slice(0, 10),
             label: formatDate(locale, new Date(iso), "long"),
-            fromFile,
+            fromFile: fileDate !== undefined,
           },
         }),
-    ...(document.author === undefined ? {} : { author: document.author }),
+    ...(author === undefined ? {} : { author }),
+    ...(fromPreview ? { fromPreview } : {}),
     files,
     labels: documentPageLabels(context, files.length),
   };

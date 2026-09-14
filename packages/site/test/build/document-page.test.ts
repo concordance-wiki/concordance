@@ -169,6 +169,9 @@ const pdfTwin: FragmentDocument = {
   ],
 };
 
+const [deckDocument] = deckFragment.documents ?? [];
+if (deckDocument === undefined) throw new Error("the fixture carries the deck");
+
 /** The deck of the fixture with the PDF twin among its documents, in path order: the PDF first. */
 function withTwin(documents: FragmentDocument[]): SiteContext {
   return context({
@@ -177,9 +180,6 @@ function withTwin(documents: FragmentDocument[]): SiteContext {
 }
 
 describe("documentsOf folds the PDF twin of a converted file into one document", () => {
-  const [deckDocument] = deckFragment.documents ?? [];
-  if (deckDocument === undefined) throw new Error("the fixture carries the deck");
-
   it("finds the twin of a converted file among the documents at its preview target, none for a PDF, a transcript or a file whose PDF the build produced", () => {
     const transcript: FragmentDocument = {
       source: "framing",
@@ -245,10 +245,12 @@ describe("documentsOf folds the PDF twin of a converted file into one document",
     );
     expect(merged?.unit).toBe("page");
     expect(merged?.positions.map((position) => position.label)).toEqual(["page 1", "page 2"]);
+    expect(merged?.positionsFromPreview).toBe(true);
     expect(merged?.preview).toEqual({ href: "transcript-publication-framing.pdf" });
     const [alone] = documentsOf(withTwin([{ ...deckDocument, pages: [] }]), page, framingDeck);
     expect(alone?.unit).toBe("slide");
     expect(alone?.positions).toEqual([]);
+    expect(alone).not.toHaveProperty("positionsFromPreview");
   });
 
   it("keeps a PDF that is its own preview as a document of its own", () => {
@@ -372,6 +374,86 @@ describe("The document page view model", () => {
       files: [{ label: ".odg", role: "original", href: "transcript-publication-framing.pptx" }],
       labels: documentPageLabels(context(), 1),
     });
+  });
+
+  it("reads from the PDF preview the count, the size, the date and the author the original does not give, and says so for the count and the size", () => {
+    const { size, author, date, pageCount, ...bareDeck } = deckDocument;
+    expect([size, author, date, pageCount]).toEqual([
+      4_200_000,
+      "Participant-2",
+      "2026-03-12T09:30:00Z",
+      24,
+    ]);
+    const everything = entityPageOf(
+      withTwin([pdfTwin, { ...bareDeck, pages: [] }]),
+      framingDeck,
+    ).document;
+    expect(everything).toMatchObject({
+      kind: "Presentation",
+      pages: 2,
+      pagesLabel: "2 pages",
+      size: "6.1 MB",
+      date: { date: "2026-03-13", label: "March 13, 2026", fromFile: true },
+      author: "Converter",
+      fromPreview: true,
+    });
+    expect(everything?.files.slice(0, 2)).toEqual([
+      { label: ".pptx", role: "original", href: "transcript-publication-framing.pptx" },
+      { label: ".pdf", role: "preview", href: "transcript-publication-framing.pdf" },
+    ]);
+    // The original gives its pages and nothing else: the size alone comes from the preview.
+    const sized = entityPageOf(withTwin([pdfTwin, bareDeck]), framingDeck).document;
+    expect(sized).toMatchObject({ pages: 2, size: "6.1 MB", fromPreview: true });
+    // The original gives everything: nothing comes from the preview, and the page says nothing.
+    const own = entityPageOf(withTwin([pdfTwin, deckDocument]), framingDeck).document;
+    expect(own).toMatchObject({ pages: 2, size: "4.2 MB", author: "Participant-2" });
+    expect(own).not.toHaveProperty("fromPreview");
+    // The original states its count without any text: the count is its own, the pages of the preview shown.
+    const counted = entityPageOf(
+      withTwin([pdfTwin, { ...bareDeck, pages: [], pageCount: 24 }]),
+      framingDeck,
+    ).document;
+    expect(counted).toMatchObject({ pages: 24, size: "6.1 MB", fromPreview: true });
+    // A preview stating nothing gives nothing but its pages, counted as its own.
+    const {
+      size: twinSize,
+      author: twinAuthor,
+      date: twinDate,
+      pageCount: twinCount,
+      ...bareTwin
+    } = pdfTwin;
+    expect([twinSize, twinAuthor, twinDate, twinCount]).toEqual([
+      6_100_000,
+      "Converter",
+      "2026-03-13T08:00:00Z",
+      24,
+    ]);
+    const nothing = entityPageOf(
+      withTwin([bareTwin, { ...bareDeck, pages: [] }]),
+      framingDeck,
+    ).document;
+    expect(nothing).toMatchObject({
+      kind: "Presentation",
+      pages: 2,
+      date: { date: "2026-03-14", fromFile: false },
+      fromPreview: true,
+    });
+    expect(nothing).not.toHaveProperty("size");
+    expect(nothing).not.toHaveProperty("author");
+  });
+
+  it("lists a PDF that is its own preview once among the files", () => {
+    const props = entityPageOf(withTwin([pdfTwin]), framingDeck);
+    expect(props.document?.kind).toBe("PDF");
+    expect(props.document?.files).toEqual([
+      { label: ".pdf", role: "original", href: "transcript-publication-framing.pdf" },
+      {
+        label: "transcript-publication-framing.md",
+        role: "session notes",
+        href: "#document-notes",
+      },
+    ]);
+    expect(props.document?.labels?.sameDocument).toBe("Same document, 2 files");
   });
 
   it("lays out no document page for a note alone, a transcript, or a deck accompanied by a transcript", () => {

@@ -220,6 +220,13 @@ describe("The panel: the properties read from the file, the files that make the 
     );
   });
 
+  it("says under the properties when the size or the page count comes from the PDF preview", () => {
+    expect(withView({ pages: 24, size: "6.1 MB", fromPreview: true })).toContain(
+      '<div class="attribute"><dt>Date</dt><dd></dd></div></dl><p class="panel-note">Size and page count of the PDF preview, the original stating none.</p></details>',
+    );
+    expect(render()).not.toContain("of the PDF preview");
+  });
+
   it("lists the files that make the document, the original, its preview and the note, under the note on how they were grouped", () => {
     const html = render();
     expect(html).toContain(
