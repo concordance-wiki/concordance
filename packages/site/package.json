@@ -3,7 +3,21 @@
   "version": "0.0.0",
   "description": "Site generation: slots, default theme, islands, stylesheet, markdown rendering, page budget and the site build.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "packages/site"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/packages/site#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,7 +26,9 @@
   },
   "files": [
     "dist",
-    "assets"
+    "assets",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"

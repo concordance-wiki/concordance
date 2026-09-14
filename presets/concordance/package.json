@@ -3,13 +3,28 @@
   "version": "0.0.0",
   "description": "The concordance command with every official plugin: builds a wiki from git repositories of markdown.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "presets/concordance"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/presets/concordance#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "concordance": "./bin/concordance.js",
     "conc": "./bin/concordance.js"
   },
   "files": [
-    "bin"
+    "bin",
+    "README.md",
+    "LICENSE"
   ],
   "dependencies": {
     "@concordance-wiki/cli": "workspace:*",

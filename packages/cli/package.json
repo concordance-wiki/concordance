@@ -3,7 +3,23 @@
   "version": "0.0.0",
   "description": "The concordance command: build, render, init, validate-config, lint.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/packages/cli#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": [
+    "./dist/bin.js"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "concordance": "./dist/bin.js",
     "conc": "./dist/bin.js"
@@ -17,7 +33,9 @@
   },
   "files": [
     "dist",
-    "templates"
+    "templates",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"
