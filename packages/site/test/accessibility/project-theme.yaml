@@ -1,0 +1,29 @@
+# The theme.yaml of a project publishing its own documentation with Concordance: the second
+# palette the contrast test measures, next to the default theme's. Its colours are a shade
+# apart from the default ones, so that a threshold crossed by either shows in the pinned ratios.
+name: Concordance
+font:
+  ui: Instrument Sans
+  mono: IBM Plex Mono
+radius: 8
+light:
+  bg: "#F6F5F2"
+  surface: "#FFFFFF"
+  soft: "#F2F0EB"
+  border: "#E4E1DA"
+  ink: "#16181B"
+  muted: "#3A3E44"
+  label: "#5E636B"
+  accent: "#B84820"
+  highlight: "#FBE3D4"
+dark:
+  bg: "#0E0F11"
+  surface: "#16181B"
+  soft: "#1C1F23"
+  border: "#26292E"
+  ink: "#E8E6E1"
+  muted: "#A7ADB5"
+  label: "#8B9199"
+  accent: "#E8703A"
+  highlight: "#4A2A1A"
+default_mode: system
