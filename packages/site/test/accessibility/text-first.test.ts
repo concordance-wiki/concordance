@@ -90,9 +90,8 @@ describe("L9-08 text first: the main content of every page in the served HTML, r
           expect(button).toMatch(/\shidden(>|\s)/);
         }
         for (const [, href] of main.matchAll(/<a [^>]*href="([^"]*)"/g)) {
-          expect(href).not.toBe("");
+          expect(href).toMatch(/^(?!javascript:).+$/);
           expect(href).not.toBe("#");
-          expect(href.startsWith("javascript:")).toBe(false);
         }
         expect(main).not.toMatch(/ on[a-z]+=/);
       });
