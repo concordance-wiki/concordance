@@ -105,6 +105,10 @@ jobs:
         # What a user of the registry does on that platform: the built command line builds a
         # corpus. The test suites still assume POSIX paths in their fixtures; they run on Linux.
         run: node packages/cli/dist/bin.js build --config fixtures/corpora/minimal/en/concordance.yaml --output dist-windows
+      - name: Every source of the corpus was read
+        # A source the platform's paths made unreachable is a warning, not a failure of the build;
+        # the job fails when one is missing, as the users of the registry would.
+        run: node scripts/check-sources-read.mjs dist-windows/build.log.json 4
   mutation:
     # A pull request mutates only the source files it changed, next to the other checks rather
     # than after them; the whole tree is mutated every night by the mutation workflow. The run
