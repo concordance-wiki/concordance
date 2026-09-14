@@ -11,9 +11,16 @@ summary:focus-visible,
   outline-offset: 2px;
 }
 
-/* The main landmark spans the page: each page component sets its own measure. */
+/* The main landmark spans the page and grows to the footer: each page component sets its own measure, and the columns of an entity page reach the foot. */
 main {
   min-inline-size: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+main > * {
+  flex: 1;
 }
 
 .skip-link {
