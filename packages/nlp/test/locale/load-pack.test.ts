@@ -110,9 +110,13 @@ describe("loadLanguagePack", () => {
 
 describe("loadSuffixes", () => {
   it("keeps the unique suffixes without their hyphen, normalised, in code unit order", () => {
-    const suffixes = loadSuffixes("-ly\n# a comment\nING # verbs\n\n ly \n", (text) =>
+    const suffixes = loadSuffixes("-ly\n# a comment\nING # verbs\n\n ly \n-ed\n", (text) =>
       text.toLowerCase(),
     );
-    expect(suffixes).toEqual(["ing", "ly"]);
+    expect(suffixes).toEqual(["ed", "ing", "ly"]);
+  });
+
+  it("strips the leading hyphen only", () => {
+    expect(loadSuffixes("-e-ment\n", (text) => text)).toEqual(["e-ment"]);
   });
 });
