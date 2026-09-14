@@ -75,7 +75,7 @@ contract: ./model-query.openapi.json
 # Model query API
 ```
 
-With the `contract-openapi` plugin declared in the configuration, the build reads the OpenAPI 3.x document and produces one operation per path and method, linked to the API at confidence 0.95 with the contract location and the operation name as provenance: the operations are never copied into the note. The schemas the contract references are offered as candidate objects, not linked. The version the contract declares is recorded with its import date. A contract that cannot be fetched, read or parsed is reported (`W-CONTRACT-UNREACHABLE`) and the note keeps the operations written by hand; the build goes on.
+With the `contract-openapi` plugin declared in the configuration, the build reads the OpenAPI 3.x document and produces one operation per path and method, linked to the API at confidence 0.95 with the contract location and the operation name as provenance: the operations are never copied into the note. The schemas the contract references are offered as candidate objects, not linked. The version the contract declares is recorded with its import date and, for a contract kept next to the note, the date of its last commit, which the page of the API shows. A contract that cannot be fetched, read or parsed is reported (`W-CONTRACT-UNREACHABLE`) and the note keeps the operations written by hand; the build goes on.
 
 The same attribute accepts a WSDL, so that a SOAP service is inventoried like the others:
 
