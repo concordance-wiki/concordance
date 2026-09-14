@@ -1,14 +1,35 @@
-# @concordance-wiki/site
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-The site generator of Concordance: the slots of a page and their view models, the default theme with its islands and stylesheet, the markdown renderer, the search index, the page budget and the accessibility checks, and the site build that `concordance build` and `concordance render` run. Installed by `@concordance-wiki/cli`; you need it only to build on the engine, to write a theme or a UI component as a plugin for instance.
+<h1 align="center">@concordance-wiki/site</h1>
 
-## Install
+<p align="center"><strong>Turns the model into the wiki: static pages, search without a server, a theme you can override, a budget every page respects.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/site"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/site?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/theming.md">Theming</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/packages/site/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+Concordance publishes a wiki where every word of your business has a page, as a static folder you drop on GitHub Pages, GitLab Pages or a bucket; it works over `file://` too. You install [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) for that. This package is the part of it that writes the site: the slots of a page and their view models, the default theme with its islands and stylesheet, the markdown renderer, the search index, the page budget and the accessibility checks every page passes before it is written. Install it alone to build on the engine, or to write a theme or a component as a plugin.
+
+## Quick start
 
 ```bash
 npm install @concordance-wiki/site
 ```
-
-## Use
 
 A note rendered the way an entity page shows it, then checked against the accessibility rules the build applies to every page:
 
@@ -25,15 +46,16 @@ checkAccessibility("<html><body><main><h1>Occurrence scan</h1></main></body></ht
 
 A theme plugin overrides a slot with its own component and ships its tokens; the theming guide shows the whole contribution.
 
-## What it contains
+## What you get
 
-- `SLOT_NAMES`, `SlotProps`, `defaultComponents`, `renderPage`, `renderSlot`, `useSlot`, `resolveTheme`: the slots of the site, the default theme in Preact rendered to static HTML, and the resolution of the components a theme or a type module overrides.
-- `loadTheme`, `chromeOf`, `writeThemeAssets`, `tokensStylesheet`, `siteStylesheet`, `projectStylesheet`, `paletteColours`: the `theme.yaml` of a project, the palette derived from its six colours and the layered stylesheet.
-- `island`, `mountIslands`, `bundleIslands`, `defaultIslands`, `mergeIslands`: the interactive parts of a page, hydrated in the browser from one hashed bundle each.
-- `renderMarkdown`, `serializeFragment`, `parseFragment`: a note as sanitised HTML sections with its written links and recognised words marked, and the `fragments/<id>.json` the build leaves next to the model.
-- `buildSite`, `siteDocuments`, `assemblePages` and the path helpers (`relativeHref`, `entityHref`, `fragmentPath`, ...): the whole site written from a model, every href relative so that it works over `file://`.
-- `buildGallery`, `galleryPages`, `typePages`, `skeletonOf`: the static page set of `concordance gallery`, every slot in every state.
-- `measureBudget`, `checkAccessibility`, `checkContrast`, `contrastRatio`, `SITE_PAGE_BUDGET`: the 150 kB budget and the structural, ARIA and contrast checks every page passes.
+- **Every page of the wiki**: the home, one page per entity and per keyword, the A–Z index, the spaces, the to-do list, the search results, the about page and the page served for a missing address, written by `buildSite` from a model, every href relative.
+- **Slots, not templates**: `SLOT_NAMES`, `renderSlot`, `resolveTheme`; a theme or a type module overrides one slot and keeps the rest.
+- **A theme from six colours**: `loadTheme`, `paletteColours`, `tokensStylesheet`, the palette, light and dark, derived from `theme.yaml`.
+- **Islands, hydrated on demand**: the mentions panel, the table of contents, the pinned pages, the side panels, the document and contract viewers, one hashed bundle each.
+- **Notes as sanitised HTML**: `renderMarkdown` marks the written links and the recognised words apart, so a reader always knows which is which.
+- **Search without a server**: a sharded index tokenised with the language packs, one shard loaded per word typed, with facets by type, repository and domain.
+- **A budget and a bar**: `measureBudget` measures every page against the 150 kB budget, `checkAccessibility` and `checkContrast` report the one that fails the structural, ARIA and contrast rules.
+- **A gallery for theme authors**: `buildGallery`, every slot in every state and every type from its template, what `concordance gallery` renders.
 
 ## Documentation
 
@@ -42,7 +64,10 @@ A theme plugin overrides a slot with its own component and ships its tokens; the
 - [Command line](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/command-line.md), the `build`, `render` and `gallery` commands
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/site/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 ### Slots and themes
 
@@ -167,4 +192,4 @@ Development only:
 | `happy-dom` | the DOM axe-core needs, as a Vitest environment; no layout engine, so the contrast rules are disabled there and the palette is checked by numbers instead |
 | `@types/mdast` | the types of the markdown syntax tree the renderer splits into sections |
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>
