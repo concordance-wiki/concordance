@@ -13,6 +13,9 @@ export default {
     "packages/checks/src/**/*.ts",
   ],
   thresholds: { high: 95, low: 90, break: 85 },
+  // Only the TypeScript sources and tests need their type checks disabled in the sandbox: the
+  // default pattern also takes the HTML snapshots of the gallery, which its parser cannot read.
+  disableTypeChecks: "{packages,plugins,presets}/*/{src,test}/**/*.{ts,tsx}",
   // The initial run executes the whole suite instrumented, on one thread: about four minutes
   // on a hosted runner with a few files mutated, more with a whole package.
   dryRunTimeoutMinutes: 15,
