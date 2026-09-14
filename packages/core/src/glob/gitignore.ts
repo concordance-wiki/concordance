@@ -36,8 +36,8 @@ function bracket(pattern: string, start: number): { body: string; end: number } 
     negated = true;
     index += 1;
   }
-  // A closing bracket right after the opening one is a member, not the end.
-  const close = pattern.indexOf("]", pattern.charAt(index) === "]" ? index + 1 : index);
+  // The first member is never the closing bracket: `[]a]` holds a bracket and an a.
+  const close = pattern.indexOf("]", index + 1);
   if (close === -1) return undefined;
   const members = pattern.slice(index, close).replace(/[\\\][]/g, "\\$&");
   // A negated class never crosses a slash, like `*` and `?`.
@@ -96,7 +96,7 @@ function ruleOf(line: string): GitignoreRule | undefined {
   if (directoryOnly) text = text.slice(0, -1);
   // A slash at the start or inside the pattern anchors it to the folder of the ignore file.
   const anchored = text.includes("/");
-  if (anchored) text = text.replace(/^\//, "");
+  text = text.replace(/^\//, "");
   if (text === "") return undefined;
   return {
     negated,
@@ -119,9 +119,7 @@ function relativeTo(directory: string, path: string): string | undefined {
 }
 
 /** Outer folders first: the rules of an inner ignore file are applied after, and override, those above it. */
-const byDepth = (a: IgnoreFile, b: IgnoreFile): number =>
-  a.directory.length - b.directory.length ||
-  Number(a.directory > b.directory) - Number(a.directory < b.directory);
+const byDepth = (a: IgnoreFile, b: IgnoreFile): number => a.directory.length - b.directory.length;
 
 /**
  * A matcher over forward-slash paths relative to the repository root, with the rules git applies:

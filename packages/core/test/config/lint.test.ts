@@ -21,16 +21,21 @@ describe("parseLintConfig", () => {
   });
 
   it.each(["", "{}\n", "checks: {}\n"])("overrides nothing on %j", (text) => {
-    expect(parseLintConfig(text)).toEqual({ ok: true, checks: {} });
+    expect(parseLintConfig(text)).toStrictEqual({ ok: true, checks: {} });
   });
 
-  it("rejects a file that is not valid YAML", () => {
-    const result = parseLintConfig("checks: [\n");
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.issues.map((issue) => [issue.severity, issue.path])).toEqual([["error", ""]]);
-      expect(result.issues[0]?.message).toMatch(/^not valid YAML: /);
-    }
+  it("rejects a file that is not valid YAML, with the first line of the parser's message", () => {
+    expect(parseLintConfig("checks: [\n")).toStrictEqual({
+      ok: false,
+      issues: [
+        {
+          severity: "error",
+          path: "",
+          message:
+            "not valid YAML: Flow sequence in block collection must be sufficiently indented and end with a ] at line 2, column 1:",
+        },
+      ],
+    });
   });
 
   it("rejects a key that is not a check identifier", () => {
@@ -93,7 +98,7 @@ describe("parseLintConfig", () => {
   });
 
   it("reads the excluded globs next to the checks", () => {
-    expect(parseLintConfig("exclude:\n  - vendor/**\n  - '*.generated.md'\n")).toEqual({
+    expect(parseLintConfig("exclude:\n  - vendor/**\n  - '*.generated.md'\n")).toStrictEqual({
       ok: true,
       checks: {},
       exclude: ["vendor/**", "*.generated.md"],
@@ -164,7 +169,12 @@ describe("readLintConfig", () => {
 
   it("leaves out the blocks the file does not carry", () => {
     const fs = memoryFileSystem({ "/repo/concordance-lint.yaml": "exclude: [vendor/**]\n" });
-    expect(readLintConfig(fs, "/repo")).toEqual({ checks: {}, exclude: ["vendor/**"] });
+    expect(readLintConfig(fs, "/repo")).toStrictEqual({ checks: {}, exclude: ["vendor/**"] });
+    fs.writeText("/repo/concordance-lint.yaml", "global: { model: model.json }\n");
+    expect(readLintConfig(fs, "/repo")).toStrictEqual({
+      checks: {},
+      global: { model: "model.json" },
+    });
   });
 });
 
