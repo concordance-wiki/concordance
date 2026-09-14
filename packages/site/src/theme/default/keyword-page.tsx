@@ -3,6 +3,7 @@ import type { ComponentChildren, JSX } from "preact";
 import type { KeywordPageLabels, KeywordPageProps, Passage, PassageGroup } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
+import { SidePanel } from "./panel-handle.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 
@@ -157,7 +158,7 @@ export function KeywordPage({
           )}
         </section>
       </div>
-      <div class="entity-side">
+      <SidePanel>
         <PanelBlock id="keyword-facts" className="keyword-facts" heading={text.whatWeKnow}>
           <dl class="attributes">
             <div class="attribute">
@@ -197,7 +198,7 @@ export function KeywordPage({
         )}
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

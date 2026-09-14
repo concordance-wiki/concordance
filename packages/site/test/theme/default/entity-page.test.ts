@@ -102,7 +102,7 @@ describe("EntityPage", () => {
       "<h1>Keyword page</h1>",
       '<article class="entity-body">',
       "</article>",
-      '<div class="entity-side"><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties<span class="count panel-count">2</span></h2></summary>',
+      '<div class="entity-side"><div class="panel-handle-track"><button type="button" class="panel-handle" data-panel="panel" aria-expanded="true" title="Fold or unfold" hidden><span class="visually-hidden">Right panel</span></button></div><section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties<span class="count panel-count">2</span></h2></summary>',
       '<dt>Owner</dt><dd><a class="value" href="../publication/">Publication</a></dd>',
       '<p class="panel-note">2 declared keys. The rest of the file is free text.</p></details></section>',
     ]);
@@ -153,7 +153,7 @@ describe("EntityPage", () => {
       },
     });
     expect(html).toContain(
-      '<div class="entity entity-with-space"><nav class="space" aria-label="Tree of the space"><details class="space-tree"><summary class="space-head"><span class="space-initials" aria-hidden="true">SP</span><span class="space-name">specs</span></summary><ul class="space-nodes"><li class="space-folder"><span class="space-folder-name">api<span class="count">3</span></span></li><li class="space-folder space-open"><span class="space-folder-name">rules<span class="count">2</span></span><ul class="space-nodes"><li class="space-page"><a href="../fail-on-policy/">Fail-on policy</a></li><li class="space-page space-current"><span aria-current="page">Keyword page</span></li></ul></li></ul></details></nav><div class="entity-main">',
+      '<div class="entity entity-with-space"><nav class="space" aria-label="Tree of the space"><div class="panel-handle-track"><button type="button" class="panel-handle" data-panel="tree" aria-expanded="true" title="Fold or unfold" hidden><span class="visually-hidden">Tree of the space</span></button></div><details class="space-tree"><summary class="space-head"><span class="space-initials" aria-hidden="true">SP</span><span class="space-name">specs</span></summary><ul class="space-nodes"><li class="space-folder"><span class="space-folder-name">api<span class="count">3</span></span></li><li class="space-folder space-open"><span class="space-folder-name">rules<span class="count">2</span></span><ul class="space-nodes"><li class="space-page"><a href="../fail-on-policy/">Fail-on policy</a></li><li class="space-page space-current"><span aria-current="page">Keyword page</span></li></ul></li></ul></details></nav><div class="entity-main">',
     );
     expect(render()).not.toContain("space-tree");
     expect(render({ labels: { spaceTree: "Arborescence" } })).not.toContain("Arborescence");

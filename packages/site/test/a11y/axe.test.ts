@@ -37,6 +37,7 @@ const islands = [
   { name: "search", file: "search-00000000.js", bytes: 0 },
   { name: "tabs", file: "tabs-00000000.js", bytes: 0 },
   { name: "toc", file: "toc-00000000.js", bytes: 0 },
+  { name: "panels", file: "panels-00000000.js", bytes: 0 },
   { name: "trail", file: "trail-00000000.js", bytes: 0 },
 ];
 

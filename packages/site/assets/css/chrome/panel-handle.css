@@ -1,0 +1,227 @@
+/* Side panels folded behind a handle: a tab of paper slid behind the edge of the panel, of which only the outer half shows, without a label or a border on the panel side. Folded to 44 px, the tree keeps its initials badge and its name written vertically, the right panel the headings of its blocks; the room goes to the wide content of the text, tables, figures and code, the prose keeping its measure. Under the desktop width the layout already folds the panels, so the handle exists from 1100 px only. */
+
+.panel-handle-track {
+  display: none;
+}
+
+@media (min-width: 68.75rem) {
+  /* The track sticks to the middle of the viewport along the panel: the handle always stands at the same place. It takes no room and lets the clicks through to the panel. */
+  .panel-handle-track {
+    position: sticky;
+    inset-block-start: calc(50vh - 1.25rem);
+    z-index: 1;
+    display: block;
+    block-size: 2.5rem;
+    margin-block-end: -2.5rem;
+    pointer-events: none;
+  }
+
+  .space,
+  .entity-side {
+    position: relative;
+  }
+
+  /* 26 px wide and as tall as every target of the theme, clipped to the 13 px that show beyond the edge, the room around them kept for the focus ring. */
+  .panel-handle {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: -0.8125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.625rem;
+    block-size: 2.5rem;
+    padding: 0 0 0 0.8125rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-soft);
+    color: var(--color-label);
+    font-size: 0.8125rem;
+    line-height: 1;
+    clip-path: inset(-0.375rem -0.375rem -0.375rem 0.8125rem);
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .panel-handle:hover {
+    color: var(--color-ink);
+  }
+
+  /* The glyph points the way the panel goes: towards it to fold, away from it to unfold. */
+  .panel-handle::before {
+    content: "‹" / "";
+  }
+
+  .panel-handle[aria-expanded="false"]::before,
+  .panel-handle-folded::before {
+    content: "›" / "";
+  }
+
+  /* On the right panel the tab shows beyond the start edge, its other half clipped, its glyph mirrored. */
+  .entity-side > .panel-handle-track > .panel-handle {
+    inset-inline-start: -0.8125rem;
+    inset-inline-end: auto;
+    padding: 0 0.8125rem 0 0;
+    clip-path: inset(-0.375rem 0.8125rem -0.375rem -0.375rem);
+  }
+
+  .entity-side > .panel-handle-track > .panel-handle::before {
+    content: "›" / "";
+  }
+
+  .entity-side > .panel-handle-track > .panel-handle[aria-expanded="false"]::before,
+  .entity-side > .panel-handle-track > .panel-handle-folded::before {
+    content: "‹" / "";
+  }
+
+  /* Read from right to left, the columns swap sides and so do the glyphs. */
+  [dir="rtl"] .panel-handle::before,
+  [dir="rtl"] .entity-side > .panel-handle-track > .panel-handle[aria-expanded="false"]::before,
+  [dir="rtl"] .entity-side > .panel-handle-track > .panel-handle-folded::before {
+    content: "›" / "";
+  }
+
+  [dir="rtl"] .panel-handle[aria-expanded="false"]::before,
+  [dir="rtl"] .panel-handle-folded::before,
+  [dir="rtl"] .entity-side > .panel-handle-track > .panel-handle::before {
+    content: "‹" / "";
+  }
+
+  /* The columns follow two lengths the folded states shorten; the open map keeps widening the panel unless it is folded. */
+  .entity {
+    --tree-column: 16rem;
+    --panel-column: 21.5rem;
+
+    grid-template-columns: minmax(0, 1fr) var(--panel-column);
+  }
+
+  .entity-with-space {
+    grid-template-columns: var(--tree-column) minmax(0, 1fr) var(--panel-column);
+  }
+
+  .entity:has(> .entity-side > .neighbourhood-fold[open]) {
+    --panel-column: 26.875rem;
+
+    grid-template-columns: minmax(0, 1fr) var(--panel-column);
+  }
+
+  .entity-with-space:has(> .entity-side > .neighbourhood-fold[open]) {
+    grid-template-columns: var(--tree-column) minmax(0, 1fr) var(--panel-column);
+  }
+
+  .category {
+    --tree-column: 16rem;
+
+    grid-template-columns: var(--tree-column) minmax(0, 1fr);
+  }
+
+  :root[data-panels~="tree"] .entity,
+  :root[data-panels~="tree"] .category,
+  .entity-tree-folded {
+    --tree-column: 2.75rem;
+  }
+
+  :root[data-panels~="panel"] .entity,
+  :root[data-panels~="panel"] .entity:has(> .entity-side > .neighbourhood-fold[open]),
+  .entity-panel-folded,
+  .entity-panel-folded:has(> .entity-side > .neighbourhood-fold[open]) {
+    --panel-column: 2.75rem;
+  }
+
+  /* The tree folded: the badge, then the name of the space written upwards, its pages gone. */
+  :root[data-panels~="tree"] .space > .space-head-link,
+  :root[data-panels~="tree"] .space > .space-tree > .space-head,
+  .entity-tree-folded > .space > .space-head-link,
+  .entity-tree-folded > .space > .space-tree > .space-head {
+    flex-direction: column;
+    gap: 0.625rem;
+    align-items: center;
+    min-block-size: 0;
+    padding: 0.8125rem 0;
+    border-block-end: 0;
+  }
+
+  :root[data-panels~="tree"] .space .space-name,
+  .entity-tree-folded > .space .space-name {
+    color: var(--color-label);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  :root[data-panels~="tree"] .space > .space-tree > .space-nodes,
+  .entity-tree-folded > .space > .space-tree > .space-nodes {
+    display: none;
+  }
+
+  /* The right panel folded: the heading of every block written upwards with its count, the blocks themselves and the line of the map gone; the summaries hidden with their headings left in view, so that nothing folded takes the focus. */
+  :root[data-panels~="panel"] .entity-side > .panel-block,
+  .entity-panel-folded > .entity-side > .panel-block {
+    padding: 0;
+    border-block-end: 0;
+  }
+
+  :root[data-panels~="panel"] .entity-side .panel-fold > summary,
+  .entity-panel-folded > .entity-side .panel-fold > summary {
+    display: flex;
+    justify-content: center;
+    min-block-size: 0;
+    padding: 0.8125rem 0 0;
+    visibility: hidden;
+  }
+
+  :root[data-panels~="panel"] .entity-side .panel-fold > summary h2,
+  .entity-panel-folded > .entity-side .panel-fold > summary h2 {
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    visibility: visible;
+  }
+
+  :root[data-panels~="panel"] .entity-side .panel-fold > summary .panel-count,
+  .entity-panel-folded > .entity-side .panel-fold > summary .panel-count {
+    display: inline-block;
+  }
+
+  :root[data-panels~="panel"] .entity-side .panel-fold::details-content,
+  .entity-panel-folded > .entity-side .panel-fold::details-content {
+    display: none;
+  }
+
+  :root[data-panels~="panel"] .entity-side > .neighbourhood-fold,
+  .entity-panel-folded > .entity-side > .neighbourhood-fold {
+    display: none;
+  }
+
+  /* The room a folded panel gives goes to the wide content: tables, figures, code and documents take the column, up to 1200 px; the prose keeps its measure. */
+  :root[data-panels~="tree"] .entity-with-space > .entity-main > *,
+  :root[data-panels~="panel"] .entity > .entity-main > *,
+  .entity-tree-folded > .entity-main > *,
+  .entity-panel-folded > .entity-main > * {
+    max-inline-size: 75rem;
+  }
+
+  :root[data-panels~="tree"]
+    .entity-with-space
+    > .entity-main
+    .entity-body
+    :is(p, ul, ol, dl, blockquote, h2, h3, h4, h5, h6),
+  :root[data-panels~="panel"]
+    .entity
+    > .entity-main
+    .entity-body
+    :is(p, ul, ol, dl, blockquote, h2, h3, h4, h5, h6),
+  .entity-tree-folded
+    > .entity-main
+    .entity-body
+    :is(p, ul, ol, dl, blockquote, h2, h3, h4, h5, h6),
+  .entity-panel-folded
+    > .entity-main
+    .entity-body
+    :is(p, ul, ol, dl, blockquote, h2, h3, h4, h5, h6) {
+    max-inline-size: 50rem;
+  }
+}

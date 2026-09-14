@@ -23,6 +23,7 @@ import {
   SpaceMark,
   TypeBadge,
 } from "./entity-page.js";
+import { SidePanel } from "./panel-handle.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** How many properties the panel of an API page shows: the operations carry the rest. */
@@ -132,7 +133,7 @@ export function ApiPage({
           ))}
         </footer>
       </div>
-      <div class="entity-side">
+      <SidePanel>
         {keys.length > 0 && (
           <PanelBlock
             id="entity-properties"
@@ -150,7 +151,7 @@ export function ApiPage({
           labels={{ ...mentions.labels, orderNote: contractText.operationsFirst }}
         />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

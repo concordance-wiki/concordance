@@ -304,3 +304,42 @@ describe("the search entry", () => {
     expect(input.focused).toBe(true);
   });
 });
+
+describe("the panels entry", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it("wires every panels island of the document with the local storage and the root element, revealing the handles", async () => {
+    const selectors: string[] = [];
+    const handle = {
+      hidden: true,
+      attributes: { "data-panel": "tree" } as Record<string, string>,
+      getAttribute: (name: string) => handle.attributes[name] ?? null,
+      setAttribute: (name: string, value: string) => {
+        handle.attributes[name] = value;
+      },
+      addEventListener: () => undefined,
+      querySelector: () => null,
+    };
+    const root = { dataset: {} as { panels?: string } };
+    vi.stubGlobal("document", {
+      documentElement: root,
+      querySelectorAll: (selector: string) => {
+        selectors.push(selector);
+        return selector === ".panel-handle" ? [handle] : [{ getAttribute: () => "{}" }];
+      },
+      addEventListener: () => undefined,
+    });
+    vi.stubGlobal("localStorage", {
+      getItem: () => "tree",
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+    await import("../../src/islands/panels.client.js");
+    expect(selectors).toEqual(['concordance-island[data-island="panels"]', ".panel-handle"]);
+    expect(handle.hidden).toBe(false);
+    expect(handle.attributes["aria-expanded"]).toBe("false");
+  });
+});

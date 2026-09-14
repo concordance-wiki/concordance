@@ -35,6 +35,9 @@ import {
   SearchSuggestions,
   type Suggestion,
 } from "../theme/default/search-suggestions.js";
+import { isEditable, type KeyEvent } from "./editable.js";
+
+export { isEditable, type KeyEvent } from "./editable.js";
 
 /** How many results the suggestions under the header field show; the results page shows them all. */
 export const SUGGESTIONS = 8;
@@ -295,30 +298,6 @@ export function searchRunner(root: string, inject: ScriptInjector, host: ShardHo
     );
     return { query, hits: hitsOf(query, meta, shards), meta };
   };
-}
-
-/** The key of a keyboard event and what it takes to decide whether the shortcut applies. */
-export interface KeyEvent {
-  key: string;
-  altKey: boolean;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  target: unknown;
-  preventDefault(): void;
-}
-
-/** Elements whose keystrokes are text: the `/` shortcut leaves them alone. */
-export function isEditable(target: unknown): boolean {
-  if (typeof target !== "object" || target === null) {
-    return false;
-  }
-  // An object, as checked above; both properties are read as unknown and tested before use.
-  const element = target as { tagName?: unknown; isContentEditable?: unknown };
-  return (
-    element.isContentEditable === true ||
-    (typeof element.tagName === "string" &&
-      ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName.toUpperCase()))
-  );
 }
 
 export interface SearchInput {

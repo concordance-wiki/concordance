@@ -195,9 +195,9 @@ describe("no external request is ever emitted by the default theme", () => {
           urls.filter((url) => /^(https?:)?\/\//i.test(url)),
           file,
         ).toEqual([]);
-        // The only inline script applies the remembered scheme; a state forced to one carries none.
+        // The inline scripts apply the remembered scheme and the folded panels; a state forced to a scheme carries only the second.
         expect(count(html, "<script>"), file).toBe(
-          html.includes('<html lang="en" dir="ltr" data-mode="dark">') ? 0 : 1,
+          html.includes('<html lang="en" dir="ltr" data-mode="dark">') ? 1 : 2,
         );
       }
       for (const file of fileSystem

@@ -1,0 +1,10 @@
+{
+  "panels.fold": {
+    "defaultMessage": "Fold or unfold",
+    "description": "Title of the handle on the edge of a side panel of the entity page, which folds the panel and unfolds it."
+  },
+  "panels.panel": {
+    "defaultMessage": "Right panel",
+    "description": "Accessible name of the handle folding the right panel of the entity page, the blocks of what the tool computed."
+  }
+}

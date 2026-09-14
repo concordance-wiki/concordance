@@ -75,6 +75,7 @@ function expectSiteSummary(
     expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+    expect.stringMatching(/^island panels: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island tabs: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island toc: \d+\.\d kB$/) as string,

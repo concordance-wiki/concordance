@@ -19,6 +19,7 @@ import {
   Source,
 } from "./entity-page.js";
 import { fill } from "./mention-list.js";
+import { SidePanel } from "./panel-handle.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** The page of a decision: the same view model, the decision always there. */
@@ -210,7 +211,7 @@ export function DecisionPage({
           ))}
         </footer>
       </div>
-      <div class="entity-side">
+      <SidePanel>
         <PanelBlock
           id="decision-properties"
           className="entity-panel decision-properties"
@@ -253,7 +254,7 @@ export function DecisionPage({
           labels={{ ...mentions.labels, orderNote: words.relatedNote }}
         />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

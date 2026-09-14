@@ -5,6 +5,7 @@ import type { ColourScheme } from "./css/tokens.js";
 import type { IslandBundle } from "./islands/bundle.js";
 import { islandsUsed } from "./islands/island.js";
 import { MODE_SCRIPT } from "./mode.js";
+import { PANELS_SCRIPT } from "./panels.js";
 import type { HeadAssets, SlotName, SlotProps, TextDirection } from "./slots.js";
 import { ThemeContext } from "./theme/context.js";
 import type { ResolvedTheme } from "./theme/types.js";
@@ -87,7 +88,7 @@ function hrefsOf(bundles: IslandBundle[], options: RenderOptions): string[] {
 /** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
 export function renderDocument(body: JSX.Element, options: RenderOptions): string {
   const head: HeadAssets = {
-    inlineScripts: options.scheme === undefined ? [MODE_SCRIPT] : [],
+    inlineScripts: [...(options.scheme === undefined ? [MODE_SCRIPT] : []), PANELS_SCRIPT],
     stylesheets: options.stylesheets,
     modulePreloads: [],
     scripts: [],

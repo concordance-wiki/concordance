@@ -11,6 +11,7 @@ import type {
 import { useSlot } from "../context.js";
 import { DocumentText, positionAnchor, ViewerIsland, viewerPropsOf } from "./document-viewer.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
+import { SidePanel } from "./panel-handle.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs } from "./tabs.js";
@@ -306,7 +307,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
           ))}
         </footer>
       </div>
-      <div class="entity-side">
+      <SidePanel>
         <PanelBlock id="entity-properties" className="entity-panel" heading={text.properties}>
           <dl class="attributes">
             <Property label={text.type} value={view.kind} />
@@ -337,7 +338,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
         </PanelBlock>
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={props.labels ?? {}} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

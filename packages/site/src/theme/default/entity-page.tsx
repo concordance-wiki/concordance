@@ -5,6 +5,7 @@ import type {
   EntityPageLabels,
   EntityPageProps,
   EntityRef,
+  FoldablePanel,
   NeighbourhoodProps,
   Section,
   SourceRef,
@@ -18,6 +19,7 @@ import { labels } from "./labels.js";
 import { fill } from "./mention-list.js";
 import { NeighbourhoodIcon } from "./neighbourhood.js";
 import { PanelBlock } from "./panel-block.js";
+import { SidePanel } from "./panel-handle.js";
 import { SpaceTree } from "./space-tree.js";
 import { TableOfContents } from "./toc.js";
 
@@ -132,6 +134,20 @@ export function NoteSection({
       imageNote={imageNote}
     />
   );
+}
+
+/** The classes of the layout of a page: its left column when it has a space, and the panels served folded. */
+export function entityClasses(
+  withSpace: boolean,
+  folded: readonly FoldablePanel[],
+  ...more: string[]
+): string {
+  return [
+    "entity",
+    ...(withSpace ? ["entity-with-space"] : []),
+    ...folded.map((panel) => `entity-${panel}-folded`),
+    ...more,
+  ].join(" ");
 }
 
 /** One step of the breadcrumb: the current page is marked, a folder without a page is plain text. */
@@ -279,6 +295,7 @@ export function EntityPage({
   sources,
   documents = [],
   mapOpen = false,
+  folded = [],
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
@@ -291,8 +308,10 @@ export function EntityPage({
   };
   const headed = sections.filter((section) => section.heading !== undefined);
   return (
-    <div class={space === undefined ? "entity" : "entity entity-with-space"}>
-      {space !== undefined && <SpaceTree space={space} label={text.spaceTree} />}
+    <div class={entityClasses(space !== undefined, folded)}>
+      {space !== undefined && (
+        <SpaceTree space={space} label={text.spaceTree} folded={folded.includes("tree")} />
+      )}
       <div class="entity-main">
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
@@ -337,7 +356,7 @@ export function EntityPage({
           ))}
         </footer>
       </div>
-      <div class="entity-side">
+      <SidePanel folded={folded.includes("panel")}>
         {attributes.length > 0 && (
           <PanelBlock
             id="entity-properties"
@@ -362,7 +381,7 @@ export function EntityPage({
         {headed.length > 0 && <TableOfContents sections={headed} heading={text.onThisPage} />}
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />
-      </div>
+      </SidePanel>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import type { HeaderLogo, HeaderProps } from "../../slots.js";
 import { defaultHeaderLabels, Drawer } from "./drawer.js";
 import { labels } from "./labels.js";
 import { ModeSwitch } from "./mode-switch.js";
+import { Panels } from "./panel-handle.js";
 import { SearchGlyph, SearchIsland } from "./search-island.js";
 import { Trail } from "./trail.js";
 
@@ -21,7 +22,7 @@ function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
  * button where the bar is too narrow for it (the magnifier alone on the phone, the word with it
  * on the tablet), the trail folded behind its button once its script lists a page, the mode
  * switch; the links stand in the drawer, which the stylesheet keeps in view in the bar where it
- * has room.
+ * has room. After the bar, the empty island whose script folds the side panels of the page.
  */
 export function Header({
   siteTitle,
@@ -32,6 +33,7 @@ export function Header({
   space,
   search,
   trail,
+  panels,
   drawerOpen = false,
   labels: given = {},
 }: HeaderProps): JSX.Element {
@@ -65,6 +67,7 @@ export function Header({
         <Trail {...(trail === undefined ? {} : { trail })} />
         <ModeSwitch label={text.darkMode} />
       </nav>
+      <Panels {...(panels === undefined ? {} : { panels })} />
     </header>
   );
 }

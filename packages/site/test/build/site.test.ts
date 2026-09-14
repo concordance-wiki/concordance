@@ -30,6 +30,7 @@ import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/s
 import type { EntityPageProps } from "../../src/slots.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
+import { withoutHandles } from "../helpers/handles.js";
 import { count, expectBalanced } from "../helpers/html.js";
 import { localTargets, references } from "../helpers/links.js";
 import { fragments, model, profile, screen as screenEntity, term, tokenize } from "./fixture.js";
@@ -155,6 +156,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "panels",
       "search",
       "tabs",
       "toc",
@@ -428,7 +430,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
     // The tree of the column is the same, served closed under the link to the space; the drawer copy is no landmark.
     expect(entity).toContain(
-      '<nav class="space" aria-label="Tree of the space"><a class="space-head space-head-link" href="../index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></a><details class="space-tree"><summary class="space-head">',
+      '<nav class="space" aria-label="Tree of the space"><div class="panel-handle-track"><button type="button" class="panel-handle" data-panel="tree" aria-expanded="true" title="Fold or unfold" hidden><span class="visually-hidden">Tree of the space</span></button></div><a class="space-head space-head-link" href="../index.html"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></a><details class="space-tree"><summary class="space-head">',
     );
     expect(entity.match(/<nav class="space"/g)).toHaveLength(1);
     // A keyword page is filed in the glossary: its drawer carries that tree, the word at its place.
@@ -437,7 +439,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<div class="drawer-space"><details class="space-tree" open><summary class="space-head"><span class="space-initials" aria-hidden="true">GL</span><span class="space-name">glossary</span></summary>',
     );
     expect(keyword).toContain(
-      '<nav class="space" aria-label="Tree of the space"><a class="space-head space-head-link" href="../../glossary/index.html">',
+      '<nav class="space" aria-label="Tree of the space"><div class="panel-handle-track"><button type="button" class="panel-handle" data-panel="tree" aria-expanded="true" title="Fold or unfold" hidden><span class="visually-hidden">Tree of the space</span></button></div><a class="space-head space-head-link" href="../../glossary/index.html">',
     );
     expect(keyword).toContain('<li class="space-page space-current"><span aria-current="page">');
     expect(keyword.match(/<nav class="space"/g)).toHaveLength(1);
@@ -615,7 +617,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.summary[0]).toBe("site: 24 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(9);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(10);
     expect(
       report.summary.some((line) => /^pages: 24, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
@@ -640,6 +642,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "panels",
       "pdf-viewer",
       "search",
       "tabs",
@@ -736,10 +739,10 @@ describe("Without JavaScript, the first twenty mentions remain readable and the 
       '<a class="related-excerpt mention-passage" href="../../specs/screens/mentions-panel/index.html#L7"><span class="related-mark">Cited · </span>',
     );
     expect(html).toContain('<a href="../../fragments/glossary/keyword-page.mentions.json">');
-    // The header carries the mode switch button on every page: only the main landmark is inspected.
-    expect(html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"))).not.toContain(
-      "<button",
-    );
+    // The header carries the mode switch button on every page, and the panels their hidden handles: the rest of the main landmark is inspected.
+    expect(
+      withoutHandles(html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"))),
+    ).not.toContain("<button");
     const written = new Set(fileSystem.listFiles("/dist"));
     for (const { reference, target } of localTargets(path, html)) {
       expect(written.has(target), `${reference} resolves to ${target}`).toBe(true);
@@ -905,6 +908,7 @@ describe("siteDocuments", () => {
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
     { name: "search", file: "search-0123ABCD.js", bytes: 1 },
     { name: "toc", file: "toc-789ABC.js", bytes: 1 },
+    { name: "panels", file: "panels-789ABC.js", bytes: 1 },
     { name: "trail", file: "trail-789ABC.js", bytes: 1 },
   ];
 

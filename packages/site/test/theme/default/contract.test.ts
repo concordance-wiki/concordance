@@ -19,6 +19,7 @@ import {
 } from "../../../src/theme/default/plugin.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import { entityPage } from "../../../src/gallery/fixtures.js";
+import { withoutHandles } from "../../helpers/handles.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 const contract: ContractSectionProps = {
@@ -260,7 +261,7 @@ describe("the contract side of an api page", () => {
     expect(html).toContain(
       '<p class="contract-data"><a href="../../../fragments/specs/api/model-query.contract.json">Contract data (JSON)</a></p>',
     );
-    expect(html).not.toContain("<button");
+    expect(withoutHandles(html)).not.toContain("<button");
     expect(html).not.toContain("Loading the contract");
     expect(renderToString(h(ContractSection, contract))).toContain("contract-viewer");
   });

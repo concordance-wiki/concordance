@@ -13,6 +13,7 @@ import { meetingMessages } from "./areas/meeting.js";
 import { mentionsMessages } from "./areas/mentions.js";
 import { navMessages } from "./areas/nav.js";
 import { neighbourhoodMessages } from "./areas/neighbourhood.js";
+import { panelsMessages } from "./areas/panels.js";
 import { relatedMessages } from "./areas/related.js";
 import { resultsMessages } from "./areas/results.js";
 import { searchMessages } from "./areas/search.js";
@@ -41,6 +42,7 @@ export const AREAS = [
   mentionsMessages,
   navMessages,
   neighbourhoodMessages,
+  panelsMessages,
   relatedMessages,
   resultsMessages,
   searchMessages,

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { IslandBundle } from "../src/islands/bundle.js";
 import { h } from "preact";
 import { MODE_SCRIPT } from "../src/mode.js";
+import { PANELS_SCRIPT } from "../src/panels.js";
 import { directionOf, renderPage, renderSlot, type RenderOptions } from "../src/render.js";
 import { defaultComponents } from "../src/theme/default/index.js";
 import { defaultTheme } from "../src/theme/resolve.js";
@@ -15,6 +16,7 @@ const modeBundle: IslandBundle = { name: "mode-switch", file: "mode-switch-DEF45
 const searchBundle: IslandBundle = { name: "search", file: "search-0123ABCD.js", bytes: 1 };
 const tocBundle: IslandBundle = { name: "toc", file: "toc-456DEF.js", bytes: 1 };
 const trailBundle: IslandBundle = { name: "trail", file: "trail-789ABC.js", bytes: 1 };
+const panelsBundle: IslandBundle = { name: "panels", file: "panels-789ABC.js", bytes: 1 };
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   return {
@@ -22,7 +24,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     locale: "en",
     title: "Keyword page",
     stylesheets: ["../assets/site.css"],
-    islands: [bundle, modeBundle, searchBundle, tocBundle, trailBundle],
+    islands: [bundle, modeBundle, searchBundle, tocBundle, trailBundle, panelsBundle],
     assetsBase: "../assets/",
     header,
     footer,
@@ -56,15 +58,16 @@ describe("renderPage", () => {
   /** An entity nobody cites: its panel carries no island. */
   const uncited = { ...entityPage, mentions: { mentions: [], initial: 20 } };
 
-  it("loads no bundle but the mode switch, the search field and the trail of the header, and the table of contents, for a page without another island", () => {
+  it("loads no bundle but the mode switch, the search field, the trail and the panels of the header, and the table of contents, for a page without another island", () => {
     const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
-    expect(count(html, "<concordance-island")).toBe(4);
-    expect(count(html, "<script defer")).toBe(4);
+    expect(count(html, "<concordance-island")).toBe(5);
+    expect(count(html, "<script defer")).toBe(5);
     expect(html).toContain('<script defer src="../assets/mode-switch-DEF456.js"></script>');
     expect(html).toContain('<script defer src="../assets/search-0123ABCD.js"></script>');
     expect(html).toContain('<script defer src="../assets/toc-456DEF.js"></script>');
     expect(html).toContain('<script defer src="../assets/trail-789ABC.js"></script>');
+    expect(html).toContain('<script defer src="../assets/panels-789ABC.js"></script>');
   });
 
   it("loads the bundle of every island with a deferred classic script tag, never as a module nor preloaded, so that a file:// page runs it in every browser", () => {
@@ -73,7 +76,7 @@ describe("renderPage", () => {
     expect(html).toContain('<script defer src="../assets/mentions-panel-ABC123.js"></script>');
     expect(html).not.toContain('type="module"');
     expect(html).not.toContain("modulepreload");
-    expect(count(html, "<script defer")).toBe(5);
+    expect(count(html, "<script defer")).toBe(6);
   });
 
   it("loads a bundle declared as a module with a preloaded module script tag, the others staying classic", () => {
@@ -82,7 +85,14 @@ describe("renderPage", () => {
       "EntityPage",
       page,
       options({
-        islands: [{ ...bundle, module: true }, modeBundle, searchBundle, tocBundle, trailBundle],
+        islands: [
+          { ...bundle, module: true },
+          modeBundle,
+          searchBundle,
+          tocBundle,
+          trailBundle,
+          panelsBundle,
+        ],
       }),
     );
     expect(html).toContain('<link rel="modulepreload" href="../assets/mentions-panel-ABC123.js"');
@@ -91,7 +101,7 @@ describe("renderPage", () => {
     );
     expect(count(html, '<script type="module"')).toBe(1);
     expect(count(html, "modulepreload")).toBe(1);
-    expect(count(html, "<script defer")).toBe(4);
+    expect(count(html, "<script defer")).toBe(5);
     expect(html).not.toContain('<script defer src="../assets/mentions-panel-ABC123.js">');
   });
 
@@ -106,21 +116,23 @@ describe("renderPage", () => {
     expect(html).not.toContain('<script type="module"');
     expect(html).not.toContain("modulepreload");
     expect(html).not.toContain("<concordance-island");
-    expect(count(html, "<script>")).toBe(1);
+    expect(count(html, "<script>")).toBe(2);
   });
 
-  it("writes the mode script inline in the head, before the stylesheets, and no other inline script", () => {
+  it("writes the mode script then the panels script inline in the head, before the stylesheets, and no other inline script", () => {
     const html = renderPage("EntityPage", entityPage, options());
-    expect(count(html, "<script>")).toBe(1);
-    expect(html).toContain(`<script>${MODE_SCRIPT}</script>`);
+    expect(count(html, "<script>")).toBe(2);
+    expect(html).toContain(`<script>${MODE_SCRIPT}</script><script>${PANELS_SCRIPT}</script>`);
     expect(html.indexOf("<script>")).toBeLessThan(html.indexOf('<link rel="stylesheet"'));
   });
 
-  it("forces a scheme on the root as data-mode, to preview a palette, and then writes no inline script that would apply a remembered choice", () => {
+  it("forces a scheme on the root as data-mode, to preview a palette, and then writes no inline script that would apply a remembered choice, keeping the one of the panels", () => {
     expect(renderPage("Todo", todo, options())).toContain('<html lang="en" dir="ltr"><head>');
     const dark = renderPage("Todo", todo, options({ scheme: "dark" }));
     expect(dark).toContain('<html lang="en" dir="ltr" data-mode="dark"><head>');
-    expect(count(dark, "<script>")).toBe(0);
+    expect(count(dark, "<script>")).toBe(1);
+    expect(dark).not.toContain(MODE_SCRIPT);
+    expect(dark).toContain(`<script>${PANELS_SCRIPT}</script>`);
     expect(dark).toContain('<script defer src="../assets/mode-switch-DEF456.js"></script>');
     expect(renderPage("Todo", todo, options({ scheme: "light" }))).toContain(
       '<html lang="en" dir="ltr" data-mode="light"><head>',
@@ -138,7 +150,7 @@ describe("renderPage", () => {
     const page = { ...entityPage, mentions: { mentions: mentions(25), initial: 20 } };
     const html = renderPage("EntityPage", page, options());
     expect(count(html, "mentions-panel-ABC123.js")).toBe(1);
-    expect(count(html, "<script defer")).toBe(5);
+    expect(count(html, "<script defer")).toBe(6);
     expect(html).toContain('<concordance-island data-island="mentions-panel"');
     expectBalanced(html);
   });
@@ -157,7 +169,7 @@ describe("renderPage", () => {
       renderPage(
         "EntityPage",
         page,
-        options({ islands: [modeBundle, searchBundle, tocBundle, trailBundle] }),
+        options({ islands: [modeBundle, searchBundle, tocBundle, trailBundle, panelsBundle] }),
       ),
     ).toThrow("renderPage: island mentions-panel has no bundle");
   });
@@ -172,9 +184,9 @@ describe("renderPage", () => {
       { ...entityPage, mentions: { mentions: hostile, initial: 20 } },
       options(),
     );
-    expect(html).not.toContain("</script><script>");
+    expect(html).not.toContain('</script><script>alert("x")');
     expect(html).toContain("&lt;/script>&lt;script>alert(&quot;x&quot;)&lt;/script>");
-    expect(count(html, "<script defer")).toBe(5);
+    expect(count(html, "<script defer")).toBe(6);
   });
 
   it("writes dir=rtl for a right-to-left locale", () => {
