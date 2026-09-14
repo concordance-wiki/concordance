@@ -15,6 +15,7 @@ Everything a reader, an integrator or a contributor needs, in English, next to t
 | [What the tool does not do](guides/limits.md) | everyone | the limits by design and the state of this version, one line each |
 | [Publishing transcripts](guides/publishing-transcripts.md) | compliance owner | what pseudonymisation does, what it cannot decide, what to settle before publishing |
 | [Theming](guides/theming.md) | theme author | the slots of the site, their view models, white label, overriding a slot from a plugin, the stylesheet layers, the gallery |
+| [Accessibility](guides/accessibility.md) | theme author | what is verified on every page of the gallery, criterion by criterion, the test that enforces it, what a theme author must keep |
 | [Plugins](guides/plugins.md) | plugin author | the official plugins, declaring one, the contribution points |
 | [Adding a type](guides/adding-a-type.md) | architect | the type module format, a complete example, how the core types are assembled, publishing a type in a plugin |
 | [Distributing the linter](guides/lint-distribution.md) | integrator | `npx`, standalone binary, GitHub action, GitLab component, container image, pre-commit hook |
