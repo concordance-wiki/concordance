@@ -7,7 +7,7 @@ export const SCREEN_NOTES_BASE = "https://concordance-wiki.github.io/demo-wiki/s
  * the panels and the chrome.
  */
 export interface GalleryBoard {
-  /** `B1` to `B15` for the boards; a word for the groups beside them. */
+  /** `B1` to `B20` for the boards; a word for the groups beside them. */
   id: string;
   title: string;
   /** What the board settles, in one sentence. */
@@ -110,6 +110,13 @@ const boards = [
     caption:
       "An office document alone or merged with its note: the viewer, the extracted text, the notes.",
     screen: "pages/document-page",
+  },
+  {
+    id: "B20",
+    title: "Dark mode",
+    caption:
+      "A second palette, not an inversion: the ground under the surface, the accent raised, no shadow.",
+    screen: "panels/colour-scheme",
   },
   {
     id: "todo",

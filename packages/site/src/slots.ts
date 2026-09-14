@@ -97,6 +97,8 @@ export interface ShellProps {
   direction: TextDirection;
   title: string;
   head: HeadAssets;
+  /** A scheme forced on the root as `data-mode`, to preview a palette; absent on a page of the site, where the reader's choice and the system preference decide. */
+  scheme?: "light" | "dark";
   children: ComponentChildren;
 }
 
