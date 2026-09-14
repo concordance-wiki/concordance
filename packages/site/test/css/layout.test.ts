@@ -220,7 +220,7 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(components).toContain(".entity-edit-short {\n  display: none;\n}");
     const phone = media(components, "(width < 43.75rem)");
     expect(phone).toContain(
-      ".entity-footer > .entity-source {\n    flex-wrap: nowrap;\n    min-block-size: 3rem;\n  }",
+      ".entity-footer > .entity-source {\n    flex: 1;\n    flex-wrap: nowrap;\n    min-block-size: 3rem;\n  }",
     );
     expect(phone).toContain(
       ".entity-source-folders,\n  .entity-edit-question,\n  .entity-edit-long {\n    display: none;\n  }",

@@ -90,8 +90,9 @@
 }
 
 @media (width < 43.75rem) {
-  /* Named with the footer, so that the rules of the article, assembled after this file, do not undo them. */
+  /* Named with the footer, so that the rules of the article, assembled after this file, do not undo them; the line takes the whole width the hidden legend leaves. */
   .entity-footer > .entity-source {
+    flex: 1;
     flex-wrap: nowrap;
     min-block-size: 3rem;
   }
