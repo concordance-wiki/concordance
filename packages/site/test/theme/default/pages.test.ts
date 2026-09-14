@@ -90,6 +90,16 @@ describe("SearchResults", () => {
     expectBalanced(html);
   });
 
+  it("proposes the closest form above the list when a theme gives it without an empty state", () => {
+    const closestOnly = { ...searchResultsEmpty };
+    delete closestOnly.empty;
+    const html = renderSlot("SearchResults", closestOnly, defaultTheme);
+    expect(html).toContain('<p class="search-closest">Closest form: ');
+    expect(html).not.toContain("results-empty");
+    expect(html).toContain('<ol class="results">');
+    expectBalanced(html);
+  });
+
   it("omits the facets navigation when there is no facet", () => {
     const html = renderSlot("SearchResults", { ...searchResults, facets: [] }, defaultTheme);
     expect(html).not.toContain("<nav");
