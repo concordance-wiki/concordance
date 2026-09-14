@@ -41,11 +41,11 @@ The repository's own test installs the package the way npm does: it deploys the 
 
 ## Standalone binary
 
-One file per platform, `concordance-<platform>-<arch>` (`concordance-linux-x64`, `concordance-darwin-arm64`, `concordance-win32-x64.exe`), with its SHA-256 next to it, attached to each release of `@concordance-wiki/cli`. It embeds Node.js and the command line, so nothing needs to be installed.
+One file per platform, `concordance-<platform>-<arch>` (`concordance-linux-x64`, `concordance-darwin-arm64`, `concordance-win32-x64.exe`), with its SHA-256 next to it, attached to each release of the repository, with the tarball of every package and `checksums.txt`. It embeds Node.js and the command line, so nothing needs to be installed.
 
 ```bash
-curl -fsSLO https://github.com/concordance-wiki/concordance/releases/download/@concordance-wiki/cli@0.1.0/concordance-linux-x64
-curl -fsSLO https://github.com/concordance-wiki/concordance/releases/download/@concordance-wiki/cli@0.1.0/concordance-linux-x64.sha256
+curl -fsSLO https://github.com/concordance-wiki/concordance/releases/download/v0.1.0/concordance-linux-x64
+curl -fsSLO https://github.com/concordance-wiki/concordance/releases/download/v0.1.0/concordance-linux-x64.sha256
 sha256sum --check concordance-linux-x64.sha256
 chmod +x concordance-linux-x64
 ./concordance-linux-x64 lint --scope repo --fail-on warning
@@ -146,12 +146,12 @@ lint:
 
 ## pre-commit hook
 
-The hook runs `concordance lint --scope repo` on the whole repository before each commit that touches a markdown or YAML file; pre-commit installs the pinned version of the linter in its own environment. The hook is declared in [`.pre-commit-hooks.yaml`](../../.pre-commit-hooks.yaml) at the root of this repository, so `repo:` names it and `rev:` picks the release, a tag of the form `@concordance-wiki/cli@<version>`:
+The hook runs `concordance lint --scope repo` on the whole repository before each commit that touches a markdown or YAML file; pre-commit installs the pinned version of the linter in its own environment. The hook is declared in [`.pre-commit-hooks.yaml`](../../.pre-commit-hooks.yaml) at the root of this repository, so `repo:` names it and `rev:` picks the release, a tag of the form `v<version>`:
 
 ```yaml
 repos:
   - repo: https://github.com/concordance-wiki/concordance
-    rev: "@concordance-wiki/cli@0.1.0"
+    rev: "v0.1.0"
     hooks:
       - id: concordance-lint
 ```
@@ -185,6 +185,6 @@ The hook exits like the command: the commit is refused when a finding reaches th
 
 The forms are tied to one version of `@concordance-wiki/cli` and checked against each other:
 
-- `scripts/check-distribution.mjs`, run by `pnpm lint`, verifies that the action, the component and the hook expose the documented inputs, produce the documented reports, and pin the version of `packages/cli`. After a release bump, `node scripts/check-distribution.mjs --write` rewrites the three pins.
+- `scripts/check-distribution.mjs`, run by `pnpm lint`, verifies that the action, the component and the hook expose the documented inputs, produce the documented reports, and pin the version of `packages/cli`. The version pull request rewrites the three pins with `node scripts/sync-distribution-versions.mjs` ([Releasing](releasing.md)); `node scripts/check-distribution.mjs --write` does the same by hand.
 - The `lint-distribution` workflow runs on every pull request that touches `packages/cli`, `packages/lint`, `packages/checks` or `distribution`, and on every release tag. It lints the `notes` source of the faulty corpus through the built command line, the `npx` package installed without any registry, the standalone binary built on the runner and the action taken from its source folder, then compares the four JSON reports byte for byte once `tool.version` is normalised (`scripts/compare-distribution.mjs`). The container image joins the comparison once its workflow publishes it. The GitLab component and the pre-commit hook, which no GitHub runner executes, are validated structurally in the same workflow, the hook manifest with `pre-commit validate-manifest`.
 - `packages/cli/test/npx.test.ts` installs the package as npm does and runs `npx concordance lint` on the faulty corpus, comparing its report with the in-process command.

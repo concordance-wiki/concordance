@@ -89,4 +89,4 @@ The pipelines do everything but these, which a person does once:
 - Credentials for private sources: a token or a deploy key in the secrets of the pipeline, given to git as [private repositories](configuration.md#private-repositories) shows; the configuration never carries one.
 - Publishing transcripts: `privacy.publish_transcripts: true` is a decision, not a setting; [Publishing transcripts](publishing-transcripts.md) lists what to settle before the first build that publishes one.
 - The Docker Hub publication of the image: the maintainer of the account creates the repository, adds the two secrets and enables the `publish` job, as the [release guide](releasing.md#container-image) describes.
-- Releases: versions and the changelog go through Changesets and a maintainer cuts them ([Releasing](releasing.md)).
+- Releases: the pipeline opens the version pull request from the merged changesets, and merging it tags the commit and publishes the GitHub release; the merge is the human decision, and the settings that let the pipeline open pull requests are set once ([Releasing](releasing.md)).

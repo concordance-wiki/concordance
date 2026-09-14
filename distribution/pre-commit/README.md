@@ -5,7 +5,7 @@ The hook `concordance-lint` runs `concordance lint --scope repo` before each com
 ```yaml
 repos:
   - repo: https://github.com/concordance-wiki/concordance
-    rev: "@concordance-wiki/cli@0.1.0"
+    rev: "v0.1.0"
     hooks:
       - id: concordance-lint
 ```
