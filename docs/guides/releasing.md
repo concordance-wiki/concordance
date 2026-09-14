@@ -61,7 +61,7 @@ When the pipeline cannot run, a maintainer does what it does, in the same order,
 1. `pnpm check` must pass, including the licence inventory (`pnpm licenses:check`).
 2. `pnpm changeset version && pnpm install --lockfile-only && node scripts/sync-distribution-versions.mjs`. Read the resulting diff.
 3. Open a pull request titled `chore(release): v<x.y.z>` with that diff, and merge it once the pipeline is green. The `release` workflow takes over from the merge: a change of the version on `main` is a release, whoever made it.
-4. Only when the `release` workflow cannot run either: tag the merge commit, `git tag -a v<x.y.z> -m "v<x.y.z>"`, push the tag, then from the tagged commit run `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm build:binary` on each platform, `pnpm -r --filter './packages/**' --filter './plugins/**' --filter './presets/**' pack --pack-destination dist-release`, `sha256sum` over the assets into `checksums.txt`, `node scripts/release-notes.mjs <version> --output notes.md`, and `gh release create v<x.y.z> --verify-tag --notes-file notes.md dist-release/*`.
+4. Only when the `release` workflow cannot run either: tag the merge commit, `git tag -a v<x.y.z> -m "v<x.y.z>"`, push the tag, then from the tagged commit run `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm build:binary` on each platform, `pnpm -r --filter './packages/**' --filter './plugins/**' --filter './presets/**' pack --pack-destination dist-release`, `sha256sum` over the assets into `checksums.txt`, `node scripts/release-notes.mjs <version> > notes.md`, and `gh release create v<x.y.z> --verify-tag --notes-file notes.md dist-release/*`.
 
 ## Container image
 
