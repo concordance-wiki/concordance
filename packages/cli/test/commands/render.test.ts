@@ -142,7 +142,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
     expect(io.fs.readText("/work/dist/notes/a/figures/a.svg")).toBe("<svg/>");
     expect(page).toContain(
-      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></p><p class="entity-source"><code>notes/a.md</code></p></footer>',
+      '<footer class="entity-footer"><p class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></p><p class="entity-source"><code><span class="entity-source-folders">notes/</span>a.md</code></p></footer>',
     );
     expect(page).toContain("<h2>Steps</h2>");
     expect(page).toContain("<title>Screen A – Wiki</title>");
@@ -376,7 +376,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     });
     expect(await buildCommand([], io)).toBe(0);
     expect(io.fs.readText("/work/dist/specs/readme/index.html")).toContain(
-      '<a class="entity-edit" href="https://github.com/concordance-wiki/demo-specs/edit/develop/README.md">Edit this page</a>',
+      '<a class="entity-edit" href="https://github.com/concordance-wiki/demo-specs/edit/develop/README.md"><span class="entity-edit-long">Edit this page</span>',
     );
     expect(
       sourceRefs({
@@ -402,7 +402,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(await buildCommand([], io)).toBe(0);
     const page = io.fs.readText("/work/dist/notes/b/index.html");
     expect(page).toContain(
-      '<a class="entity-edit" href="https://forge.example/notes/issues/new">Edit this page</a>',
+      '<a class="entity-edit" href="https://forge.example/notes/issues/new"><span class="entity-edit-long">Edit this page</span>',
     );
     expect(page).not.toContain('class="entity-source-file"');
   });
