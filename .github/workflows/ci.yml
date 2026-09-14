@@ -88,9 +88,8 @@ jobs:
           done
           DEMO_ROOT="$RUNNER_TEMP/demo" node scripts/parity.mjs
   windows:
-    # The packages run wherever Node.js runs: the command line, its tests on the minimal corpus
-    # and the golden-corpus build are exercised on Windows, so that the registry's users on that
-    # platform are not the ones finding out.
+    # The packages run wherever Node.js runs: the built command line builds a corpus on Windows,
+    # so that the registry's users on that platform are not the ones finding out.
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -103,9 +102,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Command line on the fixtures
+        # What a user of the registry does on that platform: the built command line builds a
+        # corpus. The test suites still assume POSIX paths in their fixtures; they run on Linux.
         run: node packages/cli/dist/bin.js build --config fixtures/corpora/minimal/en/concordance.yaml --output dist-windows
-      - name: Tests of the command line and the core
-        run: pnpm exec vitest run packages/core packages/cli --coverage.enabled=false
   mutation:
     # A pull request mutates only the source files it changed, next to the other checks rather
     # than after them; the whole tree is mutated every night by the mutation workflow. The run
