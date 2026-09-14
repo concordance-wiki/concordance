@@ -8,6 +8,7 @@ export const searchResultsEmptyState: GalleryPage = {
   state: "empty",
   description:
     "a query without any result or facet: the empty state names it and proposes the closest form of the dictionary",
+  board: "B3",
   ...chrome,
   props: searchResultsEmpty,
 };

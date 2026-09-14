@@ -8,6 +8,7 @@ export const entityPageContractState: GalleryPage = {
   state: "contract",
   description:
     "an API whose contract was imported, in the default chrome: the operations table after the note with one operation the contract declares without a page, the contract block with the viewer behind its button, the properties cut to five keys",
+  board: "B7",
   ...chrome,
   props: apiPage,
 };

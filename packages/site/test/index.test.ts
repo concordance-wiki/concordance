@@ -33,6 +33,7 @@ const WHOLE = [
   "theme/types.js",
   "a11y/check.js",
   "a11y/contrast.js",
+  "gallery/boards.js",
   "gallery/build.js",
   "gallery/pages.js",
   "gallery/types.js",

@@ -8,6 +8,7 @@ export const indexPageState: GalleryPage = {
   state: "default",
   description:
     "the letters, one inactive, and the entries of one segment, one without a note; named after the source file, the gallery keeping index.html for itself",
+  board: "B10",
   ...chrome,
   props: index,
 };

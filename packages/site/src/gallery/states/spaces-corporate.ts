@@ -9,6 +9,7 @@ export const spacesCorporateState: GalleryPage = {
   state: "corporate",
   description:
     "the spaces page in the corporate chrome: the seven spaces of the fixtures corpus in one table, none folded, with their content, their page count and their newest change from the git history, the dormant one dated in the accent and in days, and the note on the threshold",
+  board: "B11",
   ...chrome,
   header: corporateHeader,
   footer: corporateFooter,

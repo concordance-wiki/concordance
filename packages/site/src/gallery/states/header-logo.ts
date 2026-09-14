@@ -8,6 +8,7 @@ export const headerLogoState: GalleryPage = {
   rendered: "Todo",
   state: "logo",
   description: "the header with a logo and without a search field, above the to-do page",
+  board: "chrome",
   ...chrome,
   header: headerWithLogo,
   props: todo,

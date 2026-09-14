@@ -8,6 +8,7 @@ export const entityPageDocumentState: GalleryPage = {
   state: "document",
   description:
     "a workshop with a deck and a transcript: download links, the viewer opened on demand, the rail of slides, the extracted text",
+  board: "B2",
   ...chrome,
   props: documentEntityPage,
 };

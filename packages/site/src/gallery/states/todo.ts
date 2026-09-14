@@ -7,6 +7,7 @@ export const todoState: GalleryPage = {
   rendered: "Todo",
   state: "default",
   description: "one document without markdown and two words without a note",
+  board: "todo",
   ...chrome,
   props: todo,
 };

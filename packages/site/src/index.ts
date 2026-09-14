@@ -56,6 +56,7 @@ export * from "./theme/resolve.js";
 export * from "./theme/types.js";
 export * from "./a11y/check.js";
 export * from "./a11y/contrast.js";
+export * from "./gallery/boards.js";
 export * from "./gallery/build.js";
 export * as galleryFixtures from "./gallery/fixtures.js";
 export * from "./gallery/pages.js";

@@ -1,4 +1,5 @@
 import { chrome, type GalleryPage } from "../page.js";
+import { corporateHeader, corporateFooter } from "../fixtures/chrome.js";
 import { mentions } from "../fixtures/mentions.js";
 
 export const mentionsPanelIslandState: GalleryPage = {
@@ -8,7 +9,10 @@ export const mentionsPanelIslandState: GalleryPage = {
   state: "island",
   description:
     "twenty-five mentions in nine notes: six entries in view, the seventh page of the first twenty behind the disclosure worded as the button, the rest embedded for the island, the link to the fragment standing meanwhile, readable without JavaScript",
+  board: "panels",
   ...chrome,
+  header: corporateHeader,
+  footer: corporateFooter,
   props: {
     mentions: mentions(25),
     initial: 20,

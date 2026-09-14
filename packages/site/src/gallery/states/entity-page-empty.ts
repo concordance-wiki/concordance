@@ -7,6 +7,7 @@ export const entityPageEmptyState: GalleryPage = {
   rendered: "EntityPage",
   state: "empty",
   description: "an entity without attributes, neighbours or mentions: the panels say so",
+  board: "B2",
   ...chrome,
   props: {
     ...entityPage,

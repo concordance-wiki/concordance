@@ -7,6 +7,7 @@ export const keywordPageEmptyState: GalleryPage = {
   rendered: "KeywordPage",
   state: "empty",
   description: "a keyword without passages, neighbours or similar forms",
+  board: "B5",
   ...chrome,
   props: {
     ...keywordPage,

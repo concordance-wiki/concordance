@@ -107,6 +107,31 @@ describe("A concordance gallery command renders every slot with fixture view mod
     );
   });
 
+  it("serves a no-script state with its island elements and without their scripts, the boot script of the colour scheme kept", () => {
+    const noScript = galleryPages.filter((page) => page.scripts === false);
+    expect(noScript.map((page) => page.file)).toEqual([
+      "home-no-script.html",
+      "entity-page-no-script.html",
+      "search-results-no-script.html",
+      "keyword-page-no-script.html",
+      "meeting-page-no-script.html",
+      "api-page-no-script.html",
+      "document-page-no-script.html",
+    ]);
+    for (const page of noScript) {
+      const html = fileSystem.readText(`/out/${page.file}`);
+      expect(html, page.file).not.toMatch(/<script [^>]*src=/);
+      expect(html, page.file).not.toContain("modulepreload");
+      expect(html, page.file).toContain("<script>(function(){");
+      expect(html, page.file).toContain("<concordance-island data-island=");
+      expect(page.description.startsWith("server HTML only: "), page.file).toBe(true);
+    }
+    expect(fileSystem.readText("/out/api-page-no-script.html")).toContain("Contract data (JSON)");
+    expect(fileSystem.readText("/out/api-page-corporate.html")).toMatch(
+      /<script defer src="assets\/contract-viewer-[A-Z0-9]{8}\.js"><\/script>/,
+    );
+  });
+
   it("frames the panels under a heading so that each page carries one h1", () => {
     const html = fileSystem.readText("/out/neighbourhood.html");
     expect(html).toContain('<div class="gallery-panel"><h1>Neighbourhood, default</h1>');
