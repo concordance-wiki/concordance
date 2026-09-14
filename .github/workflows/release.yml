@@ -1,0 +1,144 @@
+name: release
+
+# A change of the version of packages/cli on main is the merge of a version pull request,
+# whatever the merge strategy: this workflow tags that commit v<x.y.z>, builds the standalone
+# binaries and the package tarballs, writes their checksums and the licence inventory, and
+# publishes the GitHub release with the changelog entries of the version. Nothing is pushed
+# to a package registry or an image registry; the image workflow builds the container image
+# on the tag with its publication disabled.
+on:
+  push:
+    branches: [main]
+    paths: [packages/cli/package.json]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  ASSETS: dist-release
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+      - name: Compare the version with the one before this push
+        id: version
+        # Empty outputs, and a workflow that stops here, when the manifest changed without its version.
+        run: |
+          current=$(node -p 'require("./packages/cli/package.json").version')
+          previous=$(git show HEAD^:packages/cli/package.json | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')
+          if [ "$current" = "$previous" ]; then
+            echo "version $current unchanged, nothing to release"
+            exit 0
+          fi
+          echo "version=$current" >> "$GITHUB_OUTPUT"
+          case "$current" in
+            *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+  tag:
+    needs: version
+    if: needs.version.outputs.version != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Annotated tag on the merge commit
+        # Pushing an existing tag on another commit fails here, and nothing below runs.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push origin "refs/tags/v$VERSION"
+
+  binaries:
+    needs: [version, tag]
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: macos-latest
+            target: darwin-arm64
+          - os: windows-latest
+            target: win32-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Standalone binary
+        run: pnpm build:binary
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: binary-${{ matrix.target }}
+          path: dist-bin/
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    needs: [version, tag, binaries]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Pack every published package
+        run: pnpm -r --filter './packages/**' --filter './plugins/**' --filter './presets/**' pack --pack-destination "$GITHUB_WORKSPACE/$ASSETS"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: binary-*
+          path: ${{ env.ASSETS }}
+          merge-multiple: true
+      - name: Licence inventory
+        run: |
+          pnpm licenses:check
+          cp docs/licenses.md "$ASSETS/licenses.md"
+      - name: Checksums of every asset
+        working-directory: ${{ env.ASSETS }}
+        run: sha256sum $(find . -maxdepth 1 -type f | sed 's|^\./||' | LC_ALL=C sort) > checksums.txt
+      - name: Release notes from the changelogs
+        run: node scripts/release-notes.mjs "$VERSION" --output "$RUNNER_TEMP/notes.md"
+      - name: GitHub release with its assets
+        run: |
+          gh release create "v$VERSION" \
+            --verify-tag \
+            --title "v$VERSION" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            ${{ needs.version.outputs.prerelease == 'true' && '--prerelease' || '' }} \
+            "$ASSETS"/*
+      - name: Container image on the tag
+        # A tag pushed with the workflow token triggers no workflow: the image workflow is
+        # dispatched on it explicitly, with its publication job disabled as it is on main.
+        run: gh workflow run image.yml --ref "v$VERSION"
