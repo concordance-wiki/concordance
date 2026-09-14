@@ -6,7 +6,6 @@ import { measureBudget, type BudgetReport, type PageSize } from "../budget.js";
 import type { ThemeConfig } from "../css/theme-config.js";
 import {
   bundleIslands,
-  defaultIslands,
   mergeIslands,
   type IslandBundle,
   type IslandEntry,
@@ -39,8 +38,8 @@ export interface AssembleOptions {
   /** The palette the stylesheet is written from when the theme carries no `theme.yaml`. */
   fallback: ThemeConfig;
   maxPageBytes: number;
-  /** The islands to bundle; those of the default theme when absent. */
-  islands?: IslandEntry[];
+  /** The islands to bundle: the site's or the gallery's, the theme's added by the assembly. */
+  islands: IslandEntry[];
   /** Every document to write, once the island bundles are known. */
   documents: (islands: IslandBundle[]) => WrittenDocument[];
 }
@@ -68,7 +67,7 @@ export async function assemblePages(options: AssembleOptions): Promise<Assembled
   const assets = `${output}/${ASSETS_DIRECTORY}`;
   const islands = await bundleIslands({
     outDir: assets,
-    islands: mergeIslands(options.islands ?? defaultIslands(), theme.islands ?? []),
+    islands: mergeIslands(options.islands, theme.islands ?? []),
     fileSystem,
   });
   const source = theme.config ?? { config: options.fallback, assets: [], fileSystem };
