@@ -154,6 +154,11 @@ Options:
 | `--output <file>` | none | writes the report to that file instead of standard output; the only file the command ever writes |
 | `--fix` | | applies the safe corrections before the check, after printing each of them; see [Safe fixes](#safe-fixes) |
 | `--dry-run` | | lists the corrections `--fix` would apply, prefixed with `would fix`, and writes nothing; implies `--fix` |
+| `--no-gitignore` | | reads the files git ignores like the others; by default every `.gitignore` of the repository is honoured, see [what is read](#what-is-read) |
+
+### What is read
+
+Every file under the current directory, `.git` and `node_modules` left aside, except three families that are never read, never counted and never reported: the globs of [`privacy.exclude`](configuration.md#privacy) in the configuration passed with `--config`, the globs of `exclude` in the repository's own [`concordance-lint.yaml`](configuration.md#concordance-lintyaml), and the files git ignores, read from every `.gitignore` of the repository with the rules git applies. A vendored folder, a generated site or a cloned tool thus stay out of the checks and out of the link resolution: a link towards an excluded file is reported as broken, as it would be in the build. `--no-gitignore` lifts the third family for the rare repository that keeps notes in an ignored folder; the excluded globs always apply. The build lists the files of a source the same way, so that the parity below holds file for file.
 
 What is checked in this version: UTF-8 encoding (`E-ENCODING`), YAML frontmatter (`E-FM-INVALID`), frontmatter identifiers (`E-ID-INVALID`), unique identifiers with the source's suffixes stripped (`E-ID-DUP`) and internal links (`E-LINK-BROKEN`). A link with a `source:` prefix or one that climbs above the repository targets another source and is left to the [global scope](#global-scope). The type cascade and the checks that depend on it (`E-TYPE-CONFLICT`, section headings) join the local lint with the typing package. Without `--source`, the repository is the source named `repo`: that name prefixes the identifiers and appears in the messages.
 

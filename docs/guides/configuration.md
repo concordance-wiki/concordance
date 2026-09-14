@@ -2,7 +2,7 @@
 
 Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`config.schema.json`](../../packages/core/schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected, then a verdict line. Exit codes: 0 valid, 1 invalid, 2 file not found. Beyond the schema, it rejects a source name used twice, a malformed domain glob and pseudonymisation enabled without a dictionary, and it warns about keys that are accepted but ignored in this version (`lock`, tracker sources) and about transcripts published without pseudonymisation. `--config` (or `-c`) points at another file; the default is `concordance.yaml` in the current directory.
 
-This guide follows the order of the file and says how the keys work together, with examples. The exhaustive tables, every key with its type, default, allowed values and description, are generated from the schemas and never diverge from them: [configuration reference](../reference/configuration.md), [theme reference](../reference/theme.md), [profile reference](../reference/profile.md), [lock file reference](../reference/lock.md). Every key not marked required is optional.
+This guide follows the order of the file and says how the keys work together, with examples. The exhaustive tables, every key with its type, default, allowed values and description, are generated from the schemas and never diverge from them: [configuration reference](../reference/configuration.md), [lint configuration reference](../reference/lint.md), [theme reference](../reference/theme.md), [profile reference](../reference/profile.md), [lock file reference](../reference/lock.md). Every key not marked required is optional.
 
 ## `version`
 
@@ -244,9 +244,12 @@ The same block, in a `concordance-lint.yaml` at the root of a knowledge reposito
 
 ## `concordance-lint.yaml`
 
-Read by `concordance lint` at the root of the linted repository; the build ignores it. The file carries two blocks: `checks`, with the same shape and the same rules as above, and `global`, which says where the [global scope](command-line.md#global-scope) finds the published model:
+Read by `concordance lint` at the root of the linted repository, and by the build for its `exclude` key when it reads the repository as a source; validated against [`lint.schema.json`](../../packages/core/schemas/lint.schema.json), every key listed in the [lint configuration reference](../reference/lint.md). The file carries three blocks: `exclude`, the files of the repository that are not notes; `checks`, with the same shape and the same rules as above; and `global`, which says where the [global scope](command-line.md#global-scope) finds the published model:
 
 ```yaml
+exclude:
+  - "vendor/**"
+  - "site/**"
 checks:
   E-LINK-BROKEN: { severity: warning }
   W-STALE: { enabled: false }
@@ -256,16 +259,19 @@ global:
   max_age_hours: 24
 ```
 
+`exclude` lists globs relative to the root of the repository, with the syntax and the matcher of [`privacy.exclude`](#privacy): a vendored folder, a generated site, a cloned tool, whose files would otherwise be read as notes. An excluded file is never read, never counted and never reported, by the linter and by the build alike, so that a repository lints clean exactly when the build reports nothing on it; `privacy.exclude` of the wiki configuration applies on top, and a build that reads a repository whose `concordance-lint.yaml` is faulty skips that source with a [`W-SOURCE-UNREACHABLE`](../checks/W-SOURCE-UNREACHABLE.md) finding, as the linter refuses to run on it. The files git ignores are left out the same way, without being listed: every `.gitignore` of the repository is read with the rules git applies (comments, negation, folder patterns, `**`, anchored patterns, escapes, a nested file overriding the ones above it; not the global exclude file of the user nor `.git/info/exclude`); [`--no-gitignore`](command-line.md#lint) checks them all the same.
+
 A `checks` entry replaces the entry of the same check given under `checks` in the `concordance.yaml` passed with `--config`; the other entries of the configuration still apply. An empty file overrides nothing.
 
 | Key | Default | Effect |
 |---|---|---|
+| `exclude` | none | globs of the files never read, counted or reported, relative to the repository; honoured by the build too |
 | `global.model` | none | the published `model.json` of the wiki: a URL (`https://…/model.json`) fetched and cached, or a path relative to the repository (`../wiki/dist/model.json`) read as it is; without it `--scope global` degrades to the local checks |
 | `global.cache_dir` | `.concordance-cache/lint` | where the fetched model and its `model.meta.json` (fetch date, source URL, `ETag` and `Last-Modified` when the server gave them) live, relative to the repository |
 | `global.max_age_hours` | `24` | how long the cached model is reused without any request; `0` revalidates on every run, with the validators the server gave |
 | `global.profile` | none | a project profile, relative to the repository, merged over the default one for the relation matrix and the types of the global checks |
 
-Any other top-level key, a key that is not a check identifier, an unknown check, a value outside `severity` and `enabled`, an unknown `global` key, an empty `model` or a negative `max_age_hours` stops the linter with an execution error (exit code 2) naming the file and the key.
+Any other top-level key, an empty glob under `exclude`, a key that is not a check identifier, an unknown check, a value outside `severity` and `enabled`, an unknown `global` key, an empty `model` or a negative `max_age_hours` stops the linter with an execution error (exit code 2) naming the file and the key.
 
 ## `lock`
 
