@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { notFoundCorporate } from "../../src/gallery/fixtures.js";
 import {
   editDistance,
+  lastSegment,
   missingAddress,
   NEARBY_LIMIT,
   NOT_FOUND_ISLAND,
@@ -128,9 +129,11 @@ describe("The page served for a missing address", () => {
     expect(editDistance("publication-treshold", "publication-threshold")).toBe(1);
   });
 
-  it("proposes the closest pages within half the length of the address, three characters at least, closest first, three at most", () => {
+  it("proposes the pages whose name stands within half the length of the missing one, a renamed file a character away and a moved file none, the nearest folder first, three at most", () => {
+    expect(lastSegment("glossary/publication-threshold")).toBe("publication-threshold");
+    expect(lastSegment("page")).toBe("page");
     expect(nearbyThreshold("ab")).toBe(3);
-    expect(nearbyThreshold("glossary/publication-treshold")).toBe(14);
+    expect(nearbyThreshold("publication-treshold")).toBe(10);
     expect(nearbyOf("glossary/publication-treshold", entries, "")).toEqual([
       {
         title: "Publication threshold",
@@ -142,12 +145,17 @@ describe("The page served for a missing address", () => {
         path: "/specs/rules/publication-threshold/",
         href: "specs/rules/publication-threshold/index.html",
       },
+      {
+        title: "Publication",
+        path: "/specs/domains/publication/",
+        href: "specs/domains/publication/index.html",
+      },
     ]);
-    expect(nearbyOf("glossary/publication-treshold", entries, "../")[0]?.href).toBe(
+    expect(nearbyOf("terms/publication-threshold", entries, "../")[0]?.href).toBe(
       "../glossary/publication-threshold/index.html",
     );
     expect(nearbyOf("", entries, "")).toEqual([]);
-    expect(nearbyOf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", entries, "")).toEqual([]);
+    expect(nearbyOf("glossary/zzzzzzzzzzzzzzzz", entries, "")).toEqual([]);
     expect(NEARBY_LIMIT).toBe(3);
     const many = Array.from({ length: 5 }, (_, index) =>
       entry(`glossary/page-${String(index)}`, `Page ${String(index)}`),
@@ -178,6 +186,7 @@ describe("The page served for a missing address", () => {
     expect(filled.nearby?.map((page) => page.title)).toEqual([
       "Publication threshold",
       "Publication threshold rule",
+      "Publication",
     ]);
     const failed = injector(undefined);
     const bare = await notFoundPropsOf(
@@ -190,12 +199,12 @@ describe("The page served for a missing address", () => {
     const far = injector(meta);
     const unmatched = await notFoundPropsOf(
       notFoundCorporate,
-      windowAt("/handbook/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz/"),
+      windowAt("/handbook/glossary/zzzzzzzzzzzzzzzz/"),
       far.inject,
       far.host,
     );
     expect(unmatched.nearby).toBeUndefined();
-    expect(unmatched.query).toBe("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+    expect(unmatched.query).toBe("zzzzzzzzzzzzzzzz");
   });
 
   it("wires the served island: words the search on the address, lists the nearby pages and shows their block", async () => {
@@ -220,6 +229,7 @@ describe("The page served for a missing address", () => {
     ).toEqual([
       '<a href="glossary/publication-threshold/index.html"><span class="not-found-nearby-title">Publication threshold</span><code class="not-found-nearby-path">/glossary/publication-threshold/</code></a>',
       '<a href="specs/rules/publication-threshold/index.html"><span class="not-found-nearby-title">Publication threshold rule</span><code class="not-found-nearby-path">/specs/rules/publication-threshold/</code></a>',
+      '<a href="specs/domains/publication/index.html"><span class="not-found-nearby-title">Publication</span><code class="not-found-nearby-path">/specs/domains/publication/</code></a>',
     ]);
   });
 

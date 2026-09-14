@@ -168,6 +168,18 @@ describe("Search works over file://", () => {
     expect(await first).toBe(await second);
   });
 
+  it("lets two loaders of one page share the global, each hearing the files it asked for", async () => {
+    const { host, inject, answer } = page();
+    const first = shardLoader("search/", inject, host);
+    const second = shardLoader("search/", inject, host);
+    const fromFirst = first("ke");
+    const fromSecond = second("pa");
+    answer("ke", shards["ke"]);
+    answer("pa", shards["pa"]);
+    expect(await fromFirst).toEqual(shards["ke"]);
+    expect(await fromSecond).toEqual(shards["pa"]);
+  });
+
   it("resolves to nothing when the script fails to load, and ignores a callback nothing waits for", async () => {
     const { host, inject, answer } = page();
     const load = shardLoader("search/", inject, host);
