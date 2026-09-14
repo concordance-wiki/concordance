@@ -105,7 +105,7 @@ describe("Minimum contrast of 4.5:1 for body text, 3:1 for headings", () => {
         use: "mark",
         foreground: "ink",
         background: "highlight",
-        ratio: 10.66,
+        ratio: 10.67,
         minimum: 4.5,
       },
     ]);
@@ -135,10 +135,10 @@ describe("Minimum contrast of 4.5:1 for body text, 3:1 for headings", () => {
     expect(ratios("light", "muted")).toEqual([9.2, 10.76, 9.95]);
     expect(ratios("light", "label")).toEqual([4.52, 5.28, 4.89]);
     expect(ratios("light", "link")).toEqual([5.15, 6.03, 5.58]);
-    expect(ratios("dark", "body")).toEqual([15.06, 13.9, 12.78]);
-    expect(ratios("dark", "muted")).toEqual([10.27, 9.48, 8.72]);
-    expect(ratios("dark", "label")).toEqual([6.82, 6.29, 5.79]);
-    expect(ratios("dark", "link")).toEqual([7.31, 6.75, 6.21]);
+    expect(ratios("dark", "body")).toEqual([15.75, 14.39, 12.68]);
+    expect(ratios("dark", "muted")).toEqual([8.46, 7.74, 6.81]);
+    expect(ratios("dark", "label")).toEqual([6.11, 5.58, 4.92]);
+    expect(ratios("dark", "link")).toEqual([6.14, 5.61, 4.94]);
     for (const scheme of ["light", "dark"] as const) {
       const colours = declared(brand, scheme);
       expect(colours).toEqual(paletteColours(brand[scheme]));
@@ -173,13 +173,13 @@ describe("Minimum contrast of 4.5:1 for body text, 3:1 for headings", () => {
       "light label text: label on soft is 2.60:1, below 4.5:1",
       "light link text: accent on bg is 4.07:1, below 4.5:1",
       "light link text: accent on soft is 4.41:1, below 4.5:1",
-      "dark body text: ink on bg is 2.04:1, below 4.5:1",
-      "dark body text: ink on surface is 1.89:1, below 4.5:1",
-      "dark body text: ink on soft is 1.73:1, below 4.5:1",
+      "dark body text: ink on bg is 2.13:1, below 4.5:1",
+      "dark body text: ink on surface is 1.95:1, below 4.5:1",
+      "dark body text: ink on soft is 1.72:1, below 4.5:1",
       "dark mark text: ink on highlight is 1.45:1, below 4.5:1",
-      "dark heading text: ink on bg is 2.04:1, below 3:1",
-      "dark heading text: ink on surface is 1.89:1, below 3:1",
-      "dark heading text: ink on soft is 1.73:1, below 3:1",
+      "dark heading text: ink on bg is 2.13:1, below 3:1",
+      "dark heading text: ink on surface is 1.95:1, below 3:1",
+      "dark heading text: ink on soft is 1.72:1, below 3:1",
     ]);
     const use: ContrastUse = findings[0]?.pair.use ?? "body";
     expect(findings[0]?.pair).toEqual({

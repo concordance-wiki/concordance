@@ -9,9 +9,11 @@ import {
   checkContrast,
   contrastPairs,
   contrastRatio,
+  relativeLuminance,
   type ColourScheme,
   type ContrastPair,
 } from "../../src/a11y/contrast.js";
+import { defaultThemeConfig } from "../../src/build/default-theme.js";
 import type { ThemeConfig } from "../../src/css/theme-config.js";
 import { paletteColours, type PaletteColour } from "../../src/css/tokens.js";
 
@@ -86,11 +88,11 @@ describe("L9-08 contrasts: measured by the checker on both palettes, no text und
       inkOnHighlight: 13.09,
     });
     expect(referenceRatios(PALETTES.default, "dark")).toEqual({
-      inkOnBg: 15.06,
-      mutedOnBg: 10.27,
-      labelOnSurface: 6.29,
-      accentOnBg: 7.31,
-      inkOnHighlight: 10.66,
+      inkOnBg: 15.75,
+      mutedOnBg: 8.46,
+      labelOnSurface: 5.58,
+      accentOnBg: 6.14,
+      inkOnHighlight: 10.67,
     });
   });
 
@@ -123,6 +125,94 @@ describe("L9-08 contrasts: measured by the checker on both palettes, no text und
     expect(checkContrast(paler).map((finding) => finding.message)).toEqual([
       "light link text: accent on bg is 4.37:1, below 4.5:1",
       "light link text: accent on soft is 4.18:1, below 4.5:1",
+    ]);
+  });
+});
+
+describe("L9-18 dark mode: a second palette measured on its own, never an inversion of the light one", () => {
+  const { light, dark } = PALETTES.default;
+  const shipped = defaultThemeConfig("Concordance");
+
+  it("ships the dark palette of the reference design in the brand file and in the default theme alike", () => {
+    expect(paletteColours(dark)).toEqual({
+      bg: "#0F1113",
+      surface: "#181B1E",
+      soft: "#22262A",
+      border: "#282C31",
+      ink: "#ECEAE6",
+      muted: "#A8AEB6",
+      label: "#8D939B",
+      accent: "#E8703A",
+      highlight: "#4A2A1B",
+    });
+    expect(shipped.dark).toEqual(dark);
+    expect(shipped.light).toEqual(light);
+  });
+
+  it("shares no colour with the light palette: the ground goes under the surface in both, the soft ground between them in light and above the surface in dark", () => {
+    const lightColours = new Set(Object.values(paletteColours(light)));
+    for (const colour of Object.values(paletteColours(dark))) {
+      expect(lightColours.has(colour), colour).toBe(false);
+    }
+    const order = (scheme: ColourScheme): PaletteColour[] =>
+      (["bg", "surface", "soft"] as const).toSorted(
+        (a, b) =>
+          relativeLuminance(paletteColours(PALETTES.default[scheme])[a]) -
+          relativeLuminance(paletteColours(PALETTES.default[scheme])[b]),
+      );
+    expect(order("light")).toEqual(["bg", "soft", "surface"]);
+    expect(order("dark")).toEqual(["bg", "surface", "soft"]);
+  });
+
+  it("raises the accent in lightness, #E8703A instead of #A8431C, so that a link holds 4.5:1 over every dark ground", () => {
+    expect(light.accent).toBe("#A8431C");
+    expect(dark.accent).toBe("#E8703A");
+    expect(relativeLuminance(dark.accent)).toBeGreaterThan(relativeLuminance(light.accent));
+    const links = textPairs(PALETTES.default).filter(
+      (pair) => pair.scheme === "dark" && pair.use === "link",
+    );
+    expect(links.map((pair) => [pair.background, pair.ratio])).toEqual([
+      ["bg", 6.14],
+      ["surface", 5.61],
+      ["soft", 4.94],
+    ]);
+  });
+
+  it("pins every dark ratio the checker measures, none deduced from the light scheme, and finds none under its minimum", () => {
+    const measured = contrastPairs(PALETTES.default)
+      .filter((pair) => pair.scheme === "dark")
+      .map((pair) => `${pair.use} ${pair.foreground} on ${pair.background} ${String(pair.ratio)}`);
+    expect(measured).toEqual([
+      "body ink on bg 15.75",
+      "body ink on surface 14.39",
+      "body ink on soft 12.68",
+      "muted muted on bg 8.46",
+      "muted muted on surface 7.74",
+      "muted muted on soft 6.81",
+      "label label on bg 6.11",
+      "label label on surface 5.58",
+      "label label on soft 4.92",
+      "link accent on bg 6.14",
+      "link accent on surface 5.61",
+      "link accent on soft 4.94",
+      "mark ink on highlight 10.67",
+      "heading ink on bg 15.75",
+      "heading ink on surface 14.39",
+      "heading ink on soft 12.68",
+      "focus accent on bg 6.14",
+      "focus accent on surface 5.61",
+      "focus accent on soft 4.94",
+    ]);
+    const keptAccent: ThemeConfig = {
+      ...PALETTES.default,
+      dark: { ...dark, accent: light.accent },
+    };
+    expect(checkContrast(keptAccent).map((finding) => finding.message)).toEqual([
+      "dark link text: accent on bg is 3.14:1, below 4.5:1",
+      "dark link text: accent on surface is 2.87:1, below 4.5:1",
+      "dark link text: accent on soft is 2.53:1, below 4.5:1",
+      "dark focus text: accent on surface is 2.87:1, below 3:1",
+      "dark focus text: accent on soft is 2.53:1, below 3:1",
     ]);
   });
 });

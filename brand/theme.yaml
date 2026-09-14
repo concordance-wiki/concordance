@@ -1,7 +1,9 @@
 # Concordance brand tokens; paths are relative to this file. A white-label
 # installation writes its own theme.yaml; it never touches the mark files.
 # The palettes are those of the default theme of the site: the light one warm
-# and the dark one measured on its own, never an inversion of the first.
+# and the dark one measured on its own, never an inversion of the first: the
+# ground goes under the surface the other way round, and the accent rises in
+# lightness to hold 4.5:1 over the dark grounds.
 name: Concordance
 logo: concordance-mark.svg
 favicon: favicon.svg
@@ -21,12 +23,12 @@ light:
   soft: "#F7F6F3"
   highlight: "#FBE3D4"
 dark:
-  bg: "#151618"
-  surface: "#1C1E21"
-  border: "#2E3136"
-  ink: "#ECEAE5"
-  muted: "#C5C3BD"
-  accent: "#EE8B5C"
-  label: "#9C9FA4"
-  soft: "#232528"
+  bg: "#0F1113"
+  surface: "#181B1E"
+  border: "#282C31"
+  ink: "#ECEAE6"
+  muted: "#A8AEB6"
+  accent: "#E8703A"
+  label: "#8D939B"
+  soft: "#22262A"
   highlight: "#4A2A1B"
