@@ -145,6 +145,7 @@ describe("concordance build", () => {
       "links: 0",
       "keyword pages: 0",
       "expressions under the threshold: 0",
+      "expressions set aside by confidence: 0",
       "duplicate candidate pairs: 0 by content, 0 scored, of 1 resources",
       "duplicate exact verifications: 0",
       "duplicates merged: 0, candidates: 0",
@@ -239,6 +240,7 @@ describe("concordance build", () => {
         "links: 0",
         "keyword pages: 0",
         "expressions under the threshold: 0",
+        "expressions set aside by confidence: 0",
         "duplicate candidate pairs: 0 by content, 0 scored, of 2 resources",
         "duplicate exact verifications: 0",
         "duplicates merged: 0, candidates: 0",
@@ -351,6 +353,7 @@ describe("concordance build", () => {
         "  explicit_link: 2",
         "keyword pages: 0",
         "expressions under the threshold: 0",
+        "expressions set aside by confidence: 0",
         "duplicate candidate pairs: 0 by content, 0 scored, of 3 resources",
         "duplicate exact verifications: 0",
         "duplicates merged: 0, candidates: 0",
@@ -372,7 +375,7 @@ describe("concordance build", () => {
           bySeverity: { error: 2, warning: 0, info: 0 },
           byCheck: { "E-ENCODING": 1, "E-FM-INVALID": 1 },
         },
-        keywords: { published: 0, discarded: 0 },
+        keywords: { published: 0, discarded: 0, withheld: 0 },
         duplicates: {
           resources: 2,
           candidatePairs: 0,
@@ -1042,6 +1045,9 @@ describe("concordance build", () => {
       text: string;
       min_occurrences?: number;
       min_files?: number;
+      min_confidence?: number;
+      /** For a withheld expression: its confidence stays under this value. */
+      max_confidence?: number;
       /** A note that uses the expression more than once, whose page marks the first occurrence only. */
       marked_once_in?: { source: string; path: string };
     }
@@ -1280,29 +1286,46 @@ describe("concordance build", () => {
         expect(built.log.findings).toEqual(built.model.findings);
       });
 
-      it("publishes the keyword pages of expected/keywords.yaml and none of the unpublished expressions", () => {
-        const { published, unpublished } = expected(corpus, "keywords.yaml") as {
+      it("publishes the keyword pages of expected/keywords.yaml and none of the unpublished or withheld expressions", () => {
+        const { published, unpublished, withheld } = expected(corpus, "keywords.yaml") as {
           published: ExpectedKeyword[];
           unpublished: ExpectedKeyword[];
+          withheld: ExpectedKeyword[];
         };
-        const pages = built.model.candidates.terms.filter((term) => term.page === true);
-        const pageOf = (text: string) =>
-          pages.find((term) => term.text.toLowerCase() === text.toLowerCase());
+        const { terms } = built.model.candidates;
+        const pages = terms.filter((term) => term.page === true);
+        const termOf = (text: string, list = terms) =>
+          list.find((term) => term.text.toLowerCase() === text.toLowerCase());
         for (const keyword of published) {
-          const page = pageOf(keyword.text);
+          const page = termOf(keyword.text, pages);
           expect(page, keyword.text).toBeDefined();
           expect(page?.occurrences).toBeGreaterThanOrEqual(keyword.min_occurrences ?? 3);
           expect(page?.documents).toBeGreaterThanOrEqual(keyword.min_files ?? 2);
-          expect(
-            built.model.entities.some(
-              (entity) => entity.keyword === true && entity.title.toLowerCase() === keyword.text,
-            ),
-          ).toBe(true);
+          expect(page?.confidence).toBeGreaterThanOrEqual(keyword.min_confidence ?? 0.5);
+          expect(page?.withheld).toBeUndefined();
+          const entity = built.model.entities.find(
+            (candidate) =>
+              candidate.keyword === true && candidate.title.toLowerCase() === keyword.text,
+          );
+          expect(entity?.attributes["confidence"]).toBe(page?.confidence);
         }
         for (const keyword of unpublished) {
-          expect(pageOf(keyword.text), keyword.text).toBeUndefined();
+          expect(termOf(keyword.text, pages), keyword.text).toBeUndefined();
+        }
+        for (const keyword of withheld) {
+          const term = termOf(keyword.text);
+          expect(term, keyword.text).toMatchObject({ page: false, withheld: true });
+          expect(term?.confidence).toBeLessThan(keyword.max_confidence ?? 0.5);
+          expect(term?.penalties?.length).toBeGreaterThan(0);
+          expect(
+            built.model.entities.some((entity) => entity.title === term?.text),
+            keyword.text,
+          ).toBe(false);
         }
         expect(built.log.summary.keywords?.published).toBe(pages.length);
+        expect(built.log.summary.keywords?.withheld).toBe(
+          terms.filter((term) => term.withheld === true).length,
+        );
       });
 
       it("marks the expression of a keyword page once per note, on its first occurrence, as a keyword link telling its passages, the other occurrences plain", () => {
@@ -1572,7 +1595,7 @@ describe("formatSummary", () => {
     ]);
   });
 
-  it("reports the keyword pages generated and the expressions discarded when the summary holds them", () => {
+  it("reports the keyword pages generated, the expressions discarded and those set aside by confidence when the summary holds them", () => {
     expect(
       formatSummary({
         sources: 1,
@@ -1580,7 +1603,7 @@ describe("formatSummary", () => {
         entities: {},
         links: {},
         findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
-        keywords: { published: 12, discarded: 340 },
+        keywords: { published: 12, discarded: 340, withheld: 25 },
       }),
     ).toEqual([
       "sources: 1",
@@ -1589,6 +1612,7 @@ describe("formatSummary", () => {
       "links: 0",
       "keyword pages: 12",
       "expressions under the threshold: 340",
+      "expressions set aside by confidence: 25",
       "findings: error 0, warning 0, info 0",
     ]);
   });

@@ -132,6 +132,44 @@ function readable(unit: ScannableUnit, labels: ReadonlySet<string>): ReadableUni
     : { text: read.text, ...(read.code === undefined ? {} : { code: read.code }) };
 }
 
+/** The string values of a frontmatter, at the top level and in its arrays: titles, aliases, summaries. */
+function frontmatterStrings(frontmatter: Record<string, unknown>): string[] {
+  const strings: string[] = [];
+  for (const value of Object.values(frontmatter)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (typeof item === "string") strings.push(item);
+    }
+  }
+  return strings;
+}
+
+/**
+ * The texts an author puts forward, whose expressions gain confidence: the headings of every
+ * note, the text of every written link, the strings of the frontmatter. Read for the
+ * confidence alone, never as usage: a heading names, it does not use.
+ */
+function prominentUnitsOf(
+  documents: readonly ParsedDocument[],
+  sources: readonly IngestedSource[],
+): KeywordUnit[] {
+  const units: KeywordUnit[] = [];
+  for (const source of sources) {
+    for (const note of documents.filter((candidate) => candidate.source === source.name)) {
+      const located = { source: source.name, path: note.path };
+      for (const unit of scannableText(note.document)) {
+        if (unit.kind === "heading") units.push({ ...located, line: unit.line, text: unit.text });
+      }
+      for (const link of note.document.links) {
+        units.push({ ...located, line: link.line, text: link.text });
+      }
+      for (const text of frontmatterStrings(note.document.frontmatter)) {
+        units.push({ ...located, line: 1, text });
+      }
+    }
+  }
+  return units;
+}
+
 /** The text units of the notes, then the pages of the documents, of the sources of one locale, in source then document order. */
 function unitsOf(
   documents: readonly ParsedDocument[],
@@ -157,14 +195,21 @@ function unitsOf(
   return units;
 }
 
-function termOf(candidate: KeywordCandidate, page: boolean): TermCandidate {
+function termOf(
+  candidate: KeywordCandidate,
+  status: { page: boolean; withheld: boolean },
+): TermCandidate {
   return {
     text: candidate.display,
     normalized: candidate.key,
     score: candidate.score,
     occurrences: candidate.occurrences,
     documents: candidate.documents,
-    page,
+    confidence: candidate.confidence,
+    signals: candidate.signals,
+    penalties: candidate.penalties,
+    page: status.page,
+    ...(status.withheld ? { withheld: true } : {}),
     contexts: candidate.mentions.map((mention) => ({
       path: mention.path,
       line: mention.line,
@@ -270,8 +315,10 @@ function takenOverOf(
 /**
  * The recurring expressions no note defines, locale by locale: n-grams over the scannable units
  * of every note and the pages of every document, headings and section labels left out, scored
- * by C-value × IDF against the dictionary of the locale, then split by the publication
- * threshold into keyword pages and discarded expressions.
+ * by C-value × IDF against the dictionary of the locale, each with the confidence its
+ * distribution gives it (the headings, written links and frontmatter counting as prominent
+ * texts), then split by the publication threshold and the confidence into keyword pages,
+ * discarded expressions and withheld ones.
  */
 export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywords {
   const { config } = input;
@@ -284,7 +331,7 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     mentions: new Map(),
     leads: new Map(),
     takenOver: new Map(),
-    counts: { published: 0, discarded: 0 },
+    counts: { published: 0, discarded: 0, withheld: 0 },
   };
   const pending: { ngrams: NgramOccurrence[]; dictionary: Dictionary; pack: LanguagePack }[] = [];
   const taken = new Set<string>();
@@ -292,21 +339,17 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
   for (const [locale, { dictionary, stopwords }] of input.dictionaries) {
     const pack = languagePack(locale);
     const sources = input.sources.filter((source) => source.locale === locale);
-    const ngrams = extractNgrams(
-      unitsOf(input.documents, input.resources ?? [], sources, labels),
-      pack,
-      {
-        ...options,
-        stopwords,
-      },
-    );
+    const extract = (units: KeywordUnit[]): NgramOccurrence[] =>
+      extractNgrams(units, pack, { ...options, stopwords });
+    const ngrams = extract(unitsOf(input.documents, input.resources ?? [], sources, labels));
     const candidates = scoreCandidates(ngrams, {
       ...options,
       pack,
       dictionaryKeys: new Set(dictionary.entries.keys()),
+      prominent: extract(prominentUnitsOf(input.documents, sources)),
     });
     result.findings.push(...undefinedTermFindings(candidates, { minScore: options.minScore }));
-    const { published, discarded } = publishKeywords(candidates, publication);
+    const { published, discarded, withheld } = publishKeywords(candidates, publication);
     const pages = withDistinctIds(published, taken);
     result.entities.push(...keywordEntities(pages, { locale }));
     for (const page of pages) {
@@ -317,11 +360,18 @@ export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywor
     }
     pending.push({ ngrams, dictionary, pack });
     const publishedKeys = new Set(pages.map((page) => page.key));
+    const withheldKeys = new Set(withheld.map((candidate) => candidate.key));
     result.terms.push(
-      ...candidates.map((candidate) => termOf(candidate, publishedKeys.has(candidate.key))),
+      ...candidates.map((candidate) =>
+        termOf(candidate, {
+          page: publishedKeys.has(candidate.key),
+          withheld: withheldKeys.has(candidate.key),
+        }),
+      ),
     );
     result.counts.published += pages.length;
     result.counts.discarded += discarded.length;
+    result.counts.withheld += withheld.length;
   }
   // Every page of every locale is known: an address one of them holds is no redirect.
   for (const { ngrams, dictionary, pack } of pending) {

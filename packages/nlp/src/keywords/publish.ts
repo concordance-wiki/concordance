@@ -11,6 +11,7 @@ export interface KeywordPage {
   occurrences: number;
   documents: number;
   score: number;
+  confidence: number;
   mentions: KeywordMention[];
 }
 
@@ -18,6 +19,8 @@ export interface KeywordPublicationOptions {
   minOccurrences: number;
   /** Distinct files the expression must appear in. */
   minFiles: number;
+  /** Confidence, in [0, 1], from which an expression at the threshold gets a page. */
+  minConfidence: number;
 }
 
 export interface PublishedKeywords {
@@ -25,6 +28,8 @@ export interface PublishedKeywords {
   published: KeywordPage[];
   /** Under the threshold, best score first; searchable, but without a page. */
   discarded: KeywordCandidate[];
+  /** At the threshold but under the confidence, best score first: suspected noise, searchable, without a page. */
+  withheld: KeywordCandidate[];
 }
 
 export interface KeywordEntitiesOptions {
@@ -34,6 +39,7 @@ export interface KeywordEntitiesOptions {
 export const keywordPublicationDefaults: KeywordPublicationOptions = {
   minOccurrences: 3,
   minFiles: 2,
+  minConfidence: 0.5,
 };
 
 /** The type of a keyword page: a term nobody has defined yet. */
@@ -50,12 +56,13 @@ function compareByScore(a: KeywordCandidate, b: KeywordCandidate): number {
   return b.score - a.score || byCodeUnit(a.key, b.key);
 }
 
-/** `inference.keyword_pages`, with its defaults: three occurrences in two distinct files. */
+/** `inference.keyword_pages`, with its defaults: three occurrences in two distinct files, a confidence of one half. */
 export function keywordPublicationOptions(config: Config): KeywordPublicationOptions {
   const pages = config.inference?.keyword_pages ?? {};
   return {
     minOccurrences: pages.min_occurrences ?? keywordPublicationDefaults.minOccurrences,
     minFiles: pages.min_files ?? keywordPublicationDefaults.minFiles,
+    minConfidence: pages.min_confidence ?? keywordPublicationDefaults.minConfidence,
   };
 }
 
@@ -67,9 +74,10 @@ function reachesThreshold(
 }
 
 /**
- * Splits the candidates into the pages to generate and the expressions the threshold
- * discards. Two keys with the same slug would share an address: the best-scored keeps the
- * plain identifier and the next ones take a numeric suffix, so that no page is lost.
+ * Splits the candidates into the pages to generate, the expressions the threshold
+ * discards and those the confidence withholds. Two keys with the same slug would share an
+ * address: the best-scored keeps the plain identifier and the next ones take a numeric
+ * suffix, so that no page is lost.
  */
 export function publishKeywords(
   candidates: readonly KeywordCandidate[],
@@ -77,10 +85,15 @@ export function publishKeywords(
 ): PublishedKeywords {
   const published: KeywordPage[] = [];
   const discarded: KeywordCandidate[] = [];
+  const withheld: KeywordCandidate[] = [];
   const taken = new Map<string, number>();
   for (const candidate of [...candidates].sort(compareByScore)) {
     if (!reachesThreshold(candidate, options)) {
       discarded.push(candidate);
+      continue;
+    }
+    if (candidate.confidence < options.minConfidence) {
+      withheld.push(candidate);
       continue;
     }
     const base = `keywords/${slugify(candidate.key)}`;
@@ -93,10 +106,11 @@ export function publishKeywords(
       occurrences: candidate.occurrences,
       documents: candidate.documents,
       score: candidate.score,
+      confidence: candidate.confidence,
       mentions: candidate.mentions,
     });
   }
-  return { published: published.toSorted((a, b) => byCodeUnit(a.id, b.id)), discarded };
+  return { published: published.toSorted((a, b) => byCodeUnit(a.id, b.id)), discarded, withheld };
 }
 
 function locationOf(page: KeywordPage): EntitySource {
@@ -109,7 +123,7 @@ function locationOf(page: KeywordPage): EntitySource {
 
 /**
  * One entity per page, marked `keyword: true`, of the type of a term, located on the first
- * mention of its expression, with its counts and score as attributes; in page order.
+ * mention of its expression, with its counts, score and confidence as attributes; in page order.
  */
 export function keywordEntities(
   pages: readonly KeywordPage[],
@@ -124,7 +138,12 @@ export function keywordEntities(
     status: KEYWORD_STATUS,
     type_origin: "default",
     graph: "full",
-    attributes: { documents: page.documents, occurrences: page.occurrences, score: page.score },
+    attributes: {
+      documents: page.documents,
+      occurrences: page.occurrences,
+      score: page.score,
+      confidence: page.confidence,
+    },
     source: locationOf(page),
     keyword: true,
   }));

@@ -197,6 +197,10 @@ describe("scoreCandidates", () => {
       occurrences: 3,
       documents: 3,
       score: 3.2958,
+      // Three files: the spread does not read; "related" is an inflected form.
+      confidence: 0.576,
+      signals: { spread: 1, burst: 1, prominence: 0, neighbour: false, inflected: true },
+      penalties: ["morphology"],
       mentions: [
         {
           source: "glossary",

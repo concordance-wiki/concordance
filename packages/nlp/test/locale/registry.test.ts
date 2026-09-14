@@ -17,6 +17,7 @@ function fakePack(locale: string): LanguagePack {
     language: "Test",
     normalize: (text) => text,
     segment: () => [],
+    suffixes: new Set(),
     stopwords: new Set(),
     plural: [],
     collator,

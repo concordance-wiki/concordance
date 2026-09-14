@@ -1,0 +1,7 @@
+# Endings of the inflected forms of English: a candidate expression whose word ends with one
+# is more often an adverb or a verb form of the prose than a term, and its confidence takes
+# a soft penalty, never an elimination ("meeting", "feed" are terms). One suffix per line,
+# the leading hyphen optional; compared on the comparison form of the words.
+-ly
+-ing
+-ed

@@ -26,19 +26,31 @@ function candidate(
   key: string,
   counts: { occurrences: number; documents: number },
   score: number,
+  confidence = 0.72,
 ): KeywordCandidate {
   const mentions: KeywordMention[] = [];
   for (let index = 0; index < counts.occurrences; index += 1) {
     const file = `note-${String(index % counts.documents)}.md`;
     mentions.push(mention("notes", file, index + 1));
   }
-  return { key, display: key, words: key.split(" ").length, ...counts, score, mentions };
+  const signals = { spread: 0.1, burst: 2, prominence: 0, neighbour: false, inflected: false };
+  return {
+    key,
+    display: key,
+    words: key.split(" ").length,
+    ...counts,
+    score,
+    confidence,
+    signals,
+    penalties: [],
+    mentions,
+  };
 }
 
 const summary = candidate("build summary", { occurrences: 4, documents: 3 }, 13.8621);
 const cold = candidate("cold start", { occurrences: 2, documents: 2 }, 2.1);
 const nightly = candidate("nightly batch", { occurrences: 3, documents: 1 }, 5.5);
-const threshold = { minOccurrences: 3, minFiles: 2 };
+const threshold = { minOccurrences: 3, minFiles: 2, minConfidence: 0.5 };
 
 describe("publishKeywords", () => {
   it("generates a keyword page only from three occurrences in at least two distinct files", () => {
@@ -55,6 +67,26 @@ describe("publishKeywords", () => {
     expect(result.discarded[0]?.mentions).toBe(cold.mentions);
   });
 
+  it("withholds an expression at the threshold whose confidence is under min_confidence", () => {
+    const noise = candidate("always filed", { occurrences: 9, documents: 8 }, 6, 0.36);
+    const border = candidate("border case", { occurrences: 3, documents: 2 }, 5, 0.5);
+    const result = publishKeywords([summary, noise, border, cold], threshold);
+    expect(result.published.map((page) => page.key)).toEqual(["border case", "build summary"]);
+    expect(result.withheld).toEqual([noise]);
+    expect(result.discarded).toEqual([cold]);
+    expect(publishKeywords([noise], { ...threshold, minConfidence: 0.3 }).withheld).toEqual([]);
+  });
+
+  it("lists the withheld expressions best score first, then by key, the discarded ones apart", () => {
+    const low = candidate("low tie", { occurrences: 3, documents: 2 }, 5, 0.1);
+    const lower = candidate("lower tie", { occurrences: 3, documents: 2 }, 5, 0.2);
+    const rare = candidate("rare noise", { occurrences: 2, documents: 1 }, 9, 0.1);
+    const result = publishKeywords([lower, rare, low], threshold);
+    expect(result.withheld.map((page) => page.key)).toEqual(["low tie", "lower tie"]);
+    expect(result.discarded.map((page) => page.key)).toEqual(["rare noise"]);
+    expect(result.published).toEqual([]);
+  });
+
   it("addresses every page under keywords/ by the slug of its key, sorted by identifier", () => {
     const accented = candidate("règle d'écrêtage", { occurrences: 3, documents: 2 }, 9);
     const result = publishKeywords([summary, accented], threshold);
@@ -65,6 +97,7 @@ describe("publishKeywords", () => {
       occurrences: 4,
       documents: 3,
       score: 13.8621,
+      confidence: 0.72,
       mentions: summary.mentions,
     };
     expect(result.published).toEqual([
@@ -105,7 +138,8 @@ describe("publishKeywords", () => {
       candidate("six in two", { occurrences: 6, documents: 2 }, 7),
     ];
     const count = (minOccurrences: number, minFiles: number): number =>
-      publishKeywords(candidates, { minOccurrences, minFiles }).published.length;
+      publishKeywords(candidates, { minOccurrences, minFiles, minConfidence: 0.5 }).published
+        .length;
     const lowered = count(1, 1);
     const standard = count(3, 2);
     const raised = count(5, 3);
@@ -114,9 +148,9 @@ describe("publishKeywords", () => {
     expect(raised).toBe(1);
     expect(lowered).toBeGreaterThan(standard);
     expect(standard).toBeGreaterThan(raised);
-    expect(publishKeywords(candidates, { minOccurrences: 5, minFiles: 3 }).discarded).toHaveLength(
-      5,
-    );
+    expect(
+      publishKeywords(candidates, { minOccurrences: 5, minFiles: 3, minConfidence: 0.5 }).discarded,
+    ).toHaveLength(5);
   });
 
   it("leaves the input untouched", () => {
@@ -127,31 +161,41 @@ describe("publishKeywords", () => {
 });
 
 describe("keywordPublicationOptions", () => {
-  it("exposes the threshold under inference.keyword_pages as min_occurrences and min_files", () => {
+  it("exposes the threshold under inference.keyword_pages as min_occurrences, min_files and min_confidence", () => {
     expect(
       keywordPublicationOptions({
         ...config,
-        inference: { keyword_pages: { min_occurrences: 5, min_files: 3 } },
+        inference: { keyword_pages: { min_occurrences: 5, min_files: 3, min_confidence: 0.8 } },
       }),
-    ).toEqual({ minOccurrences: 5, minFiles: 3 });
+    ).toEqual({ minOccurrences: 5, minFiles: 3, minConfidence: 0.8 });
     expect(
       keywordPublicationOptions({ ...config, inference: { keyword_pages: { min_files: 1 } } }),
-    ).toEqual({ minOccurrences: 3, minFiles: 1 });
+    ).toEqual({ minOccurrences: 3, minFiles: 1, minConfidence: 0.5 });
     expect(
       keywordPublicationOptions({
         ...config,
         inference: { keyword_pages: { min_occurrences: 1 } },
       }),
-    ).toEqual({ minOccurrences: 1, minFiles: 2 });
+    ).toEqual({ minOccurrences: 1, minFiles: 2, minConfidence: 0.5 });
+    expect(
+      keywordPublicationOptions({
+        ...config,
+        inference: { keyword_pages: { min_confidence: 0 } },
+      }),
+    ).toEqual({ minOccurrences: 3, minFiles: 2, minConfidence: 0 });
   });
 
-  it("defaults to three occurrences in two distinct files", () => {
-    expect(keywordPublicationOptions(config)).toEqual({ minOccurrences: 3, minFiles: 2 });
+  it("defaults to three occurrences in two distinct files and a confidence of one half", () => {
+    expect(keywordPublicationOptions(config)).toEqual(threshold);
     expect(keywordPublicationOptions({ ...config, inference: {} })).toEqual(threshold);
     expect(keywordPublicationOptions({ ...config, inference: { keyword_pages: {} } })).toEqual(
       threshold,
     );
-    expect(keywordPublicationDefaults).toEqual({ minOccurrences: 3, minFiles: 2 });
+    expect(keywordPublicationDefaults).toEqual({
+      minOccurrences: 3,
+      minFiles: 2,
+      minConfidence: 0.5,
+    });
   });
 });
 
@@ -167,7 +211,7 @@ describe("keywordEntities", () => {
       status: "valid",
       type_origin: "default",
       graph: "full",
-      attributes: { documents: 3, occurrences: 4, score: 13.8621 },
+      attributes: { documents: 3, occurrences: 4, score: 13.8621, confidence: 0.72 },
       source: { name: "notes", path: "note-0.md", line: 1 },
       keyword: true,
     };
@@ -193,6 +237,7 @@ describe("keywordEntities", () => {
       id: "keywords/nightly",
       key: "nightly",
       display: "Nightly",
+      confidence: 0.72,
       occurrences: 3,
       documents: 2,
       score: 5,
@@ -218,6 +263,7 @@ describe("keywordEntities", () => {
       id: "keywords/orphan",
       key: "orphan",
       display: "orphan",
+      confidence: 0.72,
       occurrences: 3,
       documents: 2,
       score: 5,
@@ -230,15 +276,20 @@ describe("keywordEntities", () => {
 });
 
 describe("the build summary of the keyword publication", () => {
-  it("counts the keyword pages generated and the expressions discarded by the threshold", () => {
-    const result = publishKeywords([summary, cold, nightly], threshold);
+  it("counts the keyword pages generated, the expressions discarded by the threshold and those withheld by the confidence", () => {
+    const noise = candidate("always filed", { occurrences: 9, documents: 8 }, 6, 0.36);
+    const result = publishKeywords([summary, cold, nightly, noise], threshold);
     const counts = summarize({
       sources: 1,
       files: 3,
       findings: [],
-      keywords: { published: result.published.length, discarded: result.discarded.length },
+      keywords: {
+        published: result.published.length,
+        discarded: result.discarded.length,
+        withheld: result.withheld.length,
+      },
     });
-    expect(counts.keywords).toEqual({ published: 1, discarded: 2 });
+    expect(counts.keywords).toEqual({ published: 1, discarded: 2, withheld: 1 });
   });
 });
 
@@ -251,13 +302,14 @@ describe.each(["en", "fr"])("the keyword pages of the minimal %s corpus", (local
   const publish = (): PublishedKeywords =>
     publishKeywords(candidates, keywordPublicationOptions(corpus.config));
 
-  it("publishes every expected expression with at least the expected counts", () => {
+  it("publishes every expected expression with at least the expected counts and confidence", () => {
     const result = publish();
     for (const expectation of corpus.expected.published) {
       const page = result.published.find((p) => p.key === pack.normalize(expectation.text));
       expect(page, expectation.text).toBeDefined();
       expect(page?.occurrences).toBeGreaterThanOrEqual(expectation.min_occurrences ?? 0);
       expect(page?.documents).toBeGreaterThanOrEqual(expectation.min_files ?? 0);
+      expect(page?.confidence).toBeGreaterThanOrEqual(expectation.min_confidence ?? 0.5);
       expect(page?.id).toBe(`keywords/${pack.normalize(expectation.text).replaceAll(" ", "-")}`);
     }
   });
@@ -273,13 +325,23 @@ describe.each(["en", "fr"])("the keyword pages of the minimal %s corpus", (local
     }
   });
 
-  it("publishes nothing more under the configured threshold than the discovery keeps", () => {
+  it("publishes nothing more under the configured threshold than the discovery keeps, the confidence withholding some", () => {
     const result = publish();
     const strict = discover(corpus)
       .map((c) => c.key)
       .sort();
-    expect(result.published.map((p) => p.key).sort()).toEqual(strict);
-    expect(result.published.length + result.discarded.length).toBe(candidates.length);
+    const kept = [...result.published.map((p) => p.key), ...result.withheld.map((c) => c.key)];
+    expect(kept.sort()).toEqual(strict);
+    expect(result.withheld.length).toBeGreaterThan(0);
+    for (const candidate of result.withheld) {
+      expect(candidate.confidence).toBeLessThan(0.5);
+    }
+    for (const page of result.published) {
+      expect(page.confidence).toBeGreaterThanOrEqual(0.5);
+    }
+    expect(result.published.length + result.discarded.length + result.withheld.length).toBe(
+      candidates.length,
+    );
   });
 
   it("gives every page a valid entity located in the corpus", () => {

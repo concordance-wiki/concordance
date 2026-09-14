@@ -94,6 +94,7 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
       : [
           `keyword pages: ${String(keywords.published)}`,
           `expressions under the threshold: ${String(keywords.discarded)}`,
+          `expressions set aside by confidence: ${String(keywords.withheld)}`,
         ]),
     ...(duplicates === undefined ? [] : formatDuplicateStats(duplicates)),
     `findings: error ${String(bySeverity.error)}, warning ${String(bySeverity.warning)}, info ${String(bySeverity.info)}`,

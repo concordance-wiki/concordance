@@ -96,7 +96,7 @@ export interface InferenceConfig {
   type_prefixes?: Record<string, Record<string, string[]>>;
   cross_source_links?: boolean;
   ngrams?: { min?: number; max?: number; min_occurrences?: number; min_documents?: number };
-  keyword_pages?: { min_occurrences?: number; min_files?: number };
+  keyword_pages?: { min_occurrences?: number; min_files?: number; min_confidence?: number };
   neighbours?: { k?: number };
   candidate_score?: number;
   duplicates?: DuplicatesConfig;

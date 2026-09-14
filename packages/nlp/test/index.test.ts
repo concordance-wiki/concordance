@@ -3,13 +3,19 @@ import { describe, expect, it } from "vitest";
 import * as entry from "../src/index.js";
 
 describe("@concordance-wiki/nlp", () => {
-  it("exposes the language pack registry, the stopword file reader, text normalisation, the search tokens, the dictionary, the occurrence scan, the keyword discovery and its publication", () => {
+  it("exposes the language pack registry, the stopword and suffix file readers, text normalisation, the search tokens, the dictionary, the occurrence scan, the keyword discovery and its publication", () => {
     expect(Object.keys(entry).sort()).toEqual([
+      "BURST_MIN_FILES",
+      "BURST_PER_FILE",
       "CONTEXT_WIDTH",
       "HOMONYM_CHECK",
       "KEYWORD_TYPE",
       "LanguagePackError",
+      "MORPHOLOGY_PENALTY",
+      "NEIGHBOURHOOD_BASE",
+      "POSITION_BASE",
       "SIMILAR_EXPRESSIONS_LIMIT",
+      "SPREAD_MIN_FILES",
       "UNDEFINED_TERM_CHECK",
       "availableLocales",
       "buildAutomaton",
@@ -19,6 +25,10 @@ describe("@concordance-wiki/nlp", () => {
       "compareOccurrences",
       "comparisonForm",
       "comparisonWords",
+      "confidenceDefaults",
+      "confidenceFactors",
+      "confidenceOf",
+      "confidencePenalties",
       "definedExpressions",
       "dictionaryStopwords",
       "extractNgrams",
@@ -34,6 +44,7 @@ describe("@concordance-wiki/nlp", () => {
       "languagePack",
       "loadLanguagePack",
       "loadStopwords",
+      "loadSuffixes",
       "longestMatches",
       "occurrenceConfidence",
       "occurrenceContext",

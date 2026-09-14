@@ -24,6 +24,9 @@ function candidate(
     occurrences: counts.occurrences,
     documents: counts.documents,
     score,
+    confidence: 0.72,
+    signals: { spread: 0.1, burst: 2, prominence: 0, neighbour: false, inflected: false },
+    penalties: [],
     mentions,
   };
 }

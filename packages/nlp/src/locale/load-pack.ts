@@ -8,6 +8,7 @@ import { normalizer } from "./normalize.js";
 import type { LanguagePack, PluralRule, Word } from "./pack.js";
 import { canonicalLocale } from "./tag.js";
 import { loadStopwords } from "./stopwords.js";
+import { loadSuffixes } from "./suffixes.js";
 
 interface PackDocument {
   locale: string;
@@ -47,9 +48,21 @@ function canonical(tag: string, directory: URL): Locale {
   }
 }
 
+/** The text of an optional file of the pack: an absent file reads as empty, any other failure is raised. */
+function optionalText(url: URL): string {
+  try {
+    return readFileSync(url, "utf8");
+  } catch (error) {
+    // A node file system error carries its code; any other value has none and is rethrown.
+    if ((error as { code?: unknown }).code === "ENOENT") return "";
+    throw error;
+  }
+}
+
 /**
- * Reads a language pack from a folder holding `pack.yaml` and `stopwords.txt`.
- * The core packs and the ones shipped by plugins are read the same way.
+ * Reads a language pack from a folder holding `pack.yaml` and `stopwords.txt`, and
+ * `suffixes.txt` when the pack lists inflected-form suffixes. The core packs and the ones
+ * shipped by plugins are read the same way.
  */
 export function loadLanguagePack(directory: URL): LanguagePack {
   const base = directory.href.endsWith("/") ? directory : new URL(`${directory.href}/`);
@@ -57,6 +70,7 @@ export function loadLanguagePack(directory: URL): LanguagePack {
   const locale = canonical(document.locale, base);
   const collator = new Intl.Collator(locale, document.collation);
   const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
+  const normalize = normalizer(document.apostrophes ?? []);
   const plural: PluralRule[] = document.plural.map((rule) => ({
     ending: rule.ending,
     singular: rule.singular,
@@ -65,7 +79,7 @@ export function loadLanguagePack(directory: URL): LanguagePack {
   return {
     locale,
     language: document.language,
-    normalize: normalizer(document.apostrophes ?? []),
+    normalize,
     segment: (text): Word[] =>
       [...segmenter.segment(text)].map((part) => ({
         text: part.segment,
@@ -73,6 +87,7 @@ export function loadLanguagePack(directory: URL): LanguagePack {
         isWordLike: part.isWordLike === true,
       })),
     stopwords: new Set(loadStopwords(readFileSync(new URL("stopwords.txt", base), "utf8"))),
+    suffixes: new Set(loadSuffixes(optionalText(new URL("suffixes.txt", base)), normalize)),
     plural,
     collator,
     compare: (a, b) => collator.compare(a, b),

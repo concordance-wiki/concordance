@@ -59,14 +59,14 @@ describe("summarize", () => {
     });
   });
 
-  it("counts the keyword pages generated and the expressions discarded by the threshold", () => {
+  it("counts the keyword pages generated, the expressions discarded by the threshold and those withheld by the confidence", () => {
     const summary = summarize({
       sources: 1,
       files: 4,
       findings: [],
-      keywords: { published: 12, discarded: 340 },
+      keywords: { published: 12, discarded: 340, withheld: 25 },
     });
-    expect(summary.keywords).toEqual({ published: 12, discarded: 340 });
+    expect(summary.keywords).toEqual({ published: 12, discarded: 340, withheld: 25 });
     expect(Object.keys(summary)).toEqual([
       "sources",
       "files",
@@ -260,13 +260,13 @@ describe("serializeBuildLog", () => {
   it("writes the keyword counts after the findings only when the summary holds them", () => {
     const withKeywords: BuildLog = {
       ...log,
-      summary: { ...log.summary, keywords: { discarded: 7, published: 2 } },
+      summary: { ...log.summary, keywords: { withheld: 1, discarded: 7, published: 2 } },
     };
     const text = serializeBuildLog(withKeywords);
     expect(text).toContain(
-      '      "byCheck": {\n        "E-ENCODING": 1,\n        "E-FM-INVALID": 1\n      }\n    },\n    "keywords": {\n      "published": 2,\n      "discarded": 7\n    }\n  },\n',
+      '      "byCheck": {\n        "E-ENCODING": 1,\n        "E-FM-INVALID": 1\n      }\n    },\n    "keywords": {\n      "published": 2,\n      "discarded": 7,\n      "withheld": 1\n    }\n  },\n',
     );
-    expect(parse(text).summary.keywords).toEqual({ published: 2, discarded: 7 });
+    expect(parse(text).summary.keywords).toEqual({ published: 2, discarded: 7, withheld: 1 });
     expect(serializeBuildLog(log)).not.toContain("keywords");
   });
 

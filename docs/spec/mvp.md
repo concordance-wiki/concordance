@@ -443,9 +443,9 @@ Depends on: L1-04.
 As the pipeline owner, I want to control the number of generated pages so that the site does not go from two thousand to fifty thousand files without my deciding it.
 
 - A keyword page is generated only from three occurrences in at least two distinct files.
-- The threshold is exposed in configuration under `inference.keyword_pages` (`min_occurrences`, `min_files`).
-- Below the threshold, the word remains findable through full-text search but has no page.
-- The build summary reports the number of keyword pages generated and the number of expressions discarded by the threshold.
+- The threshold is exposed in configuration under `inference.keyword_pages` (`min_occurrences`, `min_files`, and `min_confidence`, the confidence in [0, 1] every candidate carries from the shape of its distribution: spread across the files, occurrences per file, prominence in headings, written links and frontmatter, the company of a defined term, the inflected-form suffixes of the language pack).
+- Below the threshold, the word remains findable through full-text search but has no page; at the counts but under the confidence it is suspected noise, without a page nor a mark in the text, listed on the to-do page with its reason.
+- The build summary reports the number of keyword pages generated, the number of expressions discarded by the threshold and the number set aside by confidence.
 - A test verifies that lowering the threshold increases the page count and raising it decreases it.
 
 Depends on: L1-11.

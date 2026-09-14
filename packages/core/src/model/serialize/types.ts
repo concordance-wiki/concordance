@@ -34,6 +34,23 @@ export interface TermContext {
   context: string;
 }
 
+/** What the confidence of a term candidate was read from; the shares rounded to four decimals. */
+export interface TermSignals {
+  /** Share of the corpus files holding the expression. */
+  spread: number;
+  /** Occurrences per file holding the expression. */
+  burst: number;
+  /** Appearances in a heading, a written link or the frontmatter per occurrence, in [0, 1]. */
+  prominence: number;
+  /** The expression is, or is a component of, a frequent n-gram that also holds a defined term. */
+  neighbour: boolean;
+  /** A word of the expression ends with an inflected-form suffix of the language pack. */
+  inflected: boolean;
+}
+
+/** A signal that lowered the confidence of a term candidate. */
+export type TermPenalty = "spread" | "burst" | "morphology";
+
 /** A recurring expression that no note defines. */
 export interface TermCandidate {
   text: string;
@@ -41,7 +58,14 @@ export interface TermCandidate {
   score: number;
   occurrences: number;
   documents: number;
+  /** In [0, 1]: how much the distribution of the expression looks like a term's rather than a word of the language's. */
+  confidence?: number;
+  signals?: TermSignals;
+  /** The signals that lowered the confidence, in formula order. */
+  penalties?: TermPenalty[];
   page?: boolean;
+  /** At the publication threshold but under `min_confidence`: suspected noise, without a page. */
+  withheld?: boolean;
   contexts?: TermContext[];
 }
 

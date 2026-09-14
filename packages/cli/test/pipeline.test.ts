@@ -6,11 +6,13 @@ import {
   type CheckContribution,
   type Config,
   type Entity,
+  type KeywordCounts,
   type Link,
   type PluginRegistry,
   type SourceInput,
   type SourceOutput,
   type SourceProvider,
+  type TermCandidate,
 } from "@concordance-wiki/core";
 import { ingestSources } from "@concordance-wiki/ingest";
 import { loadDefaultProfile, type Profile } from "@concordance-wiki/profile";
@@ -805,7 +807,7 @@ describe("keyword discovery and publication", () => {
         .map((page) => `${page.id} ${page.locale}`),
     ).toEqual(["keywords/cache-warmup en", "keywords/cache-warmup-2 fr"]);
     expect(new Set(pages.map((page) => page.id)).size).toBe(pages.length);
-    expect(result.keywords).toEqual({ published: pages.length, discarded: 0 });
+    expect(result.keywords).toEqual({ published: pages.length, discarded: 0, withheld: 0 });
   });
 
   it("counts the expressions the publication threshold discards and records them as terms without a page", async () => {
@@ -842,6 +844,98 @@ describe("keyword discovery and publication", () => {
     expect(discovered.terms[0]?.contexts?.[0]).toMatchObject({
       line: expect.any(Number) as number,
     });
+  });
+});
+
+describe("keyword discovery reads the confidence of every candidate", () => {
+  /** Discovery over an in-memory corpus, the terms keyed by their text, with the counts. */
+  async function discovered(
+    files: Record<string, string>,
+    configText = twoSources,
+  ): Promise<{ terms: Map<string, TermCandidate>; counts: KeywordCounts }> {
+    const { input } = await corpus(files, configText);
+    const parsed = parseSources(input.sources, input.fs);
+    const typed = typeNotes({
+      sources: input.sources,
+      documents: indexDocuments(parsed.documents),
+      config: input.config,
+      profile,
+    });
+    const dictionaries = buildDictionaries({
+      entities: typed.entities,
+      sources: input.sources,
+      config: input.config,
+      configDirectory: "/work",
+      fs: input.fs,
+    });
+    const result = discoverKeywords({
+      documents: parsed.documents,
+      sources: input.sources,
+      dictionaries: dictionaries.byLocale,
+      config: input.config,
+      profile,
+    });
+    return { terms: new Map(result.terms.map((term) => [term.text, term])), counts: result.counts };
+  }
+
+  /** Six notes, each using "cache warmup" once in passing, and "cold start" treated in two. */
+  const passing: Record<string, string> = Object.fromEntries(
+    ["a", "b", "c", "d", "e", "f"].map((name) => [
+      `/work/specs/screens/${name}.md`,
+      `# Screen ${name}\n\nThe cache warmup runs first.\n`,
+    ]),
+  );
+  const treated: Record<string, string> = {
+    "/work/specs/screens/g.md":
+      "---\naliases: [cold start delay]\nsummary: A cold start is slow.\ndepth: 2\n---\n# Screen g\n\n## Cold start\n\nA cold start reads every file; the cold start is slow. See [cold start](./h.md).\n",
+    "/work/specs/screens/h.md":
+      "# Second screen\n\n## Cold start\n\nThe cold start of this screen; a cold start again.\n",
+  };
+
+  it("withholds an expression mentioned once in each of five files and records why, without a page", async () => {
+    const { terms, counts } = await discovered({ ...passing, ...treated });
+    const warmup = terms.get("cache warmup");
+    expect(warmup).toMatchObject({
+      page: false,
+      withheld: true,
+      confidence: 0.36,
+      penalties: ["burst"],
+    });
+    expect(warmup?.signals).toEqual({
+      spread: 0.75,
+      burst: 1,
+      prominence: 0,
+      neighbour: false,
+      inflected: false,
+    });
+    // The parts and the longer n-grams of both expressions share their fate.
+    expect(counts).toEqual({ published: 3, discarded: 0, withheld: 6 });
+  });
+
+  it("counts the headings, the written links and the frontmatter strings as prominent texts, never as usage", async () => {
+    const { terms } = await discovered({ ...passing, ...treated });
+    const cold = terms.get("cold start");
+    // Five usages; put forward by two headings, one link, one alias and one summary.
+    expect(cold).toMatchObject({ page: true, occurrences: 5, documents: 2, confidence: 0.9 });
+    expect(cold?.withheld).toBeUndefined();
+    expect(cold?.signals).toEqual({
+      spread: 0.25,
+      burst: 2.5,
+      prominence: 1,
+      neighbour: false,
+      inflected: false,
+    });
+  });
+
+  it("publishes a withheld expression when min_confidence is lowered", async () => {
+    const config = `${twoSources}inference: { keyword_pages: { min_confidence: 0.3 } }\n`;
+    const { terms, counts } = await discovered(
+      { ...passing, ...treated },
+      config.replace("inference: { cross_source_links: true }\n", ""),
+    );
+    expect(terms.get("cache warmup")).toMatchObject({ page: true, confidence: 0.36 });
+    expect(terms.get("cache warmup")?.withheld).toBeUndefined();
+    expect(counts).toEqual({ published: 9, discarded: 0, withheld: 0 });
   });
 });
 

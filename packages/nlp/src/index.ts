@@ -8,6 +8,7 @@ export {
 } from "./locale/registry.js";
 export { canonicalLocale } from "./locale/tag.js";
 export { loadStopwords } from "./locale/stopwords.js";
+export { loadSuffixes } from "./locale/suffixes.js";
 export { isOnWordBoundaries, wordBoundaries, type WordBoundary } from "./text/boundaries.js";
 export { comparisonForm, comparisonWords } from "./text/comparison-form.js";
 export { searchTokens } from "./text/search-tokens.js";
@@ -65,6 +66,23 @@ export {
   type KeywordMention,
   type ScoreCandidatesOptions,
 } from "./keywords/score.js";
+export {
+  BURST_MIN_FILES,
+  BURST_PER_FILE,
+  confidenceDefaults,
+  confidenceFactors,
+  confidenceOf,
+  confidencePenalties,
+  MORPHOLOGY_PENALTY,
+  NEIGHBOURHOOD_BASE,
+  POSITION_BASE,
+  SPREAD_MIN_FILES,
+  type ConfidenceFactors,
+  type ConfidenceInput,
+  type ConfidenceOptions,
+  type ConfidencePenalty,
+  type ConfidenceSignals,
+} from "./keywords/confidence.js";
 export {
   UNDEFINED_TERM_CHECK,
   undefinedTermFindings,

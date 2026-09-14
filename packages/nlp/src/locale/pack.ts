@@ -26,6 +26,8 @@ export interface LanguagePack {
   /** Cuts a text into words with the locale's rules (Unicode segmentation). */
   segment: (text: string) => Word[];
   stopwords: ReadonlySet<string>;
+  /** Endings of the inflected forms of the language, in comparison form; empty when the pack lists none. */
+  suffixes: ReadonlySet<string>;
   plural: readonly PluralRule[];
   /** Locale-aware, accent-insensitive and numeric, for every alphabetical index. */
   collator: Intl.Collator;
