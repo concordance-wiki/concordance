@@ -1,9 +1,7 @@
 import type { ThemeConfig } from "../css/theme-config.js";
-import { paletteColours, type PaletteColour } from "../css/tokens.js";
+import { paletteColours, type ColourScheme, type PaletteColour } from "../css/tokens.js";
 
-export type { PaletteColour } from "../css/tokens.js";
-
-export type ColourScheme = "light" | "dark";
+export type { ColourScheme, PaletteColour } from "../css/tokens.js";
 
 /** What a pair of tokens is used for; each use has its own minimum ratio. */
 export type ContrastUse = "body" | "muted" | "label" | "link" | "mark" | "heading" | "focus";

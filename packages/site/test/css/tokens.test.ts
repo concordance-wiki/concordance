@@ -36,8 +36,29 @@ describe("tokensStylesheet", () => {
     expect(css).toContain("  --space-1: 0.25rem;\n  --space-2: 0.5rem;\n  --space-3: 1rem;");
     expect(css).toContain("  --space-6: 4rem;");
     expect(css).toContain(
-      "  --color-bg: #F6F5F2;\n  --color-surface: #FFFFFF;\n  --color-soft: #F6F5F2;\n  --color-border: #E4E1DA;\n  --color-ink: #16181B;\n  --color-muted: #4E5259;\n  --color-label: #4E5259;\n  --color-accent: #B84820;\n  --color-highlight: #E4E1DA;\n}",
+      "  --scheme: light;\n  --color-bg: #F6F5F2;\n  --color-surface: #FFFFFF;\n  --color-soft: #F6F5F2;\n  --color-border: #E4E1DA;\n  --color-ink: #16181B;\n  --color-muted: #4E5259;\n  --color-label: #4E5259;\n  --color-accent: #B84820;\n  --color-highlight: #E4E1DA;\n  --shadow-float: 0 6px 18px rgb(0 0 0 / 10%);\n}",
     );
+  });
+
+  it("names the scheme of every palette block and drops the floating shadow in the dark one, where grounds and rules carry the hierarchy", () => {
+    const css = tokensStylesheet(theme);
+    const blocks = css.split("\n}\n").filter((block) => block.includes("--scheme:"));
+    expect(blocks).toHaveLength(4);
+    expect(blocks.map((block) => /--scheme: (\w+)/.exec(block)?.[1])).toEqual([
+      "light",
+      "dark",
+      "light",
+      "dark",
+    ]);
+    expect(blocks.map((block) => /--shadow-float: ([^;]+);/.exec(block)?.[1])).toEqual([
+      "0 6px 18px rgb(0 0 0 / 10%)",
+      "none",
+      "0 6px 18px rgb(0 0 0 / 10%)",
+      "none",
+    ]);
+    const dark = tokensStylesheet({ ...theme, default_mode: "dark" });
+    expect(dark).toContain(":root {\n  color-scheme: dark;\n");
+    expect(dark).toMatch(/:root \{[^}]*--scheme: dark;[^}]*--shadow-float: none;\n\}/);
   });
 
   it("writes the label, soft and highlight colours a theme declares, and derives them from muted, bg and border otherwise", () => {
@@ -49,7 +70,7 @@ describe("tokensStylesheet", () => {
     expect(css).toContain("  --color-label: #676C74;");
     expect(css).toContain("  --color-highlight: #FBE3D4;");
     expect(css).toContain(
-      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --color-bg: #0E0F11;\n  --color-surface: #16181B;\n  --color-soft: #0E0F11;',
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --scheme: dark;\n  --color-bg: #0E0F11;\n  --color-surface: #16181B;\n  --color-soft: #0E0F11;',
     );
     expect(paletteColours(theme.dark)).toEqual({
       bg: "#0E0F11",
@@ -67,13 +88,13 @@ describe("tokensStylesheet", () => {
   it("follows the system preference and the remembered mode by default", () => {
     const css = tokensStylesheet(theme);
     expect(css).toContain(
-      '@media (prefers-color-scheme: dark) {\n:root:not([data-mode="light"]) {\n  --color-bg: #0E0F11;',
+      '@media (prefers-color-scheme: dark) {\n:root:not([data-mode="light"]) {\n  --scheme: dark;\n  --color-bg: #0E0F11;',
     );
     expect(css).toContain(
-      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --color-bg: #0E0F11;\n  --color-surface: #16181B;\n  --color-soft: #0E0F11;\n  --color-border: #26292E;\n  --color-ink: #E8E6E1;\n  --color-muted: #8B9199;\n  --color-label: #8B9199;\n  --color-accent: #E8703A;\n  --color-highlight: #26292E;\n}',
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --scheme: dark;\n  --color-bg: #0E0F11;\n  --color-surface: #16181B;\n  --color-soft: #0E0F11;\n  --color-border: #26292E;\n  --color-ink: #E8E6E1;\n  --color-muted: #8B9199;\n  --color-label: #8B9199;\n  --color-accent: #E8703A;\n  --color-highlight: #26292E;\n  --shadow-float: none;\n}',
     );
     expect(css).toContain(
-      ':root[data-mode="light"] {\n  color-scheme: light;\n  --color-bg: #F6F5F2;',
+      ':root[data-mode="light"] {\n  color-scheme: light;\n  --scheme: light;\n  --color-bg: #F6F5F2;',
     );
     expect(css.endsWith("}\n")).toBe(true);
   });
@@ -107,7 +128,7 @@ describe("tokensStylesheet", () => {
     expect(css).toContain(":root {\n  color-scheme: light;\n");
     expect(css).not.toContain("prefers-color-scheme");
     expect(css).toContain(
-      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --color-bg: #0E0F11;',
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --scheme: dark;\n  --color-bg: #0E0F11;',
     );
     expect(css).not.toContain('[data-mode="light"]');
   });
@@ -118,7 +139,7 @@ describe("tokensStylesheet", () => {
     expect(css).toContain("  --color-bg: #0E0F11;\n  --color-surface: #16181B;");
     expect(css).not.toContain("prefers-color-scheme");
     expect(css).toContain(
-      ':root[data-mode="light"] {\n  color-scheme: light;\n  --color-bg: #F6F5F2;',
+      ':root[data-mode="light"] {\n  color-scheme: light;\n  --scheme: light;\n  --color-bg: #F6F5F2;',
     );
     expect(css).not.toContain('[data-mode="dark"]');
   });

@@ -17,6 +17,9 @@ function fontStack(family: string | undefined, fallback: string): string {
     : `${JSON.stringify(family)}, ${fallback}`;
 }
 
+/** One of the two schemes of a theme, the palette in force; `--scheme` on the root names it. */
+export type ColourScheme = Exclude<ThemeMode, "system">;
+
 /** A colour of a palette as the stylesheet names it, `--color-<name>`. */
 export type PaletteColour =
   "bg" | "surface" | "soft" | "border" | "ink" | "muted" | "label" | "accent" | "highlight";
@@ -36,10 +39,21 @@ export function paletteColours(palette: ThemePalette): Record<PaletteColour, str
   };
 }
 
-function paletteLines(palette: ThemePalette): string[] {
-  return Object.entries(paletteColours(palette)).map(
-    ([name, colour]) => `  --color-${name}: ${colour};`,
-  );
+/** The shadow of what floats over the page, the live results or the trail; none in the dark scheme, where the hierarchy is carried by the grounds and the rules alone. */
+const FLOAT_SHADOW: Readonly<Record<ColourScheme, string>> = {
+  light: "0 6px 18px rgb(0 0 0 / 10%)",
+  dark: "none",
+};
+
+/** The lines of one scheme: the scheme named for the mode switch to read, its nine colours, its shadow. */
+function schemeLines(scheme: ColourScheme, palette: ThemePalette): string[] {
+  return [
+    `  --scheme: ${scheme};`,
+    ...Object.entries(paletteColours(palette)).map(
+      ([name, colour]) => `  --color-${name}: ${colour};`,
+    ),
+    `  --shadow-float: ${FLOAT_SHADOW[scheme]};`,
+  ];
 }
 
 function block(selector: string, lines: string[]): string {
@@ -47,10 +61,10 @@ function block(selector: string, lines: string[]): string {
 }
 
 /** The palette of a mode forced through `data-mode`, with the matching `color-scheme` for form controls. */
-function forced(mode: Exclude<ThemeMode, "system">, palette: ThemePalette): string {
+function forced(mode: ColourScheme, palette: ThemePalette): string {
   return block(`:root[data-mode="${mode}"]`, [
     `  color-scheme: ${mode};`,
-    ...paletteLines(palette),
+    ...schemeLines(mode, palette),
   ]);
 }
 
@@ -59,11 +73,12 @@ function forced(mode: Exclude<ThemeMode, "system">, palette: ThemePalette): stri
  * the text, headings included, unless the theme names a display family; the monospace family is
  * reserved to file paths and identifiers. The default mode decides which palette the root
  * carries; the other answers the system preference and a `data-mode` attribute on the root,
- * which the mode switch sets and remembers.
+ * which the mode switch sets and remembers. Every palette block names its scheme in `--scheme`
+ * and sets the shadow of what floats over the page, none in the dark scheme.
  */
 export function tokensStylesheet(theme: ThemeConfig): string {
   const mode = theme.default_mode ?? "system";
-  const initial = mode === "dark" ? theme.dark : theme.light;
+  const initial: ColourScheme = mode === "dark" ? "dark" : "light";
   const ui = fontStack(theme.font?.ui, FALLBACKS.ui);
   const radius = theme.radius ?? DEFAULT_RADIUS;
   const root = block(":root", [
@@ -76,13 +91,13 @@ export function tokensStylesheet(theme: ThemeConfig): string {
     `  --radius-large: ${String(radius * 1.5)}px;`,
     ...SPACING.map((value, index) => `  --space-${String(index + 1)}: ${value};`),
     "  --measure: 70ch;",
-    ...paletteLines(initial),
+    ...schemeLines(initial, theme[initial]),
   ]);
   const blocks = [root];
   if (mode === "system") {
     blocks.push(
       block("@media (prefers-color-scheme: dark)", [
-        block(':root:not([data-mode="light"])', paletteLines(theme.dark)),
+        block(':root:not([data-mode="light"])', schemeLines("dark", theme.dark)),
       ]),
     );
   }
