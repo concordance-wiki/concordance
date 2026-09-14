@@ -101,8 +101,9 @@
 }
 
 .cue {
-  display: flex;
-  gap: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
   padding-block: var(--space-1) var(--space-2);
 }
 
@@ -145,7 +146,7 @@
   line-height: 1.65;
 }
 
-/* The decisions the meeting produced: a card in the surface colour at the start of the column, the lead in words, the decisions as links. */
+/* The decisions the meeting produced: a card in the surface colour under the cue each came from, at the head of the transcript for the ones no cue names, after the tabs for a meeting without a transcript; the lead in words, the decisions as links. */
 .meeting-decisions {
   margin-block-start: var(--space-3);
 }
@@ -154,16 +155,26 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.5625rem;
   inline-size: fit-content;
   margin: 0;
-  padding: var(--space-2) var(--space-3);
+  padding: 0.625rem 0.8125rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-muted);
   font-size: 0.8125rem;
   font-weight: 500;
+  line-height: 1.4;
+}
+
+.cue > .meeting-decision {
+  grid-column: 2;
+  margin-block-start: 0.625rem;
+}
+
+.meeting-panel > .meeting-decision {
+  margin-block-end: var(--space-3);
 }
 
 .meeting-decision-link {

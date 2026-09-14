@@ -294,7 +294,11 @@ export const corporateMeetingPage: SlotProps["EntityPage"] = {
     participants: "Pseudonymised participants",
     pseudonymized: true,
     decisions: [
-      { label: "Threshold applied in model", href: "../../decisions/threshold-applied-in-model/" },
+      {
+        label: "Threshold applied in model",
+        href: "../../decisions/threshold-applied-in-model/",
+        cue: 4,
+      },
     ],
     grouping: {
       count: 3,
@@ -305,7 +309,7 @@ export const corporateMeetingPage: SlotProps["EntityPage"] = {
       representations: "Representations",
       transcript: "Transcript",
       notes: "Notes",
-      slides: "Slides",
+      deck: "Deck",
       document: "Document",
       grouped: "Grouped automatically",
       decision: "Decision taken here",

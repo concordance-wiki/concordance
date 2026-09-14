@@ -10,6 +10,7 @@ import {
   documentsOf,
   entityPageOf,
   formatSize,
+  previewTwinOf,
 } from "../../src/build/entity-page.js";
 import type { EntityFragment, FragmentDocument } from "../../src/build/fragments.js";
 import { datedBreadcrumbOf, datedSpaceOf, isDatedSpace } from "../../src/build/meeting.js";
@@ -147,6 +148,114 @@ describe("The space of a document page is folded by year and month when every pa
     const note = entityPageOf(context(), roadmapNote);
     expect(note.document).toBeUndefined();
     expect(note.space).toEqual(spaceOf(context(), pagePath(roadmapNote.id), roadmapNote));
+  });
+});
+
+/** The PDF kept next to the deck in the sources, read as a file of its own: copied where the deck's preview is. */
+const pdfTwin: FragmentDocument = {
+  source: "framing",
+  path: "transcript-publication-framing.pdf",
+  format: "pdf",
+  target: `${framingDeck.id}/transcript-publication-framing.pdf`,
+  preview: `${framingDeck.id}/transcript-publication-framing.pdf`,
+  size: 6_100_000,
+  author: "Converter",
+  date: "2026-03-13T08:00:00Z",
+  pageCount: 24,
+  unit: "page",
+  pages: [
+    { number: 1, label: "page 1", text: "Transcript publication framing" },
+    { number: 2, label: "page 2", text: "Why publish transcripts, as printed" },
+  ],
+};
+
+/** The deck of the fixture with the PDF twin among its documents, in path order: the PDF first. */
+function withTwin(documents: FragmentDocument[]): SiteContext {
+  return context({
+    fragments: new Map([...fragments, [framingDeck.id, { ...deckFragment, documents }]]),
+  });
+}
+
+describe("documentsOf folds the PDF twin of a converted file into one document", () => {
+  const [deckDocument] = deckFragment.documents ?? [];
+  if (deckDocument === undefined) throw new Error("the fixture carries the deck");
+
+  it("finds the twin of a converted file among the documents at its preview target, none for a PDF, a transcript or a file whose PDF the build produced", () => {
+    const transcript: FragmentDocument = {
+      source: "framing",
+      path: "transcript-publication-framing.vtt",
+      format: "vtt",
+      target: `${framingDeck.id}/transcript-publication-framing.vtt`,
+      unit: "cue",
+      pages: [],
+    };
+    const all = [pdfTwin, deckDocument, transcript];
+    expect(previewTwinOf(deckDocument, all)).toBe(pdfTwin);
+    expect(previewTwinOf(pdfTwin, all)).toBeUndefined();
+    expect(previewTwinOf(transcript, all)).toBeUndefined();
+    expect(previewTwinOf(deckDocument, [deckDocument, transcript])).toBeUndefined();
+  });
+
+  it("offers the original to download and the PDF as its preview with what its reader read, in the place of the original, the positions of the original", () => {
+    const documents = documentsOf(withTwin([pdfTwin, deckDocument]), page, framingDeck, {
+      viewer: "assets/viewer-pdf-00000000.js",
+      worker: "assets/viewer-pdf-worker-00000000.js",
+    });
+    expect(documents).toEqual([
+      {
+        file: {
+          label: "transcript-publication-framing.pptx",
+          href: "transcript-publication-framing.pptx",
+          format: "pptx",
+        },
+        preview: {
+          href: "transcript-publication-framing.pdf",
+          viewerHref: "../../assets/viewer-pdf-00000000.js",
+          workerHref: "../../assets/viewer-pdf-worker-00000000.js",
+          size: 6_100_000,
+          pageCount: 24,
+          author: "Converter",
+          date: "2026-03-13T08:00:00Z",
+        },
+        unit: "slide",
+        positions: [
+          { number: 1, label: "slide 1", text: "Transcript publication framing" },
+          { number: 2, label: "slide 2", text: "Why publish transcripts" },
+        ],
+        size: 4_200_000,
+        author: "Participant-2",
+        date: "2026-03-12T09:30:00Z",
+        pageCount: 24,
+      },
+    ]);
+  });
+
+  it("takes the pages of the PDF, and their unit, when the reader of the original gave no text, and carries no property the PDF does not state", () => {
+    const { size, author, date, pageCount, ...bareTwin } = pdfTwin;
+    expect([size, author, date, pageCount]).toEqual([
+      6_100_000,
+      "Converter",
+      "2026-03-13T08:00:00Z",
+      24,
+    ]);
+    const [merged] = documentsOf(
+      withTwin([bareTwin, { ...deckDocument, pages: [] }]),
+      page,
+      framingDeck,
+    );
+    expect(merged?.unit).toBe("page");
+    expect(merged?.positions.map((position) => position.label)).toEqual(["page 1", "page 2"]);
+    expect(merged?.preview).toEqual({ href: "transcript-publication-framing.pdf" });
+    const [alone] = documentsOf(withTwin([{ ...deckDocument, pages: [] }]), page, framingDeck);
+    expect(alone?.unit).toBe("slide");
+    expect(alone?.positions).toEqual([]);
+  });
+
+  it("keeps a PDF that is its own preview as a document of its own", () => {
+    const documents = documentsOf(withTwin([pdfTwin]), page, framingDeck);
+    expect(documents.map((document) => document.file.format)).toEqual(["pdf"]);
+    expect(documents[0]?.preview).toEqual({ href: "transcript-publication-framing.pdf" });
+    expect(documents[0]?.pageCount).toBe(24);
   });
 });
 

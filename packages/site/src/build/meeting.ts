@@ -1,11 +1,11 @@
-import type { Entity } from "@concordance-wiki/core";
+import type { Entity, Link } from "@concordance-wiki/core";
 import { formatDate, formatMessage, formatMonth, formatMonthName } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type {
   BreadcrumbItem,
   DocumentView,
-  Link,
+  MeetingDecision,
   MeetingGrouping,
   MeetingLabels,
   MeetingProps,
@@ -233,16 +233,48 @@ export function participantsOf(context: SiteContext, entity: Entity): string | u
     : undefined;
 }
 
-/** The decisions the model links to the meeting at either end, by identifier: what the meeting produced. */
-export function decisionsOf(context: SiteContext, page: string, entity: Entity): Link[] {
-  const decisions = new Map<string, Entity>();
+/** The paths of the transcripts of the meeting, from its fragment. */
+function transcriptPathsOf(context: SiteContext, entity: Entity): Set<string> {
+  return new Set(
+    (context.fragments.get(entity.id)?.documents ?? [])
+      .filter((document) => document.unit === "cue")
+      .map((document) => document.path),
+  );
+}
+
+/** The cues of the transcripts of the meeting a link was read in: its provenances located in one. */
+function cuesOf(link: Link, transcripts: ReadonlySet<string>): number[] {
+  return link.provenance.flatMap((provenance) =>
+    provenance.path !== undefined &&
+    transcripts.has(provenance.path) &&
+    provenance.line !== undefined
+      ? [provenance.line]
+      : [],
+  );
+}
+
+/**
+ * The decisions the model links to the meeting at either end, by identifier: what the meeting
+ * produced; each with the last cue of the transcript the decision was recognised in, where the
+ * page places its callout.
+ */
+export function decisionsOf(context: SiteContext, page: string, entity: Entity): MeetingDecision[] {
+  const transcripts = transcriptPathsOf(context, entity);
+  const decisions = new Map<string, { decision: Entity; cues: number[] }>();
   for (const link of context.touching.get(entity.id) ?? []) {
     const other = context.entities.get(link.from === entity.id ? link.to : link.from);
-    if (other?.type === DECISION_TYPE) decisions.set(other.id, other);
+    if (other?.type !== DECISION_TYPE) continue;
+    const found = decisions.get(other.id) ?? { decision: other, cues: [] };
+    found.cues.push(...cuesOf(link, transcripts));
+    decisions.set(other.id, found);
   }
   return [...decisions.values()]
-    .sort((a, b) => byCodeUnit(a.id, b.id))
-    .map((decision) => ({ label: decision.title, href: entityHref(page, decision.id) }));
+    .sort((a, b) => byCodeUnit(a.decision.id, b.decision.id))
+    .map(({ decision, cues }) => ({
+      label: decision.title,
+      href: entityHref(page, decision.id),
+      ...(cues.length === 0 ? {} : { cue: Math.max(...cues) }),
+    }));
 }
 
 /** The signals of the twin-resource reconciliation the page words, in the order it names them. */
@@ -295,7 +327,7 @@ export function meetingLabels(context: SiteContext): MeetingLabels {
     representations: message(context, "meeting.representations"),
     transcript: message(context, "meeting.transcript"),
     notes: message(context, "meeting.notes"),
-    slides: message(context, "meeting.slides"),
+    deck: message(context, "meeting.deck"),
     document: message(context, "meeting.document"),
     grouped: message(context, "meeting.grouped"),
     decision: message(context, "meeting.decision"),

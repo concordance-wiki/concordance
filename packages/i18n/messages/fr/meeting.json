@@ -1,6 +1,7 @@
 {
   "meeting.date": "Date",
   "meeting.decision": "Décision retenue ici",
+  "meeting.deck": "Support de séance",
   "meeting.document": "Document",
   "meeting.durationHours": "{hours} h {minutes}",
   "meeting.durationMinutes": "{minutes} min",
@@ -21,7 +22,6 @@
   "meeting.signal.name": "même nom de base",
   "meeting.signal.similarName": "noms de base voisins",
   "meeting.signal.title": "titre égal au titre de la note",
-  "meeting.slides": "Support de séance",
   "meeting.space": "Espace",
   "meeting.transcript": "Transcription"
 }

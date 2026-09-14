@@ -7,9 +7,13 @@
     "defaultMessage": "Decision taken here",
     "description": "Lead of the callout linking the decisions a meeting produced."
   },
+  "meeting.deck": {
+    "defaultMessage": "Deck",
+    "description": "Tab of the deck on the page of a meeting: the original file, its preview and its extracted text."
+  },
   "meeting.document": {
     "defaultMessage": "Document",
-    "description": "Tab of a converted document on the page of a meeting."
+    "description": "Tab of a converted document that is not a deck on the page of a meeting."
   },
   "meeting.durationHours": {
     "defaultMessage": "{hours} h {minutes}",
@@ -86,10 +90,6 @@
   "meeting.signal.title": {
     "defaultMessage": "title equal to the heading",
     "description": "Grouping reason of the files of a meeting: the title of a document is the heading of the note."
-  },
-  "meeting.slides": {
-    "defaultMessage": "Slides",
-    "description": "Tab of the slide deck on the page of a meeting."
   },
   "meeting.space": {
     "defaultMessage": "Space",
