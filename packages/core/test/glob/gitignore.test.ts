@@ -74,10 +74,15 @@ describe("compileGitignore", () => {
   });
 
   it("treats consecutive stars elsewhere as regular stars", () => {
-    const ignored = root("a**b.md\n");
+    const ignored = root("a**b.md\na**/c\nlib/*p\n");
     expect(ignored("ab.md")).toBe(true);
     expect(ignored("aXYb.md")).toBe(true);
     expect(ignored("aX/Yb.md")).toBe(false);
+    expect(ignored("ax/c")).toBe(true);
+    expect(ignored("a/x/c")).toBe(false);
+    expect(ignored("lib/tmp")).toBe(true);
+    expect(ignored("lib/tmq")).toBe(false);
+    expect(ignored("lib/t/mp")).toBe(false);
   });
 
   it("ignores everything under a folder a trailing slash names, and not a file of that name", () => {
@@ -115,8 +120,14 @@ describe("compileGitignore", () => {
     expect(ignored("docs/private/other.md")).toBe(true);
   });
 
-  it("reads bracket expressions, negated with ! or ^, with a leading ] as a member", () => {
-    const ignored = root("[abc]x.md\n[!abc]y.md\n[^a]z.md\n[]x].md\n");
+  it("reads bracket expressions, negated with ! or ^, with a leading ] as a member, never crossing a slash", () => {
+    const ignored = root("[abc]x.md\n[!abc]y.md\n[^a]z.md\n[]x].md\na[!b]c.md\na[^b]d.md\n");
+    expect(ignored("axc.md")).toBe(true);
+    expect(ignored("a/c.md")).toBe(false);
+    expect(ignored("axd.md")).toBe(true);
+    expect(ignored("a/d.md")).toBe(false);
+    expect(ignored("!y.md")).toBe(true);
+    expect(ignored("[y.md")).toBe(true);
     expect(ignored("ax.md")).toBe(true);
     expect(ignored("dx.md")).toBe(false);
     expect(ignored("ay.md")).toBe(false);
@@ -176,7 +187,7 @@ describe("compileGitignore", () => {
     }
   });
 
-  it("orders two ignore files of the same depth by name, without one applying to the other's folder", () => {
+  it("keeps two ignore files of the same depth to their own folders", () => {
     const ignored = compileGitignore([
       { directory: "b", text: "*.md\n" },
       { directory: "a", text: "!*.md\n" },
