@@ -27,6 +27,7 @@ function model(
 }
 
 /** One definition per page under `docs/checks`, in the order of the specification table. */
+// Stryker disable StringLiteral: the identifiers are pinned by the tests and the descriptions are prose, so a changed string only ever runs the whole suite for nothing.
 export const catalogue: readonly CheckDefinition[] = [
   step(
     "W-SOURCE-UNREACHABLE",
