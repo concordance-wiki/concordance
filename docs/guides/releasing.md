@@ -74,7 +74,7 @@ The image size is written to the summary of the run under "Container image"; cop
 
 ## Publish
 
-The `publish` job of the `release` workflow runs after the GitHub release, on the tagged commit, and ships disabled: its `if: false` is the line the maintainer replaces with `needs.version.outputs.version != ''` at the first publication (the workflow runs on `main`, never on the tag, so a condition on `refs/tags/` would keep it silent). Enabled, it does this:
+The `publish` job of the `release` workflow runs after the GitHub release, on the tagged commit. The first version, 0.1.0, was published by hand from the maintainer's machine (the packages had to exist on npm before trusted publishing could be configured); from the next version the job publishes through trusted publishing, without a secret, or through the `NPM_TOKEN` secret when it is set. It does this:
 
 1. checks out the tag `v<x.y.z>` and fails unless `packages/cli/package.json` carries that version;
 2. downloads the tarballs, `checksums.txt` and the Linux binary from the release and verifies the tarballs against the checksums, so that what reaches npm is what the release carries, byte for byte; nothing is rebuilt;
@@ -101,7 +101,7 @@ Before the first publication, the maintainer of the npm account does this, once,
 1. creates the npm organisation `concordance-wiki`, which holds the scope of the eighteen `@concordance-wiki/*` packages, the preset included: the unscoped name `concordance` belongs to another package on npm, so the preset is published as `@concordance-wiki/concordance` (the getting-started guide, the pipelines guide and the container image name it that way);
 2. sets the publication credentials: either trusted publishing, configured on npm for every package with this repository, the workflow file `release.yml` and no environment, which is what `--provenance` and the `id-token: write` permission are for, and needs no secret; or, failing that, an automation token of the organisation, granular, with publish access to the packages, stored as the `NPM_TOKEN` secret of the repository, which the job writes to the npm configuration when it is set;
 3. creates the `concordance-wiki/lint-action` repository on GitHub and the `concordance-wiki/lint` project of the `concordance-wiki` group on GitLab, both empty, and stores a token with write access to each as the `LINT_ACTION_TOKEN` and `GITLAB_LINT_TOKEN` secrets; without a secret the matching mirror is skipped with a notice;
-4. replaces the `if: false` of the `publish` job with `needs.version.outputs.version != ''`.
+4. configures, on npm, the trusted publisher of every published package: repository `concordance-wiki/concordance`, workflow `release.yml`, no environment — the job is enabled and runs at the next version.
 
 A version released before the job was enabled stays on GitHub only: the job publishes the versions that follow it, and never an earlier one, which npm would refuse anyway since a version is published once.
 

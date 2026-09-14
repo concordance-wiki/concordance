@@ -87,6 +87,25 @@ jobs:
             git clone --quiet --depth 1 --branch main "https://github.com/concordance-wiki/$name.git" "$RUNNER_TEMP/demo/$name"
           done
           DEMO_ROOT="$RUNNER_TEMP/demo" node scripts/parity.mjs
+  windows:
+    # The packages run wherever Node.js runs: the command line, its tests on the minimal corpus
+    # and the golden-corpus build are exercised on Windows, so that the registry's users on that
+    # platform are not the ones finding out.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Command line on the fixtures
+        run: node packages/cli/dist/bin.js build --config fixtures/corpora/minimal/en/concordance.yaml --output dist-windows
+      - name: Tests of the command line and the core
+        run: pnpm exec vitest run packages/core packages/cli --coverage.enabled=false
   mutation:
     # A pull request mutates only the source files it changed, next to the other checks rather
     # than after them; the whole tree is mutated every night by the mutation workflow. The run

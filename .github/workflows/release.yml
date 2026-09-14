@@ -187,12 +187,12 @@ jobs:
         run: gh workflow run image.yml --ref "v$VERSION"
 
   publish:
-    # Enabled by the maintainer at the first publication to npm: replace `false` with
-    # `needs.version.outputs.version != ''` once the npm organisation exists and either
-    # trusted publishing (OIDC) is configured for every package or the NPM_TOKEN secret is
-    # set. This workflow runs on main and never on the tag, so a condition on
-    # `startsWith(github.ref, 'refs/tags/v')` would keep it disabled.
-    if: false
+    # The first version (0.1.0) was published by hand; from the next one the job publishes the
+    # tarballs of the release through trusted publishing (OIDC, provenance), which the maintainer
+    # configured on npm for every package with this workflow file; NPM_TOKEN is the fallback.
+    # This workflow runs on main and never on the tag, so a condition on
+    # `startsWith(github.ref, 'refs/tags/v')` would keep it silent.
+    if: always() && needs.version.outputs.version != '' && needs.release.result == 'success'
     needs: [version, release]
     runs-on: ubuntu-latest
     permissions:
