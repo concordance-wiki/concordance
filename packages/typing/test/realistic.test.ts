@@ -1,7 +1,13 @@
 import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { nodeFileSystem, parseConfig, type Config, type GitClient } from "@concordance-wiki/core";
+import {
+  nodeFileSystem,
+  parseConfig,
+  parseLock,
+  type Config,
+  type GitClient,
+} from "@concordance-wiki/core";
 import { ingestSources, readMarkdown, type ParsedMarkdown } from "@concordance-wiki/ingest";
 import { loadDefaultProfile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
@@ -37,6 +43,13 @@ function readConfig(root: string): Config {
   const validation = parseConfig(nodeFileSystem.readText(posix.join(root, "concordance.yaml")));
   if (!validation.ok) throw new Error("unreachable: the fixture configuration is valid");
   return validation.config;
+}
+
+/** The notes the lock file of the corpus files under a domain, whose unclassified finding a later step answers. */
+function lockedDomains(root: string): Set<string> {
+  const validation = parseLock(nodeFileSystem.readText(posix.join(root, "concordance.lock.yaml")));
+  if (!validation.ok) throw new Error("unreachable: the fixture lock file is valid");
+  return new Set(Object.keys(validation.lock.domains ?? {}));
 }
 
 function readExpected<T>(root: string, name: string): T[] {
@@ -122,15 +135,18 @@ describe("the realistic corpus typed through the real file system", () => {
   );
 
   it.each(["en", "fr"])(
-    "reports typing findings on the %s corpus that are all listed in expected/findings.yaml",
+    "reports typing findings on the %s corpus that are all listed in expected/findings.yaml, the one the lock file answers aside",
     async (locale) => {
       const { typed } = await typeCorpus(locale);
       const expected = readExpected<ExpectedFinding>(posix.join(corpora, locale), "findings.yaml");
       const listed = new Set(
         expected.map((finding) => `${finding.check} ${finding.source ?? ""}/${finding.path ?? ""}`),
       );
+      const locked = lockedDomains(posix.join(corpora, locale));
+      expect(locked.size).toBe(1);
       expect(typed.findings.length).toBeGreaterThan(0);
       for (const finding of typed.findings) {
+        if (finding.check === "W-DOMAIN-UNCLASSIFIED" && locked.has(finding.entity ?? "")) continue;
         expect(
           listed.has(`${finding.check} ${finding.source ?? ""}/${finding.path ?? ""}`),
           finding.message,

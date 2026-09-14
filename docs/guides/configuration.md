@@ -50,7 +50,9 @@ Global business domains, orthogonal to sources. A domain claims files by the fol
 
 Folders and globs combine on the same domain, and the precedence between domains does not depend on the route: the deepest domain that claims the file wins, and between domains of the same depth the last declared. A domain with neither `folder` nor `match` claims no file and is only ever named in frontmatter.
 
-A frontmatter `domain` overrides folders and globs; it names a domain by its identifier (`recognition`, the first declared with it) or by its identifier path (`inference/recognition`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter, no folder and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt.
+A frontmatter `domain` overrides folders and globs; it names a domain by its identifier (`recognition`, the first declared with it) or by its identifier path (`inference/recognition`). A value that names no declared domain is kept as written and yields `W-DOMAIN-UNKNOWN`. A note that no frontmatter, no folder and no glob files goes to the `unclassified` domain and yields `W-DOMAIN-UNCLASSIFIED`; applications and domains declared as notes are containers and are exempt. Every entity records how its domain was decided under `domain_origin`: `frontmatter`, `folder`, `glob`, `unclassified`, `lock` for a note the [lock file](#lock) files, `inferred` for one the proposal below filed.
+
+A corpus nobody filed yet can ask the neighbourhood for a proposal: [`inference.domains`](#inferencedomains) names the terms with enough neighbours as pivots and reports every unclassified note within the radius as a candidate for a domain named after it, without assigning anything. Promote what stands by declaring the domain here with the folders or globs that claim its notes, or by naming each note under `domains` in the lock file.
 
 ```yaml
 domains:
@@ -176,6 +178,7 @@ The keys below decide what the dictionary holds, which links are produced and wh
 | `neighbours` | `{ k: 50 }` | `k` is the number of co-occurrence neighbours kept per node, ranked by the number of shared paragraphs then by identifier; it bounds the memory of the accumulation and the size of the `neighbours` block of `model.json` (see the [architecture guide](architecture.md#bounded-neighbourhood)) |
 | `candidate_score` | 4.0 | score from which a candidate yields [`W-TERM-UNDEFINED`](../checks/W-TERM-UNDEFINED.md); the score is the C-value of the expression multiplied by its IDF, both described on the check page |
 | `duplicates` | see below | how the twin resources of one document (a deck, its notes, its transcript) are reconciled |
+| `domains` | absent | domains proposed from the neighbourhood graph, see below; nothing is proposed while the key is absent |
 
 ### Word confidence
 
@@ -198,6 +201,17 @@ Two resources are scored by adding their signals, capped at 1: an explicit front
 The seven keys are in the [reference](../reference/configuration.md#inferenceduplicates): `mode` (`auto`; `estimate` never recomputes the exact Jaccard index and reports the MinHash estimate, `exact` recomputes it on every pair the LSH banding brings together, `auto` on the pairs estimated at `exact_above` or more), `exact_above` (0.5), `size_ratio_min` (0.5, the word-count ratio under which the content signal is capped at 0.4 and the finding says the pair looks like an inclusion), `shingle_size` (5 words), `minhash_functions` (128, four per LSH band), `merge_above` (0.9, strictly above which resources merge) and `candidate_above` (0.5, from which a finding is produced).
 
 Build time against precision: the estimate alone visits every candidate pair once through its 128-value signature, the exact index re-reads the two full shingle sets of a pair, and `auto` spends that only on the pairs that are already close. Lowering `exact_above` or choosing `exact` makes the index in the findings exact on more pairs at the cost of build time, `estimate` makes the build fastest with an index accurate to about one tenth. The build summary reports the pairs brought together by the banding, the pairs scored, the exact verifications and the time spent.
+
+### `inference.domains`
+
+Domains proposed from the neighbourhood, for a corpus nobody filed. `min_neighbours` (an integer of at least 1) is the degree from which a term with a note of its own becomes a pivot, its degree being the number of distinct neighbours in the undirected graph of the typed links and the co-occurrence neighbours; a stopword or a `rejected_terms` entry of the lock file never pivots. `radius` (1 to 3) is the distance, in edges, within which a note belongs to a pivot: every note no frontmatter, folder or glob files that lies within it is attached to the closest pivot, at equal distance to the pivot of highest degree, then to the first in code-unit order of its identifier, and the domain proposed is named after the last segment of the pivot's identifier. The same corpus gives the same proposal from one build to the next.
+
+The proposal reads as one [`I-DOMAIN-SUGGESTED`](../checks/I-DOMAIN-SUGGESTED.md) per reached note (`specs/roles/maintainer lies within 1 of glossary/check (degree 14): a candidate for a domain named "check" after it`) and as the `suggested domains` section of the build summary and of `build.log.json`, each pivot that reaches a note with its degree and the notes. Nothing is assigned by default: a growing corpus moves its pivots, and a note would swing from one domain to another between two builds. Promote a proposal by declaring the domain under [`domains`](#domains) with the folders or globs that claim its notes, or by naming the note under `domains` in the [lock file](#lock), which files it with the origin `lock`; a declaration always wins over the lock. `assign: true` lets the build file every reached note itself under the domain named after its pivot, with the origin `inferred`, and never touches a note with a declared domain.
+
+```yaml
+inference:
+  domains: { min_neighbours: 10, radius: 2 }
+```
 
 
 ## `conversion`
@@ -283,12 +297,13 @@ Any other top-level key, an empty glob under `exclude`, a key that is not a chec
 
 ## `lock`
 
-Path to `concordance.lock.yaml`, relative to the configuration, the record of human decisions ([lock file reference](../reference/lock.md)). The build reads the file, validates it against [`lock.schema.json`](../../packages/core/schemas/lock.schema.json) and applies two of its blocks:
+Path to `concordance.lock.yaml`, relative to the configuration, the record of human decisions ([lock file reference](../reference/lock.md)). The build reads the file, validates it against [`lock.schema.json`](../../packages/core/schemas/lock.schema.json) and applies three of its blocks:
 
 - `rejected_terms`, the expressions the keyword discovery must not propose: no candidate, no [`W-TERM-UNDEFINED`](../checks/W-TERM-UNDEFINED.md), no keyword page, no mark in the text, no line on the to-do page. An expression is compared on its normalised form, the one the language pack gives the text, so `Merge Request` rejects `merge request` and `merge requests` alike.
 - `duplicates`: `merged`, pairs of resource identifiers that merge into one entity whatever their score, the criterion recorded as `lock file` in `grouped_by`; `separated`, pairs that never merge and produce no [`W-DUP-CANDIDATE`](../checks/W-DUP-CANDIDATE.md).
+- `domains`, the domain of a note by its identifier, a proposal of [`I-DOMAIN-SUGGESTED`](../checks/I-DOMAIN-SUGGESTED.md) promoted: the note is filed there with the origin `lock` unless its frontmatter, a folder or a glob files it already, and the proposal leaves it aside.
 
-`links`, the promoted and rejected links, is recorded, not read: the build of this version produces no `lock_promoted` link, and `validate-config` says so with a warning on the `lock` key. A missing or invalid lock file is a configuration error: the build stops with exit code 1, naming the file and the faulty key, so that a decision is never silently dropped; a configuration without `lock` applies none. The end-of-build summary and `build.log.json` count the decisions applied under `lock` (`rejected_terms`, `merged`, `separated`: the entries of each block).
+`links`, the promoted and rejected links, is recorded, not read: the build of this version produces no `lock_promoted` link, and `validate-config` says so with a warning on the `lock` key. A missing or invalid lock file is a configuration error: the build stops with exit code 1, naming the file and the faulty key, so that a decision is never silently dropped; a configuration without `lock` applies none. The end-of-build summary and `build.log.json` count the decisions applied under `lock` (`rejected_terms`, `merged`, `separated`, `domains`: the entries of each block).
 
 ```yaml
 version: 1
@@ -297,9 +312,11 @@ rejected_terms:
 duplicates:
   separated:
     - [glossary/canonical-model, specs/api/canonical-model]
+domains:
+  specs/roles/maintainer: quality
 ```
 
-Each entry answers a finding of an earlier build: the remediation of `W-TERM-UNDEFINED` and `W-DUP-CANDIDATE` names the block to write it in. The file lives next to the configuration, versioned and reviewed like any change; nothing is ever written into a knowledge repository.
+Each entry answers a finding of an earlier build: the remediation of `W-TERM-UNDEFINED`, `W-DUP-CANDIDATE` and `I-DOMAIN-SUGGESTED` names the block to write it in. The file lives next to the configuration, versioned and reviewed like any change; nothing is ever written into a knowledge repository.
 
 ## `theme.yaml`
 
