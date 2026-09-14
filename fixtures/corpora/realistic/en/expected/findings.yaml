@@ -16,6 +16,7 @@
 - { check: I-TERM-HOMONYM, form: occurrence, entities: [glossary/occurrence, specs/objects/occurrence] }
 - { check: I-TERM-HOMONYM, form: publication threshold, entities: [glossary/publication-threshold, specs/rules/publication-threshold] }
 - { check: I-TERM-HOMONYM, form: source, entities: [glossary/source, specs/objects/source] }
+- { check: I-TERM-HOMONYM, form: twin size ratio, entities: [specs/rules/twin-size-ratio, specs/rules/twin-size-ratio-rule.docx], note: "the Word twin of the rule, read before the reconciliation folds it into the note" }
 - { check: W-API-CONSUMER-MISMATCH, path: specs/api/model-query.md, note: "declares screens/service/suggestion-review as a consumer, which never cites it" }
 - { check: W-API-NOCONSUMER, path: specs/api/forge-bridge.md }
 - { check: W-APP-MISSING, source: framing, path: vision.md }

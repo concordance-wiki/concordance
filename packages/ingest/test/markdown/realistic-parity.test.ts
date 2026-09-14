@@ -166,7 +166,7 @@ describe("the realistic corpus has the same structure in both languages", () => 
       "glossary markdown: 45",
       "meetings markdown: 6",
       "specs markdown: 57",
-      "specs other: 3",
+      "specs other: 4",
     ]);
   });
 

@@ -663,6 +663,49 @@ export function centralDocument(documents: readonly DocumentView[]): DocumentVie
     : documents.find((document) => document.unit !== "cue");
 }
 
+/** The type whose notes describe a document: their page is the document page even when the note leads. */
+export const DOCUMENT_TYPE = "document";
+
+/** Whether the file an entity stands for is a markdown note, the one that leads a group of twins when there is one. */
+export function leadsWithNote(entity: Entity): boolean {
+  return entity.source.path.endsWith(".md");
+}
+
+/**
+ * How many positions a document has: the pages the conversion read, else the count the file or
+ * its preview states; none when nothing counted them. The positions of the PDF preview count
+ * for the original only through the count it states.
+ */
+export function pageCountOf(document: DocumentView): number | undefined {
+  const converted = document.positions.length > 0 ? document.positions.length : undefined;
+  const own =
+    document.positionsFromPreview === true ? document.pageCount : (converted ?? document.pageCount);
+  return own ?? converted ?? document.preview?.pageCount;
+}
+
+/**
+ * The line a document is folded behind under the note that leads its page: its file name,
+ * its kind, its page count when one is known. A transcript counts no page.
+ */
+export function documentSummary(context: SiteContext, document: DocumentView): string {
+  return formatMessage(context.catalogue, "entity.alsoAvailable", {
+    name: document.file.label,
+    format: kindOf(context, document.file.format),
+    count: document.unit === "cue" ? 0 : (pageCountOf(document) ?? 0),
+  });
+}
+
+/** The documents with the line each is folded behind, for a page its note leads. */
+export function foldedDocuments(
+  context: SiteContext,
+  documents: readonly DocumentView[],
+): DocumentView[] {
+  return documents.map((document) => ({
+    ...document,
+    summary: documentSummary(context, document),
+  }));
+}
+
 /** A size in the unit that reads best, one decimal at most: "312 kB", "4.2 MB". */
 export function formatSize(locale: string, bytes: number): string {
   const [unit, divisor]: [Intl.NumberFormatOptions["unit"], number] =
@@ -794,7 +837,7 @@ export function documentPageOf(
   const converted = document.positions.length > 0 ? document.positions.length : undefined;
   const own =
     document.positionsFromPreview === true ? document.pageCount : (converted ?? document.pageCount);
-  const pages = own ?? converted ?? preview?.pageCount ?? 0;
+  const pages = pageCountOf(document) ?? 0;
   const size = document.size ?? preview?.size;
   const fromPreview =
     (own === undefined && pages !== 0) || (document.size === undefined && size !== undefined);
@@ -970,8 +1013,12 @@ export function entityPageOf(
   options: EntityPageOptions = {},
 ): EntityPageProps {
   const page = pagePath(entity.id);
-  const documents = documentsOf(context, page, entity, options.viewer);
-  const document = documentPageOf(context, entity, documents);
+  const read = documentsOf(context, page, entity, options.viewer);
+  // The template follows the lead: a note keeps the template of its type and folds its twins
+  // under the article; a document without a note, or a note describing one, gets the document page.
+  const leads = leadsWithNote(entity) && entity.type !== DOCUMENT_TYPE;
+  const document = leads ? undefined : documentPageOf(context, entity, read);
+  const documents = leads && entity.type !== MEETING_TYPE ? foldedDocuments(context, read) : read;
   const contract = contractOf(context, page, entity);
   const notice = contract === undefined ? contractNoticeOf(context, entity) : undefined;
   const declaration = declarationOf(context, entity.type);

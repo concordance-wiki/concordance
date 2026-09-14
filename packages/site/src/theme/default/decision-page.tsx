@@ -9,7 +9,7 @@ import type {
   Link,
 } from "../../slots.js";
 import { useSlot } from "../context.js";
-import { DocumentBlock } from "./document-viewer.js";
+import { Documents } from "./document-viewer.js";
 import {
   Breadcrumb,
   defaultEntityPageLabels,
@@ -200,9 +200,7 @@ export function DecisionPage({
               imageNote={text.imageNote}
             />
           ))}
-          {documents.map((document, index) => (
-            <DocumentBlock key={document.file.href} document={document} index={index + 1} />
-          ))}
+          <Documents documents={documents} />
         </article>
         {decision.sessions.map((session) => (
           <SessionNote key={session.href} session={session} text={words} />

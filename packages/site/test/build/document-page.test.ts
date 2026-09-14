@@ -7,16 +7,19 @@ import {
   centralDocument,
   documentPageLabels,
   documentPageOf,
+  documentSummary,
   documentsOf,
   entityPageOf,
   formatSize,
+  leadsWithNote,
+  pageCountOf,
   previewTwinOf,
 } from "../../src/build/entity-page.js";
 import type { EntityFragment, FragmentDocument } from "../../src/build/fragments.js";
 import { datedBreadcrumbOf, datedSpaceOf, isDatedSpace } from "../../src/build/meeting.js";
 import { breadcrumbOf, spaceOf } from "../../src/build/space.js";
 import type { DocumentView } from "../../src/slots.js";
-import { entity, fragments, model, profile, untyped } from "./fixture.js";
+import { entity, fragments, model, profile, rule, untyped } from "./fixture.js";
 
 /** A framing space of dated decks: three of 2026 and one of 2025, one deck merged with its notes. */
 const framingDeck = entity({
@@ -560,5 +563,130 @@ describe("A document whose conversion failed", () => {
     const view = documentPageOf(failing(deckDocument), framingDeck, converted);
     expect(view?.previewFailure).toBeUndefined();
     expect(view?.representations).toBeUndefined();
+  });
+});
+
+/** The rule of the fixture model as a note with its Word equivalent: two files the reconciliation grouped, the note leading. */
+const ruleWithTwin: Entity = {
+  ...rule,
+  representations: [
+    { path: "rules/publication-threshold.md", format: "markdown" },
+    { path: "rules/publication-threshold.rule.docx", format: "docx" },
+  ],
+  grouped_by: "same base name",
+};
+
+const wordTwin: FragmentDocument = {
+  source: "specs",
+  path: "rules/publication-threshold.rule.docx",
+  format: "docx",
+  target: `${rule.id}/rules/publication-threshold.rule.docx`,
+  size: 31_000,
+  pageCount: 3,
+  unit: "page",
+  pages: [],
+};
+
+function ruleContext(documents: FragmentDocument[], overrides: Partial<SiteContextInput> = {}) {
+  return context({
+    fragments: new Map([
+      ...fragments,
+      [rule.id, { id: rule.id, sections: [{ id: "lead", html: "<p>The rule.</p>" }], documents }],
+    ]),
+    ...overrides,
+  });
+}
+
+describe("The template follows the lead of a group", () => {
+  it("keeps the template of the type of a note whose twins are documents, each folded behind its line naming the file, its kind and its pages", () => {
+    const props = entityPageOf(ruleContext([wordTwin]), ruleWithTwin);
+    expect(props.document).toBeUndefined();
+    expect(props.meeting).toBeUndefined();
+    expect(props.documents?.map((document) => document.summary)).toEqual([
+      "Also available: publication-threshold.rule.docx · Text document · 3 pages",
+    ]);
+    expect(props.space).toEqual(spaceOf(ruleContext([wordTwin]), pagePath(rule.id), ruleWithTwin));
+    const french = entityPageOf(
+      ruleContext([wordTwin], { catalogue: loadCatalogue("fr"), locale: "fr" }),
+      ruleWithTwin,
+    );
+    expect(french.documents?.[0]?.summary).toBe(
+      "Également disponible : publication-threshold.rule.docx · Document texte · 3 pages",
+    );
+  });
+
+  it("counts one page in the singular, none for a transcript or a file nothing counted, and names another format by its extension", () => {
+    const one = { ...wordTwin, pageCount: 1 };
+    expect(entityPageOf(ruleContext([one]), ruleWithTwin).documents?.[0]?.summary).toBe(
+      "Also available: publication-threshold.rule.docx · Text document · 1 page",
+    );
+    const { pageCount, ...uncounted } = wordTwin;
+    expect(pageCount).toBe(3);
+    expect(entityPageOf(ruleContext([uncounted]), ruleWithTwin).documents?.[0]?.summary).toBe(
+      "Also available: publication-threshold.rule.docx · Text document",
+    );
+    const transcript: FragmentDocument = {
+      source: "specs",
+      path: "rules/publication-threshold.vtt",
+      format: "vtt",
+      target: `${rule.id}/rules/publication-threshold.vtt`,
+      unit: "cue",
+      pages: [{ number: 1, label: "00:00:04", text: "The rule, spoken." }],
+    };
+    expect(entityPageOf(ruleContext([transcript]), ruleWithTwin).documents?.[0]?.summary).toBe(
+      "Also available: publication-threshold.vtt · VTT",
+    );
+  });
+
+  it("lays the document page out for a document that leads, its own file not being a note, and for a note describing a document", () => {
+    const wordAlone: Entity = {
+      ...rule,
+      id: "specs/rules/publication-threshold.rule.docx",
+      source: { ...rule.source, path: "rules/publication-threshold.rule.docx" },
+    };
+    expect(leadsWithNote(wordAlone)).toBe(false);
+    expect(leadsWithNote(rule)).toBe(true);
+    const leading = entityPageOf(
+      context({
+        model: model({ entities: [...model().entities, wordAlone] }),
+        fragments: new Map([
+          ...fragments,
+          [wordAlone.id, { id: wordAlone.id, sections: [], documents: [wordTwin] }],
+        ]),
+      }),
+      wordAlone,
+    );
+    expect(leading.document?.kind).toBe("Text document");
+    expect(leading.documents?.[0]?.summary).toBeUndefined();
+    const described = entityPageOf(context(), framingDeck);
+    expect(framingDeck.source.path.endsWith(".md")).toBe(true);
+    expect(described.document?.kind).toBe("Presentation");
+    expect(described.documents?.[0]?.summary).toBeUndefined();
+  });
+
+  it("hands the files of a meeting to its template in full, never folded", () => {
+    const session: Entity = { ...ruleWithTwin, type: "meeting" };
+    const props = entityPageOf(ruleContext([wordTwin]), session);
+    expect(props.meeting).toBeDefined();
+    expect(props.document).toBeUndefined();
+    expect(props.documents?.[0]?.summary).toBeUndefined();
+  });
+
+  it("counts the positions read, else the count the file states, else the one of its preview, none otherwise", () => {
+    const base: DocumentView = {
+      file: { label: "a.docx", href: "a.docx", format: "docx" },
+      unit: "page",
+      positions: [],
+    };
+    const read = [{ number: 1, label: "page 1", text: "one" }];
+    expect(pageCountOf({ ...base, positions: read, pageCount: 12 })).toBe(1);
+    expect(
+      pageCountOf({ ...base, positions: read, pageCount: 12, positionsFromPreview: true }),
+    ).toBe(12);
+    expect(pageCountOf({ ...base, positions: read, positionsFromPreview: true })).toBe(1);
+    expect(pageCountOf({ ...base, pageCount: 12 })).toBe(12);
+    expect(pageCountOf({ ...base, preview: { href: "a.pdf", pageCount: 7 } })).toBe(7);
+    expect(pageCountOf(base)).toBeUndefined();
+    expect(documentSummary(context(), base)).toBe("Also available: a.docx · Text document");
   });
 });

@@ -1,4 +1,5 @@
 {
+  "entity.alsoAvailable": "Également disponible : {name} · {format}{count, plural, =0 {} one { · # page} other { · # pages}}",
   "entity.application": "Application",
   "entity.attributes": "Propriétés",
   "entity.breadcrumb": "Vous êtes ici",

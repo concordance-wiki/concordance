@@ -1,6 +1,6 @@
 # Realistic corpus
 
-Concordance described by itself, in 120 markdown notes per language (`en` and `fr`, same structure, translated names and text) plus two interface contracts: the pipeline, the site, the checks and the future service are the subject of every note. Every implemented type, every inference method and every file-level check appear at least once; the expected model and findings under `expected/` are the contract that the later stories verify.
+Concordance described by itself, in 120 markdown notes per language (`en` and `fr`, same structure, translated names and text) plus two interface contracts and one Word document: the pipeline, the site, the checks and the future service are the subject of every note. Every implemented type, every inference method and every file-level check appear at least once; the expected model and findings under `expected/` are the contract that the later stories verify.
 
 Nothing in it is real: the people are `Participant-1` to `Participant-6`, and no company, city, brand or product exists.
 
@@ -9,7 +9,7 @@ Nothing in it is real: the people are `Participant-1` to `Participant-6`, and no
 | Source | Content | Typing |
 |---|---|---|
 | `glossary` | 45 terms with aliases, `broader` and `narrower`, several multi-word terms, two homonym pairs (`link` is the title of one term and an alias of `explicit-link`; `index` is an alias of both `search-index` and `alphabetical-index`), one alias shorter than three characters (`id`) and three terms nobody cites | `type: term`, `glossary: true` |
-| `specs` | 11 screens (`## Objects`, `## Actions`, `## Rules`, frontmatter `roles`, `reads`, `writes`, `url_pattern`), 3 APIs with `## Consumers` and `## Objects`, one OpenAPI contract with three operations and one WSDL with two, 6 operation notes with `operation_id`, 12 business objects with `lifecycle`, 4 data objects with `fields`, 10 rules with `## Applies to`, 5 processes with `## Steps`, 3 roles, 3 batches with `## Reads`, `## Writes` and `depends_on` | path rules per folder, `.rule.md` and `.table.md` suffixes, a last rule that also sets the application of `screens/service/**` |
+| `specs` | 11 screens (`## Objects`, `## Actions`, `## Rules`, frontmatter `roles`, `reads`, `writes`, `url_pattern`), 3 APIs with `## Consumers` and `## Objects`, one OpenAPI contract with three operations and one WSDL with two, 6 operation notes with `operation_id`, 12 business objects with `lifecycle`, 4 data objects with `fields`, 10 rules with `## Applies to`, 5 processes with `## Steps`, 3 roles, 3 batches with `## Reads`, `## Writes` and `depends_on`, and the Word twin of one rule, `twin-size-ratio.rule.docx`, a minimal package written with the zip helper of the office reader tests whose title is the heading of the note: the reader the configuration loads gives it its properties and the reconciliation folds it into the note on their base name | path rules per folder, `.rule.md` and `.table.md` suffixes, a last rule that also sets the application of `screens/service/**` |
 | `decisions` | 7 decisions with `## Affects`; one supersedes another | `type: decision` |
 | `meetings` | 6 design workshops written as notes, with pseudonymous `participants`, dates and the decisions they took | `default_type: meeting` |
 | `framing` | 4 framing documents, plus `private/` which `privacy.exclude` removes before anything is read | `default_type: document`, `convert: true` |
@@ -31,7 +31,7 @@ The corpus is clean of errors: every link resolves, every identifier is unique, 
 
 `concordance.lock.yaml`, named by the `lock` key of the configuration, records two decisions the build applies: the rejected expression above, a term of the forge rather than of the corpus, compared on its normalised form (the file writes it `Merge Request`), and one `separated` pair, the glossary term and the API sharing the base name `canonical-model` (`modele-canonique`), two notes the twin detection reported on that likeness alone; `expected/findings.yaml` lists the other pairs and not that one.
 
-The checks that need git history, binary documents or transcripts (`W-STALE`, `W-CONV-*`, `W-DOC-NOMD`, `W-DUP-CANDIDATE`, `I-PII-DETECTED`) are not exercised here; see the [faulty corpus](../faulty/en/README.md).
+The Word twin is read before the reconciliation folds it into its note, so the dictionary reports its title as a homonym of the rule, `I-TERM-HOMONYM`, listed in `expected/findings.yaml`. The checks that need git history, converted documents or transcripts (`W-STALE`, `W-CONV-*`, `W-DOC-NOMD`, `W-DUP-CANDIDATE`, `I-PII-DETECTED`) are not exercised here; see the [faulty corpus](../faulty/en/README.md).
 
 ## Tests
 

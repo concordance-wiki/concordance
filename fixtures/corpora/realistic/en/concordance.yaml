@@ -2,6 +2,9 @@ version: 1
 project:
   name: Realistic corpus
   locale: en
+# The office reader gives the Word twin of a rule its properties: the build groups it with the note.
+plugins:
+  - "@concordance-wiki/plugin-reader-office"
 applications:
   - id: concordance-cli
     title: Concordance command line

@@ -7,6 +7,7 @@ export const entityMessages = {
   en,
   fr,
   arguments: {
+    "entity.alsoAvailable": { count: "plural", format: "argument", name: "argument" },
     "entity.application": {},
     "entity.attributes": {},
     "entity.breadcrumb": {},

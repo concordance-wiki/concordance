@@ -14,7 +14,7 @@ import type {
 import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList } from "./attributes.js";
-import { DocumentBlock } from "./document-viewer.js";
+import { Documents } from "./document-viewer.js";
 import { labels } from "./labels.js";
 import { PageNotice } from "./page-notice.js";
 import { fill } from "./mention-list.js";
@@ -267,7 +267,8 @@ export function NeighbourhoodFold({
 /**
  * The page of every typed entity, whatever its type: the tree of its space on the left; in the
  * centre the breadcrumb, the title, the line naming the type, the last change and the space,
- * the note at full column width, its documents under it, then the foot of the article, the
+ * the note at full column width, its documents under it, folded behind their line when the
+ * note leads the page and its files only accompany it, then the foot of the article, the
  * legend of the marks of the text with the path of the file and its edit link; on the right
  * three stacked blocks, the declared attributes (and the attributes the type does not declare,
  * when the note sets some), the table of contents of the note, the related pages, then the
@@ -345,9 +346,7 @@ export function EntityPage({
               imageNote={text.imageNote}
             />
           ))}
-          {documents.map((document, index) => (
-            <DocumentBlock key={document.file.href} document={document} index={index + 1} />
-          ))}
+          <Documents documents={documents} />
         </article>
         <footer class="entity-footer">
           {sections.length > 0 && (

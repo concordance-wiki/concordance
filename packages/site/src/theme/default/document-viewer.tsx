@@ -198,3 +198,26 @@ export function DocumentBlock({
     </section>
   );
 }
+
+/**
+ * The documents of a page under its note, in their order: a document the page leads with, or
+ * a file of a meeting, in full; a document the build folded under the note that leads the page
+ * behind its summary line, "Also available: deck.pptx · Presentation · 24 pages", the block
+ * opening on demand and readable without JavaScript like any disclosure.
+ */
+export function Documents({ documents }: { documents: readonly DocumentView[] }): JSX.Element {
+  return (
+    <>
+      {documents.map((document, index) =>
+        document.summary === undefined ? (
+          <DocumentBlock key={document.file.href} document={document} index={index + 1} />
+        ) : (
+          <details key={document.file.href} class="document-fold">
+            <summary>{document.summary}</summary>
+            <DocumentBlock document={document} index={index + 1} />
+          </details>
+        ),
+      )}
+    </>
+  );
+}

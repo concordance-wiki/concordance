@@ -1522,14 +1522,51 @@ describe("concordance build", () => {
           built.model.entities.length,
         );
         expect(Object.keys(summary.links)).toEqual([...producedMethods].sort());
-        expect(summary.duplicates?.resources).toBe(
-          built.model.entities.filter((entity) => entity.keyword !== true).length,
+        // Every note and document compared: the pages, plus the files a merged group folded into one.
+        const notes = built.model.entities.filter((entity) => entity.keyword !== true);
+        const folded = notes.reduce(
+          (count, entity) =>
+            count +
+            Math.max(
+              0,
+              (entity.representations ?? []).filter((file) => file.kind === undefined).length - 1,
+            ),
+          0,
         );
+        expect(summary.duplicates?.resources).toBe(notes.length + folded);
+        expect(summary.duplicates?.merged).toBe(corpus === "realistic/en" ? 1 : 0);
         expect(built.model.neighbours).toBeDefined();
         expect(Object.keys(built.model.displayed_neighbourhood ?? {})).toEqual(
           built.model.entities.map((entity) => entity.id),
         );
       });
+    });
+
+    it("folds the Word twin of a rule of the realistic corpus under its note, the page keeping the template of a rule and the index one entry", async () => {
+      const { model, pages, files } = await build("realistic/en");
+      const twinned = model.entities.find((entity) => entity.id === "specs/rules/twin-size-ratio");
+      expect(twinned?.representations).toEqual([
+        { path: "rules/twin-size-ratio.rule.md", format: "markdown" },
+        { path: "rules/twin-size-ratio.rule.docx", format: "docx" },
+      ]);
+      expect(twinned?.grouped_by).toBe("same base name");
+      expect(model.entities.some((entity) => entity.id.endsWith(".docx"))).toBe(false);
+      const page = pages.get("specs/rules/twin-size-ratio/index.html") ?? "";
+      expect(page).toContain('<div class="entity entity-with-space">');
+      expect(page).not.toContain('<div class="tabs document-views">');
+      expect(page).toContain(
+        '<details class="document-fold"><summary>Also available: twin-size-ratio.rule.docx · Text document · 2 pages</summary><section class="document document-page"',
+      );
+      expect(page).toContain(
+        '<a class="document-download" href="rules/twin-size-ratio.rule.docx" download="twin-size-ratio.rule.docx">',
+      );
+      expect(files).toContain("specs/rules/twin-size-ratio/rules/twin-size-ratio.rule.docx");
+      const index = [...pages]
+        .filter(([path]) => path === "index/index.html" || path === "index/t/index.html")
+        .map(([, html]) => html)
+        .join("\n");
+      expect(index.split('href="../../specs/rules/twin-size-ratio/index.html"')).toHaveLength(2);
+      expect(index).not.toContain("twin-size-ratio.rule.docx");
     });
 
     it("files the four notes of the minimal corpus that no domain covers as unclassified", async () => {

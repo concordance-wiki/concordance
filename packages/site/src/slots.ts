@@ -637,6 +637,12 @@ export interface DocumentView {
   positionsFromPreview?: boolean;
   /** Why the document has no preview: the conversion failed, and the finding the build recorded says how; absent when the preview exists or nothing failed. */
   previewFailure?: PreviewFailure;
+  /**
+   * The line the block is folded behind when the document accompanies the note that leads the
+   * page, "Also available: deck.pptx · Presentation · 24 pages"; absent for a document the page
+   * shows in full, the one it leads with or the files of a meeting.
+   */
+  summary?: string;
 }
 
 /** One file of the document as the panel of the document page lists it: the original, its preview, the note. */
