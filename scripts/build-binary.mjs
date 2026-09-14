@@ -48,6 +48,8 @@ function run(command, args, cwd = root) {
   });
   if (result.error !== undefined) throw result.error;
   if (result.status !== 0) {
+    // What the command printed comes first: pnpm writes its own errors on stdout.
+    process.stderr.write(result.stdout);
     throw new Error(`${[command, ...args].join(" ")} exited with ${String(result.status)}`);
   }
   return result.stdout;

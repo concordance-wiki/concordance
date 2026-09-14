@@ -92,7 +92,8 @@ jobs:
   binaries:
     needs: [version, tag]
     strategy:
-      fail-fast: true
+      # A platform whose binary fails does not hold the release: the others ship, the notes say so.
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -122,6 +123,7 @@ jobs:
 
   release:
     needs: [version, tag, binaries]
+    if: always() && needs.version.outputs.version != '' && needs.tag.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -153,7 +155,13 @@ jobs:
         working-directory: ${{ env.ASSETS }}
         run: sha256sum $(find . -maxdepth 1 -type f | sed 's|^\./||' | LC_ALL=C sort) > checksums.txt
       - name: Release notes from the changelogs
-        run: node scripts/release-notes.mjs "$VERSION" > "$RUNNER_TEMP/notes.md"
+        run: |
+          node scripts/release-notes.mjs "$VERSION" > "$RUNNER_TEMP/notes.md"
+          for target in linux-x64 darwin-arm64 win32-x64; do
+            if ! ls "$ASSETS"/concordance-"$target"* >/dev/null 2>&1; then
+              printf '\nThe standalone binary for %s is not part of this release: its build failed and will be attached by a later run.\n' "$target" >> "$RUNNER_TEMP/notes.md"
+            fi
+          done
       - name: GitHub release with its assets
         run: |
           gh release create "v$VERSION" \
