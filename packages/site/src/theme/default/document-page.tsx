@@ -4,7 +4,6 @@ import type {
   DocumentPageLabels,
   DocumentPageView,
   DocumentRepresentation,
-  DocumentTwinFile,
   DocumentView,
   EntityPageProps,
   PreviewFailure,
@@ -13,6 +12,7 @@ import type {
 import { useSlot } from "../context.js";
 import { DocumentText, positionAnchor, ViewerIsland, viewerPropsOf } from "./document-viewer.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
+import { GroupedFilesBlock } from "./grouped-files.js";
 import { SidePanel } from "./panel-handle.js";
 import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
@@ -35,8 +35,8 @@ const FAILURE_LABELS = {
     "The same finding stands in the publication report and in the linter output: the failure is reported to whoever can fix it.",
 } as const;
 
-/** The labels of the default theme for every label the page does not receive; the file count is worded from the page. */
-export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
+/** The labels of the default theme for every label the page does not receive. */
+export function defaultDocumentPageLabels(): DocumentPageLabels {
   return {
     document: labels.documentView,
     extractedText: labels.extractedText,
@@ -55,8 +55,6 @@ export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
     date: labels.date,
     dateNote: labels.dateNote,
     previewNote: labels.previewNote,
-    sameDocument: `${labels.sameDocument}, ${String(files)} ${files === 1 ? labels.file : labels.filesUnit}`,
-    groupedNote: labels.groupedNote,
     noNote: labels.noNote,
     ...FAILURE_LABELS,
   };
@@ -271,26 +269,6 @@ function Property({
   );
 }
 
-/** The files that make the document, one row each: its extension or name, then what it is. */
-function TwinFiles({ files }: { files: DocumentTwinFile[] }): JSX.Element {
-  return (
-    <ul class="document-twins">
-      {files.map((file) => (
-        <li key={file.label}>
-          {file.href === undefined ? (
-            <span class="document-twin-name">{file.label}</span>
-          ) : (
-            <a class="document-twin-name" href={file.href}>
-              {file.label}
-            </a>
-          )}
-          <span class="document-twin-role">{file.role}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 /**
  * The page of an office document, a deck or a report: the tree of its space on the left, folded
  * by year and month when every page of the space is dated; in the centre the breadcrumb, the title,
@@ -298,17 +276,26 @@ function TwinFiles({ files }: { files: DocumentTwinFile[] }): JSX.Element {
  * tabs of the theme: the document (the strip of pages, the rendering of the current page with
  * the viewer and its notes), the extracted text, the note merged with the document; the
  * download of the original at the end of the tab bar; then the path of the file with its edit
- * link. On the right the
- * properties read from the file, the files that make the document, the related pages, then the
- * neighbourhood folded behind its line.
+ * link. On the right the properties read from the file, with the files the build grouped into
+ * the page and why at the foot of the block, the related pages, then the neighbourhood folded
+ * behind its line.
  */
 export function DocumentPage(props: EntityPageProps & { document: DocumentPageView }): JSX.Element {
-  const { entity, space, breadcrumb = [], sections, sources, neighbours, mentions } = props;
+  const {
+    entity,
+    space,
+    breadcrumb = [],
+    sections,
+    sources,
+    neighbours,
+    mentions,
+    grouping,
+  } = props;
   const document = centralOf(props.documents ?? []);
   const view = props.document;
   const MentionsPanel = useSlot("MentionsPanel");
   const text: DocumentPageLabels = {
-    ...defaultDocumentPageLabels(view.files.length),
+    ...defaultDocumentPageLabels(),
     ...view.labels,
   };
   const spaceTreeLabel = props.labels?.spaceTree ?? labels.spaceTree;
@@ -428,14 +415,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
           </dl>
           {view.date?.fromFile === true && <p class="panel-note">{text.dateNote}</p>}
           {view.fromPreview === true && <p class="panel-note">{text.previewNote}</p>}
-        </PanelBlock>
-        <PanelBlock
-          id="document-files"
-          className="entity-panel document-files"
-          heading={text.sameDocument}
-        >
-          <TwinFiles files={view.files} />
-          <p class="panel-note">{text.groupedNote}</p>
+          {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
         </PanelBlock>
         {view.representations !== undefined && (
           <Representations representations={view.representations} text={text} />

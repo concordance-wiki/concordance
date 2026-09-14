@@ -12,6 +12,7 @@ import type {
 } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { DocumentBlock, positionAnchor } from "./document-viewer.js";
+import { GroupedFilesBlock } from "./grouped-files.js";
 import {
   Breadcrumb,
   defaultEntityPageLabels,
@@ -39,7 +40,6 @@ export const defaultMeetingLabels: MeetingLabels = {
   date: labels.date,
   duration: labels.duration,
   space: labels.space,
-  files: labels.filesCount,
   relatedNote: labels.meetingRelatedNote,
 };
 
@@ -241,8 +241,9 @@ function tabsOf(
  * tabs, the transcript as timestamped lines with the callout of the decisions the meeting produced in the
  * cue each came from, the notes as the entity page renders them, the deck with its viewer; the
  * callout after the tabs for a meeting without a transcript; the path of every file. In the
- * panel the properties, the related pages and the neighbourhood folded, or unfolded when
- * `mapOpen` asks, as on every entity page.
+ * panel the properties, with the files the build grouped into the page and why at the foot of
+ * the block, the clues of the reconciliation under them, the related pages and the
+ * neighbourhood folded, or unfolded when `mapOpen` asks, as on every entity page.
  */
 export function MeetingPage({
   entity,
@@ -254,6 +255,7 @@ export function MeetingPage({
   mentions,
   sources,
   documents = [],
+  grouping,
   mapOpen = false,
   meeting,
 }: EntityPageProps & { meeting: MeetingProps }): JSX.Element {
@@ -288,7 +290,7 @@ export function MeetingPage({
             label={words.representations}
             tabs={tabs}
             className="meeting-representations"
-            {...(meeting.grouping === undefined
+            {...(grouping === undefined
               ? {}
               : { trailing: <span class="meeting-grouped">{words.grouped}</span> })}
           />
@@ -333,16 +335,9 @@ export function MeetingPage({
                 </dd>
               </div>
             )}
-            {meeting.grouping !== undefined && (
-              <div class="attribute">
-                <dt>{words.files}</dt>
-                <dd>{meeting.grouping.label}</dd>
-              </div>
-            )}
           </dl>
-          {meeting.grouping?.note !== undefined && (
-            <p class="panel-note">{meeting.grouping.note}</p>
-          )}
+          {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
+          {meeting.groupingNote !== undefined && <p class="panel-note">{meeting.groupingNote}</p>}
         </PanelBlock>
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={given} open={mapOpen} />

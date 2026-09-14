@@ -1,0 +1,58 @@
+/* The files the build grouped into a page, at the foot of the properties block of every template: the line counting them and naming the criterion, one row per file with its kind, then the link to contest the grouping. */
+
+.grouped-files {
+  margin-block: var(--space-2) var(--space-3);
+}
+
+.grouped-files-lead {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.grouped-files-list {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  list-style: none;
+  overflow: hidden;
+}
+
+.grouped-files-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  min-block-size: 2.5rem;
+  padding: 0 0.6875rem;
+  border-block-end: 1px solid var(--color-soft);
+}
+
+.grouped-files-list li:last-child {
+  border-block-end: 0;
+}
+
+.grouped-file-name {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grouped-file-format {
+  flex: none;
+  color: var(--color-label);
+  font-size: 0.8125rem;
+}
+
+.grouped-files-separate {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  font-size: 0.8125rem;
+}

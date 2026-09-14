@@ -207,11 +207,12 @@ describe("MeetingPage", () => {
     );
   });
 
-  it("lists the date, the duration, the space linking to the file tree and the grouped files in the properties block, the reason under them", () => {
+  it("lists the date, the duration, the space linking to the file tree and the grouped files in the properties block, the clues of the reconciliation under them", () => {
     const html = render();
     expect(html).toContain(
-      '<dl class="attributes"><div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-12">March 12, 2026</time></dd></div><div class="attribute"><dt>Duration</dt><dd>1 h 12</dd></div><div class="attribute"><dt>Space</dt><dd><a href="../../#home-tree">meetings</a></dd></div><div class="attribute"><dt>Files</dt><dd>3 grouped</dd></div></dl><p class="panel-note">3 files: same folder, same base name, same commit, high textual overlap.</p>',
+      '<dl class="attributes"><div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-12">March 12, 2026</time></dd></div><div class="attribute"><dt>Duration</dt><dd>1 h 12</dd></div><div class="attribute"><dt>Space</dt><dd><a href="../../#home-tree">meetings</a></dd></div></dl><div class="grouped-files"><p class="grouped-files-lead">3 files grouped — same base name</p><ul class="grouped-files-list"><li><code class="grouped-file-name">2026-03-12-keyword-page-threshold-review.md</code><span class="grouped-file-format">Markdown note</span></li><li><code class="grouped-file-name">2026-03-12-keyword-page-threshold-review.pptx</code><span class="grouped-file-format">Presentation</span></li><li><code class="grouped-file-name">2026-03-12-keyword-page-threshold-review.vtt</code><span class="grouped-file-format">VTT</span></li></ul><a class="grouped-files-separate" href="https://forge.example/meetings">Separate these files</a></div><p class="panel-note">3 files: same folder, same base name, same commit, high textual overlap.</p>',
     );
+    expect(html).not.toContain("<dt>Files</dt>");
   });
 
   it("leaves out the rows the meeting does not give, and the grouping mention with them", () => {
@@ -221,18 +222,22 @@ describe("MeetingPage", () => {
       delete props.meeting.date;
       delete props.meeting.duration;
       delete props.meeting.participants;
-      delete props.meeting.grouping;
+      delete props.meeting.groupingNote;
+      delete props.grouping;
     });
     expect(html).toContain(
       '<dl class="attributes"><div class="attribute"><dt>Space</dt><dd>meetings</dd></div></dl></details>',
     );
     expect(html).toContain('<p class="entity-badge"><span class="badge">Meeting</span></p>');
     expect(html).not.toContain("meeting-grouped");
+    expect(html).not.toContain("grouped-files");
     expect(html).not.toContain("breadcrumbs");
     const unexplained = render((props) => {
-      props.meeting.grouping = { count: 2, label: "2 grouped" };
+      delete props.meeting.groupingNote;
     });
-    expect(unexplained).toContain("<dd>2 grouped</dd></div></dl></details>");
+    expect(unexplained).toContain(
+      '<a class="grouped-files-separate" href="https://forge.example/meetings">Separate these files</a></div></details>',
+    );
     expect(unexplained).toContain('<span class="meeting-grouped">Grouped automatically</span>');
   });
 

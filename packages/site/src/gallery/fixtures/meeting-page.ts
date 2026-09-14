@@ -215,6 +215,19 @@ export const corporateMeetingPage: SlotProps["EntityPage"] = {
     { source: "meetings", path: "2026-03-12-keyword-page-threshold-review.pptx" },
     { source: "meetings", path: "2026-03-12-keyword-page-threshold-review.vtt" },
   ],
+  grouping: {
+    count: 3,
+    label: "3 files grouped — same base name",
+    files: [
+      { name: "2026-03-12-keyword-page-threshold-review.md", format: "Markdown note" },
+      { name: "2026-03-12-keyword-page-threshold-review.pptx", format: "Presentation" },
+      { name: "2026-03-12-keyword-page-threshold-review.vtt", format: "VTT" },
+    ],
+    separate: {
+      label: "Separate these files",
+      href: "https://forge.example/meetings",
+    },
+  },
   documents: [
     {
       file: {
@@ -300,11 +313,7 @@ export const corporateMeetingPage: SlotProps["EntityPage"] = {
         cue: 4,
       },
     ],
-    grouping: {
-      count: 3,
-      label: "3 grouped",
-      note: "3 files: same folder, same base name, same commit, high textual overlap.",
-    },
+    groupingNote: "3 files: same folder, same base name, same commit, high textual overlap.",
     labels: {
       representations: "Representations",
       transcript: "Transcript",
@@ -318,7 +327,6 @@ export const corporateMeetingPage: SlotProps["EntityPage"] = {
       date: "Date",
       duration: "Duration",
       space: "Space",
-      files: "Files",
       relatedNote:
         "A meeting does not enter the model: it brings passages, and sometimes a decision someone took the trouble to write elsewhere.",
     },

@@ -56,6 +56,7 @@ export const CSS_FILES = {
     "chrome/panel-handle.css",
     "pages/document-page.css",
     "pages/decision-page.css",
+    "chrome/grouped-files.css",
     "pages/about.css",
     "pages/edge-cases.css",
     "pages/gallery.css",

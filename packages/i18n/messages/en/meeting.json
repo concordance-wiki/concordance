@@ -23,14 +23,6 @@
     "defaultMessage": "{minutes} min",
     "description": "Duration of a meeting under an hour."
   },
-  "meeting.files": {
-    "defaultMessage": "Files",
-    "description": "Label of the number of files grouped into the page of a meeting."
-  },
-  "meeting.filesGrouped": {
-    "defaultMessage": "{count, plural, one {# grouped} other {# grouped}}",
-    "description": "Value of the files property of a meeting: how many files the build grouped into its page."
-  },
   "meeting.grouped": {
     "defaultMessage": "Grouped automatically",
     "description": "Mention next to the tabs of a meeting: the build grouped its files."

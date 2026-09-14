@@ -17,6 +17,18 @@ export const entityPageWithTwin: SlotProps["EntityPage"] = {
     },
     { source: "specs", path: "rules/publication-threshold.rule.docx" },
   ],
+  grouping: {
+    count: 2,
+    label: "2 files grouped — same base name",
+    files: [
+      { name: "publication-threshold.rule.md", format: "Markdown note" },
+      { name: "publication-threshold.rule.docx", format: "Text document" },
+    ],
+    separate: {
+      label: "Separate these files",
+      href: "https://forge.example/specs",
+    },
+  },
   documents: [
     {
       file: {

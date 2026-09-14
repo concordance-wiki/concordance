@@ -10,6 +10,7 @@ import type {
 } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { Documents } from "./document-viewer.js";
+import { GroupedFilesBlock } from "./grouped-files.js";
 import {
   Breadcrumb,
   defaultEntityPageLabels,
@@ -137,7 +138,8 @@ function Row({ label, value }: { label: string; value: string | Link }): JSX.Ele
  * decision was taken in, pointing at the cue of the transcript that names it; the path of the
  * file at the foot, without the legend of the marks. In the panel the properties, the status
  * and the date first, then the decision it supersedes, the one that supersedes it and its
- * session, the note counting the keys; the related pages with the note that a decision cites
+ * session, the note counting the keys, the files the build grouped into the page and why at
+ * the foot of the block; the related pages with the note that a decision cites
  * what it changes; the neighbourhood folded, or unfolded when `mapOpen` asks.
  */
 export function DecisionPage({
@@ -151,6 +153,7 @@ export function DecisionPage({
   mentions,
   sources,
   documents = [],
+  grouping,
   mapOpen = false,
   decision,
 }: DecisionPageProps): JSX.Element {
@@ -248,6 +251,7 @@ export function DecisionPage({
             )}
           </dl>
           <p class="panel-note">{words.keysNote}</p>
+          {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
         </PanelBlock>
         <MentionsPanel
           {...mentions}

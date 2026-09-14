@@ -16,7 +16,6 @@ import type {
   DocumentPageView,
   DocumentPosition,
   DocumentRepresentation,
-  DocumentTwinFile,
   DocumentView,
   EntityPageLabels,
   EntityPageProps,
@@ -58,6 +57,8 @@ import {
   unmatchedOperations,
   type ExposedOperation,
 } from "./operations.js";
+import { groupingOf } from "./grouping.js";
+import { kindOf } from "./kinds.js";
 import { breadcrumbOf, spaceOf } from "./space.js";
 import {
   contractFileTarget,
@@ -634,25 +635,6 @@ export function documentsOf(
     });
 }
 
-/** The kinds of office documents the page names from the extension; any other format is named by its extension. */
-const DOCUMENT_KINDS: Readonly<Record<string, "presentation" | "text" | "spreadsheet" | "pdf">> = {
-  pptx: "presentation",
-  ppt: "presentation",
-  odp: "presentation",
-  docx: "text",
-  doc: "text",
-  odt: "text",
-  xlsx: "spreadsheet",
-  xls: "spreadsheet",
-  ods: "spreadsheet",
-  pdf: "pdf",
-};
-
-function kindOf(context: SiteContext, format: string): string {
-  const kind = DOCUMENT_KINDS[format];
-  return kind === undefined ? format.toUpperCase() : message(context, `document.kind.${kind}`);
-}
-
 /**
  * The document a page centres on: the first one with pages or slides, when no transcript
  * accompanies it; a page with a transcript, or with notes alone, is not a document page.
@@ -723,11 +705,7 @@ export function formatSize(locale: string, bytes: number): string {
 }
 
 /** The headings, notes and names of the document page in the site language. */
-export function documentPageLabels(
-  context: SiteContext,
-  files: number,
-  pages = 0,
-): DocumentPageLabels {
+export function documentPageLabels(context: SiteContext, pages = 0): DocumentPageLabels {
   return {
     document: message(context, "document.view"),
     extractedText: message(context, "document.extractedText"),
@@ -746,8 +724,6 @@ export function documentPageLabels(
     date: message(context, "document.date"),
     dateNote: message(context, "document.dateNote"),
     previewNote: message(context, "document.previewNote"),
-    sameDocument: formatMessage(context.catalogue, "document.sameDocument", { count: files }),
-    groupedNote: message(context, "document.groupedNote"),
     noNote: message(context, "document.noNote"),
     previewFailed: message(context, "document.previewFailed"),
     textExtracted: message(context, "document.textExtracted"),
@@ -785,45 +761,12 @@ export function representationsOf(
   ];
 }
 
-/** The files that make the document: the original, its PDF when one stands next to it, the note when one is merged with it. */
-function twinFilesOf(
-  context: SiteContext,
-  entity: Entity,
-  document: DocumentView,
-): DocumentTwinFile[] {
-  const files: DocumentTwinFile[] = [
-    {
-      label: `.${document.file.format}`,
-      role: message(context, "document.roleOriginal"),
-      href: document.file.href,
-    },
-  ];
-  if (document.preview !== undefined && document.preview.href !== document.file.href) {
-    files.push({
-      label: ".pdf",
-      role: message(context, "document.rolePreview"),
-      href: document.preview.href,
-    });
-  }
-  const note = (entity.representations ?? []).find(
-    (representation) => representation.format === "markdown",
-  );
-  if (note !== undefined) {
-    files.push({
-      label: note.path.slice(note.path.lastIndexOf("/") + 1),
-      role: message(context, "document.roleNotes"),
-      href: "#document-notes",
-    });
-  }
-  return files;
-}
-
 /**
  * What lays the page of an office document out: the kind of the file from its extension, its
  * page count (what the conversion found, else what the file states), its size, its date (the
- * one the file states, else the last change in the repository) and its author, then the files
- * that make the document; none for an entity that is not a document page. A count or a size
- * the original does not give is read from its PDF preview, and the page says so.
+ * one the file states, else the last change in the repository) and its author; none for an
+ * entity that is not a document page. A count or a size the original does not give is read
+ * from its PDF preview, and the page says so.
  */
 export function documentPageOf(
   context: SiteContext,
@@ -844,7 +787,6 @@ export function documentPageOf(
   const fileDate = document.date ?? preview?.date;
   const iso = fileDate ?? entity.source.last_modified;
   const author = document.author ?? preview?.author;
-  const files = twinFilesOf(context, entity, document);
   return {
     kind: kindOf(context, document.file.format),
     ...(pages === 0
@@ -865,14 +807,13 @@ export function documentPageOf(
         }),
     ...(author === undefined ? {} : { author }),
     ...(fromPreview ? { fromPreview } : {}),
-    files,
     ...(document.previewFailure === undefined
       ? {}
       : {
           previewFailure: document.previewFailure,
           representations: representationsOf(context, document),
         }),
-    labels: documentPageLabels(context, files.length, pages),
+    labels: documentPageLabels(context, pages),
   };
 }
 
@@ -1026,6 +967,7 @@ export function entityPageOf(
   const changed = changedOf(context, entity);
   const neighbours = neighbourhoodOf(context, page, entity);
   const attributes = panelOf(context, page, entity);
+  const grouping = groupingOf(context, entity);
   const meeting =
     entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
   const decision =
@@ -1074,6 +1016,7 @@ export function entityPageOf(
     mentions,
     sources: sourcesOf(context, entity),
     ...(documents.length === 0 ? {} : { documents }),
+    ...(grouping === undefined ? {} : { grouping }),
     ...(contract === undefined ? {} : { contract }),
     ...(meeting === undefined ? {} : { meeting }),
     ...(document === undefined ? {} : { document }),
