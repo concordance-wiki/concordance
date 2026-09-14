@@ -13,12 +13,12 @@ npm install @concordance-wiki/ingest
 ```ts
 import { parseMarkdown, scannableText } from "@concordance-wiki/ingest";
 
-const note = "---\ntype: term\n---\n# Occurrence scan\n\nThe scan reads every [note](../notes/note.md).\n";
+const note = "---\ntype: term\n---\n# Occurrence scan\n\nThe scan reads every note.\n\n## Findings\n\n- one finding per missing target\n";
 const document = parseMarkdown(note, { path: "glossary/occurrence-scan.md" });
 document.title; // "Occurrence scan"
 document.frontmatter; // { type: "term" }
-document.links.map((link) => link.target); // ["../notes/note.md"]
-scannableText(document).map((unit) => unit.text); // ["Occurrence scan", "The scan reads every note."]
+document.sections.map((section) => section.heading); // ["Findings"]
+scannableText(document).map((unit) => unit.text); // ["Occurrence scan", "The scan reads every note.", "Findings", "one finding per missing target"]
 ```
 
 ## What it contains
