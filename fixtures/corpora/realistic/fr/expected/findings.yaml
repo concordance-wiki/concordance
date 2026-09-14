@@ -2,7 +2,8 @@
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
 # An I-TERM-HOMONYM names the entities sharing a title or alias; a W-DUP-CANDIDATE names its pair under `entities`,
-# notes sharing a base name across sources (0.5) or close base names in one folder (0.76).
+# notes sharing a base name across sources (0.5) or close base names in one folder (0.76); the pair the lock file
+# separates, the glossary term and the API sharing the base name canonical-model, is neither merged nor reported.
 - { check: I-REL-AMBIGUOUS, path: specs/ecrans/page-mot-cle.md, note: "page mot-clé (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: candidat, entities: [glossaire/expression-candidate, specs/objets/candidat] }
 - { check: I-TERM-HOMONYM, form: constat, entities: [glossaire/constat, specs/objets/constat] }
@@ -30,7 +31,6 @@
 - { check: W-DUP-CANDIDATE, path: glossaire/entite.md, entities: [glossaire/entite, specs/objets/entite] }
 - { check: W-DUP-CANDIDATE, path: glossaire/index-alphabetique.md, entities: [glossaire/index-alphabetique, specs/ecrans/index-alphabetique] }
 - { check: W-DUP-CANDIDATE, path: glossaire/lien.md, entities: [glossaire/lien, specs/objets/lien] }
-- { check: W-DUP-CANDIDATE, path: glossaire/modele-canonique.md, entities: [glossaire/modele-canonique, specs/api/modele-canonique] }
 - { check: W-DUP-CANDIDATE, path: glossaire/occurrence.md, entities: [glossaire/occurrence, specs/objets/occurrence] }
 - { check: W-DUP-CANDIDATE, path: glossaire/page-mot-cle.md, entities: [glossaire/page-mot-cle, specs/ecrans/page-mot-cle] }
 - { check: W-DUP-CANDIDATE, path: glossaire/page-mot-cle.md, entities: [glossaire/page-mot-cle, specs/objets/page-mot-cle] }

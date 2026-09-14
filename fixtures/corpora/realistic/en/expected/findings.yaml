@@ -2,7 +2,8 @@
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
 # An I-TERM-HOMONYM names the entities sharing a title or alias; a W-DUP-CANDIDATE names its pair under `entities`,
-# notes sharing a base name across sources (0.5) or close base names in one folder (0.76).
+# notes sharing a base name across sources (0.5) or close base names in one folder (0.76); the pair the lock file
+# separates, the glossary term and the API sharing the base name canonical-model, is neither merged nor reported.
 - { check: I-REL-AMBIGUOUS, path: specs/screens/keyword-page.md, note: "keyword page (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: alphabetical index, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
 - { check: I-TERM-HOMONYM, form: candidate, entities: [glossary/candidate-expression, specs/objects/candidate] }
@@ -27,7 +28,6 @@
 - { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/maintainer.md }
 - { check: W-DUP-CANDIDATE, path: decisions/suggestions-in-service-deferred.md, entities: [decisions/suggestions-in-service-deferred, decisions/suggestions-in-service-planned], note: "close base names in one folder: the planned decision supersedes the deferred one" }
 - { check: W-DUP-CANDIDATE, path: glossary/alphabetical-index.md, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
-- { check: W-DUP-CANDIDATE, path: glossary/canonical-model.md, entities: [glossary/canonical-model, specs/api/canonical-model] }
 - { check: W-DUP-CANDIDATE, path: glossary/entity.md, entities: [glossary/entity, specs/objects/entity] }
 - { check: W-DUP-CANDIDATE, path: glossary/finding.md, entities: [glossary/finding, specs/objects/finding] }
 - { check: W-DUP-CANDIDATE, path: glossary/keyword-page.md, entities: [glossary/keyword-page, specs/objects/keyword-page] }

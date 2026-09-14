@@ -84,7 +84,12 @@ function translate(table: Readonly<Record<string, string>>, value: string): stri
 function listCorpus(locale: string): string[] {
   return nodeFileSystem
     .listFiles(posix.join(corpora, locale))
-    .filter((path) => !path.startsWith("expected/") && path !== "concordance.yaml");
+    .filter(
+      (path) =>
+        !path.startsWith("expected/") &&
+        path !== "concordance.yaml" &&
+        path !== "concordance.lock.yaml",
+    );
 }
 
 function readCorpus(locale: string, sourceOf: (folder: string) => string): CorpusNote[] {
