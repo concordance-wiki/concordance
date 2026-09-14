@@ -38,11 +38,16 @@ import type {
   FragmentPassage,
 } from "../../src/build/fragments.js";
 import {
+  foldedGroupOf,
   KEYWORD_NEIGHBOURS_MAX,
   keywordNeighbourhoodOf,
   keywordPageLabels,
   keywordPageOf,
   keywordSpaceOf,
+  locatedGroupsOf,
+  PASSAGE_GROUPS_IN_VIEW,
+  PASSAGES_IN_VIEW,
+  passageBlocksOf,
   passageGroupsOf,
   passageLocationOf,
   similarOf,
@@ -1604,7 +1609,7 @@ describe("keywordPageOf", () => {
     expect(usedSinceOf(dated, passages.slice(2, 3))?.date).toBe("2026-06-30");
   });
 
-  it("lists the passages grouped by file in corpus order, sources as declared then paths, with the title and the type of the page, their text and their line, and leaves out a file that is no page", () => {
+  it("lists the passages grouped by page in corpus order, sources as declared then paths, with the title and the type of the page, their text and their line, and leaves out a file that is no page", () => {
     const props = keywordPageOf(context(), keyword);
     expect(props.passages).toEqual([
       {
@@ -1722,9 +1727,127 @@ describe("keywordPageOf", () => {
     const grouped = passageGroupsOf(withDocument("slide"), "keywords/x/index.html", [at(2)]);
     expect(grouped[0]?.passages[0]?.location).toBe("slide 2");
     expect(grouped[0]?.file).toEqual({
-      label: "screens/mentions-panel.pptx",
+      label: "screens/mentions-panel.md",
       href: "../../specs/screens/mentions-panel/index.html",
     });
+  });
+
+  it("makes one group of the files of a page, the note and the deck of a screen, its passages by file then line, the group ordered by its first file", () => {
+    const passages: FragmentPassage[] = [
+      { source: "specs", path: "screens/mentions-panel.pptx", line: 2, context: "on a slide" },
+      { source: "specs", path: "screens/mentions-panel.md", line: 40, context: "in the note" },
+      { source: "specs", path: "screens/mentions-panel.pptx", line: 1, context: "on the cover" },
+      {
+        source: "specs",
+        path: "screens/mentions-panel.md",
+        line: 12,
+        context: "early in the note",
+      },
+      { source: "specs", path: "screens/aaa.md", line: 9, context: "elsewhere" },
+    ];
+    const withAaa = context({
+      model: model({
+        entities: [
+          ...model().entities,
+          entity({ id: "specs/screens/aaa", type: "screen", title: "Aaa" }),
+        ],
+      }),
+    });
+    const groups = locatedGroupsOf(withAaa, "keywords/x/index.html", passages);
+    expect(groups.map((group) => [group.source, group.path])).toEqual([
+      ["specs", "screens/aaa.md"],
+      ["specs", "screens/mentions-panel.md"],
+    ]);
+    expect(groups[1]?.group.file.label).toBe("screens/mentions-panel.md");
+    expect(groups[1]?.group.passages.map((passage) => [passage.line, passage.context])).toEqual([
+      [12, "early in the note"],
+      [40, "in the note"],
+      [1, "on the cover"],
+      [2, "on a slide"],
+    ]);
+    // The deck alone names the group's file when it comes first in path order.
+    const deckFirst = locatedGroupsOf(withAaa, "keywords/x/index.html", [
+      { source: "specs", path: "screens/mentions-panel.pptx", line: 2, context: "on a slide" },
+      { source: "specs", path: "screens/mentions-panel.md", line: 40, context: "in the note" },
+    ]);
+    expect(deckFirst.map((group) => group.path)).toEqual(["screens/mentions-panel.md"]);
+  });
+
+  it("keeps two passages of a page in view and folds the others under their count, worded in the site language", () => {
+    const at = (line: number): FragmentPassage => ({
+      source: "glossary",
+      path: "page.md",
+      line,
+      context: `line ${String(line)}`,
+    });
+    expect(PASSAGES_IN_VIEW).toBe(2);
+    const [two] = passageGroupsOf(context(), "keywords/x/index.html", [at(2), at(1)]);
+    expect(two?.passages.map((passage) => passage.line)).toEqual([1, 2]);
+    expect(two?.folded).toBeUndefined();
+    const [three] = passageGroupsOf(context(), "keywords/x/index.html", [at(3), at(1), at(2)]);
+    expect(three?.passages.map((passage) => passage.line)).toEqual([1, 2]);
+    expect(three?.folded?.label).toBe("1 other passage");
+    expect(three?.folded?.passages.map((passage) => passage.line)).toEqual([3]);
+    const [five] = passageGroupsOf(context(), "keywords/x/index.html", [1, 2, 3, 4, 5].map(at));
+    expect(five?.folded?.label).toBe("3 other passages");
+    expect(five?.folded?.passages.map((passage) => passage.line)).toEqual([3, 4, 5]);
+    const fr = context({ catalogue: loadCatalogue("fr") });
+    expect(
+      passageGroupsOf(fr, "keywords/x/index.html", [at(3), at(1), at(2)])[0]?.folded?.label,
+    ).toBe("1 autre passage");
+    expect(
+      passageGroupsOf(fr, "keywords/x/index.html", [1, 2, 3, 4].map(at))[0]?.folded?.label,
+    ).toBe("2 autres passages");
+    const group = { file: { label: "a", href: "a" }, passages: [] };
+    expect(foldedGroupOf(context(), group)).toBe(group);
+  });
+
+  it("keeps six pages in view and the other files behind a disclosure worded with their count", () => {
+    expect(PASSAGE_GROUPS_IN_VIEW).toBe(6);
+    const ids = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const crowded = context({
+      model: model({
+        entities: [
+          ...model().entities,
+          ...ids.map((id) => entity({ id: `specs/${id}`, type: "screen", title: id })),
+        ],
+      }),
+    });
+    const passages = (count: number): FragmentPassage[] =>
+      ids
+        .slice(0, count)
+        .map((id) => ({ source: "specs", path: `${id}.md`, line: 1, context: id }));
+    const six = passageBlocksOf(
+      crowded,
+      locatedGroupsOf(crowded, "keywords/x/index.html", passages(6)),
+    );
+    expect(six.passages.map((group) => group.title)).toEqual(["a", "b", "c", "d", "e", "f"]);
+    expect(six.morePassages).toBeUndefined();
+    const seven = passageBlocksOf(
+      crowded,
+      locatedGroupsOf(crowded, "keywords/x/index.html", passages(7)),
+    );
+    expect(seven.passages).toHaveLength(6);
+    expect(seven.morePassages?.label).toBe("Show the other file");
+    expect(seven.morePassages?.groups.map((group) => group.title)).toEqual(["g"]);
+    const eight = passageBlocksOf(
+      crowded,
+      locatedGroupsOf(crowded, "keywords/x/index.html", passages(8)),
+    );
+    expect(eight.morePassages?.label).toBe("Show the 2 other files");
+    expect(eight.morePassages?.groups.map((group) => group.title)).toEqual(["g", "h"]);
+    const fr = { ...crowded, catalogue: loadCatalogue("fr") };
+    expect(
+      passageBlocksOf(fr, locatedGroupsOf(fr, "keywords/x/index.html", passages(7))).morePassages
+        ?.label,
+    ).toBe("Afficher l’autre fichier");
+    expect(
+      passageBlocksOf(fr, locatedGroupsOf(fr, "keywords/x/index.html", passages(8))).morePassages
+        ?.label,
+    ).toBe("Afficher les 2 autres fichiers");
+    const props = keywordPageOf(crowded, keyword);
+    expect(props.morePassages).toBeUndefined();
+    expect(props.passages).toHaveLength(2);
   });
 
   it("draws the neighbourhood of a keyword page from its co-occurrences, the most frequent first, a page as a full node and a noteless word as a dashed one, a neighbour the model lost left out", () => {

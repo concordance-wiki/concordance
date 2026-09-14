@@ -39,8 +39,29 @@ export function markedContext(passage: Passage): ComponentChildren {
   );
 }
 
-/** One file: its type, its title linking to its page, its number of passages, then each passage where it stands and its text. */
+/** The rows of passages: where each one stands, and its text with the expression marked. */
+function PassageRows({ passages }: { passages: readonly Passage[] }): JSX.Element {
+  return (
+    <ul class="passage-list">
+      {passages.map((passage) => (
+        <li key={passage.href} class="passage">
+          <a class="passage-at" href={passage.href}>
+            {passage.location ?? `${labels.line} ${String(passage.line)}`}
+          </a>
+          <q class="passage-text">{markedContext(passage)}</q>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * One page: its type, its title linking to it, its number of passages, then the passages in
+ * view, and the others behind a fold worded with their count when the page builder folded them.
+ */
 function PassageFile({ group }: { group: PassageGroup }): JSX.Element {
+  const folded = group.folded;
+  const count = group.passages.length + (folded?.passages.length ?? 0);
   return (
     <section class="passage-group">
       <h3 class="passage-file">
@@ -48,18 +69,15 @@ function PassageFile({ group }: { group: PassageGroup }): JSX.Element {
         <a class="passage-title" href={group.file.href}>
           {group.title ?? group.file.label}
         </a>
-        <span class="passage-count">{group.passages.length}</span>
+        <span class="passage-count">{count}</span>
       </h3>
-      <ul class="passage-list">
-        {group.passages.map((passage) => (
-          <li key={passage.href} class="passage">
-            <a class="passage-at" href={passage.href}>
-              {passage.location ?? `${labels.line} ${String(passage.line)}`}
-            </a>
-            <q class="passage-text">{markedContext(passage)}</q>
-          </li>
-        ))}
-      </ul>
+      <PassageRows passages={group.passages} />
+      {folded !== undefined && (
+        <details class="passage-more">
+          <summary>{folded.label}</summary>
+          <PassageRows passages={folded.passages} />
+        </details>
+      )}
     </section>
   );
 }
@@ -68,8 +86,9 @@ function PassageFile({ group }: { group: PassageGroup }): JSX.Element {
  * The page of a word nobody defined, on the shell of the entity page: the tree of the space the
  * word is filed in on the left; in the centre the breadcrumb, the title marked as having no note,
  * the line saying so and since when the word is used, then in place of the note the notice with
- * the lead to propose a definition, and the passages grouped by file, each file with its type,
- * its title and its count, each passage with where it stands and its text; on the right the
+ * the lead to propose a definition, and the passages grouped by page, each page with its type,
+ * its title and its count, two passages in view and the others folded under their count, the
+ * pages beyond the first six behind a disclosure; on the right the
  * counts under "what we know" with the note that the word has no property, the expressions of a
  * similar form as a lead, the related pages, and the neighbourhood folded behind its line,
  * drawn from the words that accompany the word, through the slots of the theme. No article, no
@@ -85,6 +104,7 @@ export function KeywordPage({
   spaces,
   summary,
   passages,
+  morePassages,
   similar,
   similarLead,
   neighbours,
@@ -127,6 +147,14 @@ export function KeywordPage({
           {passages.map((group) => (
             <PassageFile key={group.file.href} group={group} />
           ))}
+          {morePassages !== undefined && (
+            <details class="passage-files-more">
+              <summary>{morePassages.label}</summary>
+              {morePassages.groups.map((group) => (
+                <PassageFile key={group.file.href} group={group} />
+              ))}
+            </details>
+          )}
         </section>
       </div>
       <div class="entity-side">

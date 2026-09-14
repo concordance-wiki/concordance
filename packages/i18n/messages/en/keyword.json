@@ -47,6 +47,10 @@
     "defaultMessage": "{count, plural, one {# occurrence} other {# occurrences}}",
     "description": "Number of occurrences of a keyword across the corpus."
   },
+  "keyword.otherPassages": {
+    "defaultMessage": "{count, plural, one {# other passage} other {# other passages}}",
+    "description": "Line under the two passages in view of a page on a keyword page, which unfolds the other passages of that page."
+  },
   "keyword.pageAt": {
     "defaultMessage": "p. {number, number}",
     "description": "Position of a passage read from a converted document, given by its page number."
@@ -58,6 +62,10 @@
   "keyword.relatedNote": {
     "defaultMessage": "Ordered by number of passages. None is “cited”: this word has no note to carry links.",
     "description": "Note under the related pages of a keyword page, saying how they are ordered and why none is cited."
+  },
+  "keyword.showOtherFiles": {
+    "defaultMessage": "{count, plural, one {Show the other file} other {Show the # other files}}",
+    "description": "Disclosure under the six pages in view of a keyword page, which shows the passages of the other files."
   },
   "keyword.similarLead": {
     "defaultMessage": "Expressions close in form and context. A lead, not a claim.",
