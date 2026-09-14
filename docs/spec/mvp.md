@@ -1291,6 +1291,18 @@ As a reader, I want the footer of every page to tell me where the content comes 
 
 Depends on: L9-01, L9-10.
 
+#### L9-17 About this wiki
+
+As a reader who wonders whether what I read is current, I want one page saying when the site was built, from which repositories and at which versions, so that I judge for myself instead of trusting a date on a page.
+
+- The page `about/index.html`, linked from the footer of every page: the breadcrumb "Home › About this wiki", the title, the sentence "This site is rebuilt at every change of the repositories. It is not edited here: every correction is made in the original file, and appears at the next publication.", then the figures of the build in one card: "Published on" with the build instant, "Pages" with the notes counted, "Indexed words" with every entry of the index counted. No quality indicator stands among them, and no duration: the model records none, so that two builds of the same sources agree.
+- "Sources — each with the version exactly used": one table, the repositories in the order of the home page, the most cited first, with the columns REPOSITORY (the name of the source), NATURE (`sources[].title` when the configuration gives one, else the labels of its dominant types), VERSION (the commit the build read, shortened to seven characters; empty for a source without a git history), CONTENT KEPT ("312 pages" or "205 documents", as the home page counts them) and LAST CHANGE (the newest change from the git history, worded relative to the build). A source past the freshness threshold shows its date in the accent colour, doubled by its value in days and by a hidden phrase for assistive technology, and is named under the table: "The versions are those read at publication: two publications on the same versions produce an identical site. The source framing exceeds the freshness threshold of 180 days, which is reported here and in the build report, never on the pages themselves.", the threshold being the one that flags the source.
+- The page closes on two paragraphs over a rule: "What the site does not contain. The files the configuration excludes, the documents whose conversion failed, and the words used fewer than 3 times. The publication report lists them." (the threshold `inference.keyword_pages.min_occurrences`, the report the to-do page) and "Correct a page. Every page carries at its foot the path of its file and a link to the forge. There is no other way to edit, and that is deliberate.", followed by the link "How to contribute" when `project.contribute_url` is set; a third paragraph, "What is pseudonymised.", says that the names of the participants are replaced by stable pseudonyms and that the mapping is never published, when `privacy.pseudonymize.enabled` is true.
+- The page is generated from the model and the configuration; the new key `project.about`, the path of a markdown file relative to the configuration, extends it: the sections of the file are rendered after the generated content, on the template of a note, and a file named and missing stops the command as a missing profile would.
+- Gallery states `about-corporate` and `about-sections`; the accessibility checker and the contrast checker pass on them. The page has a screen note of its own in the demonstration.
+
+Depends on: L9-01, L9-16.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

@@ -16,6 +16,7 @@ export const SLOT_NAMES = [
   "Spaces",
   "Space",
   "CategoryList",
+  "About",
 ] as const;
 
 export type SlotName = (typeof SLOT_NAMES)[number];
@@ -1433,6 +1434,96 @@ export interface SpacesProps {
   labels?: Partial<SpacesLabels>;
 }
 
+/** The strings of the about page, worded by the site in its language; the default theme has English ones. */
+export interface AboutLabels {
+  /** The step of the breadcrumb leading home, and the accessible name of the breadcrumb. */
+  home: string;
+  breadcrumb: string;
+  title: string;
+  lead: string;
+  /** The figures at the head of the page: the build instant, the pages, the indexed words. */
+  publishedOn: string;
+  pages: string;
+  words: string;
+  /** The heading of the sources table and the sentence next to it. */
+  sources: string;
+  sourcesLead: string;
+  /** The five column headings. */
+  repository: string;
+  nature: string;
+  version: string;
+  content: string;
+  lastChange: string;
+  /** Under the table: the versions are those read at publication. */
+  versionsNote: string;
+  /** Before the name of a dormant source in the sentence under the table: "The source". */
+  staleSource: string;
+  /** After the date of a dormant source, for assistive technology: the alert in words, since the accent is a colour. */
+  stale: string;
+  /** What the site does not contain: the lead, the sentence up to the link, the link to the report, the end of the sentence. */
+  notContained: string;
+  notContainedText: string;
+  report: string;
+  reportLists: string;
+  /** How a page is corrected: the lead, the sentence, the link to the contribution address. */
+  correct: string;
+  correctText: string;
+  contribute: string;
+  /** What is pseudonymised: the lead and the sentence, shown when the configuration enables it. */
+  pseudonymised: string;
+  pseudonymisedText: string;
+}
+
+/** One figure at the head of the about page: its label and its value, already worded. */
+export interface AboutFigure {
+  label: string;
+  value: string;
+}
+
+/** One source of the site as the about page lists it: the repository, what it holds, the version the build read, how much it kept and when it last changed. */
+export interface AboutSource {
+  /** The name of the source, the repository as declared. */
+  name: string;
+  /** What the repository holds: its title when the configuration gives one, else the labels of its dominant types. */
+  nature: string;
+  /** The commit the build read, shortened; absent for a source without a git history. */
+  version?: string;
+  /** How much the site kept, worded: "312 pages", "205 documents". */
+  content: string;
+  /** ISO 8601 date of the newest change among its notes; absent when none carries a git date. */
+  date?: string;
+  /** The change worded relative to the build, "2 days ago", or in days for a dormant source; the theme shows `date` when absent. */
+  dateLabel?: string;
+  /** Whether the staleness threshold makes the source dormant: its date reads in the accent, doubled by its value in days. */
+  stale: boolean;
+  /** The threshold that makes the source dormant, in days; present for a dormant source alone. */
+  threshold?: number;
+  /** The sentence under the table after the name of a dormant source, the threshold already worded: "exceeds the freshness threshold of 180 days, which is reported here…"; the theme words it from `threshold` when absent. */
+  staleNote?: string;
+}
+
+export interface AboutProps {
+  /** Where the home page stands, for the breadcrumb. */
+  homeHref: string;
+  /** ISO 8601 instant of the build. */
+  generatedAt: string;
+  /** The build instant, the page count, the indexed words and, when known, the duration, each already worded. */
+  figures: AboutFigure[];
+  /** Every source of the site, the most cited first. */
+  sources: AboutSource[];
+  /** How many occurrences a word needs before it gets a page: what the site leaves out below it. */
+  threshold: number;
+  /** Where the publication report stands: the to-do page. */
+  reportHref: string;
+  /** Where the contribution address of the configuration leads; absent, no link. */
+  contributeHref?: string;
+  /** Whether the transcripts are pseudonymised: the page says so. */
+  pseudonymised: boolean;
+  /** The sections of the markdown file the configuration names, rendered after the generated content. */
+  sections?: Section[];
+  labels?: Partial<AboutLabels>;
+}
+
 /** A category of a space: a top-level folder of its repository, with the list it opens. */
 export interface SpaceCategory extends Link {
   /** One sentence on what the folder holds; absent when nothing declares one. */
@@ -1624,4 +1715,5 @@ export interface SlotProps {
   Spaces: SpacesProps;
   Space: SpaceProps;
   CategoryList: CategoryListProps;
+  About: AboutProps;
 }

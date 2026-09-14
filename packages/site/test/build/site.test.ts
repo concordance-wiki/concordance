@@ -11,6 +11,7 @@ import {
   mentionsFragmentPath,
   SEARCH_PAGE,
   siteRootOf,
+  ABOUT_PAGE,
   SPACES_PAGE,
   spacePagePath,
   TODO_PAGE,
@@ -122,6 +123,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         TODO_PAGE,
         SEARCH_PAGE,
         SPACES_PAGE,
+        ABOUT_PAGE,
         ...spaces,
         ...entities,
         ...categories,
@@ -143,6 +145,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         INDEX_PAGE,
         SEARCH_PAGE,
         SPACES_PAGE,
+        ABOUT_PAGE,
         TODO_PAGE,
       ].sort(),
     );
@@ -395,7 +398,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<a class="site-footer-todo" href="todo/index.html">To do<span class="count">5</span></a>',
     );
     expect(home).toContain(
-      '<p class="site-footer-published">Published on September 12, 2026 at 12:00 PM, from <a href="spaces/index.html">3 repositories</a>.</p>',
+      '<p class="site-footer-published">Published on September 12, 2026 at 12:00 PM, from <a href="spaces/index.html">3 repositories</a>. <a href="about/index.html">See the sources and their versions</a>.</p>',
     );
     expect(home).toContain(
       '<p class="site-footer-licence">Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
@@ -609,12 +612,12 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.maxPageBytes).toBe(SITE_PAGE_BUDGET);
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.summary[0]).toBe("site: 23 pages written to /dist");
+    expect(report.summary[0]).toBe("site: 24 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
     expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(9);
     expect(
-      report.summary.some((line) => /^pages: 23, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
+      report.summary.some((line) => /^pages: 24, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
@@ -791,7 +794,7 @@ describe("The labels of the site come from the message catalogue of the project 
       '<a class="site-footer-todo" href="todo/index.html">À faire<span class="count">5</span></a>',
     );
     expect(home).toContain(
-      '<p class="site-footer-published">Publié le 12 septembre 2026 à 12:00, depuis <a href="spaces/index.html">3 dépôts</a>.</p>',
+      '<p class="site-footer-published">Publié le 12 septembre 2026 à 12:00, depuis <a href="spaces/index.html">3 dépôts</a>. <a href="about/index.html">Voir les sources et leurs versions</a>.</p>',
     );
     expect(home).toContain(
       '<p class="site-footer-build">publication <time datetime="2026-09-12T12:00:00.000Z">12 sept. 2026 12:00</time> · profil default@1 · 5 pages · ',
@@ -916,6 +919,7 @@ describe("siteDocuments", () => {
       INDEX_PAGE,
       TODO_PAGE,
       SPACES_PAGE,
+      ABOUT_PAGE,
       ...["framing", "glossary", "specs"].map(spacePagePath),
       SEARCH_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),

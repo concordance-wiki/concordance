@@ -12,7 +12,7 @@
       "const": 1
     },
     "project": {
-      "description": "The project: its name, its interface language, its theme file, its edit link and the pages the organisation declares.",
+      "description": "The project: its name, its interface language, its theme file, its edit link, the pages the organisation declares and the file that extends the about page.",
       "type": "object",
       "additionalProperties": false,
       "required": ["name"],
@@ -67,6 +67,11 @@
               "pattern": "^https://[^\\s]+$"
             }
           }
+        },
+        "about": {
+          "description": "Path of a markdown file, relative to this configuration, rendered after the generated content of the about page: what the maintainer wants to add to what the tool says of the site.",
+          "type": "string",
+          "minLength": 1
         }
       }
     },

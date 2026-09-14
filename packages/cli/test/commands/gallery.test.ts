@@ -118,7 +118,7 @@ describe("A concordance gallery command renders every slot with fixture view mod
     const entityPages = galleryPages.filter((page) => page.rendered === "EntityPage").length;
     const failing = pageCount - entityPages - coreTypePages;
     expect(io.stderr).toHaveLength(failing + 1);
-    expect(io.stderr[0]).toBe("category-corporate.html: landmarks: no footer landmark");
+    expect(io.stderr[0]).toBe("about-corporate.html: landmarks: no footer landmark");
     expect(io.stderr.at(-1)).toBe(`gallery failed: ${String(failing)} problem(s)`);
     expect(io.stdout[1]).toBe("override Footer: plugin @example/theme, theme custom");
   });

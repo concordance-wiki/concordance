@@ -10,6 +10,8 @@ export const TODO_PAGE = "todo/index.html";
 export const SEARCH_PAGE = "search/index.html";
 /** The page listing every space. */
 export const SPACES_PAGE = "spaces/index.html";
+/** The page saying where the site comes from and when it was built. */
+export const ABOUT_PAGE = "about/index.html";
 export const ASSETS_DIRECTORY = "assets";
 export const FRAGMENTS_DIRECTORY = "fragments";
 

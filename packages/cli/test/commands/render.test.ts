@@ -534,6 +534,44 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     ]);
   });
 
+  it("links the legal pages of the configuration from the footer, extends the about page with the file project.about names, and stops when that file is missing", async () => {
+    const config = validConfig.replace(
+      "project: { name: Wiki }",
+      [
+        "project:",
+        "  name: Wiki",
+        "  about: about.md",
+        "  legal:",
+        "    mentions_url: https://forge.example/legal/mentions",
+        "    accessibility_url: https://forge.example/legal/accessibility",
+        "    accessibility_status: partially-compliant",
+      ].join("\n"),
+    );
+    const io = corpus(config);
+    io.fs.writeText(
+      "/work/about.md",
+      "# About\n\n## Who maintains this wiki\n\nIts maintainers.\n",
+    );
+    expect(await buildCommand([], io)).toBe(0);
+    const home = io.fs.readText("/work/dist/index.html");
+    expect(home).toContain(
+      '<ul class="site-footer-links"><li><a href="https://forge.example/legal/mentions">Legal notice</a></li><li><a href="https://forge.example/legal/accessibility">Accessibility — partially compliant</a></li></ul>',
+    );
+    const about = io.fs.readText("/work/dist/about/index.html");
+    expect(about).toContain("<h1>About this wiki</h1>");
+    expect(about).toContain(
+      '<section id="section-who-maintains-this-wiki"><h2>Who maintains this wiki</h2><div class="markdown"><p>Its maintainers.</p></div></section>',
+    );
+    expect(about).toContain("the words used fewer than 3 times.");
+    io.fs.remove("/work/about.md");
+    io.stderr.length = 0;
+    expect(await renderCommand([], io)).toBe(1);
+    expect(io.stderr).toEqual([
+      "/work/about.md: about file not found",
+      "render stopped: fix the configuration first",
+    ]);
+  });
+
   it("renders with the theme.yaml next to the configuration: its name, its credit, and stops on a faulty one", async () => {
     const io = corpus();
     io.fs.writeText("/work/theme.yaml", projectTheme);
@@ -593,9 +631,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
     expect(await renderCommand([], io, fakeDependencies(BareFooter)).catch(() => 2)).toBe(2);
     expect(await buildCommand([], io, fakeDependencies(BareFooter))).toBe(0);
-    // Every page carries the footer: the entities, the home, index, to-do and search pages, the spaces page and the page of the one space.
+    // Every page carries the footer: the entities, the home, index, to-do, search and about pages, the spaces page and the page of the one space.
     expect(io.stdout.find((line) => line.startsWith("accessibility: "))).toBe(
-      "accessibility: 12 findings",
+      "accessibility: 13 findings",
     );
     expect(io.stderr).toContain(
       'warning: index.html: img-alt: <img src="x.png"> has no alt attribute',

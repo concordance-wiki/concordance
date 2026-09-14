@@ -158,6 +158,8 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
       ".document-page .document-rail a",
       ".viewer-counter",
       ".document-twin-name",
+      ".about-table .about-version",
+      ".about-table .about-content",
     ]);
   });
 });

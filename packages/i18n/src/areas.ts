@@ -1,3 +1,4 @@
+import { aboutMessages } from "./areas/about.js";
 import { apiMessages } from "./areas/api.js";
 import { categoryMessages } from "./areas/category.js";
 import { decisionMessages } from "./areas/decision.js";
@@ -25,6 +26,7 @@ import { transcriptMessages } from "./areas/transcript.js";
 
 /** Every area of the catalogues, one per identifier prefix, in the order of the prefixes. */
 export const AREAS = [
+  aboutMessages,
   apiMessages,
   categoryMessages,
   decisionMessages,

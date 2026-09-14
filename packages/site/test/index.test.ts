@@ -44,6 +44,8 @@ const WHOLE = [
   "build/paths.js",
   "build/spaces.js",
   "build/footer.js",
+  "build/about.js",
+  "theme/default/about.js",
   "build/fragments.js",
   "build/default-theme.js",
   "build/assemble.js",

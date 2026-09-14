@@ -25,6 +25,8 @@ export interface ProjectConfig {
   contribute_url?: string;
   /** The legal pages the organisation declares, linked from the footer of every page. */
   legal?: LegalConfig;
+  /** Path of a markdown file, relative to the configuration, rendered after the generated content of the about page. */
+  about?: string;
 }
 
 export type PluginConfig = string | { name: string; options?: Record<string, unknown> };

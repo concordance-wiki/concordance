@@ -5,7 +5,7 @@ import { byCodeUnit } from "../order.js";
 import type { FooterLabels, FooterProps, Link } from "../slots.js";
 import { message, type SiteContext } from "./context.js";
 import { notesOf, sourceNames } from "./home.js";
-import { entityHref, relativeHref, SPACES_PAGE, TODO_PAGE } from "./paths.js";
+import { ABOUT_PAGE, entityHref, relativeHref, SPACES_PAGE, TODO_PAGE } from "./paths.js";
 
 /** The three pages the organisation may declare, in the order the footer lists them. */
 export const LEGAL_PAGES = ["mentions", "accessibility", "privacy"] as const;
@@ -119,7 +119,7 @@ export interface FooterTheme {
 
 /**
  * The footer of one page, every href relative to it: what the tool knows, the repositories
- * counted and linked to the spaces page, the profile and the page count; then
+ * counted and linked to the spaces page, the about page, the profile and the page count; then
  * what the organisation declared, the legal pages before the links of the theme; the to-do
  * page with its count, a build statistic kept out of the top bar.
  */
@@ -138,6 +138,7 @@ export function footerOf(
       href: relativeHref(page, SPACES_PAGE),
       label: formatMessage(context.catalogue, "footer.repositories", { count: repositories }),
     },
+    aboutHref: relativeHref(page, ABOUT_PAGE),
     profile: profileLabelOf(context),
     pages: pageCountOf(context),
     links: [...legalLinksOf(context, page), ...(theme.links ?? [])],

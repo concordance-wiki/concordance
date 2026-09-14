@@ -106,6 +106,8 @@ export {
 export type { FolderCount, SpaceCount, Filing } from "./build/space.js";
 export * from "./build/spaces.js";
 export * from "./build/footer.js";
+export * from "./build/about.js";
+export * from "./theme/default/about.js";
 export {
   CATEGORY_VARIANTS_MAX,
   categoryDocumentsOf,
