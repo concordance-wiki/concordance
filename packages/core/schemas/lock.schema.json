@@ -125,7 +125,7 @@
         "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
       },
       "additionalProperties": {
-        "description": "The identifier of a domain, declared under domains of concordance.yaml or named after the pivot of the proposal.",
+        "description": "The identifier of a domain, declared under domains of concordance.yaml or proposed by the neighbourhood (the domain of the pivot, else one named after it).",
         "type": "string",
         "minLength": 1
       }

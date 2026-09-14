@@ -10,6 +10,7 @@ export function emergentDomainsOptions(
   if (domains === undefined) return undefined;
   return {
     minNeighbours: domains.min_neighbours,
+    ...(domains.max_neighbours === undefined ? {} : { maxNeighbours: domains.max_neighbours }),
     radius: domains.radius,
     assign: domains.assign ?? false,
   };

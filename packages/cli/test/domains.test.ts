@@ -21,6 +21,7 @@ import type { LocaleDictionary } from "../src/pipeline/dictionary.js";
 import {
   DOMAIN_SUGGESTED_CHECK,
   domainNamedAfter,
+  domainOfPivot,
   proposeDomains,
   withoutAnswered,
   type ProposeDomainsInput,
@@ -155,6 +156,39 @@ describe("proposeDomains", () => {
     expect(domainNamedAfter("glossary/inference/co-occurrence")).toBe("co-occurrence");
   });
 
+  it("proposes the pivot's own domain when something files the pivot, and one named after it otherwise", () => {
+    // The linter term is filed under quality by a glob and cited by the linter screen and the check term.
+    // A lint summary screen cites the linter term alone: the linter is its only pivot.
+    const result = proposeDomains({
+      entities: [...entities, entity("specs/lint-summary")],
+      links: [
+        ...links,
+        link("glossary/check", "glossary/linter"),
+        link("specs/lint-summary", "glossary/linter"),
+      ],
+      neighbourhood: cooccurrences,
+      config: configWith("inference: { domains: { min_neighbours: 3, radius: 1, assign: true } }"),
+      dictionaries: dictionaries(["the"]),
+    });
+    const linter = result.findings.filter((finding) =>
+      finding.message.includes("glossary/linter ("),
+    );
+    expect(linter.map((finding) => finding.message)).toEqual([
+      'specs/lint-summary lies within 1 of glossary/linter (degree 3): a candidate for its domain "quality"',
+    ]);
+    expect(result.suggested?.find((row) => row.pivot === "glossary/linter")?.domain).toBe(
+      "quality",
+    );
+    expect(result.entities.find((entity) => entity.id === "specs/lint-summary")).toMatchObject({
+      domain: "quality",
+      domain_origin: "inferred",
+    });
+    expect(domainOfPivot(entity("glossary/check"))).toEqual({ domain: "check", own: false });
+    const bare = entity("glossary/check");
+    delete bare.domain;
+    expect(domainOfPivot(bare)).toEqual({ domain: "check", own: false });
+  });
+
   it("proposes nothing and files nothing while inference.domains is unset", () => {
     const result = propose("");
     expect(result).toEqual({ entities, findings: [], filed: new Set() });
@@ -193,6 +227,7 @@ describe("proposeDomains", () => {
       {
         pivot: "glossary/check",
         degree: 4,
+        domain: "check",
         notes: ["glossary/check", "glossary/finding", "specs/lint-report", "specs/todo-page"],
       },
     ]);
@@ -448,6 +483,7 @@ describe("The proposal runs after the twins and before the model checks, and rea
       {
         pivot: "glossary/check",
         degree: 4,
+        domain: "check",
         notes: [
           "glossary/check",
           "glossary/finding",
@@ -539,6 +575,7 @@ describe("concordance build writes the suggested domains in the summary and the 
       {
         pivot: "glossary/check",
         degree: 4,
+        domain: "check",
         notes: ["glossary/check", "glossary/finding", "specs/screens/lint-report"],
       },
     ]);

@@ -21,6 +21,8 @@ export interface EmergentDomainsInput {
 export interface EmergentDomainsOptions {
   /** Degree from which a candidate becomes a pivot. */
   minNeighbours: number;
+  /** Degree above which a term is a hub, never a pivot; undefined for no bound. */
+  maxNeighbours?: number;
   /** Distance, in edges, within which a note belongs to a pivot. */
   radius: number;
   /** Whether the pipeline files the attached notes; the walk itself never reads it. */
