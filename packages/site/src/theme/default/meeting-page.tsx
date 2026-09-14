@@ -22,6 +22,7 @@ import {
 } from "./entity-page.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
+import { Tabs, type Tab } from "./tabs.js";
 
 /** The labels of the default theme, used for every label the page does not receive. */
 export const defaultMeetingLabels: MeetingLabels = {
@@ -39,17 +40,6 @@ export const defaultMeetingLabels: MeetingLabels = {
   files: labels.filesCount,
   relatedNote: labels.meetingRelatedNote,
 };
-
-/** How many tabs the stylesheet marks as current by their position; a page rarely has more than three. */
-export const TABS_MARKED = 4;
-
-/** One representation of the meeting as a tab: the transcript, the notes or a converted document. */
-interface Tab {
-  /** The id of the panel, the target of the tab: `representation-transcript`. */
-  id: string;
-  label: string;
-  content: JSX.Element;
-}
 
 /** A timecode under the hour reads as minutes and seconds. */
 export function cueTime(label: string): string {
@@ -190,9 +180,10 @@ function tabId(kind: string, rank: number): string {
 
 /**
  * The tabs of the page: the transcripts first, the decisions placed in the first one, then the
- * notes when the meeting has some, then the deck and any other converted document, each
- * document keeping the anchors of its positions so that a mention still lands on its cue, slide
- * or page. A converted file and the PDF next to it come as one document, so one tab.
+ * notes when the meeting has some, then the deck and any other converted document, its viewer
+ * opening as soon as its tab is shown, each document keeping the anchors of its positions so
+ * that a mention still lands on its cue, slide or page. A converted file and the PDF next to it
+ * come as one document, so one tab.
  */
 function tabsOf(
   entity: EntityRef,
@@ -236,7 +227,7 @@ function tabsOf(
     tabs.push({
       id: next(deck ? "deck" : "document"),
       label: deck ? text.deck : text.document,
-      content: <DocumentBlock document={document} index={index} />,
+      content: <DocumentBlock document={document} index={index} open />,
     });
   }
   return tabs;
@@ -245,8 +236,7 @@ function tabsOf(
 /**
  * The page of a meeting on the shell of the entity page: the same tree, breadcrumb and title;
  * under the title the type, the duration and the participants; then the representations as
- * tabs, anchors to panels that the stylesheet shows one at a time and without any script, the
- * transcript as timestamped lines with the callout of the decisions the meeting produced in the
+ * tabs, the transcript as timestamped lines with the callout of the decisions the meeting produced in the
  * cue each came from, the notes as the entity page renders them, the deck with its viewer; the
  * callout after the tabs for a meeting without a transcript; the path of every file. In the
  * panel the properties, the related pages and the neighbourhood folded, or unfolded when
@@ -291,30 +281,14 @@ export function MeetingPage({
           </p>
         </header>
         {tabs.length > 0 && (
-          <div class="meeting-representations">
-            <nav class="meeting-tabs" aria-label={words.representations}>
-              {tabs.map((tab) => (
-                <a key={tab.id} class="meeting-tab" id={`tab-${tab.id}`} href={`#${tab.id}`}>
-                  {tab.label}
-                </a>
-              ))}
-              {meeting.grouping !== undefined && (
-                <span class="meeting-grouped">{words.grouped}</span>
-              )}
-            </nav>
-            <div class="meeting-panels">
-              {tabs.map((tab) => (
-                <section
-                  key={tab.id}
-                  class="meeting-panel"
-                  id={tab.id}
-                  aria-labelledby={`tab-${tab.id}`}
-                >
-                  {tab.content}
-                </section>
-              ))}
-            </div>
-          </div>
+          <Tabs
+            label={words.representations}
+            tabs={tabs}
+            className="meeting-representations"
+            {...(meeting.grouping === undefined
+              ? {}
+              : { trailing: <span class="meeting-grouped">{words.grouped}</span> })}
+          />
         )}
         {meeting.decisions.length > 0 && !documents.some((document) => document.unit === "cue") && (
           <div class="meeting-decisions">

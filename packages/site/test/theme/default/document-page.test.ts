@@ -73,25 +73,25 @@ describe("The document page: the tree by year, the line under the title, the tab
     expect(withView({ pages: 12 })).toContain('<span class="document-pages">12 pages</span>');
   });
 
-  it("offers the three views as a tab bar of anchors with the download of the original at its end", () => {
+  it("offers the three views behind the tabs of the theme, anchors following the tablist pattern, with the download of the original at the end of the bar", () => {
     const html = render();
     expect(html).toContain(
-      '<nav class="document-tabs" aria-label="Views of the document"><a class="document-tab document-tab-view" href="#document-view">Document</a><a class="document-tab document-tab-text" href="#document-text">Extracted text</a><a class="document-tab document-tab-notes" href="#document-notes">Related notes</a><a class="document-download" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a></nav>',
+      '<div class="tabs document-views"><div class="tabs-bar"><concordance-island data-island="tabs" data-props="{&quot;label&quot;:&quot;Views of the document&quot;,&quot;tabs&quot;:[{&quot;id&quot;:&quot;document-view&quot;,&quot;label&quot;:&quot;Document&quot;},{&quot;id&quot;:&quot;document-text&quot;,&quot;label&quot;:&quot;Extracted text&quot;},{&quot;id&quot;:&quot;document-notes&quot;,&quot;label&quot;:&quot;Related notes&quot;}]}"><div class="tabs-list" role="tablist" aria-label="Views of the document"><a class="tab" role="tab" id="tab-document-view" href="#document-view" aria-controls="document-view" aria-selected="true">Document</a><a class="tab" role="tab" id="tab-document-text" href="#document-text" aria-controls="document-text" aria-selected="false">Extracted text</a><a class="tab" role="tab" id="tab-document-notes" href="#document-notes" aria-controls="document-notes" aria-selected="false">Related notes</a></div></concordance-island><a class="document-download" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a></div>',
     );
     expect(html).toContain(
-      '<section id="document-view" class="document-panel document-view" aria-label="Document">',
+      '<section class="tabs-panel" role="tabpanel" id="document-view" aria-labelledby="tab-document-view">',
     );
     expect(html).toContain(
-      '<section id="document-text" class="document-panel document-text" aria-label="Extracted text">',
+      '<section class="tabs-panel" role="tabpanel" id="document-text" aria-labelledby="tab-document-text"><div class="document-text">',
     );
     expect(html).toContain(
-      '<section id="document-notes" class="document-panel document-notes" aria-label="Related notes">',
+      '<section class="tabs-panel" role="tabpanel" id="document-notes" aria-labelledby="tab-document-notes">',
     );
     expect(count(html, "<h1>")).toBe(1);
     const without = render({ documents: [] });
     expect(without).not.toContain('class="document-download"');
     expect(without).toContain(
-      '<section id="document-view" class="document-panel document-view" aria-label="Document"></section>',
+      '<section class="tabs-panel" role="tabpanel" id="document-view" aria-labelledby="tab-document-view"></section>',
     );
     expect(without).toContain('<p class="empty">No text was extracted from this document.</p>');
     const { documents, ...none } = documentPageCorporate;
@@ -178,14 +178,14 @@ describe("The text and the notes: reachable without JavaScript by their anchors"
   it("renders the note merged with the document with its legend, and says so when there is none", () => {
     const html = render();
     expect(html).toContain(
-      '<section id="document-notes" class="document-panel document-notes" aria-label="Related notes"><article class="entity-body"><section id="notes"><div class="markdown">',
+      '<section class="tabs-panel" role="tabpanel" id="document-notes" aria-labelledby="tab-document-notes"><article class="entity-body"><section id="notes"><div class="markdown">',
     );
     expect(html).toContain('<section id="decisions"><h2>Decisions</h2>');
     expect(html).toContain(
       '<footer class="legend"><span class="legend-written">written link</span><span class="legend-recognised">recognised word, existing note</span><span class="legend-keyword">recognised word, no note</span></footer>',
     );
     expect(render({ sections: [] })).toContain(
-      'aria-label="Related notes"><p class="empty">No note describes this document yet.</p></section>',
+      'aria-labelledby="tab-document-notes"><p class="empty">No note describes this document yet.</p></section>',
     );
   });
 

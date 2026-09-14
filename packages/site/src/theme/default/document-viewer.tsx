@@ -140,16 +140,18 @@ export function DocumentText({
 
 /**
  * One document of the page: the download link, the PDF link and, when the build produced the
- * viewer, the island that opens it on demand; then the rail of positions, each leading to its
- * text, and the extracted text position by position in disclosure blocks. Everything but the
- * viewer itself works without JavaScript.
+ * viewer, the island that opens it on demand, or as soon as the block is shown when `open`
+ * asks; then the rail of positions, each leading to its text, and the extracted text position
+ * by position in disclosure blocks. Everything but the viewer itself works without JavaScript.
  */
 export function DocumentBlock({
   document,
   index,
+  open = false,
 }: {
   document: DocumentView;
   index: number;
+  open?: boolean;
 }): JSX.Element {
   const id = `document-${String(index)}`;
   const { file, preview, positions } = document;
@@ -169,7 +171,7 @@ export function DocumentBlock({
           </a>
         )}
       </p>
-      {viewer !== undefined && <ViewerIsland {...viewer} />}
+      {viewer !== undefined && <ViewerIsland {...viewer} {...(open ? { open } : {})} />}
       {positions.length > 0 && (
         <nav class="document-rail" aria-label={railHeading(document.unit)}>
           <ol>

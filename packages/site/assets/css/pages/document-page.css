@@ -1,4 +1,4 @@
-/* Document page: the tab bar and the three views of an office document, the strip of pages beside the rendering of the current page and its notes, the files that make the document in the panel. */
+/* Document page: the three views of an office document behind the tabs of the theme, the strip of pages beside the rendering of the current page and its notes, the files that make the document in the panel. */
 
 .document-page .entity-main {
   padding: 1.625rem 2.125rem var(--space-5);
@@ -13,48 +13,12 @@
   border-block-end: 0;
 }
 
-/* The tab bar: three links ruled underneath and the download of the original at the end; the stylesheet marks the tab whose view is shown, the first one until a view is targeted. */
+/* The download of the original at the end of the tab bar, as a button. */
 
-.document-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-block-start: var(--space-3);
-  border-block-end: 1px solid var(--color-border);
-}
-
-.document-tab {
+.document-views .document-download {
   display: inline-flex;
   align-items: center;
   min-block-size: 2.5rem;
-  margin-block-end: -1px;
-  padding: 0 0.875rem;
-  border-block-end: 2px solid transparent;
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.document-tab:hover {
-  color: var(--color-ink);
-}
-
-.document-page:not(:has(.document-panel:target, .document-panel :target)) .document-tab-view,
-.document-page:has(#document-view:target) .document-tab-view,
-.document-page:has(#document-text:target, #document-text :target) .document-tab-text,
-.document-page:has(#document-notes:target, #document-notes :target) .document-tab-notes {
-  border-block-end-color: var(--color-accent);
-  color: var(--color-ink);
-  font-weight: 600;
-}
-
-.document-tabs .document-download {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 2.5rem;
-  margin-inline-start: auto;
   padding: 0 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -65,21 +29,12 @@
   text-decoration: none;
 }
 
-.document-tabs .document-download:hover {
+.document-views .document-download:hover {
   color: var(--color-ink);
   text-decoration: underline;
 }
 
-/* One view at a time: the targeted one, or the one holding the target, the document until then; every view stays reachable by its anchor without any script. */
-
-.document-panels:not(:has(.document-panel:target, .document-panel :target))
-  > .document-panel:not(:first-child),
-.document-panels:has(.document-panel:target, .document-panel :target)
-  > .document-panel:not(:target):not(:has(:target)) {
-  display: none;
-}
-
-.document-panel {
+.document-views .tabs-panel {
   padding-block-start: 1.125rem;
 }
 

@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { baseStylesheet, componentsStylesheet } from "../../../src/css/stylesheet.js";
 import { buildGallery } from "../../../src/gallery/build.js";
-import { TABS_MARKED } from "../../../src/theme/default/meeting-page.js";
+import { TABS_MARKED } from "../../../src/theme/default/tabs.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import { count } from "../../helpers/html.js";
 
@@ -45,22 +45,15 @@ const CONTRACT_BUTTONS = [".contract-operation > button", ".contract-schema-list
   ",\n",
 );
 
-/** The tab whose panel is in view, by position, the first one until a tab or an anchor inside a panel is followed; laid out as the stylesheet formats it inside its `@supports` block. */
+/** The tab whose panel is in view: by position without any script, the first one until a tab or an anchor inside a panel is followed, by its selected state once the island runs; laid out as the stylesheet formats it inside its `@supports` block. */
 const CURRENT_TAB = [
-  "  .meeting-representations:not(:has(.meeting-panel:target, .meeting-panel :target))\n    .meeting-tab:nth-child(1)",
+  ".tabs:not(.tabs-scripted):not(:has(.tabs-panel:target, .tabs-panel :target)) .tab:nth-child(1)",
   ...Array.from({ length: TABS_MARKED }, (_, index) => index + 1).map(
     (position) =>
-      `.meeting-representations:has(\n      .meeting-panel:nth-child(${String(position)}):target,\n      .meeting-panel:nth-child(${String(position)}) :target\n    )\n    .meeting-tab:nth-child(${String(position)})`,
+      `.tabs:not(.tabs-scripted):has(.tabs-panel:nth-child(${String(position)}):target, .tabs-panel:nth-child(${String(position)}) :target)\n    .tab:nth-child(${String(position)})`,
   ),
+  '.tabs-scripted .tab[aria-selected="true"]',
 ].join(",\n  ");
-
-/** The tab of the document page whose view is shown: the first one until a view is targeted. */
-const DOCUMENT_TAB_CURRENT = [
-  ".document-page:not(:has(.document-panel:target, .document-panel :target)) .document-tab-view",
-  ".document-page:has(#document-view:target) .document-tab-view",
-  ".document-page:has(#document-text:target, #document-text :target) .document-tab-text",
-  ".document-page:has(#document-notes:target, #document-notes :target) .document-tab-notes",
-].join(",\n");
 
 describe("The accent colour never carries information on its own", () => {
   const base = accentRules(baseStylesheet());
@@ -97,7 +90,6 @@ describe("The accent colour never carries information on its own", () => {
       CURRENT_TAB,
       ".cue-time",
       ".spaces-row.stale .spaces-date",
-      DOCUMENT_TAB_CURRENT,
       ".document-page .document-rail a.current",
     ]);
   });
@@ -190,7 +182,7 @@ describe("The accent colour never carries information on its own", () => {
     );
   });
 
-  it("marks the current tab of a meeting page by a rule and the bold weight, and underlines the timecode of a cue", () => {
+  it("marks the current tab of a row of tabs by a rule and the bold weight, and underlines the timecode of a cue", () => {
     const current = ruleFor(components, CURRENT_TAB).body;
     expect(current).toContain("border-block-end-color: var(--color-accent);");
     expect(current).toContain("font-weight: 600;");

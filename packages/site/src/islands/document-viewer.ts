@@ -1,4 +1,5 @@
 import type { DocumentViewerProps, ViewerLabels } from "../theme/default/document-viewer.js";
+import { TAB_SHOWN_EVENT, TABS_SCRIPTED } from "./tabs.js";
 
 /** A position of the document as the viewer searches it: its number and its extracted text. */
 export interface ViewerPosition {
@@ -71,12 +72,24 @@ function fallback(container: HTMLElement, props: DocumentViewerProps): void {
 }
 
 /**
+ * Whether the island stands in a panel of tabs that is not shown: a panel the tabs island
+ * hides, or one it has not driven yet, whose display the stylesheet still decides.
+ */
+function inHiddenPanel(panel: HTMLElement | null): panel is HTMLElement {
+  return (
+    panel !== null &&
+    (panel.hidden || panel.closest(".tabs")?.classList.contains(TABS_SCRIPTED) !== true)
+  );
+}
+
+/**
  * Reveals the button of one document island and makes it import the viewer bundle on the first
  * click, then open the viewer on the PDF; the button toggles the viewer afterwards, and the rail
  * follows the page shown, its entries showing their page in the viewer rather than leading to
  * their text once it is open. An island served `open` imports the viewer at once and never
- * shows the button, as the document page does. When the bundle cannot be imported, the reader
- * gets a link to the PDF.
+ * shows the button, as the document page does; in a panel of tabs that is not shown, it waits
+ * for the panel to be, so that only the visible panel opens its viewer. When the bundle cannot
+ * be imported, the reader gets a link to the PDF.
  */
 export function wireDocumentViewer(element: HTMLElement, deps: OpenerDependencies): boolean {
   const button = element.querySelector<HTMLButtonElement>("button.document-open");
@@ -134,11 +147,22 @@ export function wireDocumentViewer(element: HTMLElement, deps: OpenerDependencie
       handle.goTo(Number(entry.dataset["position"]));
     });
   }
-  if (props.open === true) {
-    void open();
-  } else {
+  if (props.open !== true) {
     show(false);
     button.hidden = false;
+    return true;
+  }
+  const panel = element.closest<HTMLElement>('[role="tabpanel"]');
+  if (inHiddenPanel(panel)) {
+    panel.addEventListener(
+      TAB_SHOWN_EVENT,
+      () => {
+        void open();
+      },
+      { once: true },
+    );
+  } else {
+    void open();
   }
   return true;
 }

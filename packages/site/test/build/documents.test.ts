@@ -95,6 +95,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
       "mentions-panel",
       "mode-switch",
       "search",
+      "tabs",
       "toc",
       "trail",
       "viewer-pdf",
@@ -106,7 +107,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(viewer?.bytes).toBeGreaterThan(300_000);
     expect(worker?.bytes).toBeGreaterThan(1_000_000);
     expect(opener?.bytes).toBeLessThan(3_000);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(10);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(11);
     // The page loads the opener as any island, once; the viewer bundles are only named in its props.
     const loaded = references(html).filter((reference) => reference.includes("/assets/"));
     expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(1);
@@ -200,6 +201,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       "mentions-panel",
       "mode-switch",
       "search",
+      "tabs",
       "toc",
       "trail",
     ]);
