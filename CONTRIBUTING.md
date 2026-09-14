@@ -26,7 +26,7 @@ pnpm check
 | `pnpm test` | every test with coverage; fails under 100% lines, branches, functions and statements |
 | `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation, distribution manifests |
 | `pnpm build:binary` | the standalone binary of the command line for the current platform, under `dist-bin/` (after `pnpm build`) |
-| `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85%; the pipeline runs it every night on the whole tree (`mutation` workflow) and, on a pull request, on the changed files only |
+| `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85%; see [Mutation testing](#mutation-testing) for what the pipeline runs |
 | `pnpm format` | Prettier on everything it owns (code, configuration, package files) |
 | `pnpm licenses:update` | regenerate the [licence inventory](docs/licenses.md) from the installed dependencies; `pnpm licenses:check` verifies that it is current and that every licence is in the allow-list of `scripts/licenses.mjs` |
 | `pnpm reference:update` | regenerate the [reference pages](docs/reference/) from the JSON schemas of `packages/core/schemas`; `pnpm lint` fails when a committed page differs from its schema or when a property of those schemas has no `description`, so a schema change is a schema edit, a description, and this command |
@@ -35,6 +35,16 @@ pnpm check
 | `pnpm check` | all of the above, plus the determinism step (builds the golden corpus twice with `SOURCE_DATE_EPOCH=0` through the built command line and compares every output file byte for byte), the walkthrough, the hygiene scan and the licence check |
 
 A package lives in `packages/<name>/` with `src/` (compiled to `dist/`), `test/` (Vitest, run against the sources), a `tsconfig.json` for type checking sources and tests (`tsc -b`, so that referenced packages are built first) and a `tsconfig.build.json` for emitting. Every package keeps a test that pins its public exports, so that the public surface changes only on purpose. Under Vitest, `@concordance-wiki/*` imports resolve to the sources of the workspace, so cross-package tests count for coverage and mutation testing without a build.
+
+## Mutation testing
+
+`stryker.config.mjs` mutates the sources of `core`, `typing`, `nlp`, `inference` and `checks` and fails under a score of 85%. Every run is incremental: the results land in a file under `reports/mutation/incremental/`, and the next run reuses the result of every mutant whose code, and whose covering tests, did not change since. `scripts/mutation.mjs` picks the file and the scope:
+
+- `node scripts/mutation.mjs --package nlp` mutates one package into `incremental/nlp.json`. The `mutation` workflow runs it every night, one job per package, each restoring last night's file from the cache and saving the new one; a final job prints the five scores on one line of the job summary, fails when one is under the threshold, and merges the five files into `incremental/main.json`, which the pull requests start from. `workflow_dispatch` with `force` retests every mutant.
+- `node scripts/mutation.mjs --since origin/main` mutates the source files a branch changed, with `--ignoreStatic`: a mutant that only the loading of a module executes, or a `beforeAll` hook, needs the whole suite in a fresh process and belongs to the nightly run. The `mutation` job of the `ci` workflow runs it on every pull request into `incremental/branch.json`, cached by branch and seeded from `main.json`, and is bounded to thirty minutes; the merge queue does not wait for it.
+- `pnpm mutation` mutates everything into `incremental/all.json`.
+
+A mutant gets the time its covering tests took, times `timeoutFactor`, plus `timeoutMS` and the fixed cost of a run, before it counts as hung; the initial run gets `dryRunTimeoutMinutes`. The string literals of `packages/checks/src/catalogue.ts` are not mutated (`// Stryker disable StringLiteral`): the tests pin the identifiers and the descriptions are prose. Under the instrumented suite, `.stryker-tmp/` holds the sandbox and `reports/mutation/` the HTML and JSON reports; both are ignored by git.
 
 ## Quality bar
 

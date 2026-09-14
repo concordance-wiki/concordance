@@ -78,9 +78,12 @@ jobs:
           DEMO_ROOT="$RUNNER_TEMP/demo" node scripts/parity.mjs
   mutation:
     # A pull request mutates only the source files it changed, next to the other checks rather
-    # than after them; the whole tree is mutated every night by the mutation workflow.
+    # than after them; the whole tree is mutated every night by the mutation workflow. The run
+    # starts from the incremental file of the branch, or from the merged nightly one, so that
+    # only the mutants whose code or tests changed are tested again.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -92,5 +95,24 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - name: Restore the merged nightly incremental file
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/main.json
+          key: mutation-incremental-main-${{ github.run_id }}
+          restore-keys: mutation-incremental-main-
+      - name: Restore the incremental file of the branch
+        # Keys are immutable: every run saves a new one and the next restores the latest.
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/branch.json
+          key: mutation-incremental-branch-${{ github.head_ref }}-${{ github.run_id }}
+          restore-keys: mutation-incremental-branch-${{ github.head_ref }}-
       - name: Mutation testing of the changed files
         run: node scripts/mutation.mjs --since origin/${{ github.event.pull_request.base.ref }}
+      - name: Save the incremental file of the branch
+        if: always() && hashFiles('reports/mutation/incremental/branch.json') != ''
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/branch.json
+          key: mutation-incremental-branch-${{ github.head_ref }}-${{ github.run_id }}

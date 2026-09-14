@@ -1,24 +1,33 @@
 name: mutation
 
-# Mutates every source file of the core packages once a night: the whole run takes hours, which
-# no push should wait for. A run is never cancelled by the next one. The pull request pipeline
-# mutates only the files a change touches.
+# Mutates every source file of the core packages once a night, one job per package so that none
+# waits for the others and each keeps its own incremental file: a mutant whose code and tests did
+# not change keeps last night's result. A run is never cancelled by the next one. The pull request
+# pipeline mutates only the files a change touches, starting from the merged nightly file.
 on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      force:
+        description: Retest every mutant instead of reusing the incremental file
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
-concurrency:
-  group: mutation
-  cancel-in-progress: false
-
 jobs:
   mutate:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [core, typing, nlp, inference, checks]
+    concurrency:
+      group: mutation-${{ matrix.package }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
@@ -28,13 +37,46 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Mutation testing
-        # Fails under the 85% threshold of stryker.config.json.
-        run: pnpm mutation
-      - name: Publish mutation report
+      - name: Restore the incremental file of the package
+        # Keys are immutable: every run saves a new one and the next restores the latest.
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/${{ matrix.package }}.json
+          key: mutation-incremental-${{ matrix.package }}-${{ github.run_id }}
+          restore-keys: mutation-incremental-${{ matrix.package }}-
+      - name: Mutation testing of ${{ matrix.package }}
+        # Fails under the 85% threshold of stryker.config.mjs; the score goes to the job summary.
+        run: node scripts/mutation.mjs --package ${{ matrix.package }} ${{ inputs.force && '--force' || '' }}
+      - name: Save the incremental file of the package
+        if: always() && hashFiles(format('reports/mutation/incremental/{0}.json', matrix.package)) != ''
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/${{ matrix.package }}.json
+          key: mutation-incremental-${{ matrix.package }}-${{ github.run_id }}
+      - name: Publish the report of the package
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: mutation
+          name: mutation-${{ matrix.package }}
           path: reports/mutation
           if-no-files-found: ignore
+  summary:
+    # One line with the five scores, and the merged incremental file the pull requests start from.
+    needs: mutate
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: mutation-*
+          path: ${{ runner.temp }}/mutation
+      - name: Aggregate the scores
+        run: node scripts/mutation.mjs --summary ${{ runner.temp }}/mutation
+      - name: Save the merged incremental file
+        if: always() && hashFiles('reports/mutation/incremental/main.json') != ''
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/incremental/main.json
+          key: mutation-incremental-main-${{ github.run_id }}
