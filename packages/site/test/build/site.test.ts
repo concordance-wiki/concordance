@@ -635,7 +635,7 @@ describe("A page weighs under 150 KB excluding previews", () => {
     ]);
     const viewer = report.budget.islands.find((island) => island.name === "contract-viewer");
     expect(fileSystem.readText(`/dist/assets/${viewer?.file ?? ""}`)).toContain(
-      "Show the contract",
+      "Loading the contract",
     );
   });
 

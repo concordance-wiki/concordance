@@ -147,9 +147,10 @@ function Operations({
 
 /**
  * The contract side of an API page, after the note: the operations table, then the contract
- * block, its format, its file, its import date and its download link on one line, and the
- * viewer island, which shows the operations and schemas on demand, with the note that nothing
- * of the contract is copied into the text. The markdown of the note is untouched.
+ * block, its format, its file and the date of its last change on one line, the viewer island,
+ * open in the page as soon as its script runs and a link to the JSON view until then, with the
+ * note that nothing of the contract is copied into the text, and the download link at the foot.
+ * The markdown of the note is untouched.
  */
 export function ContractSection(props: ContractSectionProps): JSX.Element {
   const text: ContractLabels = { ...defaultContractLabels, ...props.labels };
@@ -166,14 +167,16 @@ export function ContractSection(props: ContractSectionProps): JSX.Element {
             <time class="contract-imported" dateTime={props.importedAt}>
               {imported === undefined ? props.importedAt : imported.label}
             </time>
-            <a class="contract-download" href={props.downloadHref} download>
-              {text.download}
-            </a>
           </p>
           <div class="contract-body">
             <ContractViewerIsland href={props.fragmentHref} />
             <p class="contract-note">{text.viewerNote}</p>
           </div>
+          <p class="contract-foot">
+            <a class="contract-download" href={props.downloadHref} download>
+              {text.download}
+            </a>
+          </p>
         </div>
       </section>
     </>

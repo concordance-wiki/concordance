@@ -131,7 +131,7 @@ describe("bundleIslands", () => {
     const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
     expect(bundle?.bytes).toBeLessThan(25_000);
     expect(written).toContain('"contract-viewer"');
-    expect(written).toContain("Show the contract");
+    expect(written).toContain("Loading the contract");
     expect(written).not.toContain("<form");
     expect(written).not.toContain("XMLHttpRequest");
     expect(written).not.toContain("swagger");

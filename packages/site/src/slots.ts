@@ -661,17 +661,17 @@ export interface ContractSectionProps {
   version: string;
   /** The format of the contract with its version, as the record names it: `openapi 3.1`, `wsdl 1.1`. */
   format: string;
-  /** ISO 8601 instant of the import. */
+  /** ISO 8601 instant the block dates the contract by: the last change of its file, the import of a contract fetched from a URL. */
   importedAt: string;
-  /** The import worded relative to the build, "imported 3 days ago"; the instant stands in when absent. */
+  /** That instant worded relative to the build, "imported 3 days ago"; the instant stands in when absent. */
   imported?: ChangeDate;
   /** The contract location as written in the note: a URL, or a path relative to it. */
   location: string;
   /** The original contract: its URL, or the copy placed next to the page for a path. */
   downloadHref: string;
-  /** The JSON view of the contract the viewer fetches on demand, relative to the page. */
+  /** The JSON view of the contract the viewer fetches as soon as it runs, relative to the page. */
   fragmentHref: string;
-  /** In model order. */
+  /** In the order of the contract. */
   operations: ContractOperationItem[];
   /** The `endpoint` notes that name the API and match none of its operations, in identifier order: described, absent from the contract. */
   unmatched?: ContractOperationItem[];

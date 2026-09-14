@@ -482,7 +482,7 @@ describe("concordance build", () => {
     };
 
     function contractCorpus(): RecordedIo {
-      return recordedIo({
+      const io = recordedIo({
         "/work/concordance.yaml": `${validConfig}plugins: ["@concordance-wiki/plugin-contract-openapi"]\n`,
         "/work/notes/model-query.md":
           "---\ntype: api\ncontract: contracts/model-query.openapi.json\n---\n# Model query API\n\nServes the canonical model over HTTP.\n",
@@ -490,6 +490,9 @@ describe("concordance build", () => {
         "/work/notes/list-entities.md":
           "---\ntype: endpoint\napi: model-query\noperation_id: listEntities\n---\n# List the entities\n\nReturns the entities of the last build.\n",
       });
+      // The contract file changed four days before the build: the page dates the contract by it.
+      io.fs.dates.set("/work/notes/contracts/model-query.openapi.json", "2026-09-08T12:00:00.000Z");
+      return io;
     }
 
     it("writes the JSON view of the contract under fragments/ and the copy of the path contract next to the page", async () => {
@@ -510,7 +513,7 @@ describe("concordance build", () => {
       );
     });
 
-    it("renders the operations table and the contract block after the note, the download link and the viewer island loaded on demand", async () => {
+    it("renders the operations table and the contract block after the note, dated by the file of the contract, the viewer island served as a link and the download link at the foot", async () => {
       const io = contractCorpus();
       await buildCommand([], io, withOpenApi);
       const page = io.fs.readText("/work/dist/notes/model-query/index.html");
@@ -529,7 +532,10 @@ describe("concordance build", () => {
       );
       expect(page).toContain('<h2 id="contract-title">Interface contract</h2>');
       expect(page).toContain(
-        '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-12T12:00:00.000Z">imported now</time><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p>',
+        '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-08T12:00:00.000Z">imported 4 days ago</time></p>',
+      );
+      expect(page).toContain(
+        '<p class="contract-foot"><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p></div></section>',
       );
       expect(page).toContain(
         '<concordance-island data-island="contract-viewer" data-props="{&quot;href&quot;:&quot;../../fragments/notes/model-query.contract.json&quot;}"><p class="contract-data"><a href="../../fragments/notes/model-query.contract.json">Contract data (JSON)</a></p></concordance-island>',

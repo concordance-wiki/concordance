@@ -102,8 +102,6 @@ export const labels = {
   contractNoOperation: "The contract declares no operation.",
   downloadContract: "Download the contract",
   contractData: "Contract data (JSON)",
-  showContract: "Show the contract",
-  hideContract: "Hide the contract",
   loadingContract: "Loading the contract…",
   contractUnavailable: "The contract could not be loaded.",
   contractSchemas: "Schemas",

@@ -116,7 +116,7 @@ a.api-operation:hover {
   color: var(--color-muted);
 }
 
-/* The contract block of the API page: the meta line on the soft surface, the viewer centred under it. */
+/* The contract block of the API page: the meta line on the soft surface with the date at its end, the viewer open under it, the download link at the foot. */
 
 .contract-card {
   border: 1px solid var(--color-border);
@@ -128,12 +128,12 @@ a.api-operation:hover {
 .contract-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
+  gap: var(--space-2) 0.75rem;
   align-items: baseline;
   margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border-block-end: 1px solid var(--color-border);
-  background: var(--color-soft);
+  padding: 0.6875rem 0.9375rem;
+  border-block-end: 1px solid var(--color-soft);
+  background: var(--color-bg);
   color: var(--color-muted);
   font-size: 0.8125rem;
 }
@@ -150,12 +150,11 @@ a.api-operation:hover {
 }
 
 .contract-imported {
+  margin-inline-start: auto;
   color: var(--color-label);
 }
 
-.contract-download {
-  margin-inline-start: auto;
-}
+/* The viewer takes the body of the card as soon as its script runs; until then, and without it, the link to the JSON view stands centred in the zone the board reserves. */
 
 .contract-body {
   display: flex;
@@ -163,7 +162,7 @@ a.api-operation:hover {
   gap: var(--space-2);
   align-items: center;
   min-block-size: 8.5rem;
-  padding: var(--space-3);
+  padding: var(--space-3) 0.9375rem;
   justify-content: center;
   text-align: center;
 }
@@ -180,10 +179,22 @@ a.api-operation:hover {
   text-align: start;
 }
 
+.contract-body .contract-viewer > h3 {
+  margin-block: var(--space-2);
+  font-size: 0.875rem;
+}
+
 .contract-note {
   max-inline-size: 28rem;
   margin: 0;
   color: var(--color-label);
   font-size: 0.8125rem;
   line-height: 1.55;
+}
+
+.contract-foot {
+  margin: 0;
+  padding: var(--space-2) 0.9375rem;
+  border-block-start: 1px solid var(--color-soft);
+  font-size: 0.8125rem;
 }

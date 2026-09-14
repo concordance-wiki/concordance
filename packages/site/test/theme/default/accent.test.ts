@@ -41,11 +41,9 @@ const FOCUS_RING = [
   "[tabindex]:focus-visible",
 ].join(",\n");
 
-const CONTRACT_BUTTONS = [
-  ".contract-data button",
-  ".contract-operation > button",
-  ".contract-schema-list button",
-].join(",\n");
+const CONTRACT_BUTTONS = [".contract-operation > button", ".contract-schema-list button"].join(
+  ",\n",
+);
 
 /** The tab whose panel is in view, by position, the first one until a tab or an anchor inside a panel is followed; laid out as the stylesheet formats it inside its `@supports` block. */
 const CURRENT_TAB = [
