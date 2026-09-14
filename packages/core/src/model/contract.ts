@@ -24,6 +24,14 @@ export interface ContractRecord {
   fingerprint: string;
   /** ISO 8601 date of the import, from the injected clock. */
   imported_at: string;
+  /**
+   * ISO 8601 date of the last change of a contract read as a file, as the ingest dates the file:
+   * its last commit in a repository, the file system date elsewhere. Absent for a contract fetched
+   * from a URL, and in a model an earlier version wrote.
+   */
+  last_modified?: string;
+  /** The operation names as the contract writes them, in declaration order: the order the pages keep. Absent in a model an earlier version wrote. */
+  operations?: string[];
 }
 
 /** One field of a schema, as the contract viewer lists it. */

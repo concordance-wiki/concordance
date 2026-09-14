@@ -62,7 +62,7 @@
         },
         "contracts": {
           "type": "array",
-          "description": "The contracts imported by the build, with the version and the format each one declares and its import date",
+          "description": "The contracts imported by the build, with the version and the format each one declares, its import date, the date of the file it was read from and its operations in declaration order",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -100,6 +100,18 @@
               "imported_at": {
                 "type": "string",
                 "format": "date-time"
+              },
+              "last_modified": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When a contract read as a file last changed, as the ingest dates the file: its last commit in a repository, the file system date elsewhere; absent for a contract fetched from a URL"
+              },
+              "operations": {
+                "type": "array",
+                "description": "The operation names as the contract writes them, in declaration order",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }

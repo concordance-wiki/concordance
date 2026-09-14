@@ -127,6 +127,12 @@ export interface SourcePayload {
   cacheDirectory: string;
   /** Confidence of each provenance method, as the profile declares it. */
   confidence: Partial<Record<ProvenanceMethod, number>>;
+  /**
+   * When every ingested file last changed, by source name then by path relative to the root of
+   * the source: the last commit date in a repository, the file system date elsewhere. A source
+   * plugin dates what it reads next to the notes by it, never by the clock of the build.
+   */
+  dates?: Record<string, Record<string, string>>;
 }
 
 export interface SourceInput {
