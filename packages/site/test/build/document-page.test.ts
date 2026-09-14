@@ -100,6 +100,18 @@ function context(overrides: Partial<SiteContextInput> = {}): SiteContext {
 
 const page = pagePath(framingDeck.id);
 
+describe("The document panel carries the domain row of the entity page", () => {
+  it("hands the row when the note is filed, nothing otherwise", () => {
+    expect(entityPageOf(context(), framingDeck).document?.domain).toBeUndefined();
+    const filed = entity({ ...framingDeck, domain: "ingestion", domain_origin: "folder" });
+    expect(entityPageOf(context(), filed).document?.domain).toEqual({
+      name: "domain",
+      label: "Domain",
+      values: [{ text: "ingestion", href: "../../search/index.html?domain=ingestion" }],
+    });
+  });
+});
+
 describe("The space of a document page is folded by year and month when every page of it is dated", () => {
   it("draws the tree and the breadcrumb of a deck as those of a meeting, the folder tree for an undated space or for a note", () => {
     const props = entityPageOf(context(), framingDeck);

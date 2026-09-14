@@ -56,6 +56,29 @@ export function AttributeValues({
   );
 }
 
+/**
+ * The domain of a page whose panel draws its own rows, the meeting and the document: the row
+ * the entity page would draw, so that a filed note says so wherever it is, and nothing when
+ * the note has no domain.
+ */
+export function DomainRow({
+  entity,
+  attribute,
+}: {
+  entity: EntityRef;
+  attribute: Attribute | undefined;
+}): JSX.Element | null {
+  if (attribute === undefined) return null;
+  return (
+    <div class="attribute">
+      <dt>{attribute.label}</dt>
+      <dd>
+        <AttributeValues entity={entity} attribute={attribute} />
+      </dd>
+    </div>
+  );
+}
+
 /** Attributes as a description list, one term per attribute, the values inside one definition when a part renders them. */
 export function AttributeList({
   entity,

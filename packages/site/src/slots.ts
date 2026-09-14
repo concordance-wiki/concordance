@@ -775,6 +775,8 @@ export interface DocumentPageView {
   previewFailure?: PreviewFailure;
   /** The representations of the document and the state of each; the panel is drawn when the list is given. */
   representations?: DocumentRepresentation[];
+  /** The Domain row of the entity page, drawn after the date when the note is filed; absent for an unclassified note. */
+  domain?: Attribute;
   labels?: Partial<DocumentPageLabels>;
 }
 
@@ -912,6 +914,8 @@ export interface MeetingProps {
    * properties panel that counts them; absent for a note alone or when the model recorded no reason.
    */
   groupingNote?: string;
+  /** The Domain row of the entity page, drawn after the space when the note is filed; absent for an unclassified note. */
+  domain?: Attribute;
   labels?: Partial<MeetingLabels>;
 }
 
