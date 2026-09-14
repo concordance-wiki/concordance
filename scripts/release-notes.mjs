@@ -1,14 +1,13 @@
 // Release notes of one version, gathered from the changelogs Changesets
 // writes: the entries of every published workspace package for that version,
 // each entry once however many packages carry it, grouped by bump, and the
-// list of the packages at that version. The release workflow hands the result
-// to `gh release create --notes-file`.
+// list of the packages at that version, on standard output. The release
+// workflow redirects it to the file it hands to `gh release create`.
 //
-//   node scripts/release-notes.mjs <version> [--output notes.md]
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+//   node scripts/release-notes.mjs <version> > notes.md
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseArgs } from "node:util";
 import { parse as parseYaml } from "yaml";
 
 const bumps = ["Major", "Minor", "Patch"];
@@ -103,17 +102,11 @@ export function releaseNotes(root, version) {
 }
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({
-    options: { output: { type: "string" } },
-    allowPositionals: true,
-  });
-  const version = positionals[0];
+  const version = process.argv[2];
   if (version === undefined) {
-    console.error("usage: node scripts/release-notes.mjs <version> [--output notes.md]");
+    console.error("usage: node scripts/release-notes.mjs <version>");
     process.exit(2);
   }
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const notes = releaseNotes(root, version);
-  if (values.output === undefined) process.stdout.write(notes);
-  else writeFileSync(resolve(values.output), notes);
+  process.stdout.write(releaseNotes(root, version));
 }
