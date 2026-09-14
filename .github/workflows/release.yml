@@ -174,13 +174,19 @@ jobs:
             fi
           done
       - name: GitHub release with its assets
+        # A run repeated by hand completes the release that exists: its assets are replaced by
+        # the ones just built, its notes kept.
         run: |
-          gh release create "v$VERSION" \
-            --verify-tag \
-            --title "v$VERSION" \
-            --notes-file "$RUNNER_TEMP/notes.md" \
-            ${{ needs.version.outputs.prerelease == 'true' && '--prerelease' || '' }} \
-            "$ASSETS"/*
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            gh release upload "v$VERSION" --clobber "$ASSETS"/*
+          else
+            gh release create "v$VERSION" \
+              --verify-tag \
+              --title "v$VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              ${{ needs.version.outputs.prerelease == 'true' && '--prerelease' || '' }} \
+              "$ASSETS"/*
+          fi
       - name: Container image on the tag
         # A tag pushed with the workflow token triggers no workflow: the image workflow is
         # dispatched on it explicitly, with its publication job disabled as it is on main.
@@ -212,8 +218,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-      - name: npm with trusted publishing
-        run: npm install --global npm@11.19.1
+      - name: npm with trusted and staged publishing
+        run: npm install --global npm@12.0.2
       - name: Registry credentials when a token is given, trusted publishing otherwise
         # A token in the configuration takes precedence over the OIDC exchange, so none is written without the secret.
         run: |
@@ -234,7 +240,10 @@ jobs:
         run: |
           sha256sum --check --strict --ignore-missing checksums.txt
           test -f "concordance-wiki-cli-$VERSION.tgz"
-      - name: Publish every tarball in dependency order
+      - name: Stage every tarball in dependency order
+        # The trusted publisher of every package allows staged publishing only: the job stages the
+        # tarballs with their provenance, and a maintainer approves them from a machine with 2FA
+        # (`npm stage list`, `npm stage approve`), which is when they reach the registry.
         # A plain version is `latest`; a prerelease is `rc` for an -rc suffix and `next` otherwise.
         run: |
           case "$VERSION" in
@@ -248,11 +257,20 @@ jobs:
           while read -r name; do
             file="$ASSETS/$(echo "${name#@}" | tr / -)-$VERSION.tgz"
             test -f "$file"
-            npm publish "$file" --provenance --access public --tag "$tag"
+            # A run repeated by hand stages only what the registry does not serve yet.
+            if npm view "$name@$VERSION" version > /dev/null 2>&1; then
+              echo "$name@$VERSION is on the registry already"
+              continue
+            fi
+            npm stage publish "$file" --provenance --access public --tag "$tag"
           done < "$RUNNER_TEMP/order"
+          npm stage list "@concordance-wiki/cli" >> "$GITHUB_STEP_SUMMARY" || true
       - name: The published command line gives the report of the binary
-        # The same lint as the lint-distribution workflow, through npx from an empty folder once the
-        # registry serves the version, and through the binary of the release; the reports must match.
+        # Once the maintainer approved the staged versions, this workflow run by hand with the same
+        # version checks the registry: the same lint as the lint-distribution workflow, through
+        # npx from an empty folder once the registry serves the version, and through the binary of
+        # the release; the reports must match. Skipped on the run that stages.
+        if: github.event_name == 'workflow_dispatch'
         run: |
           mkdir "$RUNNER_TEMP/smoke"
           cp -r "$CORPUS" "$RUNNER_TEMP/smoke/repo"
