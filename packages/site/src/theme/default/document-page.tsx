@@ -16,6 +16,7 @@ import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { SidePanel } from "./panel-handle.js";
 import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
+import { PageNotice } from "./page-notice.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs } from "./tabs.js";
 
@@ -173,21 +174,14 @@ function FailedPreview({
   const extracted = document.positions.length > 0;
   return (
     <div class="document-failure">
-      <aside class="document-notice" role="note">
-        <p class="document-notice-lead">{text.previewFailed}</p>
-        <p class="document-notice-detail">{extracted ? text.textExtracted : text.textMissing}</p>
-        <div class="document-notice-exits">
-          <a class="button-primary" href={document.file.href} download={document.file.label}>
-            {text.downloadOriginal}
-          </a>
-          <details class="document-why">
-            <summary class="button-secondary">{text.whyFailed}</summary>
-            <p>
-              {failure.cause} <code>{failure.check}</code>
-            </p>
-          </details>
-        </div>
-      </aside>
+      <PageNotice
+        lead={text.previewFailed}
+        detail={extracted ? text.textExtracted : text.textMissing}
+        exits={[
+          { label: text.downloadOriginal, href: document.file.href, download: document.file.label },
+        ]}
+        finding={{ label: text.whyFailed, cause: failure.cause, check: failure.check }}
+      />
       {extracted && (
         <section class="document-extracted" aria-labelledby="document-extracted">
           <header class="document-extracted-head">

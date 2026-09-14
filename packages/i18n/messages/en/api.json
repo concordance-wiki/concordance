@@ -23,6 +23,14 @@
     "defaultMessage": "Interface contract",
     "description": "Heading of the block of the API page that shows the imported contract."
   },
+  "api.contractUnreachable": {
+    "defaultMessage": "The contract of this interface could not be read.",
+    "description": "Title of the notice on the page of an interface whose declared contract the build could not fetch or read."
+  },
+  "api.contractUnreachableDetail": {
+    "defaultMessage": "The note stands on its own meanwhile: its text and the operations it describes are indexed and cited like any page.",
+    "description": "Sentence of that notice: what remains reachable without the contract."
+  },
   "api.download": {
     "defaultMessage": "Download the contract",
     "description": "Link to the original contract file on the API page."
@@ -46,6 +54,10 @@
   "api.notInContract": {
     "defaultMessage": "described, absent from the contract",
     "description": "Gap row of the operations table for a note the contract does not declare."
+  },
+  "api.openContract": {
+    "defaultMessage": "Open the contract address",
+    "description": "Exit of that notice: a link to the declared address of the contract."
   },
   "api.operations": {
     "defaultMessage": "Operations",

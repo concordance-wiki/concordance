@@ -297,10 +297,10 @@ describe("A document whose conversion failed: the fact named in place of the ren
   it("names the fact, says the text was extracted, offers the original and unfolds the finding with the check after the cause", () => {
     const html = renderSlot("EntityPage", documentPageNoPreview, defaultTheme);
     expect(html).toContain(
-      '<div class="document-failure"><aside class="document-notice" role="note"><p class="document-notice-lead">The preview of this document could not be generated.</p><p class="document-notice-detail">The text was extracted all the same: it is indexed, cited on the other pages, and readable below.</p>',
+      '<div class="document-failure"><aside class="page-notice" role="note"><p class="page-notice-lead">The preview of this document could not be generated.</p><p class="page-notice-detail">The text was extracted all the same: it is indexed, cited on the other pages, and readable below.</p>',
     );
     expect(html).toContain(
-      '<div class="document-notice-exits"><a class="button-primary" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a><details class="document-why"><summary class="button-secondary">Why this failure?</summary><p>conversion of 2026/transcript-publication-framing.pptx failed: timed out after 120 s <code>W-CONV-FAILED</code></p></details></div></aside>',
+      '<div class="page-notice-exits"><a class="button-primary" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a><details class="page-notice-why"><summary class="button-secondary">Why this failure?</summary><p>conversion of 2026/transcript-publication-framing.pptx failed: timed out after 120 s <code>W-CONV-FAILED</code></p></details></div></aside>',
     );
     expect(html).not.toContain("document-stage");
     expect(html).not.toContain("document-render");
@@ -322,7 +322,7 @@ describe("A document whose conversion failed: the fact named in place of the ren
       defaultTheme,
     );
     expect(html).toContain(
-      '<p class="document-notice-detail">Its text could not be extracted either: the original stays downloadable, and the note that describes it stands among its files.</p>',
+      '<p class="page-notice-detail">Its text could not be extracted either: the original stays downloadable, and the note that describes it stands among its files.</p>',
     );
     expect(html).not.toContain("document-extracted");
   });

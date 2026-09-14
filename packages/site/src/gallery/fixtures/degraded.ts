@@ -77,8 +77,10 @@ export const keywordPageWithoutTimecode: SlotProps["KeywordPage"] = {
 
 /**
  * The API page when the contract its note points at could not be fetched: no contract record in
- * the model, the page falls back to the generic layout and its panel shows every declared key.
- * The application is named without the tool, the white-label check reading every visible value.
+ * the model, the page falls back to the generic layout, names the fact under its title with the
+ * declared address as an exit and the finding behind its disclosure, and its panel shows every
+ * declared key. The application is named without the tool, the white-label check reading every
+ * visible value.
  */
 export const apiPageWithoutContract: SlotProps["EntityPage"] = {
   ...corporateApiPage,
@@ -87,5 +89,22 @@ export const apiPageWithoutContract: SlotProps["EntityPage"] = {
       ? { ...attribute, values: [{ text: "query-service" }] }
       : attribute,
   ),
+  notice: {
+    lead: "The contract of this interface could not be read.",
+    detail:
+      "The note stands on its own meanwhile: its text and the operations it describes are indexed and cited like any page.",
+    exits: [
+      {
+        label: "Open the contract address",
+        href: "https://forge.example/query-service/openapi.json",
+      },
+    ],
+    finding: {
+      label: "Why this failure?",
+      cause:
+        "contract https://forge.example/query-service/openapi.json of specs/api/model-query could not be read: HTTP 404",
+      check: "W-CONTRACT-UNREACHABLE",
+    },
+  },
 };
 delete apiPageWithoutContract.contract;

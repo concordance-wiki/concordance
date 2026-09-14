@@ -20,6 +20,7 @@ import {
 } from "../../src/build/context.js";
 import {
   changedOf,
+  contractNoticeOf,
   contractOf,
   declarationOf,
   entityPageOf,
@@ -1462,6 +1463,50 @@ describe("contractOf", () => {
   it("gives no contract section to a page without a record, and none when the model has no contracts block", () => {
     expect(contractOf(withContracts([]), "glossary/keyword-page/index.html", term)).toBeUndefined();
     expect(entityPageOf(context(), term)).not.toHaveProperty("contract");
+  });
+
+  it("names under the title of an api whose contract could not be read the fact, what remains, the declared address when it is one and the finding, and nothing on any other page", () => {
+    const unreachable = (id: string, location: string): CanonicalModel["findings"][number] => ({
+      check: "W-CONTRACT-UNREACHABLE",
+      severity: "warning",
+      message: `contract ${location} of ${id} could not be read: HTTP 404`,
+      remediation: "fix the contract URL or path",
+      source: "specs",
+      path: "api/x.md",
+      entity: id,
+    });
+    const remote = unreachable(forgeBridge.id, "https://example.invalid/forge-bridge.wsdl");
+    const local = unreachable(modelQuery.id, "contracts/model-query.openapi.json");
+    const site = context({
+      model: model({ entities: [modelQuery, forgeBridge], findings: [remote, local] }),
+    });
+    expect(contractNoticeOf(site, forgeBridge)).toEqual({
+      lead: "The contract of this interface could not be read.",
+      detail:
+        "The note stands on its own meanwhile: its text and the operations it describes are indexed and cited like any page.",
+      exits: [
+        { label: "Open the contract address", href: "https://example.invalid/forge-bridge.wsdl" },
+      ],
+      finding: {
+        label: "Why this failure?",
+        cause: remote.message,
+        check: "W-CONTRACT-UNREACHABLE",
+      },
+    });
+    expect(contractNoticeOf(site, modelQuery)?.exits).toEqual([]);
+    expect(contractNoticeOf(site, term)).toBeUndefined();
+    expect(entityPageOf(site, forgeBridge).notice?.lead).toBe(
+      "The contract of this interface could not be read.",
+    );
+    expect(entityPageOf(site, term)).not.toHaveProperty("notice");
+    expect(entityPageOf(withContracts([]), modelQuery)).not.toHaveProperty("notice");
+    const french = context({
+      catalogue: loadCatalogue("fr"),
+      model: model({ entities: [forgeBridge], findings: [remote] }),
+    });
+    expect(contractNoticeOf(french, forgeBridge)?.lead).toBe(
+      "Le contrat de cette interface n’a pas pu être lu.",
+    );
   });
 });
 
