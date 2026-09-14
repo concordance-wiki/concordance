@@ -253,8 +253,8 @@
   font-family: var(--font-mono);
 }
 
-/* The word filed among the notes of its space carries its passage count at the end of its line, as a folder does. */
+/* The word filed among the notes of its space, in the column and in the drawer alike, carries its passage count at the end of its line, as a folder does. */
 
-.keyword .space-page .count {
+.space-page > span > .count {
   margin-inline-start: auto;
 }
