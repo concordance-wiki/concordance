@@ -102,7 +102,7 @@ Before the first publication, the maintainer of the npm account does this, once,
 3. creates the `concordance-wiki/lint-action` repository on GitHub and the `concordance-wiki/lint` project of the `concordance-wiki` group on GitLab, both empty, and stores a token with write access to each as the `LINT_ACTION_TOKEN` and `GITLAB_LINT_TOKEN` secrets; without a secret the matching mirror is skipped with a notice;
 4. replaces the `if: false` of the `publish` job with `needs.version.outputs.version != ''`.
 
-The first version published this way has to be one that no earlier run attached to a release with different bytes: npm refuses to publish a version twice, so a version released before the job was enabled stays on GitHub only, and the next version is the first on npm.
+A version released before the job was enabled stays on GitHub only: the job publishes the versions that follow it, and never an earlier one, which npm would refuse anyway since a version is published once.
 
 ## Support
 
