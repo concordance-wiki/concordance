@@ -11,7 +11,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `version` (required) | constant | — | `1` | Version of this schema; always 1. |
-| `project` (required) | object | — | — | The project: its name, its interface language, its theme file and its edit link. See [`project`](#project). |
+| `project` (required) | object | — | — | The project: its name, its interface language, its theme file, its edit link and the pages the organisation declares. See [`project`](#project). |
 | `profile` | string | — | — | Path of the project profile, relative to this configuration, merged key by key over the default profile. |
 | `plugins` | (string \| object)[] | — | each: non-empty | Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them. See [`plugins[]`](#plugins). |
 | `applications` | object[] | — | — | First-level containers every entity is resolved to, through its source, a typing rule or its frontmatter. An identifier not declared here yields W-APP-UNKNOWN; an entity without one yields W-APP-MISSING. See [`applications[]`](#applications). |
@@ -28,7 +28,7 @@ A key marked (required) must be present; every other key is optional and takes t
 
 ## `project`
 
-The project: its name, its interface language, its theme file and its edit link.
+The project: its name, its interface language, its theme file, its edit link and the pages the organisation declares.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -37,6 +37,18 @@ The project: its name, its interface language, its theme file and its edit link.
 | `theme` | string | — | — | Path of the theme file, relative to this configuration. Without it, theme.yaml next to the configuration is used when it exists, else a neutral default theme. |
 | `edit_url` | string | — | — | Pattern of the edit link in the footer of every page, with {source}, {path} and {commit} placeholders. Without it, a source hosted on github.com or on a GitLab instance gets the edit URL of its forge, and a local source gets none. |
 | `contribute_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address every call to action of the site leads to when no forge link can be built for it: proposing a definition, editing a page. Without it and without a forge link, the call to action is not shown. |
+| `legal` | object | — | — | What only the organisation that publishes the site can declare: its legal notice, its accessibility statement and its personal data page. None has a default; each link appears in the footer of every page once its address is given or a note stands at legal/<page>.md in a source. See [`project.legal`](#projectlegal). |
+
+### `project.legal`
+
+What only the organisation that publishes the site can declare: its legal notice, its accessibility statement and its personal data page. None has a default; each link appears in the footer of every page once its address is given or a note stands at legal/<page>.md in a source.
+
+| Key | Type | Default | Allowed values | Description |
+|---|---|---|---|---|
+| `mentions_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address of the legal notice. Without it, a note at legal/mentions.md in a source stands for the page; without either, the footer shows no legal notice. |
+| `accessibility_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address of the accessibility statement. Without it, a note at legal/accessibility.md in a source stands for the page; without either, the footer shows no accessibility link. |
+| `accessibility_status` | enum | — | `non-compliant`, `partially-compliant`, `compliant` | The compliance the accessibility statement declares, worded after its link in the footer; never derived, never assumed: without it the link reads without a state. |
+| `privacy_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address of the personal data page. Without it, a note at legal/privacy.md in a source stands for the page; without either, the footer shows no personal data link. |
 
 ## `plugins[]`
 

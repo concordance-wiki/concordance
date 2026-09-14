@@ -111,7 +111,7 @@ export function isDormant(context: SiteContext, source: string, newest: string):
 }
 
 /** Whether a note stands for a converted document: a deck, a transcript, a PDF merged with it, never an operation of a contract. */
-function hasDocument(entity: Entity): boolean {
+export function hasDocument(entity: Entity): boolean {
   return (entity.representations ?? []).some(
     (representation) => representation.format !== "markdown" && representation.kind === undefined,
   );

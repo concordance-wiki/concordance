@@ -222,17 +222,60 @@ export interface HeaderProps {
   labels?: Partial<HeaderLabels>;
 }
 
+/** The strings of the footer, worded by the site in its language; the default theme has English ones. */
+export interface FooterLabels {
+  /** Heading of the first column: what the tool knows of the site. */
+  thisSite: string;
+  /** The first sentence up to the link counting the repositories, the build instant already worded: "Published on 13 September 2026 at 10:04, from". */
+  published: string;
+  /** The link to the about page. */
+  sources: string;
+  /** The sentence naming the generator, in three parts: "Built with", "a static site generator", "under the GNU GPL v3 or later licence." */
+  builtWith: string;
+  generator: string;
+  licence: string;
+  /** After the licence: the content belongs to the organisation. */
+  content: string;
+  /** Heading of the second column: what the organisation declared. */
+  declared: string;
+  /** The line under the columns, in the monospace family: "publication", the build instant worded, then the profile and the page count, each already worded. */
+  publication: string;
+  buildAt: string;
+  profile: string;
+  pages: string;
+}
+
+/** The repositories the site is built from, counted, linking to the spaces page. */
+export interface FooterRepositories extends Link {
+  count: number;
+}
+
+/**
+ * The footer of every page, in two columns: what the tool knows, then what the organisation
+ * declared, the second shown only when something was declared; under them the build line.
+ */
 export interface FooterProps {
   /** Version of the tool that generated the site. */
   version: string;
   /** ISO 8601 instant of the build. */
   generatedAt: string;
+  /** The repositories the site is built from, their count worded in the label; absent, the sentence ends at the build instant. */
+  repositories?: FooterRepositories;
+  /** Where the about page stands; absent, no link to it. */
+  aboutHref?: string;
+  /** The profile with its version, "default@1", for the build line. */
+  profile?: string;
+  /** How many pages the site holds, for the build line. */
+  pages?: number;
+  /** A paragraph the organisation declares, at the head of the second column. */
   text?: string;
+  /** The pages the organisation declares, its legal notice, accessibility statement and personal data page among them, then the links of the theme. */
   links: Link[];
-  /** The link to the to-do page with the number of its entries: a build statistic, kept out of the top bar. */
+  /** The link to the to-do page with the number of its entries: a build statistic, kept out of the top bar and set on the build line. */
   todo?: NavigationItem;
-  /** Whether the discreet credit of the tool, a link to its repository, is shown; nothing else names it. */
+  /** Whether the tool is named and linked to its repository in the sentence naming the generator; nothing else names it. */
   credit: boolean;
+  labels?: Partial<FooterLabels>;
 }
 
 /** A space of the home page: a source, how much it holds and when it last moved; its row leads to its page. */

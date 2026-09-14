@@ -52,6 +52,8 @@ import { headerLogoState } from "./states/header-logo.js";
 import { footerTextState } from "./states/footer-text.js";
 import { entityPageDarkState } from "./states/entity-page-dark.js";
 import { homeDarkState } from "./states/home-dark.js";
+import { footerCorporateState } from "./states/footer-corporate.js";
+import { footerAloneState } from "./states/footer-alone.js";
 
 export type { GalleryPage, GalleryWidth } from "./page.js";
 export { DEFAULT_GALLERY_WIDTH, GALLERY_WIDTHS } from "./page.js";
@@ -96,6 +98,8 @@ export const galleryPages: readonly GalleryPage[] = [
   documentPageCorporateState,
   documentPageNoScriptState,
   decisionPageCorporateState,
+  footerCorporateState,
+  footerAloneState,
   entityPageDarkState,
   homeDarkState,
   todoState,

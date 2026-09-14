@@ -1,16 +1,75 @@
-/* Footer: the project text and links, the to-do page with its count, the build line. */
+/* Footer: a card at the width of the pages, in two columns, what the tool knows of the site then what the organisation declared, the second shown only when something was; under them the build line, in the monospace family on the soft surface, the to-do page with its count at its end. */
 
 .site-footer {
-  padding: var(--space-3) var(--space-4);
-  border-block-start: 1px solid var(--color-border);
+  box-sizing: border-box;
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.site-footer-card {
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.site-footer-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) 2.25rem;
+  padding: 1.25rem var(--space-4);
+}
+
+.site-footer-site {
+  flex: 1;
+  min-inline-size: 17.5rem;
+}
+
+.site-footer-declared {
+  flex: none;
+  min-inline-size: 13.75rem;
+}
+
+.site-footer-site,
+.site-footer-declared {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+}
+
+.site-footer-heading {
+  margin: 0;
   color: var(--color-label);
+  font-family: var(--font-ui);
   font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.site-footer-published,
+.site-footer-licence,
+.site-footer-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.site-footer-published,
+.site-footer-text {
+  color: var(--color-muted);
+}
+
+.site-footer-licence {
+  color: var(--color-label);
 }
 
 .site-footer-links {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+  flex-direction: column;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -19,8 +78,25 @@
   display: inline-flex;
   align-items: center;
   min-block-size: 2.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
 
-.site-footer-credit {
+.site-footer-card > .site-footer-build {
+  margin: 0;
+  padding: var(--space-1) var(--space-4);
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-soft);
+  color: var(--color-label);
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+/* The to-do link ends the build line and keeps the target height of the other links. */
+
+.site-footer-todo {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
 }

@@ -2,6 +2,7 @@ import type {
   CanonicalModel,
   Entity,
   FolderConfig,
+  LegalConfig,
   Link,
   Locale,
   StalenessConfig,
@@ -53,6 +54,8 @@ export interface SiteContextInput {
   glossarySources?: string[];
   /** `privacy.pseudonymize.enabled` of the configuration: the page of a meeting says that its speakers are pseudonyms. */
   pseudonymized?: boolean;
+  /** `project.legal` of the configuration: the pages the organisation declares, linked from the footer. */
+  legal?: LegalConfig;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */

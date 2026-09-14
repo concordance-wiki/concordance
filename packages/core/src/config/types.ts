@@ -1,6 +1,21 @@
 /** A BCP 47 language tag; the engine ships packs for `en` and `fr`, plugins may add others. */
 export type Locale = string;
 
+/** The compliance an accessibility statement declares: the organisation's word, never derived. */
+export type AccessibilityStatus = "non-compliant" | "partially-compliant" | "compliant";
+
+/** What only the organisation that publishes the site can declare; no key has a default. */
+export interface LegalConfig {
+  /** HTTPS address of the legal notice. */
+  mentions_url?: string;
+  /** HTTPS address of the accessibility statement. */
+  accessibility_url?: string;
+  /** The compliance the accessibility statement declares, worded after its link in the footer. */
+  accessibility_status?: AccessibilityStatus;
+  /** HTTPS address of the personal data page. */
+  privacy_url?: string;
+}
+
 export interface ProjectConfig {
   name: string;
   locale?: Locale;
@@ -8,6 +23,8 @@ export interface ProjectConfig {
   edit_url?: string;
   /** Where every call to action of the site leads when no forge link can be built for it. */
   contribute_url?: string;
+  /** The legal pages the organisation declares, linked from the footer of every page. */
+  legal?: LegalConfig;
 }
 
 export type PluginConfig = string | { name: string; options?: Record<string, unknown> };

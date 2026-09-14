@@ -540,7 +540,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(await buildCommand([], io)).toBe(0);
     const home = io.fs.readText("/work/dist/index.html");
     expect(home).toContain("<title>Concordance handbook</title>");
-    expect(home).toContain("Built with Concordance");
+    expect(home).toContain(
+      'Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator',
+    );
     expect(io.stdout).toContain("theme: Concordance handbook, from /work/theme.yaml");
     io.fs.writeText("/work/theme.yaml", "name: 3\n");
     io.stderr.length = 0;
