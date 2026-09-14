@@ -265,6 +265,8 @@ Options of the generated pages.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
+| `url` | string | — | pattern `^https://[^\s]+$` | HTTPS address the site is published at, its path included when the host serves it under one. The page served for a missing address, 404.html, links back through it; without it, that page assumes the site stands at the root of its host. |
+| `publish_every_days` | integer | — | at least 1 | Days between two publications, as the pipeline is scheduled. Past three times that many days, every page tells its reader how old the site is; without it, no page does. |
 | `neighbourhood` | object | — | — | The neighbourhood mini-map of a page. See [`site.neighbourhood`](#siteneighbourhood). |
 
 ### `site.neighbourhood`

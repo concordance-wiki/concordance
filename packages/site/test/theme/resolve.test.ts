@@ -358,7 +358,7 @@ describe("resolveTheme", () => {
       resolveTheme(registry, { load: () => Promise.resolve(() => null) }),
     ).rejects.toThrow(
       new ThemeResolutionError(
-        "plugin @example/theme, theme custom: Sidebar is not a slot; slots are Shell, Header, Footer, Home, EntityPage, KeywordPage, MentionsPanel, Neighbourhood, SearchResults, Index, Todo, Spaces, Space, CategoryList, About, EntityPage@<type>, Attribute@<attribute> or Section@<section>",
+        "plugin @example/theme, theme custom: Sidebar is not a slot; slots are Shell, Header, Footer, Home, EntityPage, KeywordPage, MentionsPanel, Neighbourhood, SearchResults, Index, Todo, Spaces, Space, CategoryList, About, NotFound, EntityPage@<type>, Attribute@<attribute> or Section@<section>",
       ),
     );
   });

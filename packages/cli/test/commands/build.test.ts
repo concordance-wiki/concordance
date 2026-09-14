@@ -56,7 +56,8 @@ const modelLines = (stdout: string[]): string[] =>
 /**
  * The site summary the rendering appends to stdout; the island sizes vary with the code, so their
  * lines are matched. `pages` counts the pages of the model, the redirects and the fixed ones, the
- * search page, the spaces page, the about page and the page of every space apart.
+ * search page, the spaces page, the about page, the page served for a missing address and the
+ * page of every space apart.
  */
 function expectSiteSummary(
   stdout: string[],
@@ -66,15 +67,17 @@ function expectSiteSummary(
   spaces = 1,
 ): void {
   const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
-  const total = pages + 3 + spaces;
+  const total = pages + 4 + spaces;
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
+    expect.stringMatching(/^island age: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island category-list: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island contract-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+    expect.stringMatching(/^island not-found: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island panels: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island pins: \d+\.\d kB$/) as string,
     expect.stringMatching(/^island search: \d+\.\d kB$/) as string,
@@ -1395,10 +1398,10 @@ describe("concordance build", () => {
         expect(
           built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
-        // The home, the index, the to-do, search, spaces and about pages, then one per space.
+        // The home, the index, the to-do, search, spaces and about pages, the page served for a missing address, then one per space.
         expect(built.pages.size).toBe(
           built.model.entities.length +
-            6 +
+            7 +
             built.model.build.sources.length +
             redirectsOf(built).length +
             letterPagesOf(built).length +
@@ -1482,8 +1485,11 @@ describe("concordance build", () => {
         const written = new Set(built.files);
         let checked = 0;
         for (const [path, html] of built.pages) {
-          for (const reference of references(html)) {
-            expect(reference.startsWith("/")).toBe(false);
+          // The page served for a missing address names its own address as its base: the host serves it, never file://.
+          if (path !== "404.html") {
+            for (const reference of references(html)) {
+              expect(reference.startsWith("/")).toBe(false);
+            }
           }
           for (const { reference, target } of localTargets(path, html)) {
             expect(written.has(target), `${path}: ${reference} resolves to ${target}`).toBe(true);

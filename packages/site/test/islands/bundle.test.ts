@@ -16,13 +16,15 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the category list, document viewer, mentions panel, mode switch, panels, pins, search, tabs and table of contents islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
+  it("declares the age notice, category list, document viewer, mentions panel, mode switch, not-found, panels, pins, search, tabs and table of contents islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
+      "age",
       "category-list",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -30,18 +32,20 @@ describe("defaultIslands", () => {
       "toc",
       "contract-viewer",
     ]);
-    expect(islands[0]?.entry.endsWith("/src/islands/category-list.client")).toBe(true);
-    expect(islands[1]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
-    expect(islands[2]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
-    expect(islands[3]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
-    expect(islands[4]?.entry.endsWith("/src/islands/panels.client")).toBe(true);
-    expect(islands[5]?.entry.endsWith("/src/islands/pins.client")).toBe(true);
-    expect(islands[6]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands[7]?.entry.endsWith("/src/islands/tabs.client")).toBe(true);
-    expect(islands[8]?.entry.endsWith("/src/islands/toc.client")).toBe(true);
-    expect(islands[9]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
-    expect(islands[9]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
-    expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 10 }));
+    expect(islands[0]?.entry.endsWith("/src/islands/age.client")).toBe(true);
+    expect(islands[1]?.entry.endsWith("/src/islands/category-list.client")).toBe(true);
+    expect(islands[2]?.entry.endsWith("/src/islands/document-viewer.client")).toBe(true);
+    expect(islands[3]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
+    expect(islands[4]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
+    expect(islands[5]?.entry.endsWith("/src/islands/not-found.client")).toBe(true);
+    expect(islands[6]?.entry.endsWith("/src/islands/panels.client")).toBe(true);
+    expect(islands[7]?.entry.endsWith("/src/islands/pins.client")).toBe(true);
+    expect(islands[8]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands[9]?.entry.endsWith("/src/islands/tabs.client")).toBe(true);
+    expect(islands[10]?.entry.endsWith("/src/islands/toc.client")).toBe(true);
+    expect(islands[11]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
+    expect(islands[11]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
+    expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 12 }));
   });
 
   it("keeps the PDF viewer and its worker apart, the only modules, built from the legacy build of pdf.js only for a site that shows a PDF", () => {
@@ -104,14 +108,16 @@ describe("bundleIslands", () => {
       islands: defaultIslands(),
       fileSystem,
     });
-    expect(bundles).toHaveLength(10);
+    expect(bundles).toHaveLength(12);
     const bundle = bundles.find((candidate) => candidate.name === "mentions-panel");
     expect(bundles.map((candidate) => candidate.name)).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -161,7 +167,7 @@ describe("bundleIslands", () => {
   it("bundles every default island as a classic script, without import or export, so that a file:// page runs it in every browser", async () => {
     const fileSystem = memoryFileSystem();
     const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
-    expect(bundles).toHaveLength(10);
+    expect(bundles).toHaveLength(12);
     for (const bundle of bundles) {
       expect(bundle.module, bundle.name).toBeUndefined();
       const written = fileSystem.readText(`/out/${bundle.file}`);

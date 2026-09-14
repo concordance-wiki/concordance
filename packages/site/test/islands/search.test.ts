@@ -954,7 +954,10 @@ describe("mountSearch", () => {
     input.fire("input");
     await settled();
     expect(results.html).toContain(
-      '<p class="search-summary" role="status">No result for “zebra”</p>',
+      '<p class="results-empty-lead" role="status">No result for “zebra”</p><p class="results-empty-cause">No file uses this word.</p>',
+    );
+    expect(results.html).toContain(
+      '<p class="results-empty-note">The search matches the start of words: a typo gives zero results and no suggestion.</p>',
     );
   });
 
@@ -1562,9 +1565,17 @@ describe("Facets combine, and filtering happens in the browser", () => {
       },
     ]);
     expect(results.html).toContain(
-      '<p class="search-summary" role="status">No result for “key”</p>',
+      '<p class="results-empty-lead" role="status">No result for “key” with the filters Term, specs.</p><p class="results-empty-cause">The word exists in the documentation, but on none of the pages the filter keeps.</p>',
     );
-    expect(results.html).toContain('<ol class="results"></ol>');
+    expect(view.props().empty).toEqual({
+      explanation:
+        "The word exists in the documentation, but on none of the pages the filter keeps.",
+      exits: [
+        { label: "Remove the filter “Term”", href: "?q=key&source=specs", count: 1 },
+        { label: "Remove the filter “specs”", href: "?q=key&type=term", count: 1 },
+      ],
+    });
+    expect(results.html).not.toContain('<ol class="results">');
   });
 
   it("intersects the facets: a type and a source keep the entities carrying both", async () => {
@@ -2102,15 +2113,20 @@ describe("No result: the closest form of the dictionary is proposed, and the emp
     answer("ke", shards["ke"]);
     await settled();
     expect(results.html).toContain(
-      '<p class="search-summary" role="status">No result for “keywort”</p>',
+      '<p class="results-empty-lead" role="status">No result for “keywort”</p><p class="results-empty-cause">No file uses this word.</p><p class="search-closest">',
     );
+    expect(view.props().empty).toEqual({
+      explanation: "No file uses this word.",
+      exits: [],
+      note: "The search matches the start of words: a typo gives zero results and no suggestion.",
+    });
     expect(view.props().closest).toEqual({
       form: "Keyword page",
       href: "?q=Keyword+page&source=glossary",
       detail: "cited in 4 pages",
     });
     expect(results.html).toContain(
-      '<p class="search-closest">Closest form: <a href="?q=Keyword+page&amp;source=glossary">Keyword page</a>, cited in 4 pages</p><ol class="results"></ol>',
+      '<p class="search-closest">Closest form: <a href="?q=Keyword+page&amp;source=glossary">Keyword page</a>, cited in 4 pages</p><p class="results-empty-note">',
     );
     expect(results.html).not.toContain("results-note");
     expect(closestOf(parseSearchState("?q=build+sum"), meta)).toEqual({
@@ -2142,9 +2158,13 @@ describe("No result: the closest form of the dictionary is proposed, and the emp
     await settled();
     await follow("?q=key&type=term&nonote=only");
     expect(results.html).toContain(
-      '<p class="search-summary" role="status">No result for “key”</p>',
+      '<p class="results-empty-lead" role="status">No result for “key” with the filters Term, Only.</p>',
     );
     expect(view.props().closest).toBeUndefined();
+    expect(view.props().empty?.exits).toEqual([
+      { label: "Remove the filter “Term”", href: "?q=key&nonote=only", count: 1 },
+      { label: "Remove the filter “Only”", href: "?q=key&type=term", count: 1 },
+    ]);
     await follow("?nonote=only&source=glossary");
     expect(results.html).toContain('<p class="search-summary" role="status">No result</p>');
     expect(view.props().closest).toBeUndefined();
@@ -2196,7 +2216,7 @@ describe("A no-note facet isolates or excludes them", () => {
     expect(results.html).not.toContain("build summary");
     await follow("?q=key&type=term&nonote=only");
     expect(results.html).toContain(
-      '<p class="search-summary" role="status">No result for “key”</p>',
+      '<p class="results-empty-lead" role="status">No result for “key” with the filters Term, Only.</p>',
     );
     expect(
       view.props().facets[4]?.values.map((value) => [value.value, value.count, value.disabled]),

@@ -5,9 +5,15 @@
   "results.clearQuery": "Effacer la recherche",
   "results.closestForm": "Forme la plus proche :",
   "results.countersNote": "Les compteurs sont établis à la publication du site. Le filtrage se fait dans le navigateur, sans aller-retour.",
+  "results.existsElsewhere": "Le mot existe dans la documentation, mais sur aucune des pages que le filtre retient.",
+  "results.liftFilter": "Retirer le filtre « '{label}' »",
+  "results.noFileUses": "Aucun fichier n’emploie ce mot.",
+  "results.noResultFiltered": "{count, plural, one {Aucun résultat pour « '{query}' » avec le filtre '{filters}'.} other {Aucun résultat pour « '{query}' » avec les filtres '{filters}'.}}",
   "results.noResultFor": "Aucun résultat pour « '{query}' »",
   "results.noteless": "Sans définition",
   "results.notelessNote": "Les mots employés mais non définis apparaissent avec les autres, en trait pointillé. C'est ainsi qu'on repère ce qui manque au glossaire.",
+  "results.prefixNote": "La recherche étant à préfixe, une faute de frappe donne zéro résultat sans suggestion.",
+  "results.seeWordPage": "Voir la page du mot",
   "results.showNext": "{count, plural, one {Afficher le suivant} other {Afficher les # suivants}}",
   "results.usedIn": "{count, plural, one {Employé dans # document, jamais défini dans le glossaire} other {Employé dans # documents, jamais défini dans le glossaire}}"
 }

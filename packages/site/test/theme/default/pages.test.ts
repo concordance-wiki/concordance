@@ -72,12 +72,16 @@ describe("SearchResults", () => {
     expectBalanced(html);
   });
 
-  it("names the query in the empty state and proposes the closest form of the dictionary, without the note under the list", () => {
+  it("names the query in the empty state as one card, says no file uses the word, proposes the closest form of the dictionary and explains the prefix search, without the note under the list", () => {
     const html = renderSlot("SearchResults", searchResultsEmpty, defaultTheme);
-    expect(html).toContain('<p class="search-summary" role="status">No result for “thresold”</p>');
     expect(html).toContain(
-      '<p class="search-closest">Closest form: <a href="?q=threshold">threshold</a>, cited in 12 pages</p><ol class="results"></ol></div>',
+      '<div class="results-empty"><p class="results-empty-lead" role="status">No result for “thresold”</p><p class="results-empty-cause">No file uses this word.</p>',
     );
+    expect(html).toContain(
+      '<p class="search-closest">Closest form: <a href="?q=threshold">threshold</a>, cited in 12 pages</p><p class="results-empty-note">The search matches the start of words: a typo gives zero results and no suggestion.</p></div>',
+    );
+    expect(html).not.toContain("search-summary");
+    expect(html).not.toContain('<ol class="results">');
     expect(html).not.toContain("results-note");
     expectBalanced(html);
   });

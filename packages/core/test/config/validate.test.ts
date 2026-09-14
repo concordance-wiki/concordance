@@ -166,6 +166,33 @@ describe("validateConfig against the published schema", () => {
     ]);
   });
 
+  it("accepts the published address of the site and the days between two publications, typed", () => {
+    const result = validateConfig({
+      ...minimal,
+      site: { url: "https://example.org/handbook/", publish_every_days: 1 },
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.config.site?.url).toBe("https://example.org/handbook/");
+      expect(result.config.site?.publish_every_days).toBe(1);
+      expect(result.issues).toEqual([]);
+    }
+  });
+
+  it("rejects a site address that is not HTTPS and a publication cadence under a day", () => {
+    expect(issuesOf({ ...minimal, site: { url: "http://example.org/" } })).toEqual([
+      {
+        path: "site.url",
+        message: "value does not match the expected format",
+        severity: "error",
+        expected: "a value matching ^https://[^\\s]+$",
+      },
+    ]);
+    expect(issuesOf({ ...minimal, site: { publish_every_days: 0 } })).toEqual([
+      { path: "site.publish_every_days", message: "must be >= 1", severity: "error" },
+    ]);
+  });
+
   it("accepts inference.keyword_pages.min_confidence between 0 and 1 and rejects the rest", () => {
     for (const confidence of [0, 0.5, 0.8765, 1]) {
       const result = validateConfig({

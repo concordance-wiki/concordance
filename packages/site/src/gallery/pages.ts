@@ -58,6 +58,11 @@ import { footerCorporateState } from "./states/footer-corporate.js";
 import { footerAloneState } from "./states/footer-alone.js";
 import { aboutCorporateState } from "./states/about-corporate.js";
 import { aboutSectionsState } from "./states/about-sections.js";
+import { notFoundCorporateState } from "./states/not-found-corporate.js";
+import { notFoundNearbyState } from "./states/not-found-nearby.js";
+import { searchResultsFilteredState } from "./states/search-results-filtered.js";
+import { documentPageNoPreviewState } from "./states/document-page-no-preview.js";
+import { ageNoticeState } from "./states/age-notice.js";
 
 export type { GalleryPage, GalleryWidth } from "./page.js";
 export { DEFAULT_GALLERY_WIDTH, GALLERY_WIDTHS } from "./page.js";
@@ -102,6 +107,11 @@ export const galleryPages: readonly GalleryPage[] = [
   documentPageCorporateState,
   documentPageNoScriptState,
   decisionPageCorporateState,
+  notFoundCorporateState,
+  notFoundNearbyState,
+  searchResultsFilteredState,
+  documentPageNoPreviewState,
+  ageNoticeState,
   footerCorporateState,
   footerAloneState,
   aboutCorporateState,

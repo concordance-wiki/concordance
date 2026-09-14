@@ -238,4 +238,5 @@ export const labels = {
   filterPins: "Filter",
   removeAllPins: "Remove all",
   confirmRemoveAllPins: "Remove every pinned page?",
+  noResult: "No result",
 } as const;

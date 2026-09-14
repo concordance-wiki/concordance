@@ -118,6 +118,13 @@ const boards = [
     screen: "pages/decision-page",
   },
   {
+    id: "B17",
+    title: "Edge cases",
+    caption:
+      "What shows when something is missing: the cause named, what stays reachable said, two exits at least, the navigation kept.",
+    screen: "pages/edge-cases",
+  },
+  {
     id: "B18",
     title: "Footer",
     caption:

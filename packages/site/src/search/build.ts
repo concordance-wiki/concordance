@@ -266,6 +266,12 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     closestForm: plain(catalogue, "results.closestForm"),
     occurrences: pluralForms(catalogue, "keyword.occurrences"),
     showNext: pluralForms(catalogue, "results.showNext"),
+    noResultFiltered: pluralForms(catalogue, "results.noResultFiltered"),
+    existsElsewhere: plain(catalogue, "results.existsElsewhere"),
+    liftFilter: plain(catalogue, "results.liftFilter"),
+    noFileUses: plain(catalogue, "results.noFileUses"),
+    seeWordPage: plain(catalogue, "results.seeWordPage"),
+    prefixNote: plain(catalogue, "results.prefixNote"),
   };
 }
 

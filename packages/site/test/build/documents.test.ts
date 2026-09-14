@@ -89,11 +89,13 @@ describe("A document page: download link, viewer on demand, extracted text", () 
   it("builds the viewer and its worker as separate bundles, announced in the summary with their size, and never loads them with the page", () => {
     const names = report.budget.islands.map((island) => island.name);
     expect(names).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -108,7 +110,7 @@ describe("A document page: download link, viewer on demand, extracted text", () 
     expect(viewer?.bytes).toBeGreaterThan(300_000);
     expect(worker?.bytes).toBeGreaterThan(1_000_000);
     expect(opener?.bytes).toBeLessThan(3_000);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(12);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(14);
     // The page loads the opener as any island, once; the viewer bundles are only named in its props.
     const loaded = references(html).filter((reference) => reference.includes("/assets/"));
     expect(loaded.filter((reference) => reference.includes("document-viewer-"))).toHaveLength(1);
@@ -196,11 +198,13 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
     const site = options({ fragments: withoutPreview });
     const report = await buildSite(site);
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -221,6 +225,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       { name: "document-viewer", file: "document-viewer-00000000.js", bytes: 1 },
       { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 1 },
       { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 1 },
+      { name: "not-found", file: "not-found-00000000.js", bytes: 1 },
       { name: "search", file: "search-00000000.js", bytes: 1 },
       { name: "toc", file: "toc-00000000.js", bytes: 1 },
       { name: "panels", file: "panels-00000000.js", bytes: 1 },

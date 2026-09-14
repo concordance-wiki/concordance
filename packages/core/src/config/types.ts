@@ -147,6 +147,10 @@ export interface BuildConfig {
 }
 
 export interface SiteConfig {
+  /** HTTPS address the site is published at, path included; the page served for a missing address links back through it. */
+  url?: string;
+  /** Days between two publications; past three times that many, every page tells its reader how old the site is. */
+  publish_every_days?: number;
   /** Nodes of the neighbourhood mini-map of a page: 6 by default, 12 at most. */
   neighbourhood?: { size?: number };
 }

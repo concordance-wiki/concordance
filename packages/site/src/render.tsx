@@ -31,6 +31,10 @@ export interface RenderOptions {
   redirect?: string;
   /** A scheme forced on the root, to preview a palette: the page then carries no script applying a remembered choice. */
   scheme?: ColourScheme;
+  /** The address of the page itself, for a page the host serves at other addresses than its own; the head carries it as a base. */
+  base?: string;
+  /** What stands between the header and the main landmark on every page: the notice on the age of the site, when the site counts its days. */
+  notice?: JSX.Element;
 }
 
 const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
@@ -61,6 +65,7 @@ function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): 
       {...(options.scheme === undefined ? {} : { scheme: options.scheme })}
     >
       <Header {...options.header} />
+      {options.notice}
       <main id="main">{body}</main>
       <Footer {...options.footer} />
     </Shell>
@@ -94,6 +99,7 @@ export function renderDocument(body: JSX.Element, options: RenderOptions): strin
     scripts: [],
     ...(options.favicon === undefined ? {} : { favicon: options.favicon }),
     ...(options.redirect === undefined ? {} : { redirect: options.redirect }),
+    ...(options.base === undefined ? {} : { base: options.base }),
   };
   const first = document(body, options, head);
   const islands = islandsUsed(first);

@@ -1,0 +1,9 @@
+{
+  "notfound.browse": "Parcourir les espaces",
+  "notfound.cause": "Le fichier a pu être renommé ou déplacé, ou son mot est passé sous le seuil de publication. Le contenu reste dans le dépôt et son texte reste cherchable.",
+  "notfound.label": "Page introuvable",
+  "notfound.nearby": "Adresses proches",
+  "notfound.search": "Chercher « '{query}' »",
+  "notfound.searchSite": "Chercher dans la documentation",
+  "notfound.title": "Cette adresse ne correspond à aucune page de la dernière publication."
+}

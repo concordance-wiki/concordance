@@ -1,0 +1,30 @@
+{
+  "notfound.browse": {
+    "defaultMessage": "Browse the spaces",
+    "description": "Button of the page served for a missing address, leading to the list of the spaces."
+  },
+  "notfound.cause": {
+    "defaultMessage": "The file may have been renamed or moved, or its word fell under the publication threshold. The content stays in the repository and its text stays searchable.",
+    "description": "Sentence of the page served for a missing address naming the likely causes and what stays reachable."
+  },
+  "notfound.label": {
+    "defaultMessage": "Page not found",
+    "description": "Eyebrow and browser title of the page served for a missing address."
+  },
+  "notfound.nearby": {
+    "defaultMessage": "Nearby addresses",
+    "description": "Heading of the list of the pages whose address is closest to the missing one, computed in the browser from the table written at publication."
+  },
+  "notfound.search": {
+    "defaultMessage": "Search “'{query}'”",
+    "description": "Button of the page served for a missing address, searching the last segment of that address; the quoted placeholder is filled in the browser."
+  },
+  "notfound.searchSite": {
+    "defaultMessage": "Search the documentation",
+    "description": "Button of the page served for a missing address when no script filled the search from the address: leads to the search page."
+  },
+  "notfound.title": {
+    "defaultMessage": "This address matches no page of the last publication.",
+    "description": "Title of the page served for a missing address."
+  }
+}

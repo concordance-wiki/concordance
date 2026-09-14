@@ -313,8 +313,8 @@ describe("Every theme override is visible there", () => {
     expect(await galleryCommand([], io, deps)).toBe(0);
     expect(deps.asked).toEqual([]);
     expect(io.stdout[0]).toBe("/work/concordance.yaml: valid configuration");
-    expect(io.stdout[2]).toMatch(/^island category-list: /);
-    expect(io.stdout[3]).toMatch(/^island contract-viewer: /);
+    expect(io.stdout[2]).toMatch(/^island age: /);
+    expect(io.stdout[3]).toMatch(/^island category-list: /);
   });
 
   it("reads the theme.yaml next to the configuration, or the one project.theme names, and lets it win over plugin tokens", async () => {

@@ -15,6 +15,7 @@ import type {
   DocumentPageLabels,
   DocumentPageView,
   DocumentPosition,
+  DocumentRepresentation,
   DocumentTwinFile,
   DocumentView,
   EntityPageLabels,
@@ -22,6 +23,7 @@ import type {
   Neighbour,
   NeighbourhoodLabels,
   NeighbourhoodProps,
+  PreviewFailure,
   Section,
   SourceRef,
   SpaceTree,
@@ -555,6 +557,23 @@ export function previewTwinOf(
   return documents.find((candidate) => candidate.target === document.preview);
 }
 
+/** The check the converter reports a document it could not convert under. */
+export const CONVERSION_FAILED = "W-CONV-FAILED";
+
+/** The finding the build recorded for a document whose conversion failed, worded as its cause; none for a converted document. */
+export function conversionFailureOf(
+  context: SiteContext,
+  document: FragmentDocument,
+): PreviewFailure | undefined {
+  const finding = context.model.findings.find(
+    (candidate) =>
+      candidate.check === CONVERSION_FAILED &&
+      candidate.source === document.source &&
+      candidate.path === document.path,
+  );
+  return finding === undefined ? undefined : { cause: finding.message, check: finding.check };
+}
+
 /**
  * The documents of the entity as its page offers them, from its fragment: the original file to
  * download, the PDF to open, with the viewer bundles when the build produced them, and the
@@ -582,6 +601,8 @@ export function documentsOf(
       const twin = previewTwinOf(document, documents);
       const own = positionsOf(document);
       const fromTwin = own.length === 0 && twin !== undefined;
+      const failure =
+        document.preview === undefined ? conversionFailureOf(context, document) : undefined;
       return {
         file: {
           label: document.path.slice(document.path.lastIndexOf("/") + 1),
@@ -606,6 +627,7 @@ export function documentsOf(
         positions: fromTwin ? positionsOf(twin) : own,
         ...readOf(document),
         ...(fromTwin ? { positionsFromPreview: true } : {}),
+        ...(failure === undefined ? {} : { previewFailure: failure }),
       };
     });
 }
@@ -656,7 +678,11 @@ export function formatSize(locale: string, bytes: number): string {
 }
 
 /** The headings, notes and names of the document page in the site language. */
-export function documentPageLabels(context: SiteContext, files: number): DocumentPageLabels {
+export function documentPageLabels(
+  context: SiteContext,
+  files: number,
+  pages = 0,
+): DocumentPageLabels {
   return {
     document: message(context, "document.view"),
     extractedText: message(context, "document.extractedText"),
@@ -678,7 +704,40 @@ export function documentPageLabels(context: SiteContext, files: number): Documen
     sameDocument: formatMessage(context.catalogue, "document.sameDocument", { count: files }),
     groupedNote: message(context, "document.groupedNote"),
     noNote: message(context, "document.noNote"),
+    previewFailed: message(context, "document.previewFailed"),
+    textExtracted: message(context, "document.textExtracted"),
+    textMissing: message(context, "document.textMissing"),
+    whyFailed: message(context, "document.whyFailed"),
+    extractedTextOf: formatMessage(context.catalogue, "document.extractedTextOf", { count: pages }),
+    indexedNote: message(context, "document.indexedNote"),
+    representations: message(context, "document.representations"),
+    reportedNote: message(context, "document.reportedNote"),
   };
+}
+
+/** The representations of a document whose conversion failed, the state of each written: the original, the preview that failed, the text read or not. */
+export function representationsOf(
+  context: SiteContext,
+  document: DocumentView,
+): DocumentRepresentation[] {
+  return [
+    {
+      label: `.${document.file.format}`,
+      state: message(context, "document.stateAvailable"),
+    },
+    {
+      label: `.pdf ${message(context, "document.rolePreview")}`,
+      state: message(context, "document.stateFailed"),
+      failed: true,
+    },
+    {
+      label: message(context, "document.textRepresentation"),
+      state: message(
+        context,
+        document.positions.length > 0 ? "document.stateExtracted" : "document.stateMissing",
+      ),
+    },
+  ];
 }
 
 /** The files that make the document: the original, its PDF when one stands next to it, the note when one is merged with it. */
@@ -762,7 +821,13 @@ export function documentPageOf(
     ...(author === undefined ? {} : { author }),
     ...(fromPreview ? { fromPreview } : {}),
     files,
-    labels: documentPageLabels(context, files.length),
+    ...(document.previewFailure === undefined
+      ? {}
+      : {
+          previewFailure: document.previewFailure,
+          representations: representationsOf(context, document),
+        }),
+    labels: documentPageLabels(context, files.length, pages),
   };
 }
 

@@ -49,12 +49,14 @@ describe("A concordance gallery command renders every slot with fixture view mod
       ].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "gallery-width",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -222,12 +224,14 @@ describe("A concordance gallery command renders every slot with fixture view mod
     expect(report.overrides).toEqual([]);
     expect(report.summary).toEqual([
       `gallery: ${String(galleryPages.length + 1)} pages written to /out`,
+      expect.stringMatching(/^island age: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island category-list: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island contract-viewer: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island document-viewer: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island gallery-width: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mentions-panel: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island mode-switch: \d+\.\d kB$/) as string,
+      expect.stringMatching(/^island not-found: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island panels: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island pins: \d+\.\d kB$/) as string,
       expect.stringMatching(/^island search: \d+\.\d kB$/) as string,

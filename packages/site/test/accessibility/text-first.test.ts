@@ -55,7 +55,7 @@ const CONTENT: Readonly<Record<string, readonly string[]>> = {
   "neighbourhood-overflow.html": ['<ul id="neighbourhood-list"', '<p class="neighbourhood-total">'],
   "neighbourhood-empty.html": ['<p class="empty">'],
   "search-results.html": ['<li class="result', '<ul class="facet-values">'],
-  "search-results-empty.html": ['<p class="search-summary"', '<p class="search-closest">'],
+  "search-results-empty.html": ['<p class="results-empty-lead"', '<p class="search-closest">'],
   "search-results-corporate.html": ['<li class="result', '<ul class="facet-values">'],
   "index-page.html": ['<tr class="index-entry'],
   "index-corporate.html": ['<tr class="index-entry', '<ul class="index-filter-list">'],

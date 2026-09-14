@@ -29,6 +29,7 @@ import {
 import type { PinnedPage, SearchField, SlotProps, SpaceTree } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
 import { pageComponentFor } from "../theme/context.js";
+import { AgeNotice } from "../theme/default/age-notice.js";
 import { SearchIsland } from "../theme/default/search-island.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import {
@@ -56,6 +57,7 @@ import { homeOf, suggestionLabels } from "./home.js";
 import { planIndex } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
 import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
+import { ageNoticeOf, NOT_FOUND_PAGE, notFoundBase, notFoundOf } from "./not-found.js";
 import {
   ABOUT_PAGE,
   ASSETS_DIRECTORY,
@@ -119,6 +121,10 @@ export interface SiteInput {
   about?: string;
   /** `inference.keyword_pages.min_occurrences` of the configuration, which the about page names. */
   keywordThreshold?: number;
+  /** `site.url` of the configuration: where the site is published, which the page served for a missing address links back through. */
+  siteUrl?: string;
+  /** `site.publish_every_days` of the configuration: past three times that many days, every page shows its age. */
+  publishEveryDays?: number;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -355,6 +361,9 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       assetsBase: assetsBaseOf(page),
       header: chrome.header,
       footer: chrome.footer,
+      ...(input.publishEveryDays === undefined
+        ? {}
+        : { notice: h(AgeNotice, ageNoticeOf(context, page, input.publishEveryDays)) }),
     };
   };
   const document = (
@@ -437,6 +446,14 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   });
   const siteTitle = themeChrome(input, "").siteTitle;
   const spacesTitle = message(context, "site.spaces");
+  // Served by the host for any missing address under the site: its links resolve from its own address, never the one asked for.
+  const notFound: WrittenDocument = {
+    path: NOT_FOUND_PAGE,
+    content: renderDocument(h(input.theme.components.NotFound, notFoundOf(context)), {
+      ...optionsFor(NOT_FOUND_PAGE, message(context, "notfound.label"), input.locale),
+      base: notFoundBase(input.siteUrl),
+    }),
+  };
   // The page of a space: its search field says it keeps to the space, and does.
   const spacePage = (source: string): WrittenDocument => {
     const page = spacePagePath(source);
@@ -499,6 +516,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       render(ABOUT_PAGE, "About", aboutOf(context), message(context, "about.title"), input.locale),
       ...spaces.map((space) => spacePage(space.name)),
       searchPage,
+      notFound,
       ...input.model.entities.map(entityPage),
       ...categoryPages,
       ...redirects,

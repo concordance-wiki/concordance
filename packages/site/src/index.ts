@@ -34,6 +34,8 @@ export * from "./islands/toc.js";
 export * from "./islands/panels.js";
 export * from "./islands/pins.js";
 export * from "./islands/tabs.js";
+export * from "./islands/age.js";
+export * from "./islands/not-found.js";
 export * from "./mode.js";
 export * from "./panels.js";
 export * from "./pins.js";
@@ -53,6 +55,8 @@ export * from "./theme/default/toc.js";
 export * from "./theme/default/panel-handle.js";
 export * from "./theme/default/pins.js";
 export * from "./theme/default/tabs.js";
+export * from "./theme/default/age-notice.js";
+export * from "./theme/default/not-found.js";
 export * from "./theme/load.js";
 export * from "./theme/chrome.js";
 export * from "./theme/node-loader.js";
@@ -70,6 +74,7 @@ export * from "./markdown/figures.js";
 export * from "./markdown/marks.js";
 export * from "./markdown/render.js";
 export * from "./build/paths.js";
+export * from "./build/not-found.js";
 export {
   DEFAULT_MENTIONS_INLINE,
   citingPages,
@@ -204,6 +209,8 @@ export {
   SUGGESTIONS,
   citedDetail,
   closestOf,
+  emptyOf,
+  emptySummary,
   factsOf,
   hitsOf,
   isEditable,

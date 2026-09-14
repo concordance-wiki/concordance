@@ -25,4 +25,14 @@ export const searchLabels: SearchLabels = {
   closestForm: "Closest form:",
   occurrences: { one: "# occurrence", other: "# occurrences" },
   showNext: { one: "Show the next one", other: "Show the next #" },
+  noResultFiltered: {
+    one: "No result for “{query}” with the filter {filters}.",
+    other: "No result for “{query}” with the filters {filters}.",
+  },
+  existsElsewhere:
+    "The word exists in the documentation, but on none of the pages the filter keeps.",
+  liftFilter: "Remove the filter “{label}”",
+  noFileUses: "No file uses this word.",
+  seeWordPage: "See the page of the word",
+  prefixNote: "The search matches the start of words: a typo gives zero results and no suggestion.",
 };

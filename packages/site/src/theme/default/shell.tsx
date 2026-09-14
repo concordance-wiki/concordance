@@ -27,6 +27,7 @@ export function Shell({
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{title}</title>
+        {head.base !== undefined && <base href={head.base} />}
         {head.redirect !== undefined && (
           <meta http-equiv="refresh" content={`0; url=${head.redirect}`} />
         )}

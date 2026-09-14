@@ -23,9 +23,17 @@
     "defaultMessage": "Extracted text",
     "description": "Tab of a document page showing the text extracted from the file."
   },
+  "document.extractedTextOf": {
+    "defaultMessage": "Extracted text — {count, plural, one {# page} other {# pages}}",
+    "description": "Heading of the extracted text of a document whose conversion failed, with its number of pages."
+  },
   "document.groupedNote": {
     "defaultMessage": "Grouped by folder, date and textual overlap — a single entry in the index.",
     "description": "Note under the files of a document page: why they form one page."
+  },
+  "document.indexedNote": {
+    "defaultMessage": "indexed and searchable",
+    "description": "Note at the head of the extracted text of a document whose conversion failed."
   },
   "document.kind.pdf": {
     "defaultMessage": "PDF",
@@ -67,6 +75,10 @@
     "defaultMessage": "Preview",
     "description": "Link to the rendered preview of a converted document."
   },
+  "document.previewFailed": {
+    "defaultMessage": "The preview of this document could not be generated.",
+    "description": "Title of the notice on a document page whose conversion failed."
+  },
   "document.previewNote": {
     "defaultMessage": "Size and page count of the PDF preview, the original stating none.",
     "description": "Note under the properties of a document page when the size or the page count was read from the PDF preview rather than from the original file."
@@ -78,6 +90,14 @@
   "document.relatedNotes": {
     "defaultMessage": "Related notes",
     "description": "Tab of a document page showing the note merged with the document."
+  },
+  "document.reportedNote": {
+    "defaultMessage": "The same finding stands in the publication report and in the linter output: the failure is reported to whoever can fix it.",
+    "description": "Note under the state of the representations of a document whose conversion failed."
+  },
+  "document.representations": {
+    "defaultMessage": "State of the representations",
+    "description": "Heading of the panel listing the representations of a document and the state of each."
   },
   "document.roleNotes": {
     "defaultMessage": "session notes",
@@ -95,6 +115,34 @@
     "defaultMessage": "Same document, {count, plural, one {one file} other {# files}}",
     "description": "Heading of the block listing the files that make one document page."
   },
+  "document.stateAvailable": {
+    "defaultMessage": "available",
+    "description": "State of the original file in the panel of the representations."
+  },
+  "document.stateExtracted": {
+    "defaultMessage": "extracted",
+    "description": "State of the text in the panel of the representations when it was read."
+  },
+  "document.stateFailed": {
+    "defaultMessage": "failed",
+    "description": "State of the preview in the panel of the representations when the conversion failed."
+  },
+  "document.stateMissing": {
+    "defaultMessage": "missing",
+    "description": "State of the text in the panel of the representations when nothing was read."
+  },
+  "document.textExtracted": {
+    "defaultMessage": "The text was extracted all the same: it is indexed, cited on the other pages, and readable below.",
+    "description": "Sentence of the notice on a document page whose conversion failed, when the text of the document was read."
+  },
+  "document.textMissing": {
+    "defaultMessage": "Its text could not be extracted either: the original stays downloadable, and the note that describes it stands among its files.",
+    "description": "Sentence of the notice on a document page whose conversion failed, when no text of the document was read."
+  },
+  "document.textRepresentation": {
+    "defaultMessage": "text",
+    "description": "Row of the text in the panel of the representations."
+  },
   "document.type": {
     "defaultMessage": "Type",
     "description": "Row of the properties block of a document page: the kind of the file."
@@ -106,5 +154,9 @@
   "document.views": {
     "defaultMessage": "Views of the document",
     "description": "Accessible name of the tab bar of a document page."
+  },
+  "document.whyFailed": {
+    "defaultMessage": "Why this failure?",
+    "description": "Control of the notice on a document page whose conversion failed, unfolding the finding the build recorded."
   }
 }

@@ -225,8 +225,14 @@ build:
 
 `neighbourhood.size` (6) is the number of nodes of the neighbourhood mini-map of a page, an integer from 1 to 12; a larger value is a configuration error, the map being legible only up to twelve labelled nodes. Which nodes are kept follows the `display.neighbours_order` of the page's type in the profile (see the [architecture guide](architecture.md#displayed-neighbourhood)).
 
+`url` is the HTTPS address the site is published at, its path included when the host serves it under one (`https://example.org/handbook/`). The page written for a missing address, `404.html`, is served by GitHub Pages and GitLab Pages at any address under the site, so its links cannot be relative: it links back through this address, and assumes the root of the host without it.
+
+`publish_every_days` is the number of days between two publications, as the pipeline is scheduled: `1` for a nightly build. Past three times that many days, every page shows a notice giving the age of the site, so that a reader knows a recent change of the repositories may be missing; the notice closes and stays closed until a later publication grows old in its turn. A static site can only tell its own age, never that a publication failed: without the key no page counts the days.
+
 ```yaml
 site:
+  url: https://example.org/handbook/
+  publish_every_days: 1
   neighbourhood: { size: 8 }
 ```
 
