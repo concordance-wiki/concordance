@@ -55,15 +55,12 @@ describe("the contract viewer in a document", () => {
     vi.unstubAllGlobals();
   });
 
-  it("shows the button once mounted, fetches on its click only, then expands an operation and selects a schema on click", async () => {
+  it("fetches the view as soon as it mounts and opens the viewer in the page, then expands an operation and selects a schema on click", async () => {
     render(h(Answering, { href }), document.body);
-    await settle();
-    expect(document.body.innerHTML).toContain("Show the contract");
-    expect(Answering.calls).toEqual([]);
-    button("Show the contract").click();
     await settle();
     await settle();
     expect(Answering.calls).toEqual([href]);
+    expect(document.body.innerHTML).not.toContain("Contract data (JSON)");
     const operation = button("GET /entities");
     expect(operation.getAttribute("aria-expanded")).toBe("false");
     operation.click();
@@ -75,9 +72,11 @@ describe("the contract viewer in a document", () => {
     await settle();
     expect(button("Severity").getAttribute("aria-pressed")).toBe("true");
     expect(button("Entity").getAttribute("aria-pressed")).toBe("false");
-    button("Hide the contract").click();
-    await settle();
-    expect(document.body.innerHTML).toContain("Show the contract");
+    expect([...document.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "GET /entities",
+      "Entity",
+      "Severity",
+    ]);
     expect(Answering.calls).toEqual([href]);
   });
 

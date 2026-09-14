@@ -1050,6 +1050,9 @@ describe("contractOf", () => {
       format: "openapi 3.1",
       fingerprint: "a".repeat(64),
       imported_at: "2026-09-12T10:00:00.000Z",
+      last_modified: "2026-09-08T12:00:00.000Z",
+      // The contract declares the search before the listing: the page follows it, not the identifiers.
+      operations: ["searchModel", "listEntities"],
     },
   ];
   const withContracts = (
@@ -1096,7 +1099,7 @@ describe("contractOf", () => {
       "On an interface the operations rise to the top: that is the grain we work at.",
   };
 
-  it("describes the contract of an api page from the record of the model: title, version, format, the import worded relative to the build, the copy of a path contract next to the page, the view under fragments/ and the labels of the site language", () => {
+  it("describes the contract of an api page from the record of the model: title, version, format, the last change of the file worded relative to the build, the operations in contract order, the copy of a path contract next to the page, the view under fragments/ and the labels of the site language", () => {
     const ctx = withContracts([
       exposes("specs/endpoints/list-entities", "listEntities"),
       exposes("specs/api/model-query/searchmodel", "searchModel"),
@@ -1107,12 +1110,21 @@ describe("contractOf", () => {
       title: "Model query API",
       version: "0.1.0",
       format: "openapi 3.1",
-      importedAt: "2026-09-12T10:00:00.000Z",
-      imported: { date: "2026-09-12", label: "imported 2 hours ago", short: "2 hr. ago" },
+      importedAt: "2026-09-08T12:00:00.000Z",
+      imported: { date: "2026-09-08", label: "imported 4 days ago", short: "4 days ago" },
       location: "contracts/model-query.openapi.json",
       downloadHref: "model-query.openapi.json",
       fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
       operations: [
+        {
+          name: "searchModel",
+          title: "GET /search",
+          href: "searchmodel/index.html",
+          documented: false,
+          method: "GET",
+          path: "/search",
+          callers: "0 callers",
+        },
         {
           name: "listEntities",
           title: "List the entities",
@@ -1123,28 +1135,60 @@ describe("contractOf", () => {
           path: "/entities",
           callers: "1 caller",
         },
-        {
-          name: "searchModel",
-          title: "GET /search",
-          href: "searchmodel/index.html",
-          documented: false,
-          method: "GET",
-          path: "/search",
-          callers: "0 callers",
-        },
       ],
       labels,
     });
   });
 
-  it("words the import in the language of the site, in French as in English", () => {
+  it("dates a contract by its import only when its record carries no file date, as for a contract fetched from a URL, and keeps the model order of operations a record does not rank", () => {
+    const links = [
+      exposes("specs/api/model-query/searchmodel", "searchModel"),
+      exposes("specs/endpoints/list-entities", "listEntities"),
+    ];
+    const remote = contractOf(
+      withContracts(links),
+      "specs/api/forge-bridge/index.html",
+      forgeBridge,
+    );
+    expect(remote?.importedAt).toBe("2026-09-12T10:00:00.000Z");
+    expect(remote?.imported).toEqual({
+      date: "2026-09-12",
+      label: "imported 2 hours ago",
+      short: "2 hr. ago",
+    });
+    const names = (ranked: string[] | undefined): string[] | undefined => {
+      const ctx = context({
+        model: model({
+          build: {
+            ...model().build,
+            contracts: contracts.map(({ operations, ...record }) =>
+              operations === undefined || ranked === undefined
+                ? record
+                : { ...record, operations: ranked },
+            ),
+          },
+          entities: [modelQuery, forgeBridge, listEntities, searchModel],
+          links,
+        }),
+      });
+      return contractOf(ctx, "specs/api/model-query/index.html", modelQuery)?.operations.map(
+        (operation) => operation.name,
+      );
+    };
+    expect(names(["listEntities"])).toEqual(["listEntities", "searchModel"]);
+    expect(names(["searchModel"])).toEqual(["searchModel", "listEntities"]);
+    expect(names([])).toEqual(["searchModel", "listEntities"]);
+    expect(names(undefined)).toEqual(["searchModel", "listEntities"]);
+  });
+
+  it("words the date in the language of the site, in French as in English", () => {
     const ctx = context({
       model: model({ build: { ...model().build, contracts }, entities: [modelQuery], links: [] }),
       catalogue: loadCatalogue("fr"),
       locale: "fr",
     });
     const props = contractOf(ctx, "specs/api/model-query/index.html", modelQuery);
-    expect(props?.imported?.label).toBe("importé il y a 2 heures");
+    expect(props?.imported?.label).toBe("importé il y a 4 jours");
     expect(props?.labels?.contract).toBe("Contrat d’interface");
     expect(props?.labels?.withoutPage).toBe("présente au contrat, sans page");
   });
@@ -1328,7 +1372,7 @@ describe("contractOf", () => {
     ).toBeUndefined();
   });
 
-  it("hangs the operations of the api under its node in the tree of its space, in model order, whatever folder they are filed in", () => {
+  it("hangs the operations of the api under its node in the tree of its space, in the order of the contract, whatever folder they are filed in", () => {
     const ctx = withContracts([
       exposes("specs/endpoints/list-entities", "listEntities"),
       exposes("specs/api/model-query/searchmodel", "searchModel"),
@@ -1339,8 +1383,8 @@ describe("contractOf", () => {
       label: "Model query API",
       current: true,
       children: [
-        { label: "List the entities", href: "../../endpoints/list-entities/index.html" },
         { label: "GET /search", href: "searchmodel/index.html" },
+        { label: "List the entities", href: "../../endpoints/list-entities/index.html" },
       ],
     });
     const alone = spaceOf(withContracts([]), "specs/api/model-query/index.html", modelQuery);

@@ -65,10 +65,25 @@ describe("ApiPage", () => {
     expect(html).not.toContain("entity-other-attributes");
   });
 
-  it("lists the operations under the current interface in the tree of the space", () => {
+  it("lists the operations under the current interface in the tree of the space, in the order of the contract, the same order as the table", () => {
     const html = render(corporateApiPage);
     expect(html).toContain(
-      '<li class="space-page space-current"><span aria-current="page">Model query API</span><ul class="space-nodes"><li class="space-page"><a href="../../endpoints/get-entity/">Read an entity</a></li><li class="space-page"><a href="../../endpoints/list-entities/">List the entities</a></li><li class="space-page"><a href="../../endpoints/search-model/">Search the model</a></li><li class="space-page"><a href="listfindings/">GET /findings</a></li></ul></li>',
+      '<li class="space-page space-current"><span aria-current="page">Model query API</span><ul class="space-nodes"><li class="space-page"><a href="../../endpoints/list-entities/">List the entities</a></li><li class="space-page"><a href="../../endpoints/get-entity/">Read an entity</a></li><li class="space-page"><a href="../../endpoints/search-model/">Search the model</a></li><li class="space-page"><a href="listfindings/">GET /findings</a></li></ul></li>',
+    );
+    const rows = [...html.matchAll(/<a class="api-operation" href="[^"]*">([^<]+)<\/a>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toEqual([
+      "List the entities",
+      "Read an entity",
+      "Search the model",
+      "Suggest links",
+    ]);
+    expect(html).toContain(
+      '<time class="contract-imported" datetime="2026-09-04T09:12:00.000Z">imported 9 days ago</time></p>',
+    );
+    expect(html).toContain(
+      '<p class="contract-foot"><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p>',
     );
   });
 

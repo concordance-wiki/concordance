@@ -9,7 +9,6 @@
   color: var(--color-muted);
 }
 
-.contract-data button,
 .contract-operation > button,
 .contract-schema-list button {
   cursor: pointer;
@@ -23,10 +22,8 @@
   text-underline-offset: 0.15em;
 }
 
-.contract-data button[disabled] {
-  cursor: progress;
+.contract-data[aria-busy="true"] {
   color: var(--color-muted);
-  text-decoration: none;
 }
 
 .contract-operation-list,

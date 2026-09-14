@@ -427,7 +427,7 @@ function unmatchedOf(context: SiteContext, page: string, entity: Entity): Contra
   });
 }
 
-/** When the contract was imported, relative to the build instant, worded in full and in short. */
+/** When the contract last changed, relative to the build instant, worded in full and in short. */
 function importedOf(context: SiteContext, importedAt: string): ChangeDate {
   const locale = context.locale ?? context.language;
   const from = new Date(importedAt);
@@ -463,7 +463,12 @@ export function contractLabels(context: SiteContext): ContractLabels {
   };
 }
 
-/** The contract side of an `api` page, from the record the import left in the model; none without one. */
+/**
+ * The contract side of an `api` page, from the record the import left in the model; none without
+ * one. The block dates the contract by the last change of its file, as the ingest dates it, and
+ * by its import only for a contract fetched from a URL: the instant of the build says nothing
+ * about the contract.
+ */
 export function contractOf(
   context: SiteContext,
   page: string,
@@ -473,12 +478,13 @@ export function contractOf(
   if (record === undefined) return undefined;
   const { location } = record;
   const unmatched = unmatchedOf(context, page, entity);
+  const importedAt = record.last_modified ?? record.imported_at;
   return {
     title: record.title,
     version: record.version,
     format: record.format,
-    importedAt: record.imported_at,
-    imported: importedOf(context, record.imported_at),
+    importedAt,
+    imported: importedOf(context, importedAt),
     location,
     downloadHref: isContractUrl(location)
       ? location

@@ -90,7 +90,7 @@ export const apiPage: SlotProps["EntityPage"] = {
   },
 };
 
-/** The tree of the specifications space as the interface sees it: the api folder open, the current page listing its operations. */
+/** The tree of the specifications space as the interface sees it: the api folder open, the current page listing its operations in the order of the contract. */
 const corporateApiSpaceTree: SpaceTree = {
   name: "specs",
   initials: "SP",
@@ -106,8 +106,8 @@ const corporateApiSpaceTree: SpaceTree = {
           label: "Model query API",
           current: true,
           children: [
-            { label: "Read an entity", href: "../../endpoints/get-entity/" },
             { label: "List the entities", href: "../../endpoints/list-entities/" },
+            { label: "Read an entity", href: "../../endpoints/get-entity/" },
             { label: "Search the model", href: "../../endpoints/search-model/" },
             { label: "GET /findings", href: "listfindings/" },
           ],
@@ -253,7 +253,7 @@ export const corporateApiMentions: Mention[] = [
   ),
 ];
 
-/** The model query API of the fixtures corpus, laid out as the corporate chrome shows an interface: the tree with its operations under it, the operations table with its gaps, the contract block, the five keys and the operations first among the related pages. */
+/** The model query API of the fixtures corpus, laid out as the corporate chrome shows an interface: the tree with its operations under it, the operations table in the order of the contract with its gaps, the contract block dated by its file with the viewer open in it, the five keys and the operations first among the related pages. */
 export const corporateApiPage: SlotProps["EntityPage"] = {
   entity: {
     id: "specs/api/model-query",
@@ -400,22 +400,12 @@ export const corporateApiPage: SlotProps["EntityPage"] = {
     title: "Model query API",
     version: "0.1.0",
     format: "openapi 3.1",
-    importedAt: "2026-09-10T00:26:40.000Z",
-    imported: { date: "2026-09-10", label: "imported 3 days ago", short: "3 days ago" },
+    importedAt: "2026-09-04T09:12:00.000Z",
+    imported: { date: "2026-09-04", label: "imported 9 days ago", short: "9 days ago" },
     location: "contracts/model-query.openapi.json",
     downloadHref: "model-query.openapi.json",
     fragmentHref: "../../../fragments/specs/api/model-query.contract.json",
     operations: [
-      {
-        name: "getEntity",
-        title: "Read an entity",
-        summary: "Read an entity",
-        href: "../../endpoints/get-entity/",
-        documented: true,
-        method: "GET",
-        path: "/entities/{id}",
-        callers: "1 caller",
-      },
       {
         name: "listEntities",
         title: "List the entities",
@@ -425,6 +415,16 @@ export const corporateApiPage: SlotProps["EntityPage"] = {
         method: "GET",
         path: "/entities",
         callers: "3 callers",
+      },
+      {
+        name: "getEntity",
+        title: "Read an entity",
+        summary: "Read an entity",
+        href: "../../endpoints/get-entity/",
+        documented: true,
+        method: "GET",
+        path: "/entities/{id}",
+        callers: "1 caller",
       },
       {
         name: "searchModel",

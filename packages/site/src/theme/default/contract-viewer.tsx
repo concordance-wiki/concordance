@@ -16,10 +16,10 @@ export interface ContractViewerProps {
   href: string;
 }
 
-export type ContractViewerStatus = "idle" | "loading" | "loaded" | "failed";
+export type ContractViewerStatus = "loading" | "loaded" | "failed";
 
 export interface ContractViewerState {
-  /** False in the served HTML and until the island mounts: a link to the JSON stands in for the button. */
+  /** False in the served HTML and until the island mounts: a link to the JSON stands in for the viewer. */
   hydrated: boolean;
   status: ContractViewerStatus;
   view?: ContractView;
@@ -141,18 +141,20 @@ function Fields({ schema }: { schema: ContractSchema }): JSX.Element {
 
 /**
  * The contract viewer, mounted on the API page as an island: a link to the JSON view in the served
- * HTML, a button once hydrated, and after one fetch an expandable operation list and a schema
- * explorer, both read-only. Nothing here posts anything anywhere: the viewer shows a contract, it
- * never calls the API it describes.
+ * HTML, and as soon as the script runs one fetch of that view, then an expandable operation list
+ * and a schema explorer open in the page, both read-only. Nothing here posts anything anywhere:
+ * the viewer shows a contract, it never calls the API it describes.
  */
 export class ContractViewer extends Component<ContractViewerProps, ContractViewerState> {
-  override state: ContractViewerState = { hydrated: false, status: "idle", open: [] };
+  override state: ContractViewerState = { hydrated: false, status: "loading", open: [] };
 
   /** Replaceable so that tests fetch nothing; the bundle uses the browser's `fetch`. */
   fetchView: FetchView = (href) => fetch(href);
 
+  /** Opens the viewer as soon as the island mounts, as the document page opens its own. */
   override componentDidMount(): void {
     this.setState({ hydrated: true });
+    void this.load();
   }
 
   /** Fetches the view once; every failure, network or shape, leaves the link to the JSON. */
@@ -178,14 +180,6 @@ export class ContractViewer extends Component<ContractViewerProps, ContractViewe
           this.setState({ status: "failed" });
         },
       );
-  };
-
-  show = (): void => {
-    void this.load();
-  };
-
-  hide = (): void => {
-    this.setState({ status: "idle" });
   };
 
   toggle = (name: string): void => {
@@ -280,23 +274,16 @@ export class ContractViewer extends Component<ContractViewerProps, ContractViewe
         </p>
       );
     }
-    if (state.status !== "loaded" || state.view === undefined) {
+    if (state.status === "loading" || state.view === undefined) {
       return (
-        <p class="contract-data">
-          <button type="button" disabled={state.status === "loading"} onClick={this.show}>
-            {state.status === "loading" ? labels.loadingContract : labels.showContract}
-          </button>
+        <p class="contract-data" aria-busy="true">
+          {labels.loadingContract}
         </p>
       );
     }
     const { view } = state;
     return (
       <div class="contract-viewer">
-        <p class="contract-data">
-          <button type="button" onClick={this.hide}>
-            {labels.hideContract}
-          </button>
-        </p>
         <h3>{labels.contractOperations}</h3>
         {view.operations.length === 0 ? (
           <p class="contract-empty">{labels.contractNoOperation}</p>

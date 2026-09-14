@@ -117,7 +117,7 @@ function viewer(state: Partial<ContractViewerState>): string {
   return renderToString(
     component.render(
       { href: contract.fragmentHref },
-      { hydrated: true, status: "idle", open: [], ...state },
+      { hydrated: true, status: "loaded", open: [], ...state },
     ),
   );
 }
@@ -159,10 +159,10 @@ describe("the contract side of an api page", () => {
     expect(markdown).not.toContain("listEntities");
     expect(html).toContain('<h2 id="contract-title">Interface contract</h2>');
     expect(html).toContain(
-      '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-12T10:00:00.000Z">imported 3 days ago</time><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p>',
+      '<p class="contract-meta"><span class="contract-format">openapi 3.1</span><code class="contract-file">contracts/model-query.openapi.json</code><time class="contract-imported" datetime="2026-09-12T10:00:00.000Z">imported 3 days ago</time></p>',
     );
     expect(html).toContain(
-      '<p class="contract-note">No schema is copied into the text: the page shows the contract, it does not duplicate it.</p>',
+      '<p class="contract-note">No schema is copied into the text: the page shows the contract, it does not duplicate it.</p></div><p class="contract-foot"><a class="contract-download" href="model-query.openapi.json" download>Download the contract</a></p></div></section>',
     );
     expectBalanced(html);
   });
@@ -260,7 +260,8 @@ describe("the contract side of an api page", () => {
     expect(html).toContain(
       '<p class="contract-data"><a href="../../../fragments/specs/api/model-query.contract.json">Contract data (JSON)</a></p>',
     );
-    expect(html).not.toContain("Show the contract");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("Loading the contract");
     expect(renderToString(h(ContractSection, contract))).toContain("contract-viewer");
   });
 
@@ -273,8 +274,8 @@ describe("the contract side of an api page", () => {
     expect([...section.matchAll(/href="([^"]*)"/g)].map((match) => match[1])).toEqual([
       "../../endpoints/list-entities/index.html",
       "../../endpoints/suggest-links/index.html",
-      "model-query.openapi.json",
       "../../../fragments/specs/api/model-query.contract.json",
+      "model-query.openapi.json",
     ]);
     for (const html of [
       section,
@@ -289,35 +290,32 @@ describe("the contract side of an api page", () => {
 });
 
 describe("ContractViewer", () => {
-  it("marks itself hydrated once mounted, the button replacing the link to the JSON", () => {
-    const component = new ContractViewer({ href: contract.fragmentHref });
-    const setState = vi.spyOn(component, "setState");
-    component.componentDidMount();
-    expect(setState).toHaveBeenCalledWith({ hydrated: true });
-    expect(viewer({})).toBe(
-      '<p class="contract-data"><button type="button">Show the contract</button></p>',
-    );
-    expect(viewer({ status: "loading" })).toBe(
-      '<p class="contract-data"><button type="button" disabled>Loading the contract…</button></p>',
-    );
-  });
-
-  it("fetches the fragment on demand only, once the button is used, and shows the first schema", async () => {
+  it("marks itself hydrated once mounted and fetches the view at once, the loading notice replacing the link to the JSON meanwhile", async () => {
     const component = new ContractViewer({ href: contract.fragmentHref });
     const { calls, fetch } = fetching("view");
     component.fetchView = fetch;
     const setState = vi.spyOn(component, "setState");
     expect(calls).toEqual([]);
-    component.show();
+    component.componentDidMount();
+    expect(setState).toHaveBeenCalledWith({ hydrated: true });
     expect(setState).toHaveBeenCalledWith({ status: "loading" });
+    expect(calls).toEqual([contract.fragmentHref]);
     await component.load();
-    expect(calls).toEqual([contract.fragmentHref, contract.fragmentHref]);
     expect(setState).toHaveBeenLastCalledWith({
       status: "loaded",
       view,
       open: [],
       schema: "Entity",
     });
+    expect(viewer({ status: "loading" })).toBe(
+      '<p class="contract-data" aria-busy="true">Loading the contract…</p>',
+    );
+    expect(viewer({ status: "loaded" })).toBe(
+      '<p class="contract-data" aria-busy="true">Loading the contract…</p>',
+    );
+    expect(viewer({ hydrated: false, status: "loading" })).toBe(
+      '<p class="contract-data"><a href="../../../fragments/specs/api/model-query.contract.json">Contract data (JSON)</a></p>',
+    );
   });
 
   it("falls back to the link when the fragment is missing, of another shape or unreachable, as over file://", async () => {
@@ -349,9 +347,9 @@ describe("ContractViewer", () => {
     expect(html).toContain('<p class="contract-empty">The contract declares no schema.</p>');
   });
 
-  it("lists the operations collapsed, each behind a button that controls its details", () => {
+  it("lists the operations collapsed, each behind a button that controls its details, without any control to close the viewer", () => {
     const html = viewer({ status: "loaded", view });
-    expect(html).toContain('<button type="button">Hide the contract</button>');
+    expect(html).toMatch(/^<div class="contract-viewer"><h3>Operations<\/h3>/);
     expect(count(html, '<li class="contract-operation">')).toBe(3);
     expect(html).toContain(
       '<button type="button" aria-expanded="false" aria-controls="contract-operation-listEntities"><code>GET /entities</code><span class="contract-summary"> List the entities of the model</span></button><div id="contract-operation-listEntities" hidden class="contract-operation-details">',
@@ -397,8 +395,6 @@ describe("ContractViewer", () => {
     }
     component.select("Severity");
     expect(setState).toHaveBeenLastCalledWith({ schema: "Severity" });
-    component.hide();
-    expect(setState).toHaveBeenLastCalledWith({ status: "idle" });
   });
 
   it("explores the schemas: one pressed button per schema, the selected one shown with its fields, the first by default", () => {
@@ -416,10 +412,6 @@ describe("ContractViewer", () => {
     );
     const gone = viewer({ status: "loaded", view, schema: "Missing" });
     expect(gone).toContain('<button type="button" aria-pressed="true">Entity</button>');
-  });
-
-  it("renders the button when the state says loaded without a view", () => {
-    expect(viewer({ status: "loaded" })).toContain("Show the contract");
   });
 });
 

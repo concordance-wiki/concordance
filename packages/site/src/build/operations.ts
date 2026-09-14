@@ -16,7 +16,21 @@ export interface ExposedOperation {
   documented: boolean;
 }
 
-/** The operations the contract import attached to an API, in model order: the `exposes` links from it with a `contract_import` provenance. */
+/**
+ * The rank of every operation name in the contract of the API, from the record the import left;
+ * an operation the record does not name, or a record an earlier version wrote without the
+ * names, ranks after the named ones.
+ */
+function contractRanks(context: SiteContext, api: Entity): ReadonlyMap<string, number> {
+  const record = context.model.build.contracts?.find((candidate) => candidate.api === api.id);
+  return new Map((record?.operations ?? []).map((name, index) => [name, index]));
+}
+
+/**
+ * The operations the contract import attached to an API, in the order of the contract: the
+ * `exposes` links from it with a `contract_import` provenance, ranked by the operation names the
+ * record keeps, the model order deciding between operations the record does not name.
+ */
 export function exposedOperations(context: SiteContext, api: Entity): ExposedOperation[] {
   const operations: ExposedOperation[] = [];
   for (const link of context.touching.get(api.id) ?? []) {
@@ -30,7 +44,11 @@ export function exposedOperations(context: SiteContext, api: Entity): ExposedOpe
       documented: entity.type_origin !== "contract",
     });
   }
-  return operations;
+  const ranks = contractRanks(context, api);
+  const rankOf = (operation: ExposedOperation): number =>
+    ranks.get(operation.name) ?? Number.MAX_SAFE_INTEGER;
+  // A stable sort: two operations the contract does not rank keep the model order.
+  return operations.toSorted((a, b) => rankOf(a) - rankOf(b));
 }
 
 /** The names of the attributes of the operation type that reference an API, `api` in the default profile. */
