@@ -1,4 +1,4 @@
-import { posix } from "node:path";
+import { join, resolve } from "node:path";
 
 import {
   compareFindings,
@@ -80,7 +80,7 @@ async function ingestGit(
   deps: IngestDependencies,
 ): Promise<Outcome> {
   const ref = source.ref ?? DEFAULT_REF;
-  const root = posix.join(deps.cacheDirectory, "sources", source.name);
+  const root = join(deps.cacheDirectory, "sources", source.name);
   try {
     if (deps.fs.exists(root)) {
       await deps.git.update(root, ref);
@@ -90,7 +90,7 @@ async function ingestGit(
     const commit = await deps.git.head(root);
     const history = await deps.git.history(root);
     const files = keptFiles(deps, root, excluded).map((path): IngestedFile => {
-      const absolutePath = posix.join(root, path);
+      const absolutePath = join(root, path);
       // An untracked file has no history: it belongs to the checked-out commit as far as the build knows.
       const known = history.get(path) ?? { commit, modifiedAt: deps.fs.modifiedAt(absolutePath) };
       return { path, absolutePath, commit: known.commit, modifiedAt: known.modifiedAt };
@@ -119,7 +119,8 @@ async function ingestLocal(
   excluded: readonly string[],
   deps: IngestDependencies,
 ): Promise<Outcome> {
-  const root = posix.resolve(deps.configDirectory, path);
+  // The platform's resolution: a configuration under `C:\wiki` names `..\glossary` as Windows does.
+  const root = resolve(deps.configDirectory, path);
   if (!deps.fs.exists(root)) {
     return {
       finding: unreachable(
@@ -137,7 +138,7 @@ async function ingestLocal(
   }
   const history = (await deps.git.localHistory?.(root)) ?? new Map<string, FileHistory>();
   const files = kept.map((relative): IngestedFile => {
-    const absolutePath = posix.join(root, relative);
+    const absolutePath = join(root, relative);
     const known = history.get(relative);
     return known === undefined
       ? { path: relative, absolutePath, modifiedAt: deps.fs.modifiedAt(absolutePath) }

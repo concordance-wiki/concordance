@@ -20,7 +20,7 @@ One line each, so that nobody discovers a limit after the first build. The first
 - Search matches by prefix only: `key` finds "Keyword page", a misspelt word finds nothing, and there is no semantic search; the results have no facets yet, the counts by type, source, domain and application come next.
 - The build is not incremental: every run recomputes the whole model from the sources; only the clones of the git sources and the converted documents are kept in the cache. [Operations](operations.md#what-to-expect) gives the durations.
 - Office conversion needs the LibreOffice plugin and its command: without them, documents stay downloadable entities without preview or extracted text, and none is counted as unconverted. No thumbnail is produced yet, and transcripts are not pseudonymised yet: `privacy.pseudonymize` is validated, not applied.
-- The lock file is not read by the build: `lock:` is accepted with a warning from `validate-config`; accepted links, rejected links and rejected terms wait for a producer.
+- The `links` block of the lock file is recorded, not read: accepted and rejected links wait for a producer; `rejected_terms`, `duplicates` and `domains` are applied.
 - `W-STALE` is catalogued but not produced; the home page flags dormant sources with the same thresholds instead.
 - Cross-source links are off by default (`inference.cross_source_links`), and a link to another repository is left to `lint --scope global` when the build does not resolve it.
 - Over `file://`, a page may not fetch: an entity with two hundred mentions or more shows the first `build.mentions_inline` of them and a link to its fragment, and the button that loads the rest in place works behind a server only; under two hundred, every mention travels in the page.

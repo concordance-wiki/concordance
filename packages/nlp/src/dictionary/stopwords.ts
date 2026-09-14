@@ -1,4 +1,4 @@
-import { posix } from "node:path";
+import { resolve } from "node:path";
 
 import type { Config, FileSystem } from "@concordance-wiki/core";
 
@@ -20,7 +20,7 @@ export interface DictionaryStopwordsInput {
 export function dictionaryStopwords(input: DictionaryStopwordsInput): ReadonlySet<string> {
   const words = new Set(languagePack(input.locale).stopwords);
   for (const file of input.config.inference?.stopwords ?? []) {
-    const path = posix.resolve(input.configDirectory, file);
+    const path = resolve(input.configDirectory, file);
     if (!input.fs.exists(path)) {
       throw new Error(`stopword file not found: ${path} (inference.stopwords lists "${file}")`);
     }

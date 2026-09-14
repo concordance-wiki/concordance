@@ -1,4 +1,4 @@
-import { posix } from "node:path";
+import { isAbsolute, join, normalize } from "node:path";
 
 import {
   DEFAULT_CACHE_DIR,
@@ -27,9 +27,9 @@ export function isRemote(location: string): boolean {
   return /^https?:\/\//i.test(location);
 }
 
-/** A location the block gives, relative to the repository root unless it is absolute. */
+/** A location the block gives, relative to the repository root unless it is absolute, as the platform reads it. */
 export function absolutePath(root: string, location: string): string {
-  return posix.isAbsolute(location) ? posix.normalize(location) : posix.join(root, location);
+  return isAbsolute(location) ? normalize(location) : join(root, location);
 }
 
 /** Only `global.model` has no default: without it the global scope has nothing to check against. */
