@@ -5,27 +5,32 @@
 }
 
 @media (min-width: 68.75rem) {
-  /* The track sticks to the middle of the viewport along the panel: the handle always stands at the same place. It takes no room and lets the clicks through to the panel. */
-  .panel-handle-track {
+  /* The panels stay while the text scrolls: each sticks to the top of the viewport, no taller than it, and scrolls on its own when it holds more. Its scroll stops at its edge rather than moving the page. */
+  .space,
+  .entity-side {
     position: sticky;
-    inset-block-start: calc(50vh - 1.25rem);
-    z-index: 1;
+    inset-block-start: 0;
+    align-self: start;
+    min-block-size: 100dvh;
+    max-block-size: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* The track takes no room and lets the clicks through to the panel. */
+  .panel-handle-track {
     display: block;
-    block-size: 2.5rem;
-    margin-block-end: -2.5rem;
+    block-size: 0;
     pointer-events: none;
   }
 
-  .space,
-  .entity-side {
-    position: relative;
-  }
-
-  /* 26 px wide and as tall as every target of the theme, clipped to the 13 px that show beyond the edge, the room around them kept for the focus ring. */
+  /* 26 px wide and as tall as every target of the theme, clipped to the 13 px that show beyond the edge, the room around them kept for the focus ring. Fixed to the middle of the viewport at the edge of the column, out of the panel that would otherwise clip the half beyond its edge: the handle always stands at the same place. */
   .panel-handle {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: -0.8125rem;
+    position: fixed;
+    z-index: 1;
+    inset-block-start: calc(50vh - 1.25rem);
+    inset-inline-start: calc(var(--tree-column) - 0.8125rem);
+    inset-inline-end: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -64,8 +69,8 @@
 
   /* On the right panel the tab shows beyond the start edge, its other half clipped, its glyph mirrored. */
   .entity-side > .panel-handle-track > .panel-handle {
-    inset-inline-start: -0.8125rem;
-    inset-inline-end: auto;
+    inset-inline-start: auto;
+    inset-inline-end: calc(var(--panel-column) - 0.8125rem);
     padding: 0 0.8125rem 0 0;
     clip-path: inset(-0.375rem 0.8125rem -0.375rem -0.375rem);
   }

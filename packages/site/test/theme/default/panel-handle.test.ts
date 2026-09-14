@@ -97,14 +97,27 @@ describe("The handles folding the side panels of the entity page", () => {
     );
   });
 
-  it("draws the handle as a 26 px tab clipped to its outer 13 px, stuck to the middle of the viewport, from the desktop width only, and folds each panel to 44 px on the root attribute or the served class", () => {
+  it("keeps both panels in view while the text scrolls, each no taller than the viewport and scrolling on its own, from the desktop width only", () => {
+    const css = componentsStylesheet();
+    expect(css).toContain(
+      "  .space,\n  .entity-side {\n    position: sticky;\n    inset-block-start: 0;\n    align-self: start;\n    min-block-size: 100dvh;\n    max-block-size: 100dvh;\n    overflow-y: auto;\n    overscroll-behavior: contain;\n  }",
+    );
+    expect(css.indexOf("  .space,\n  .entity-side {\n    position: sticky;")).toBeGreaterThan(
+      css.indexOf("@media (min-width: 68.75rem) {\n  .space,\n  .entity-side {"),
+    );
+  });
+
+  it("draws the handle as a 26 px tab clipped to its outer 13 px, fixed to the middle of the viewport at the edge of its column, from the desktop width only, and folds each panel to 44 px on the root attribute or the served class", () => {
     const css = componentsStylesheet();
     expect(css).toContain(".panel-handle-track {\n  display: none;\n}");
     expect(css).toContain(
-      "  .panel-handle-track {\n    position: sticky;\n    inset-block-start: calc(50vh - 1.25rem);\n    z-index: 1;\n    display: block;\n    block-size: 2.5rem;\n    margin-block-end: -2.5rem;\n    pointer-events: none;\n  }",
+      "  .panel-handle-track {\n    display: block;\n    block-size: 0;\n    pointer-events: none;\n  }",
     );
     expect(css).toContain(
-      "  .panel-handle {\n    position: absolute;\n    inset-block-start: 0;\n    inset-inline-end: -0.8125rem;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    inline-size: 1.625rem;\n    block-size: 2.5rem;\n    padding: 0 0 0 0.8125rem;\n    border: 1px solid var(--color-border);\n    border-radius: var(--radius);\n    background: var(--color-soft);\n    color: var(--color-label);",
+      "  .panel-handle {\n    position: fixed;\n    z-index: 1;\n    inset-block-start: calc(50vh - 1.25rem);\n    inset-inline-start: calc(var(--tree-column) - 0.8125rem);\n    inset-inline-end: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    inline-size: 1.625rem;\n    block-size: 2.5rem;\n    padding: 0 0 0 0.8125rem;\n    border: 1px solid var(--color-border);\n    border-radius: var(--radius);\n    background: var(--color-soft);\n    color: var(--color-label);",
+    );
+    expect(css).toContain(
+      "  .entity-side > .panel-handle-track > .panel-handle {\n    inset-inline-start: auto;\n    inset-inline-end: calc(var(--panel-column) - 0.8125rem);",
     );
     expect(css).toContain("    clip-path: inset(-0.375rem -0.375rem -0.375rem 0.8125rem);");
     expect(css).toContain("  .panel-handle[hidden] {\n    display: none;\n  }");
