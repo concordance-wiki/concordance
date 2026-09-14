@@ -3,7 +3,21 @@
   "version": "0.0.0",
   "description": "Profile loading, validation and merge; the allowed relation matrix.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "packages/profile"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/packages/profile#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,7 +28,9 @@
     "dist",
     "base.yaml",
     "default.yaml",
-    "types"
+    "types",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"

@@ -3,7 +3,21 @@
   "version": "0.0.0",
   "description": "Git cloning, file reading, markdown and frontmatter parsing.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "packages/ingest"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/packages/ingest#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,7 +25,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"

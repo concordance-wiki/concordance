@@ -3,7 +3,21 @@
   "version": "0.0.0",
   "description": "Normalisation, Aho-Corasick, n-grams, C-value, MinHash and the language packs.",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concordance-wiki/concordance.git",
+    "directory": "packages/nlp"
+  },
+  "homepage": "https://github.com/concordance-wiki/concordance/tree/main/packages/nlp#readme",
+  "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,7 +26,9 @@
   },
   "files": [
     "dist",
-    "locales"
+    "locales",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"

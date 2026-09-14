@@ -1,7 +1,8 @@
 // Validates what the repository publishes without any engine code: the JSON
 // schemas themselves, the default profile, the brand theme, the fixture
 // configurations, the note templates, the relative links of the docs, the
-// licence of every workspace package.
+// licence of every workspace package, the manifest and the tarball of every
+// published one.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
@@ -10,6 +11,7 @@ import { parse as parseYaml } from "yaml";
 
 import { assembleProfileText, profileFile, typesDirectory } from "./assemble-profile.mjs";
 import { checkDistribution } from "./check-distribution.mjs";
+import { checkPackaging } from "./check-packaging.mjs";
 import { generateReference } from "./config-reference.mjs";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
@@ -475,11 +477,16 @@ for (const match of pipelines.matchAll(/```ya?ml\n([\s\S]*?)```/g)) {
 }
 if (yamlBlocks === 0) fail("docs/guides/pipelines.md: no YAML block found");
 
+// 15. A published package ships neither its tests, nor its sources, nor its fixtures: its
+//     manifest carries the registry fields, lists only the built and shipped folders, points
+//     at them, and the tarball pnpm would pack holds nothing else (scripts/check-packaging.mjs).
+for (const message of checkPackaging(root)) fail(message);
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages and pipeline examples are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples and package manifests are valid",
 );
