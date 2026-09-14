@@ -43,9 +43,17 @@ const islands = [
   { name: "pins", file: "pins-00000000.js", bytes: 0 },
 ];
 
-/** Loads a rendered page into the test document, root attributes included, so that axe sees the page as served. */
+/**
+ * Loads a rendered page into the test document, root attributes included, so that axe sees the
+ * page as served. The frames of the gallery index keep their title and lose their address: the
+ * audit reads none of them (`iframes: false`), and a frame the DOM would start loading, then
+ * abort when the next page replaces it, traces a failed request for every page of the gallery.
+ */
 function load(html: string): void {
-  const source = new DOMParser().parseFromString(html, "text/html").documentElement;
+  const source = new DOMParser().parseFromString(
+    html.replaceAll(/(<iframe\b[^>]*?)\ssrc="[^"]*"/gu, "$1"),
+    "text/html",
+  ).documentElement;
   const target = document.documentElement;
   for (const { name } of [...target.attributes]) target.removeAttribute(name);
   for (const { name, value } of [...source.attributes]) target.setAttribute(name, value);
@@ -171,6 +179,6 @@ describe("An automated audit (axe-core) runs in continuous integration and fails
 
   it("is run by the test step of the continuous integration workflow", () => {
     const workflow = readFileSync(resolve(root, ".github/workflows/ci.yml"), "utf8");
-    expect(workflow).toContain("run: pnpm test");
+    expect(workflow).toContain("pnpm test 2>&1 | tee test.log");
   });
 });

@@ -221,7 +221,8 @@ const PART: Readonly<Record<string, readonly string[]>> = {
 const NAMESPACES: Readonly<Record<string, string>> = { "gallery/fixtures.js": "galleryFixtures" };
 
 async function exportsOf(path: string): Promise<string[]> {
-  const module: unknown = await import(`../src/${path}`);
+  // The path is data of the test, not a pattern for the bundler to expand.
+  const module: unknown = await import(/* @vite-ignore */ `../src/${path}`);
   return typeof module === "object" && module !== null ? Object.keys(module).sort() : [];
 }
 
