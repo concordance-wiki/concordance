@@ -2,6 +2,8 @@ name: ci
 
 on:
   pull_request:
+    # Labels take part in the changeset step: a label change runs the pipeline again.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
 
@@ -28,6 +30,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Changeset
+        # A pull request that changes a published package carries a changeset. The label
+        # no-changeset lifts the requirement, with the reason in the pull request; the version
+        # pull request consumes the changesets instead of adding one.
+        if: >-
+          github.event_name == 'pull_request'
+          && !contains(github.event.pull_request.labels.*.name, 'no-changeset')
+          && !startsWith(github.event.pull_request.title, 'chore(release): v')
+        run: pnpm changeset status --since origin/${{ github.event.pull_request.base.ref }}
       - name: Lint, format, type check, schemas and fixtures
         run: pnpm lint
       - name: Build
