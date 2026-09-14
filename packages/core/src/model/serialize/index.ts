@@ -14,4 +14,6 @@ export type {
   Neighbours,
   TermCandidate,
   TermContext,
+  TermPenalty,
+  TermSignals,
 } from "./types.js";

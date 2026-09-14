@@ -1,6 +1,10 @@
-# Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
+# Keyword pages expected above the threshold (3 occurrences in 2 files, a confidence of 0.5), expressions expected below it,
+# and expressions at the threshold expected withheld by their confidence: discovered, searchable, without a page.
 # `marked_once_in` names a note that uses the expression more than once: its page marks the first occurrence only.
 published:
-  - { text: build summary, min_occurrences: 5, min_files: 3, marked_once_in: { source: meetings, path: 2026-03-12-links-workshop.md } }
+  - { text: build summary, min_occurrences: 5, min_files: 3, min_confidence: 0.8, marked_once_in: { source: meetings, path: 2026-03-12-links-workshop.md } }
 unpublished:
   - { text: cold start, reason: "2 occurrences in a single file" }
+withheld:
+  - { text: mention, max_confidence: 0.5, reason: "once in each of its 9 files: the burst halves the confidence" }
+  - { text: panel, max_confidence: 0.5, reason: "once in each of its 6 files" }

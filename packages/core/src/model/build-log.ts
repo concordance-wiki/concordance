@@ -10,7 +10,7 @@ export interface BuildSummary {
   /** Links per inference method; a link with two methods counts once for each. */
   links: Record<string, number>;
   findings: { bySeverity: Record<Severity, number>; byCheck: Record<string, number> };
-  /** Keyword pages published and expressions under the threshold; absent while the build computes none. */
+  /** Keyword pages published, expressions under the threshold and expressions withheld by the confidence; absent while the build computes none. */
   keywords?: KeywordCounts;
   /** What the twin-resource reconciliation did; absent while the build computes none. */
   duplicates?: DuplicateCounts;
@@ -18,7 +18,10 @@ export interface BuildSummary {
 
 export interface KeywordCounts {
   published: number;
+  /** Under the publication threshold. */
   discarded: number;
+  /** At the threshold, under `min_confidence`: suspected noise. */
+  withheld: number;
 }
 
 /** The statistics of the twin-resource reconciliation, as the inference step reports them. */
@@ -90,7 +93,13 @@ export function summarize(input: {
     findings: { bySeverity, byCheck: countBy(input.findings.map((finding) => finding.check)) },
     ...(input.keywords === undefined
       ? {}
-      : { keywords: { published: input.keywords.published, discarded: input.keywords.discarded } }),
+      : {
+          keywords: {
+            published: input.keywords.published,
+            discarded: input.keywords.discarded,
+            withheld: input.keywords.withheld,
+          },
+        }),
     ...(input.duplicates === undefined ? {} : { duplicates: duplicateCounts(input.duplicates) }),
   };
 }
@@ -174,6 +183,7 @@ export function serializeBuildLog(log: BuildLog): string {
             keywords: {
               published: log.summary.keywords.published,
               discarded: log.summary.keywords.discarded,
+              withheld: log.summary.keywords.withheld,
             },
           }),
       ...(log.summary.duplicates === undefined

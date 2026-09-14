@@ -166,6 +166,37 @@ describe("validateConfig against the published schema", () => {
     ]);
   });
 
+  it("accepts inference.keyword_pages.min_confidence between 0 and 1 and rejects the rest", () => {
+    for (const confidence of [0, 0.5, 0.8765, 1]) {
+      const result = validateConfig({
+        ...minimal,
+        inference: { keyword_pages: { min_confidence: confidence } },
+      });
+      expect(result.ok, String(confidence)).toBe(true);
+      if (result.ok) {
+        expect(result.config.inference?.keyword_pages?.min_confidence).toBe(confidence);
+      }
+    }
+    expect(
+      issuesOf({ ...minimal, inference: { keyword_pages: { min_confidence: 1.01 } } }),
+    ).toEqual([
+      {
+        path: "inference.keyword_pages.min_confidence",
+        message: "must be <= 1",
+        severity: "error",
+      },
+    ]);
+    expect(
+      issuesOf({ ...minimal, inference: { keyword_pages: { min_confidence: -0.1 } } }),
+    ).toEqual([
+      {
+        path: "inference.keyword_pages.min_confidence",
+        message: "must be >= 0",
+        severity: "error",
+      },
+    ]);
+  });
+
   it("accepts build.mentions_inline from zero up and rejects a negative or fractional count", () => {
     for (const count of [0, 1, 20, 500]) {
       const result = validateConfig({ ...minimal, build: { mentions_inline: count } });

@@ -72,6 +72,7 @@ interface ExpectedLink {
 interface ExpectedKeywords {
   published: { text: string }[];
   unpublished: { text: string }[];
+  withheld: { text: string }[];
 }
 
 function translate(table: Readonly<Record<string, string>>, value: string): string {
@@ -258,13 +259,15 @@ describe("the expected results of the realistic corpus have the same structure i
     ]);
   });
 
-  it("lists the same number of published and unpublished keywords", () => {
+  it("lists the same number of published, unpublished and withheld keywords", () => {
     const english = asKeywords(readExpected("en", "keywords.yaml"));
     const french = asKeywords(readExpected("fr", "keywords.yaml"));
-    expect([french.published.length, french.unpublished.length]).toEqual([
+    expect([french.published.length, french.unpublished.length, french.withheld.length]).toEqual([
       english.published.length,
       english.unpublished.length,
+      english.withheld.length,
     ]);
     expect(english.published).toHaveLength(1);
+    expect(english.withheld).toHaveLength(2);
   });
 });

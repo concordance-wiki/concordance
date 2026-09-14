@@ -23,12 +23,16 @@ export interface Expectation {
   text: string;
   min_occurrences?: number;
   min_files?: number;
+  min_confidence?: number;
+  max_confidence?: number;
   reason?: string;
 }
 
 export interface ExpectedKeywords {
   published: Expectation[];
   unpublished: Expectation[];
+  /** At the threshold, under `min_confidence` in the real build, which leaves the headings out of usage as this reader does not. */
+  withheld: Expectation[];
 }
 
 export interface Corpus {

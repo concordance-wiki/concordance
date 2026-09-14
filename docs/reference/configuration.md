@@ -167,7 +167,7 @@ Thresholds and options of the recognition dictionary, the link producers, the ke
 | `type_prefixes` | map of map of string[] | — | — | Words that announce a type in prose and raise the confidence of the mention that follows, by locale then by type; each list replaces the profile's for that type. |
 | `cross_source_links` | boolean | `false` | — | Whether markdown links across sources, written with a source: prefix or as a relative path climbing into a sibling source, are resolved; otherwise they yield W-LINK-CROSS-SOURCE. |
 | `ngrams` | object | — | — | Discovery of the recurring expressions without a note: the lengths of the n-grams read over the text of every note, and the thresholds a candidate must reach to be kept at all. See [`inference.ngrams`](#inferencengrams). |
-| `keyword_pages` | object | — | — | Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files; below it, it stays in the search index without a page. See [`inference.keyword_pages`](#inferencekeyword_pages). |
+| `keyword_pages` | object | — | — | Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files, with a confidence of at least min_confidence; below it, it stays in the search index without a page. See [`inference.keyword_pages`](#inferencekeyword_pages). |
 | `neighbours` | object | — | — | Bound of the co-occurrence neighbourhood accumulated per node. See [`inference.neighbours`](#inferenceneighbours). |
 | `candidate_score` | number | `4` | at least 0 | Score from which a candidate expression yields W-TERM-UNDEFINED: the C-value of the expression multiplied by its IDF. |
 | `duplicates` | object | — | — | How the twin resources of one document (a deck, its notes, its transcript) are reconciled: the signals of a pair are added, capped at 1, and the total decides between a merge and a W-DUP-CANDIDATE finding. See [`inference.duplicates`](#inferenceduplicates). |
@@ -185,12 +185,13 @@ Discovery of the recurring expressions without a note: the lengths of the n-gram
 
 ### `inference.keyword_pages`
 
-Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files; below it, it stays in the search index without a page.
+Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files, with a confidence of at least min_confidence; below it, it stays in the search index without a page.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `min_occurrences` | integer | `3` | at least 1 | Occurrences from which a discovered expression gets a page. |
 | `min_files` | integer | `2` | at least 1 | Distinct files an expression must appear in to get a page. |
+| `min_confidence` | number | `0.5` | 0 to 1 | Confidence, between 0 and 1, from which an expression at the threshold gets a page; below it the expression is suspected noise, listed on the to-do page, searchable, without a page nor a mark in the text. |
 
 ### `inference.neighbours`
 

@@ -446,7 +446,7 @@
           }
         },
         "keyword_pages": {
-          "description": "Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files; below it, it stays in the search index without a page.",
+          "description": "Publication threshold of a keyword page: a discovered expression gets a page under keywords/ only from min_occurrences occurrences in min_files distinct files, with a confidence of at least min_confidence; below it, it stays in the search index without a page.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -461,6 +461,13 @@
               "type": "integer",
               "minimum": 1,
               "default": 2
+            },
+            "min_confidence": {
+              "description": "Confidence, between 0 and 1, from which an expression at the threshold gets a page; below it the expression is suspected noise, listed on the to-do page, searchable, without a page nor a mark in the text.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
             }
           }
         },

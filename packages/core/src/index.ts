@@ -89,6 +89,8 @@ export {
   type Neighbour,
   type Neighbours,
   type TermCandidate,
+  type TermPenalty,
+  type TermSignals,
   type TermContext,
 } from "./model/serialize/index.js";
 export { PLUGIN_API_VERSION } from "./plugin/api.js";

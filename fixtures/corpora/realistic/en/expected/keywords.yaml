@@ -1,11 +1,15 @@
-# Keyword pages expected above the threshold (3 occurrences in 2 files), and expressions expected below it.
+# Keyword pages expected above the threshold (3 occurrences in 2 files, a confidence of 0.5), expressions expected below it,
+# and expressions at the threshold expected withheld by their confidence: discovered, searchable, without a page.
 # A minimum: other everyday expressions may cross the threshold, none of the unpublished ones may.
 # `marked_once_in` names a note that uses the expression more than once: its page marks the first occurrence only.
 published:
-  - { text: build summary, min_occurrences: 7, min_files: 3, marked_once_in: { source: framing, path: lint-report-study.md } }
+  - { text: build summary, min_occurrences: 7, min_files: 3, min_confidence: 0.8, marked_once_in: { source: framing, path: lint-report-study.md } }
 unpublished:
   - { text: cold start, reason: "2 occurrences in 1 file" }
   - { text: incremental rebuild, reason: "1 occurrence" }
   - { text: white label, reason: "defined in the glossary; its only citation is excluded by privacy.exclude" }
   - { text: last build, reason: "starts with a stopword of the language pack" }
   - { text: 180 days, reason: "ends with a stopword of the language pack" }
+withheld:
+  - { text: type, max_confidence: 0.5, reason: "once in each of its 15 files: a word of the prose, not a term of the corpus" }
+  - { text: static site, max_confidence: 0.5, reason: "once in each of its 5 files" }

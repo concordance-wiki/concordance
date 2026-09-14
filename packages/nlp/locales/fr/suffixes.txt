@@ -1,0 +1,12 @@
+# Endings of the inflected forms of French: a candidate expression whose word ends with one
+# is more often a conjugated verb or an adverb of the prose than a term, and its confidence
+# takes a soft penalty, never an elimination ("document", "paiement" are terms). One suffix
+# per line, the leading hyphen optional; compared on the comparison form of the words, after
+# the plural rules of the pack: an ending in -s ("-ons") would never match, "faisons" being
+# compared as "faison", so none is listed.
+-ment
+-ait
+-aient
+-ez
+-era
+-erait
