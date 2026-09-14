@@ -43,8 +43,24 @@ export interface ThemeDependencies extends PluginLoaderDependencies, TypeModuleD
   loadFile?: ThemeLoader["loadFile"];
 }
 
+/**
+ * Imports a declared plugin by its package name, resolved from the command line package, which
+ * depends on every shipped plugin: a checkout of the repository finds the workspace packages the
+ * way an installation finds them hoisted next to the command line. A name the command line
+ * cannot resolve is handed to the core loader as written, which names the missing package.
+ */
+export async function importDeclaredPlugin(name: string): Promise<unknown> {
+  let specifier = name;
+  try {
+    specifier = import.meta.resolve(name);
+  } catch {
+    // Left as written: the core loader reports the package as missing.
+  }
+  return importPlugin(specifier);
+}
+
 export const nodeThemeDependencies: ThemeDependencies = {
-  load: importPlugin,
+  load: importDeclaredPlugin,
   commandAvailable: commandExists,
   loadTheme: importThemeModule,
   loadFile: importFile,
