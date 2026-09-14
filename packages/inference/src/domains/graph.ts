@@ -30,7 +30,7 @@ export function distancesFrom(
 ): Map<string, number> {
   const distances = new Map<string, number>([[start, 0]]);
   let frontier = [start];
-  for (let distance = 1; distance <= radius && frontier.length > 0; distance += 1) {
+  for (let distance = 1; distance <= radius; distance += 1) {
     const next: string[] = [];
     for (const id of frontier) {
       for (const neighbour of graph.get(id) ?? []) {

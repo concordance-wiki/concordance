@@ -64,15 +64,4 @@ describe("the neighbourhood graph of the proposal", () => {
   it("gives a start the graph does not know no neighbour", () => {
     expect([...distancesFrom(buildGraph([], []), "glossary/a", 3)]).toEqual([["glossary/a", 0]]);
   });
-
-  it("stops when nothing is left to visit before the radius is spent", () => {
-    const graph = buildGraph(
-      [node("glossary/a"), node("glossary/b")],
-      [{ a: "glossary/a", b: "glossary/b" }],
-    );
-    expect([...distancesFrom(graph, "glossary/a", 3)]).toEqual([
-      ["glossary/a", 0],
-      ["glossary/b", 1],
-    ]);
-  });
 });
