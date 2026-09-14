@@ -225,7 +225,7 @@ function tabsOf(
     if (document.unit === "cue") continue;
     const deck = document.unit === "slide";
     tabs.push({
-      id: next(deck ? "deck" : "document"),
+      id: next(deck ? "deck" : "pages"),
       label: deck ? text.deck : text.document,
       content: <DocumentBlock document={document} index={index} open />,
     });
