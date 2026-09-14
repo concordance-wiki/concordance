@@ -128,6 +128,7 @@ describe("@concordance-wiki/plugin-contract-openapi", () => {
           format: "openapi 3.1",
           fingerprint: fingerprintOf(example),
           imported_at: "2026-09-12T10:00:00.000Z",
+          operations: ["listEntities", "getEntity", "searchModel"],
         },
       ],
       findings: [],

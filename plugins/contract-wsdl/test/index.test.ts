@@ -127,6 +127,7 @@ describe("@concordance-wiki/plugin-contract-wsdl", () => {
           format: "wsdl 1.1",
           fingerprint: fingerprintOf(forgeBridge),
           imported_at: "2026-09-12T10:00:00.000Z",
+          operations: ["fetchFindings", "notifyBuild"],
         },
       ],
       findings: [],
