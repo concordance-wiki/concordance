@@ -1,7 +1,31 @@
 {
+  "todo.contribute": {
+    "defaultMessage": "Add them to the project's stopwords",
+    "description": "Call to contribute under the suspected noise of the to-do page, leading to the contribution address of the project."
+  },
   "todo.findings": {
     "defaultMessage": "{count, plural, one {# finding} other {# findings}}",
     "description": "Number of findings listed on the to-do page."
+  },
+  "todo.noise": {
+    "defaultMessage": "Suspected noise",
+    "description": "Heading of the folded section of the to-do page listing the expressions the confidence set aside."
+  },
+  "todo.noiseNote": {
+    "defaultMessage": "Frequent enough for a page, but spread like the prose of the notes rather than a term of the corpus: no page, no mark in the text, still found by the search.",
+    "description": "Sentence under the heading of the suspected noise, saying what the list holds and what those expressions lack."
+  },
+  "todo.reasonBurst": {
+    "defaultMessage": "{count, number} per file",
+    "description": "Part of the reason an expression is suspected noise, its occurrences per file, under one and a half."
+  },
+  "todo.reasonMorphology": {
+    "defaultMessage": "verb or adverb form",
+    "description": "Part of the reason an expression is suspected noise: a word of it ends like an inflected form of the language."
+  },
+  "todo.reasonSpread": {
+    "defaultMessage": "in {share, number, percent} of the files",
+    "description": "Part of the reason an expression is suspected noise: the share of the corpus files it appears in, beyond half."
   },
   "todo.severity.error": {
     "defaultMessage": "Error",
@@ -14,6 +38,10 @@
   "todo.severity.warning": {
     "defaultMessage": "Warning",
     "description": "Severity label of a finding that is reported but tolerated."
+  },
+  "todo.showOthers": {
+    "defaultMessage": "{count, plural, one {Show the # other} other {Show the # others}}",
+    "description": "Line that unfolds the words of the to-do page listed after the first hundred, with how many they are."
   },
   "todo.title": {
     "defaultMessage": "To do",

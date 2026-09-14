@@ -1,7 +1,14 @@
 {
+  "todo.contribute": "Les ajouter aux mots vides du projet",
   "todo.findings": "{count, plural, one {# constat} other {# constats}}",
+  "todo.noise": "Bruit présumé",
+  "todo.noiseNote": "Assez fréquents pour une page, mais répartis comme la prose des fiches plutôt que comme un terme du corpus : pas de page, pas de marque dans le texte, toujours trouvés par la recherche.",
+  "todo.reasonBurst": "{count, number} par fichier",
+  "todo.reasonMorphology": "forme verbale ou adverbiale",
+  "todo.reasonSpread": "dans {share, number, percent} des fichiers",
   "todo.severity.error": "Erreur",
   "todo.severity.info": "Information",
   "todo.severity.warning": "Avertissement",
+  "todo.showOthers": "{count, plural, one {Afficher l'autre} other {Afficher les # autres}}",
   "todo.title": "À faire"
 }

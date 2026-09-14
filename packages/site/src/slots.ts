@@ -1252,11 +1252,38 @@ export interface TodoEntry extends Link {
   files?: number;
 }
 
+/** An expression at the publication threshold whose confidence set it aside: suspected noise, without a page. */
+export interface TodoNoiseEntry {
+  label: string;
+  /** Occurrences. */
+  count: number;
+  files: number;
+  /** Why the confidence set it aside, already worded: "in 68% of the files, 1.2 per file, verb or adverb form". */
+  reason: string;
+}
+
+/** The strings of the to-do page in the language of the site; the theme's own English when absent. */
+export interface TodoLabels {
+  /** The line that unfolds the words after the first hundred, already counted: "Show the 535 others". */
+  showOthers: string;
+  /** Heading of the suspected noise section. */
+  noise: string;
+  /** Sentence under that heading: what the list holds and what those expressions lack. */
+  noiseNote: string;
+  /** The call to contribute: add those words to the project's stopwords. */
+  contribute: string;
+}
+
 export interface TodoProps {
   /** Documents without a markdown representation, with their file count. */
   documents: TodoEntry[];
   /** Words above the threshold without a note, with their occurrence and file counts. */
   terms: TodoEntry[];
+  /** The expressions the confidence set aside, best score first; none when absent. */
+  noise?: TodoNoiseEntry[];
+  /** Where the call to contribute leads, `project.contribute_url`; without it the call is not shown. */
+  contributeHref?: string;
+  labels?: Partial<TodoLabels>;
 }
 
 /** A row of the spaces page: a source, what it holds, how many pages and when it last moved. */
