@@ -33,7 +33,7 @@ The confidence score is computed and stored: it orders mentions and decides what
 | Lock | `concordance.lock.yaml`; only `rejected_terms` is read in the MVP |
 | Per-repository override | `concordance-lint.yaml` |
 | Outputs | `dist/`, `dist/model.json`, `dist/build.log.json`, `dist/metrics.json` |
-| Published schemas | `schemas/config.schema.json`, `profile.schema.json`, `model.schema.json`, `lock.schema.json`, `theme.schema.json`, `plugin.schema.json` |
+| Published schemas | `schemas/config.schema.json`, `lint.schema.json`, `profile.schema.json`, `model.schema.json`, `lock.schema.json`, `theme.schema.json`, `plugin.schema.json` |
 
 The binary name is independent from the npm package name.
 
@@ -916,7 +916,7 @@ As a team, I want to wire the check in two lines so that adoption does not depen
 - Six forms delivered: `npx`-executable package, standalone binary, GitLab CI component, GitHub action, container image, pre-commit hook.
 - Each form is documented by a complete, copyable example.
 - The six forms run the same registry version and produce the same output on the same repository; verified in continuous integration.
-- A `concordance-lint.yaml` in the repository overrides severities locally.
+- A `concordance-lint.yaml` in the repository overrides severities locally and lists, under `exclude`, the files that are never read, counted or reported; the files git ignores are left out the same way, `--no-gitignore` reads them.
 - The GitHub action lives in the organisation's `lint-action` repository; the GitLab component in a `concordance-wiki` group on GitLab.
 
 Depends on: L6-04.
