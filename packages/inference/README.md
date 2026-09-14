@@ -1,14 +1,35 @@
-# @concordance-wiki/inference
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-The link production of a Concordance build: written links, frontmatter references, section and prose mentions, co-occurrences, the combination of their confidences, the relation named from the profile, the displayed neighbourhood of every page, twin resources and the operation notes matched to an imported contract. Installed by `@concordance-wiki/cli`; you need it only to build on the engine.
+<h1 align="center">@concordance-wiki/inference</h1>
 
-## Install
+<p align="center"><strong>Decides which pages are linked, how surely, and on what evidence.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/inference"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/inference?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/architecture.md">Architecture</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/packages/inference/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+Concordance shows, on every page, the pages related to it, and every link says where it comes from: written links always beat inferred ones. You install [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) for that. This package is the part of it that produces the links: from the links people wrote, the references in the frontmatter, the mentions of a title in a section or a paragraph and the terms that keep appearing together; it combines their confidences, names the relation from the meta-model, keeps the neighbourhood a page shows, and recognises the documents that are twins of a note. Install it alone to build on the engine.
+
+## Quick start
 
 ```bash
 npm install @concordance-wiki/inference
 ```
-
-## Use
 
 Two producers saw the same link; the build keeps one, at the combined confidence, with both provenances:
 
@@ -24,15 +45,15 @@ const links = [
 combineLinks(links, combineOptions(loadDefaultProfile())); // one link at 0.8, its two provenances in canonical order
 ```
 
-## What it contains
+## What you get
 
-- `explicitLinks`, `frontmatterLinks`, `mentionLinks`, `cooccurrenceLinks`: the four producers, from the written links, the reference attributes of the frontmatter, the occurrences of a title or alias and the entities named in the same paragraph.
-- `combineLinks`, `combineConfidences`, `glossaryConfidence`, `combineOptions`: one link per source, target, relation and attributes, at `1 − Π(1 − cᵢ)`, every provenance kept.
-- `typeRelations`, `relationLabel`: the relation of every link named from the profile (mapped section, typed attribute, type pair with a single relation, else `related`), `E-META-REL` and `I-REL-AMBIGUOUS`.
-- `accumulateCooccurrences`, `neighbourhoodToModel`, `displayedNeighbourhood`, `displayedNeighbourhoodToModel`: the bounded neighbourhood of every node and the neighbours a page shows, precomputed at build.
-- `resolveDuplicateResources`, `formatDuplicateStats`: twin resources scored by their signals, MinHash and LSH for the text, the lock file's decisions applied.
-- `attachOperations`: every hand-written `endpoint` note matched to an operation imported from the contract of its API.
-- `indexEntities`, `resolveReference`: a frontmatter value resolved by identifier, path or exact title.
+- **Four producers**: `explicitLinks`, `frontmatterLinks`, `mentionLinks`, `cooccurrenceLinks`, from the written links, the reference attributes of the frontmatter, the occurrences of a title or alias, and the entities named in the same paragraph.
+- **One link, every proof**: `combineLinks` keeps one link per source, target and relation, at `1 − Π(1 − cᵢ)`, with every provenance so the page can show why.
+- **A relation with a name**: `typeRelations` and `relationLabel` read it from the meta-model (mapped section, typed attribute, single relation of a type pair, else `related`), with `E-META-REL` and `I-REL-AMBIGUOUS` when the notes disagree with it.
+- **The neighbourhood, precomputed**: the bounded neighbours of every node and the ones a page displays, decided at build so the site needs no server.
+- **Twin resources**: `resolveDuplicateResources` scores a document and a note that describe the same thing, MinHash and LSH on the text, and applies the decisions of the lock file.
+- **Contracts matched to notes**: `attachOperations` joins every hand-written `endpoint` note to the operation imported from the contract of its API.
+- **References resolved**: `indexEntities` and `resolveReference` read a frontmatter value by identifier, path or exact title.
 
 ## Documentation
 
@@ -41,7 +62,10 @@ combineLinks(links, combineOptions(loadDefaultProfile())); // one link at 0.8, i
 - [Architecture](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/architecture.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/inference/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 Explicit links (`explicitLinks`): every markdown link written in a note that resolves to another note gives a link at the `explicit_link` confidence of the profile, with the file, the line, the link text and the anchor as provenance; a link to a non-markdown file gives a `documents` link from the resource to the note; a missing target is `E-LINK-BROKEN`; a target in another source, written `<source>:<path>` or as a relative path climbing into a sibling source, resolves when `inference.cross_source_links` allows it and is `W-LINK-CROSS-SOURCE` otherwise. Links from one note to the same target are merged with every provenance kept; a link between two notes is `related` until the relation typing step names it. Bounded neighbourhood (`accumulateCooccurrences`, `neighbourhoodOptions`): two entities named in the same paragraph are neighbours, counted per paragraph; every node keeps its K best neighbours by count then by identifier (`inference.neighbours.k`, 50 by default), its row trimmed whenever it grows past 2K so that the full matrix is never held, and a paragraph naming more than 200 entities pairs only the first 200. `cooccurrenceLinks` turns every pair into one `related` link at the `cooccurrence` confidence with the number of shared paragraphs as provenance; `neighbourhoodToModel` writes the `neighbours` block of `model.json`. Confidence combination (`combineLinks`, `combineOptions`): one link per source, target, relation and attributes, at `1 − Π(1 − cᵢ)` over its methods (`combineConfidences`, clamped to [0, 1] and rounded to four decimals), the glossary occurrences of a group counting as one method at the base of the strongest plus `per_occurrence` per additional occurrence up to `cap` (`glossaryConfidence`); every provenance is kept in canonical order, an exact duplicate once, and the function is pure and idempotent. Displayed neighbourhood (`displayedNeighbourhood`, `displayOptions`): the one-hop neighbours of every entity through the links of the model in either direction, typed entities and noteless keyword pages alike, each flagged by its `kind`, carrying the largest confidence and the relation of the most confident link between the two nodes, its `direction` seen from the entity and its `rank`, the position of its type in the `display.neighbours_order` the profile declares for the entity's type (types not listed, keyword pages included, share the rank after the last one); sorted by rank, then by decreasing confidence, then by identifier, and truncated after that to `site.neighbourhood.size` (6 by default, never more than `MAX_DISPLAYED_NEIGHBOURS`, 12), so that the nodes shown are the best of the priority order; a type without a declaration sorts by confidence alone; an entity without any neighbour has an empty list. `displayedNeighbourhoodToModel` writes the `displayed_neighbourhood` block of `model.json`, precomputed at build so that the browser never computes it.
 
@@ -53,4 +77,4 @@ Mentions (`mentionLinks`): every occurrence of a note's title or alias read in a
 
 Operation notes (`attachOperations`): every hand-written `endpoint` note is matched to an operation imported from the contract of its API, on the `operation_id` of its frontmatter, then on its `method` and `path` (or `port` and title for a SOAP operation), then on its title in comparison form with spaces and punctuation removed, against the operation title or identifier; the note names its API through the reference attribute of the profile (`api`), through a link already recorded with the API note, or is a candidate for every API of its source that has imported operations. A note stops at the first rung that matches, and an operation matched at a stronger rung is no longer offered to the weaker ones. A matched pair merges into the note, which keeps its identifier, markdown and frontmatter, takes the contract attributes it does not set, the operation's aliases and summary when it has none, lists the contract as a representation `{ kind: "contract", path, operation }` next to its own file (after any twin resources already merged) and names the rung in `grouped_by`; the imported operation disappears and every link that named it, the `exposes` link of the API first of all, now names the note. A note matching several operations, or an operation claimed by several notes, yields `W-OPERATION-AMBIGUOUS` naming every candidate and attaches nothing; a note that names an API with an imported contract and matches none of its operations yields `W-OPERATION-UNMATCHED`, saying that the operation left the contract or that the note is ahead of it, while a note that names no API is left alone. The step is pure and deterministic and returns sorted entities, links and findings; in the pipeline it runs after the sources step, which imports the contracts, and before the mention scan, so that the merged note is the one the dictionary and the sections link.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>

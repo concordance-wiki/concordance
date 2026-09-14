@@ -1,14 +1,35 @@
-# @concordance-wiki/i18n
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-The message catalogues of the generated site, `en` and `fr`, in ICU MessageFormat, typed by identifier and resolved at build time so that the published pages carry final strings and no formatting library. Installed by `@concordance-wiki/cli`; you need it only to build on the engine, to word a theme component from a plugin for instance.
+<h1 align="center">@concordance-wiki/i18n</h1>
 
-## Install
+<p align="center"><strong>Every string of the site, in English and French, resolved at build so the pages ship words and no machinery.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/i18n"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/i18n?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/theming.md">Theming</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/packages/i18n/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+Concordance publishes a static site that speaks the language of your team, with your own words for its labels if you want them. You install [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) for that. This package is the part of it that holds the strings: the message catalogues of the site, `en` and `fr`, in ICU MessageFormat, typed by identifier so that a missing variable does not compile, and resolved at build time so that a published page carries final text and no formatting library. Install it alone to build on the engine, or to word a theme component from a plugin.
+
+## Quick start
 
 ```bash
 npm install @concordance-wiki/i18n
 ```
-
-## Use
 
 ```ts
 import { formatMessage, loadCatalogue, textDirection } from "@concordance-wiki/i18n";
@@ -21,13 +42,13 @@ textDirection(catalogue.locale); // "ltr", for the dir attribute of the page
 
 An unknown identifier, a missing variable or an extra one does not compile: `MessageId` is the union of every key of the catalogue and `MessageArguments` derives the argument types from the declared kinds.
 
-## What it contains
+## What you get
 
-- `loadCatalogue`, `formatMessage`, `formatText`, `resolveLanguage`, `CatalogueError`: the catalogue of a locale, picked by language subtag with fallback to the source language, and the messages resolved with the plural rules, number and date formats of the locale.
-- `validateLabels`, `validateOverride`, `validateOverrides`: the `labels` block of `theme.yaml` checked before any rendering.
-- `formatDate`, `formatDay`, `formatMonth`, `formatMonthName`, `formatNumber`, `formatRelative`, `textDirection`: the platform `Intl` formatters for the values rendered outside a message.
-- `messageIds`, `messageArguments`, `argumentNames`, `parseMessage`, `argumentsOf`: the identifiers, the declared kinds and the ICU parser, for the tests of a theme.
-- `SOURCE_LANGUAGE`, `shippedLanguages`: `en`, and the languages that ship a complete catalogue.
+- **Two complete catalogues**, `en` and `fr`, picked by language subtag with fallback to the source language: `loadCatalogue`, `resolveLanguage`, `shippedLanguages`.
+- **Plurals, numbers and dates done right**: `formatMessage` and `formatText` apply the plural rules and the `Intl` formats of the locale.
+- **Your labels, checked first**: `validateLabels`, `validateOverride`, `validateOverrides` verify the `labels` block of a theme before any page renders.
+- **Formatters for the rest**: `formatDate`, `formatDay`, `formatMonth`, `formatNumber`, `formatRelative`, `textDirection` for the values rendered outside a message.
+- **Tools for a theme's tests**: `messageIds`, `messageArguments`, `argumentNames`, `parseMessage`, the identifiers, the declared kinds and the ICU parser.
 
 ## Documentation
 
@@ -35,7 +56,10 @@ An unknown identifier, a missing variable or an extra one does not compile: `Mes
 - [Configuration reference](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md), `project.locale`
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/i18n/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 Every label of the site comes from a catalogue per language in ICU MessageFormat, stored as the JSON translation platforms exchange, one file per area of the site under `messages/<language>/`: an area is an identifier prefix (`home`, `entity`, `search`, `results`, `spaces`...), `messages/en/<area>.json` is its source, `{ "<id>": { "defaultMessage": "...", "description": "..." } }`, and `messages/<language>/<area>.json` its flat translation, `{ "<id>": "..." }`. Every key of a file is under the prefix the file is named after, and the keys are sorted. `en` and `fr` ship complete; a test checks that every locale carries every key of the source with the same variables and kinds.
 
@@ -77,4 +101,4 @@ An override uses the syntax of the message it replaces and must use exactly the 
 - `intl-messageformat` 11.2.15 (BSD-3-Clause, FormatJS): formats an ICU message with the plural rules, number and date formats of a locale through the platform `Intl` objects, without any locale data of its own.
 - `@formatjs/icu-messageformat-parser` 3.5.18 (MIT, FormatJS): the parser `intl-messageformat` already uses, needed on its own to read the variables of a message for the parity test and the validation of overrides.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>
