@@ -1,7 +1,14 @@
+import { nodeFileSystem } from "@concordance-wiki/core";
+import {
+  defaultTypesDirectory,
+  loadDefaultProfile,
+  readTypeModules,
+} from "@concordance-wiki/profile";
 import { expect } from "vitest";
 
 import { galleryDocuments, type GalleryDocument } from "../../src/gallery/build.js";
 import { galleryPages } from "../../src/gallery/pages.js";
+import type { GalleryTypes } from "../../src/gallery/types.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 
 /** The islands of the default theme with fixed file names, so that the pages are the ones the gallery serves. */
@@ -17,8 +24,18 @@ export const islands = [
   { name: "trail", file: "trail-00000000.js", bytes: 0 },
 ];
 
-/** Every page of the gallery through the default theme, the index included: the fixtures the criteria are verified on. */
-export const documents: readonly GalleryDocument[] = galleryDocuments(defaultTheme, islands);
+/** The core types, as the gallery command shows them: one page per type that ships a template. */
+export const coreTypes: GalleryTypes = {
+  profile: loadDefaultProfile(),
+  modules: readTypeModules(nodeFileSystem, defaultTypesDirectory()).modules,
+};
+
+/** Every page of the gallery through the default theme, the type pages and the index included: the fixtures the criteria are verified on. */
+export const documents: readonly GalleryDocument[] = galleryDocuments(
+  defaultTheme,
+  islands,
+  coreTypes,
+);
 
 /** The gallery states alone: one document per entry of the page list, in its order. */
 export const states: readonly GalleryDocument[] = galleryPages.map((page) => {
