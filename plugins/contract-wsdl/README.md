@@ -1,8 +1,31 @@
-# @concordance-wiki/plugin-contract-wsdl
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-A source plugin for Concordance that imports the WSDL contract an `api` note declares, so that the operations of a SOAP service come from the contract like those of an HTTP API do, and the inventory does not stop at the modern perimeter. An integrator installs it next to `@concordance-wiki/cli` and declares it in `concordance.yaml`; it is not part of `@concordance-wiki/concordance`.
+<h1 align="center">@concordance-wiki/plugin-contract-wsdl</h1>
 
-## Install
+<p align="center"><strong>Reads the WSDL contract an API note declares, so your SOAP services are inventoried like your HTTP APIs.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/plugin-contract-wsdl"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/plugin-contract-wsdl?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/writing-notes.md">Writing notes</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/plugins/contract-wsdl/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+The inventory of an organisation does not stop at the modern perimeter: the services that run the business are often SOAP, and their contract is the only document that still tells the truth about them. This plugin imports the WSDL 1.1 or 2.0 contract an `api` note declares, from a URL or a path, and the wiki shows the service as the contract describes it: one page per operation of every port type, linked to the API with evidence, the XSD elements and types as candidate business objects, and the contract in a viewer on the page of the API. Install it next to [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli); it is not part of [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance). No system dependency.
+
+## Quick start
 
 ```bash
 npm install --save-dev @concordance-wiki/plugin-contract-wsdl
@@ -14,8 +37,6 @@ Then declare it in `concordance.yaml`:
 plugins:
   - "@concordance-wiki/plugin-contract-wsdl"
 ```
-
-## Use
 
 An `api` note names its contract, as a URL or as a path relative to the note:
 
@@ -29,14 +50,15 @@ contract: https://legacy.example.invalid/forge-bridge?wsdl
 # Forge bridge
 ```
 
-The build then produces one `endpoint` entity per operation of every port type, titled `operation (port)`, an `exposes` link from the API to each at confidence 0.95, and the XSD elements and types the messages reference as candidate objects. With the OpenAPI plugin declared as well, the two tell their formats apart by content: an XML document whose root is `definitions` or `description` goes here, anything else to the OpenAPI plugin.
+## What you get
 
-## What it contains
-
-- The plugin manifest, as the default export: one `source` contribution of kind `wsdl`, no system dependency.
-- `readWsdl`, `isWsdlRoot`: a WSDL 1.1 or 2.0 document read into its operations, the referenced elements and types and the view of the contract viewer, and the root test that tells a WSDL from any other XML.
-- `wsdlReader`, `loadContracts`: the `ContractReader` handed to the loader the core shares between the contract plugins, and that loader bound to it.
-- `SOURCE_KIND`, `STYLE`: `wsdl` and `soap`.
+- **One `endpoint` page per operation** of every port type, titled `operation (port)`, produced by the build from the contract.
+- **Links with evidence**: an `exposes` link from the API to each operation at confidence 0.95.
+- **Business objects surfaced**: the XSD elements and types the messages reference become candidate objects of the wiki.
+- **The contract on the page**: the page of the API shows the contract viewer.
+- **Both WSDL versions**: `readWsdl` reads WSDL 1.1 and 2.0; `isWsdlRoot` tells a WSDL from any other XML.
+- **Side by side with OpenAPI**: with the OpenAPI plugin declared too, an XML document whose root is `definitions` or `description` goes here, anything else to the OpenAPI plugin.
+- **A build that goes on**: a contract that cannot be fetched, read or parsed is a `W-CONTRACT-UNREACHABLE` finding, not a failure.
 
 ## Documentation
 
@@ -45,7 +67,10 @@ The build then produces one `endpoint` entity per operation of every port type, 
 - [W-CONTRACT-UNREACHABLE](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONTRACT-UNREACHABLE.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/plugins/contract-wsdl/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 ### Contribution
 
@@ -82,4 +107,4 @@ The XML parser is `fast-xml-parser`, the one the office metadata reader already 
 
 Unit tests read a WSDL 1.1 fixture with two port types, two bindings, several ports and an imported schema, a WSDL 2.0 fixture, malformed and non-WSDL XML; they run the source through the plugin registry with an in-memory file system, a fixed clock and a `fetch` double, and check the parity of shape with the OpenAPI plugin on the example contracts of the API note template, `docs/templates/openapi.example.json` and its WSDL twin `docs/templates/wsdl.example.wsdl` in the repository. No test touches the network.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>

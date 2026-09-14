@@ -1,8 +1,31 @@
-# @concordance-wiki/plugin-convert-libreoffice
+<p align="center">
+  <img src="https://raw.githubusercontent.com/concordance-wiki/concordance/main/brand/concordance-mark.svg" width="72" alt="Concordance">
+</p>
 
-A converter plugin for Concordance that turns `.docx`, `.pptx` and `.xlsx` documents into PDF through headless LibreOffice, so that the site can preview them without the original application, and extracts the text of every page of the PDF with pdf.js, the single extraction path of the tool, which a `.pdf` source takes too. An integrator installs it with `@concordance-wiki/concordance`, which carries it, or next to `@concordance-wiki/cli`, and declares it in `concordance.yaml`; LibreOffice must be on the machine that builds.
+<h1 align="center">@concordance-wiki/plugin-convert-libreoffice</h1>
 
-## Install
+<p align="center"><strong>Previews your office documents in the wiki and makes every page of them searchable, through LibreOffice.</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/plugin-convert-libreoffice"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/plugin-convert-libreoffice?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md">Configuration</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/operations.md">Operations</a> ·
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/plugins/convert-libreoffice/CHANGELOG.md">Changelog</a>
+</p>
+
+---
+
+## Why
+
+A document the wiki can only offer for download is a document nobody opens. This plugin turns the `.docx`, `.pptx` and `.xlsx` files of your repositories into PDF through headless LibreOffice, so that the site previews them without the original application, and extracts the text of every page with pdf.js, for `.pdf` sources too. That text is what lets the build recognise the words of your business inside a slide deck and cite the page where they appear. It is carried by [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance) and by the container image, LibreOffice included; install it on its own next to [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli), with LibreOffice on the machine that builds.
+
+## Quick start
 
 ```bash
 npm install --save-dev @concordance-wiki/plugin-convert-libreoffice
@@ -15,9 +38,7 @@ plugins:
   - "@concordance-wiki/plugin-convert-libreoffice"
 ```
 
-## Use
-
-With the plugin declared, every office document and PDF of a source gets a PDF representation and the text of its pages, cached by fingerprint; the `conversion` block bounds the work:
+Every office document and PDF of a source gets a PDF representation and the text of its pages, cached by fingerprint; the `conversion` block bounds the work:
 
 ```yaml
 conversion:
@@ -26,15 +47,17 @@ conversion:
   cache: .concordance-cache
 ```
 
-A source that must stay downloadable without a preview declares `convert: false`. When LibreOffice is missing, the plugin is disabled with a `W-PLUGIN-DISABLED` finding and the documents stay downloadable entities, PDF sources included.
+A source that must stay downloadable without a preview declares `convert: false`.
 
-## What it contains
+## What you get
 
-- The plugin manifest, as the default export: two `converter` contributions producing `pdf` and `text`, one for `.docx`, `.pptx` and `.xlsx`, one for `.pdf`, and LibreOffice as a system dependency detected through `soffice --version`.
-- `createConverter`, `createPdfConverter`, `convertToPdf`: the conversions, over an injected command runner and file system.
-- `extractPdfPages`, `extractPdfText`: the text of every page of a PDF, in reading order.
-- `convertMany`: a small pool that runs conversions in parallel and returns the results in input order.
-- `sha256Of`, `extractedTextPath`, `OFFICE_EXTENSIONS`, `PDF_EXTENSION`, `SOFFICE`, `SUSPECT_SOURCE_BYTES`: the cache key, the text file next to the PDF and the constants of the plugin.
+- **A preview in the page**: the PDF of every document opened in the site's viewer, page by page, with a find box over the extracted text.
+- **Every page searchable**: the text of each page goes through the same recognition as a note, so a term cites the page of a deck the way it cites the line of a note.
+- **Converted once**: the cache key is the SHA-256 of the source bytes; an unchanged document is never reconverted nor re-read, whatever its path.
+- **Bounded work**: `conversion.timeout_s` and `conversion.max_size_mb` cap each conversion; a failure is a `W-CONV-FAILED` finding and the document stays downloadable.
+- **Suspect output named**: a large source whose PDF holds no text is a `W-CONV-SUSPECT` finding, reproduced on every build.
+- **Graceful without LibreOffice**: when `soffice` is missing the plugin is disabled with a `W-PLUGIN-DISABLED` finding and the build goes on, documents downloadable, PDF sources included.
+- **Nothing written next to a source**: conversions run in a temporary folder under the cache, with their own user profile, in parallel.
 
 ## Documentation
 
@@ -44,7 +67,10 @@ A source that must stay downloadable without a preview declares `convert: false`
 - [W-CONV-FAILED](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONV-FAILED.md) and [W-CONV-SUSPECT](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONV-SUSPECT.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/plugins/convert-libreoffice/CHANGELOG.md)
 
-## Inside
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+
+<details>
+<summary>Inside the package</summary>
 
 ### Contribution
 
@@ -63,4 +89,4 @@ Two `converter` contributions, both producing `pdf` and `text`: one for the thre
 
 Unit tests replace LibreOffice with a fake command runner. The integration test runs the installed `soffice` only when `CONCORDANCE_INTEGRATION=1` is set (the pipeline sets it) and there is one; it is skipped otherwise, and every line is covered without it.
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+</details>
