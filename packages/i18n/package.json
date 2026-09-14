@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/i18n",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Message catalogues of the generated site and their build-time resolution.",
   "license": "GPL-3.0-or-later",
   "repository": {

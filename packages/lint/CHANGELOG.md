@@ -1,5 +1,24 @@
 # @concordance-wiki/lint
 
+## 0.2.0
+
+### Patch Changes
+
+- 0adb9b5: Commands are located by an absolute path, never by a name looked up on the `PATH`: the build takes `git` from the system directories of the platform, or from `CONCORDANCE_GIT`; the linter orders the suffixes of a source by code unit, as every other list.
+- dbabd01: Readmes written for the registry: every package README opens with what the package is for and who installs it, the install line, the shortest example that runs against the published exports, its entry points and the guides as absolute links, the former notes kept under an Inside section; a packaging check refuses a relative link in a published README.
+- e7ab68f: Package pages that say what they are for: every README on the registry opens with the mark, the package name, a one-line promise, the badges and the links, then why the package exists for the person who installs it, the quick start, what you get and the documentation; the maintainers' notes are kept at the end, folded.
+- Updated dependencies [90cdb13]
+- Updated dependencies [678b2f8]
+- Updated dependencies [0adb9b5]
+- Updated dependencies [dbabd01]
+- Updated dependencies [e7ab68f]
+  - @concordance-wiki/core@0.2.0
+  - @concordance-wiki/checks@0.2.0
+  - @concordance-wiki/typing@0.2.0
+  - @concordance-wiki/ingest@0.2.0
+  - @concordance-wiki/nlp@0.2.0
+  - @concordance-wiki/profile@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

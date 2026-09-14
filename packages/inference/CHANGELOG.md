@@ -1,5 +1,25 @@
 # @concordance-wiki/inference
 
+## 0.2.0
+
+### Minor Changes
+
+- 90cdb13: `inference.domains.max_neighbours`: the degree above which a term is a hub of the corpus rather than a domain and never a pivot. Without it the most cited words of a corpus win every tie and every proposal names them. A proposal now names the pivot's own domain when something files the pivot, so that an unclassified note joins the domain of the terms it is close to; a domain named after the pivot only when the pivot itself is unclassified.
+- 678b2f8: Emergent domains proposed from the neighbourhood: `inference.domains` names the terms with enough neighbours as pivots and reports every unclassified note within the radius as `I-DOMAIN-SUGGESTED`, listed in the build log, assigned only under `assign`; the lock file promotes a proposal under `domains`, and every entity records the origin of its domain under `domain_origin`.
+
+### Patch Changes
+
+- dbabd01: Readmes written for the registry: every package README opens with what the package is for and who installs it, the install line, the shortest example that runs against the published exports, its entry points and the guides as absolute links, the former notes kept under an Inside section; a packaging check refuses a relative link in a published README.
+- e7ab68f: Package pages that say what they are for: every README on the registry opens with the mark, the package name, a one-line promise, the badges and the links, then why the package exists for the person who installs it, the quick start, what you get and the documentation; the maintainers' notes are kept at the end, folded.
+- Updated dependencies [90cdb13]
+- Updated dependencies [678b2f8]
+- Updated dependencies [0adb9b5]
+- Updated dependencies [dbabd01]
+- Updated dependencies [e7ab68f]
+  - @concordance-wiki/core@0.2.0
+  - @concordance-wiki/ingest@0.2.0
+  - @concordance-wiki/profile@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
