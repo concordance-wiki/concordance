@@ -1,9 +1,10 @@
 # Findings the engine must produce, sorted by check then path. A minimum, same cases as the English corpus:
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
-# An I-TERM-HOMONYM names the entities sharing a title or alias; a W-DUP-CANDIDATE names its pair under `entities`,
-# notes sharing a base name across sources (0.5) or close base names in one folder (0.76); the pair the lock file
-# separates, the glossary term and the API sharing the base name canonical-model, is neither merged nor reported.
+# An I-TERM-HOMONYM names the entities sharing a title or alias, a twin folded into its note never being one of them;
+# a W-DUP-CANDIDATE names its pair under `entities`, notes sharing a base name across sources (0.5) or close base
+# names in one folder (0.76); the pair the lock file separates, the glossary term and the API sharing the base name
+# canonical-model, is neither merged nor reported.
 - { check: I-REL-AMBIGUOUS, path: specs/ecrans/page-mot-cle.md, note: "page mot-clé (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: candidat, entities: [glossaire/expression-candidate, specs/objets/candidat] }
 - { check: I-TERM-HOMONYM, form: constat, entities: [glossaire/constat, specs/objets/constat] }
@@ -13,7 +14,6 @@
 - { check: I-TERM-HOMONYM, form: lien, entities: [glossaire/lien, glossaire/lien-explicite, specs/objets/lien] }
 - { check: I-TERM-HOMONYM, form: occurrence, entities: [glossaire/occurrence, specs/objets/occurrence] }
 - { check: I-TERM-HOMONYM, form: page mot-cle, entities: [glossaire/page-mot-cle, specs/ecrans/page-mot-cle, specs/objets/page-mot-cle] }
-- { check: I-TERM-HOMONYM, form: ratio de taille des jumelles, entities: [specs/regles/ratio-de-taille-des-jumelles, specs/regles/ratio-de-taille-des-jumelles-regle.docx], note: "the Word twin of the rule, read before the reconciliation folds it into the note" }
 - { check: I-TERM-HOMONYM, form: seuil de publication, entities: [glossaire/seuil-de-publication, specs/regles/seuil-de-publication] }
 - { check: I-TERM-HOMONYM, form: source, entities: [glossaire/source, specs/objets/source] }
 - { check: I-TERM-HOMONYM, form: voisinage, entities: [glossaire/voisinage, specs/objets/voisinage] }

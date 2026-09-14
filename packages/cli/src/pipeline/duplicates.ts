@@ -23,30 +23,39 @@ import { comparisonWords, languagePack } from "@concordance-wiki/nlp";
 import type { Profile } from "@concordance-wiki/profile";
 
 import { combineProducedLinks } from "./combine.js";
-import type { LocaleDictionary } from "./dictionary.js";
 import type { ReadDocument } from "./documents.js";
 import { documentKey } from "./parse.js";
 
 export interface ReconcileTwinsInput {
   entities: readonly Entity[];
-  links: readonly Link[];
-  /** Parsed notes keyed by `<source name>/<path>`; an entity with neither a note nor a document, or a keyword page, is not a resource. */
+  /** Parsed notes keyed by `<source name>/<path>`; an entity with neither a note nor a document is not a resource. */
   documents: ReadonlyMap<string, ParsedMarkdown>;
   /** The documents that are not notes, whose title and extracted text enter the comparison. */
   resources?: readonly ReadDocument[];
   sources: readonly IngestedSource[];
-  dictionaries: ReadonlyMap<string, LocaleDictionary>;
+  /** The stopwords of every locale of the corpus, which the text similarity leaves out. */
+  stopwords: ReadonlyMap<string, ReadonlySet<string>>;
   config: Config;
   profile: Profile;
   clock: Clock;
   lock?: DuplicateLock;
 }
 
+/** An entity a merge folded into another: the twin as typed, and the identifier it now answers to. */
+export interface FoldedEntity {
+  entity: Entity;
+  into: string;
+}
+
 export interface ReconciledTwins {
   /** The entities with every merged group folded into its note, representations recorded. */
   entities: Entity[];
-  /** The links, those of a merged twin re-pointed at its note and combined again. */
-  links: Link[];
+  /**
+   * The twins that disappeared into a merged entity, in the order of the entities. Their titles
+   * and aliases still name the entity in the dictionary and their files still declare links, which
+   * `repointLinks` moves to the entity.
+   */
+  folded: FoldedEntity[];
   /** `W-DUP-CANDIDATE`, one per pair that stays separate. */
   findings: Finding[];
   /** Every scored pair, as the `candidates.duplicates` block records it. */
@@ -98,8 +107,7 @@ function resourcesOf(
 ): DuplicateResource[] {
   const resources: DuplicateResource[] = [];
   for (const entity of entities) {
-    // A keyword page is located on the note that first mentions its expression: it has no file of its own.
-    if (entity.source.name !== source.name || entity.keyword === true) continue;
+    if (entity.source.name !== source.name) continue;
     const key = documentKey(entity.source.name, entity.source.path);
     const resource = read.get(key);
     if (resource !== undefined) {
@@ -143,13 +151,20 @@ function mergedInto(groups: readonly DuplicateGroup[]): Map<string, string> {
   return target;
 }
 
-function mergeEntities(entities: readonly Entity[], groups: readonly DuplicateGroup[]): Entity[] {
+function mergeEntities(
+  entities: readonly Entity[],
+  groups: readonly DuplicateGroup[],
+): Pick<ReconciledTwins, "entities" | "folded"> {
   const target = mergedInto(groups);
   const byId = new Map(groups.map((group) => [group.id, group]));
   const merged: Entity[] = [];
+  const folded: FoldedEntity[] = [];
   for (const entity of entities) {
     const root = target.get(entity.id);
-    if (root !== undefined && root !== entity.id) continue;
+    if (root !== undefined && root !== entity.id) {
+      folded.push({ entity, into: root });
+      continue;
+    }
     const group = byId.get(entity.id);
     merged.push(
       group === undefined
@@ -161,16 +176,21 @@ function mergeEntities(entities: readonly Entity[], groups: readonly DuplicateGr
           },
     );
   }
-  return merged;
+  return { entities: merged, folded };
 }
 
-function repointLinks(
+/**
+ * The links of a folded twin moved to the entity it answers to, at both ends, a link the move
+ * turns onto itself dropped, and the result combined again so that a link the twin and its note
+ * both declared is one. The links are returned as they are when nothing was folded.
+ */
+export function repointLinks(
   links: readonly Link[],
-  groups: readonly DuplicateGroup[],
+  folded: readonly FoldedEntity[],
   profile: Profile,
 ): Link[] {
-  if (groups.length === 0) return [...links];
-  const target = mergedInto(groups);
+  if (folded.length === 0) return [...links];
+  const target = new Map(folded.map((twin) => [twin.entity.id, twin.into]));
   const repointed = links.flatMap((link) => {
     const from = target.get(link.from) ?? link.from;
     const to = target.get(link.to) ?? link.to;
@@ -185,6 +205,8 @@ function repointLinks(
  * texts that are similar. Above the merge threshold the resources become one entity carrying
  * every representation; from the candidate threshold they stay separate with a finding. The
  * text similarity works on the words of the language pack of the locale, its stopwords removed.
+ * The step runs before the dictionary is built, so that a twin folded into its note never enters
+ * the dictionary as a homonym of that note.
  */
 export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
   const options = duplicateOptions(input.config.inference);
@@ -206,7 +228,7 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
       document,
     ]),
   );
-  for (const [locale, { stopwords }] of input.dictionaries) {
+  for (const [locale, stopwords] of input.stopwords) {
     const pack = languagePack(locale);
     const excluded = new Set([...stopwords].flatMap((word) => comparisonWords(word, pack)));
     const sources = input.sources.filter((source) => source.locale === locale);
@@ -233,8 +255,7 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
     addCounts(counts, result.stats);
   }
   return {
-    entities: mergeEntities(input.entities, groups),
-    links: repointLinks(input.links, groups, input.profile),
+    ...mergeEntities(input.entities, groups),
     findings: findings.toSorted(compareFindings),
     candidates,
     counts,

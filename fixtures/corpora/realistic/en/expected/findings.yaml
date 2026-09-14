@@ -1,9 +1,10 @@
 # Findings the engine must produce, sorted by check then path. The list is a minimum: every entry must be present;
 # further I-REL-AMBIGUOUS findings on other prose mentions and further W-TERM-UNDEFINED candidates are allowed.
 # No error is intended: every link resolves, every identifier is unique, every frontmatter parses.
-# An I-TERM-HOMONYM names the entities sharing a title or alias; a W-DUP-CANDIDATE names its pair under `entities`,
-# notes sharing a base name across sources (0.5) or close base names in one folder (0.76); the pair the lock file
-# separates, the glossary term and the API sharing the base name canonical-model, is neither merged nor reported.
+# An I-TERM-HOMONYM names the entities sharing a title or alias, a twin folded into its note never being one of them;
+# a W-DUP-CANDIDATE names its pair under `entities`, notes sharing a base name across sources (0.5) or close base
+# names in one folder (0.76); the pair the lock file separates, the glossary term and the API sharing the base name
+# canonical-model, is neither merged nor reported.
 - { check: I-REL-AMBIGUOUS, path: specs/screens/keyword-page.md, note: "keyword page (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: alphabetical index, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
 - { check: I-TERM-HOMONYM, form: candidate, entities: [glossary/candidate-expression, specs/objects/candidate] }
@@ -16,7 +17,6 @@
 - { check: I-TERM-HOMONYM, form: occurrence, entities: [glossary/occurrence, specs/objects/occurrence] }
 - { check: I-TERM-HOMONYM, form: publication threshold, entities: [glossary/publication-threshold, specs/rules/publication-threshold] }
 - { check: I-TERM-HOMONYM, form: source, entities: [glossary/source, specs/objects/source] }
-- { check: I-TERM-HOMONYM, form: twin size ratio, entities: [specs/rules/twin-size-ratio, specs/rules/twin-size-ratio-rule.docx], note: "the Word twin of the rule, read before the reconciliation folds it into the note" }
 - { check: W-API-CONSUMER-MISMATCH, path: specs/api/model-query.md, note: "declares screens/service/suggestion-review as a consumer, which never cites it" }
 - { check: W-API-NOCONSUMER, path: specs/api/forge-bridge.md }
 - { check: W-APP-MISSING, source: framing, path: vision.md }

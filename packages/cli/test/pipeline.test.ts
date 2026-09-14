@@ -19,8 +19,8 @@ import { loadDefaultProfile, type Profile } from "@concordance-wiki/profile";
 import { describe, expect, it } from "vitest";
 
 import { enrichStepFindings, runModelChecks } from "../src/pipeline/checks.js";
-import { buildDictionaries, corpusLocales } from "../src/pipeline/dictionary.js";
-import { reconcileTwins } from "../src/pipeline/duplicates.js";
+import { buildDictionaries, corpusLocales, corpusStopwords } from "../src/pipeline/dictionary.js";
+import { reconcileTwins, repointLinks } from "../src/pipeline/duplicates.js";
 import { discoverKeywords } from "../src/pipeline/keywords.js";
 import { indexDocuments, parseSources } from "../src/pipeline/parse.js";
 import { refineRelations } from "../src/pipeline/relations.js";
@@ -312,10 +312,13 @@ describe("The build runs every implemented step in order", () => {
     });
     const dictionaries = buildDictionaries({
       entities: typed.entities,
-      sources: input.sources,
       config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
+      stopwords: corpusStopwords({
+        sources: input.sources,
+        config: input.config,
+        configDirectory: "/work",
+        fs: input.fs,
+      }),
     });
     expect([...dictionaries.byLocale.keys()]).toEqual(["en"]);
     expect([...(dictionaries.byLocale.get("en")?.dictionary.entries.keys() ?? [])]).toEqual([
@@ -825,10 +828,13 @@ describe("keyword discovery and publication", () => {
     });
     const dictionaries = buildDictionaries({
       entities: typed.entities,
-      sources: input.sources,
       config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
+      stopwords: corpusStopwords({
+        sources: input.sources,
+        config: input.config,
+        configDirectory: "/work",
+        fs: input.fs,
+      }),
     });
     const discovered = discoverKeywords({
       documents: parsed.documents,
@@ -863,10 +869,13 @@ describe("keyword discovery reads the confidence of every candidate", () => {
     });
     const dictionaries = buildDictionaries({
       entities: typed.entities,
-      sources: input.sources,
       config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
+      stopwords: corpusStopwords({
+        sources: input.sources,
+        config: input.config,
+        configDirectory: "/work",
+        fs: input.fs,
+      }),
     });
     const result = discoverKeywords({
       documents: parsed.documents,
@@ -954,10 +963,13 @@ describe("keyword discovery reads usage, not titles", () => {
     });
     const dictionaries = buildDictionaries({
       entities: typed.entities,
-      sources: input.sources,
       config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
+      stopwords: corpusStopwords({
+        sources: input.sources,
+        config: input.config,
+        configDirectory: "/work",
+        fs: input.fs,
+      }),
     });
     const result = discoverKeywords({
       documents: parsed.documents,
@@ -1052,6 +1064,16 @@ describe("twin-resource reconciliation over the markdown notes", () => {
     "",
   ].join("\n");
 
+  /** The stopwords of the in-memory corpus, as the pipeline reads them before the reconciliation. */
+  function stopwordsOf(input: PipelineInput) {
+    return corpusStopwords({
+      sources: input.sources,
+      config: input.config,
+      configDirectory: "/work",
+      fs: input.fs,
+    });
+  }
+
   async function reconciled(
     files: Record<string, string>,
     lock?: { separated: [string, string][] },
@@ -1060,37 +1082,30 @@ describe("twin-resource reconciliation over the markdown notes", () => {
     const parsed = parseSources(input.sources, input.fs);
     const documents = indexDocuments(parsed.documents);
     const typed = typeNotes({ sources: input.sources, documents, config: input.config, profile });
-    const dictionaries = buildDictionaries({
-      entities: typed.entities,
-      sources: input.sources,
-      config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
-    });
-    const written = (from: string, to: string): Link => ({
-      from,
-      to,
-      relation: "related",
-      confidence: 1,
-      provenance: [{ method: "explicit_link", confidence: 1, path: `${from}.md`, line: 1 }],
-    });
-    const links: Link[] = [
-      written("meetings/2026-03-12-links-workshop", "decks/2026-03-12-links-workshop"),
-      written("decks/2026-03-12-links-workshop", "meetings/other"),
-      written("meetings/other", "meetings/2026-03-12-links-workshop"),
-    ];
     return reconcileTwins({
       entities: typed.entities,
-      links,
       documents,
       sources: input.sources,
-      dictionaries: dictionaries.byLocale,
+      stopwords: stopwordsOf(input),
       config: input.config,
       profile,
       clock,
       ...(lock === undefined ? {} : { lock }),
     });
   }
+
+  const written = (from: string, to: string): Link => ({
+    from,
+    to,
+    relation: "related",
+    confidence: 1,
+    provenance: [{ method: "explicit_link", confidence: 1, path: `${from}.md`, line: 1 }],
+  });
+  const links: Link[] = [
+    written("meetings/2026-03-12-links-workshop", "decks/2026-03-12-links-workshop"),
+    written("decks/2026-03-12-links-workshop", "meetings/other"),
+    written("meetings/other", "meetings/2026-03-12-links-workshop"),
+  ];
 
   const workshop = "# Links workshop\n\nThe workshop reviewed every written link of the corpus.\n";
   const twins = {
@@ -1117,11 +1132,86 @@ describe("twin-resource reconciliation over the markdown notes", () => {
     expect(result.findings).toEqual([]);
   });
 
-  it("re-points the links of a merged twin at its note, drops the self-link and combines again", async () => {
+  it("lists the folded twin with the identifier it now answers to, and leaves the list empty when nothing merged", async () => {
     const result = await reconciled(twins);
-    expect(result.links.map((link) => `${link.from} -> ${link.to}`)).toEqual([
+    expect(result.folded.map((twin) => `${twin.entity.id} -> ${twin.into}`)).toEqual([
+      "meetings/2026-03-12-links-workshop -> decks/2026-03-12-links-workshop",
+    ]);
+    expect(result.folded[0]?.entity.title).toBe("Links workshop");
+    const separate = await reconciled(twins, {
+      separated: [["decks/2026-03-12-links-workshop", "meetings/2026-03-12-links-workshop"]],
+    });
+    expect(separate.folded).toEqual([]);
+  });
+
+  it("re-points the links of a folded twin at its note, drops the self-link and combines again", async () => {
+    const result = await reconciled(twins);
+    const repointed = repointLinks(links, result.folded, profile);
+    expect(repointed.map((link) => `${link.from} -> ${link.to}`)).toEqual([
       "decks/2026-03-12-links-workshop -> meetings/other",
       "meetings/other -> decks/2026-03-12-links-workshop",
+    ]);
+    // A link the twin and the note both declared is one link with the provenance of each.
+    const both = repointLinks(
+      [...links, written("meetings/2026-03-12-links-workshop", "meetings/other")],
+      result.folded,
+      profile,
+    );
+    expect(both).toHaveLength(2);
+    expect(both[0]?.provenance.map((provenance) => provenance.path)).toEqual([
+      "decks/2026-03-12-links-workshop.md",
+      "meetings/2026-03-12-links-workshop.md",
+    ]);
+  });
+
+  it("returns the links as they are when no twin was folded", () => {
+    const untouched = repointLinks(links, [], profile);
+    expect(untouched).toEqual(links);
+    expect(untouched).not.toBe(links);
+  });
+
+  it("lends the titles and aliases of a folded twin to its note in the dictionary, a shared form being no homonym", async () => {
+    const { input } = await corpus(
+      {
+        ...twins,
+        // The meeting note is the one folded into the deck's, the lower identifier: its alias travels.
+        "/work/meetings/2026-03-12-links-workshop.md": `---\naliases: [link review]\n---\n${workshop}`,
+      },
+      twinConfig,
+    );
+    const parsed = parseSources(input.sources, input.fs);
+    const documents = indexDocuments(parsed.documents);
+    const typed = typeNotes({ sources: input.sources, documents, config: input.config, profile });
+    const stopwords = stopwordsOf(input);
+    const result = reconcileTwins({
+      entities: typed.entities,
+      documents,
+      sources: input.sources,
+      stopwords,
+      config: input.config,
+      profile,
+      clock,
+    });
+    const dictionaries = buildDictionaries({
+      entities: result.entities,
+      folded: result.folded,
+      config: input.config,
+      stopwords,
+    });
+    const entries = dictionaries.byLocale.get("en")?.dictionary.entries;
+    // "Other", the heading of the third note, is a stopword of the pack.
+    expect([...(entries?.keys() ?? [])]).toEqual(["link review", "link workshop"]);
+    expect(entries?.get("link workshop")?.targets).toEqual([
+      { id: "decks/2026-03-12-links-workshop", kind: "title", form: "Links workshop", priority: 1 },
+    ]);
+    expect(entries?.get("link review")?.targets.map((target) => target.id)).toEqual([
+      "decks/2026-03-12-links-workshop",
+    ]);
+    expect(dictionaries.findings).toEqual([]);
+    // Without the folded twins, the dictionary knows the merged entity by its own forms only.
+    const own = buildDictionaries({ entities: result.entities, config: input.config, stopwords });
+    expect([...(own.byLocale.get("en")?.dictionary.entries.keys() ?? [])]).toEqual([
+      "link workshop",
     ]);
   });
 
@@ -1137,7 +1227,7 @@ describe("twin-resource reconciliation over the markdown notes", () => {
       { resources: ["decks/workshop", "meetings/workshop"], score: 0.5, signals: ["same_name"] },
     ]);
     expect(result.entities).toHaveLength(3);
-    expect(result.links).toHaveLength(3);
+    expect(result.folded).toEqual([]);
   });
 
   it("applies the lock it is given: a separated pair yields neither a merge nor a finding", async () => {
@@ -1148,23 +1238,11 @@ describe("twin-resource reconciliation over the markdown notes", () => {
     expect(result.findings).toEqual([]);
   });
 
-  it("reads the plain text of a note and leaves out keyword pages and entities without a note", async () => {
+  it("reads the plain text of a note and leaves out an entity without a note", async () => {
     const { input } = await corpus(twins, twinConfig);
     const parsed = parseSources(input.sources, input.fs);
     const documents = indexDocuments(parsed.documents);
     const typed = typeNotes({ sources: input.sources, documents, config: input.config, profile });
-    const dictionaries = buildDictionaries({
-      entities: typed.entities,
-      sources: input.sources,
-      config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
-    });
-    const keyword: Entity = {
-      ...(typed.entities[0] as Entity),
-      id: "keywords/written-link",
-      keyword: true,
-    };
     const endpoint: Entity = {
       ...(typed.entities[0] as Entity),
       id: "meetings/api/op",
@@ -1176,17 +1254,15 @@ describe("twin-resource reconciliation over the markdown notes", () => {
       source: { ...entity.source, commit: "c0ffee" },
     }));
     const result = reconcileTwins({
-      entities: [...committed, keyword, endpoint],
-      links: [],
+      entities: [...committed, endpoint],
       documents,
       sources: input.sources,
-      dictionaries: dictionaries.byLocale,
+      stopwords: stopwordsOf(input),
       config: input.config,
       profile,
       clock,
     });
     expect(result.counts.resources).toBe(3);
-    expect(result.entities.map((entity) => entity.id)).toContain("keywords/written-link");
     expect(result.entities.map((entity) => entity.id)).toContain("meetings/api/op");
   });
 
@@ -1202,19 +1278,11 @@ describe("twin-resource reconciliation over the markdown notes", () => {
     const parsed = parseSources(input.sources, input.fs);
     const documents = indexDocuments(parsed.documents);
     const typed = typeNotes({ sources: input.sources, documents, config: input.config, profile });
-    const dictionaries = buildDictionaries({
-      entities: typed.entities,
-      sources: input.sources,
-      config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
-    });
     const result = reconcileTwins({
       entities: typed.entities,
-      links: [],
       documents,
       sources: input.sources,
-      dictionaries: dictionaries.byLocale,
+      stopwords: stopwordsOf(input),
       config: input.config,
       profile,
       clock,

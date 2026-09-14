@@ -188,9 +188,9 @@ describe("The decisions of the lock file reach the keyword discovery and the twi
     expect(result.duplicates).toMatchObject({ merged: 0, candidates: 0 });
   });
 
-  it("merges a merged pair whatever its score, the lock file named as the criterion", async () => {
+  it("merges a merged pair whatever its score, the lock file named as the criterion, the shared title no homonym", async () => {
     const result = await pipeline({ version: 1, duplicates: { merged: [pair] } });
-    expect(checksOf(result)).toEqual(["I-TERM-HOMONYM", "W-TERM-UNDEFINED"]);
+    expect(checksOf(result)).toEqual(["W-TERM-UNDEFINED"]);
     const ids = result.entities.map((entity) => entity.id);
     expect(ids).toContain("glossary/finding");
     expect(ids).not.toContain("specs/objects/finding");
