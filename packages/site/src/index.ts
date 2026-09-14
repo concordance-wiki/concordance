@@ -60,6 +60,7 @@ export * from "./gallery/boards.js";
 export * from "./gallery/build.js";
 export * as galleryFixtures from "./gallery/fixtures.js";
 export * from "./gallery/pages.js";
+export * from "./gallery/skeleton.js";
 export * from "./gallery/types.js";
 export * from "./markdown/figures.js";
 export * from "./markdown/marks.js";
