@@ -97,10 +97,26 @@ export function sectionLabels(profile: Profile): Set<string> {
  * A list item may open with a label of that vocabulary, the way the note templates write
  * `- Reads: [entity](...)` under `## Objects`: the label is a title too, and is not read.
  */
-function withoutLabel(text: string, labels: ReadonlySet<string>): string {
-  const colon = text.indexOf(":");
-  if (colon <= 0 || colon > MAX_LABEL_LENGTH) return text;
-  return labels.has(foldHeading(text.slice(0, colon))) ? text.slice(colon + 1).trimStart() : text;
+/** What discovery reads of a unit: its text, and the inline code it leaves out at the offsets of that text. */
+type ReadableUnit = Pick<ScannableUnit, "text" | "code">;
+
+/**
+ * The unit without the label that opens it, nor the blanks after the colon: the code spans of the
+ * label go with it, the others move up; a code span standing in those blanks keeps the blank that
+ * follows it, so that the context quotes it as written.
+ */
+function withoutLabel(unit: ReadableUnit, labels: ReadonlySet<string>): ReadableUnit {
+  const colon = unit.text.indexOf(":");
+  if (colon <= 0 || colon > MAX_LABEL_LENGTH) return unit;
+  if (!labels.has(foldHeading(unit.text.slice(0, colon)))) return unit;
+  const rest = colon + 1;
+  const kept = (unit.code ?? []).filter((span) => span.at >= rest);
+  const start = Math.min(
+    unit.text.length - unit.text.slice(rest).trimStart().length,
+    ...kept.map((span) => span.at),
+  );
+  const code = kept.map((span) => ({ ...span, at: span.at - start }));
+  return { text: unit.text.slice(start), ...(code.length === 0 ? {} : { code }) };
 }
 
 /**
@@ -108,10 +124,12 @@ function withoutLabel(text: string, labels: ReadonlySet<string>): string {
  * section the profile maps ("Reads", "Steps"), so an expression read there says nothing about a
  * term the corpus lacks; a list item loses the same vocabulary when it opens with it as a label.
  */
-function readable(unit: ScannableUnit, labels: ReadonlySet<string>): string | undefined {
+function readable(unit: ScannableUnit, labels: ReadonlySet<string>): ReadableUnit | undefined {
   if (unit.kind === "heading") return undefined;
-  const text = unit.kind === "list-item" ? withoutLabel(unit.text, labels) : unit.text;
-  return text.trim() === "" ? undefined : text;
+  const read = unit.kind === "list-item" ? withoutLabel(unit, labels) : unit;
+  return read.text.trim() === ""
+    ? undefined
+    : { text: read.text, ...(read.code === undefined ? {} : { code: read.code }) };
 }
 
 /** The text units of the notes, then the pages of the documents, of the sources of one locale, in source then document order. */
@@ -125,9 +143,9 @@ function unitsOf(
   for (const source of sources) {
     for (const note of documents.filter((candidate) => candidate.source === source.name)) {
       for (const unit of scannableText(note.document)) {
-        const text = readable(unit, labels);
-        if (text === undefined) continue;
-        units.push({ source: source.name, path: note.path, line: unit.line, text });
+        const read = readable(unit, labels);
+        if (read === undefined) continue;
+        units.push({ source: source.name, path: note.path, line: unit.line, ...read });
       }
     }
     for (const document of resources.filter((candidate) => candidate.source === source.name)) {

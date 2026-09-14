@@ -837,8 +837,10 @@ describe("keyword discovery and publication", () => {
 });
 
 describe("keyword discovery reads usage, not titles", () => {
-  /** Discovery over an in-memory corpus, the terms keyed by their text. */
-  async function discovered(files: Record<string, string>): Promise<Map<string, number>> {
+  /** Discovery over an in-memory corpus, the terms with their occurrences and contexts keyed by their text. */
+  async function discoveredTerms(
+    files: Record<string, string>,
+  ): Promise<Map<string, { occurrences: number; contexts: string[] }>> {
     const { input } = await corpus(files);
     const parsed = parseSources(input.sources, input.fs);
     const typed = typeNotes({
@@ -861,8 +863,43 @@ describe("keyword discovery reads usage, not titles", () => {
       config: input.config,
       profile,
     });
-    return new Map(result.terms.map((term) => [term.text, term.occurrences]));
+    return new Map(
+      result.terms.map((term) => [
+        term.text,
+        {
+          occurrences: term.occurrences,
+          contexts: (term.contexts ?? []).map((context) => context.context),
+        },
+      ]),
+    );
   }
+
+  /** Discovery over an in-memory corpus, the terms keyed by their text. */
+  async function discovered(files: Record<string, string>): Promise<Map<string, number>> {
+    const terms = await discoveredTerms(files);
+    return new Map([...terms].map(([text, term]) => [text, term.occurrences]));
+  }
+
+  it("quotes the inline code of a unit in the contexts it never reads, the code of a stripped label gone with it", async () => {
+    const terms = await discoveredTerms({
+      "/work/specs/screens/a.md":
+        "# A\n\nSet `lint.max` before the cache warmup runs.\n\n## Objects\n\n- `Reads`: the `cache` of the cache warmup\n",
+      "/work/specs/screens/b.md": "# B\n\nThe cache warmup `cache.warm` runs `nightly`.\n",
+      "/work/specs/screens/c.md":
+        "# C\n\n- Reads: `x` before the cache warmup\n- Reads`y`:`z`the cache warmup again\n",
+    });
+    expect(terms.has("lint")).toBe(false);
+    expect(terms.has("nightly")).toBe(false);
+    // A label written as code is no label: the item is read whole, and quoted as written.
+    expect(terms.get("cache warmup")?.contexts).toEqual([
+      "Set lint.max before the cache warmup runs.",
+      "Reads: the cache of the cache warmup",
+      "The cache warmup cache.warm runs nightly.",
+      "x before the cache warmup",
+      "zthe cache warmup again",
+    ]);
+    expect(terms.has("Reads")).toBe(false);
+  });
 
   it("leaves every heading out: an expression that only titles sections never becomes a candidate", async () => {
     const terms = await discovered({

@@ -1,13 +1,14 @@
 import type { LanguagePack } from "../locale/pack.js";
+import { occurrenceContext, type QuotedText } from "../scan/context.js";
 import { tokenize, type Token } from "../scan/tokens.js";
-import { contextAround } from "../text/context.js";
 
 /** A text unit the discovery reads: a scannable unit of a document, with the file it comes from. */
-export interface KeywordUnit {
+export interface KeywordUnit extends QuotedText {
   /** Name of the source holding the file; two sources may hold the same path. */
   source?: string;
   path: string;
   line: number;
+  /** The text the discovery reads, inline code left out. */
   text: string;
 }
 
@@ -21,7 +22,7 @@ export interface NgramOccurrence {
   line: number;
   /** Code unit offset of the span in the unit text. */
   position: number;
-  /** 160 characters of the unit text centred on the span, an ellipsis marking each cut. */
+  /** 160 characters of the unit text as written, inline code included, centred on the span, an ellipsis marking each cut. */
   context: string;
 }
 
@@ -87,7 +88,7 @@ function ngramsOf(
         path: unit.path,
         line: unit.line,
         position: first.start,
-        context: contextAround(unit.text, first.start, last.end, contextWidth),
+        context: occurrenceContext(unit, first.start, last.end, contextWidth),
       });
     }
   }

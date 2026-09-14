@@ -17,11 +17,16 @@ export interface QuotedText {
 export const CONTEXT_WIDTH = 80;
 
 /**
- * The context of an occurrence: a window of the text as written, the inline code the scan skipped
- * put back in place, centred on the match at `start`–`end` of the scanned text. A code span at the
- * start of the match precedes it, one at its end follows it.
+ * The context of an occurrence: a window of `width` characters of the text as written, the
+ * inline code the scan skipped put back in place, centred on the match at `start`–`end` of the
+ * scanned text. A code span at the start of the match precedes it, one at its end follows it.
  */
-export function occurrenceContext(quoted: QuotedText, start: number, end: number): string {
+export function occurrenceContext(
+  quoted: QuotedText,
+  start: number,
+  end: number,
+  width = CONTEXT_WIDTH,
+): string {
   const code = quoted.code ?? [];
   let written = "";
   let cursor = 0;
@@ -34,5 +39,5 @@ export function occurrenceContext(quoted: QuotedText, start: number, end: number
     if (span.at < end) to += span.text.length;
   }
   written += quoted.text.slice(cursor);
-  return contextAround(written, from, to, CONTEXT_WIDTH);
+  return contextAround(written, from, to, width);
 }
