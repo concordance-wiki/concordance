@@ -13,5 +13,6 @@ export const spacesMessages = {
     "spaces.lead": { count: "plural" },
     "spaces.pages": {},
     "spaces.space": {},
+    "spaces.stale": {},
   },
 } as const satisfies Area<keyof typeof en>;

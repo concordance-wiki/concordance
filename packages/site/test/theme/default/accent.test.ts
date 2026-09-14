@@ -172,13 +172,13 @@ describe("The accent colour never carries information on its own", () => {
     expect(page).toContain('<span class="neighbour-type">Keyword</span>');
   });
 
-  it("doubles the accent of a dormant space on the spaces page by its age in days, the one place where the colour carries an alert", () => {
+  it("doubles the accent of a dormant space on the spaces page by its age in days and a hidden phrase, the one place where the colour carries an alert", () => {
     expect(ruleFor(components, ".spaces-row.stale .spaces-date").body).toBe(
       "\n  color: var(--color-accent);\n",
     );
     const spaces = pages.get("spaces-corporate.html") ?? "";
     expect(spaces).toContain(
-      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">FR</span><a href="../framing/">framing</a></th><td class="spaces-content">Document</td><td class="spaces-count">4</td><td class="spaces-date"><time datetime="2026-03-03">194 days ago</time></td></tr>',
+      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">FR</span><a href="../framing/">framing</a></th><td class="spaces-content">Document</td><td class="spaces-count">4</td><td class="spaces-date"><time datetime="2026-03-03">194 days ago</time><span class="visually-hidden">, past the freshness threshold</span></td></tr>',
     );
   });
 

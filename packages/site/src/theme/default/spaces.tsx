@@ -13,15 +13,17 @@ export function defaultSpacesLabels(count: number): SpacesLabels {
     pages: labels.pages,
     lastUpdate: labels.lastUpdate,
     datesNote: labels.spacesDatesNote,
+    stale: labels.staleSpace,
   };
 }
 
 /**
  * The row of a space: the initials badge and the name linking to its page, what it holds, its
  * page count and its newest change; past the freshness threshold the date reads in the accent
- * and in days, the only place where a colour carries an alert.
+ * and in days, the only place where a colour carries an alert, and a hidden phrase says so to
+ * assistive technology, which sees no colour.
  */
-function Row({ space }: { space: SpaceRow }): JSX.Element {
+function Row({ space, stale }: { space: SpaceRow; stale: string }): JSX.Element {
   return (
     <tr class={space.stale ? "spaces-row stale" : "spaces-row"}>
       <th scope="row" class="spaces-name">
@@ -36,6 +38,7 @@ function Row({ space }: { space: SpaceRow }): JSX.Element {
         {space.date !== undefined && (
           <time dateTime={space.date}>{space.dateLabel ?? space.date}</time>
         )}
+        {space.stale && <span class="visually-hidden">, {stale}</span>}
       </td>
     </tr>
   );
@@ -72,7 +75,7 @@ export function Spaces({ spaces, labels: given = {} }: SpacesProps): JSX.Element
         </thead>
         <tbody>
           {spaces.map((space) => (
-            <Row key={space.name} space={space} />
+            <Row key={space.name} space={space} stale={text.stale} />
           ))}
         </tbody>
       </table>

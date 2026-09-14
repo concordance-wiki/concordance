@@ -961,7 +961,7 @@ describe("siteDocuments", () => {
     );
     const spaces = documents.find((document) => document.path === SPACES_PAGE);
     expect(spaces?.content).toContain(
-      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">GL</span><a href="../glossary/index.html">glossary</a></th><td class="spaces-content">The vocabulary of the tool.</td><td class="spaces-count">2</td><td class="spaces-date"><time datetime="2026-09-01">11 days ago</time></td></tr>',
+      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">GL</span><a href="../glossary/index.html">glossary</a></th><td class="spaces-content">The vocabulary of the tool.</td><td class="spaces-count">2</td><td class="spaces-date"><time datetime="2026-09-01">11 days ago</time><span class="visually-hidden">, past the freshness threshold</span></td></tr>',
     );
     expect(spaces?.content).toContain(
       '<td class="spaces-content">Business rule, Screen</td><td class="spaces-count">2</td><td class="spaces-date"></td>',

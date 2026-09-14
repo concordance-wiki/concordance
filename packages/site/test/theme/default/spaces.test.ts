@@ -31,7 +31,7 @@ describe("Spaces", () => {
   it("marks a dormant space by its class, its date reading in days; a space without a date leaves the cell empty, one without a worded date shows the date", () => {
     const html = renderSlot("Spaces", corporateSpaces, defaultTheme);
     expect(html).toContain(
-      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">FR</span><a href="../framing/">framing</a></th><td class="spaces-content">Document</td><td class="spaces-count">4</td><td class="spaces-date"><time datetime="2026-03-03">194 days ago</time></td></tr>',
+      '<tr class="spaces-row stale"><th scope="row" class="spaces-name"><span class="space-initials" aria-hidden="true">FR</span><a href="../framing/">framing</a></th><td class="spaces-content">Document</td><td class="spaces-count">4</td><td class="spaces-date"><time datetime="2026-03-03">194 days ago</time><span class="visually-hidden">, past the freshness threshold</span></td></tr>',
     );
     const bare = renderSlot(
       "Spaces",
@@ -55,7 +55,7 @@ describe("Spaces", () => {
       '<a href="../notes/">notes</a></th><td class="spaces-content"></td><td class="spaces-count">0</td><td class="spaces-date"></td></tr>',
     );
     expect(bare).toContain(
-      '<td class="spaces-date"><time datetime="2025-01-01">2025-01-01</time></td>',
+      '<td class="spaces-date"><time datetime="2025-01-01">2025-01-01</time><span class="visually-hidden">, past the freshness threshold</span></td>',
     );
   });
 
@@ -83,6 +83,15 @@ describe("Spaces", () => {
       defaultTheme,
     );
     expect(french).toContain('<h1>Espaces</h1><p class="spaces-lead">Sept espaces.</p>');
+    expect(
+      renderSlot(
+        "Spaces",
+        { ...corporateSpaces, labels: { stale: "au-delà du seuil de fraîcheur" } },
+        defaultTheme,
+      ),
+    ).toContain(
+      '<time datetime="2026-03-03">194 days ago</time><span class="visually-hidden">, au-delà du seuil de fraîcheur</span>',
+    );
     expect(french).toContain('<th scope="col" class="spaces-content">Content</th>');
   });
 });

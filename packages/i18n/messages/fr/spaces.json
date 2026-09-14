@@ -4,5 +4,6 @@
   "spaces.lastUpdate": "Dernière mise à jour",
   "spaces.lead": "{count, plural, one {# espace, alimenté par les dépôts déclarés dans la configuration.} other {# espaces, alimentés par les dépôts déclarés dans la configuration.}} Un dépôt peut porter plusieurs espaces, et un espace se répartir sur plusieurs dépôts.",
   "spaces.pages": "Pages",
-  "spaces.space": "Espace"
+  "spaces.space": "Espace",
+  "spaces.stale": "au-delà du seuil de fraîcheur"
 }

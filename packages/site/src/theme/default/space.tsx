@@ -62,12 +62,24 @@ function Change({ change }: { change: SpaceChange }): JSX.Element {
   );
 }
 
-/** A word cited in the space: a chip with its count, dashed for a word without a note. */
+/** A word cited in the space: a chip with its count, dashed for a word without a note, which says so on hover and in hidden text so that the dashes never carry it alone. */
 function Word({ word }: { word: SpaceWord }): JSX.Element {
+  if (word.keyword !== true) {
+    return (
+      <li>
+        <a class="chip" href={word.href}>
+          {word.label}
+          <span class="chip-count">{word.count}</span>
+        </a>
+      </li>
+    );
+  }
+  const mark = word.title ?? labels.noNoteMark;
   return (
     <li>
-      <a class={word.keyword === true ? "chip chip-keyword" : "chip"} href={word.href}>
+      <a class="chip chip-keyword" href={word.href} title={mark}>
         {word.label}
+        <span class="visually-hidden"> ({mark})</span>
         <span class="chip-count">{word.count}</span>
       </a>
     </li>
