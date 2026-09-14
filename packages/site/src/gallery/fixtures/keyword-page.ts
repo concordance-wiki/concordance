@@ -49,7 +49,7 @@ export const keywordPage: SlotProps["KeywordPage"] = {
       ],
     },
   ],
-  similar: [{ label: "Build", href: "../build/" }],
+  similar: [{ label: "Build", href: "../build/", count: 3 }],
   similarLead: "Expressions close in form and context. A lead, not a claim.",
   neighbours: {
     centre: "build summary",
@@ -331,7 +331,7 @@ export const corporateKeywordPage: SlotProps["KeywordPage"] = {
     nodes: [
       { label: "Alias", href: "../../glossary/alias/" },
       { label: "Build log", href: "../../glossary/build-log/" },
-      { label: "build summary", current: true },
+      { label: "build summary", current: true, passages: 17 },
       { label: "Candidate expression", href: "../../glossary/candidate-expression/" },
       { label: "Confidence", href: "../../glossary/confidence/" },
       { label: "Finding", href: "../../glossary/finding/" },
@@ -361,7 +361,7 @@ export const corporateKeywordPage: SlotProps["KeywordPage"] = {
   passages: corporatePassages,
   similar: [
     { label: "build report", href: "../build-report/", count: 4 },
-    { label: "Build log", href: "../../glossary/build-log/" },
+    { label: "Build log", href: "../../glossary/build-log/", count: 9, aliases: ["build summary log", "summary log"] },
   ],
   similarLead: "Expressions close in form and context. A lead, not a claim.",
   neighbours: {

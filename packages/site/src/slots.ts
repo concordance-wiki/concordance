@@ -430,6 +430,8 @@ export interface SpaceNode {
   current?: boolean;
   /** A node standing for the pages of a long folder the tree leaves out, its label saying how many. */
   omitted?: boolean;
+  /** On the keyword page filed among the notes of its space: how many passages use the word, shown at the end of its line as a folder shows its count. */
+  passages?: number;
 }
 
 /** The space of a page: the source it comes from, as the reader browses it in the left column. */
@@ -838,8 +840,10 @@ export interface KeywordBanner {
 
 /** An expression of a similar form, offered as a lead from a keyword page. */
 export interface SimilarExpression extends Link {
-  /** How many occurrences the model counts for the expression; absent for a note. */
-  count?: number;
+  /** How many passages use the expression: the occurrences the model counts for a keyword page, the passages that mention a note. */
+  count: number;
+  /** The other forms a note was met under, its aliases, when the lead reached it through them; absent when the title alone did. */
+  aliases?: string[];
 }
 
 /** The headings and notes the keyword page adds itself, in the language of the site; the theme's own English when absent. */

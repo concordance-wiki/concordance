@@ -22,9 +22,9 @@ import {
 } from "./context.js";
 import { neighbourhoodLabels, neighbourPages } from "./entity-page.js";
 import type { FragmentPassage } from "./fragments.js";
-import { mentionsPanelOf, passageLocationOf } from "./mentions.js";
+import { mentionsOf, mentionsPanelOf, passageLocationOf } from "./mentions.js";
 import { entityHref, spaceHref } from "./paths.js";
-import { spaceWithPageOf } from "./space.js";
+import { foldersOf, spaceWithPageOf, type Filing } from "./space.js";
 
 /** How many nodes the map of a keyword page draws: the words that accompany it most often. */
 export const KEYWORD_NEIGHBOURS_MAX = 6;
@@ -163,16 +163,30 @@ export function passageBlocksOf(
   };
 }
 
+/** Where a word is filed: its space and, in it, the folder and the passage count of its node in the tree. */
+export interface KeywordFiling extends Filing {
+  source: string;
+}
+
 /**
  * The space a word is filed in: the first glossary source the model knows, where its note would
- * be written, else the source of its first passage; none for a word without either.
+ * be written, else the source of its first passage; none for a word without either. In that
+ * space the word stands in the folder of its first passage there, at the root when the space
+ * holds none, with every passage of the word counted after its name.
  */
 export function keywordSpaceOf(
   context: SiteContext,
   groups: readonly LocatedGroup[],
-): string | undefined {
+): KeywordFiling | undefined {
   const known = new Set(context.model.build.sources.map((source) => source.name));
-  return context.glossarySources?.find((name) => known.has(name)) ?? groups[0]?.source;
+  const source = context.glossarySources?.find((name) => known.has(name)) ?? groups[0]?.source;
+  if (source === undefined) return undefined;
+  const first = groups.find((group) => group.source === source);
+  return {
+    source,
+    folders: first === undefined ? [] : foldersOf(first.path),
+    passages: groups.reduce((total, group) => total + group.group.passages.length, 0),
+  };
 }
 
 /**
@@ -238,22 +252,34 @@ export function keywordNeighbourhoodOf(
   };
 }
 
+/** How many passages use a page the leads name: the occurrences of a keyword page, the passages that mention a note. */
+function passagesUsing(context: SiteContext, page: string, target: Entity): number {
+  return target.keyword === true
+    ? numberOf(target.attributes["occurrences"])
+    : mentionsOf(context, page, target).length;
+}
+
 /**
- * The leads of the fragment as links, a keyword page among them carrying its occurrence count;
- * a lead to a page the model lost is left out.
+ * The leads of the fragment as links, one per page in the order of the leads: a note reached
+ * under several of its forms is named once, by its title, the other forms as its aliases; each
+ * lead carries how many passages use the page; a lead to a page the model lost is left out.
  */
 export function similarOf(context: SiteContext, page: string, entity: Entity): SimilarExpression[] {
-  return (context.fragments.get(entity.id)?.leads ?? []).flatMap((lead) => {
+  const leads = new Map<string, SimilarExpression>();
+  for (const lead of context.fragments.get(entity.id)?.leads ?? []) {
     const target = context.entities.get(lead.id);
-    if (target === undefined) return [];
-    return [
-      {
-        label: lead.title,
-        href: entityHref(page, lead.id),
-        ...(target.keyword === true ? { count: numberOf(target.attributes["occurrences"]) } : {}),
-      },
-    ];
-  });
+    if (target === undefined) continue;
+    const known = leads.get(lead.id) ?? {
+      label: target.title,
+      href: entityHref(page, lead.id),
+      count: passagesUsing(context, page, target),
+    };
+    if (lead.title !== target.title && !known.aliases?.includes(lead.title)) {
+      known.aliases = [...(known.aliases ?? []), lead.title];
+    }
+    leads.set(lead.id, known);
+  }
+  return [...leads.values()];
 }
 
 /** The headings and notes of the page in the site language. */
@@ -302,7 +328,7 @@ export function keywordPageOf(
   const slug = entity.id.replace(/^.*\//, "");
   // The new-file page of the glossary on its forge, else the contribution address of the project; none without either, and the page shows no lead.
   const createHref = createNoteHref(context, slug) ?? context.contributeUrl;
-  const space = keywordSpaceOf(context, groups);
+  const filing = keywordSpaceOf(context, groups);
   const usedSince = usedSinceOf(context, passages);
   const mentions = mentionsPanelOf(context, page, entity, options.mentionsInline);
   return {
@@ -312,12 +338,12 @@ export function keywordPageOf(
       locale: entity.locale,
       typeLabel: message(context, "keyword.title"),
     },
-    ...(space === undefined
+    ...(filing === undefined
       ? {}
       : {
-          space: spaceWithPageOf(context, page, entity, space),
+          space: spaceWithPageOf(context, page, entity, filing.source, filing),
           breadcrumb: [
-            { label: spaceTitle(context, space), href: spaceHref(page, space) },
+            { label: spaceTitle(context, filing.source), href: spaceHref(page, filing.source) },
             { label: message(context, "keyword.terms") },
             { label: entity.title },
           ],

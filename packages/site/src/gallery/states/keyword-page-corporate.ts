@@ -8,7 +8,7 @@ export const keywordPageCorporateState: GalleryPage = {
   rendered: "KeywordPage",
   state: "corporate",
   description:
-    "an expression of the fixtures corpus nobody defined, in the corporate chrome: the tree of the glossary with the word at its place, the breadcrumb, the dotted title, the line saying there is no definition and since when the word is used, the notice with the lead to propose a definition, the passages by page with their type, their title, their count and where each one stands, a timecode, a page or a line, two in view and the others folded under their count; in the panel what we know, the expressions that may be the same thing, the accompanying words, the related pages with the note that none is cited, the neighbourhood folded",
+    "an expression of the fixtures corpus nobody defined, in the corporate chrome: the tree of the glossary with the word at its place among the notes with its passage count, the breadcrumb, the dotted title, the line saying there is no definition and since when the word is used, the notice with the lead to propose a definition, the passages by page with their type, their title, their count and where each one stands, a timecode, a page or a line, two in view and the others folded under their count; in the panel what we know, the expressions that may be the same thing, one per page with its count and the forms a note was met under, the related pages with the note that none is cited, the neighbourhood folded",
   ...chrome,
   header: corporateHeader,
   footer: corporateFooter,
