@@ -26,7 +26,7 @@ jobs:
         with: { node-version: 22 }
       - uses: actions/cache@v4
         with: { path: .concordance-cache, key: concordance-cache }
-      - run: npm install --global concordance
+      - run: npm install --global @concordance-wiki/concordance
       - run: concordance build
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
@@ -53,7 +53,7 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
-    - npm install --global concordance
+    - npm install --global @concordance-wiki/concordance
     - concordance build --output public
   cache:
     key: concordance-cache
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - id: lint
-        run: npx --yes concordance lint --format sarif --output concordance.sarif
+        run: npx --yes @concordance-wiki/concordance lint --format sarif --output concordance.sarif
         continue-on-error: true
       - uses: github/codeql-action/upload-sarif@v3
         with: { sarif_file: concordance.sarif }
@@ -104,7 +104,7 @@ lint:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
-    - npx --yes concordance lint --format junit --output concordance-junit.xml
+    - npx --yes @concordance-wiki/concordance lint --format junit --output concordance-junit.xml
   artifacts:
     when: always
     reports:
@@ -115,7 +115,7 @@ The GitLab CI/CD component `concordance-wiki/lint/lint` wraps this job with the 
 
 ## With the container image
 
-The image `concordancewiki/concordance` carries Node.js, the `concordance` preset, git, headless LibreOffice and the fonts the conversion needs; the pipeline only mounts the configuration repository on `/wiki`. The image runs as uid 1000, so the working directory of the job must be writable by that user; the [operations guide](operations.md#container-image) says how to keep `dist/` yours on a runner that checks out as another user.
+The image `concordancewiki/concordance` carries Node.js, the `@concordance-wiki/concordance` preset, git, headless LibreOffice and the fonts the conversion needs; the pipeline only mounts the configuration repository on `/wiki`. The image runs as uid 1000, so the working directory of the job must be writable by that user; the [operations guide](operations.md#container-image) says how to keep `dist/` yours on a runner that checks out as another user.
 
 ### GitHub Pages, in the container
 

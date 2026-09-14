@@ -1,5 +1,5 @@
 {
-  "name": "concordance",
+  "name": "@concordance-wiki/concordance",
   "version": "0.0.0",
   "description": "The concordance command with every official plugin: builds a wiki from git repositories of markdown.",
   "license": "GPL-3.0-or-later",
