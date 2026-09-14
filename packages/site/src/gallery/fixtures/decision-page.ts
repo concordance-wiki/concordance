@@ -205,7 +205,7 @@ export const corporateDecisionPage: SlotProps["EntityPage"] = {
         href: pageHref(arbitration),
         typeLabel: "Meeting",
         typeGlyph: "meeting",
-        relation: "is documented by",
+        relation: "documents",
         weight: 1,
         rank: 3,
       },

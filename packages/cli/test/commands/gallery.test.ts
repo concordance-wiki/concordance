@@ -133,8 +133,9 @@ describe("The gallery shows every registered type", () => {
     expect(files).toContain("type-screen.html");
     const index = io.fs.readText("/work/gallery/index.html");
     expect(index).toContain('<a href="type-screen.html">screen</a>: Screen, generic entity page');
+    // The decision type renders through its own template: the chip carries the status after the type.
     expect(io.fs.readText("/work/gallery/type-decision.html")).toContain(
-      '<a class="badge" href="../../search/index.html?type=decision">Decision</a>',
+      '<span class="badge decision-chip"><a class="decision-type" href="../../search/index.html?type=decision">Decision</a>',
     );
   });
 
