@@ -147,6 +147,27 @@ describe("extractNgrams", () => {
     expect(occurrences).toEqual(expected);
   });
 
+  it("quotes the inline code of a unit back in the context, the span and its position staying in the text read", () => {
+    const [occurrence] = extractNgrams(
+      [
+        {
+          path: "a.md",
+          line: 1,
+          text: "In the  Mentions API.",
+          code: [{ at: 7, text: "site" }],
+        },
+      ],
+      en,
+      { minWords: 2, maxWords: 2, minLength: 4 },
+    );
+    expect(occurrence).toMatchObject({
+      key: "mention api",
+      surface: "Mentions API",
+      position: 8,
+      context: "In the site Mentions API.",
+    });
+  });
+
   it("trims the context to 160 characters around the span with an ellipsis", () => {
     const text = `${"word ".repeat(20)}target span${" word".repeat(20)}`;
     const units = [{ path: "a.md", line: 1, text }];
