@@ -224,8 +224,8 @@ describe("closestForm", () => {
     entry("Publication threshold", ["threshold"]),
     entry("Threshold review"),
     entry("Keyword page", ["word page"]),
-    entry("Plafond de versement"),
-    entry("Plafond"),
+    entry("Seuil de publication"),
+    entry("Seuil"),
   ];
 
   it("proposes the title or alias sharing the longest prefix with the query, case and accents folded", () => {
@@ -236,8 +236,8 @@ describe("closestForm", () => {
   });
 
   it("prefers the shortest form among equal prefixes, so that a word beats the expressions starting with it", () => {
-    expect(closestForm("plafon", entries)).toEqual({ entity: 4, form: "Plafond" });
-    expect(closestForm("plafond de", entries)).toEqual({ entity: 3, form: "Plafond de versement" });
+    expect(closestForm("seui", entries)).toEqual({ entity: 4, form: "Seuil" });
+    expect(closestForm("seuil de", entries)).toEqual({ entity: 3, form: "Seuil de publication" });
   });
 
   it("proposes nothing under two characters in common, or over an empty table", () => {
