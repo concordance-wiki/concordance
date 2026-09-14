@@ -185,13 +185,15 @@ function malformedGlobs(domains: DomainConfig[], prefix: string): ConfigIssue[] 
   return issues;
 }
 
+/** The keys the build accepts without reading, in whole or in part; the warning says exactly what is read. */
 function ignoredFeatures(config: Config): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
   if (config.lock !== undefined) {
     issues.push({
       severity: "warning",
       path: "lock",
-      message: "accepted but ignored: only rejected_terms of the lock file is read in this version",
+      message:
+        "rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
     });
   }
   config.sources.forEach((source, index) => {

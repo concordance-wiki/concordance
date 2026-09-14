@@ -641,7 +641,7 @@
       "$ref": "#/$defs/checks"
     },
     "lock": {
-      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; accepted but not read by the build in this version.",
+      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms and duplicates and stops on a missing or invalid file; its links are recorded, not read.",
       "type": "string"
     }
   },

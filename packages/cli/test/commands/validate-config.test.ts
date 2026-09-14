@@ -39,7 +39,9 @@ describe("concordance validate-config", () => {
       "/work/concordance.yaml": `${validConfig}lock: ./concordance.lock.yaml\n`,
     });
     expect(validateConfigCommand([], io)).toBe(0);
-    expect(io.stdout[0]).toMatch(/^warning: .*lock: accepted but ignored/);
+    expect(io.stdout[0]).toBe(
+      "warning: /work/concordance.yaml: lock: rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
+    );
   });
 
   it("warns that transcripts are published without pseudonymisation and still exits 0", () => {

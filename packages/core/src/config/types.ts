@@ -212,3 +212,32 @@ export interface ThemeConfig {
 
 export type ThemeValidation =
   { ok: true; theme: ThemeConfig; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };
+
+/** A link a human promoted, `links.accepted[]` of the lock file. */
+export interface LockAcceptedLink {
+  from: string;
+  to: string;
+  rel: string;
+  by?: string;
+  at?: string;
+}
+
+/** A link a human rejected, `links.rejected[]` of the lock file. */
+export interface LockRejectedLink {
+  from: string;
+  to: string;
+  rel: string;
+  reason?: string;
+}
+
+/** `concordance.lock.yaml`, mirroring `schemas/lock.schema.json`: the human decisions the build applies over its inferences. */
+export interface LockFile {
+  version: 1;
+  /** Recorded, not read: the build of this version produces no `lock_promoted` link. */
+  links?: { accepted?: LockAcceptedLink[]; rejected?: LockRejectedLink[] };
+  duplicates?: { merged?: [string, string][]; separated?: [string, string][] };
+  rejected_terms?: string[];
+}
+
+export type LockValidation =
+  { ok: true; lock: LockFile; issues: ConfigIssue[] } | { ok: false; issues: ConfigIssue[] };

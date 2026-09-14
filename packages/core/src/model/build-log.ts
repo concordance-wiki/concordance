@@ -14,6 +14,15 @@ export interface BuildSummary {
   keywords?: KeywordCounts;
   /** What the twin-resource reconciliation did; absent while the build computes none. */
   duplicates?: DuplicateCounts;
+  /** The decisions of the lock file the build applied; absent when the configuration names no lock file. */
+  lock?: LockCounts;
+}
+
+/** The entries of `concordance.lock.yaml` the build applied, block by block. */
+export interface LockCounts {
+  rejected_terms: number;
+  merged: number;
+  separated: number;
 }
 
 export interface KeywordCounts {
@@ -74,6 +83,7 @@ export function summarize(input: {
   findings: readonly Finding[];
   keywords?: KeywordCounts;
   duplicates?: DuplicateCounts;
+  lock?: LockCounts;
   entities?: readonly { type: string }[];
   links?: readonly { provenance: readonly { method: string }[] }[];
 }): BuildSummary {
@@ -101,6 +111,16 @@ export function summarize(input: {
           },
         }),
     ...(input.duplicates === undefined ? {} : { duplicates: duplicateCounts(input.duplicates) }),
+    ...(input.lock === undefined ? {} : { lock: lockCounts(input.lock) }),
+  };
+}
+
+/** The counts in a fixed key order, the order of the blocks in the lock file. */
+function lockCounts(counts: LockCounts): LockCounts {
+  return {
+    rejected_terms: counts.rejected_terms,
+    merged: counts.merged,
+    separated: counts.separated,
   };
 }
 
@@ -189,6 +209,7 @@ export function serializeBuildLog(log: BuildLog): string {
       ...(log.summary.duplicates === undefined
         ? {}
         : { duplicates: duplicateCounts(log.summary.duplicates) }),
+      ...(log.summary.lock === undefined ? {} : { lock: lockCounts(log.summary.lock) }),
     },
     contracts: log.contracts === undefined ? undefined : [...log.contracts].sort(compareContracts),
     // Absent keys stay absent: JSON.stringify drops undefined values.
