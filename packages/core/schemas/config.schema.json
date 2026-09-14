@@ -574,6 +574,30 @@
               "default": 0.5
             }
           }
+        },
+        "domains": {
+          "description": "Domains proposed from the neighbourhood graph: every term with a note whose degree reaches min_neighbours is a pivot, and every unclassified note within radius edges of one is a candidate for a domain named after it, reported as I-DOMAIN-SUGGESTED and listed in the build log. Absent, nothing is proposed.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min_neighbours", "radius"],
+          "properties": {
+            "min_neighbours": {
+              "description": "Degree in the graph of links and co-occurrences from which a term becomes a pivot; stopwords and the rejected terms of the lock file never do.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "radius": {
+              "description": "Distance, in edges, within which a note belongs to a pivot; a note reached by several is attached to the closest, then to the one of highest degree.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "assign": {
+              "description": "Whether the proposal files the unclassified notes it reaches under the domain named after their pivot, with the origin inferred; a note with a declared domain is never touched.",
+              "type": "boolean",
+              "default": false
+            }
+          }
         }
       }
     },
@@ -683,7 +707,7 @@
       "$ref": "#/$defs/checks"
     },
     "lock": {
-      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms and duplicates and stops on a missing or invalid file; its links are recorded, not read.",
+      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms, duplicates and domains and stops on a missing or invalid file; its links are recorded, not read.",
       "type": "string"
     }
   },

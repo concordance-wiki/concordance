@@ -40,7 +40,7 @@ describe("concordance validate-config", () => {
     });
     expect(validateConfigCommand([], io)).toBe(0);
     expect(io.stdout[0]).toBe(
-      "warning: /work/concordance.yaml: lock: rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
+      "warning: /work/concordance.yaml: lock: rejected_terms, duplicates and domains of the lock file are applied; links are recorded, not read",
     );
   });
 

@@ -193,7 +193,7 @@ function ignoredFeatures(config: Config): ConfigIssue[] {
       severity: "warning",
       path: "lock",
       message:
-        "rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
+        "rejected_terms, duplicates and domains of the lock file are applied; links are recorded, not read",
     });
   }
   config.sources.forEach((source, index) => {

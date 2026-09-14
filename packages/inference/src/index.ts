@@ -100,3 +100,16 @@ export {
   type OperationMatch,
   type OperationNote,
 } from "./operations/index.js";
+export { proposeEmergentDomains } from "./domains/attach.js";
+export { buildGraph, distancesFrom, type DomainGraph } from "./domains/graph.js";
+export { emergentDomainsOptions } from "./domains/options.js";
+export { comparePivots, selectPivots } from "./domains/pivots.js";
+export type {
+  Attachment,
+  DomainEdge,
+  DomainNode,
+  EmergentDomains,
+  EmergentDomainsInput,
+  EmergentDomainsOptions,
+  Pivot,
+} from "./domains/types.js";

@@ -21,6 +21,7 @@ const full = {
     separated: [["glossary/entity", "specs/objects/entity"]],
   },
   rejected_terms: ["Build Summary", "merge request"],
+  domains: { "specs/roles/maintainer": "quality", "glossary/cue": "glossary/transcript" },
 };
 
 describe("The lock file is validated against schemas/lock.schema.json before the build applies it", () => {
@@ -58,6 +59,20 @@ describe("The lock file is validated against schemas/lock.schema.json before the
         message: 'must match format "date"',
         received: "13 September 2026",
       },
+    ]);
+  });
+
+  it("refuses a domain keyed by something other than a note identifier, or empty", () => {
+    const result = validateLock({
+      version: 1,
+      domains: { maintainer: "quality", "specs/roles/author": "" },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues.map(({ path, message }) => ({ path, message }))).toEqual([
+      { path: "domains", message: "value does not match the expected format" },
+      { path: "domains", message: "property name must be valid" },
+      // The slashes of the identifier are escaped the way JSON pointers write them.
+      { path: "domains.specs~1roles~1author", message: "must NOT have fewer than 1 characters" },
     ]);
   });
 

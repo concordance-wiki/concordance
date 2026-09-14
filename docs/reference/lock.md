@@ -2,7 +2,7 @@
 
 Every key of `concordance.lock.yaml`, generated from [`lock.schema.json`](../../packages/core/schemas/lock.schema.json) by `scripts/config-reference.mjs`: edit the schema, then run `pnpm reference:update`. The [guide](../guides/configuration.md#lock) explains how the keys work together.
 
-Schema of concordance.lock.yaml, the record of the human decisions the build applies over its inferences: promoted and rejected links, twin resources merged or kept apart, expressions the keyword discovery must not propose.
+Schema of concordance.lock.yaml, the record of the human decisions the build applies over its inferences: promoted and rejected links, twin resources merged or kept apart, expressions the keyword discovery must not propose, domains promoted from a proposal.
 
 A key marked (required) must be present; every other key is optional and takes the default shown, or none. Paths use `[]` for the items of a list and `*` for the keys of a map.
 
@@ -14,6 +14,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | `links` | object | — | — | Human decisions about inferred links: the promoted and the rejected ones. Recorded for the later versions; not read by this one. See [`links`](#links). |
 | `duplicates` | object | — | — | Human decisions about twin resources, applied whatever the score of the pair. See [`duplicates`](#duplicates). |
 | `rejected_terms` | string[] | — | each: non-empty | Expressions the keyword discovery never proposes again: no candidate, no W-TERM-UNDEFINED, no keyword page. Compared on the normalised form. |
+| `domains` | map of string | — | keys: pattern `^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$`; values: non-empty | The domain of a note by its identifier, a proposal of I-DOMAIN-SUGGESTED promoted: the note is filed there with the origin lock, unless its frontmatter, a folder or a glob already files it. |
 
 ## `links`
 

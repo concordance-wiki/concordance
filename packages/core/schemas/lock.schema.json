@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concordance-wiki.github.io/concordance/schemas/lock.schema.json",
   "title": "Concordance lock",
-  "description": "Schema of concordance.lock.yaml, the record of the human decisions the build applies over its inferences: promoted and rejected links, twin resources merged or kept apart, expressions the keyword discovery must not propose.",
+  "description": "Schema of concordance.lock.yaml, the record of the human decisions the build applies over its inferences: promoted and rejected links, twin resources merged or kept apart, expressions the keyword discovery must not propose, domains promoted from a proposal.",
   "type": "object",
   "additionalProperties": false,
   "required": ["version"],
@@ -114,6 +114,18 @@
       "description": "Expressions the keyword discovery never proposes again: no candidate, no W-TERM-UNDEFINED, no keyword page. Compared on the normalised form.",
       "type": "array",
       "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "domains": {
+      "description": "The domain of a note by its identifier, a proposal of I-DOMAIN-SUGGESTED promoted: the note is filed there with the origin lock, unless its frontmatter, a folder or a glob already files it.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9._-]*)+$"
+      },
+      "additionalProperties": {
+        "description": "The identifier of a domain, declared under domains of concordance.yaml or named after the pivot of the proposal.",
         "type": "string",
         "minLength": 1
       }
