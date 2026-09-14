@@ -333,6 +333,55 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
+  it("accepts the legal pages of a project, and rejects a status outside the three declared states, a plain HTTP address or a stray legal key", () => {
+    expect(
+      validateConfig({
+        ...minimal,
+        project: {
+          name: "Wiki",
+          legal: {
+            mentions_url: "https://forge.example/legal/mentions",
+            accessibility_url: "https://forge.example/legal/accessibility",
+            accessibility_status: "partially-compliant",
+            privacy_url: "https://forge.example/legal/privacy",
+          },
+        },
+      }).ok,
+    ).toBe(true);
+    expect(
+      issuesOf({
+        ...minimal,
+        project: {
+          name: "Wiki",
+          legal: {
+            accessibility_status: "conforming",
+            privacy_url: "http://forge.example/legal/privacy",
+            statement: "yes",
+          },
+        },
+      }),
+    ).toEqual([
+      {
+        severity: "error",
+        path: "project.legal.statement",
+        message: "unknown key",
+        expected: "one of the documented keys",
+      },
+      {
+        severity: "error",
+        path: "project.legal.accessibility_status",
+        message: "value is not allowed",
+        expected: 'one of "non-compliant", "partially-compliant", "compliant"',
+      },
+      {
+        severity: "error",
+        path: "project.legal.privacy_url",
+        message: "value does not match the expected format",
+        expected: "a value matching ^https://[^\\s]+$",
+      },
+    ]);
+  });
+
   it("accepts a title and titled, described folders on a source, keyed by their path, and rejects an empty title, a stray key or a path with a slash at either end", () => {
     const result = validateConfig({
       ...minimal,

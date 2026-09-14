@@ -43,6 +43,7 @@ const WHOLE = [
   "markdown/render.js",
   "build/paths.js",
   "build/spaces.js",
+  "build/footer.js",
   "build/fragments.js",
   "build/default-theme.js",
   "build/assemble.js",
@@ -80,7 +81,7 @@ const PART: Readonly<Record<string, readonly string[]>> = {
     "mergeIslands",
   ],
   "theme/default/index.js": ["defaultComponents"],
-  "theme/default/footer.js": ["REPOSITORY_URL"],
+  "theme/default/footer.js": ["REPOSITORY_URL", "TOOL_NAME", "defaultFooterLabels"],
   "theme/default/document-page.js": ["DocumentPage", "defaultDocumentPageLabels"],
   "build/mentions.js": [
     "DEFAULT_MENTIONS_INLINE",

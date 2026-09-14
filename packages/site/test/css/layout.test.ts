@@ -139,6 +139,7 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
     ].map((match) => (match[1] ?? "").trim());
     expect(monospace).toEqual([
       ".count",
+      ".site-footer-card > .site-footer-build",
       ".related-count",
       ".letter",
       ".index-table .index-pages",

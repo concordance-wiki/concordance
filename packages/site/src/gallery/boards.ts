@@ -118,6 +118,12 @@ const boards = [
     screen: "pages/decision-page",
   },
   {
+    id: "B18",
+    title: "Footer",
+    caption:
+      "Two natures on every page: what the tool knows of the site, and what the organisation declared.",
+  },
+  {
     id: "B20",
     title: "Dark mode",
     caption:

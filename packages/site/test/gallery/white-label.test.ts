@@ -177,7 +177,7 @@ describe("a project theme without a logo", () => {
     expect(logo).not.toContain('rel="icon"');
     expect(logo).not.toContain("project.css");
     expect(logo).toContain(
-      '<p class="site-footer-credit"><a href="https://github.com/concordance-wiki/concordance">Built with Concordance</a></p>',
+      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
     );
     expect(report.problems).toEqual([]);
   });

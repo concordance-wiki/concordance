@@ -4,7 +4,7 @@ import { MODE_SCRIPT } from "../../../src/mode.js";
 import { renderSlot } from "../../../src/render.js";
 import { REPOSITORY_URL } from "../../../src/theme/default/footer.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { footer, header } from "../../../src/gallery/fixtures.js";
+import { corporateFooter, footer, footerWithText, header } from "../../../src/gallery/fixtures.js";
 import { expectBalanced } from "../../helpers/html.js";
 
 describe("Shell", () => {
@@ -171,48 +171,75 @@ describe("Header", () => {
 });
 
 describe("Footer", () => {
-  it("renders the version, the build instant as a time element, the links and the discreet credit as a link to the repository", () => {
-    const html = renderSlot("Footer", footer, defaultTheme);
-    expect(html).toContain("version 0.1.0, built on ");
+  it("renders the two columns, what the tool knows then what the organisation declared, and the build line with the to-do link at its end", () => {
+    const html = renderSlot("Footer", corporateFooter, defaultTheme);
     expect(html).toContain(
-      '<time datetime="2024-05-01T10:00:00.000Z">2024-05-01T10:00:00.000Z</time>',
+      '<footer class="site-footer"><div class="site-footer-card"><div class="site-footer-columns"><div class="site-footer-site"><h2 class="site-footer-heading">This site</h2>',
     );
     expect(html).toContain(
-      '<ul class="site-footer-links"><li><a href="https://forge.example/wiki">Forge</a></li><li class="site-footer-todo"><a href="../todo/">To do<span class="count">12</span></a></li></ul>',
+      '<p class="site-footer-published">Published on 13 September 2026 at 10:04, from <a href="../spaces/">7 repositories</a>. <a href="../about/">See the sources and their versions</a>.</p>',
     );
     expect(html).toContain(
-      `<p class="site-footer-credit"><a href="${REPOSITORY_URL}">Built with Concordance</a></p>`,
+      '<p class="site-footer-licence">Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
     );
+    expect(html).toContain(
+      '<div class="site-footer-declared"><h2 class="site-footer-heading">Declared by the organisation</h2><ul class="site-footer-links"><li><a href="https://forge.example/legal/mentions">Legal notice</a></li><li><a href="https://forge.example/legal/accessibility">Accessibility — partially compliant</a></li><li><a href="https://forge.example/legal/privacy">Personal data</a></li></ul></div>',
+    );
+    expect(html).toContain(
+      '<p class="site-footer-build">publication <time datetime="2026-09-13T10:04:00.000Z">Sep 13, 2026 10:04 AM</time> · profile default@1 · 134 pages · <a class="site-footer-todo" href="../todo/">To do<span class="count">12</span></a></p>',
+    );
+    expect(html).not.toContain("Concordance");
     expectBalanced(html);
   });
 
-  it("carries the to-do link with its count without any project link, and neither without a to-do page", () => {
-    const { todo, ...bare } = footer;
-    if (todo === undefined) throw new Error("the fixture footer carries the to-do link");
-    const alone = renderSlot("Footer", { ...bare, links: [], todo }, defaultTheme);
-    expect(alone).toContain(
-      '<ul class="site-footer-links"><li class="site-footer-todo"><a href="../todo/">To do<span class="count">12</span></a></li></ul>',
+  it("shows the first column alone without anything declared, exact and complete, and words the build line itself without labels", () => {
+    const html = renderSlot("Footer", footerWithText, defaultTheme);
+    expect(html).toContain(
+      '<div class="site-footer-declared"><h2 class="site-footer-heading">Declared by the organisation</h2><p class="site-footer-text">Documentation of the build pipeline, kept by its maintainers.</p></div>',
     );
-    expect(
-      renderSlot(
-        "Footer",
-        { ...bare, links: [], todo: { label: "To do", href: "../todo/" } },
-        defaultTheme,
-      ),
-    ).toContain('<li class="site-footer-todo"><a href="../todo/">To do</a></li>');
-    expect(renderSlot("Footer", { ...bare, links: [] }, defaultTheme)).not.toContain("<ul");
+    const { text, ...withoutText } = footerWithText;
+    expect(text).toBeDefined();
+    const alone = renderSlot("Footer", withoutText, defaultTheme);
+    expect(alone).not.toContain("site-footer-declared");
+    expect(alone).not.toContain("<ul");
+    expect(alone).toContain(
+      'Published on 2024-05-01T10:00:00.000Z, from <a href="../spaces/">2 repositories</a>. <a href="../about/">See the sources and their versions</a>.',
+    );
+    expect(alone).toContain(
+      '<p class="site-footer-build">publication <time datetime="2024-05-01T10:00:00.000Z">2024-05-01T10:00:00.000Z</time> · profile default@1 · 105 pages</p>',
+    );
+    expect(alone).not.toContain("Concordance");
   });
 
-  it("imposes no mention of the tool and renders the project text when given", () => {
-    const { todo, ...bare } = footer;
-    expect(todo).toBeDefined();
+  it("names the tool and links it to its repository in the sentence naming the generator only when the theme credits it", () => {
+    const html = renderSlot("Footer", footer, defaultTheme);
+    expect(html).toContain(
+      `<p class="site-footer-licence">Built with <a class="site-footer-credit" href="${REPOSITORY_URL}">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>`,
+    );
+    expect(html).toContain(
+      '<ul class="site-footer-links"><li><a href="https://forge.example/wiki">Forge</a></li></ul>',
+    );
+    expect(html).toContain(
+      '<a class="site-footer-todo" href="../todo/">To do<span class="count">12</span></a>',
+    );
+  });
+
+  it("ends the sentence at the build instant without repositories, leaves the profile and the count out when unknown, and the count of the to-do link when it has none", () => {
+    const { repositories, aboutHref, profile, pages, todo, ...bare } = footer;
+    expect([repositories, aboutHref, profile, pages, todo].every(Boolean)).toBe(true);
     const html = renderSlot(
       "Footer",
-      { ...bare, links: [], credit: false, text: "Internal use only" },
+      { ...bare, links: [], todo: { label: "To do", href: "../todo/" } },
       defaultTheme,
     );
-    expect(html).not.toContain("Concordance");
-    expect(html).not.toContain("<ul");
-    expect(html).toContain('<p class="site-footer-text">Internal use only</p>');
+    expect(html).toContain(
+      '<p class="site-footer-published">Published on 2024-05-01T10:00:00.000Z.</p>',
+    );
+    expect(html).toContain(
+      '<p class="site-footer-build">publication <time datetime="2024-05-01T10:00:00.000Z">2024-05-01T10:00:00.000Z</time> · <a class="site-footer-todo" href="../todo/">To do</a></p>',
+    );
+    expect(renderSlot("Footer", { ...bare, links: [] }, defaultTheme)).not.toContain(
+      "site-footer-todo",
+    );
   });
 });

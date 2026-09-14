@@ -9,6 +9,7 @@ describe("The gallery has one state per board of the reference design, named aft
   it("lists the boards in their order, then the to-do page, the panels and the chrome", () => {
     expect(BOARD_IDS).toEqual([
       ...Array.from({ length: 16 }, (_, index) => `B${String(index + 1)}`),
+      "B18",
       "B20",
       "todo",
       "panels",
@@ -67,8 +68,9 @@ describe("The gallery has one state per board of the reference design, named aft
     const linked = GALLERY_BOARDS.filter(
       (board): board is GalleryBoard & { screen: string } => board.screen !== undefined,
     );
+    // The accessibility board has no page of its own, nor does the footer, seen on every page.
     expect(linked.map((board) => board.id)).toEqual(
-      BOARD_IDS.filter((id) => id !== "B4" && id !== "chrome"),
+      BOARD_IDS.filter((id) => id !== "B4" && id !== "B18" && id !== "chrome"),
     );
     for (const board of linked) {
       expect(screenNoteHref(board)).toBe(

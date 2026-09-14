@@ -377,7 +377,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');
   });
 
-  it("writes the project name as the site title, the spaces, index and recent links in the top bar, the to-do link with its count in the footer, and no credit without a theme", () => {
+  it("writes the project name as the site title, the spaces, index and recent links in the top bar, the footer with what the tool knows and the to-do link on its build line, and no credit without a theme", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
     expect(home).toContain(
@@ -392,11 +392,19 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const header = home.slice(home.indexOf("<header"), home.indexOf("</header>"));
     expect(header).not.toContain("todo/index.html");
     expect(home).toContain(
-      '<li class="site-footer-todo"><a href="todo/index.html">To do<span class="count">5</span></a></li>',
+      '<a class="site-footer-todo" href="todo/index.html">To do<span class="count">5</span></a>',
     );
-    expect(home).not.toContain("Built with");
-    expect(home).toContain("version 0.1.0");
-    expect(home).toContain('<time datetime="2026-09-12T12:00:00.000Z">');
+    expect(home).toContain(
+      '<p class="site-footer-published">Published on September 12, 2026 at 12:00 PM, from <a href="spaces/index.html">3 repositories</a>.</p>',
+    );
+    expect(home).toContain(
+      '<p class="site-footer-licence">Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+    );
+    expect(home).not.toContain("site-footer-declared");
+    expect(home).not.toContain("Concordance</a>");
+    expect(home).toContain(
+      '<p class="site-footer-build">publication <time datetime="2026-09-12T12:00:00.000Z">Sep 12, 2026 12:00 PM</time> · profile default@1 · 5 pages · ',
+    );
   });
 
   it("lists every space in the drawer of every page with its initials and its note count, and the tree of the page on an entity page and a keyword page", () => {
@@ -779,7 +787,15 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(home).toContain('<details class="site-drawer" aria-label="Menu">');
     expect(home).toContain('<summary class="site-search-button">');
     expect(home).toContain('</svg><span class="site-search-label">Rechercher</span></summary>');
-    expect(home).toContain('<a href="todo/index.html">À faire<span class="count">5</span></a>');
+    expect(home).toContain(
+      '<a class="site-footer-todo" href="todo/index.html">À faire<span class="count">5</span></a>',
+    );
+    expect(home).toContain(
+      '<p class="site-footer-published">Publié le 12 septembre 2026 à 12:00, depuis <a href="spaces/index.html">3 dépôts</a>.</p>',
+    );
+    expect(home).toContain(
+      '<p class="site-footer-build">publication <time datetime="2026-09-12T12:00:00.000Z">12 sept. 2026 12:00</time> · profil default@1 · 5 pages · ',
+    );
     expect(home).toContain('placeholder="Rechercher dans la documentation"');
     expect(home).toContain('<h1 id="home-question">Que cherchez-vous ?</h1>');
     expect(home).toContain(
@@ -863,8 +879,12 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(home).toContain('<link rel="stylesheet" href="assets/project.css"');
     expect(home).toContain("Kept by its maintainers.");
     expect(home).toContain('<a href="https://forge.example/wiki">Forge</a>');
-    expect(home).toContain("Built with Concordance");
-    expect(home).toContain('<a href="todo/index.html">Backlog<span class="count">5</span></a>');
+    expect(home).toContain(
+      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+    );
+    expect(home).toContain(
+      '<a class="site-footer-todo" href="todo/index.html">Backlog<span class="count">5</span></a>',
+    );
     expect(home).toContain('<img class="site-logo" src="assets/logo.png" alt/>');
     expect(fileSystem.listFiles("/dist/assets")).toContain("favicon.svg");
     expect(fileSystem.listFiles("/dist/assets")).toContain("logo.png");

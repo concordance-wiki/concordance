@@ -3,6 +3,7 @@ import {
   type CanonicalModel,
   type Entity,
   type FileSystem,
+  type LegalConfig,
   type StalenessConfig,
 } from "@concordance-wiki/core";
 import { loadCatalogue } from "@concordance-wiki/i18n";
@@ -48,6 +49,7 @@ import {
 } from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
 import { entityPageOf, type ViewerBundles } from "./entity-page.js";
+import { footerOf } from "./footer.js";
 import type { EntityFragment } from "./fragments.js";
 import { homeOf, suggestionLabels } from "./home.js";
 import { planIndex } from "./index-page.js";
@@ -109,6 +111,8 @@ export interface SiteInput {
   bodyMaxChars?: number;
   /** `privacy.pseudonymize.enabled` of the configuration, which the page of a meeting states. */
   pseudonymized?: boolean;
+  /** `project.legal` of the configuration: the pages the organisation declares, linked from the footer of every page. */
+  legal?: LegalConfig;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -228,24 +232,9 @@ function chromeFor(
     },
     ...(current === undefined ? {} : { current }),
   };
-  const footer: SlotProps["Footer"] = {
-    version: input.model.build.tool,
-    generatedAt: input.model.build.at,
-    links: chrome.footer.links ?? [],
-    // A build statistic: it stays out of the top bar.
-    todo: {
-      label: message(context, "site.todo"),
-      href: relativeHref(page, TODO_PAGE),
-      count: todoCount,
-    },
-    credit: chrome.footer.credit,
-  };
-  if (chrome.footer.text !== undefined) {
-    footer.text = chrome.footer.text;
-  }
   return {
     header,
-    footer,
+    footer: footerOf(context, page, chrome.footer, todoCount),
     stylesheets: chrome.stylesheets,
     ...(chrome.favicon === undefined ? {} : { favicon: chrome.favicon }),
     siteTitle: chrome.siteTitle,
@@ -322,6 +311,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     ...(input.collate === undefined ? {} : { collate: input.collate }),
     ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
     ...(input.pseudonymized === undefined ? {} : { pseudonymized: input.pseudonymized }),
+    ...(input.legal === undefined ? {} : { legal: input.legal }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;

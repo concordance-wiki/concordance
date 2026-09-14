@@ -65,7 +65,7 @@ export function contentOf(context: SiteContext, source: string): string {
 }
 
 /** A dormant space says its age in days, "193 days ago", so that the accent is doubled by a number. */
-function daysAgo(context: SiteContext, iso: string): string {
+export function daysAgo(context: SiteContext, iso: string): string {
   return new Intl.RelativeTimeFormat(context.locale ?? context.language, {
     numeric: "always",
   }).format(-daysSince(context, iso), "day");

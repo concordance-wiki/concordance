@@ -26,6 +26,10 @@ export const headerWithLogo: SlotProps["Header"] = {
 export const footer: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
+  repositories: { count: 2, href: "../spaces/", label: "2 repositories" },
+  aboutHref: "../about/",
+  profile: "default@1",
+  pages: 105,
   links: [{ label: "Forge", href: "https://forge.example/wiki" }],
   todo: { label: "To do", href: "../todo/", count: 12 },
   credit: true,
@@ -35,6 +39,10 @@ export const footer: SlotProps["Footer"] = {
 export const footerWithText: SlotProps["Footer"] = {
   version: "0.1.0",
   generatedAt: "2024-05-01T10:00:00.000Z",
+  repositories: { count: 2, href: "../spaces/", label: "2 repositories" },
+  aboutHref: "../about/",
+  profile: "default@1",
+  pages: 105,
   text: "Documentation of the build pipeline, kept by its maintainers.",
   links: [],
   credit: false,
@@ -68,5 +76,35 @@ export const corporateHeader: SlotProps["Header"] = {
 /** The same bar with its drawer served open, as a phone shows it once the menu button is pressed. */
 export const corporateDrawerHeader: SlotProps["Header"] = { ...corporateHeader, drawerOpen: true };
 
-/** The footer of the corporate state: the same as the others, the to-do page with its count kept out of the top bar. */
-export const corporateFooter: SlotProps["Footer"] = footer;
+/**
+ * The footer of the corporate state: what the tool knows of the fixtures corpus, worded as the
+ * site words it, then what the organisation declared, the accessibility statement with its
+ * state among the three legal pages; the to-do page with its count on the build line.
+ */
+export const corporateFooter: SlotProps["Footer"] = {
+  version: "0.1.0",
+  generatedAt: "2026-09-13T10:04:00.000Z",
+  repositories: { count: 7, href: "../spaces/", label: "7 repositories" },
+  aboutHref: "../about/",
+  profile: "default@1",
+  pages: 134,
+  links: [
+    { label: "Legal notice", href: "https://forge.example/legal/mentions" },
+    {
+      label: "Accessibility — partially compliant",
+      href: "https://forge.example/legal/accessibility",
+    },
+    { label: "Personal data", href: "https://forge.example/legal/privacy" },
+  ],
+  todo: { label: "To do", href: "../todo/", count: 12 },
+  credit: false,
+  labels: {
+    published: "Published on 13 September 2026 at 10:04, from",
+    buildAt: "Sep 13, 2026 10:04 AM",
+    profile: "profile default@1",
+    pages: "134 pages",
+  },
+};
+
+/** The footer of the corporate state without anything declared: the first column alone, exact and complete. */
+export const corporateFooterAlone: SlotProps["Footer"] = { ...corporateFooter, links: [] };

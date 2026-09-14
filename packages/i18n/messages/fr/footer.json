@@ -1,3 +1,22 @@
 {
-  "footer.builtWith": "Généré avec Concordance"
+  "footer.accessibility": "Accessibilité",
+  "footer.accessibilityWith": "Accessibilité — {status}",
+  "footer.buildAt": "{day, date, medium} {time, time, short}",
+  "footer.builtWith": "Construit avec",
+  "footer.compliant": "totalement conforme",
+  "footer.content": "Le contenu appartient à son organisation.",
+  "footer.declared": "Déclaré par l’organisation",
+  "footer.generator": "un générateur de site statique",
+  "footer.licence": "sous licence GNU GPL v3 ou ultérieure.",
+  "footer.mentions": "Mentions légales",
+  "footer.nonCompliant": "non conforme",
+  "footer.pages": "{count, plural, one {# page} other {# pages}}",
+  "footer.partiallyCompliant": "partiellement conforme",
+  "footer.privacy": "Données personnelles",
+  "footer.profile": "profil {profile}",
+  "footer.publication": "publication",
+  "footer.published": "Publié le {day, date, long} à {time, time, short}, depuis",
+  "footer.repositories": "{count, plural, one {# dépôt} other {# dépôts}}",
+  "footer.sources": "Voir les sources et leurs versions",
+  "footer.thisSite": "Ce site"
 }

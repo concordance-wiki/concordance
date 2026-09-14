@@ -1279,6 +1279,18 @@ As the author of a theme, I want the gallery to show every board of the referenc
 
 Depends on: L9-01 to L9-14.
 
+#### L9-16 Footer and legal pages
+
+As a reader, I want the footer of every page to tell me where the content comes from, when it was published and under which licence the tool runs, and to distinguish that from what the organisation declares, so that I never mistake a statement of the tool for a commitment of the organisation, nor the reverse.
+
+- The footer of every page is a card at the width of the pages, in two columns then a line. The first column, headed "This site", is what the tool knows: the sentence "Published on 13 September 2026 at 10:04, from 7 repositories. See the sources and their versions.", the repositories counted from the sources of the build and linked to the spaces page, the second link leading to the about page; then "Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation." The line under the columns, in the monospace family on the soft surface, reads "publication 13 Sept 2026 10:04 · profile default@1 · 1,894 pages" (the build instant, the profile of the configuration with its version, the notes counted) and ends on the to-do link with its count, the build statistic kept out of the top bar since L9-01. Every string comes from the catalogue in the site language; a theme receives them worded on the `labels` of the `Footer` slot.
+- The second column, headed "Declared by the organisation", appears only when something was declared, and nothing is ever pre-filled: the new configuration keys `project.legal.mentions_url`, `project.legal.accessibility_url` and `project.legal.privacy_url` (HTTPS addresses) link the legal notice, the accessibility statement and the personal data page, in that order; without an address, a note filed at `legal/mentions.md`, `legal/accessibility.md` or `legal/privacy.md` in a source stands for the page and is linked; without either, the link is not shown. The accessibility link reads "Accessibility — partially compliant" when `project.legal.accessibility_status` declares one of `non-compliant`, `partially-compliant` or `compliant`, and "Accessibility" alone otherwise: the state is the organisation's word, never derived, never assumed. The paragraph `footer.text` and the links `footer.links` of `theme.yaml` follow the legal links in the same column.
+- `footer.credit: true` names the tool and links it to its repository inside the sentence of the generator, "Built with Concordance, a static site generator…"; `false`, the default, names nothing, and no page names the tool anywhere else. Without any configuration the first column alone shows, exact and complete.
+- The footer carries no version of the tool: it is not a datum a reader judges a site by. Every text of the footer keeps to the 13 px floor of the theme, its headings included.
+- Gallery states `footer-corporate` (the three legal links, the accessibility state declared) and `footer-alone` (nothing declared), under the spaces page; the accessibility checker and the contrast checker pass on them, and on every state, since the footer is on every page. The keys are in the schema, the reference and the configuration guide.
+
+Depends on: L9-01, L9-10.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

@@ -263,6 +263,7 @@ export async function renderSite(
     ...(config.build?.extracted_text_max_chars === undefined
       ? {}
       : { bodyMaxChars: config.build.extracted_text_max_chars }),
+    ...(config.project.legal === undefined ? {} : { legal: config.project.legal }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   placeDocuments(io.fs, fragments, input.modelDirectory, input.output);

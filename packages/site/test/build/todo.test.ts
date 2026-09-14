@@ -245,10 +245,12 @@ describe("The to-do page is reachable from the home page and the header with its
 
   it("counts the documents and the words in the footer link of every page, the home page included, and nowhere else on the home page", () => {
     expect(home).toContain(
-      '<li class="site-footer-todo"><a href="todo/index.html">To do<span class="count">5</span></a></li>',
+      '<a class="site-footer-todo" href="todo/index.html">To do<span class="count">5</span></a>',
     );
     expect(home.match(/todo\/index\.html/g)).toHaveLength(1);
-    expect(page).toContain('<a href="index.html">To do<span class="count">5</span></a>');
+    expect(page).toContain(
+      '<a class="site-footer-todo" href="index.html">To do<span class="count">5</span></a>',
+    );
   });
 
   it("folds the suspected noise after the words, worded in the language of the site", () => {

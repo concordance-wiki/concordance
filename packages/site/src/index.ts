@@ -40,7 +40,7 @@ export * from "./theme/context.js";
 export * from "./neighbourhood/layout.js";
 export * from "./theme/default/glyphs.js";
 export { defaultComponents } from "./theme/default/index.js";
-export { REPOSITORY_URL } from "./theme/default/footer.js";
+export { REPOSITORY_URL, TOOL_NAME, defaultFooterLabels } from "./theme/default/footer.js";
 export * from "./theme/default/mode-switch.js";
 export * from "./theme/default/contract-viewer.js";
 export * from "./theme/default/contract-section.js";
@@ -105,6 +105,7 @@ export {
 } from "./build/space.js";
 export type { FolderCount, SpaceCount, Filing } from "./build/space.js";
 export * from "./build/spaces.js";
+export * from "./build/footer.js";
 export {
   CATEGORY_VARIANTS_MAX,
   categoryDocumentsOf,

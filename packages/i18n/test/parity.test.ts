@@ -141,7 +141,7 @@ describe("message catalogues", () => {
     for (const id of messageIds) {
       for (const kind of Object.values<ArgumentKind>(messageArguments[id])) kinds.add(kind);
     }
-    expect([...kinds].sort()).toEqual(["argument", "date", "number", "plural"]);
+    expect([...kinds].sort()).toEqual(["argument", "date", "number", "plural", "time"]);
   });
 
   it("type the identifiers from the source catalogue", () => {

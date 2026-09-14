@@ -1,6 +1,82 @@
 {
+  "footer.accessibility": {
+    "defaultMessage": "Accessibility",
+    "description": "Link of the footer to the accessibility statement the organisation declared, without a state."
+  },
+  "footer.accessibilityWith": {
+    "defaultMessage": "Accessibility — {status}",
+    "description": "Link of the footer to the accessibility statement, with the compliance it declares."
+  },
+  "footer.buildAt": {
+    "defaultMessage": "{day, date, medium} {time, time, short}",
+    "description": "The build instant on the line under the footer."
+  },
   "footer.builtWith": {
-    "defaultMessage": "Built with Concordance",
-    "description": "Optional discreet mention of the tool in the footer."
+    "defaultMessage": "Built with",
+    "description": "Start of the sentence naming the generator; the name of the tool follows only when the theme credits it."
+  },
+  "footer.compliant": {
+    "defaultMessage": "compliant",
+    "description": "Accessibility state declared by the organisation: fully compliant."
+  },
+  "footer.content": {
+    "defaultMessage": "The content belongs to its organisation.",
+    "description": "Sentence of the footer after the licence of the tool."
+  },
+  "footer.declared": {
+    "defaultMessage": "Declared by the organisation",
+    "description": "Heading of the second column of the footer: the pages only the organisation can declare."
+  },
+  "footer.generator": {
+    "defaultMessage": "a static site generator",
+    "description": "What the site is built with, after Built with; linked to the repository when the theme credits the tool."
+  },
+  "footer.licence": {
+    "defaultMessage": "under the GNU GPL v3 or later licence.",
+    "description": "End of the sentence naming the generator: its licence."
+  },
+  "footer.mentions": {
+    "defaultMessage": "Legal notice",
+    "description": "Link of the footer to the legal notice the organisation declared."
+  },
+  "footer.nonCompliant": {
+    "defaultMessage": "non compliant",
+    "description": "Accessibility state declared by the organisation: not compliant."
+  },
+  "footer.pages": {
+    "defaultMessage": "{count, plural, one {# page} other {# pages}}",
+    "description": "The number of pages on the line under the footer."
+  },
+  "footer.partiallyCompliant": {
+    "defaultMessage": "partially compliant",
+    "description": "Accessibility state declared by the organisation: partially compliant."
+  },
+  "footer.privacy": {
+    "defaultMessage": "Personal data",
+    "description": "Link of the footer to the personal data page the organisation declared."
+  },
+  "footer.profile": {
+    "defaultMessage": "profile {profile}",
+    "description": "The profile with its version on the line under the footer, default@1 for instance."
+  },
+  "footer.publication": {
+    "defaultMessage": "publication",
+    "description": "Start of the line under the footer, in the monospace family, before the build instant."
+  },
+  "footer.published": {
+    "defaultMessage": "Published on {day, date, long} at {time, time, short}, from",
+    "description": "First sentence of the footer, before the link counting the repositories."
+  },
+  "footer.repositories": {
+    "defaultMessage": "{count, plural, one {# repository} other {# repositories}}",
+    "description": "Link of the footer to the spaces page, counting the repositories the site is built from."
+  },
+  "footer.sources": {
+    "defaultMessage": "See the sources and their versions",
+    "description": "Link of the footer to the about page."
+  },
+  "footer.thisSite": {
+    "defaultMessage": "This site",
+    "description": "Heading of the first column of the footer: what the tool knows of the site."
   }
 }
