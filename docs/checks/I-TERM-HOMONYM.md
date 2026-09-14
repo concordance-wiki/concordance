@@ -6,6 +6,8 @@ Two entities share a title or an alias once spellings are compared: same form af
 
 The recognition dictionary keeps both. Every occurrence of the form links to each entity, at half the confidence it would have with a single target, glossary entities first. The finding names the form and the identifiers of the entities, sorted.
 
+A twin folded into its note is not a homonym: the twin resources are reconciled before the dictionary is built, so a converted document whose title is the heading of a note, or two notes merged on their base names, lend their titles and aliases to the one entity they became, and a form the two share names that entity once, at full confidence.
+
 ## Before
 
 ```
