@@ -86,7 +86,7 @@ describe("L9-08 text first: the main content of every page in the served HTML, r
       });
 
       it("serves no control that needs a script: every button hidden, every link a real target, no inline handler", () => {
-        for (const [button] of main.matchAll(/<button[^>]*>/g)) {
+        for (const [button] of shown(main).matchAll(/<button[^>]*>/g)) {
           expect(button).toMatch(/\shidden(>|\s)/);
         }
         for (const [, href] of main.matchAll(/<a [^>]*href="([^"]*)"/g)) {
@@ -106,6 +106,12 @@ describe("L9-08 text first: the main content of every page in the served HTML, r
             // The viewer opens on demand: its button is served hidden and the page reads the file through its extracted text or its link.
             expect(visible).toBe("");
             expect(main).toMatch(/<div class="document-text">|<a class="document-pdf"/);
+            continue;
+          }
+          if (name === "gallery-width") {
+            // The width switch of the gallery index is a convenience: served hidden, every frame keeps the width of its board without it.
+            expect(visible).toBe("");
+            expect(main).toMatch(/<iframe [^>]*width="/);
             continue;
           }
           expect(visible !== "" || noscript !== undefined, `${path}: island ${name ?? ""}`).toBe(
