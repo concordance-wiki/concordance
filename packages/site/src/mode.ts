@@ -1,22 +1,28 @@
+import type { ColourScheme } from "./css/tokens.js";
+
 /** The `localStorage` key holding the reader's choice of colour scheme; absent when the site's default applies. */
 export const MODE_STORAGE_KEY = "concordance-mode";
 
-/** The choices of the mode switch, in the order it cycles through them; `system` means no stored choice. */
+/** The choices a reader can hold: the two schemes, or `system` when no choice is stored. */
 export const MODES = ["system", "light", "dark"] as const;
 
 /** A colour scheme a reader can force; `system` leaves the theme's default and the system preference in charge. */
 export type ModeChoice = (typeof MODES)[number];
 
-/** The glyph the mode switch draws for each choice: a half disc for the system preference, a sun, a moon. */
-export const MODE_GLYPHS: Readonly<Record<ModeChoice, string>> = {
-  system: "◐",
+/** The glyph of each scheme: a sun, a moon. The switch draws the glyph of the scheme it switches to. */
+export const SCHEME_GLYPHS: Readonly<Record<ColourScheme, string>> = {
   light: "☀",
   dark: "☾",
 };
 
-/** The accessible name of the mode switch: the name of the control, then the current choice. */
-export function modeSwitchName(name: string, choice: string): string {
-  return `${name}: ${choice}`;
+/** The scheme the other one is: what the switch offers from the one displayed. */
+export function otherScheme(scheme: ColourScheme): ColourScheme {
+  return scheme === "dark" ? "light" : "dark";
+}
+
+/** The glyph the switch draws over a page in the given scheme: a moon over a light page, a sun over a dark one. */
+export function switchGlyph(displayed: ColourScheme): string {
+  return SCHEME_GLYPHS[otherScheme(displayed)];
 }
 
 /**

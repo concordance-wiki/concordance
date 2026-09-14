@@ -7,6 +7,7 @@ export const siteMessages = {
   en,
   fr,
   arguments: {
+    "site.darkMode": {},
     "site.generatedAt": { date: "date" },
     "site.home": {},
     "site.index": {},

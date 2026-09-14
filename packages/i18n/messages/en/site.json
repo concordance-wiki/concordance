@@ -1,4 +1,8 @@
 {
+  "site.darkMode": {
+    "defaultMessage": "Dark mode",
+    "description": "Name of the mode switch of the top bar, a toggle pressed while the dark colour scheme is displayed."
+  },
   "site.generatedAt": {
     "defaultMessage": "Generated on {date, date, long}",
     "description": "Footer line giving the day the site was built."

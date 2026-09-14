@@ -63,7 +63,7 @@ export function Header({
           </details>
         )}
         <Trail {...(trail === undefined ? {} : { trail })} />
-        <ModeSwitch />
+        <ModeSwitch label={text.darkMode} />
       </nav>
     </header>
   );

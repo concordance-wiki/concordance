@@ -8,6 +8,7 @@ import { SpaceTreeFold } from "./space-tree.js";
 export const defaultHeaderLabels: HeaderLabels = {
   menu: labels.menu,
   search: labels.search,
+  darkMode: labels.darkMode,
 };
 
 /** The spaces: the link to their place on the home page as a heading, then one entry per source with its initials and its note count. */

@@ -41,18 +41,14 @@ describe("the mode-switch entry", () => {
     vi.unstubAllGlobals();
   });
 
-  it("wires every mode switch of the document with the local storage and the root element", async () => {
+  it("wires every mode switch of the document with the local storage, the root element and the scheme the tokens layer displays", async () => {
     const selectors: string[] = [];
     const buttons: { hidden: boolean; attributes: Record<string, string>; text: string }[] = [];
+    const queries: string[] = [];
     const island = () => {
       const button = { hidden: true, attributes: {} as Record<string, string>, text: "" };
       buttons.push(button);
       return {
-        getAttribute: () =>
-          JSON.stringify({
-            name: "Couleurs",
-            labels: { system: "auto", light: "clair", dark: "sombre" },
-          }),
         querySelector: () => ({
           get hidden() {
             return button.hidden;
@@ -75,8 +71,9 @@ describe("the mode-switch entry", () => {
         }),
       };
     };
+    const documentElement = { dataset: {} };
     vi.stubGlobal("document", {
-      documentElement: { dataset: {} },
+      documentElement,
       querySelectorAll: (selector: string) => {
         selectors.push(selector);
         return [island(), island()];
@@ -87,16 +84,26 @@ describe("the mode-switch entry", () => {
       setItem: () => undefined,
       removeItem: () => undefined,
     });
+    vi.stubGlobal("getComputedStyle", (element: unknown) => ({
+      getPropertyValue: (property: string) => {
+        expect(element).toBe(documentElement);
+        return property === "--scheme" ? " dark" : "";
+      },
+    }));
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      addEventListener: (type: string) => {
+        queries.push(`${query} ${type}`);
+      },
+    }));
     await import("../../src/islands/mode-switch.client.js");
     expect(selectors).toEqual(['concordance-island[data-island="mode-switch"]']);
-    const named = {
-      "aria-pressed": "true",
-      "aria-label": "Couleurs: sombre",
-      title: "Couleurs: sombre",
-    };
+    expect(queries).toEqual([
+      "(prefers-color-scheme: dark) change",
+      "(prefers-color-scheme: dark) change",
+    ]);
     expect(buttons).toEqual([
-      { hidden: false, attributes: named, text: "sombre" },
-      { hidden: false, attributes: named, text: "sombre" },
+      { hidden: false, attributes: { "aria-pressed": "true" }, text: "☀" },
+      { hidden: false, attributes: { "aria-pressed": "true" }, text: "☀" },
     ]);
   });
 });

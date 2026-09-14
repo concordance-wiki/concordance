@@ -1,5 +1,5 @@
-import { MODE_GLYPHS, MODE_STORAGE_KEY, MODES, modeSwitchName, type ModeChoice } from "../mode.js";
-import type { ModeSwitchProps } from "../theme/default/mode-switch.js";
+import type { ColourScheme } from "../css/tokens.js";
+import { MODE_STORAGE_KEY, otherScheme, switchGlyph, type ModeChoice } from "../mode.js";
 
 /** The part of `localStorage` the switch uses; every call may throw when storage is disabled. */
 export interface ModeStorage {
@@ -13,6 +13,16 @@ export interface ModeRoot {
   dataset: { mode?: string };
 }
 
+/**
+ * What the page displays: the scheme the tokens layer put in force, whatever decided it, the
+ * theme's default, the system preference or a remembered choice; and a way to hear the system
+ * preference change while no choice is stored.
+ */
+export interface SchemeView {
+  displayed(): ColourScheme;
+  onPreferenceChange(listener: () => void): void;
+}
+
 export interface ModeSwitchText {
   textContent: string | null;
 }
@@ -24,24 +34,9 @@ export interface ModeSwitchButton {
   querySelector(selector: string): ModeSwitchText | null;
 }
 
-/** The island element written at build, holding the serialised labels and the button. */
+/** The island element written at build, holding the button; its label is written in the markup. */
 export interface ModeSwitchElement {
-  getAttribute(name: string): string | null;
   querySelector(selector: string): ModeSwitchButton | null;
-}
-
-function isForced(value: string | null): value is Exclude<ModeChoice, "system"> {
-  return value === "light" || value === "dark";
-}
-
-/** The stored choice, or `system` when nothing valid is stored or storage cannot be read. */
-export function readChoice(storage: ModeStorage): ModeChoice {
-  try {
-    const stored = storage.getItem(MODE_STORAGE_KEY);
-    return isForced(stored) ? stored : "system";
-  } catch {
-    return "system";
-  }
 }
 
 /** Applies a choice to the root and remembers it; a failing storage still changes the page. */
@@ -62,47 +57,51 @@ export function applyChoice(choice: ModeChoice, storage: ModeStorage, root: Mode
   }
 }
 
-export function nextChoice(choice: ModeChoice): ModeChoice {
-  // The index is always found: a choice is one of the modes; the modulo keeps it in range.
-  return MODES[(MODES.indexOf(choice) + 1) % MODES.length] as ModeChoice;
+/**
+ * The choice that displays the other scheme: nothing stored when the theme's default and the
+ * system preference already give it, so that the page follows the system again; the scheme
+ * itself otherwise, remembered until the reader switches back.
+ */
+export function toggleChoice(view: SchemeView, root: ModeRoot): ModeChoice {
+  const target = otherScheme(view.displayed());
+  delete root.dataset.mode;
+  return view.displayed() === target ? "system" : target;
+}
+
+/** The scheme the tokens layer names on the root, read from its computed style; light when it names none. */
+export function displayedScheme(read: (property: string) => string): ColourScheme {
+  return read("--scheme").trim() === "dark" ? "dark" : "light";
 }
 
 /**
- * Reveals the button of one island and makes it cycle through the modes: the glyph draws the
- * current one, its name and its title read the current choice for assistive technology.
+ * Reveals the button of one island and makes it toggle the scheme: the glyph draws the scheme it
+ * switches to, a moon over a light page, a sun over a dark one, and the button is pressed while
+ * the dark scheme is displayed. The label written at build, "Dark mode", is the same in both
+ * states: the pressed state tells which one holds.
  */
 export function wireModeSwitch(
   element: ModeSwitchElement,
   storage: ModeStorage,
   root: ModeRoot,
+  view: SchemeView,
 ): boolean {
   const button = element.querySelector("button");
   if (button === null) {
     return false;
   }
-  // Written by island() at build: the attribute carries the props of the switch.
-  const props = JSON.parse(element.getAttribute("data-props") ?? "{}") as Partial<ModeSwitchProps>;
   const glyph = button.querySelector(".mode-switch-glyph");
-  const value = button.querySelector(".mode-switch-value");
-  let current = readChoice(storage);
   const show = (): void => {
-    const choice = props.labels?.[current] ?? current;
-    const name = modeSwitchName(props.name ?? "", choice);
-    button.setAttribute("aria-pressed", current === "system" ? "false" : "true");
-    button.setAttribute("aria-label", name);
-    button.setAttribute("title", name);
+    const displayed = view.displayed();
+    button.setAttribute("aria-pressed", displayed === "dark" ? "true" : "false");
     if (glyph !== null) {
-      glyph.textContent = MODE_GLYPHS[current];
-    }
-    if (value !== null) {
-      value.textContent = choice;
+      glyph.textContent = switchGlyph(displayed);
     }
   };
   button.addEventListener("click", () => {
-    current = nextChoice(current);
-    applyChoice(current, storage, root);
+    applyChoice(toggleChoice(view, root), storage, root);
     show();
   });
+  view.onPreferenceChange(show);
   show();
   button.hidden = false;
   return true;
