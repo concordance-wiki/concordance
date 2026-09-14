@@ -23,7 +23,6 @@
     "@concordance-wiki/checks": "workspace:*",
     "@concordance-wiki/ingest": "workspace:*",
     "@concordance-wiki/nlp": "workspace:*",
-    "ajv": "8.17.1",
     "yaml": "2.8.1"
   }
 }

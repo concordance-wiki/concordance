@@ -2,12 +2,12 @@ import { posix } from "node:path";
 
 import type { CheckId, StepFinding } from "@concordance-wiki/checks";
 import {
-  compileGlobs,
   identifierFor,
   type CanonicalModel,
   type Config,
   type Entity,
   type FileSystem,
+  type LintOverrides,
   type SourceConfig,
 } from "@concordance-wiki/core";
 import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wiki/ingest";
@@ -24,6 +24,7 @@ import {
 } from "@concordance-wiki/profile";
 import { resolveType } from "@concordance-wiki/typing";
 
+import { lintedFiles } from "../files.js";
 import { DEFAULT_SOURCE_NAME, leavesRoot } from "../local.js";
 
 /**
@@ -42,6 +43,10 @@ export interface GlobalChecksInput {
   root: string;
   source?: SourceConfig;
   config?: Config;
+  /** The content of `concordance-lint.yaml`; its `exclude` keeps files out of the checks. */
+  overrides?: LintOverrides;
+  /** Whether the files git ignores are left out; they are unless this is false. */
+  gitignore?: boolean;
   fs: FileSystem;
   profile: Profile;
   /** The published model; its entities stand for every other source. */
@@ -97,11 +102,10 @@ function localNotes(input: GlobalChecksInput): { notes: LocalNote[]; files: Read
   const { root, fs, profile } = input;
   const source = input.source ?? { name: DEFAULT_SOURCE_NAME };
   const locale = resolveLocale(source, input.config?.project ?? {});
-  const excluded = compileGlobs(input.config?.privacy?.exclude ?? []);
   const suffixes = (source.rules ?? []).flatMap((rule) =>
     rule.match.suffix === undefined ? [] : [rule.match.suffix],
   );
-  const files = fs.listFiles(root).filter((path) => !excluded(path));
+  const files = lintedFiles(input);
   const notes: LocalNote[] = [];
   for (const path of files) {
     if (!path.endsWith(".md")) continue;

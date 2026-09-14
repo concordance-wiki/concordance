@@ -37,6 +37,7 @@ describe("@concordance-wiki/lint", () => {
       "isOutputFormat",
       "lintGlobal",
       "lintRepository",
+      "lintedFiles",
       "loadPublishedModel",
       "locationOf",
       "mergeFindings",

@@ -157,6 +157,27 @@ describe("Linter and build parity", () => {
       },
     );
 
+    it.each([
+      ["faulty/en", "vendor/copy.md", "nowhere.md"],
+      ["faulty/fr", "externe/copie.md", "nulle-part.md"],
+    ])(
+      "never reports the folder concordance-lint.yaml excludes nor the file git ignores in %s, on either side",
+      async (corpus, excluded, target) => {
+        cpSync(join(corpora, corpus), copy, { recursive: true });
+        // Both files carry a broken link and a faulty frontmatter, which would be reported if read.
+        for (const path of [excluded, "site/index.md"]) {
+          const text = readFileSync(join(copy, "notes", path), "utf8");
+          expect(text).toContain(`](${target})`);
+          expect(text.startsWith("---\nid: [\n---\n")).toBe(true);
+        }
+        const reported = [...lintCopy(copy, readConfig(copy)), ...(await buildCopy(copy))].map(
+          (finding) => `${finding.source ?? ""}/${finding.path ?? ""}`,
+        );
+        expect(reported).not.toContain(`notes/${excluded}`);
+        expect(reported).not.toContain("notes/site/index.md");
+      },
+    );
+
     it("lets the build report more than the linter, but only for the checks that need the whole model", async () => {
       cpSync(join(corpora, "faulty/en"), copy, { recursive: true });
       const build = await buildCopy(copy);

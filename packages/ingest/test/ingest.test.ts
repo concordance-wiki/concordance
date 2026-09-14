@@ -361,7 +361,94 @@ describe("ingestSources", () => {
       expect(modifiedAt.mock.calls).toEqual([["/project/notes/public.md"]]);
     });
 
-    it("never reads the content of any file: ingestion lists and stamps only", async () => {
+    it("leaves out the files the lint configuration of the repository excludes and the files git ignores, never stamping them", async () => {
+      const { fs, deps } = harness({
+        [URL]: {
+          commit: COMMIT,
+          files: {
+            "README.md": { content: "# Docs\n" },
+            "concordance-lint.yaml": { content: "exclude: ['vendor/**']\n" },
+            "vendor/lib.md": { content: "# Vendored\n" },
+          },
+        },
+      });
+      fs.writeText("/project/notes/.gitignore", "site/\n*.tmp.md\n");
+      fs.writeText("/project/notes/concordance-lint.yaml", "exclude: [drafts/**]\n");
+      fs.writeText("/project/notes/public.md", "ok");
+      fs.writeText("/project/notes/scratch.tmp.md", "no");
+      fs.writeText("/project/notes/site/index.md", "no");
+      fs.writeText("/project/notes/drafts/wip.md", "no");
+      const modifiedAt = vi.spyOn(fs, "modifiedAt");
+      const result = await ingestSources(
+        config([
+          { name: "docs", git: URL },
+          { name: "notes", path: "notes" },
+        ]),
+        deps,
+      );
+      expect(result.findings).toEqual([]);
+      expect(result.sources.map((source) => source.files.map((file) => file.path))).toEqual([
+        ["README.md", "concordance-lint.yaml"],
+        [".gitignore", "concordance-lint.yaml", "public.md"],
+      ]);
+      expect(modifiedAt.mock.calls.map(([path]) => path)).toEqual([
+        "/cache/sources/docs/README.md",
+        "/cache/sources/docs/concordance-lint.yaml",
+        "/project/notes/.gitignore",
+        "/project/notes/concordance-lint.yaml",
+        "/project/notes/public.md",
+      ]);
+    });
+
+    it("skips a source whose lint configuration is faulty, as the linter refuses to run on it", async () => {
+      const { fs, deps } = harness({
+        [URL]: {
+          commit: COMMIT,
+          files: { "concordance-lint.yaml": { content: "exclude: 3\n" } },
+        },
+      });
+      fs.writeText("/project/notes/concordance-lint.yaml", "checks:\n  stale: {}\n");
+      fs.writeText("/project/notes/public.md", "ok");
+      const result = await ingestSources(
+        config([
+          { name: "docs", git: URL },
+          { name: "notes", path: "notes" },
+        ]),
+        deps,
+      );
+      expect(result.sources).toEqual([]);
+      const unreadable = (name: string, detail: string) => ({
+        check: "W-SOURCE-UNREACHABLE",
+        severity: "warning",
+        source: name,
+        message: `source "${name}" could not be read: ${detail}`,
+        remediation:
+          "Fix concordance-lint.yaml in the repository, as concordance lint reports it; the source is skipped in this build.",
+      });
+      expect(result.findings).toEqual([
+        unreadable(
+          "docs",
+          "error: /cache/sources/docs/concordance-lint.yaml: exclude: wrong type; received 3; expected array",
+        ),
+        unreadable(
+          "notes",
+          'error: /project/notes/concordance-lint.yaml: checks.stale: key is not a check identifier; received "stale"',
+        ),
+      ]);
+    });
+
+    it("lets any other failure of a local source through, as before", async () => {
+      const { fs, deps } = harness();
+      fs.writeText("/project/notes/public.md", "ok");
+      vi.spyOn(fs, "listFiles").mockImplementation(() => {
+        throw new Error("EACCES: permission denied");
+      });
+      await expect(ingestSources(config([{ name: "notes", path: "notes" }]), deps)).rejects.toThrow(
+        "EACCES: permission denied",
+      );
+    });
+
+    it("never reads the content of a note: ingestion lists and stamps only, reading the ignore files and the lint configuration alone", async () => {
       const { fs, deps } = harness();
       fs.writeText("/project/notes/a.md", "a");
       const readText = vi.spyOn(fs, "readText");
@@ -373,6 +460,13 @@ describe("ingestSources", () => {
         deps,
       );
       expect(readText).not.toHaveBeenCalled();
+      fs.writeText("/project/notes/.gitignore", "");
+      fs.writeText("/project/notes/concordance-lint.yaml", "");
+      await ingestSources(config([{ name: "notes", path: "notes" }]), deps);
+      expect(readText.mock.calls.map(([path]) => path)).toEqual([
+        "/project/notes/concordance-lint.yaml",
+        "/project/notes/.gitignore",
+      ]);
     });
   });
 
