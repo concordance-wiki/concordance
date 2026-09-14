@@ -1254,10 +1254,10 @@ the word, grouped by file.
         </p>
         <div class="read">
 <pre><span class="c"># 1 — check one repository, before you push. No site needed.</span>
-npx concordance lint
+npx @concordance-wiki/concordance lint
 
 <span class="c"># 2 — build the wiki from every source in concordance.yaml</span>
-npx concordance build
+npx @concordance-wiki/concordance build
 
 <span class="c"># or turnkey, with the container image</span>
 docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build</pre>

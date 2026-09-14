@@ -15,8 +15,8 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@concordance-wiki/concordance"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/concordance?style=flat-square"></a>
   <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
-  <img alt="Status" src="https://img.shields.io/badge/status-pre--alpha-C24E24?style=flat-square">
   <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
 </p>
 
@@ -39,8 +39,8 @@ Concordance takes those repositories **exactly as they are** and builds a wiki w
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/page-dark.svg">
-    <img src="docs/assets/page-light.svg" width="100%" alt="A Concordance page: the note on the left, every file that mentions the word on the right, written links and simple citations kept apart">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-entity-dark.png">
+    <img src="docs/assets/screenshot-entity-light.png" width="100%" alt="The page of the rule Broken link in the wiki Concordance builds from its own specifications: the tree of the space on the left, the note in the middle with its written links, its recognised words that have a note and those that have none marked apart, and on the right the properties of the note, its outline and the seven related pages with the passage that cites it">
   </picture>
 </p>
 
@@ -57,8 +57,8 @@ docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
 Or in a pipeline, with the CLI:
 
 ```bash
-npx concordance build      # clones your repositories, builds dist/, publish it anywhere
-npx concordance lint       # checks one repository before you push: broken links, duplicates, gaps
+npx @concordance-wiki/concordance build      # clones your repositories, builds dist/, publish it anywhere
+npx @concordance-wiki/concordance lint       # checks one repository before you push: broken links, duplicates, gaps
 ```
 
 `dist/` is a static folder. Drop it on GitHub Pages, GitLab Pages or a bucket. It works over `file://` too.
@@ -92,7 +92,7 @@ sources:
 
 ## Status
 
-Pre-alpha. This repository holds the specification, the default meta-model, the schemas, the reference corpora and the documentation; the engine is being written against them. The commands above describe what is coming, not what is published.
+Version 0.1.x is published on npm: [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance), the command with every official plugin, and [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli), the command alone, with the [engine packages](packages/README.md) and the plugins next to them. The [demo wiki](https://concordance-wiki.github.io/demo-wiki/) is built from this project's own repositories, the [gallery](https://concordance-wiki.github.io/concordance/gallery/) shows every slot of the default theme in every state, and each version has its [release notes](https://github.com/concordance-wiki/concordance/releases) on GitHub.
 
 The project's own wiki is built with Concordance from its [glossary](https://github.com/concordance-wiki/demo-glossary) and [specifications](https://github.com/concordance-wiki/demo-specs), configured by [demo-wiki](https://github.com/concordance-wiki/demo-wiki). Copy that repository to start yours.
 
