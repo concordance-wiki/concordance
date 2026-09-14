@@ -1,8 +1,9 @@
 // What a published package ships, checked before it is packed: the manifest
 // of every workspace package that is not private carries the fields a registry
 // shows, its entry points and its `files` stay under the built and shipped
-// folders, its licence is the one of the repository, and the tarball `pnpm
-// pack --dry-run` would write holds neither tests, nor sources, nor fixtures.
+// folders, its licence is the one of the repository, its README carries no
+// relative link, and the tarball `pnpm pack --dry-run` would write holds
+// neither tests, nor sources, nor fixtures.
 // Run through scripts/validate.mjs; the pack itself is injectable for tests.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -22,6 +23,9 @@ const forbidden = [
   /\.test\.[cm]?[jt]sx?$/u,
 ];
 const required = ["package.json", "README.md", "LICENSE"];
+// A published README is what the registry shows, where a link into the repository is dead: a
+// target starting with `./` or `../`, or any target without a scheme that ends in `.md`.
+const relativeLink = /\]\(((?:\.\.?\/|[^:)]+\.md)[^)]*)\)/gu;
 
 // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
 const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
@@ -124,6 +128,25 @@ function checkLicence(root, directory, dir, fail) {
     fail(`${directory}/LICENSE: differs from the one of the repository`);
 }
 
+/** The relative links of a README, each with its line, in reading order. */
+export function relativeLinks(readme) {
+  const links = [];
+  readme.split("\n").forEach((text, index) => {
+    for (const match of text.matchAll(relativeLink))
+      links.push({ line: index + 1, target: match[1] });
+  });
+  return links;
+}
+
+/** A published README carries no relative link: the registry shows it far from the repository. */
+function checkReadme(directory, dir, fail) {
+  const readme = join(dir, "README.md");
+  if (!existsSync(readme)) return;
+  for (const { line, target } of relativeLinks(readFileSync(readme, "utf8"))) {
+    fail(`${directory}/README.md:${String(line)}: relative link ${target}`);
+  }
+}
+
 function checkManifest(root, pkg, manifest, fail) {
   const directory = relative(root, pkg.dir);
   const file = `${directory}/package.json`;
@@ -131,6 +154,7 @@ function checkManifest(root, pkg, manifest, fail) {
   const files = checkFiles(file, pkg.dir, manifest, fail);
   checkEntryPoints(file, pkg.dir, manifest, files, fail);
   checkLicence(root, directory, pkg.dir, fail);
+  checkReadme(directory, pkg.dir, fail);
 }
 
 function checkTarball(root, pkg, files, fail) {

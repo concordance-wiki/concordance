@@ -4,7 +4,13 @@ import { join } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { checkPackaging, entryPoints, packList, pnpmCommand } from "../check-packaging.mjs";
+import {
+  checkPackaging,
+  entryPoints,
+  packList,
+  pnpmCommand,
+  relativeLinks,
+} from "../check-packaging.mjs";
 
 const repository = join(import.meta.dirname, "../..");
 const licence = "GNU GENERAL PUBLIC LICENSE\n";
@@ -174,6 +180,37 @@ describe("checkPackaging", () => {
     ]);
   });
 
+  it("refuses a relative link in a published README", () => {
+    const root = workspace([manifest("core")]);
+    writeFileSync(
+      join(root, "packages/core/README.md"),
+      [
+        "# @concordance-wiki/core",
+        "",
+        "See the [plugin guide](../../docs/guides/plugins.md) and [profile](../profile/README.md).",
+        "The [templates](templates/README.md#notes) ship with the package; [home](https://example.invalid/) and [top](#top) are fine.",
+        "One line, two links: [a](./a.md) then [b](https://example.invalid/b.md).",
+        "",
+      ].join("\n"),
+    );
+    expect(checkPackaging(root, shipped)).toEqual([
+      "packages/core/README.md:3: relative link ../../docs/guides/plugins.md",
+      "packages/core/README.md:3: relative link ../profile/README.md",
+      "packages/core/README.md:4: relative link templates/README.md#notes",
+      "packages/core/README.md:5: relative link ./a.md",
+    ]);
+  });
+
+  it("checks the README of every published package, and none when it is missing", () => {
+    const root = workspace([manifest("core"), manifest("cli")]);
+    writeFileSync(join(root, "packages/cli/README.md"), "[core](../core/README.md)\n");
+    rmSync(join(root, "packages/core/README.md"));
+    expect(checkPackaging(root, shipped)).toEqual([
+      "packages/cli/README.md:1: relative link ../core/README.md",
+      "packages/core/package.json: files lists README.md, which does not exist",
+    ]);
+  });
+
   it("refuses a tarball that ships tests, sources, fixtures or build files", () => {
     const root = workspace([manifest("core")]);
     const pack = () => [
@@ -243,6 +280,21 @@ describe("entryPoints", () => {
 
   it("is empty for a manifest without entry points", () => {
     expect(entryPoints({ name: "concordance" })).toEqual([]);
+  });
+});
+
+describe("relativeLinks", () => {
+  it("lists every relative target with its line and leaves absolute links and anchors alone", () => {
+    expect(
+      relativeLinks("[a](https://example.invalid/a.md) [b](#b)\n[c](../c.md) [d](docs/d.md)\n"),
+    ).toEqual([
+      { line: 2, target: "../c.md" },
+      { line: 2, target: "docs/d.md" },
+    ]);
+  });
+
+  it("is empty for a README without any link", () => {
+    expect(relativeLinks("# title\n")).toEqual([]);
   });
 });
 
