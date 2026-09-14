@@ -19,7 +19,6 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
@@ -90,7 +89,12 @@ if (!existsSync(entry)) {
 }
 
 const version = JSON.parse(readFileSync(join(root, "packages/cli/package.json"), "utf8")).version;
-const staging = mkdtempSync(join(tmpdir(), "concordance-binary-"));
+// Staged inside the repository, not under the temporary folder of the system: pnpm resolves the
+// target of a deploy against the working directory, and on Windows a folder on another drive
+// ends up joined to it.
+const stagingRoot = join(root, "dist-bin");
+mkdirSync(stagingRoot, { recursive: true });
+const staging = mkdtempSync(join(stagingRoot, ".staging-"));
 try {
   const runtime = join(staging, "runtime");
   pnpm([
