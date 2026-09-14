@@ -15,7 +15,7 @@ The core of Concordance reads markdown and produces JSON. It depends on no offic
 | `viewer-contract` (shipped by `@concordance-wiki/site`, no package to install) | UI component: the contract viewer of the `api` page, a purpose-built island rendering the operations and schemas of an imported OpenAPI or WSDL contract from a JSON fragment, loaded on demand | none | available |
 | `@concordance-wiki/plugin-viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
-The `concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this. The core never imports a plugin; a test walks its sources and its `package.json` to verify it.
+The `@concordance-wiki/concordance` preset depends on all of them. Install the core packages alone when you want a build without any of this. The core never imports a plugin; a test walks its sources and its `package.json` to verify it.
 
 ## Declaring plugins
 

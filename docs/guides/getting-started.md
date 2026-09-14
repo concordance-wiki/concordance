@@ -14,11 +14,11 @@ Concordance is pre-alpha. The packages and the container image are not on a publ
 ### From the published package
 
 ```bash
-npm install --global concordance
+npm install --global @concordance-wiki/concordance
 concordance --help
 ```
 
-The `concordance` package is a preset: it installs the core and every official plugin, and provides the `concordance` command (`conc` for short). `npx concordance <command>` runs it without installing.
+The `@concordance-wiki/concordance` package is a preset: it installs the core and every official plugin, and provides the `concordance` command (`conc` for short). `npx @concordance-wiki/concordance <command>` runs it without installing.
 
 ### With the container image
 

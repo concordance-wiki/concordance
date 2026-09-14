@@ -16,7 +16,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 # --legacy: the workspace does not inject its packages, which the default deploy requires.
-RUN pnpm --filter concordance deploy --legacy --prod /out
+RUN pnpm --filter @concordance-wiki/concordance deploy --legacy --prod /out
 
 FROM ${NODE_IMAGE}
 ARG VERSION=0.0.0
