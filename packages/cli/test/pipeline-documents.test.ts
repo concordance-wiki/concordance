@@ -21,7 +21,7 @@ import { loadDefaultProfile } from "@concordance-wiki/profile";
 import { parseFragment } from "@concordance-wiki/site";
 import { describe, expect, it } from "vitest";
 
-import { buildDictionaries } from "../src/pipeline/dictionary.js";
+import { buildDictionaries, corpusStopwords } from "../src/pipeline/dictionary.js";
 import { fragmentsOf, writeFragments } from "../src/pipeline/fragments.js";
 import { parseSources } from "../src/pipeline/parse.js";
 import { runPipeline, type PipelineInput, type PipelineResult } from "../src/pipeline/run.js";
@@ -403,10 +403,13 @@ describe("L4-07 extracted text indexed", () => {
     const { result, input } = await build();
     const dictionaries = buildDictionaries({
       entities: result.entities,
-      sources: input.sources,
       config: input.config,
-      configDirectory: "/work",
-      fs: input.fs,
+      stopwords: corpusStopwords({
+        sources: input.sources,
+        config: input.config,
+        configDirectory: "/work",
+        fs: input.fs,
+      }),
     });
     const parsed = parseSources(input.sources, input.fs);
     const occurrences = scanNotes({

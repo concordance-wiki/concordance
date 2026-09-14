@@ -23,7 +23,7 @@ import type { Profile } from "@concordance-wiki/profile";
 import { enrichStepFindings, runModelChecks } from "./checks.js";
 import { combineProducedLinks } from "./combine.js";
 import { keywordNeighbours } from "./companions.js";
-import { buildDictionaries } from "./dictionary.js";
+import { buildDictionaries, corpusStopwords } from "./dictionary.js";
 import { displayedNeighbourhoodBlock } from "./display.js";
 import {
   documentsWithoutMarkdown,
@@ -31,7 +31,7 @@ import {
   resourcesOf,
   type ReadDocument,
 } from "./documents.js";
-import { reconcileTwins } from "./duplicates.js";
+import { reconcileTwins, repointLinks } from "./duplicates.js";
 import { discoverKeywords, type KeywordLead } from "./keywords.js";
 import { produceLinks } from "./links.js";
 import { attachOperationNotes } from "./operations.js";
@@ -96,8 +96,8 @@ export interface PipelineResult {
 /**
  * The inference chain, from the ingested sources to the blocks of the model, each step a pure
  * function of the previous ones: parse, documents, transcripts pseudonymised, type, notes and
- * documents of the scope pseudonymised, plugin sources, operation notes, dictionary, scan,
- * links, combination, relation typing, keywords, twin resources, documents without a note,
+ * documents of the scope pseudonymised, plugin sources, operation notes, twin resources,
+ * dictionary, scan, links, combination, relation typing, keywords, documents without a note,
  * model checks, displayed neighbourhood.
  */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
@@ -165,13 +165,29 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     // The same default as the ingest step gives a source without a locale of its own.
     locale: config.project.locale ?? "en",
   });
-  let entities = attached.entities;
-  const dictionaries = buildDictionaries({
-    entities,
+  const stopwords = corpusStopwords({
     sources,
     config,
     configDirectory: input.configDirectory,
     fs,
+  });
+  // Before the dictionary: a twin folded into its note must not enter it as a homonym of the note.
+  const twins = reconcileTwins({
+    entities: attached.entities,
+    documents,
+    resources: scoped.resources,
+    sources,
+    stopwords,
+    config,
+    profile,
+    clock,
+    ...(input.lock?.duplicates === undefined ? {} : { lock: input.lock.duplicates }),
+  });
+  const dictionaries = buildDictionaries({
+    entities: twins.entities,
+    folded: twins.folded,
+    config,
+    stopwords,
   });
   const occurrences = scanNotes({
     documents: scoped.documents,
@@ -181,9 +197,18 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     profile,
     config,
   });
-  const produced = produceLinks({ entities, sources, documents, occurrences, profile, config });
+  // The files of a folded twin still declare and receive links, moved to its entity once the relations are typed.
+  const declaring = [...twins.entities, ...twins.folded.map((twin) => twin.entity)];
+  const produced = produceLinks({
+    entities: declaring,
+    sources,
+    documents,
+    occurrences,
+    profile,
+    config,
+  });
   const combined = combineProducedLinks([...produced.links, ...attached.links], profile);
-  const refined = refineRelations(combined, { profile, entities });
+  const refined = refineRelations(combined, { profile, entities: declaring });
   const keywords = discoverKeywords({
     documents: scoped.documents,
     resources: scoped.resources,
@@ -194,23 +219,12 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     rejected: pseudonymization.names,
     ...(input.lock === undefined ? {} : { lock: input.lock }),
   });
-  entities = [...entities, ...keywords.entities];
-  const twins = reconcileTwins({
-    entities,
-    links: refined.links,
-    documents,
-    resources: scoped.resources,
-    sources,
-    dictionaries: dictionaries.byLocale,
-    config,
-    profile,
-    clock,
-    ...(input.lock?.duplicates === undefined ? {} : { lock: input.lock.duplicates }),
-  });
+  const entities = [...twins.entities, ...keywords.entities];
+  const links = repointLinks(refined.links, twins.folded, profile);
   const checked = runModelChecks({
     registry: input.checks,
-    entities: twins.entities,
-    links: twins.links,
+    entities,
+    links,
     sources,
     profile,
     ...(config.checks === undefined ? {} : { overrides: config.checks }),
@@ -226,11 +240,11 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...typed.findings,
       ...contributed.findings,
       ...attached.findings,
+      ...twins.findings,
       ...dictionaries.findings,
       ...produced.findings,
       ...refined.findings,
       ...keywords.findings,
-      ...twins.findings,
       ...documentsWithoutMarkdown(twins.entities, scoped.resources),
       ...checked,
     ],
@@ -238,8 +252,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   );
   return {
     files: sources.reduce((count, source) => count + source.files.length, 0),
-    entities: twins.entities,
-    links: twins.links,
+    entities,
+    links,
     findings,
     candidates: {
       terms: keywords.terms,
@@ -256,8 +270,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       }),
     },
     displayedNeighbourhood: displayedNeighbourhoodBlock({
-      entities: twins.entities,
-      links: twins.links,
+      entities,
+      links,
       config,
       profile,
     }),
