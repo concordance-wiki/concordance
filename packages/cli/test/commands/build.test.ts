@@ -1561,6 +1561,9 @@ describe("concordance build", () => {
         '<a class="document-download" href="rules/twin-size-ratio.rule.docx" download="twin-size-ratio.rule.docx">',
       );
       expect(files).toContain("specs/rules/twin-size-ratio/rules/twin-size-ratio.rule.docx");
+      expect(page).toContain(
+        '<div class="grouped-files"><p class="grouped-files-lead">2 files grouped — same base name</p><ul class="grouped-files-list"><li><code class="grouped-file-name">twin-size-ratio.rule.md</code><span class="grouped-file-format">Markdown note</span></li><li><code class="grouped-file-name">twin-size-ratio.rule.docx</code><span class="grouped-file-format">Text document</span></li></ul><a class="grouped-files-separate" href="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md#lock">Separate these files</a></div>',
+      );
       const index = [...pages]
         .filter(([path]) => path === "index/index.html" || path === "index/t/index.html")
         .map(([, html]) => html)

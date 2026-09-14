@@ -15,6 +15,7 @@ import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList } from "./attributes.js";
 import { Documents } from "./document-viewer.js";
+import { GroupedFilesBlock } from "./grouped-files.js";
 import { labels } from "./labels.js";
 import { PageNotice } from "./page-notice.js";
 import { fill } from "./mention-list.js";
@@ -271,7 +272,8 @@ export function NeighbourhoodFold({
  * note leads the page and its files only accompany it, then the foot of the article, the
  * legend of the marks of the text with the path of the file and its edit link; on the right
  * three stacked blocks, the declared attributes (and the attributes the type does not declare,
- * when the note sets some), the table of contents of the note, the related pages, then the
+ * when the note sets some), with the files the build grouped into the page and why at the foot
+ * of the block, the table of contents of the note, the related pages, then the
  * neighbourhood folded behind its line. The properties the profile puts forward stay in the
  * panel with the others: the line under the title names nothing the panel says. An attribute
  * value or a mapped section goes through the `Attribute@<name>` or `Section@<key>` component
@@ -297,6 +299,7 @@ export function EntityPage({
   mentions,
   sources,
   documents = [],
+  grouping,
   mapOpen = false,
   folded = [],
   pinned = false,
@@ -362,15 +365,16 @@ export function EntityPage({
         </footer>
       </div>
       <SidePanel folded={folded.includes("panel")}>
-        {attributes.length > 0 && (
+        {(attributes.length > 0 || grouping !== undefined) && (
           <PanelBlock
             id="entity-properties"
             className="entity-panel"
             heading={text.properties}
-            count={attributes.length}
+            {...(attributes.length === 0 ? {} : { count: attributes.length })}
           >
-            <AttributeList entity={entity} attributes={attributes} />
-            <p class="panel-note">{text.declaredAtTop}</p>
+            {attributes.length > 0 && <AttributeList entity={entity} attributes={attributes} />}
+            {attributes.length > 0 && <p class="panel-note">{text.declaredAtTop}</p>}
+            {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
           </PanelBlock>
         )}
         {otherAttributes.length > 0 && (

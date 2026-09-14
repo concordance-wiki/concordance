@@ -13,8 +13,6 @@ export const meetingMessages = {
     "meeting.document": {},
     "meeting.durationHours": { hours: "argument", minutes: "argument" },
     "meeting.durationMinutes": { minutes: "argument" },
-    "meeting.files": {},
-    "meeting.filesGrouped": { count: "plural" },
     "meeting.grouped": {},
     "meeting.groupingNote": { count: "plural", reasons: "argument" },
     "meeting.notes": {},

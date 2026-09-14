@@ -13,7 +13,7 @@ import {
   decisionsOf,
   durationLabel,
   durationOf,
-  groupingOf,
+  groupingNoteOf,
   groupingReasonsOf,
   isDatedSpace,
   MEETING_TYPE,
@@ -504,23 +504,19 @@ describe("groupingReasonsOf", () => {
   });
 });
 
-describe("groupingOf", () => {
-  it("counts the representations and words why they were grouped, nothing for a note alone or a single representation", () => {
-    expect(groupingOf(context(), review)).toEqual({
-      count: 3,
-      label: "3 grouped",
-      note: "3 files: same base name, similar content.",
-    });
-    expect(groupingOf(context(), capReview)).toBeUndefined();
+describe("groupingNoteOf", () => {
+  it("counts the files and words why they were grouped, nothing for a note alone, a single file or a grouping without a recorded reason", () => {
+    expect(groupingNoteOf(context(), review)).toBe("3 files: same base name, similar content.");
+    expect(groupingNoteOf(context(), capReview)).toBeUndefined();
     expect(
-      groupingOf(
+      groupingNoteOf(
         context(),
         entity({ ...review, representations: [{ path: "a.md", format: "markdown" }] }),
       ),
     ).toBeUndefined();
     const { grouped_by: criterion, ...unexplained } = review;
     expect(criterion).toBeDefined();
-    expect(groupingOf(context(), unexplained)).toEqual({ count: 3, label: "3 grouped" });
+    expect(groupingNoteOf(context(), unexplained)).toBeUndefined();
   });
 });
 
@@ -539,7 +535,6 @@ describe("meetingLabels", () => {
       date: "Date",
       duration: "Durée",
       space: "Espace",
-      files: "Fichiers",
       relatedNote:
         "Une réunion n’entre pas dans le modèle : elle apporte des passages, et parfois une décision qu’on a pris la peine d’écrire ailleurs.",
     });
@@ -564,7 +559,7 @@ describe("meetingOf", () => {
           href: "../../decisions/threshold-applied-in-model/index.html",
         },
       ],
-      grouping: { count: 3, label: "3 grouped", note: "3 files: same base name, similar content." },
+      groupingNote: "3 files: same base name, similar content.",
     });
     expect(meeting.labels?.transcript).toBe("Transcript");
   });

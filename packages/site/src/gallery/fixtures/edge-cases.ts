@@ -132,7 +132,6 @@ export const documentPageNoPreview: SlotProps["EntityPage"] = {
   documents: corporateDocuments.map(withoutPreview),
   document: {
     ...corporateView,
-    files: corporateView.files.filter((file) => file.label !== ".pdf"),
     previewFailure: {
       cause: "conversion of 2026/transcript-publication-framing.pptx failed: timed out after 120 s",
       check: "W-CONV-FAILED",
@@ -144,7 +143,6 @@ export const documentPageNoPreview: SlotProps["EntityPage"] = {
     ],
     labels: {
       ...corporateView.labels,
-      sameDocument: "Same document, 2 files",
       previewFailed: "The preview of this document could not be generated.",
       textExtracted:
         "The text was extracted all the same: it is indexed, cited on the other pages, and readable below.",

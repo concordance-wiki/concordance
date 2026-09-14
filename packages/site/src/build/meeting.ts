@@ -6,13 +6,13 @@ import type {
   BreadcrumbItem,
   DocumentView,
   MeetingDecision,
-  MeetingGrouping,
   MeetingLabels,
   MeetingProps,
   SpaceNode,
   SpaceTree,
 } from "../slots.js";
 import { message, spaceTitle, type SiteContext } from "./context.js";
+import { groupedFilesOf } from "./grouping.js";
 import { entityHref, spaceHref } from "./paths.js";
 import { spaceTreeOf, withListLink } from "./space.js";
 
@@ -307,18 +307,14 @@ export function groupingReasonsOf(context: SiteContext, entity: Entity): string 
   return [...known.map(([, id]) => message(context, id)), ...unknown].join(", ");
 }
 
-/** The files merged into the page and why, when the build grouped several; none for a note alone. */
-export function groupingOf(context: SiteContext, entity: Entity): MeetingGrouping | undefined {
-  const count = entity.representations?.length ?? 0;
+/** Why the build grouped the files of the page, worded under the line that counts them; none for a note alone or without a recorded reason. */
+export function groupingNoteOf(context: SiteContext, entity: Entity): string | undefined {
+  const count = groupedFilesOf(entity).length;
   if (count < 2) return undefined;
   const reasons = groupingReasonsOf(context, entity);
-  return {
-    count,
-    label: formatMessage(context.catalogue, "meeting.filesGrouped", { count }),
-    ...(reasons === undefined
-      ? {}
-      : { note: formatMessage(context.catalogue, "meeting.groupingNote", { count, reasons }) }),
-  };
+  return reasons === undefined
+    ? undefined
+    : formatMessage(context.catalogue, "meeting.groupingNote", { count, reasons });
 }
 
 /** The headings and notes of the page of a meeting in the site language. */
@@ -335,7 +331,6 @@ export function meetingLabels(context: SiteContext): MeetingLabels {
     date: message(context, "meeting.date"),
     duration: message(context, "transcript.duration"),
     space: message(context, "meeting.space"),
-    files: message(context, "meeting.files"),
     relatedNote: message(context, "meeting.relatedNote"),
   };
 }
@@ -350,7 +345,7 @@ export function meetingOf(
   const date = dateOf(entity);
   const duration = durationOf(context, entity, documents);
   const participants = participantsOf(context, entity);
-  const grouping = groupingOf(context, entity);
+  const groupingNote = groupingNoteOf(context, entity);
   return {
     ...(date === undefined
       ? {}
@@ -364,7 +359,7 @@ export function meetingOf(
     ...(participants === undefined ? {} : { participants }),
     pseudonymized: context.pseudonymized === true,
     decisions: decisionsOf(context, page, entity),
-    ...(grouping === undefined ? {} : { grouping }),
+    ...(groupingNote === undefined ? {} : { groupingNote }),
     labels: meetingLabels(context),
   };
 }

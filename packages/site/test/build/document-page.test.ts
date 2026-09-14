@@ -299,7 +299,7 @@ describe("The document page view model", () => {
     expect(plain).not.toHaveProperty("pageCount");
   });
 
-  it("words the kind, the count, the size, the date read from the file and the author, and lists the three files", () => {
+  it("words the kind, the count, the size, the date read from the file and the author, and lists the grouped files in the panel", () => {
     const props = entityPageOf(context(), framingDeck);
     expect(props.document).toEqual({
       kind: "Presentation",
@@ -308,26 +308,19 @@ describe("The document page view model", () => {
       size: "4.2 MB",
       date: { date: "2026-03-12", label: "March 12, 2026", fromFile: true },
       author: "Participant-2",
-      files: [
-        { label: ".pptx", role: "original", href: "transcript-publication-framing.pptx" },
-        { label: ".pdf", role: "preview", href: "transcript-publication-framing.pdf" },
-        {
-          label: "transcript-publication-framing.md",
-          role: "session notes",
-          href: "#document-notes",
-        },
-      ],
-      labels: documentPageLabels(context(), 3, 2),
+      labels: documentPageLabels(context(), 2),
     });
     expect(props.document?.labels).toMatchObject({
       document: "Document",
       extractedText: "Extracted text",
       relatedNotes: "Related notes",
       downloadOriginal: "Download the original",
-      sameDocument: "Same document, 3 files",
       dateNote: "Read from the file, distinct from the repository date.",
     });
-    expect(documentPageLabels(context(), 1).sameDocument).toBe("Same document, one file");
+    expect(props.grouping?.files).toEqual([
+      { name: "transcript-publication-framing.md", format: "Markdown note" },
+      { name: "transcript-publication-framing.pptx", format: "Presentation" },
+    ]);
     expect(props.breadcrumb).toEqual(datedBreadcrumbOf(context(), page, framingDeck));
   });
 
@@ -337,7 +330,7 @@ describe("The document page view model", () => {
       kind: "Présentation",
       size: "4,2\u202fMo",
       date: { label: "12 mars 2026" },
-      labels: { sameDocument: "Même document, 3 fichiers", relatedNotes: "Notes associées" },
+      labels: { relatedNotes: "Notes associées" },
     });
   });
 
@@ -361,9 +354,9 @@ describe("The document page view model", () => {
       pages: 24,
       pagesLabel: "24 pages",
       date: { date: "2026-03-14", label: "March 14, 2026", fromFile: false },
-      files: [{ label: ".odg", role: "original", href: "transcript-publication-framing.pptx" }],
-      labels: documentPageLabels(context(), 1, 24),
+      labels: documentPageLabels(context(), 24),
     });
+    expect(props.grouping).toBeUndefined();
     const { pageCount, ...counted } = bare;
     expect(pageCount).toBe(24);
     const { last_modified, ...source } = alone.source;
@@ -374,8 +367,7 @@ describe("The document page view model", () => {
     });
     expect(nothing.document).toEqual({
       kind: "ODG",
-      files: [{ label: ".odg", role: "original", href: "transcript-publication-framing.pptx" }],
-      labels: documentPageLabels(context(), 1),
+      labels: documentPageLabels(context()),
     });
   });
 
@@ -400,10 +392,6 @@ describe("The document page view model", () => {
       author: "Converter",
       fromPreview: true,
     });
-    expect(everything?.files.slice(0, 2)).toEqual([
-      { label: ".pptx", role: "original", href: "transcript-publication-framing.pptx" },
-      { label: ".pdf", role: "preview", href: "transcript-publication-framing.pdf" },
-    ]);
     // The original gives its pages and nothing else: the size alone comes from the preview.
     const sized = entityPageOf(withTwin([pdfTwin, bareDeck]), framingDeck).document;
     expect(sized).toMatchObject({ pages: 2, size: "6.1 MB", fromPreview: true });
@@ -445,18 +433,9 @@ describe("The document page view model", () => {
     expect(nothing).not.toHaveProperty("author");
   });
 
-  it("lists a PDF that is its own preview once among the files", () => {
+  it("names a PDF that is its own preview by its kind", () => {
     const props = entityPageOf(withTwin([pdfTwin]), framingDeck);
     expect(props.document?.kind).toBe("PDF");
-    expect(props.document?.files).toEqual([
-      { label: ".pdf", role: "original", href: "transcript-publication-framing.pdf" },
-      {
-        label: "transcript-publication-framing.md",
-        role: "session notes",
-        href: "#document-notes",
-      },
-    ]);
-    expect(props.document?.labels?.sameDocument).toBe("Same document, 2 files");
   });
 
   it("lays out no document page for a note alone, a transcript, or a deck accompanied by a transcript", () => {
@@ -528,10 +507,6 @@ describe("A document whose conversion failed", () => {
       { label: ".pptx", state: "available" },
       { label: ".pdf preview", state: "failed", failed: true },
       { label: "text", state: "missing" },
-    ]);
-    expect(view?.files.map((file) => file.label)).toEqual([
-      ".pptx",
-      "transcript-publication-framing.md",
     ]);
     expect(view?.labels?.extractedTextOf).toBe("Extracted text — 24 pages");
   });

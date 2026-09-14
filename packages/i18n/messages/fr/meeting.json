@@ -5,8 +5,6 @@
   "meeting.document": "Document",
   "meeting.durationHours": "{hours} h {minutes}",
   "meeting.durationMinutes": "{minutes} min",
-  "meeting.files": "Fichiers",
-  "meeting.filesGrouped": "{count, plural, one {# regroupé} other {# regroupés}}",
   "meeting.grouped": "Regroupés automatiquement",
   "meeting.groupingNote": "{count, plural, one {# fichier} other {# fichiers}} : {reasons}.",
   "meeting.notes": "Notes",

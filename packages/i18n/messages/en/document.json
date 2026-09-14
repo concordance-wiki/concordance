@@ -27,13 +27,13 @@
     "defaultMessage": "Extracted text — {count, plural, one {# page} other {# pages}}",
     "description": "Heading of the extracted text of a document whose conversion failed, with its number of pages."
   },
-  "document.groupedNote": {
-    "defaultMessage": "Grouped by folder, date and textual overlap — a single entry in the index.",
-    "description": "Note under the files of a document page: why they form one page."
-  },
   "document.indexedNote": {
     "defaultMessage": "indexed and searchable",
     "description": "Note at the head of the extracted text of a document whose conversion failed."
+  },
+  "document.kind.markdown": {
+    "defaultMessage": "Markdown note",
+    "description": "Kind of a file that is a markdown note, among the files grouped into a page."
   },
   "document.kind.pdf": {
     "defaultMessage": "PDF",
@@ -99,21 +99,9 @@
     "defaultMessage": "State of the representations",
     "description": "Heading of the panel listing the representations of a document and the state of each."
   },
-  "document.roleNotes": {
-    "defaultMessage": "session notes",
-    "description": "Role of the note among the files of a document page."
-  },
-  "document.roleOriginal": {
-    "defaultMessage": "original",
-    "description": "Role of the original file among the files of a document page."
-  },
   "document.rolePreview": {
     "defaultMessage": "preview",
     "description": "Role of the PDF among the files of a document page."
-  },
-  "document.sameDocument": {
-    "defaultMessage": "Same document, {count, plural, one {one file} other {# files}}",
-    "description": "Heading of the block listing the files that make one document page."
   },
   "document.stateAvailable": {
     "defaultMessage": "available",

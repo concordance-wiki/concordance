@@ -645,15 +645,6 @@ export interface DocumentView {
   summary?: string;
 }
 
-/** One file of the document as the panel of the document page lists it: the original, its preview, the note. */
-export interface DocumentTwinFile {
-  /** `.pptx` for the original, `.pdf` for the preview, the file name of the note. */
-  label: string;
-  /** What the file is, worded in the site language: "original", "preview", "session notes". */
-  role: string;
-  href?: string;
-}
-
 /** The headings, notes and names the document page adds, in the language of the site; the theme's own English when absent. */
 export interface DocumentPageLabels {
   /** The tab of the rendered document. */
@@ -688,10 +679,6 @@ export interface DocumentPageLabels {
   dateNote: string;
   /** Note under the properties: the size or the page count is that of the PDF preview, the original stating none. */
   previewNote: string;
-  /** Heading of the block listing the files of the document, the count worded: "Same document, three files". */
-  sameDocument: string;
-  /** Note under the files: grouped by folder, date and textual overlap, one entry in the index. */
-  groupedNote: string;
   /** What the notes tab says when no note is merged with the document. */
   noNote: string;
   /** Title of the notice of a document whose conversion failed. */
@@ -782,8 +769,6 @@ export interface DocumentPageView {
   author?: string;
   /** Whether the size or the page count was read from the PDF preview, the original stating none: the panel says so. */
   fromPreview?: boolean;
-  /** The files that make the document: the original, its preview when there is one, the note when there is one. */
-  files: DocumentTwinFile[];
   /** Present when the conversion of the document failed: the page then names the cause in place of the rendering. */
   previewFailure?: PreviewFailure;
   /** The representations of the document and the state of each; the panel is drawn when the list is given. */
@@ -887,7 +872,6 @@ export interface MeetingLabels {
   date: string;
   duration: string;
   space: string;
-  files: string;
   /** Under the related pages: that a meeting does not enter the model. */
   relatedNote: string;
 }
@@ -904,19 +888,10 @@ export interface MeetingDecision extends Link {
   cue?: number;
 }
 
-/** The files the build merged into the page of the meeting, and why. */
-export interface MeetingGrouping {
-  count: number;
-  /** The value of the files row, "3 grouped", worded. */
-  label: string;
-  /** The reasons under the properties, worded: "3 files: same folder, same commit, high textual overlap."; absent when the model recorded none. */
-  note?: string;
-}
-
 /**
  * What the page of a meeting lays out beyond the generic view model: its date and duration,
- * whether its transcript was pseudonymised, the decisions it produced and the grouping of its
- * files. The tabs come from the sections and the documents of the page.
+ * whether its transcript was pseudonymised, the decisions it produced and why its files were
+ * grouped. The tabs come from the sections and the documents of the page.
  */
 export interface MeetingProps {
   /** The `date` attribute of the note, worded; absent without one. */
@@ -929,8 +904,12 @@ export interface MeetingProps {
   pseudonymized: boolean;
   /** The decisions the meeting produced, as the model links them, by identifier, each with the cue it was recognised in; empty when none is linked. */
   decisions: MeetingDecision[];
-  /** The files merged into the page, when the build grouped several. */
-  grouping?: MeetingGrouping;
+  /**
+   * Why the build grouped the files of the page, worded from the signals of the duplicates
+   * block, "3 files: same folder, same commit, high textual overlap.", under the line of the
+   * properties panel that counts them; absent for a note alone or when the model recorded no reason.
+   */
+  groupingNote?: string;
   labels?: Partial<MeetingLabels>;
 }
 
@@ -990,6 +969,29 @@ export interface DecisionProps {
   labels?: Partial<DecisionLabels>;
 }
 
+/** One file the build grouped into a page: its name and its kind, worded. */
+export interface GroupedFile {
+  /** The file name without its folders: `threshold-review.pptx`. */
+  name: string;
+  /** The kind of the file in the site language: "Markdown note", "Presentation", "PDF". */
+  format: string;
+}
+
+/**
+ * The files the build merged into one page and what grouped them, as the properties panel of
+ * every template says it: the line counting them and naming the criterion, the files with
+ * their kinds, then the way to contest the grouping.
+ */
+export interface GroupedFiles {
+  count: number;
+  /** "3 files grouped — same base name", worded in the site language. */
+  label: string;
+  /** In the order of the representations of the entity: the note first. */
+  files: GroupedFile[];
+  /** "Separate these files", leading to the contribution address of the project, else to the guide of the lock file. */
+  separate: Link;
+}
+
 export interface EntityPageProps {
   entity: EntityRef;
   /** The results page filtered on the type of the page, where the type chip leads; absent, the chip is plain text. */
@@ -1023,6 +1025,8 @@ export interface EntityPageProps {
   sources: SourceRef[];
   /** The documents of the entity beyond its note, in path order; absent or empty for a note alone. */
   documents?: DocumentView[];
+  /** The files the build grouped into the page and what grouped them, when its representations hold more than one file; absent for a page of one file. */
+  grouping?: GroupedFiles;
   /** The imported contract of an `api` entity, which gives the page its own layout; absent for every other page. */
   contract?: ContractSectionProps;
   /** The neighbourhood map served unfolded, the panel replaced by it; folded behind its line when absent. */

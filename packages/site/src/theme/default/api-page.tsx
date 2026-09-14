@@ -12,6 +12,7 @@ import { useSlot } from "../context.js";
 import { AttributeList } from "./attributes.js";
 import { ContractSection, defaultContractLabels } from "./contract-section.js";
 import { Documents } from "./document-viewer.js";
+import { GroupedFilesBlock } from "./grouped-files.js";
 import {
   Breadcrumb,
   defaultEntityPageLabels,
@@ -53,7 +54,8 @@ export function apiKeys(
  * The page of an interface: the tree of its space on the left, its operations as its children;
  * in the centre the breadcrumb, the title, the line naming the type, the last change and the
  * space, the note, its documents, then the operations table and the contract block; on the
- * right the properties cut to five keys, the related pages with the operations first, and the
+ * right the properties cut to five keys, with the files the build grouped into the page and why
+ * at the foot of the block, the related pages with the operations first, and the
  * neighbourhood folded behind its line, served unfolded by `mapOpen` as on the generic page. No
  * highlight on the line under the title and no table of contents: the operations are the grain
  * the page works at.
@@ -73,6 +75,7 @@ export function ApiPage({
   sources,
   contract,
   documents = [],
+  grouping,
   mapOpen = false,
 }: ApiPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
@@ -134,15 +137,16 @@ export function ApiPage({
         </footer>
       </div>
       <SidePanel>
-        {keys.length > 0 && (
+        {(keys.length > 0 || grouping !== undefined) && (
           <PanelBlock
             id="entity-properties"
             className="entity-panel"
             heading={text.properties}
-            count={keys.length}
+            {...(keys.length === 0 ? {} : { count: keys.length })}
           >
-            <AttributeList entity={entity} attributes={keys} />
-            <p class="panel-note">{contractText.fiveKeys}</p>
+            {keys.length > 0 && <AttributeList entity={entity} attributes={keys} />}
+            {keys.length > 0 && <p class="panel-note">{contractText.fiveKeys}</p>}
+            {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
           </PanelBlock>
         )}
         <MentionsPanel

@@ -20,7 +20,7 @@ function render(overrides: Partial<EntityPageProps> = {}): string {
 
 /** The document page with its view model reduced to what a corpus without the datum would give. */
 function withView(document: Partial<DocumentPageView>, overrides: Partial<EntityPageProps> = {}) {
-  return render({ document: { kind: view.kind, files: view.files, ...document }, ...overrides });
+  return render({ document: { kind: view.kind, ...document }, ...overrides });
 }
 
 describe("The document page: the tree by year, the line under the title, the tabs", () => {
@@ -192,16 +192,16 @@ describe("The text and the notes: reachable without JavaScript by their anchors"
   it("closes the column with the path of every file, the edit link on the note", () => {
     const html = render();
     expect(html).toContain(
-      '<footer class="entity-footer"><p class="entity-source"><code>framing/2026/transcript-publication-framing.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/framing/edit/main/2026/transcript-publication-framing.md">Edit this page</a></span></p><p class="entity-source"><code>framing/2026/transcript-publication-framing.pptx</code></p></footer>',
+      '<footer class="entity-footer"><p class="entity-source"><code>framing/2026/transcript-publication-framing.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/framing/edit/main/2026/transcript-publication-framing.md">Edit this page</a></span></p><p class="entity-source"><code>framing/2026/transcript-publication-framing.pdf</code></p><p class="entity-source"><code>framing/2026/transcript-publication-framing.pptx</code></p></footer>',
     );
   });
 });
 
-describe("The panel: the properties read from the file, the files that make the document, the related pages, the neighbourhood folded", () => {
+describe("The panel: the properties read from the file, the files the build grouped, the related pages, the neighbourhood folded", () => {
   it("lists the type, the author, the page count and the date, with the note that they were read from the file", () => {
     const html = render();
     expect(html).toContain(
-      '<section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties</h2></summary><dl class="attributes"><div class="attribute"><dt>Type</dt><dd>Presentation</dd></div><div class="attribute"><dt>Author</dt><dd>Participant-2</dd></div><div class="attribute"><dt>Pages</dt><dd>24</dd></div><div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-12">March 12, 2026</time></dd></div></dl><p class="panel-note">Read from the file, distinct from the repository date.</p></details></section>',
+      '<section class="panel-block entity-panel" aria-labelledby="entity-properties"><details class="panel-fold"><summary><h2 id="entity-properties">Properties</h2></summary><dl class="attributes"><div class="attribute"><dt>Type</dt><dd>Presentation</dd></div><div class="attribute"><dt>Author</dt><dd>Participant-2</dd></div><div class="attribute"><dt>Pages</dt><dd>24</dd></div><div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-12">March 12, 2026</time></dd></div></dl><p class="panel-note">Read from the file, distinct from the repository date.</p><div class="grouped-files">',
     );
   });
 
@@ -212,38 +212,35 @@ describe("The panel: the properties read from the file, the files that make the 
     expect(html).toContain('<div class="attribute"><dt>Author</dt><dd></dd></div>');
     expect(html).toContain('<div class="attribute"><dt>Pages</dt><dd></dd></div>');
     expect(html).toContain(
-      '<div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-14">March 14, 2026</time></dd></div></dl></details>',
+      '<div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-14">March 14, 2026</time></dd></div></dl><div class="grouped-files">',
     );
     expect(html).not.toContain("Read from the file");
     expect(withView({})).toContain(
-      '<div class="attribute"><dt>Date</dt><dd></dd></div></dl></details>',
+      '<div class="attribute"><dt>Date</dt><dd></dd></div></dl><div class="grouped-files">',
     );
   });
 
   it("says under the properties when the size or the page count comes from the PDF preview", () => {
     expect(withView({ pages: 24, size: "6.1 MB", fromPreview: true })).toContain(
-      '<div class="attribute"><dt>Date</dt><dd></dd></div></dl><p class="panel-note">Size and page count of the PDF preview, the original stating none.</p></details>',
+      '<div class="attribute"><dt>Date</dt><dd></dd></div></dl><p class="panel-note">Size and page count of the PDF preview, the original stating none.</p><div class="grouped-files">',
     );
     expect(render()).not.toContain("of the PDF preview");
   });
 
-  it("lists the files that make the document, the original, its preview and the note, under the note on how they were grouped", () => {
+  it("says at the foot of the properties which files the build grouped and why, each with its kind, then how to separate them; nothing for a page of one file", () => {
     const html = render();
     expect(html).toContain(
-      '<section class="panel-block entity-panel document-files" aria-labelledby="document-files"><details class="panel-fold"><summary><h2 id="document-files">Same document, 3 files</h2></summary><ul class="document-twins"><li><a class="document-twin-name" href="2026/transcript-publication-framing.pptx">.pptx</a><span class="document-twin-role">original</span></li><li><a class="document-twin-name" href="2026/transcript-publication-framing.pdf">.pdf</a><span class="document-twin-role">preview</span></li><li><a class="document-twin-name" href="#document-notes">transcript-publication-framing.md</a><span class="document-twin-role">session notes</span></li></ul><p class="panel-note">Grouped by folder, date and textual overlap — a single entry in the index.</p></details></section>',
+      '<p class="panel-note">Read from the file, distinct from the repository date.</p><div class="grouped-files"><p class="grouped-files-lead">3 files grouped — same base name, similar content</p><ul class="grouped-files-list"><li><code class="grouped-file-name">transcript-publication-framing.md</code><span class="grouped-file-format">Markdown note</span></li><li><code class="grouped-file-name">transcript-publication-framing.pdf</code><span class="grouped-file-format">PDF</span></li><li><code class="grouped-file-name">transcript-publication-framing.pptx</code><span class="grouped-file-format">Presentation</span></li></ul><a class="grouped-files-separate" href="https://forge.example/framing">Separate these files</a></div></details></section>',
     );
-    const plain = withView({
-      files: [{ label: ".pdf", role: "original" }],
-      labels: {},
-    });
-    expect(plain).toContain(
-      '<h2 id="document-files">Same document, 1 file</h2></summary><ul class="document-twins"><li><span class="document-twin-name">.pdf</span><span class="document-twin-role">original</span></li></ul>',
-    );
+    expect(html).not.toContain("Same document");
+    const { grouping, ...alone } = documentPageCorporate;
+    expect(grouping).toBeDefined();
+    expect(renderSlot("EntityPage", alone, defaultTheme)).not.toContain("grouped-files");
   });
 
-  it("stacks the related pages and the neighbourhood folded behind its line after the files", () => {
+  it("stacks the related pages and the neighbourhood folded behind its line after the properties", () => {
     const html = render();
-    const files = html.indexOf('aria-labelledby="document-files"');
+    const files = html.indexOf('class="grouped-files"');
     const related = html.indexOf('<h2 id="mentions-title">Related pages');
     const map = html.indexOf('<details class="neighbourhood-fold">');
     expect(files).toBeGreaterThan(0);
@@ -253,26 +250,27 @@ describe("The panel: the properties read from the file, the files that make the 
     expect(count(html, '<li class="related-page')).toBe(5);
   });
 
-  it("words its labels itself when the page carries none, one file singular", () => {
-    const labels = defaultDocumentPageLabels(1);
-    expect(labels.sameDocument).toBe("Same document, 1 file");
-    expect(defaultDocumentPageLabels(3).sameDocument).toBe("Same document, 3 files");
+  it("words its labels itself when the page carries none", () => {
+    const labels = defaultDocumentPageLabels();
     expect(labels).toMatchObject({
       document: "Document",
       extractedText: "Extracted text",
       relatedNotes: "Related notes",
       downloadOriginal: "Download the original",
       dateNote: "Read from the file, distinct from the repository date.",
-      groupedNote: "Grouped by folder, date and textual overlap — a single entry in the index.",
+      previewNote: "Size and page count of the PDF preview, the original stating none.",
     });
     const { labels: pageLabels, ...unlabelled } = documentPageCorporate;
     expect(pageLabels).toBeDefined();
     const html = renderSlot(
       "EntityPage",
-      { ...unlabelled, document: { kind: view.kind, files: view.files } },
+      { ...unlabelled, document: { kind: view.kind } },
       defaultTheme,
     );
-    expect(html).toContain('<h2 id="document-files">Same document, 3 files</h2>');
+    expect(html).toContain('<h2 id="entity-properties">Properties</h2>');
+    expect(html).toContain(
+      '<a class="document-download" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a>',
+    );
     expect(html).toContain('aria-label="Tree of the space"');
     expect(html).toContain('aria-label="You are here"');
     expect(html).toContain("Something to correct?");
@@ -344,7 +342,7 @@ describe("A document whose conversion failed: the fact named in place of the ren
   });
 
   it("words the notice with the theme's own labels when the page gives none", () => {
-    const labels = defaultDocumentPageLabels(2);
+    const labels = defaultDocumentPageLabels();
     expect(labels.previewFailed).toBe("The preview of this document could not be generated.");
     expect(labels.whyFailed).toBe("Why this failure?");
     expect(labels.extractedTextOf).toBe("Extracted text");

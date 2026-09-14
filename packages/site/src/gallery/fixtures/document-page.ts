@@ -273,6 +273,7 @@ export const documentPageCorporate: SlotProps["EntityPage"] = {
       path: "2026/transcript-publication-framing.md",
       editHref: "https://forge.example/framing/edit/main/2026/transcript-publication-framing.md",
     },
+    { source: "framing", path: "2026/transcript-publication-framing.pdf" },
     { source: "framing", path: "2026/transcript-publication-framing.pptx" },
   ],
   documents: [
@@ -306,15 +307,6 @@ export const documentPageCorporate: SlotProps["EntityPage"] = {
     size: "4.2 MB",
     date: { date: "2026-03-12", label: "March 12, 2026", fromFile: true },
     author: "Participant-2",
-    files: [
-      { label: ".pptx", role: "original", href: "2026/transcript-publication-framing.pptx" },
-      { label: ".pdf", role: "preview", href: "2026/transcript-publication-framing.pdf" },
-      {
-        label: "transcript-publication-framing.md",
-        role: "session notes",
-        href: "#document-notes",
-      },
-    ],
     labels: {
       document: "Document",
       extractedText: "Extracted text",
@@ -333,9 +325,20 @@ export const documentPageCorporate: SlotProps["EntityPage"] = {
       date: "Date",
       dateNote: "Read from the file, distinct from the repository date.",
       previewNote: "Size and page count of the PDF preview, the original stating none.",
-      sameDocument: "Same document, 3 files",
-      groupedNote: "Grouped by folder, date and textual overlap — a single entry in the index.",
       noNote: "No note describes this document yet.",
+    },
+  },
+  grouping: {
+    count: 3,
+    label: "3 files grouped — same base name, similar content",
+    files: [
+      { name: "transcript-publication-framing.md", format: "Markdown note" },
+      { name: "transcript-publication-framing.pdf", format: "PDF" },
+      { name: "transcript-publication-framing.pptx", format: "Presentation" },
+    ],
+    separate: {
+      label: "Separate these files",
+      href: "https://forge.example/framing",
     },
   },
 };
