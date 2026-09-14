@@ -22,6 +22,7 @@ import {
   undefinedTermFindings,
   type Dictionary,
   type KeywordCandidate,
+  type KeywordLock,
   type KeywordMention,
   type KeywordPage,
   type KeywordUnit,
@@ -42,6 +43,8 @@ export interface DiscoverKeywordsInput {
   dictionaries: ReadonlyMap<string, LocaleDictionary>;
   config: Config;
   profile: Profile;
+  /** The lock file, whose `rejected_terms` the discovery never proposes: no candidate, no finding, no page. */
+  lock?: KeywordLock;
   /** Expressions never proposed, on top of the lock's: the real names of the pseudonymisation dictionary. */
   rejected?: readonly string[];
 }
@@ -322,7 +325,9 @@ function takenOverOf(
  */
 export function discoverKeywords(input: DiscoverKeywordsInput): DiscoveredKeywords {
   const { config } = input;
-  const options = keywordOptions(config, { rejected_terms: input.rejected ?? [] });
+  const options = keywordOptions(config, {
+    rejected_terms: [...(input.lock?.rejected_terms ?? []), ...(input.rejected ?? [])],
+  });
   const publication = keywordPublicationOptions(config);
   const result: DiscoveredKeywords = {
     entities: [],

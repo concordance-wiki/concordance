@@ -26,6 +26,7 @@ import { defaultThemeManifest } from "@concordance-wiki/site";
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { writeContractFragments } from "../pipeline/contracts.js";
 import { writeFragments } from "../pipeline/fragments.js";
+import { loadLock, lockCountsOf } from "../pipeline/lock.js";
 import { formatFinding } from "./findings.js";
 import { runPipeline } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
@@ -79,7 +80,7 @@ function countLines(counts: Record<string, number>): string[] {
 
 export function formatSummary(summary: BuildLog["summary"]): string[] {
   const { bySeverity, byCheck } = summary.findings;
-  const { keywords, duplicates } = summary;
+  const { keywords, duplicates, lock } = summary;
   const total = (counts: Record<string, number>): number =>
     Object.values(counts).reduce((sum, count) => sum + count, 0);
   return [
@@ -97,6 +98,11 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
           `expressions set aside by confidence: ${String(keywords.withheld)}`,
         ]),
     ...(duplicates === undefined ? [] : formatDuplicateStats(duplicates)),
+    ...(lock === undefined
+      ? []
+      : [
+          `lock decisions applied: rejected_terms ${String(lock.rejected_terms)}, merged ${String(lock.merged)}, separated ${String(lock.separated)}`,
+        ]),
     `findings: error ${String(bySeverity.error)}, warning ${String(bySeverity.warning)}, info ${String(bySeverity.info)}`,
     ...countLines(byCheck),
   ];
@@ -187,6 +193,14 @@ export async function buildCommand(
   }
   const config = loaded.validation.config;
   const configDirectory = dirname(loaded.file);
+  const lock = loadLock({ config, configDirectory, fs: io.fs });
+  if (!lock.ok) {
+    for (const line of lock.errors) {
+      io.err(line);
+    }
+    io.err("build stopped: fix the lock file first");
+    return exitCodes.invalid;
+  }
   // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
   const plugins = await loadPlugins(config.plugins ?? [], {
     ...deps,
@@ -229,6 +243,7 @@ export async function buildCommand(
     clock: io.clock,
     ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
     parallelism: config.conversion?.parallelism ?? deps.parallelism ?? 1,
+    ...(lock.lock === undefined ? {} : { lock: lock.lock }),
   });
 
   const at = io.clock.now().toISOString();
@@ -244,6 +259,7 @@ export async function buildCommand(
       links: result.links,
       keywords: result.keywords,
       duplicates: result.duplicates,
+      ...(lock.lock === undefined ? {} : { lock: lockCountsOf(lock.lock) }),
     }),
     ...(result.contracts.length === 0 ? {} : { contracts: result.contracts }),
     findings: result.findings,
