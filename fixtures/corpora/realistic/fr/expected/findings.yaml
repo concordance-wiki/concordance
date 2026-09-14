@@ -13,6 +13,7 @@
 - { check: I-TERM-HOMONYM, form: lien, entities: [glossaire/lien, glossaire/lien-explicite, specs/objets/lien] }
 - { check: I-TERM-HOMONYM, form: occurrence, entities: [glossaire/occurrence, specs/objets/occurrence] }
 - { check: I-TERM-HOMONYM, form: page mot-cle, entities: [glossaire/page-mot-cle, specs/ecrans/page-mot-cle, specs/objets/page-mot-cle] }
+- { check: I-TERM-HOMONYM, form: ratio de taille des jumelles, entities: [specs/regles/ratio-de-taille-des-jumelles, specs/regles/ratio-de-taille-des-jumelles-regle.docx], note: "the Word twin of the rule, read before the reconciliation folds it into the note" }
 - { check: I-TERM-HOMONYM, form: seuil de publication, entities: [glossaire/seuil-de-publication, specs/regles/seuil-de-publication] }
 - { check: I-TERM-HOMONYM, form: source, entities: [glossaire/source, specs/objets/source] }
 - { check: I-TERM-HOMONYM, form: voisinage, entities: [glossaire/voisinage, specs/objets/voisinage] }

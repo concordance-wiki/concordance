@@ -49,6 +49,20 @@ describe("The original file remains downloadable", () => {
     expect(renderSlot("EntityPage", alone, defaultTheme)).not.toContain('class="document');
     expect(render({ documents: [] })).not.toContain('class="document');
   });
+
+  it("folds a document that accompanies the note leading the page behind its summary line, the block whole inside, and leaves the others in full", () => {
+    const summary = "Also available: threshold-review.pptx · Presentation · 4 pages";
+    const html = render({ documents: [{ ...deck, summary }, transcript] });
+    expectBalanced(html);
+    expect(html).toContain(
+      `<details class="document-fold"><summary>${summary}</summary><section class="document document-slide" aria-labelledby="document-1">`,
+    );
+    expect(html).toContain('<h2 id="document-1">Document <code>threshold-review.pptx</code></h2>');
+    expect(html).toContain('</section></details><section class="document document-cue"');
+    expect(count(html, 'class="document-fold"')).toBe(1);
+    expect(html).not.toContain('<details class="document-fold" open');
+    expect(render()).not.toContain("document-fold");
+  });
 });
 
 describe("The viewer is loaded on demand, never in the page's initial bundle", () => {

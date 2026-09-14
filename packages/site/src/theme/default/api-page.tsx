@@ -11,7 +11,7 @@ import {
 import { useSlot } from "../context.js";
 import { AttributeList } from "./attributes.js";
 import { ContractSection, defaultContractLabels } from "./contract-section.js";
-import { DocumentBlock } from "./document-viewer.js";
+import { Documents } from "./document-viewer.js";
 import {
   Breadcrumb,
   defaultEntityPageLabels,
@@ -117,9 +117,7 @@ export function ApiPage({
               imageNote={text.imageNote}
             />
           ))}
-          {documents.map((document, index) => (
-            <DocumentBlock key={document.file.href} document={document} index={index + 1} />
-          ))}
+          <Documents documents={documents} />
         </article>
         <ContractSection {...contract} />
         <footer class="entity-footer">

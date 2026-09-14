@@ -63,6 +63,7 @@ import { notFoundNearbyState } from "./states/not-found-nearby.js";
 import { searchResultsFilteredState } from "./states/search-results-filtered.js";
 import { documentPageNoPreviewState } from "./states/document-page-no-preview.js";
 import { ageNoticeState } from "./states/age-notice.js";
+import { entityPageWithTwinState } from "./states/entity-page-with-twin.js";
 
 export type { GalleryPage, GalleryWidth } from "./page.js";
 export { DEFAULT_GALLERY_WIDTH, GALLERY_WIDTHS } from "./page.js";
@@ -79,6 +80,7 @@ export const galleryPages: readonly GalleryPage[] = [
   entityPageDocumentState,
   entityPageNoPropertyState,
   entityPageNoScriptState,
+  entityPageWithTwinState,
   searchResultsState,
   searchResultsEmptyState,
   searchResultsCorporateState,

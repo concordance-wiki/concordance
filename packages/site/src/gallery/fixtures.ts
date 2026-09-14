@@ -24,3 +24,4 @@ export * from "./fixtures/decision-page.js";
 export * from "./fixtures/about.js";
 export * from "./fixtures/pins.js";
 export * from "./fixtures/edge-cases.js";
+export * from "./fixtures/entity-page-twin.js";

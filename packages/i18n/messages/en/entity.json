@@ -1,4 +1,8 @@
 {
+  "entity.alsoAvailable": {
+    "defaultMessage": "Also available: {name} · {format}{count, plural, =0 {} one { · # page} other { · # pages}}",
+    "description": "Line a document is folded behind under the note that leads its page: the file name, its kind and its page count when one is known."
+  },
   "entity.application": {
     "defaultMessage": "Application",
     "description": "Label of the application an entity belongs to."
