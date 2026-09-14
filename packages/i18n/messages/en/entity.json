@@ -35,6 +35,10 @@
     "defaultMessage": "Domain",
     "description": "Label of the domain an entity belongs to."
   },
+  "entity.domainInferred": {
+    "defaultMessage": "Proposed by the build from the notes this page is close to; nothing declares it.",
+    "description": "Tooltip on the domain of an entity page when the build filed the note itself, from the graph, rather than a folder, a glob, the frontmatter or the lock file."
+  },
   "entity.edit": {
     "defaultMessage": "Edit this page",
     "description": "Link to the edit page of the note on its forge."

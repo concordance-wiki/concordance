@@ -34,6 +34,6 @@ domains:
 
 ## How to fix
 
-Promote the proposal into a declaration: file the note under the proposed domain in `domains` in `concordance.yaml` with a folder or a glob that claims the note, or record the note under `domains` in the [lock file](../guides/configuration.md#lock), which files it with the origin `lock`. A domain declared by frontmatter, folder or glob always wins over the lock. To let the build file every reached note itself, set `inference.domains.assign: true`: the note takes the domain named after its pivot with the origin `inferred`, and swings to another pivot when the corpus grows, which is why nothing is assigned by default.
+Promote the proposal into a declaration: file the note under the proposed domain in `domains` in `concordance.yaml` with a folder or a glob that claims the note, or record the note under `domains` in the [lock file](../guides/configuration.md#lock), which files it with the origin `lock`. A domain declared by frontmatter, folder or glob always wins over the lock. To let the build file every reached note itself, set `inference.domains.assign: true`: the note takes the domain its pivot proposes with the origin `inferred`, its page shows the domain in italics with the reason on hovering, and the note swings to another pivot when the corpus grows, which is why nothing is assigned by default.
 
 Severity can be overridden in `concordance.yaml` or in a repository's `concordance-lint.yaml` under `checks:`.

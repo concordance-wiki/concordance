@@ -414,6 +414,8 @@ export interface EntityRef {
 export interface AttributeValue {
   text: string;
   href?: string;
+  /** What a reader learns on hovering the value: that the build proposed the domain, for instance. */
+  note?: string;
 }
 
 export interface Attribute {

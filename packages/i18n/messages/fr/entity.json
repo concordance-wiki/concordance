@@ -8,6 +8,7 @@
   "entity.correction": "Une correction à apporter ?",
   "entity.declaredAtTop": "{count, plural, one {# clé déclarée} other {# clés déclarées}}. Le reste du fichier est du texte libre.",
   "entity.domain": "Domaine",
+  "entity.domainInferred": "Proposé par le build d'après les notes dont cette page est proche ; rien ne le déclare.",
   "entity.edit": "Modifier cette page",
   "entity.editShort": "Modifier",
   "entity.groupedBy.declared": "déclarés dans le frontmatter",

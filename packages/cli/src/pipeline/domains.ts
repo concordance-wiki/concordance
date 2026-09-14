@@ -20,6 +20,7 @@ import {
 import { comparisonForm, languagePack } from "@concordance-wiki/nlp";
 
 import type { LocaleDictionary } from "./dictionary.js";
+import type { FoldedEntity } from "./duplicates.js";
 
 export const DOMAIN_SUGGESTED_CHECK = "I-DOMAIN-SUGGESTED";
 const UNCLASSIFIED_CHECK = "W-DOMAIN-UNCLASSIFIED";
@@ -216,6 +217,19 @@ export function proposeDomains(input: ProposeDomainsInput): ProposedDomains {
     suggested: sectionOf(proposal.pivots, proposal.attachments, byId),
     filed: filedIds,
   };
+}
+
+/**
+ * The filed identifiers with every twin folded into a filed note: the transcript or the deck the
+ * build grouped into a session is filed with the session, which was typed after the group formed.
+ */
+export function withFoldedTwins(
+  filedIds: ReadonlySet<string>,
+  folded: readonly FoldedEntity[],
+): Set<string> {
+  const answered = new Set(filedIds);
+  for (const twin of folded) if (filedIds.has(twin.into)) answered.add(twin.entity.id);
+  return answered;
 }
 
 /** The findings without the unclassified ones the lock or the proposal answered. */

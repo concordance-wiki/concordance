@@ -134,6 +134,31 @@ describe("EntityPage", () => {
     );
   });
 
+  it("sets a noted value apart, the reason as its tooltip, linked or not", () => {
+    const html = render({
+      attributes: [
+        {
+          name: "domain",
+          label: "Domain",
+          values: [
+            { text: "Quality", href: "../search/?domain=quality", note: "Proposed by the build." },
+          ],
+        },
+        {
+          name: "origin",
+          label: "Origin",
+          values: [{ text: "graph", note: "Proposed by the build." }],
+        },
+      ],
+    });
+    expect(html).toContain(
+      '<dt>Domain</dt><dd><a class="value value-noted" href="../search/?domain=quality" title="Proposed by the build.">Quality</a></dd>',
+    );
+    expect(html).toContain(
+      '<dt>Origin</dt><dd><span class="value value-noted" title="Proposed by the build.">graph</span></dd>',
+    );
+  });
+
   it("lists the tree of the space in the left column, the folders on the way open, the current page ruled and named as current", () => {
     const html = render({
       space: {

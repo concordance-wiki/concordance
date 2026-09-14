@@ -26,7 +26,7 @@ import { combineProducedLinks } from "./combine.js";
 import { keywordNeighbours } from "./companions.js";
 import { buildDictionaries, corpusStopwords } from "./dictionary.js";
 import { displayedNeighbourhoodBlock } from "./display.js";
-import { proposeDomains, withoutAnswered } from "./domains.js";
+import { proposeDomains, withFoldedTwins, withoutAnswered } from "./domains.js";
 import {
   documentsWithoutMarkdown,
   readDocuments,
@@ -249,7 +249,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...read.findings,
       ...pseudonymization.findings,
       ...transcripts.findings,
-      ...withoutAnswered(typed.findings, domains.filed),
+      ...withoutAnswered(typed.findings, withFoldedTwins(domains.filed, twins.folded)),
       ...contributed.findings,
       ...attached.findings,
       ...twins.findings,
