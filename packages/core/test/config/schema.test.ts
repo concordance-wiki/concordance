@@ -5,6 +5,7 @@ import { readSchema } from "../../src/config/schema.js";
 describe("readSchema", () => {
   it.each([
     "config",
+    "lint",
     "profile",
     "type-module",
     "model",

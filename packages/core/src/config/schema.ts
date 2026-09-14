@@ -6,6 +6,7 @@ const schemaDirectory = new URL("../../schemas/", import.meta.url);
 
 export type SchemaName =
   | "config"
+  | "lint"
   | "profile"
   | "type-module"
   | "model"

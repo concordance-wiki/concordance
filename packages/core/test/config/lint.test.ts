@@ -1,4 +1,3 @@
-import { memoryFileSystem } from "@concordance-wiki/core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -6,7 +5,8 @@ import {
   parseLintConfig,
   readLintConfig,
   readLintOverrides,
-} from "../src/overrides.js";
+} from "../../src/config/lint.js";
+import { memoryFileSystem } from "../../src/io/file-system.js";
 
 describe("parseLintConfig", () => {
   it("reads the checks block", () => {
@@ -92,6 +92,35 @@ describe("parseLintConfig", () => {
     });
   });
 
+  it("reads the excluded globs next to the checks", () => {
+    expect(parseLintConfig("exclude:\n  - vendor/**\n  - '*.generated.md'\n")).toEqual({
+      ok: true,
+      checks: {},
+      exclude: ["vendor/**", "*.generated.md"],
+    });
+  });
+
+  it("rejects an empty glob and a glob that is not a string", () => {
+    expect(parseLintConfig("exclude: ['', 3]\n")).toEqual({
+      ok: false,
+      issues: [
+        {
+          severity: "error",
+          path: "exclude[0]",
+          message: "must NOT have fewer than 1 characters",
+          received: "",
+        },
+        {
+          severity: "error",
+          path: "exclude[1]",
+          message: "wrong type",
+          received: 3,
+          expected: "string",
+        },
+      ],
+    });
+  });
+
   it("rejects an unknown top-level key and a wrong override value", () => {
     expect(parseLintConfig("profile: x\nchecks:\n  W-STALE: { enabled: no }\n")).toEqual({
       ok: false,
@@ -121,15 +150,21 @@ describe("readLintConfig", () => {
     });
   });
 
-  it("returns the checks and the global block of the file at the root", () => {
+  it("returns the checks, the global block and the excluded globs of the file at the root", () => {
     const fs = memoryFileSystem({
       "/repo/concordance-lint.yaml":
-        "checks:\n  W-STALE: { severity: error }\nglobal:\n  model: ../wiki/dist/model.json\n",
+        "checks:\n  W-STALE: { severity: error }\nglobal:\n  model: ../wiki/dist/model.json\nexclude: [vendor/**]\n",
     });
     expect(readLintConfig(fs, "/repo")).toEqual({
       checks: { "W-STALE": { severity: "error" } },
       global: { model: "../wiki/dist/model.json" },
+      exclude: ["vendor/**"],
     });
+  });
+
+  it("leaves out the blocks the file does not carry", () => {
+    const fs = memoryFileSystem({ "/repo/concordance-lint.yaml": "exclude: [vendor/**]\n" });
+    expect(readLintConfig(fs, "/repo")).toEqual({ checks: {}, exclude: ["vendor/**"] });
   });
 });
 
