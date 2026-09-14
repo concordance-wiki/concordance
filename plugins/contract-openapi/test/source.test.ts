@@ -340,7 +340,7 @@ describe("loadContracts", () => {
     expect(output.contracts).toEqual([]);
   });
 
-  it("records the contract version read with its import date and fingerprint", async () => {
+  it("records the contract version read with its import date, its fingerprint and its operations in contract order", async () => {
     const { input } = harness(localFile);
     const output = await loadContracts(input([api()]));
     expect(output.contracts).toEqual([
@@ -352,6 +352,7 @@ describe("loadContracts", () => {
         format: "openapi 3.1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
+        operations: ["createPayment", "GET /payments/{id}"],
       },
     ]);
     expect(fingerprint).toMatch(/^[0-9a-f]{64}$/);

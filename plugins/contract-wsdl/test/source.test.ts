@@ -236,7 +236,7 @@ describe("loadContracts", () => {
     ]);
   });
 
-  it("caches the extracted contract by fingerprint and records the title read with the import date", async () => {
+  it("caches the extracted contract by fingerprint and records the title read with the import date and the operations in contract order", async () => {
     const { fs, input } = harness(localFile);
     const output = await loadContracts(input([api()]));
     const fingerprint = fingerprintOf(orders);
@@ -251,6 +251,7 @@ describe("loadContracts", () => {
         format: "wsdl 1.1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
+        operations: ["cancelOrder", "cancelOrder", "placeOrder"],
       },
     ]);
   });
