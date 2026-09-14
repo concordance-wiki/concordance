@@ -143,3 +143,4 @@ inference:
   keyword_pages: { min_occurrences: 3, min_files: 2 }
 staleness:
   warn_after_days: { default: 60, glossaire: 120 }
+lock: ./concordance.lock.yaml

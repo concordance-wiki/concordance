@@ -1504,7 +1504,12 @@ describe("concordance build", () => {
 
       it("counts entities per type, links per method, keywords, duplicates and findings alike in the log and on stdout", () => {
         const summary = built.log.summary;
-        expect(modelLines(built.stdout).slice(1)).toEqual(formatSummary(summary));
+        // The validation prints its warnings, the lock one for the realistic corpus, then its verdict line.
+        const verdict = built.stdout.findIndex((line) => line.endsWith(": valid configuration"));
+        expect(modelLines(built.stdout).slice(verdict + 1)).toEqual(formatSummary(summary));
+        expect(summary.lock).toEqual(
+          corpus === "realistic/en" ? { rejected_terms: 1, merged: 0, separated: 1 } : undefined,
+        );
         expect(Object.values(summary.entities).reduce((a, b) => a + b, 0)).toBe(
           built.model.entities.length,
         );

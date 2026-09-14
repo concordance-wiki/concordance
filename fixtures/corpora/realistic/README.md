@@ -27,7 +27,9 @@ The corpus is clean of errors: every link resolves, every identifier is unique, 
 - `W-DOMAIN-UNCLASSIFIED` on the notes outside every domain glob (two roles, four terms);
 - `W-TERM-UNDEFINED` on `build summary` (`résumé de build`), used seven times in three files without a glossary note, and `W-TERM-UNUSED` on the three terms nobody cites, one of which is cited only under the excluded `private/` folder.
 
-`expected/keywords.yaml` names that published expression and three expressions that must stay unpublished, among them `cold start` (`démarrage à froid`), twice in one file; `expected/links.yaml` lists sixty links covering every method of the confidence scale, as a minimum rather than an exhaustive list.
+`expected/keywords.yaml` names that published expression and the expressions that must stay unpublished, among them `cold start` (`démarrage à froid`), twice in one file, and `merge request` (`demande de fusion`), which the earlier builds published and the lock file now rejects; `expected/links.yaml` lists sixty links covering every method of the confidence scale, as a minimum rather than an exhaustive list.
+
+`concordance.lock.yaml`, named by the `lock` key of the configuration, records two decisions the build applies: the rejected expression above, a term of the forge rather than of the corpus, compared on its normalised form (the file writes it `Merge Request`), and one `separated` pair, the glossary term and the API sharing the base name `canonical-model` (`modele-canonique`), two notes the twin detection reported on that likeness alone; `expected/findings.yaml` lists the other pairs and not that one.
 
 The checks that need git history, binary documents or transcripts (`W-STALE`, `W-CONV-*`, `W-DOC-NOMD`, `W-DUP-CANDIDATE`, `I-PII-DETECTED`) are not exercised here; see the [faulty corpus](../faulty/en/README.md).
 

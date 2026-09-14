@@ -1,0 +1,12 @@
+# Human decisions the build applies over its inferences, named by the `lock`
+# key of concordance.yaml. Each entry answers a finding of a build of this
+# corpus: an expression the discovery proposed that is a term of the forge
+# rather than of the corpus, and a pair the twin detection reported on the
+# likeness of two base names alone, a glossary term and the API of the same
+# name, which are two notes and not two representations of one document.
+version: 1
+duplicates:
+  separated:
+    - [glossaire/modele-canonique, specs/api/modele-canonique]
+rejected_terms:
+  - Demande de Fusion
