@@ -144,7 +144,7 @@ describe("MeetingPage", () => {
       props.documents = [transcript, pdf, transcript, pdf];
     });
     expect(html).toContain(
-      '<a class="tab" role="tab" id="tab-representation-transcript" href="#representation-transcript" aria-controls="representation-transcript" aria-selected="true">Transcript</a><a class="tab" role="tab" id="tab-representation-transcript-2" href="#representation-transcript-2" aria-controls="representation-transcript-2" aria-selected="false">Transcript</a><a class="tab" role="tab" id="tab-representation-document" href="#representation-document" aria-controls="representation-document" aria-selected="false">Document</a><a class="tab" role="tab" id="tab-representation-document-2" href="#representation-document-2" aria-controls="representation-document-2" aria-selected="false">Document</a>',
+      '<a class="tab" role="tab" id="tab-representation-transcript" href="#representation-transcript" aria-controls="representation-transcript" aria-selected="true">Transcript</a><a class="tab" role="tab" id="tab-representation-transcript-2" href="#representation-transcript-2" aria-controls="representation-transcript-2" aria-selected="false">Transcript</a><a class="tab" role="tab" id="tab-representation-pages" href="#representation-pages" aria-controls="representation-pages" aria-selected="false">Document</a><a class="tab" role="tab" id="tab-representation-pages-2" href="#representation-pages-2" aria-controls="representation-pages-2" aria-selected="false">Document</a>',
     );
     expect(html).not.toContain("representation-notes");
     expect(html).toContain('<li class="cue" id="L1-3">');
