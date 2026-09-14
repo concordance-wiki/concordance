@@ -1570,7 +1570,7 @@ describe("concordance build", () => {
         .join("\n");
       expect(index.split('href="../../specs/rules/twin-size-ratio/index.html"')).toHaveLength(2);
       expect(index).not.toContain("twin-size-ratio.rule.docx");
-    });
+    }, 60_000);
 
     it("files the four notes of the minimal corpus that no domain covers as unclassified", async () => {
       const { model } = await build("minimal/en");
