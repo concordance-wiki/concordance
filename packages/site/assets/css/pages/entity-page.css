@@ -82,3 +82,27 @@
   max-inline-size: 50rem;
   margin-inline: auto;
 }
+
+/* The foot of the article on the phone: the name of the file alone, its folders left out, and the short label of the edit link, "plafond.md · Edit" on one line of 48 px, the path kept at the 13 px floor of the theme; the question stays for the wider widths. */
+
+.entity-edit-short {
+  display: none;
+}
+
+@media (width < 43.75rem) {
+  /* Named with the footer, so that the rules of the article, assembled after this file, do not undo them. */
+  .entity-footer > .entity-source {
+    flex-wrap: nowrap;
+    min-block-size: 3rem;
+  }
+
+  .entity-source-folders,
+  .entity-edit-question,
+  .entity-edit-long {
+    display: none;
+  }
+
+  .entity-edit-short {
+    display: inline;
+  }
+}

@@ -216,6 +216,18 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(phone).toContain(".entity-footer > .legend {\n    display: none;\n  }");
   });
 
+  it("reads the foot of the article on the phone as the name of the file and the short edit label on one line of 48 px, the folders and the question left out", () => {
+    expect(components).toContain(".entity-edit-short {\n  display: none;\n}");
+    const phone = media(components, "(width < 43.75rem)");
+    expect(phone).toContain(
+      ".entity-footer > .entity-source {\n    flex-wrap: nowrap;\n    min-block-size: 3rem;\n  }",
+    );
+    expect(phone).toContain(
+      ".entity-source-folders,\n  .entity-edit-question,\n  .entity-edit-long {\n    display: none;\n  }",
+    );
+    expect(phone).toContain(".entity-edit-short {\n    display: inline;\n  }");
+  });
+
   it("folds the trail behind a square button of the bar, the island hidden while its script lists no page, the list unfolded under the bar", () => {
     expect(components).toContain(
       'concordance-island[data-island="trail"] {\n  position: relative;\n  flex: none;\n}\n\nconcordance-island[data-island="trail"]:empty {\n  display: none;\n}',

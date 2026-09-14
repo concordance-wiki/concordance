@@ -323,10 +323,12 @@ describe("EntityPage", () => {
   it("shows the source file path and the edit link to the forge under the note, the path linked to the file when the forge is known, the call to action only when it leads somewhere", () => {
     const html = render();
     expect(html).toContain(
-      '<p class="entity-source"><code>glossary/keyword-page.md</code><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Edit this page</a></span></p></footer></div><div class="entity-side">',
+      '<p class="entity-source"><code><span class="entity-source-folders">glossary/</span>keyword-page.md</code><span class="entity-edit-lead"><span class="entity-edit-question">Something to correct?</span> <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md"><span class="entity-edit-long">Edit this page</span><span class="entity-edit-short">Edit</span></a></span></p></footer></div><div class="entity-side">',
     );
     const without = render({ sources: [{ source: "framing", path: "a.md" }] });
-    expect(without).toContain('<p class="entity-source"><code>framing/a.md</code></p>');
+    expect(without).toContain(
+      '<p class="entity-source"><code><span class="entity-source-folders">framing/</span>a.md</code></p>',
+    );
     expect(without).not.toContain("entity-edit");
     const onForge = render({
       sources: [
@@ -339,10 +341,27 @@ describe("EntityPage", () => {
       ],
     });
     expect(onForge).toContain(
-      '<p class="entity-source"><a class="entity-source-file" href="https://forge.example/framing/edit/main/a.md"><code>framing/a.md</code></a><span class="entity-edit-lead">',
+      '<p class="entity-source"><a class="entity-source-file" href="https://forge.example/framing/edit/main/a.md"><code><span class="entity-source-folders">framing/</span>a.md</code></a><span class="entity-edit-lead">',
     );
-    expect(render({ labels: { correction: "Une correction ?", edit: "Modifier" } })).toContain(
-      '<span class="entity-edit-lead">Une correction ? <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md">Modifier</a></span>',
+    expect(
+      render({
+        labels: {
+          correction: "Une correction ?",
+          edit: "Modifier cette page",
+          editShort: "Modifier",
+        },
+      }),
+    ).toContain(
+      '<span class="entity-edit-lead"><span class="entity-edit-question">Une correction ?</span> <a class="entity-edit" href="https://forge.example/glossary/edit/main/keyword-page.md"><span class="entity-edit-long">Modifier cette page</span><span class="entity-edit-short">Modifier</span></a></span>',
+    );
+  });
+
+  it("splits the path of the file so that the phone keeps the name alone: the source and the folders in a span of their own, the name after it", () => {
+    const nested = render({
+      sources: [{ source: "specs", path: "rules/publication/threshold.rule.md" }],
+    });
+    expect(nested).toContain(
+      '<code><span class="entity-source-folders">specs/rules/publication/</span>threshold.rule.md</code>',
     );
   });
 

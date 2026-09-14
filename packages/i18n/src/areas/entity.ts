@@ -16,6 +16,7 @@ export const entityMessages = {
     "entity.declaredAtTop": { count: "plural" },
     "entity.domain": {},
     "entity.edit": {},
+    "entity.editShort": {},
     "entity.imageNote": {},
     "entity.inSpace": { space: "argument" },
     "entity.legendKeyword": {},

@@ -230,4 +230,5 @@ export const labels = {
   noNote: "No note describes this document yet.",
   inTheDocument: "in the document",
   inSpace: "Space {space}",
+  editShort: "Edit",
 } as const;

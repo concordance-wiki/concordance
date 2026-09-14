@@ -406,6 +406,8 @@ export interface EntityPageLabels {
   imageNote: string;
   /** The space of the page on the line under the title, already worded with its title: "Space Specifications"; the theme words it from the name of the tree when absent. */
   inSpace: string;
+  /** The edit link of the footer under the phone width, next to the name of the file: "Edit". */
+  editShort: string;
 }
 
 /** A step of the breadcrumb: the space, a folder, the page; the space leads to its page, a folder to its list, the last step is where the reader stands. */

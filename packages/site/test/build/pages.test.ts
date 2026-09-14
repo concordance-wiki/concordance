@@ -396,6 +396,7 @@ describe("entityPageOf", () => {
       legendKeyword: "recognised word, no note",
       imageNote: "Image of the repository, shown in the flow of the text",
       inSpace: "Space glossary",
+      editShort: "Edit",
     });
     expect(stranger.attributes).toHaveLength(3);
     expect(

@@ -1052,7 +1052,7 @@ describe("siteDocuments", () => {
     const entity = documents.find((document) => document.path === pagePath(term.id));
     const screen = documents.find((document) => document.path === pagePath(screenEntity.id));
     expect(entity?.content).toContain(
-      '<p class="entity-source"><a class="entity-source-file" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md"><code>glossary/keyword-page.md</code></a><span class="entity-edit-lead">Something to correct? <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md">Edit this page</a></span></p>',
+      '<p class="entity-source"><a class="entity-source-file" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md"><code><span class="entity-source-folders">glossary/</span>keyword-page.md</code></a><span class="entity-edit-lead"><span class="entity-edit-question">Something to correct?</span> <a class="entity-edit" href="https://github.com/concordance-wiki/demo-glossary/edit/main/keyword-page.md"><span class="entity-edit-long">Edit this page</span><span class="entity-edit-short">Edit</span></a></span></p>',
     );
     expect(screen?.content).toContain(
       '<a class="entity-edit" href="https://gitlab.com/concordance-wiki/demo-specs/-/edit/develop/screens/mentions-panel.md">',

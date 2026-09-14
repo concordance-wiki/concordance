@@ -47,6 +47,7 @@ export function defaultEntityPageLabels(
     legendKeyword: labels.legendKeyword,
     imageNote: labels.imageNote,
     inSpace: fill(labels.inSpace, { space }),
+    editShort: labels.editShort,
   };
 }
 
@@ -162,7 +163,12 @@ export function Breadcrumb({
   );
 }
 
-/** The path of the file in the monospace family, linked to the file on its forge when known, then the call to action when it has somewhere to lead. */
+/**
+ * The path of the file in the monospace family, linked to the file on its forge when known,
+ * then the call to action when it has somewhere to lead. Under the phone width the stylesheet
+ * keeps the name of the file alone, its folders left out, and the short label of the link, so
+ * that the foot reads "plafond.md · Edit" on one line.
+ */
 export function Source({
   source,
   text,
@@ -170,9 +176,13 @@ export function Source({
   source: SourceRef;
   text: EntityPageLabels;
 }): JSX.Element {
+  const cut = source.path.lastIndexOf("/") + 1;
   const path = (
     <code>
-      {source.source}/{source.path}
+      <span class="entity-source-folders">
+        {source.source}/{source.path.slice(0, cut)}
+      </span>
+      {source.path.slice(cut)}
     </code>
   );
   return (
@@ -186,9 +196,10 @@ export function Source({
       )}
       {source.editHref !== undefined && (
         <span class="entity-edit-lead">
-          {text.correction}{" "}
+          <span class="entity-edit-question">{text.correction}</span>{" "}
           <a class="entity-edit" href={source.editHref}>
-            {text.edit}
+            <span class="entity-edit-long">{text.edit}</span>
+            <span class="entity-edit-short">{text.editShort}</span>
           </a>
         </span>
       )}
