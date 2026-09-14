@@ -88,7 +88,7 @@ The display rules of a type: the attributes its page highlights and the order of
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
-| `highlight` | string[] | — | at most 5 items | Attributes shown next to the type badge of the page, in order, five at most. |
+| `highlight` | string[] | — | at most 5 items | Attributes the site puts forward, in order, five at most: the first filters the list of a category of the type and heads its second column, all of them lead the five keys of the panel of an API; the page of an entity shows them in its panel with the others. |
 | `neighbours_order` | string[] | — | each: pattern `^[a-z][a-z0-9_]*$` | Neighbour types the neighbourhood panel shows first, in priority order; the types not listed come after, by confidence. Each must be a declared type. |
 
 ## `relations.*`

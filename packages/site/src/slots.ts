@@ -751,8 +751,9 @@ export interface EntityPageProps {
   /** The last change of the note, on the line under the title; absent when the source recorded none. */
   changed?: ChangeDate;
   /**
-   * Qualifying properties, in the order of `display.highlight` of the type: the first two sit
-   * next to the badge, the next three on a line under it, the template shows at most five.
+   * The properties `display.highlight` of the type puts forward, in its order, as the panel
+   * resolves them: the API page leads its five keys with them; the generic page shows them in
+   * the panel alone, the line under the title naming nothing the panel says.
    */
   highlights: Attribute[];
   /** The note rendered by the build; the text marks written links and recognised words. */

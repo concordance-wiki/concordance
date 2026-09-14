@@ -124,7 +124,7 @@ status: valid
 - [Fail-on policy](../rules/fail-on-policy.md)
 ```
 
-The `## Steps` section produces `related` links to every note it mentions, `## Rules` makes each listed rule constrain the runbook, `owner` assigns the role, and the page of a runbook highlights its trigger and its owner, lists its rules first among its neighbours, and shows every other attribute in its panel. Nothing else is needed for the generic page to render a runbook; the [theming guide](theming.md#rendering-per-type) says how to give it a page of its own.
+The `## Steps` section produces `related` links to every note it mentions, `## Rules` makes each listed rule constrain the runbook, `owner` assigns the role, and the page of a runbook shows its trigger and its owner in its panel with every other attribute, lists its rules first among its neighbours, and the list of the runbooks folder filters on the trigger. Nothing else is needed for the generic page to render a runbook; the [theming guide](theming.md#rendering-per-type) says how to give it a page of its own.
 
 ## The core types
 

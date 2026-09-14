@@ -1,27 +1,19 @@
-/* Title, then the line naming the type, the last change, the space and the highlighted properties. */
+/* Title, then the line naming the type, the last change and the space. */
 
 .entity-header h1 {
   margin-block: 0 var(--space-2);
 }
 
-.entity-badge,
-.entity-highlights {
+.entity-badge {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
   align-items: center;
-  color: var(--color-label);
-  font-size: 0.8125rem;
-}
-
-.entity-badge {
   margin: 0;
   padding-block-end: var(--space-3);
   border-block-end: 1px solid var(--color-border);
-}
-
-.entity-highlights {
-  margin-block: var(--space-2) 0;
+  color: var(--color-label);
+  font-size: 0.8125rem;
 }
 
 .entity-badge > * + *::before {
@@ -42,10 +34,6 @@ a.entity-space {
 
 a.entity-space:hover {
   text-decoration: underline;
-}
-
-.highlight-label {
-  margin-inline-end: var(--space-1);
 }
 
 .entity-body {

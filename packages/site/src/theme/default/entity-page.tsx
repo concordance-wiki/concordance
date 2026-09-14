@@ -1,7 +1,6 @@
 import type { JSX } from "preact";
 
 import type {
-  Attribute,
   BreadcrumbItem,
   EntityPageLabels,
   EntityPageProps,
@@ -13,7 +12,7 @@ import type {
 } from "../../slots.js";
 import { withImageNotes } from "../../markdown/figures.js";
 import { useSectionPart, useSlot } from "../context.js";
-import { AttributeList, AttributeValues } from "./attributes.js";
+import { AttributeList } from "./attributes.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
 import { fill } from "./mention-list.js";
@@ -23,11 +22,6 @@ import { SpaceTree } from "./space-tree.js";
 import { TableOfContents } from "./toc.js";
 
 export { PanelBlock } from "./panel-block.js";
-
-/** How many highlights sit on the badge line; the next ones go on a line of their own. */
-export const HIGHLIGHTS_WITH_BADGE = 2;
-/** How many highlights the header shows in all; the rest stays in the panel. */
-export const HIGHLIGHTS_MAX = 5;
 
 /** The labels of the default theme, used for every label the page does not receive; the neighbour and key counts and the name of the space are worded from the page. */
 export function defaultEntityPageLabels(
@@ -56,7 +50,6 @@ export function defaultEntityPageLabels(
   };
 }
 
-/** The space of the page on the line under the title, "Space Specifications", leading to the page of the space when the tree knows it. */
 /** The type of the page as a chip, leading to the results filtered on that type when the page knows where. */
 export function TypeBadge({ label, href }: { label: string; href?: string }): JSX.Element {
   return href === undefined ? (
@@ -68,6 +61,7 @@ export function TypeBadge({ label, href }: { label: string; href?: string }): JS
   );
 }
 
+/** The space of the page on the line under the title, "Space Specifications", leading to the page of the space when the tree knows it. */
 export function SpaceMark({ space, label }: { space: SpaceTreeModel; label: string }): JSX.Element {
   return space.href === undefined ? (
     <span class="entity-space">{label}</span>
@@ -75,21 +69,6 @@ export function SpaceMark({ space, label }: { space: SpaceTreeModel; label: stri
     <a class="entity-space" href={space.href}>
       {label}
     </a>
-  );
-}
-
-function Highlight({
-  entity,
-  attribute,
-}: {
-  entity: EntityRef;
-  attribute: Attribute;
-}): JSX.Element {
-  return (
-    <span class="highlight">
-      <span class="highlight-label">{attribute.label}</span>{" "}
-      <AttributeValues entity={entity} attribute={attribute} />
-    </span>
   );
 }
 
@@ -132,7 +111,6 @@ function MappedSection({
   );
 }
 
-/** A section of the note: plain, or through the component of its mapped key when there is one. */
 /** A section of the note: mapped through its `Section@<key>` component when the type has one, plain otherwise. */
 export function NoteSection({
   entity,
@@ -259,29 +237,21 @@ export function NeighbourhoodFold({
 
 /**
  * The page of every typed entity, whatever its type: the tree of its space on the left; in the
- * centre the breadcrumb, the title, the line naming the type, the last change and the space
- * with the highlights, the note at full column width, its documents under it, the contract of
- * an API after it, then the foot of the article, the legend of the two marks of the text with
- * the path of the file and its edit link; on the right three stacked
- * blocks, the declared attributes (and the attributes the type does not declare, when the note
- * sets some), the table of contents of the note, the related pages, then the neighbourhood
- * folded behind its line. An attribute value or a mapped section goes through the
- * `Attribute@<name>` or `Section@<key>` component of the theme or of the type module when one
- * exists; the rest of the page is the same for every type. `mapOpen` serves the neighbourhood
- * unfolded, as the reader sees it after opening its line. The default theme hands a meeting,
- * whose view model carries what its files bring, to the meeting template on the same shell.
- * with the highlights, the note at full column width, its documents under it, then the foot of
- * the article, the legend of the two marks of the text with the path of the file and its edit
- * link; on the right three stacked blocks, the declared attributes (and the attributes the type
- * does not declare, when the note sets some), the table of contents of the note, the related
- * pages, then the neighbourhood folded behind its line. An attribute value or a mapped section
- * goes through the `Attribute@<name>` or `Section@<key>` component of the theme or of the type
- * module when one exists; the rest of the page is the same for every type. `mapOpen` serves the
- * neighbourhood unfolded, as the reader sees it after opening its line. An API whose contract
- * was imported has a page of its own, `ApiPage`, which the theme serves in its place.
- * whose view model carries what its files bring, to the meeting template on the same shell, and
- * an entity the build laid out as a document page, an office document with what the page says
- * of it, to the document template.
+ * centre the breadcrumb, the title, the line naming the type, the last change and the space,
+ * the note at full column width, its documents under it, then the foot of the article, the
+ * legend of the marks of the text with the path of the file and its edit link; on the right
+ * three stacked blocks, the declared attributes (and the attributes the type does not declare,
+ * when the note sets some), the table of contents of the note, the related pages, then the
+ * neighbourhood folded behind its line. The properties the profile puts forward stay in the
+ * panel with the others: the line under the title names nothing the panel says. An attribute
+ * value or a mapped section goes through the `Attribute@<name>` or `Section@<key>` component
+ * of the theme or of the type module when one exists; the rest of the page is the same for
+ * every type. `mapOpen` serves the neighbourhood unfolded, as the reader sees it after opening
+ * its line. An API whose contract was imported has a page of its own, `ApiPage`, which the
+ * theme serves in its place; the default theme hands a meeting, whose view model carries what
+ * its files bring, to the meeting template on the same shell, and an entity the build laid out
+ * as a document page, an office document with what the page says of it, to the document
+ * template.
  */
 export function EntityPage({
   entity,
@@ -289,7 +259,6 @@ export function EntityPage({
   space,
   breadcrumb = [],
   changed,
-  highlights,
   sections,
   attributes,
   otherAttributes = [],
@@ -309,8 +278,6 @@ export function EntityPage({
     ),
     ...given,
   };
-  const withBadge = highlights.slice(0, HIGHLIGHTS_WITH_BADGE);
-  const underBadge = highlights.slice(HIGHLIGHTS_WITH_BADGE, HIGHLIGHTS_MAX);
   const headed = sections.filter((section) => section.heading !== undefined);
   return (
     <div class={space === undefined ? "entity" : "entity entity-with-space"}>
@@ -331,17 +298,7 @@ export function EntityPage({
               </time>
             )}
             {space !== undefined && <SpaceMark space={space} label={text.inSpace} />}
-            {withBadge.map((attribute) => (
-              <Highlight key={attribute.name} entity={entity} attribute={attribute} />
-            ))}
           </p>
-          {underBadge.length > 0 && (
-            <p class="entity-highlights">
-              {underBadge.map((attribute) => (
-                <Highlight key={attribute.name} entity={entity} attribute={attribute} />
-              ))}
-            </p>
-          )}
         </header>
         <article class="entity-body">
           {sections.map((section) => (

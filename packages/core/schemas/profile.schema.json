@@ -403,7 +403,7 @@
       "additionalProperties": false,
       "properties": {
         "highlight": {
-          "description": "Attributes shown next to the type badge of the page, in order, five at most.",
+          "description": "Attributes the site puts forward, in order, five at most: the first filters the list of a category of the type and heads its second column, all of them lead the five keys of the panel of an API; the page of an entity shows them in its panel with the others.",
           "type": "array",
           "maxItems": 5,
           "items": {
