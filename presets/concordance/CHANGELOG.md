@@ -1,5 +1,14 @@
 # @concordance-wiki/concordance
 
+## 0.3.0
+
+### Patch Changes
+
+- @concordance-wiki/cli@0.3.0
+  - @concordance-wiki/plugin-convert-libreoffice@0.3.0
+  - @concordance-wiki/plugin-reader-office@0.3.0
+  - @concordance-wiki/plugin-reader-vtt@0.3.0
+
 ## 0.2.0
 
 ### Patch Changes
