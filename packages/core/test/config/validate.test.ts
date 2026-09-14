@@ -333,12 +333,13 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
-  it("accepts the legal pages of a project, and rejects a status outside the three declared states, a plain HTTP address or a stray legal key", () => {
+  it("accepts the legal pages and the about file of a project, and rejects a status outside the three declared states, a plain HTTP address or a stray legal key", () => {
     expect(
       validateConfig({
         ...minimal,
         project: {
           name: "Wiki",
+          about: "about.md",
           legal: {
             mentions_url: "https://forge.example/legal/mentions",
             accessibility_url: "https://forge.example/legal/accessibility",
@@ -353,6 +354,7 @@ describe("validateConfig beyond the schema", () => {
         ...minimal,
         project: {
           name: "Wiki",
+          about: "",
           legal: {
             accessibility_status: "conforming",
             privacy_url: "http://forge.example/legal/privacy",
@@ -378,6 +380,11 @@ describe("validateConfig beyond the schema", () => {
         path: "project.legal.privacy_url",
         message: "value does not match the expected format",
         expected: "a value matching ^https://[^\\s]+$",
+      },
+      {
+        severity: "error",
+        path: "project.about",
+        message: "must NOT have fewer than 1 characters",
       },
     ]);
   });

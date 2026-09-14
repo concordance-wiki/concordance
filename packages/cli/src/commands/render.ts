@@ -206,6 +206,25 @@ export function placeContracts(
 }
 
 /**
+ * The markdown of the file `project.about` names, relative to the configuration, which extends
+ * the about page; none when the configuration names no file. A file named and missing is a
+ * configuration error, reported as the profile's would be.
+ */
+export function aboutText(
+  io: CommandIo,
+  config: Config,
+  configFile: string,
+): { about?: string } | { exit: ExitCode } {
+  if (config.project.about === undefined) return {};
+  const file = resolve(dirname(configFile), config.project.about);
+  if (!io.fs.exists(file)) {
+    io.err(`${file}: about file not found`);
+    return { exit: exitCodes.invalid };
+  }
+  return { about: io.fs.readText(file) };
+}
+
+/**
  * Renders the site from a model and its fragments through the theme of the configuration, prints
  * the summary on stdout and every warning on stderr; a page over budget or with an accessibility
  * finding is reported, never a failure.
@@ -225,6 +244,11 @@ export async function renderSite(
   });
   if ("exit" in theme) {
     return theme.exit;
+  }
+  const about = aboutText(io, config, input.configFile);
+  if ("exit" in about) {
+    io.err(`${command} stopped: fix the configuration first`);
+    return about.exit;
   }
   const { fragments, missing } = readFragments(io.fs, input.modelDirectory, input.model);
   if (missing > 0) {
@@ -264,6 +288,10 @@ export async function renderSite(
       ? {}
       : { bodyMaxChars: config.build.extracted_text_max_chars }),
     ...(config.project.legal === undefined ? {} : { legal: config.project.legal }),
+    ...about,
+    ...(config.inference?.keyword_pages?.min_occurrences === undefined
+      ? {}
+      : { keywordThreshold: config.inference.keyword_pages.min_occurrences }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   placeDocuments(io.fs, fragments, input.modelDirectory, input.output);

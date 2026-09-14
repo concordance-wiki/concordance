@@ -10,6 +10,7 @@ describe("The gallery has one state per board of the reference design, named aft
     expect(BOARD_IDS).toEqual([
       ...Array.from({ length: 16 }, (_, index) => `B${String(index + 1)}`),
       "B18",
+      "B19",
       "B20",
       "todo",
       "panels",

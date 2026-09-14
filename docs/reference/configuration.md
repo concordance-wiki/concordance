@@ -11,7 +11,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `version` (required) | constant | — | `1` | Version of this schema; always 1. |
-| `project` (required) | object | — | — | The project: its name, its interface language, its theme file, its edit link and the pages the organisation declares. See [`project`](#project). |
+| `project` (required) | object | — | — | The project: its name, its interface language, its theme file, its edit link, the pages the organisation declares and the file that extends the about page. See [`project`](#project). |
 | `profile` | string | — | — | Path of the project profile, relative to this configuration, merged key by key over the default profile. |
 | `plugins` | (string \| object)[] | — | each: non-empty | Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them. See [`plugins[]`](#plugins). |
 | `applications` | object[] | — | — | First-level containers every entity is resolved to, through its source, a typing rule or its frontmatter. An identifier not declared here yields W-APP-UNKNOWN; an entity without one yields W-APP-MISSING. See [`applications[]`](#applications). |
@@ -28,7 +28,7 @@ A key marked (required) must be present; every other key is optional and takes t
 
 ## `project`
 
-The project: its name, its interface language, its theme file, its edit link and the pages the organisation declares.
+The project: its name, its interface language, its theme file, its edit link, the pages the organisation declares and the file that extends the about page.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -38,6 +38,7 @@ The project: its name, its interface language, its theme file, its edit link and
 | `edit_url` | string | — | — | Pattern of the edit link in the footer of every page, with {source}, {path} and {commit} placeholders. Without it, a source hosted on github.com or on a GitLab instance gets the edit URL of its forge, and a local source gets none. |
 | `contribute_url` | string | — | pattern `^https://[^\s]+$` | HTTPS address every call to action of the site leads to when no forge link can be built for it: proposing a definition, editing a page. Without it and without a forge link, the call to action is not shown. |
 | `legal` | object | — | — | What only the organisation that publishes the site can declare: its legal notice, its accessibility statement and its personal data page. None has a default; each link appears in the footer of every page once its address is given or a note stands at legal/<page>.md in a source. See [`project.legal`](#projectlegal). |
+| `about` | string | — | non-empty | Path of a markdown file, relative to this configuration, rendered after the generated content of the about page: what the maintainer wants to add to what the tool says of the site. |
 
 ### `project.legal`
 

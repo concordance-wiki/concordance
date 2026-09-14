@@ -55,6 +55,7 @@ export const CSS_FILES = {
     "pages/category-list.css",
     "pages/document-page.css",
     "pages/decision-page.css",
+    "pages/about.css",
     "pages/gallery.css",
   ],
 } as const;

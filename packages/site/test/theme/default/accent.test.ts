@@ -92,6 +92,7 @@ describe("The accent colour never carries information on its own", () => {
       ".spaces-row.stale .spaces-date",
       ".document-page .document-rail a.current",
       ".decision-session",
+      ".about-row.stale .about-date",
     ]);
   });
 

@@ -124,6 +124,13 @@ const boards = [
       "Two natures on every page: what the tool knows of the site, and what the organisation declared.",
   },
   {
+    id: "B19",
+    title: "About this wiki",
+    caption:
+      "The page of trust: when the site was built, from which repositories, at which versions.",
+    screen: "pages/about",
+  },
+  {
     id: "B20",
     title: "Dark mode",
     caption:

@@ -1,0 +1,102 @@
+{
+  "about.content": {
+    "defaultMessage": "Content kept",
+    "description": "Column of the sources table of the about page: how many pages or documents the site kept from the repository."
+  },
+  "about.contribute": {
+    "defaultMessage": "How to contribute",
+    "description": "Link of the about page to the contribution address of the configuration."
+  },
+  "about.correct": {
+    "defaultMessage": "Correct a page.",
+    "description": "Lead of the paragraph of the about page saying how a page is corrected."
+  },
+  "about.correctText": {
+    "defaultMessage": "Every page carries at its foot the path of its file and a link to the forge. There is no other way to edit, and that is deliberate.",
+    "description": "Paragraph of the about page saying how a page is corrected."
+  },
+  "about.lastChange": {
+    "defaultMessage": "Last change",
+    "description": "Column of the sources table of the about page: the newest change of the repository."
+  },
+  "about.lead": {
+    "defaultMessage": "This site is rebuilt at every change of the repositories. It is not edited here: every correction is made in the original file, and appears at the next publication.",
+    "description": "Sentence under the title of the about page."
+  },
+  "about.nature": {
+    "defaultMessage": "Nature",
+    "description": "Column of the sources table of the about page: what the repository holds."
+  },
+  "about.notContained": {
+    "defaultMessage": "What the site does not contain.",
+    "description": "Lead of the paragraph of the about page listing what was left out."
+  },
+  "about.notContainedText": {
+    "defaultMessage": "The files the configuration excludes, the documents whose conversion failed, and the words used fewer than {count, plural, one {# time} other {# times}}. The",
+    "description": "Paragraph of the about page listing what was left out, before the link to the report; the count is the publication threshold of a keyword page."
+  },
+  "about.pages": {
+    "defaultMessage": "Pages",
+    "description": "Figure at the head of the about page: how many pages the site holds."
+  },
+  "about.pseudonymised": {
+    "defaultMessage": "What is pseudonymised.",
+    "description": "Lead of the paragraph of the about page on pseudonymisation, shown when the configuration enables it."
+  },
+  "about.pseudonymisedText": {
+    "defaultMessage": "The names of the participants are replaced at publication by stable pseudonyms. The mapping is never published.",
+    "description": "Paragraph of the about page on pseudonymisation."
+  },
+  "about.publishedAt": {
+    "defaultMessage": "{day, date, medium} {time, time, short}",
+    "description": "Figure at the head of the about page: the build instant."
+  },
+  "about.publishedOn": {
+    "defaultMessage": "Published on",
+    "description": "Label of the first figure of the about page, the build instant."
+  },
+  "about.report": {
+    "defaultMessage": "publication report",
+    "description": "Link of the about page to the to-do page, which lists what the build could not finish."
+  },
+  "about.reportLists": {
+    "defaultMessage": "lists them.",
+    "description": "End of the paragraph of the about page listing what was left out, after the link to the report."
+  },
+  "about.repository": {
+    "defaultMessage": "Repository",
+    "description": "Column of the sources table of the about page: the name of the source."
+  },
+  "about.sources": {
+    "defaultMessage": "Sources",
+    "description": "Heading of the sources table of the about page."
+  },
+  "about.sourcesLead": {
+    "defaultMessage": "each with the version exactly used",
+    "description": "Sentence next to the heading of the sources table of the about page."
+  },
+  "about.staleExceeds": {
+    "defaultMessage": "exceeds the freshness threshold of {count, plural, one {# day} other {# days}}, which is reported here and in the build report, never on the pages themselves.",
+    "description": "End of the sentence naming a dormant source under the sources table of the about page, after its name."
+  },
+  "about.staleSource": {
+    "defaultMessage": "The source",
+    "description": "Start of the sentence naming a dormant source under the sources table of the about page, before its name."
+  },
+  "about.title": {
+    "defaultMessage": "About this wiki",
+    "description": "Title of the about page, and its link in the footer."
+  },
+  "about.version": {
+    "defaultMessage": "Version",
+    "description": "Column of the sources table of the about page: the commit the build read."
+  },
+  "about.versionsNote": {
+    "defaultMessage": "The versions are those read at publication: two publications on the same versions produce an identical site.",
+    "description": "Note under the sources table of the about page."
+  },
+  "about.words": {
+    "defaultMessage": "Indexed words",
+    "description": "Figure at the head of the about page: how many words the index lists."
+  }
+}

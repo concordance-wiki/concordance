@@ -56,6 +56,10 @@ export interface SiteContextInput {
   pseudonymized?: boolean;
   /** `project.legal` of the configuration: the pages the organisation declares, linked from the footer. */
   legal?: LegalConfig;
+  /** The markdown of the file `project.about` names, rendered after the generated content of the about page. */
+  about?: string;
+  /** `inference.keyword_pages.min_occurrences` of the configuration: below it a word gets no page, which the about page says. */
+  keywordThreshold?: number;
 }
 
 /** Everything the page builders share: the model indexed, the profile, the labels. */

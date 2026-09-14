@@ -56,7 +56,7 @@ const modelLines = (stdout: string[]): string[] =>
 /**
  * The site summary the rendering appends to stdout; the island sizes vary with the code, so their
  * lines are matched. `pages` counts the pages of the model, the redirects and the fixed ones, the
- * search page, the spaces page and the page of every space apart.
+ * search page, the spaces page, the about page and the page of every space apart.
  */
 function expectSiteSummary(
   stdout: string[],
@@ -66,7 +66,7 @@ function expectSiteSummary(
   spaces = 1,
 ): void {
   const lines = stdout.slice(stdout.findIndex((line) => line.startsWith("site: ")));
-  const total = pages + 2 + spaces;
+  const total = pages + 3 + spaces;
   expect(lines).toEqual([
     `site: ${String(total)} pages written to ${output}`,
     `redirects: ${String(redirects)} former keyword addresses forwarding to a note`,
@@ -1394,9 +1394,10 @@ describe("concordance build", () => {
         expect(
           built.files.filter((file) => /^assets\/search-[A-Z0-9]+\.js$/.test(file)),
         ).toHaveLength(1);
+        // The home, the index, the to-do, search, spaces and about pages, then one per space.
         expect(built.pages.size).toBe(
           built.model.entities.length +
-            5 +
+            6 +
             built.model.build.sources.length +
             redirectsOf(built).length +
             letterPagesOf(built).length +

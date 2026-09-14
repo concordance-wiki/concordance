@@ -21,3 +21,4 @@ export * from "./fixtures/document-page.js";
 export * from "./fixtures/spaces.js";
 export * from "./fixtures/degraded.js";
 export * from "./fixtures/decision-page.js";
+export * from "./fixtures/about.js";

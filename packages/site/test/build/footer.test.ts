@@ -154,6 +154,7 @@ describe("footerOf", () => {
       version: "0.1.0",
       generatedAt: "2026-09-12T12:00:00.000Z",
       repositories: { count: 3, href: "../../spaces/index.html", label: "3 repositories" },
+      aboutHref: "../../about/index.html",
       profile: "default@1",
       pages: 5,
       links: [

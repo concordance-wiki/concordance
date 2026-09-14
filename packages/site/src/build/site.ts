@@ -48,6 +48,7 @@ import {
   type SiteNames,
 } from "./context.js";
 import { defaultThemeConfig } from "./default-theme.js";
+import { aboutOf } from "./about.js";
 import { entityPageOf, type ViewerBundles } from "./entity-page.js";
 import { footerOf } from "./footer.js";
 import type { EntityFragment } from "./fragments.js";
@@ -56,6 +57,7 @@ import { planIndex } from "./index-page.js";
 import { keywordPageOf } from "./keyword-page.js";
 import { mentionsFragmentOf, serializeMentionsFragment } from "./mentions.js";
 import {
+  ABOUT_PAGE,
   ASSETS_DIRECTORY,
   assetsBaseOf,
   HOME_PAGE,
@@ -113,6 +115,10 @@ export interface SiteInput {
   pseudonymized?: boolean;
   /** `project.legal` of the configuration: the pages the organisation declares, linked from the footer of every page. */
   legal?: LegalConfig;
+  /** The markdown of the file `project.about` names, rendered after the generated content of the about page. */
+  about?: string;
+  /** `inference.keyword_pages.min_occurrences` of the configuration, which the about page names. */
+  keywordThreshold?: number;
 }
 
 export interface SiteOptions extends SiteInput {
@@ -312,6 +318,8 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),
     ...(input.pseudonymized === undefined ? {} : { pseudonymized: input.pseudonymized }),
     ...(input.legal === undefined ? {} : { legal: input.legal }),
+    ...(input.about === undefined ? {} : { about: input.about }),
+    ...(input.keywordThreshold === undefined ? {} : { keywordThreshold: input.keywordThreshold }),
   });
   const todo = todoOf(context);
   const todoCount = todo.documents.length + todo.terms.length;
@@ -474,6 +482,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       ),
       render(TODO_PAGE, "Todo", todo, message(context, "todo.title"), input.locale),
       render(SPACES_PAGE, "Spaces", spacesPageOf(context), spacesTitle, input.locale),
+      render(ABOUT_PAGE, "About", aboutOf(context), message(context, "about.title"), input.locale),
       ...spaces.map((space) => spacePage(space.name)),
       searchPage,
       ...input.model.entities.map(entityPage),
