@@ -17,6 +17,7 @@ export const SLOT_NAMES = [
   "Space",
   "CategoryList",
   "About",
+  "NotFound",
 ] as const;
 
 export type SlotName = (typeof SLOT_NAMES)[number];
@@ -90,6 +91,12 @@ export interface HeadAssets {
   favicon?: string;
   /** Href the page forwards to at once, as a `<meta http-equiv="refresh">`; the body repeats it as a link. */
   redirect?: string;
+  /**
+   * The address of the page itself, as a `<base>`, for a page the host serves at other addresses
+   * than its own: the one served for a missing address, whose relative hrefs would otherwise
+   * resolve against the address asked for.
+   */
+  base?: string;
 }
 
 export interface ShellProps {
@@ -628,6 +635,8 @@ export interface DocumentView {
   pageCount?: number;
   /** Whether the positions, and their unit, are those of the PDF preview, the reader of the original having given no text. */
   positionsFromPreview?: boolean;
+  /** Why the document has no preview: the conversion failed, and the finding the build recorded says how; absent when the preview exists or nothing failed. */
+  previewFailure?: PreviewFailure;
 }
 
 /** One file of the document as the panel of the document page lists it: the original, its preview, the note. */
@@ -679,6 +688,40 @@ export interface DocumentPageLabels {
   groupedNote: string;
   /** What the notes tab says when no note is merged with the document. */
   noNote: string;
+  /** Title of the notice of a document whose conversion failed. */
+  previewFailed: string;
+  /** Sentence of that notice when the text of the document was read all the same. */
+  textExtracted: string;
+  /** Sentence of that notice when no text was read either. */
+  textMissing: string;
+  /** Control of that notice unfolding the finding the build recorded. */
+  whyFailed: string;
+  /** Heading of the extracted text of a document whose conversion failed, the page count worded: "Extracted text — 24 pages". */
+  extractedTextOf: string;
+  /** Note beside that heading: indexed and searchable. */
+  indexedNote: string;
+  /** Heading of the panel listing the representations of the document and the state of each. */
+  representations: string;
+  /** Note under that panel: the same finding stands in the publication report and the linter output. */
+  reportedNote: string;
+}
+
+/** One representation of a document as the panel of the representations lists it: its name, its state. */
+export interface DocumentRepresentation {
+  /** `.pptx`, `.pdf preview`, `text`. */
+  label: string;
+  /** Its state worded in the site language: "available", "failed", "extracted", "missing". */
+  state: string;
+  /** `true` for the representation the build could not produce: its row is marked and its state written in the accent. */
+  failed?: true;
+}
+
+/** Why a document page has no rendering: the conversion failed, and the finding the build recorded says how. */
+export interface PreviewFailure {
+  /** The cause as the build worded it: "conversion of decks/scan.pptx failed: timed out after 120 s". */
+  cause: string;
+  /** The identifier of the check, written after the cause, never alone. */
+  check: string;
 }
 
 /**
@@ -711,6 +754,10 @@ export interface DocumentPageView {
   fromPreview?: boolean;
   /** The files that make the document: the original, its preview when there is one, the note when there is one. */
   files: DocumentTwinFile[];
+  /** Present when the conversion of the document failed: the page then names the cause in place of the rendering. */
+  previewFailure?: PreviewFailure;
+  /** The representations of the document and the state of each; the panel is drawn when the list is given. */
+  representations?: DocumentRepresentation[];
   labels?: Partial<DocumentPageLabels>;
 }
 
@@ -1290,6 +1337,28 @@ export interface ClosestFormProposal {
   detail: string;
 }
 
+/** One exit of the empty results page: a link, with the count of what it leads to when known. */
+export interface EmptyResultsExit extends Link {
+  /** The count of results or occurrences behind the link, drawn after its label. */
+  count?: number;
+  /** `true` for the exit drawn with a dashed border: the page of the word itself. */
+  secondary?: true;
+}
+
+/**
+ * The empty state of the results page. Two causes, worded apart: the filters left every match
+ * out, and the page offers to lift each of them; or no file uses the word, and the page says
+ * so and explains that a typo finds nothing, the closest form of the dictionary standing beside.
+ */
+export interface EmptyResults {
+  /** The sentence under the notice: where the word exists, or that no file uses it. */
+  explanation: string;
+  /** The exits, in order: one per filter to lift, then the page of the word when it has one. */
+  exits: EmptyResultsExit[];
+  /** The line explaining that the search matches the start of words; absent when the filters are the cause. */
+  note?: string;
+}
+
 export interface SearchResultsProps {
   query: string;
   total: number;
@@ -1303,6 +1372,8 @@ export interface SearchResultsProps {
   labels?: Partial<SearchResultsLabels>;
   /** The closest form of the dictionary, proposed when the query matched nothing. */
   closest?: ClosestFormProposal;
+  /** What the page says and offers when the query matched nothing, or nothing under the filters. */
+  empty?: EmptyResults;
   /**
    * What a facet, an active filter or the clear link does once the search island runs: it
    * follows the address without leaving the page. Never serialised; the served page has links.
@@ -1743,6 +1814,42 @@ export interface CategoryListProps {
 }
 
 /** The view model of every slot, the contract between the site generator and a theme. */
+/** A page whose address is close to the missing one, as the page served for a missing address lists it. */
+export interface NearbyPage {
+  title: string;
+  /** The address under the site, `/glossary/publication-threshold/`, shown after the title. */
+  path: string;
+  href: string;
+}
+
+/**
+ * The page served for a missing address: the cause, what stays reachable, the nearby addresses
+ * the island computes from the table of the pages, and two exits, the search and the spaces.
+ */
+export interface NotFoundProps {
+  /** The eyebrow over the title and the browser title: "Page not found". */
+  label: string;
+  title: string;
+  /** The likely causes and what stays reachable. */
+  cause: string;
+  /** Heading of the nearby addresses. */
+  nearbyLabel: string;
+  /** The nearby addresses, once the island computed them; the served page lists none and hides the block. */
+  nearby?: NearbyPage[];
+  /** Href of the search page from the page; the island appends the query. */
+  searchHref: string;
+  /** The button leading to the search as served, before any script names the query: "Search the documentation". */
+  searchLabel: string;
+  /** The same button once the island read the address: "Search “{query}”", the placeholder filled with the last segment of the address. */
+  searchQueryLabel: string;
+  /** The query the island read from the address; absent as served. */
+  query?: string;
+  /** The button leading to the list of the spaces. */
+  browse: Link;
+  /** Href of the root of the site from the page; the island loads the table of the pages under it. */
+  root: string;
+}
+
 export interface SlotProps {
   Shell: ShellProps;
   Header: HeaderProps;
@@ -1759,4 +1866,5 @@ export interface SlotProps {
   Space: SpaceProps;
   CategoryList: CategoryListProps;
   About: AboutProps;
+  NotFound: NotFoundProps;
 }

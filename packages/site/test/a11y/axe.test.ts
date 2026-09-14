@@ -29,11 +29,13 @@ const BLOCKING: ReadonlySet<ImpactValue> = new Set(["serious", "critical"]);
 const NEEDS_LAYOUT = ["color-contrast", "color-contrast-enhanced", "link-in-text-block"];
 
 const islands = [
+  { name: "age", file: "age-00000000.js", bytes: 0 },
   { name: "contract-viewer", file: "contract-viewer-00000000.js", bytes: 0 },
   { name: "document-viewer", file: "document-viewer-00000000.js", bytes: 0 },
   { name: "gallery-width", file: "gallery-width-00000000.js", bytes: 0 },
   { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
   { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
+  { name: "not-found", file: "not-found-00000000.js", bytes: 0 },
   { name: "search", file: "search-00000000.js", bytes: 0 },
   { name: "tabs", file: "tabs-00000000.js", bytes: 0 },
   { name: "toc", file: "toc-00000000.js", bytes: 0 },

@@ -1,0 +1,34 @@
+{
+  "age.cadence": {
+    "defaultMessage": "{count, plural, one {Publications are declared daily in the configuration.} other {Publications are declared every # days in the configuration.}}",
+    "description": "Sentence of the notice shown when the site is old: the cadence the configuration declares."
+  },
+  "age.close": {
+    "defaultMessage": "Close this notice",
+    "description": "Accessible name of the button closing the notice on the age of the site."
+  },
+  "age.missing": {
+    "defaultMessage": "A recent change of the repositories may therefore be missing here.",
+    "description": "Sentence of the notice shown when the site is old: what its age implies."
+  },
+  "age.notice": {
+    "defaultMessage": "Notice",
+    "description": "Chip at the head of the notice shown when the site is old."
+  },
+  "age.or": {
+    "defaultMessage": "or",
+    "description": "Word between the two exits of the notice shown when the site is old."
+  },
+  "age.published": {
+    "defaultMessage": "{count, plural, one {This version was published # day ago.} other {This version was published # days ago.}}",
+    "description": "Lead of the notice shown when the site is old, the days counted in the browser."
+  },
+  "age.repositories": {
+    "defaultMessage": "consult the repositories directly",
+    "description": "Second exit of the notice shown when the site is old: a link to the repository of a source."
+  },
+  "age.sources": {
+    "defaultMessage": "See the sources and their versions",
+    "description": "First exit of the notice shown when the site is old: a link to the list of the spaces."
+  }
+}

@@ -23,6 +23,22 @@
     "defaultMessage": "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
     "description": "Note under the facets of the results page."
   },
+  "results.existsElsewhere": {
+    "defaultMessage": "The word exists in the documentation, but on none of the pages the filter keeps.",
+    "description": "Sentence under the notice of a search whose matches the selected filters all leave out."
+  },
+  "results.liftFilter": {
+    "defaultMessage": "Remove the filter “'{label}'”",
+    "description": "Exit of the empty results page: a link lifting one selected filter, its count of results following; the quoted placeholder is filled in the browser."
+  },
+  "results.noFileUses": {
+    "defaultMessage": "No file uses this word.",
+    "description": "Sentence under the notice of a search that matches nothing in the whole corpus."
+  },
+  "results.noResultFiltered": {
+    "defaultMessage": "{count, plural, one {No result for “'{query}'” with the filter '{filters}'.} other {No result for “'{query}'” with the filters '{filters}'.}}",
+    "description": "Notice shown when a search matches pages that the selected filters all leave out, the quoted placeholders being filled in the browser."
+  },
   "results.noResultFor": {
     "defaultMessage": "No result for “'{query}'”",
     "description": "Notice shown when a search with words matches nothing, the quoted placeholder being filled in the browser."
@@ -34,6 +50,14 @@
   "results.notelessNote": {
     "defaultMessage": "Words used but not defined appear with the others, dotted. That is how you spot what the glossary lacks.",
     "description": "Note under the list of results."
+  },
+  "results.prefixNote": {
+    "defaultMessage": "The search matches the start of words: a typo gives zero results and no suggestion.",
+    "description": "Line under the empty results page explaining why a misspelt query finds nothing."
+  },
+  "results.seeWordPage": {
+    "defaultMessage": "See the page of the word",
+    "description": "Exit of the empty results page: a link to the page whose title is the query, its count following."
   },
   "results.showNext": {
     "defaultMessage": "{count, plural, one {Show the next one} other {Show the next #}}",

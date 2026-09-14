@@ -292,6 +292,10 @@ export async function renderSite(
     ...(config.inference?.keyword_pages?.min_occurrences === undefined
       ? {}
       : { keywordThreshold: config.inference.keyword_pages.min_occurrences }),
+    ...(config.site?.url === undefined ? {} : { siteUrl: config.site.url }),
+    ...(config.site?.publish_every_days === undefined
+      ? {}
+      : { publishEveryDays: config.site.publish_every_days }),
   });
   placeImages(io.fs, fragments, input.modelDirectory, input.output);
   placeDocuments(io.fs, fragments, input.modelDirectory, input.output);

@@ -14,6 +14,8 @@ import { PANELS_ISLAND } from "../theme/default/panel-handle.js";
 import { PINS_ISLAND } from "../theme/default/pins.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
 import { defaultUiComponents } from "../theme/default/plugin.js";
+import { AGE_ISLAND } from "./age.js";
+import { NOT_FOUND_ISLAND } from "./not-found.js";
 import { TABS_ISLAND } from "../theme/default/tabs.js";
 import { TOC_ISLAND } from "../theme/default/toc.js";
 
@@ -59,6 +61,10 @@ export function defaultIslands(): IslandEntry[] {
   // No extension: the bundler picks the compiled module in a build and the source under test.
   return [
     {
+      name: AGE_ISLAND,
+      entry: fileURLToPath(new URL("./age.client", import.meta.url)),
+    },
+    {
       name: CATEGORY_ISLAND,
       entry: fileURLToPath(new URL("./category-list.client", import.meta.url)),
     },
@@ -73,6 +79,10 @@ export function defaultIslands(): IslandEntry[] {
     {
       name: MODE_SWITCH_ISLAND,
       entry: fileURLToPath(new URL("./mode-switch.client", import.meta.url)),
+    },
+    {
+      name: NOT_FOUND_ISLAND,
+      entry: fileURLToPath(new URL("./not-found.client", import.meta.url)),
     },
     {
       name: PANELS_ISLAND,

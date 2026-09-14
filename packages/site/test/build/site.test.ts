@@ -25,6 +25,7 @@ import {
   type SiteReport,
 } from "../../src/build/site.js";
 import { defaultIslands, type IslandBundle } from "../../src/islands/bundle.js";
+import { NOT_FOUND_PAGE } from "../../src/build/not-found.js";
 import { searchFilePath } from "../../src/search/build.js";
 import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/shared.js";
 import type { EntityPageProps } from "../../src/slots.js";
@@ -125,6 +126,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         SEARCH_PAGE,
         SPACES_PAGE,
         ABOUT_PAGE,
+        NOT_FOUND_PAGE,
         ...spaces,
         ...entities,
         ...categories,
@@ -148,14 +150,17 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
         SPACES_PAGE,
         ABOUT_PAGE,
         TODO_PAGE,
+        NOT_FOUND_PAGE,
       ].sort(),
     );
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pins",
       "search",
@@ -462,10 +467,13 @@ describe("The site works over file:// as well as behind a server, without URL re
     const written = new Set(fileSystem.listFiles("/dist"));
     let checked = 0;
     for (const page of report.pages) {
-      expect(page.path.endsWith("/index.html") || page.path === HOME_PAGE).toBe(true);
       const html = fileSystem.readText(`/dist/${page.path}`);
-      for (const reference of references(html)) {
-        expect(reference.startsWith("/")).toBe(false);
+      // The page served for a missing address is the host's, never reached over file://: its base names its own address.
+      if (page.path !== NOT_FOUND_PAGE) {
+        expect(page.path.endsWith("/index.html") || page.path === HOME_PAGE).toBe(true);
+        for (const reference of references(html)) {
+          expect(reference.startsWith("/")).toBe(false);
+        }
       }
       for (const { reference, target } of localTargets(page.path, html)) {
         expect(written.has(target), `${page.path}: ${reference} resolves to ${target}`).toBe(true);
@@ -614,12 +622,12 @@ describe("A page weighs under 150 KB excluding previews", () => {
     expect(report.budget.maxPageBytes).toBe(SITE_PAGE_BUDGET);
     expect(report.budget.overBudget).toEqual([]);
     expect(report.warnings).toEqual([]);
-    expect(report.summary[0]).toBe("site: 24 pages written to /dist");
+    expect(report.summary[0]).toBe("site: 25 pages written to /dist");
     expect(report.summary[1]).toBe("redirects: 0 former keyword addresses forwarding to a note");
     expect(report.redirects).toBe(0);
-    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(10);
+    expect(report.summary.filter((line) => line.startsWith("island "))).toHaveLength(12);
     expect(
-      report.summary.some((line) => /^pages: 24, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
+      report.summary.some((line) => /^pages: 25, largest \d+\.\d kB, budget 150\.0 kB$/.test(line)),
     ).toBe(true);
     expect(report.summary).toContain("accessibility: 0 findings");
     expect(report.summary).toContain("contrast: 0 pairs below the minimum");
@@ -637,11 +645,13 @@ describe("A page weighs under 150 KB excluding previews", () => {
       },
     });
     expect(report.budget.islands.map((island) => island.name)).toEqual([
+      "age",
       "category-list",
       "contract-viewer",
       "document-viewer",
       "mentions-panel",
       "mode-switch",
+      "not-found",
       "panels",
       "pdf-viewer",
       "pins",
@@ -906,6 +916,7 @@ describe("siteDocuments", () => {
   const bundles: IslandBundle[] = [
     { name: "mentions-panel", file: "mentions-panel-ABC123.js", bytes: 1 },
     { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 },
+    { name: "not-found", file: "not-found-DEF456.js", bytes: 1 },
     { name: "search", file: "search-0123ABCD.js", bytes: 1 },
     { name: "toc", file: "toc-789ABC.js", bytes: 1 },
     { name: "panels", file: "panels-789ABC.js", bytes: 1 },
@@ -926,6 +937,7 @@ describe("siteDocuments", () => {
       ABOUT_PAGE,
       ...["framing", "glossary", "specs"].map(spacePagePath),
       SEARCH_PAGE,
+      NOT_FOUND_PAGE,
       ...model().entities.map((entity) => pagePath(entity.id)),
       ...categories,
       ...index.map((document) => document.path),

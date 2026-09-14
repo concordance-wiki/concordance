@@ -159,8 +159,11 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const written = new Set(io.fs.listFiles("/work/dist"));
     for (const file of siteFiles(io).filter((candidate) => candidate.endsWith(".html"))) {
       const html = io.fs.readText(`/work/dist/${file}`);
-      for (const reference of references(html)) {
-        expect(reference.startsWith("/")).toBe(false);
+      // The page served for a missing address names its own address as its base: the host serves it, never file://.
+      if (file !== "404.html") {
+        for (const reference of references(html)) {
+          expect(reference.startsWith("/")).toBe(false);
+        }
       }
       for (const { reference, target } of localTargets(file, html)) {
         expect(written.has(target), `${file}: ${reference} resolves to ${target}`).toBe(true);
@@ -631,9 +634,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     const io = corpus(`${validConfig}plugins: ['@example/theme']\n`);
     expect(await renderCommand([], io, fakeDependencies(BareFooter)).catch(() => 2)).toBe(2);
     expect(await buildCommand([], io, fakeDependencies(BareFooter))).toBe(0);
-    // Every page carries the footer: the entities, the home, index, to-do, search and about pages, the spaces page and the page of the one space.
+    // Every page carries the footer: the entities, the home, index, to-do, search and about pages, the spaces page, the page of the one space and the page served for a missing address.
     expect(io.stdout.find((line) => line.startsWith("accessibility: "))).toBe(
-      "accessibility: 13 findings",
+      "accessibility: 14 findings",
     );
     expect(io.stderr).toContain(
       'warning: index.html: img-alt: <img src="x.png"> has no alt attribute',

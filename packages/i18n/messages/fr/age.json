@@ -1,0 +1,10 @@
+{
+  "age.cadence": "{count, plural, one {Les publications sont annoncées comme quotidiennes dans la configuration.} other {Les publications sont annoncées tous les # jours dans la configuration.}}",
+  "age.close": "Fermer cet avis",
+  "age.missing": "Une modification récente des dépôts peut donc ne pas figurer ici.",
+  "age.notice": "Avis",
+  "age.or": "ou",
+  "age.published": "{count, plural, one {Cette version a été publiée il y a # jour.} other {Cette version a été publiée il y a # jours.}}",
+  "age.repositories": "consulter les dépôts directement",
+  "age.sources": "Voir les sources et leurs versions"
+}

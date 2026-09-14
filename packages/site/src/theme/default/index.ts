@@ -15,6 +15,7 @@ import { KeywordPage } from "./keyword-page.js";
 import { MeetingPage } from "./meeting-page.js";
 import { MentionsPanel } from "./mentions-panel.js";
 import { Neighbourhood } from "./neighbourhood.js";
+import { NotFound } from "./not-found.js";
 import { SearchResults } from "./search-results.js";
 import { Shell } from "./shell.js";
 import { Space } from "./space.js";
@@ -51,4 +52,5 @@ export const defaultComponents: SlotComponents = {
   Space,
   CategoryList,
   About,
+  NotFound,
 };

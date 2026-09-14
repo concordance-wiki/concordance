@@ -11,6 +11,7 @@ import { defaultIslands, type IslandBundle, type IslandEntry } from "../islands/
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
 import type { SlotProps } from "../slots.js";
 import { chromeOf, type ThemeChrome } from "../theme/chrome.js";
+import { AgeNotice } from "../theme/default/age-notice.js";
 import { pageComponentFor } from "../theme/context.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import { footer, galleryTheme, header } from "./fixtures.js";
@@ -148,7 +149,10 @@ export function galleryDocuments(
   });
   const documents = galleryPages.map((page) => ({
     path: page.file,
-    html: body(page, options(`${page.slot}, ${page.state}`, page.locale, page, page.scheme)),
+    html: body(page, {
+      ...options(`${page.slot}, ${page.state}`, page.locale, page, page.scheme),
+      ...(page.notice === undefined ? {} : { notice: h(AgeNotice, page.notice) }),
+    }),
   }));
   const shownTypes = types === undefined ? [] : typePages(types, theme);
   for (const page of shownTypes) {

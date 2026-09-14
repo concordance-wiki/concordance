@@ -116,6 +116,18 @@ export interface SearchLabels {
   occurrences: PluralForms;
   /** "Show the next N", by plural category, on the button under the rows drawn so far. */
   showNext: PluralForms;
+  /** "No result for {query} with the filters {filters}", by plural category of the filters, the placeholders filled in the browser. */
+  noResultFiltered: PluralForms;
+  /** The sentence under that notice: the word exists, on none of the pages the filter keeps. */
+  existsElsewhere: string;
+  /** "Remove the filter {label}", the placeholder filled in the browser. */
+  liftFilter: string;
+  /** The sentence under the notice of a word no file uses. */
+  noFileUses: string;
+  /** The exit to the page of the word itself. */
+  seeWordPage: string;
+  /** The line explaining that the search matches the start of words. */
+  prefixNote: string;
 }
 
 /** The number of entities carrying every value of every facet, values in code-unit order; the keyword pages and the others under `nonote`. */

@@ -3,13 +3,15 @@ import { h, type JSX } from "preact";
 import { activeFiltersOf, countFacets, facetsOf, filterEntries } from "../search/facets.js";
 import {
   closestForm,
+  FACET_NAMES,
+  normalizeQuery,
   plural,
   queryWords,
   rank,
   SEARCH_DIRECTORY,
   SEARCH_META,
-  shardHref,
   shardOf,
+  type FacetName,
   type SearchEntry,
   type SearchIslandProps,
   type SearchMeta,
@@ -19,17 +21,23 @@ import {
   clearFilters,
   parseSearchState,
   searchQueryString,
+  toggleNoteless,
+  toggleValue,
   withQuery,
   type SearchState,
 } from "../search/state.js";
 import type {
+  ActiveFilter,
   ClosestFormProposal,
+  EmptyResults,
+  EmptyResultsExit,
   SearchField,
   SearchResult,
   SearchResultsProps,
   SuggestionLabels,
 } from "../slots.js";
 import { SearchResults } from "../theme/default/search-results.js";
+import { shardLoader, type ScriptInjector, type ShardHost } from "./shards.js";
 import {
   defaultSuggestionLabels,
   SearchSuggestions,
@@ -42,61 +50,13 @@ export { isEditable, type KeyEvent } from "./editable.js";
 /** How many results the suggestions under the header field show; the results page shows them all. */
 export const SUGGESTIONS = 8;
 
-/** Adds a classic script to the page and says whether it loaded; a missing shard is an error, not a failure. */
-export type ScriptInjector = (src: string, done: (loaded: boolean) => void) => void;
-
-/** The callback every index file calls with its name and its data. */
-export interface ShardReceiver {
-  shard(name: string, data: unknown): void;
-}
-
-/** The window, as far as the loader needs it: the global the index files call back. */
-export interface ShardHost {
-  __concordanceSearch?: ShardReceiver;
-}
-
-declare global {
-  interface Window {
-    __concordanceSearch?: ShardReceiver;
-  }
-}
-
-/** Loads an index file once, whatever the number of callers, through a script the browser accepts over `file://`. */
-export type ShardLoader = (name: string) => Promise<unknown>;
-
-/**
- * The loader of the index files of one page: each file is a classic script calling
- * `window.__concordanceSearch.shard(name, data)`, so the loader exposes that global, injects
- * the script, and resolves when the callback comes; a script that fails to load resolves to
- * nothing. Loaded files are kept, so that a prefix typed again costs no request.
- */
-export function shardLoader(index: string, inject: ScriptInjector, host: ShardHost): ShardLoader {
-  const loaded = new Map<string, Promise<unknown>>();
-  const pending = new Map<string, (data: unknown) => void>();
-  host.__concordanceSearch = {
-    shard: (name, data) => {
-      pending.get(name)?.(data);
-      pending.delete(name);
-    },
-  };
-  return (name) => {
-    const known = loaded.get(name);
-    if (known !== undefined) {
-      return known;
-    }
-    const promise = new Promise<unknown>((resolve) => {
-      pending.set(name, resolve);
-      inject(shardHref(index, name), (ok) => {
-        if (!ok) {
-          pending.delete(name);
-          resolve(undefined);
-        }
-      });
-    });
-    loaded.set(name, promise);
-    return promise;
-  };
-}
+export {
+  shardLoader,
+  type ScriptInjector,
+  type ShardHost,
+  type ShardLoader,
+  type ShardReceiver,
+} from "./shards.js";
 
 /** One entity a query matched, with its score; every entity, scored 0, for a query without a word. */
 export interface SearchHit {
@@ -205,6 +165,72 @@ export function closestOf(state: SearchState, meta: SearchMeta): ClosestFormProp
       entry.keyword === true
         ? plural(meta.labels.occurrences, entry.occurrences ?? 0, meta.locale)
         : citedDetail(entry, meta),
+  };
+}
+
+function isFacetName(name: string): name is FacetName {
+  // Widened so that any string can be looked up; the guard narrows it back.
+  return (FACET_NAMES as readonly string[]).includes(name);
+}
+
+/** The state with one active filter lifted: the facet value toggled off, or the keyword pages kept again. */
+function withoutFilter(state: SearchState, filter: ActiveFilter): SearchState {
+  return isFacetName(filter.name)
+    ? toggleValue(state, filter.name, filter.value)
+    : toggleNoteless(state, state.noteless);
+}
+
+/** The entry whose title or alias is the query itself, when the corpus has a page for the word. */
+function pageOfWord(query: string, entries: readonly SearchEntry[]): SearchEntry | undefined {
+  const wanted = normalizeQuery(query);
+  return entries.find((entry) =>
+    [entry.title, ...(entry.aliases ?? [])].some((form) => normalizeQuery(form) === wanted),
+  );
+}
+
+/** The exit to the page of the word itself, with its occurrences or its citations; none when the corpus has no such page. */
+function wordPageExit(query: string, meta: SearchMeta, root: string): EmptyResultsExit | undefined {
+  const entry = pageOfWord(query, meta.entities);
+  if (entry === undefined) return undefined;
+  return {
+    label: meta.labels.seeWordPage,
+    href: `${root}${entry.url}`,
+    count: entry.keyword === true ? (entry.occurrences ?? 0) : (entry.cited ?? 0),
+    secondary: true,
+  };
+}
+
+/**
+ * The empty state of the results page for a query with words, its two causes told apart.
+ * The filters left every match out: the notice names them, the sentence says where the word
+ * exists, and one exit per filter lifts it with the count of what comes back. No file uses
+ * the word: the sentence says so, the line explains that the search matches the start of
+ * words, and the closest form of the dictionary stands beside, in `closest`. Either way the
+ * page of the word itself is an exit when the corpus has one.
+ */
+export function emptyOf(
+  state: SearchState,
+  entries: readonly SearchEntry[],
+  meta: SearchMeta,
+  root: string,
+  filters: readonly ActiveFilter[],
+): EmptyResults {
+  const word = wordPageExit(state.query, meta, root);
+  if (entries.length > 0) {
+    const lifts = filters.map((filter): EmptyResultsExit => ({
+      label: meta.labels.liftFilter.replace("{label}", filter.label),
+      href: filter.href,
+      count: filterEntries(entries, (entry) => entry, withoutFilter(state, filter)).length,
+    }));
+    return {
+      explanation: meta.labels.existsElsewhere,
+      exits: [...lifts, ...(word === undefined ? [] : [word])],
+    };
+  }
+  return {
+    explanation: meta.labels.noFileUses,
+    exits: word === undefined ? [] : [word],
+    note: meta.labels.prefixNote,
   };
 }
 
@@ -544,6 +570,8 @@ export function resultsPropsOf(
   const filters = activeFiltersOf(meta, state, hrefOf);
   const worded = queryWords(state.query).length > 0;
   const closest = worded && entries.length === 0 ? closestOf(state, meta) : undefined;
+  const empty =
+    worded && kept.length === 0 ? emptyOf(state, entries, meta, root, filters) : undefined;
   const remaining = kept.length - actions.shown;
   return {
     query: state.query,
@@ -554,10 +582,11 @@ export function resultsPropsOf(
       kept.length > 0
         ? plural(meta.labels.results, kept.length, meta.locale)
         : worded
-          ? meta.labels.noResultFor.replace("{query}", state.query)
+          ? emptySummary(state, entries, meta, filters)
           : meta.labels.noResult,
     ...(filters.length === 0 ? {} : { active: filters, clearHref: hrefOf(clearFilters(state)) }),
     ...(closest === undefined ? {} : { closest }),
+    ...(empty === undefined ? {} : { empty }),
     labels: {
       facets: meta.labels.facets,
       activeFilters: meta.labels.activeFilters,
@@ -577,6 +606,21 @@ export function resultsPropsOf(
           },
         }),
   };
+}
+
+/** The notice of a query with words that left nothing: named with the filters when they are the cause, plain otherwise. */
+export function emptySummary(
+  state: SearchState,
+  entries: readonly SearchEntry[],
+  meta: SearchMeta,
+  filters: readonly ActiveFilter[],
+): string {
+  if (entries.length === 0 || filters.length === 0) {
+    return meta.labels.noResultFor.replace("{query}", state.query);
+  }
+  return plural(meta.labels.noResultFiltered, filters.length, meta.locale)
+    .replace("{query}", state.query)
+    .replace("{filters}", filters.map((filter) => filter.label).join(", "));
 }
 
 /** A field island once read: its input, its clear button, its panel and counter, and the field it was served with. */

@@ -94,6 +94,9 @@ describe("The accent colour never carries information on its own", () => {
       ".document-page .document-rail a.current",
       ".decision-session",
       ".about-row.stale .about-date",
+      ".document-notice",
+      ".document-extracted-position",
+      ".document-state-failed span",
     ]);
   });
 

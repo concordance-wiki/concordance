@@ -1,4 +1,5 @@
 import { aboutMessages } from "./areas/about.js";
+import { ageMessages } from "./areas/age.js";
 import { apiMessages } from "./areas/api.js";
 import { categoryMessages } from "./areas/category.js";
 import { decisionMessages } from "./areas/decision.js";
@@ -13,6 +14,7 @@ import { meetingMessages } from "./areas/meeting.js";
 import { mentionsMessages } from "./areas/mentions.js";
 import { navMessages } from "./areas/nav.js";
 import { neighbourhoodMessages } from "./areas/neighbourhood.js";
+import { notfoundMessages } from "./areas/notfound.js";
 import { panelsMessages } from "./areas/panels.js";
 import { pinsMessages } from "./areas/pins.js";
 import { relatedMessages } from "./areas/related.js";
@@ -28,6 +30,7 @@ import { transcriptMessages } from "./areas/transcript.js";
 /** Every area of the catalogues, one per identifier prefix, in the order of the prefixes. */
 export const AREAS = [
   aboutMessages,
+  ageMessages,
   apiMessages,
   categoryMessages,
   decisionMessages,
@@ -42,6 +45,7 @@ export const AREAS = [
   mentionsMessages,
   navMessages,
   neighbourhoodMessages,
+  notfoundMessages,
   panelsMessages,
   pinsMessages,
   relatedMessages,

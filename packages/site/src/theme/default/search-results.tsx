@@ -4,6 +4,7 @@ import { NOTELESS_FACET } from "../../search/shared.js";
 import type {
   ActiveFilter,
   ClosestFormProposal,
+  EmptyResults,
   Facet,
   FacetValue,
   SearchResultsLabels,
@@ -149,6 +150,54 @@ function Closest({
 }
 
 /**
+ * The empty state of the results page as one card: the notice as its title, the sentence
+ * naming the cause, the exits as rows each with its count, the closest form when there is
+ * one, then the line on the prefix search when no file uses the word.
+ */
+function EmptyState({
+  summary,
+  empty,
+  closest,
+  navigate,
+  wording,
+}: {
+  summary: string;
+  empty: EmptyResults;
+  closest: ClosestFormProposal | undefined;
+  navigate: Navigate;
+  wording: SearchResultsLabels;
+}): JSX.Element {
+  return (
+    <div class="results-empty">
+      <p class="results-empty-lead" role="status">
+        {summary}
+      </p>
+      <p class="results-empty-cause">{empty.explanation}</p>
+      {empty.exits.length > 0 && (
+        <ul class="results-exits">
+          {empty.exits.map((exit) => (
+            <li key={exit.href}>
+              <a
+                class={
+                  exit.secondary === true ? "results-exit results-exit-secondary" : "results-exit"
+                }
+                href={exit.href}
+                onClick={follow(navigate, exit.href)}
+              >
+                <span class="results-exit-label">{exit.label}</span>
+                {exit.count !== undefined && <span class="results-exit-count">{exit.count}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {closest !== undefined && <Closest closest={closest} navigate={navigate} wording={wording} />}
+      {empty.note !== undefined && <p class="results-empty-note">{empty.note}</p>}
+    </div>
+  );
+}
+
+/**
  * The results page, its heading kept for assistive technology alone: the facets in the left
  * column, folded behind their heading where the page has no room for a column, the note on
  * their counters under them; on the right the active filters as chips with the summary, the
@@ -158,6 +207,7 @@ function Closest({
  */
 export function SearchResults(props: SearchResultsProps): JSX.Element {
   const { query, total, results, facets, active, summary, clearHref, closest, onNavigate } = props;
+  const { empty } = props;
   const wording: SearchResultsLabels = {
     facets: theme.facets,
     activeFilters: theme.activeFilters,
@@ -195,18 +245,29 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
                 wording={wording}
               />
             )}
-            <p class="search-summary" role="status">
-              {summary ?? (
-                <>
-                  {total} {theme.resultsFor} <q>{query}</q>
-                </>
-              )}
-            </p>
+            {empty === undefined && (
+              <p class="search-summary" role="status">
+                {summary ?? (
+                  <>
+                    {total} {theme.resultsFor} <q>{query}</q>
+                  </>
+                )}
+              </p>
+            )}
           </div>
-          {closest !== undefined && (
+          {empty !== undefined && (
+            <EmptyState
+              summary={summary ?? theme.noResult}
+              empty={empty}
+              closest={closest}
+              navigate={onNavigate}
+              wording={wording}
+            />
+          )}
+          {empty === undefined && closest !== undefined && (
             <Closest closest={closest} navigate={onNavigate} wording={wording} />
           )}
-          <ResultList results={results} />
+          {empty === undefined && <ResultList results={results} />}
           {props.more !== undefined && (
             <button type="button" class="results-more" onClick={props.more.onMore}>
               {props.more.label}

@@ -3,9 +3,11 @@ import type { JSX } from "preact";
 import type {
   DocumentPageLabels,
   DocumentPageView,
+  DocumentRepresentation,
   DocumentTwinFile,
   DocumentView,
   EntityPageProps,
+  PreviewFailure,
   Section,
 } from "../../slots.js";
 import { useSlot } from "../context.js";
@@ -16,6 +18,21 @@ import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs } from "./tabs.js";
+
+/** The theme's own words for a document whose conversion failed; kept here, out of the shared labels, so that no island carries them. */
+const FAILURE_LABELS = {
+  previewFailed: "The preview of this document could not be generated.",
+  textExtracted:
+    "The text was extracted all the same: it is indexed, cited on the other pages, and readable below.",
+  textMissing:
+    "Its text could not be extracted either: the original stays downloadable, and the note that describes it stands among its files.",
+  whyFailed: "Why this failure?",
+  extractedTextOf: "Extracted text",
+  indexedNote: "indexed and searchable",
+  representations: "State of the representations",
+  reportedNote:
+    "The same finding stands in the publication report and in the linter output: the failure is reported to whoever can fix it.",
+} as const;
 
 /** The labels of the default theme for every label the page does not receive; the file count is worded from the page. */
 export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
@@ -40,6 +57,7 @@ export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
     sameDocument: `${labels.sameDocument}, ${String(files)} ${files === 1 ? labels.file : labels.filesUnit}`,
     groupedNote: labels.groupedNote,
     noNote: labels.noNote,
+    ...FAILURE_LABELS,
   };
 }
 
@@ -134,6 +152,91 @@ function Rendering({
         <span>{text.originalNote}</span>
       </p>
     </div>
+  );
+}
+
+/**
+ * What the page shows in place of the rendering when the conversion failed: the fact in plain
+ * words, what remains, the original to download and the finding behind a disclosure, the
+ * cause first and the check identifier after it; then the extracted text, page by page, when
+ * the text was read all the same. The most frequent lack, and the least serious.
+ */
+function FailedPreview({
+  document,
+  failure,
+  text,
+}: {
+  document: DocumentView;
+  failure: PreviewFailure;
+  text: DocumentPageLabels;
+}): JSX.Element {
+  const extracted = document.positions.length > 0;
+  return (
+    <div class="document-failure">
+      <aside class="document-notice" role="note">
+        <p class="document-notice-lead">{text.previewFailed}</p>
+        <p class="document-notice-detail">{extracted ? text.textExtracted : text.textMissing}</p>
+        <div class="document-notice-exits">
+          <a class="button-primary" href={document.file.href} download={document.file.label}>
+            {text.downloadOriginal}
+          </a>
+          <details class="document-why">
+            <summary class="button-secondary">{text.whyFailed}</summary>
+            <p>
+              {failure.cause} <code>{failure.check}</code>
+            </p>
+          </details>
+        </div>
+      </aside>
+      {extracted && (
+        <section class="document-extracted" aria-labelledby="document-extracted">
+          <header class="document-extracted-head">
+            <h2 id="document-extracted" class="section-label">
+              {text.extractedTextOf}
+            </h2>
+            <span class="document-extracted-note">{text.indexedNote}</span>
+          </header>
+          <ol class="document-extracted-list">
+            {document.positions.map((position) => (
+              <li key={position.number}>
+                <span class="document-extracted-position">{position.label}</span>
+                <p>{position.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/** The representations of the document, one row each with its state; the one that failed marked, its state written. */
+function Representations({
+  representations,
+  text,
+}: {
+  representations: DocumentRepresentation[];
+  text: DocumentPageLabels;
+}): JSX.Element {
+  return (
+    <PanelBlock
+      id="document-representations"
+      className="entity-panel document-representations"
+      heading={text.representations}
+    >
+      <ul class="document-states">
+        {representations.map((representation) => (
+          <li
+            key={representation.label}
+            class={representation.failed === true ? "document-state-failed" : undefined}
+          >
+            <code>{representation.label}</code>
+            <span>{representation.state}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="panel-note">{text.reportedNote}</p>
+    </PanelBlock>
   );
 }
 
@@ -253,6 +356,8 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
               content:
                 document === undefined ? (
                   <></>
+                ) : view.previewFailure !== undefined ? (
+                  <FailedPreview document={document} failure={view.previewFailure} text={text} />
                 ) : (
                   <div class="document-stage">
                     {document.positions.length > 0 && (
@@ -338,6 +443,9 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
           <TwinFiles files={view.files} />
           <p class="panel-note">{text.groupedNote}</p>
         </PanelBlock>
+        {view.representations !== undefined && (
+          <Representations representations={view.representations} text={text} />
+        )}
         <MentionsPanel {...mentions} />
         <NeighbourhoodFold neighbours={neighbours} labels={props.labels ?? {}} />
       </SidePanel>

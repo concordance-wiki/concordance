@@ -23,3 +23,4 @@ export * from "./fixtures/degraded.js";
 export * from "./fixtures/decision-page.js";
 export * from "./fixtures/about.js";
 export * from "./fixtures/pins.js";
+export * from "./fixtures/edge-cases.js";

@@ -314,7 +314,7 @@ describe("The document page view model", () => {
           href: "#document-notes",
         },
       ],
-      labels: documentPageLabels(context(), 3),
+      labels: documentPageLabels(context(), 3, 2),
     });
     expect(props.document?.labels).toMatchObject({
       document: "Document",
@@ -359,7 +359,7 @@ describe("The document page view model", () => {
       pagesLabel: "24 pages",
       date: { date: "2026-03-14", label: "March 14, 2026", fromFile: false },
       files: [{ label: ".odg", role: "original", href: "transcript-publication-framing.pptx" }],
-      labels: documentPageLabels(context(), 1),
+      labels: documentPageLabels(context(), 1, 24),
     });
     const { pageCount, ...counted } = bare;
     expect(pageCount).toBe(24);

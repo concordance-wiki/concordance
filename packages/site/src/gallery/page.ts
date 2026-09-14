@@ -1,5 +1,6 @@
 import type { PageSlot } from "../render.js";
 import type { SlotName, SlotProps } from "../slots.js";
+import type { AgeNoticeProps } from "../theme/default/age-notice.js";
 import type { GalleryBoardId } from "./boards.js";
 import { footer, header } from "./fixtures/chrome.js";
 
@@ -30,6 +31,8 @@ export type GalleryPage = {
     scripts?: false;
     /** `dark` forces the dark palette on the root, whatever the viewer prefers or remembered: the state of the dark board. */
     scheme?: "dark";
+    /** The notice on the age of the site between the bar and the page, as its island shows it. */
+    notice?: AgeNoticeProps;
     locale: string;
     props: SlotProps[S];
     header: SlotProps["Header"];

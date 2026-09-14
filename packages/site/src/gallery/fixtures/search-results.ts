@@ -98,7 +98,7 @@ export const searchResults: SlotProps["SearchResults"] = {
   ],
 };
 
-/** A query that matched nothing: the empty state names it and proposes the closest form of the dictionary. */
+/** A misspelt query that matched nothing in the whole corpus: the empty state says no file uses the word, proposes the closest form of the dictionary and explains that the search matches the start of words. */
 export const searchResultsEmpty: SlotProps["SearchResults"] = {
   query: "thresold",
   total: 0,
@@ -107,6 +107,11 @@ export const searchResultsEmpty: SlotProps["SearchResults"] = {
     form: "threshold",
     href: "?q=threshold",
     detail: "cited in 12 pages",
+  },
+  empty: {
+    explanation: "No file uses this word.",
+    exits: [],
+    note: "The search matches the start of words: a typo gives zero results and no suggestion.",
   },
   results: [],
   facets: [],

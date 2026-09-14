@@ -653,6 +653,16 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "url": {
+          "description": "HTTPS address the site is published at, its path included when the host serves it under one. The page served for a missing address, 404.html, links back through it; without it, that page assumes the site stands at the root of its host.",
+          "type": "string",
+          "pattern": "^https://[^\\s]+$"
+        },
+        "publish_every_days": {
+          "description": "Days between two publications, as the pipeline is scheduled. Past three times that many days, every page tells its reader how old the site is; without it, no page does.",
+          "type": "integer",
+          "minimum": 1
+        },
         "neighbourhood": {
           "description": "The neighbourhood mini-map of a page.",
           "type": "object",
