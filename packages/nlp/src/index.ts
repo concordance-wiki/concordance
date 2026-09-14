@@ -35,6 +35,12 @@ export {
 } from "./scan/automaton.js";
 export { tokenize, type Token } from "./scan/tokens.js";
 export {
+  CONTEXT_WIDTH,
+  occurrenceContext,
+  type ElidedCode,
+  type QuotedText,
+} from "./scan/context.js";
+export {
   compareOccurrences,
   occurrenceConfidence,
   scanDocument,

@@ -61,12 +61,24 @@ export interface MarkdownParagraph {
   section?: string;
 }
 
+/** An inline code span left out of the text of a unit: what was written, at the offset it stood at. */
+export interface ElidedCode {
+  /** Offset in the text of the unit where the code stood; the code precedes the character there. */
+  at: number;
+  text: string;
+}
+
 /** A text unit a scan may read, excluded zones removed. */
 export interface ScannableUnit {
   /** Line of the first character of the unit in the file. */
   line: number;
   /** The visible text; positions reported by a scan are relative to it. */
   text: string;
+  /**
+   * The inline code spans the text leaves out, in text order, so that a citation can quote the
+   * unit as written; absent when the unit holds none.
+   */
+  code?: ElidedCode[];
   /** Heading of the enclosing H2 section, when any. */
   section?: string;
   kind: "paragraph" | "heading" | "list-item" | "table-cell" | "quote";

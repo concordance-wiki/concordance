@@ -166,6 +166,27 @@ describe("scanDocument", () => {
     expect(exact).toHaveLength(80);
   });
 
+  it("quotes the inline code the paragraph leaves out in the context, never reading it, the position staying in the scanned text", () => {
+    // Written: "Set `scan.resource` so that a list mention is read, not `resource`."
+    const [occurrence, ...rest] = scanEn([
+      {
+        line: 1,
+        text: "Set  so that a list mention is read, not .",
+        code: [
+          { at: 4, text: "scan.resource" },
+          { at: 41, text: "resource" },
+        ],
+      },
+    ]);
+    expect(rest).toEqual([]);
+    expect(occurrence).toMatchObject({
+      key: "list mention",
+      position: 15,
+      text: "list mention",
+      context: "Set scan.resource so that a list mention is read, not resource.",
+    });
+  });
+
   it("keeps the longest expression on overlap: list mention panel beats list mention and mention", () => {
     const occurrences = scanEn([{ line: 1, text: "Open List mention panel, then the mentions." }]);
     expect(occurrences.map((occurrence) => [occurrence.key, occurrence.position])).toEqual([
