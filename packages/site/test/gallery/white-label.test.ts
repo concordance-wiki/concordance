@@ -195,7 +195,10 @@ describe("no external request is ever emitted by the default theme", () => {
           urls.filter((url) => /^(https?:)?\/\//i.test(url)),
           file,
         ).toEqual([]);
-        expect(count(html, "<script>"), file).toBe(1);
+        // The only inline script applies the remembered scheme; a state forced to one carries none.
+        expect(count(html, "<script>"), file).toBe(
+          html.includes('<html lang="en" dir="ltr" data-mode="dark">') ? 0 : 1,
+        );
       }
       for (const file of fileSystem
         .listFiles("/out/assets")

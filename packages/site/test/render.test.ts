@@ -116,6 +116,17 @@ describe("renderPage", () => {
     expect(html.indexOf("<script>")).toBeLessThan(html.indexOf('<link rel="stylesheet"'));
   });
 
+  it("forces a scheme on the root as data-mode, to preview a palette, and then writes no inline script that would apply a remembered choice", () => {
+    expect(renderPage("Todo", todo, options())).toContain('<html lang="en" dir="ltr"><head>');
+    const dark = renderPage("Todo", todo, options({ scheme: "dark" }));
+    expect(dark).toContain('<html lang="en" dir="ltr" data-mode="dark"><head>');
+    expect(count(dark, "<script>")).toBe(0);
+    expect(dark).toContain('<script defer src="../assets/mode-switch-DEF456.js"></script>');
+    expect(renderPage("Todo", todo, options({ scheme: "light" }))).toContain(
+      '<html lang="en" dir="ltr" data-mode="light"><head>',
+    );
+  });
+
   it("links the favicon when one is given, and none otherwise", () => {
     expect(renderPage("Todo", todo, options())).not.toContain('rel="icon"');
     expect(renderPage("Todo", todo, options({ favicon: "../assets/favicon.svg" }))).toContain(

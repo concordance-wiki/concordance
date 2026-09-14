@@ -1,6 +1,7 @@
 import { h, type JSX } from "preact";
 import { renderToString } from "preact-render-to-string";
 
+import type { ColourScheme } from "./css/tokens.js";
 import type { IslandBundle } from "./islands/bundle.js";
 import { islandsUsed } from "./islands/island.js";
 import { MODE_SCRIPT } from "./mode.js";
@@ -27,6 +28,8 @@ export interface RenderOptions {
   footer: SlotProps["Footer"];
   /** Href the page forwards to at once; the head carries it as a refresh. */
   redirect?: string;
+  /** A scheme forced on the root, to preview a palette: the page then carries no script applying a remembered choice. */
+  scheme?: ColourScheme;
 }
 
 const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
@@ -54,6 +57,7 @@ function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): 
       direction={directionOf(options.locale)}
       title={options.title}
       head={head}
+      {...(options.scheme === undefined ? {} : { scheme: options.scheme })}
     >
       <Header {...options.header} />
       <main id="main">{body}</main>
@@ -83,7 +87,7 @@ function hrefsOf(bundles: IslandBundle[], options: RenderOptions): string[] {
 /** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
 export function renderDocument(body: JSX.Element, options: RenderOptions): string {
   const head: HeadAssets = {
-    inlineScripts: [MODE_SCRIPT],
+    inlineScripts: options.scheme === undefined ? [MODE_SCRIPT] : [],
     stylesheets: options.stylesheets,
     modulePreloads: [],
     scripts: [],

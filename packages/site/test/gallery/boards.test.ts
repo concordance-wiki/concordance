@@ -6,9 +6,10 @@ import { galleryPages } from "../../src/gallery/pages.js";
 const BOARD_IDS = GALLERY_BOARDS.map((board) => board.id);
 
 describe("The gallery has one state per board of the reference design, named after it", () => {
-  it("lists the fifteen boards in their order, then the to-do page, the panels and the chrome", () => {
+  it("lists the boards in their order, then the to-do page, the panels and the chrome", () => {
     expect(BOARD_IDS).toEqual([
       ...Array.from({ length: 15 }, (_, index) => `B${String(index + 1)}`),
+      "B20",
       "todo",
       "panels",
       "chrome",
@@ -32,6 +33,15 @@ describe("The gallery has one state per board of the reference design, named aft
       "entity-page-phone.html",
       "entity-page-drawer.html",
       "entity-page-tablet.html",
+    ]);
+    expect(corporate.get("B20")).toEqual(["entity-page-dark.html", "home-dark.html"]);
+  });
+
+  it("forces the dark scheme on the states of the dark board alone", () => {
+    const forced = galleryPages.filter((page) => page.scheme !== undefined);
+    expect(forced.map((page) => [page.file, page.scheme, page.board])).toEqual([
+      ["entity-page-dark.html", "dark", "B20"],
+      ["home-dark.html", "dark", "B20"],
     ]);
   });
 

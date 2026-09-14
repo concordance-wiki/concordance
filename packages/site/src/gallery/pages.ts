@@ -49,6 +49,8 @@ import { neighbourhoodEmptyState } from "./states/neighbourhood-empty.js";
 import { shellRtlState } from "./states/shell-rtl.js";
 import { headerLogoState } from "./states/header-logo.js";
 import { footerTextState } from "./states/footer-text.js";
+import { entityPageDarkState } from "./states/entity-page-dark.js";
+import { homeDarkState } from "./states/home-dark.js";
 
 export type { GalleryPage, GalleryWidth } from "./page.js";
 export { DEFAULT_GALLERY_WIDTH, GALLERY_WIDTHS } from "./page.js";
@@ -92,6 +94,8 @@ export const galleryPages: readonly GalleryPage[] = [
   screenPageCorporateState,
   documentPageCorporateState,
   documentPageNoScriptState,
+  entityPageDarkState,
+  homeDarkState,
   todoState,
   todoEmptyState,
   todoCorporateState,

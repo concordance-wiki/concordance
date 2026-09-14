@@ -130,7 +130,12 @@ export function galleryDocuments(
 ): GalleryDocument[] {
   const chrome = theme.config === undefined ? undefined : chromeOf(theme.config, ASSETS_BASE);
   const suffix = chrome === undefined ? "" : ` – ${chrome.siteTitle}`;
-  const options = (title: string, locale: string, page: FixtureChrome): RenderOptions => ({
+  const options = (
+    title: string,
+    locale: string,
+    page: FixtureChrome,
+    scheme?: "dark",
+  ): RenderOptions => ({
     theme,
     locale,
     title: `${title}${suffix}`,
@@ -138,11 +143,12 @@ export function galleryDocuments(
     ...(chrome?.favicon === undefined ? {} : { favicon: chrome.favicon }),
     islands,
     assetsBase: ASSETS_BASE,
+    ...(scheme === undefined ? {} : { scheme }),
     ...chromeFor(page, chrome),
   });
   const documents = galleryPages.map((page) => ({
     path: page.file,
-    html: body(page, options(`${page.slot}, ${page.state}`, page.locale, page)),
+    html: body(page, options(`${page.slot}, ${page.state}`, page.locale, page, page.scheme)),
   }));
   const shownTypes = types === undefined ? [] : typePages(types, theme);
   for (const page of shownTypes) {

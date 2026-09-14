@@ -178,6 +178,27 @@ describe("A concordance gallery command renders every slot with fixture view mod
     );
   });
 
+  it("serves the states of the dark board with the dark scheme forced on the root, no boot script overriding it, the switch still bundled", () => {
+    for (const file of ["entity-page-dark.html", "home-dark.html"]) {
+      const html = fileSystem.readText(`/out/${file}`);
+      expect(html, file).toContain('<html lang="en" dir="ltr" data-mode="dark"><head>');
+      expect(html, file).not.toContain("<script>(function(){");
+      expect(html, file).toMatch(
+        /<script defer src="assets\/mode-switch-[A-Z0-9]{8}\.js"><\/script>/,
+      );
+      expect(html, file).toContain(
+        '<button type="button" class="mode-switch" aria-pressed="false" title="Dark mode" hidden>',
+      );
+    }
+    expect(fileSystem.readText("/out/entity-page-corporate.html")).toContain(
+      '<html lang="en" dir="ltr"><head>',
+    );
+    const css = fileSystem.readText("/out/assets/site.css");
+    expect(css).toContain(
+      ':root[data-mode="dark"] {\n  color-scheme: dark;\n  --scheme: dark;\n  --color-bg: #0F1113;',
+    );
+  });
+
   it("frames the panels under a heading so that each page carries one h1", () => {
     const html = fileSystem.readText("/out/neighbourhood.html");
     expect(html).toContain('<div class="gallery-panel"><h1>Neighbourhood, default</h1>');

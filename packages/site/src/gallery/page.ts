@@ -28,6 +28,8 @@ export type GalleryPage = {
     width?: GalleryWidth;
     /** `false` serves the page without the scripts of its islands: what a reader without JavaScript gets. */
     scripts?: false;
+    /** `dark` forces the dark palette on the root, whatever the viewer prefers or remembered: the state of the dark board. */
+    scheme?: "dark";
     locale: string;
     props: SlotProps[S];
     header: SlotProps["Header"];

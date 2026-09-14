@@ -13,9 +13,16 @@ function iconType(href: string): string | undefined {
   return ICON_TYPES[href.toLowerCase().replace(/^.*\./, "")];
 }
 
-export function Shell({ locale, direction, title, head, children }: ShellProps): JSX.Element {
+export function Shell({
+  locale,
+  direction,
+  title,
+  head,
+  scheme,
+  children,
+}: ShellProps): JSX.Element {
   return (
-    <html lang={locale} dir={direction}>
+    <html lang={locale} dir={direction} data-mode={scheme}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
