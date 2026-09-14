@@ -53,6 +53,45 @@ describe("concordance lint", () => {
     });
   });
 
+  describe("excluded and git-ignored files are never read, counted or reported", () => {
+    const ignored = () =>
+      recordedIo({
+        "/work/.gitignore": "site/\n",
+        "/work/concordance-lint.yaml": "exclude: ['vendor/**']\n",
+        "/work/note.md": "# Note\n",
+        "/work/site/index.md": "---\nkey: [\n---\n# Generated\n",
+        "/work/vendor/lib.md": "---\nkey: [\n---\n# Vendored\n",
+      });
+
+    it("skips the files concordance-lint.yaml excludes and the files git ignores", async () => {
+      const io = ignored();
+      expect(await lintCommand([], io)).toBe(0);
+      expect(io.stdout).toEqual(["0 findings: 0 errors, 0 warnings, 0 info"]);
+    });
+
+    it("checks the ignored files under --no-gitignore, and still skips the excluded ones", async () => {
+      const io = ignored();
+      expect(await lintCommand(["--no-gitignore"], io)).toBe(1);
+      expect(io.stdout.map((line) => line.split(": ").slice(0, 3).join(": "))).toEqual([
+        "error: site/index.md:1: E-FM-INVALID",
+        "1 finding: 1 error, 0 warnings, 0 info",
+      ]);
+    });
+
+    it("passes --no-gitignore on to the fixes and to the global scope", async () => {
+      const io = ignored();
+      io.fs.writeText(
+        "/work/site/index.md",
+        "---\nstatus: draft\nid: repo/site/index\n---\n# Generated\n",
+      );
+      expect(await lintCommand(["--no-gitignore", "--dry-run", "--scope", "global"], io)).toBe(0);
+      expect(io.stdout[0]).toMatch(/^would fix: site\/index\.md:1: /);
+      expect(io.stderr).toEqual([
+        "global: no global.model in concordance-lint.yaml; local checks only",
+      ]);
+    });
+  });
+
   describe("no network access in this mode, no write outside --output and --fix", () => {
     it("never writes a file and never calls git", async () => {
       const io = repository({ "/work/concordance.yaml": config });

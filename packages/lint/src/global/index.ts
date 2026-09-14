@@ -36,6 +36,8 @@ export interface LintGlobalInput {
   clock: Clock;
   /** Absent when the linter runs without network access; a cached or local model still serves. */
   fetch?: typeof fetch;
+  /** Whether the files git ignores are left out; they are unless this is false. */
+  gitignore?: boolean;
   /** The profile the matrix and the types come from; `global.profile` replaces it with a project profile. */
   profile: Profile;
 }
@@ -120,6 +122,8 @@ export async function lintGlobal(input: LintGlobalInput): Promise<LintGlobalResu
       root: input.root,
       ...(input.source === undefined ? {} : { source: input.source }),
       ...(input.config === undefined ? {} : { config: input.config }),
+      overrides: input.overrides,
+      ...(input.gitignore === undefined ? {} : { gitignore: input.gitignore }),
       fs: input.fs,
       profile: profile.profile,
       model: loaded.model,

@@ -128,6 +128,28 @@ describe("fixRepository", () => {
       );
     });
 
+    it("keeps the files concordance-lint.yaml excludes and the files git ignores out, unless gitignore is off", () => {
+      const fs = repository({
+        [`${root}/concordance-lint.yaml`]: "exclude: ['b/**']\n",
+        [`${root}/.gitignore`]: "rules/\n",
+      });
+      const applied = (gitignore: boolean) =>
+        fixRepository({ root, source: notes, fs, dryRun: true, gitignore }).applied.map(
+          (change) => [change.kind, change.path],
+        );
+      expect(applied(true)).toEqual([
+        ["link-target", "glossary/section-mention.md"],
+        ["frontmatter-order", "notes/entry.md"],
+      ]);
+      expect(applied(false)).toEqual([
+        ["link-target", "glossary/section-mention.md"],
+        ["frontmatter-order", "notes/entry.md"],
+        ["link-target", "notes/entry.md"],
+        ["frontmatter-type", "rules/related-cap.rule.md"],
+        ["frontmatter-order", "rules/related-cap.rule.md"],
+      ]);
+    });
+
     it("skips a file that is not UTF-8, which the lint reports", () => {
       const fs = repository();
       fs.writeBytes(`${root}/latin.md`, Uint8Array.from([0x2d, 0x2d, 0x2d, 0x0a, 0xe9, 0x0a]));

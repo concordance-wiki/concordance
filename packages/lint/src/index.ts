@@ -3,6 +3,7 @@ export {
   normalizeFrontmatter,
   type NormalizeFrontmatterOptions,
 } from "./fix/frontmatter.js";
+export { lintedFiles, type LintedFilesInput } from "./files.js";
 export { fixRepository, type FixRepositoryInput, type FixRepositoryResult } from "./fix/index.js";
 export { rewriteRenamedLinks } from "./fix/links.js";
 export { deduceType, type DeduceTypeInput } from "./fix/type.js";

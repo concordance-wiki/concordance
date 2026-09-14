@@ -244,4 +244,20 @@ describe("--scope global downloads the latest published model.json and checks cr
       "document",
     ]);
   });
+
+  it("skips the paths concordance-lint.yaml excludes and the files git ignores, unless gitignore is off", () => {
+    const fs = memoryFileSystem({
+      [`${root}/.gitignore`]: "generated/\n",
+      [`${root}/objects/finding.md`]: "# Finding\n",
+      [`${root}/vendor/finding.md`]: "# Finding\n",
+      [`${root}/generated/finding.md`]: "# Finding\n",
+    });
+    const overrides = { checks: {}, exclude: ["vendor/**"] };
+    const paths = (findings: readonly Finding[]) => [...new Set(findings.map((f) => f.path))];
+    expect(paths(run({ fs, overrides }, null))).toEqual(["objects/finding.md"]);
+    expect(paths(run({ fs, overrides, gitignore: false }, null))).toEqual([
+      "generated/finding.md",
+      "objects/finding.md",
+    ]);
+  });
 });

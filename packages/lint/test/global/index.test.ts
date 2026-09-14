@@ -66,6 +66,25 @@ describe("--scope global downloads the latest published model.json and checks cr
     ]);
   });
 
+  it("leaves out the files concordance-lint.yaml excludes and the ones git ignores, unless gitignore is off", async () => {
+    const fs = repository({ [`${root}/.gitignore`]: "screens/\n" });
+    const paths = async (gitignore?: boolean) => {
+      const result = await run({
+        fs,
+        fetch: stubFetch([{ body: modelText() }]).fetch,
+        overrides: { checks: {}, global: { model: MODEL_URL }, exclude: ["glossary/**"] },
+        ...(gitignore === undefined ? {} : { gitignore }),
+      });
+      return [...new Set(result.findings.map((finding) => finding.path))].sort();
+    };
+    expect(await paths()).toEqual(["objects/finding.md", "rules/finding.rule.md"]);
+    expect(await paths(false)).toEqual([
+      "objects/finding.md",
+      "rules/finding.rule.md",
+      "screens/entity-page.md",
+    ]);
+  });
+
   it("reads the model from a local path when global.model is not a URL, and lints an undeclared repository as documents", async () => {
     const fs = repository({ "/wiki/dist/model.json": modelText() });
     const result = await run(

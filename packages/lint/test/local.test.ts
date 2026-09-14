@@ -193,6 +193,43 @@ describe("lintRepository", () => {
     });
   });
 
+  describe("excluded and git-ignored files are never read, counted or reported", () => {
+    it("keeps the files the exclude globs of concordance-lint.yaml name out, and their links unresolved", () => {
+      const fs = memoryFileSystem({
+        [`${root}/note.md`]: "# Note\n\nSee [vendored](vendor/lib.md).\n",
+        [`${root}/vendor/lib.md`]: "---\nkey: [\n---\n# Vendored\n",
+        [`${root}/site/index.md`]: "---\nkey: [\n---\n# Generated\n",
+        [`${root}/concordance-lint.yaml`]: "exclude: ['vendor/**', 'site/**']\n",
+      });
+      const findings = lintRepository({ root, fs });
+      expect(summary(findings)).toEqual([["E-LINK-BROKEN", "note.md", 3]]);
+    });
+
+    it("keeps the files git ignores out, with the rules of every ignore file of the repository", () => {
+      const fs = memoryFileSystem({
+        [`${root}/.gitignore`]: "build/\n*.tmp.md\n",
+        [`${root}/note.md`]: "# Note\n",
+        [`${root}/build/page.md`]: "---\nkey: [\n---\n# Built\n",
+        [`${root}/scratch.tmp.md`]: "---\nkey: [\n---\n# Scratch\n",
+        [`${root}/docs/.gitignore`]: "!keep.tmp.md\n",
+        [`${root}/docs/keep.tmp.md`]: "---\nkey: [\n---\n# Kept\n",
+      });
+      expect(summary(lintRepository({ root, fs }))).toEqual([
+        ["E-FM-INVALID", "docs/keep.tmp.md", 1],
+      ]);
+    });
+
+    it("reads the ignored files like the others when gitignore is off", () => {
+      const fs = memoryFileSystem({
+        [`${root}/.gitignore`]: "build/\n",
+        [`${root}/build/page.md`]: "---\nkey: [\n---\n# Built\n",
+      });
+      expect(summary(lintRepository({ root, fs, gitignore: false }))).toEqual([
+        ["E-FM-INVALID", "build/page.md", 1],
+      ]);
+    });
+  });
+
   describe("the output is stable and sorted, so that two reports can be compared", () => {
     it("gives the same findings whatever the order the files are listed in", () => {
       const files = {

@@ -233,9 +233,6 @@ importers:
       '@concordance-wiki/typing':
         specifier: workspace:*
         version: link:../typing
-      ajv:
-        specifier: 8.17.1
-        version: 8.17.1
       yaml:
         specifier: 2.8.1
         version: 2.8.1

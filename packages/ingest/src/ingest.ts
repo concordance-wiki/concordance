@@ -2,12 +2,14 @@ import { posix } from "node:path";
 
 import {
   compareFindings,
-  compileGlobs,
+  LINT_CONFIG_FILE,
+  LintConfigError,
+  readLintConfig,
+  repositoryFiles,
   type Config,
   type FileHistory,
   type Finding,
   type Locale,
-  type PathMatcher,
   type SourceConfig,
 } from "@concordance-wiki/core";
 
@@ -44,16 +46,37 @@ function byPath(a: IngestedFile, b: IngestedFile): number {
   return Number(a.path > b.path) - Number(a.path < b.path);
 }
 
-/** Lists the files kept under `root`; exclusions are applied before any file is stamped or read. */
-function keptFiles(deps: IngestDependencies, root: string, excluded: PathMatcher): string[] {
-  return deps.fs.listFiles(root).filter((path) => !excluded(path));
+/**
+ * Lists the files kept under `root`, the ones the linter reads in that repository: `privacy.exclude`
+ * of the wiki, `exclude` of the repository's own lint configuration and its ignore files are applied
+ * before any file is stamped or read. A faulty lint configuration stops the linter; here it throws
+ * a `LintConfigError` the caller turns into a finding.
+ */
+function keptFiles(deps: IngestDependencies, root: string, excluded: readonly string[]): string[] {
+  const local = readLintConfig(deps.fs, root);
+  return repositoryFiles({
+    fs: deps.fs,
+    root,
+    exclude: [...excluded, ...(local.exclude ?? [])],
+  });
+}
+
+/** The source cannot be read consistently with its linter: it is skipped, like one that cannot be fetched. */
+function unreadable(name: string, error: LintConfigError): Finding {
+  return {
+    check: "W-SOURCE-UNREACHABLE",
+    severity: "warning",
+    source: name,
+    message: `source "${name}" could not be read: ${error.message}`,
+    remediation: `Fix ${LINT_CONFIG_FILE} in the repository, as concordance lint reports it; the source is skipped in this build.`,
+  };
 }
 
 async function ingestGit(
   source: SourceConfig,
   url: string,
   locale: Locale,
-  excluded: PathMatcher,
+  excluded: readonly string[],
   deps: IngestDependencies,
 ): Promise<Outcome> {
   const ref = source.ref ?? DEFAULT_REF;
@@ -74,6 +97,7 @@ async function ingestGit(
     });
     return { source: { name: source.name, locale, root, commit, files: files.toSorted(byPath) } };
   } catch (error) {
+    if (error instanceof LintConfigError) return { finding: unreadable(source.name, error) };
     return {
       finding: unreachable(
         source.name,
@@ -92,7 +116,7 @@ async function ingestLocal(
   source: SourceConfig,
   path: string,
   locale: Locale,
-  excluded: PathMatcher,
+  excluded: readonly string[],
   deps: IngestDependencies,
 ): Promise<Outcome> {
   const root = posix.resolve(deps.configDirectory, path);
@@ -104,8 +128,15 @@ async function ingestLocal(
       ),
     };
   }
+  let kept: string[];
+  try {
+    kept = keptFiles(deps, root, excluded);
+  } catch (error) {
+    if (error instanceof LintConfigError) return { finding: unreadable(source.name, error) };
+    throw error;
+  }
   const history = (await deps.git.localHistory?.(root)) ?? new Map<string, FileHistory>();
-  const files = keptFiles(deps, root, excluded).map((relative): IngestedFile => {
+  const files = kept.map((relative): IngestedFile => {
     const absolutePath = posix.join(root, relative);
     const known = history.get(relative);
     return known === undefined
@@ -119,7 +150,7 @@ export async function ingestSources(
   config: Config,
   deps: IngestDependencies,
 ): Promise<IngestResult> {
-  const excluded = compileGlobs(config.privacy?.exclude ?? []);
+  const excluded = config.privacy?.exclude ?? [];
   const sources: IngestedSource[] = [];
   const findings: Finding[] = [];
   for (const source of config.sources) {

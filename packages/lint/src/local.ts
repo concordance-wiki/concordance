@@ -2,8 +2,8 @@ import { posix } from "node:path";
 
 import { createRegistry, type CheckId, type StepFinding } from "@concordance-wiki/checks";
 import {
-  compileGlobs,
   identifierFor,
+  readLintConfig,
   resolveDuplicates,
   type Config,
   type FileSystem,
@@ -13,7 +13,7 @@ import {
 } from "@concordance-wiki/core";
 import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wiki/ingest";
 
-import { readLintOverrides } from "./overrides.js";
+import { lintedFiles } from "./files.js";
 
 /** Identifier prefix of a repository linted without a declared source. */
 export const DEFAULT_SOURCE_NAME = "repo";
@@ -38,6 +38,8 @@ export interface LintRepositoryInput {
   /** The wiki configuration; `privacy.exclude` and `checks` apply before the repository's own overrides. */
   config?: Config;
   fs: FileSystem;
+  /** Whether the files git ignores are left out; they are unless this is false. */
+  gitignore?: boolean;
 }
 
 function typeSuffixes(source: SourceConfig | undefined): string[] {
@@ -83,10 +85,10 @@ function brokenLinks(
 export function lintRepository(input: LintRepositoryInput): Finding[] {
   const { root, fs } = input;
   const source = input.source?.name ?? DEFAULT_SOURCE_NAME;
-  const excluded = compileGlobs(input.config?.privacy?.exclude ?? []);
-  const overrides = { ...input.config?.checks, ...readLintOverrides(fs, root) };
+  const local = readLintConfig(fs, root);
+  const overrides = { ...input.config?.checks, ...local.checks };
   const suffixes = typeSuffixes(input.source);
-  const files = fs.listFiles(root).filter((path) => !excluded(path));
+  const files = lintedFiles({ ...input, overrides: local });
   const fileSet = new Set(files);
   const findings: StepFinding[] = [];
   const identified: Identified[] = [];

@@ -1,12 +1,14 @@
 import { posix } from "node:path";
 
 import {
-  compileGlobs,
+  readLintConfig,
   type Config,
   type FileSystem,
   type SourceConfig,
 } from "@concordance-wiki/core";
 import { parseMarkdown } from "@concordance-wiki/ingest";
+
+import { lintedFiles } from "../files.js";
 
 import { normalizeFrontmatter } from "./frontmatter.js";
 import { rewriteRenamedLinks } from "./links.js";
@@ -21,6 +23,8 @@ export interface FixRepositoryInput {
   /** The wiki configuration; `privacy.exclude` keeps files out of the fixers. */
   config?: Config;
   fs: FileSystem;
+  /** Whether the files git ignores are left out; they are unless this is false. */
+  gitignore?: boolean;
   /** Lists the changes without writing any file. */
   dryRun: boolean;
   /** Called with every change, in order, before the first file is written. */
@@ -53,8 +57,7 @@ function decode(bytes: Uint8Array): string | undefined {
  */
 export function fixRepository(input: FixRepositoryInput): FixRepositoryResult {
   const { root, fs } = input;
-  const excluded = compileGlobs(input.config?.privacy?.exclude ?? []);
-  const files = fs.listFiles(root).filter((path) => !excluded(path));
+  const files = lintedFiles({ ...input, overrides: readLintConfig(fs, root) });
   const sourceFiles = new Set(files);
   const applied: FixChange[] = [];
   const refused: FixRefusal[] = [];

@@ -79,6 +79,8 @@ interface LintOptions {
   output?: string;
   fix: boolean;
   dryRun: boolean;
+  /** False under `--no-gitignore`: the files git ignores are checked like the others. */
+  gitignore: boolean;
 }
 
 /** The options of the command line, or nothing once an invalid value has been reported. */
@@ -94,7 +96,9 @@ function optionsOf(argv: string[], io: CommandIo): LintOptions | undefined {
       output: { type: "string", short: "o" },
       fix: { type: "boolean", default: false },
       "dry-run": { type: "boolean", default: false },
+      gitignore: { type: "boolean", default: true },
     },
+    allowNegative: true,
   });
   const { scope, format } = values;
   const failOn = values["fail-on"];
@@ -119,6 +123,7 @@ function optionsOf(argv: string[], io: CommandIo): LintOptions | undefined {
     ...(values.output === undefined ? {} : { output: values.output }),
     fix: values.fix,
     dryRun: values["dry-run"],
+    gitignore: values.gitignore,
   };
 }
 
@@ -145,6 +150,7 @@ function repositoryOf(io: CommandIo, options: LintOptions): LintRepositoryInput 
     root: io.cwd,
     ...(source === undefined ? {} : { source }),
     ...(config === undefined ? {} : { config }),
+    ...(options.gitignore ? {} : { gitignore: false }),
     fs: io.fs,
   };
 }
