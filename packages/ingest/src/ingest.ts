@@ -20,7 +20,7 @@ const DEFAULT_REF = "main";
 type Outcome = { source: IngestedSource } | { finding: Finding };
 
 const credentialFailure =
-  /Authentication failed|could not read Username|Permission denied|terminal prompts disabled/;
+  /Authentication failed|could not read Username|Permission denied|terminal prompts disabled|Host key verification failed/;
 
 function unreachable(name: string, message: string): Finding {
   const credentials = credentialFailure.test(message);

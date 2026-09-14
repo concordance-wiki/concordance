@@ -189,6 +189,7 @@ describe("ingestSources", () => {
       "fatal: Authentication failed for 'https://example.invalid/docs.git/'",
       "fatal: could not read Username for 'https://example.invalid': terminal prompts disabled",
       "git@example.invalid: Permission denied (publickey).",
+      "Host key verification failed.",
     ])("names missing credentials when git says %s", async (stderr) => {
       const { git, deps } = harness();
       git.fail("clone", URL, new Error(stderr));

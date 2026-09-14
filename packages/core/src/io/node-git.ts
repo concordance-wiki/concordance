@@ -14,19 +14,56 @@ const logFormat = "--format=%H %cI";
 const promisor = "--filter=blob:none";
 // Large enough for `git log --name-only` over a deep history; the default of 1 MiB is not.
 const maxBuffer = 536870912;
+/** The variable that bounds one git command, in seconds; a transfer that stalls fails rather than holds the build. */
+export const GIT_TIMEOUT_VARIABLE = "CONCORDANCE_GIT_TIMEOUT";
+const DEFAULT_GIT_TIMEOUT_SECONDS = 900;
+
+/** The seconds one git command may take: the variable when it holds a positive number, else fifteen minutes. */
+export function gitTimeoutSeconds(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): number {
+  const given = Number(env[GIT_TIMEOUT_VARIABLE]);
+  return Number.isFinite(given) && given > 0 ? given : DEFAULT_GIT_TIMEOUT_SECONDS;
+}
+
+/**
+ * The environment git runs in: never a prompt. The terminal prompt is disabled so that a private
+ * repository fails instead of waiting for credentials; Git Credential Manager is told the same
+ * (`GCM_INTERACTIVE`), and ssh runs in batch mode unless the caller names its own command, so that
+ * a passphrase or an unknown host key fails instead of opening a dialog.
+ */
+export function gitEnvironment(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Record<string, string | undefined> {
+  const ssh =
+    env["GIT_SSH_COMMAND"] === undefined && env["GIT_SSH"] === undefined
+      ? { GIT_SSH_COMMAND: "ssh -o BatchMode=yes" }
+      : {};
+  return { ...env, GIT_TERMINAL_PROMPT: "0", GCM_INTERACTIVE: "Never", LC_ALL: "C", ...ssh };
+}
 
 function git(cwd: string, args: readonly string[]): Promise<string> {
-  // The terminal prompt is disabled so that a private repository fails instead of waiting for credentials.
-  const env = { ...process.env, GIT_TERMINAL_PROMPT: "0", LC_ALL: "C" };
+  const timeout = gitTimeoutSeconds();
   return new Promise((resolve, reject) => {
-    execFile(requireExecutable("git"), [...args], { cwd, env, maxBuffer }, (error, stdout) => {
-      if (error === null) {
-        resolve(stdout);
-      } else {
-        // The message names the command and ends with git's stderr, which explains the failure.
-        reject(new Error(error.message.trim()));
-      }
-    });
+    execFile(
+      requireExecutable("git"),
+      [...args],
+      { cwd, env: gitEnvironment(), maxBuffer, timeout: timeout * 1000 },
+      (error, stdout) => {
+        if (error === null) {
+          resolve(stdout);
+        } else if (error.killed) {
+          reject(
+            new Error(
+              `git ${args.join(" ")} took more than ${String(timeout)} s and was stopped; set ${GIT_TIMEOUT_VARIABLE} to allow more`,
+            ),
+          );
+        } else {
+          // The message names the command and ends with git's stderr, which explains the failure.
+          reject(new Error(error.message.trim()));
+        }
+      },
+    );
   });
 }
 

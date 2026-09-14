@@ -6,7 +6,14 @@ import { pathToFileURL } from "node:url";
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { nodeGit, parseLog, parseStatus } from "../../src/io/node-git.js";
+import {
+  GIT_TIMEOUT_VARIABLE,
+  gitEnvironment,
+  gitTimeoutSeconds,
+  nodeGit,
+  parseLog,
+  parseStatus,
+} from "../../src/io/node-git.js";
 
 // Every test spawns several git processes; the default budget is meant for unit tests.
 vi.setConfig({ testTimeout: 60_000 });
@@ -377,5 +384,45 @@ describe("nodeGit.localHistory", () => {
     mkdirSync(empty);
     git(empty, ["init", "--quiet"]);
     expect(await nodeGit.localHistory?.(empty)).toBeUndefined();
+  });
+});
+
+describe("git never waits for anyone", () => {
+  it("disables every prompt: the terminal, the credential manager and ssh in batch mode unless the caller names its ssh command", () => {
+    const env = gitEnvironment({ HOME: "/home/build" });
+    expect(env).toEqual({
+      HOME: "/home/build",
+      GIT_TERMINAL_PROMPT: "0",
+      GCM_INTERACTIVE: "Never",
+      LC_ALL: "C",
+      GIT_SSH_COMMAND: "ssh -o BatchMode=yes",
+    });
+    expect(gitEnvironment({ GIT_SSH_COMMAND: "ssh -i key" })["GIT_SSH_COMMAND"]).toBe("ssh -i key");
+    expect(gitEnvironment({ GIT_SSH: "/usr/bin/plink" })["GIT_SSH_COMMAND"]).toBeUndefined();
+    expect(gitEnvironment()["LC_ALL"]).toBe("C");
+  });
+
+  it("bounds a command to fifteen minutes, or to the positive number of seconds the variable gives", () => {
+    expect(gitTimeoutSeconds({})).toBe(900);
+    expect(gitTimeoutSeconds({ [GIT_TIMEOUT_VARIABLE]: "30" })).toBe(30);
+    expect(gitTimeoutSeconds({ [GIT_TIMEOUT_VARIABLE]: "0" })).toBe(900);
+    expect(gitTimeoutSeconds({ [GIT_TIMEOUT_VARIABLE]: "soon" })).toBe(900);
+    expect(gitTimeoutSeconds()).toBe(900);
+  });
+
+  it("stops a command that outlives its bound and says how to allow more", async () => {
+    const stalled = join(root, "stalled-git");
+    writeFileSync(stalled, "#!/bin/sh\nsleep 30\n", { encoding: "utf8", mode: 0o755 });
+    vi.stubEnv("CONCORDANCE_GIT", stalled);
+    vi.stubEnv(GIT_TIMEOUT_VARIABLE, "0.2");
+    try {
+      const failure = await nodeGit.head(root).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      expect(failure instanceof Error ? failure.message : "").toBe(
+        `git rev-parse HEAD took more than 0.2 s and was stopped; set ${GIT_TIMEOUT_VARIABLE} to allow more`,
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
