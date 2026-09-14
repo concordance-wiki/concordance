@@ -165,6 +165,8 @@ interface TreeFocus {
   way: readonly string[];
   /** The note marked as the current page; absent when the list of the last folder of the way is the current page. */
   entity?: Entity;
+  /** How many passages use the word, when the current page is a keyword page filed among the notes. */
+  passages?: number;
 }
 
 /**
@@ -206,6 +208,7 @@ function nodesOf(
         label: note.title,
         current: true,
         ...(under.length === 0 ? {} : { children: under }),
+        ...(focus.passages === undefined ? {} : { passages: focus.passages }),
       };
     });
   return [...folders, ...windowOf(context, pages)];
@@ -265,24 +268,41 @@ export function spaceOf(context: SiteContext, page: string, entity: Entity): Spa
   );
 }
 
+/** Where a page without a file stands in its space: the folders on its way, and how many passages use the word. */
+export interface Filing {
+  /** The folders on the way, as written on the paths; none files the page at the root. */
+  folders: readonly string[];
+  passages: number;
+}
+
 /**
  * The tree of a space for a page that has no file in it: the keyword page of an expression,
- * filed at the root of the space under `<slug>.md`, so that the word stands among the notes as
- * the current page, at the place a note of that name would take.
+ * filed under `<slug>.md` in the folder given, the folders on the way open, so that the word
+ * stands among the notes as the current page, at the place a note of that name would take,
+ * its passage count after its name.
  */
 export function spaceWithPageOf(
   context: SiteContext,
   page: string,
   entity: Entity,
   source: string,
+  filing: Filing,
 ): SpaceTree {
   const root = treeOf(context, source);
-  root.pages.push({ file: `${entity.id.slice(entity.id.lastIndexOf("/") + 1)}.md`, entity });
+  let folder = root;
+  for (const name of filing.folders) {
+    folder = folderIn(folder.folders, name);
+  }
+  folder.pages.push({ file: `${entity.id.slice(entity.id.lastIndexOf("/") + 1)}.md`, entity });
   return spaceTreeOf(
     context,
     page,
     source,
-    nodesOf(context, page, source, root, [], { way: [], entity }),
+    nodesOf(context, page, source, root, [], {
+      way: filing.folders,
+      entity,
+      passages: filing.passages,
+    }),
   );
 }
 

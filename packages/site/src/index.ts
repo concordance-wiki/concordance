@@ -99,7 +99,7 @@ export {
   spaceWithPageOf,
   topFoldersOf,
 } from "./build/space.js";
-export type { FolderCount, SpaceCount } from "./build/space.js";
+export type { FolderCount, SpaceCount, Filing } from "./build/space.js";
 export * from "./build/spaces.js";
 export {
   CATEGORY_VARIANTS_MAX,

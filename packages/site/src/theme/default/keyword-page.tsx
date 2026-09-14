@@ -181,8 +181,13 @@ export function KeywordPage({
               {similar.map((lead) => (
                 <li key={lead.href}>
                   <a class="similar-lead" href={lead.href}>
-                    <span class="similar-label">{lead.label}</span>
-                    {lead.count !== undefined && <span class="similar-count">{lead.count}</span>}
+                    <span class="similar-label">
+                      {lead.label}
+                      {lead.aliases !== undefined && (
+                        <span class="similar-aliases">{lead.aliases.join(", ")}</span>
+                      )}
+                    </span>
+                    <span class="similar-count">{lead.count}</span>
                   </a>
                 </li>
               ))}

@@ -1592,7 +1592,7 @@ describe("keywordPageOf", () => {
     );
   });
 
-  it("files the word in the first glossary source the model knows, its tree with the word at its place, with the breadcrumb space › terms › word", () => {
+  it("files the word in the first glossary source the model knows, its tree with the word at its place among the notes with its passage count, with the breadcrumb space › terms › word", () => {
     const glossary = context({ glossarySources: ["nowhere", "glossary"] });
     const props = keywordPageOf(glossary, keyword);
     expect(props.breadcrumb).toEqual([
@@ -1605,7 +1605,7 @@ describe("keywordPageOf", () => {
       initials: "GL",
       href: "../../glossary/index.html",
       nodes: [
-        { label: "build summary", current: true },
+        { label: "build summary", current: true, passages: 3 },
         { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
         { label: "Page", href: "../../glossary/page/index.html" },
       ],
@@ -1617,7 +1617,7 @@ describe("keywordPageOf", () => {
     expect(fr.breadcrumb?.[1]).toEqual({ label: "Termes" });
   });
 
-  it("files the word in the space of its first passage when no glossary source is known, and nowhere without a passage", () => {
+  it("files the word in the folder of its first passage of its space, the way open, at the root when the space holds no passage, in the space of its first passage when no glossary source is known, and nowhere without a passage", () => {
     const props = keywordPageOf(context(), keyword);
     expect(props.breadcrumb?.[0]).toEqual({
       label: "glossary",
@@ -1631,10 +1631,47 @@ describe("keywordPageOf", () => {
     });
     const specs = keywordPageOf(reversed, keyword);
     expect(specs.space?.name).toBe("specs");
+    // The word stands in the folder of its first passage of the space, counted with its notes.
     expect(specs.space?.nodes).toEqual([
       { label: "rules", count: 1, href: "../../specs/rules/index.html" },
-      { label: "screens", count: 1, href: "../../specs/screens/index.html" },
-      { label: "build summary", current: true },
+      {
+        label: "screens",
+        count: 2,
+        href: "../../specs/screens/index.html",
+        children: [
+          { label: "build summary", current: true, passages: 3 },
+          { label: "Mentions panel", href: "../../specs/screens/mentions-panel/index.html" },
+        ],
+      },
+    ]);
+    // A glossary source with no passage of the word files it at the root of that space.
+    const elsewhere = keywordPageOf(
+      context({
+        glossarySources: ["glossary"],
+        fragments: new Map([
+          [
+            keyword.id,
+            {
+              id: keyword.id,
+              sections: [],
+              passages: [
+                {
+                  source: "specs",
+                  path: "screens/mentions-panel.md",
+                  line: 12,
+                  context: "after the build summaries",
+                },
+              ],
+            },
+          ],
+        ]),
+      }),
+      keyword,
+    );
+    expect(elsewhere.space?.nodes).toEqual([
+      { label: "build summary", current: true, passages: 1 },
+      { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
+      { label: "Page", href: "../../glossary/page/index.html" },
     ]);
     const orphan = keywordPageOf(context(), orphanKeyword);
     expect(orphan.space).toBeUndefined();
@@ -2015,9 +2052,9 @@ describe("keywordPageOf", () => {
     expect(none).toMatchObject({ neighbours: [], total: 0 });
   });
 
-  it("turns the leads of the fragment into links, a keyword page among them with its occurrences, a lead to a page the model lost being left out", () => {
+  it("turns the leads of the fragment into links, one per page with the passages that use it, a note met under its aliases named once by its title, a lead to a page the model lost being left out", () => {
     expect(keywordPageOf(context(), keyword).similar).toEqual([
-      { label: "Keyword page", href: "../../glossary/keyword-page/index.html" },
+      { label: "Keyword page", href: "../../glossary/keyword-page/index.html", count: 5 },
     ]);
     expect(keywordPageOf(context(), keyword).similarLead).toBe(
       "Expressions close in form and context. A lead, not a claim.",
@@ -2031,7 +2068,11 @@ describe("keywordPageOf", () => {
           sections: [],
           leads: [
             { id: "keywords/build-summary", title: "build summary" },
+            { id: "glossary/page", title: "leaf" },
             { id: "glossary/page", title: "Page" },
+            { id: "glossary/page", title: "sheet" },
+            { id: "glossary/page", title: "leaf" },
+            { id: "unknown/lost", title: "lost" },
           ],
         },
       ],
@@ -2040,7 +2081,12 @@ describe("keywordPageOf", () => {
       similarOf(context({ fragments: leads }), "keywords/zzz/index.html", orphanKeyword),
     ).toEqual([
       { label: "build summary", href: "../build-summary/index.html", count: 5 },
-      { label: "Page", href: "../../glossary/page/index.html" },
+      {
+        label: "Page",
+        href: "../../glossary/page/index.html",
+        count: 1,
+        aliases: ["leaf", "sheet"],
+      },
     ]);
   });
 

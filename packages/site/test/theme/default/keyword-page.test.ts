@@ -102,7 +102,7 @@ describe("KeywordPage", () => {
     expect(html).not.toContain('class="breadcrumbs"');
   });
 
-  it("walks the breadcrumb space › terms › word and marks the word as the current page of the tree of its space", () => {
+  it("walks the breadcrumb space › terms › word and marks the word as the current page of the tree of its space, its passage count after its name", () => {
     const html = renderCorporate();
     expect(html).toContain(
       '<ol class="breadcrumbs-list"><li><a href="../../#home-tree">glossary</a></li><li><span>Terms</span></li><li><span aria-current="page">build summary</span></li></ol>',
@@ -110,7 +110,7 @@ describe("KeywordPage", () => {
     expect(html).toContain('<span class="space-name">glossary</span>');
     expectInOrder(html, [
       '<li class="space-page"><a href="../../glossary/build-log/">Build log</a></li>',
-      '<li class="space-page space-current"><span aria-current="page">build summary</span></li>',
+      '<li class="space-page space-current"><span aria-current="page">build summary<span class="count">17</span></span></li>',
       '<li class="space-page"><a href="../../glossary/candidate-expression/">Candidate expression</a></li>',
     ]);
   });
@@ -224,10 +224,10 @@ describe("KeywordPage", () => {
     );
   });
 
-  it("offers the expressions that may be the same thing with their counts, under a note that asserts nothing, and no block without any", () => {
+  it("offers the expressions that may be the same thing, one per page with its count, the forms a note was met under as a line under its title, under a note that asserts nothing, and no block without any", () => {
     const html = renderCorporate();
     expect(html).toContain(
-      '<section class="panel-block keyword-similar" aria-labelledby="keyword-similar"><details class="panel-fold"><summary><h2 id="keyword-similar">Maybe the same thing</h2></summary><ul class="similar-list"><li><a class="similar-lead" href="../build-report/"><span class="similar-label">build report</span><span class="similar-count">4</span></a></li><li><a class="similar-lead" href="../../glossary/build-log/"><span class="similar-label">Build log</span></a></li></ul><p class="panel-note">Expressions close in form and context. A lead, not a claim.</p></details></section>',
+      '<section class="panel-block keyword-similar" aria-labelledby="keyword-similar"><details class="panel-fold"><summary><h2 id="keyword-similar">Maybe the same thing</h2></summary><ul class="similar-list"><li><a class="similar-lead" href="../build-report/"><span class="similar-label">build report</span><span class="similar-count">4</span></a></li><li><a class="similar-lead" href="../../glossary/build-log/"><span class="similar-label">Build log<span class="similar-aliases">build summary log, summary log</span></span><span class="similar-count">9</span></a></li></ul><p class="panel-note">Expressions close in form and context. A lead, not a claim.</p></details></section>',
     );
     expect(render({ similar: [] })).not.toContain("keyword-similar");
     expectInOrder(html, ['id="keyword-facts"', 'id="keyword-similar"', 'id="mentions-title"']);

@@ -240,7 +240,21 @@
   flex: 1;
 }
 
+/* The other forms a note was met under, as a muted line under its title. */
+
+.similar-aliases {
+  display: block;
+  color: var(--color-label);
+  font-weight: 400;
+}
+
 .similar-count {
   color: var(--color-label);
   font-family: var(--font-mono);
+}
+
+/* The word filed among the notes of its space carries its passage count at the end of its line, as a folder does. */
+
+.keyword .space-page .count {
+  margin-inline-start: auto;
 }
