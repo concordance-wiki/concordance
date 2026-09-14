@@ -19,6 +19,11 @@ on:
         description: "The version to release again, without its v (its tag must exist)"
         required: true
         type: string
+      smoke:
+        description: "Check the registry serves the version: only once the staged versions are approved"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -255,7 +260,7 @@ jobs:
             --filter './packages/**' --filter './plugins/**' --filter './presets/**' \
             exec node -p 'require("./package.json").name' > "$RUNNER_TEMP/order"
           while read -r name; do
-            file="$ASSETS/$(echo "${name#@}" | tr / -)-$VERSION.tgz"
+            file="./$ASSETS/$(echo "${name#@}" | tr / -)-$VERSION.tgz"
             test -f "$file"
             # A run repeated by hand stages only what the registry does not serve yet.
             if npm view "$name@$VERSION" version > /dev/null 2>&1; then
@@ -267,10 +272,11 @@ jobs:
           npm stage list "@concordance-wiki/cli" >> "$GITHUB_STEP_SUMMARY" || true
       - name: The published command line gives the report of the binary
         # Once the maintainer approved the staged versions, this workflow run by hand with the same
-        # version checks the registry: the same lint as the lint-distribution workflow, through
-        # npx from an empty folder once the registry serves the version, and through the binary of
-        # the release; the reports must match. Skipped on the run that stages.
-        if: github.event_name == 'workflow_dispatch'
+        # version and `smoke` checks the registry: the same lint as the lint-distribution workflow,
+        # through npx from an empty folder once the registry serves the version, and through the
+        # binary of the release; the reports must match. Skipped on the run that stages, by hand
+        # or not: a staged version is not on the registry yet.
+        if: github.event_name == 'workflow_dispatch' && inputs.smoke
         run: |
           mkdir "$RUNNER_TEMP/smoke"
           cp -r "$CORPUS" "$RUNNER_TEMP/smoke/repo"
