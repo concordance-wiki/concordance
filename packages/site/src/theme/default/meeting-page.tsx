@@ -5,6 +5,7 @@ import type {
   EntityPageLabels,
   EntityPageProps,
   EntityRef,
+  MeetingDecision,
   MeetingLabels,
   MeetingProps,
   Section,
@@ -27,7 +28,7 @@ export const defaultMeetingLabels: MeetingLabels = {
   representations: labels.representations,
   transcript: labels.transcript,
   notes: labels.notes,
-  slides: labels.slides,
+  deck: labels.deck,
   document: labels.document,
   grouped: labels.groupedAutomatically,
   decision: labels.decisionTakenHere,
@@ -55,13 +56,40 @@ export function cueTime(label: string): string {
   return label.replace(/^00:/, "");
 }
 
-/** One speaker turn: its timecode as an anchor, the speaker in bold, then what was said. */
+/** The callout naming the decisions the meeting produced, each a link to its note. */
+function DecisionNote({
+  decisions,
+  lead,
+}: {
+  decisions: MeetingDecision[];
+  lead: string;
+}): JSX.Element {
+  return (
+    <aside class="meeting-decision" role="note">
+      <span class="meeting-decision-lead">{lead}</span>{" "}
+      {decisions.map((decision, index) => (
+        <Fragment key={decision.href}>
+          {index > 0 && ", "}
+          <a class="meeting-decision-link" href={decision.href}>
+            {decision.label}
+          </a>
+        </Fragment>
+      ))}
+    </aside>
+  );
+}
+
+/** One speaker turn: its timecode as an anchor, the speaker in bold, then what was said; under it the decisions that came out of this cue. */
 function Cue({
   index,
   position,
+  decisions,
+  text,
 }: {
   index: number;
   position: DocumentView["positions"][number];
+  decisions: MeetingDecision[];
+  text: MeetingLabels;
 }): JSX.Element {
   const anchor = positionAnchor(position.number, index);
   return (
@@ -78,30 +106,49 @@ function Cue({
         )}
         {position.text}
       </p>
+      {decisions.length > 0 && <DecisionNote decisions={decisions} lead={text.decision} />}
     </li>
   );
 }
 
-/** The transcript as timestamped lines, the file to download under them, then the note on the pseudonyms when they apply. */
+/**
+ * The transcript as timestamped lines, the decisions the meeting produced in the cue each was
+ * recognised in and, for the ones no cue names, at the head of the lines; the file to download
+ * under them, then the note on the pseudonyms when they apply.
+ */
 function Transcript({
   document,
   index,
+  decisions,
   pseudonymized,
   text,
 }: {
   document: DocumentView;
   index: number;
+  decisions: MeetingDecision[];
   pseudonymized: boolean;
   text: MeetingLabels;
 }): JSX.Element {
+  const cued = (position: DocumentView["positions"][number]): MeetingDecision[] =>
+    decisions.filter((decision) => decision.cue === position.number);
+  const uncued = decisions.filter(
+    (decision) => !document.positions.some((position) => position.number === decision.cue),
+  );
   return (
     <>
+      {uncued.length > 0 && <DecisionNote decisions={uncued} lead={text.decision} />}
       {document.positions.length === 0 ? (
         <p class="empty">{labels.noExtractedText}</p>
       ) : (
         <ol class="transcript">
           {document.positions.map((position) => (
-            <Cue key={position.number} index={index} position={position} />
+            <Cue
+              key={position.number}
+              index={index}
+              position={position}
+              decisions={cued(position)}
+              text={text}
+            />
           ))}
         </ol>
       )}
@@ -142,9 +189,10 @@ function tabId(kind: string, rank: number): string {
 }
 
 /**
- * The tabs of the page, one per representation: the transcripts first, then the notes when
- * the meeting has some, then the decks and the other converted documents, each document keeping
- * the anchors of its positions so that a mention still lands on its cue, slide or page.
+ * The tabs of the page: the transcripts first, the decisions placed in the first one, then the
+ * notes when the meeting has some, then the deck and any other converted document, each
+ * document keeping the anchors of its positions so that a mention still lands on its cue, slide
+ * or page. A converted file and the PDF next to it come as one document, so one tab.
  */
 function tabsOf(
   entity: EntityRef,
@@ -162,13 +210,14 @@ function tabsOf(
   const indexed = documents.map((document, position) => ({ document, index: position + 1 }));
   const tabs: Tab[] = indexed
     .filter(({ document }) => document.unit === "cue")
-    .map(({ document, index }) => ({
+    .map(({ document, index }, rank) => ({
       id: next("transcript"),
       label: text.transcript,
       content: (
         <Transcript
           document={document}
           index={index}
+          decisions={rank === 0 ? meeting.decisions : []}
           pseudonymized={meeting.pseudonymized}
           text={text}
         />
@@ -183,10 +232,10 @@ function tabsOf(
   }
   for (const { document, index } of indexed) {
     if (document.unit === "cue") continue;
-    const kind = document.unit === "slide" ? "slides" : "pages";
+    const deck = document.unit === "slide";
     tabs.push({
-      id: next(kind),
-      label: document.unit === "slide" ? text.slides : text.document,
+      id: next(deck ? "deck" : "document"),
+      label: deck ? text.deck : text.document,
       content: <DocumentBlock document={document} index={index} />,
     });
   }
@@ -197,8 +246,9 @@ function tabsOf(
  * The page of a meeting on the shell of the entity page: the same tree, breadcrumb and title;
  * under the title the type, the duration and the participants; then the representations as
  * tabs, anchors to panels that the stylesheet shows one at a time and without any script, the
- * transcript as timestamped lines, the notes as the entity page renders them, a deck with its
- * viewer; the callout of the decisions the meeting produced; the path of every file. In the
+ * transcript as timestamped lines with the callout of the decisions the meeting produced in the
+ * cue each came from, the notes as the entity page renders them, the deck with its viewer; the
+ * callout after the tabs for a meeting without a transcript; the path of every file. In the
  * panel the properties, the related pages and the neighbourhood folded, or unfolded when
  * `mapOpen` asks, as on every entity page.
  */
@@ -266,19 +316,9 @@ export function MeetingPage({
             </div>
           </div>
         )}
-        {meeting.decisions.length > 0 && (
+        {meeting.decisions.length > 0 && !documents.some((document) => document.unit === "cue") && (
           <div class="meeting-decisions">
-            <aside class="meeting-decision" role="note">
-              <span class="meeting-decision-lead">{words.decision}</span>{" "}
-              {meeting.decisions.map((decision, index) => (
-                <Fragment key={decision.href}>
-                  {index > 0 && ", "}
-                  <a class="meeting-decision-link" href={decision.href}>
-                    {decision.label}
-                  </a>
-                </Fragment>
-              ))}
-            </aside>
+            <DecisionNote decisions={meeting.decisions} lead={words.decision} />
           </div>
         )}
         <footer class="entity-footer">

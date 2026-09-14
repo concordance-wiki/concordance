@@ -178,6 +178,7 @@ export const labels = {
   representations: "Representations",
   transcript: "Transcript",
   notes: "Notes",
+  deck: "Deck",
   groupedAutomatically: "Grouped automatically",
   decisionTakenHere: "Decision taken here",
   pseudonymNote:

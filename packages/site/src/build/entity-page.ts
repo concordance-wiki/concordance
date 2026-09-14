@@ -13,6 +13,7 @@ import type {
   DeclaredSection,
   DocumentPageLabels,
   DocumentPageView,
+  DocumentPosition,
   DocumentTwinFile,
   DocumentView,
   EntityPageLabels,
@@ -25,6 +26,7 @@ import type {
   TypeDeclaration,
 } from "../slots.js";
 import { OPERATION_TYPE } from "../slots.js";
+import type { FragmentDocument } from "./fragments.js";
 import {
   editHref,
   glyphNameOf,
@@ -516,10 +518,47 @@ export interface EntityPageOptions {
   viewer?: ViewerBundles;
 }
 
+/** The properties a reader read from a file, as the page carries them: absent ones left out. */
+function readOf(
+  document: FragmentDocument,
+): Pick<DocumentView, "size" | "author" | "date" | "pageCount"> {
+  return {
+    ...(document.size === undefined ? {} : { size: document.size }),
+    ...(document.author === undefined ? {} : { author: document.author }),
+    ...(document.date === undefined ? {} : { date: document.date }),
+    ...(document.pageCount === undefined ? {} : { pageCount: document.pageCount }),
+  };
+}
+
+function positionsOf(document: FragmentDocument): DocumentPosition[] {
+  return document.pages.map(({ number, label, text, speaker }) => ({
+    number,
+    label,
+    text,
+    ...(speaker === undefined ? {} : { speaker }),
+  }));
+}
+
+/**
+ * The PDF twin of a converted file among the documents of its entity: the document copied where
+ * the file's preview is, a PDF being its own preview; none for a PDF, a transcript or a file
+ * whose PDF the build produced rather than read from the sources.
+ */
+export function previewTwinOf(
+  document: FragmentDocument,
+  documents: readonly FragmentDocument[],
+): FragmentDocument | undefined {
+  if (document.preview === undefined || document.preview === document.target) return undefined;
+  return documents.find((candidate) => candidate.target === document.preview);
+}
+
 /**
  * The documents of the entity as its page offers them, from its fragment: the original file to
  * download, the PDF to open, with the viewer bundles when the build produced them, and the
- * extracted text of every position; nothing for an entity without a document.
+ * extracted text of every position; nothing for an entity without a document. A converted file
+ * and the PDF kept next to it in the sources are one document, in the place of the original:
+ * the original to download, the PDF as its preview with what its reader read from it, the
+ * positions of the original, else those of the PDF when the original's reader gave none.
  */
 export function documentsOf(
   context: SiteContext,
@@ -527,37 +566,44 @@ export function documentsOf(
   entity: Entity,
   viewer?: ViewerBundles,
 ): DocumentView[] {
-  return (context.fragments.get(entity.id)?.documents ?? []).map((document) => ({
-    file: {
-      label: document.path.slice(document.path.lastIndexOf("/") + 1),
-      href: relativeHref(page, document.target),
-      format: document.format,
-    },
-    ...(document.preview === undefined
-      ? {}
-      : {
-          preview: {
-            href: relativeHref(page, document.preview),
-            ...(viewer === undefined
-              ? {}
-              : {
-                  viewerHref: relativeHref(page, viewer.viewer),
-                  workerHref: relativeHref(page, viewer.worker),
-                }),
-          },
-        }),
-    unit: document.unit,
-    positions: document.pages.map(({ number, label, text, speaker }) => ({
-      number,
-      label,
-      text,
-      ...(speaker === undefined ? {} : { speaker }),
-    })),
-    ...(document.size === undefined ? {} : { size: document.size }),
-    ...(document.author === undefined ? {} : { author: document.author }),
-    ...(document.date === undefined ? {} : { date: document.date }),
-    ...(document.pageCount === undefined ? {} : { pageCount: document.pageCount }),
-  }));
+  const documents = context.fragments.get(entity.id)?.documents ?? [];
+  const twins = new Set(
+    documents.flatMap((document) => {
+      const twin = previewTwinOf(document, documents);
+      return twin === undefined ? [] : [twin];
+    }),
+  );
+  return documents
+    .filter((document) => !twins.has(document))
+    .map((document): DocumentView => {
+      const twin = previewTwinOf(document, documents);
+      const own = positionsOf(document);
+      const positions = own.length > 0 || twin === undefined ? own : positionsOf(twin);
+      return {
+        file: {
+          label: document.path.slice(document.path.lastIndexOf("/") + 1),
+          href: relativeHref(page, document.target),
+          format: document.format,
+        },
+        ...(document.preview === undefined
+          ? {}
+          : {
+              preview: {
+                href: relativeHref(page, document.preview),
+                ...(viewer === undefined
+                  ? {}
+                  : {
+                      viewerHref: relativeHref(page, viewer.viewer),
+                      workerHref: relativeHref(page, viewer.worker),
+                    }),
+                ...(twin === undefined ? {} : readOf(twin)),
+              },
+            }),
+        unit: own.length > 0 || twin === undefined ? document.unit : twin.unit,
+        positions,
+        ...readOf(document),
+      };
+    });
 }
 
 /** The kinds of office documents the page names from the extension; any other format is named by its extension. */

@@ -488,7 +488,11 @@ export interface DocumentFile {
   format: string;
 }
 
-/** The PDF of a document and the scripts that leaf through it, all hrefs relative to the page. */
+/**
+ * The PDF of a document and the scripts that leaf through it, all hrefs relative to the page;
+ * when the PDF is a twin file of the original, what its own reader read from it, for a page
+ * whose original states nothing.
+ */
 export interface DocumentPreview {
   /** The PDF itself, a link without JavaScript and what the viewer opens. */
   href: string;
@@ -496,6 +500,14 @@ export interface DocumentPreview {
   viewerHref?: string;
   /** The worker of the viewer, loaded by the viewer bundle. */
   workerHref?: string;
+  /** The size of the PDF in bytes, when it is a file of the sources the build recorded. */
+  size?: number;
+  /** The page count the PDF states, when its reader read one. */
+  pageCount?: number;
+  /** The author the PDF states. */
+  author?: string;
+  /** ISO 8601 date the PDF states. */
+  date?: string;
 }
 
 /** One position of a document with its extracted text: a page, a slide or a cue. */
@@ -508,7 +520,11 @@ export interface DocumentPosition {
   speaker?: string;
 }
 
-/** A document of the entity that is not its note: what the page offers, with or without JavaScript. */
+/**
+ * A document of the entity that is not its note: what the page offers, with or without
+ * JavaScript. An office file and the PDF the build keeps next to it are one document: the
+ * office file is the original, the PDF its preview.
+ */
 export interface DocumentView {
   file: DocumentFile;
   preview?: DocumentPreview;
@@ -686,10 +702,10 @@ export interface ContractSectionProps {
 export interface MeetingLabels {
   /** Accessible name of the row of tabs, one per representation of the meeting. */
   representations: string;
-  /** The tabs: the transcript, the written notes, the slide deck, any other converted document. */
+  /** The tabs: the transcript, the written notes, the deck, any other converted document. */
   transcript: string;
   notes: string;
-  slides: string;
+  deck: string;
   document: string;
   /** Next to the tabs: that the build grouped the files. */
   grouped: string;
@@ -710,6 +726,12 @@ export interface MeetingLabels {
 export interface MeetingDate {
   date: string;
   label: string;
+}
+
+/** A decision the meeting produced, and the cue of its transcript the decision was recognised in. */
+export interface MeetingDecision extends Link {
+  /** The number of the last cue of the transcript that names the decision; absent when no cue does. */
+  cue?: number;
 }
 
 /** The files the build merged into the page of the meeting, and why. */
@@ -735,8 +757,8 @@ export interface MeetingProps {
   participants?: string;
   /** Whether the transcripts were pseudonymised at build: the note under the transcript says so. */
   pseudonymized: boolean;
-  /** The decisions the meeting produced, as the model links them, by identifier; empty when none is linked. */
-  decisions: Link[];
+  /** The decisions the meeting produced, as the model links them, by identifier, each with the cue it was recognised in; empty when none is linked. */
+  decisions: MeetingDecision[];
   /** The files merged into the page, when the build grouped several. */
   grouping?: MeetingGrouping;
   labels?: Partial<MeetingLabels>;

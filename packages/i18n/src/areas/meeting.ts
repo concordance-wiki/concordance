@@ -9,6 +9,7 @@ export const meetingMessages = {
   arguments: {
     "meeting.date": {},
     "meeting.decision": {},
+    "meeting.deck": {},
     "meeting.document": {},
     "meeting.durationHours": { hours: "argument", minutes: "argument" },
     "meeting.durationMinutes": { minutes: "argument" },
@@ -29,7 +30,6 @@ export const meetingMessages = {
     "meeting.signal.name": {},
     "meeting.signal.similarName": {},
     "meeting.signal.title": {},
-    "meeting.slides": {},
     "meeting.space": {},
     "meeting.transcript": {},
   },

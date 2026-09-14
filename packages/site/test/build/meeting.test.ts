@@ -380,6 +380,72 @@ describe("decisionsOf", () => {
     ]);
     expect(decisionsOf(context(), page, capReview)).toEqual([]);
   });
+
+  it("names the last cue of a transcript of the meeting a decision was recognised in, from the provenances located in the transcript alone", () => {
+    const transcriptPath = "2026-03-12-keyword-page-threshold-review.vtt";
+    const fragment: EntityFragment = {
+      id: review.id,
+      sections: [],
+      documents: [
+        {
+          source: "meetings",
+          path: transcriptPath,
+          format: "vtt",
+          target: `${review.id}/${transcriptPath}`,
+          unit: "cue",
+          pages: [],
+        },
+      ],
+    };
+    const links: Link[] = [
+      {
+        from: review.id,
+        to: decision.id,
+        relation: "documents",
+        confidence: 1,
+        provenance: [
+          { method: "frontmatter_ref", confidence: 1, path: review.source.path, line: 1 },
+          { method: "glossary_occurrence", confidence: 0.6, path: transcriptPath, line: 4 },
+          { method: "glossary_occurrence", confidence: 0.6, path: transcriptPath, line: 11 },
+          { method: "glossary_occurrence", confidence: 0.6, path: "other.vtt", line: 40 },
+          { method: "glossary_occurrence", confidence: 0.6, path: transcriptPath },
+          { method: "cooccurrence", confidence: 0.4, count: 2 },
+        ],
+      },
+      // A second link to the same decision, the meeting as its target, read in a later cue.
+      {
+        from: decision.id,
+        to: review.id,
+        relation: "related",
+        confidence: 1,
+        provenance: [
+          { method: "glossary_occurrence", confidence: 0.6, path: transcriptPath, line: 12 },
+        ],
+      },
+      {
+        from: capDecision.id,
+        to: review.id,
+        relation: "documents",
+        confidence: 1,
+        provenance: [{ method: "explicit_link", confidence: 1, path: capDecision.source.path }],
+      },
+    ];
+    const ctx = context({
+      model: model({ entities: [review, decision, capDecision], links }),
+      fragments: new Map([[review.id, fragment]]),
+    });
+    expect(decisionsOf(ctx, page, review)).toEqual([
+      {
+        label: "Related relation capped",
+        href: "../../decisions/related-relation-capped/index.html",
+      },
+      {
+        label: "Threshold applied in model",
+        href: "../../decisions/threshold-applied-in-model/index.html",
+        cue: 12,
+      },
+    ]);
+  });
 });
 
 describe("groupingReasonsOf", () => {
@@ -464,7 +530,7 @@ describe("meetingLabels", () => {
       representations: "Représentations",
       transcript: "Transcription",
       notes: "Notes",
-      slides: "Support de séance",
+      deck: "Support de séance",
       document: "Document",
       grouped: "Regroupés automatiquement",
       decision: "Décision retenue ici",

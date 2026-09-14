@@ -71,12 +71,12 @@ describe("MeetingPage", () => {
   it("offers one tab per representation, the transcript first, then the notes, then the deck, each an anchor to its panel, the panels labelled by their tabs, the grouping named at the end of the row", () => {
     const html = render();
     expect(html).toContain(
-      '<nav class="meeting-tabs" aria-label="Representations"><a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-notes" href="#representation-notes">Notes</a><a class="meeting-tab" id="tab-representation-slides" href="#representation-slides">Slides</a><span class="meeting-grouped">Grouped automatically</span></nav>',
+      '<nav class="meeting-tabs" aria-label="Representations"><a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-notes" href="#representation-notes">Notes</a><a class="meeting-tab" id="tab-representation-deck" href="#representation-deck">Deck</a><span class="meeting-grouped">Grouped automatically</span></nav>',
     );
     expectInOrder(html, [
       '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript">',
       '<section class="meeting-panel" id="representation-notes" aria-labelledby="tab-representation-notes">',
-      '<section class="meeting-panel" id="representation-slides" aria-labelledby="tab-representation-slides">',
+      '<section class="meeting-panel" id="representation-deck" aria-labelledby="tab-representation-deck">',
     ]);
     expect(count(html, 'class="meeting-panel"')).toBe(3);
   });
@@ -102,6 +102,7 @@ describe("MeetingPage", () => {
     const html = render((props) => {
       props.documents = [{ ...transcript, positions: [cue] }];
       props.meeting.pseudonymized = false;
+      props.meeting.decisions = [];
     });
     expect(html).toContain(
       '<li class="cue" id="L1"><a class="cue-time" href="#L1">00:04</a><p class="cue-text">Nobody named.</p></li>',
@@ -110,23 +111,25 @@ describe("MeetingPage", () => {
     expect(
       render((props) => {
         props.documents = [{ ...transcript, positions: [] }];
+        props.meeting.decisions = [];
       }),
     ).toContain(
       '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><p class="empty">No text was extracted from this document.</p>',
     );
   });
 
-  it("renders the notes as the entity page does, with their legend, and a deck through the document block with its rail and its viewer", () => {
+  it("renders the notes as the entity page does, with their legend, and the deck through the document block with its rail and its viewer, once for the original and its PDF", () => {
     const html = render();
     expect(html).toContain(
       '<section class="meeting-panel" id="representation-notes" aria-labelledby="tab-representation-notes"><article class="entity-body"><section id="notes"><div class="markdown">',
     );
     expect(html).toContain('<footer class="legend">');
     expect(html).toContain(
-      '<section class="meeting-panel" id="representation-slides" aria-labelledby="tab-representation-slides"><section class="document document-slide" aria-labelledby="document-1">',
+      '<section class="meeting-panel" id="representation-deck" aria-labelledby="tab-representation-deck"><section class="document document-slide" aria-labelledby="document-1">',
     );
     expect(html).toContain('<nav class="document-rail" aria-label="Slides">');
-    expect(html).toContain('data-island="document-viewer"');
+    expect(count(html, 'data-island="document-viewer"')).toBe(1);
+    expect(count(html, 'class="document-download"')).toBe(2);
   });
 
   it("labels a converted document that is not a deck as a document, and suffixes the rank of a second representation of a kind", () => {
@@ -140,14 +143,14 @@ describe("MeetingPage", () => {
       props.documents = [transcript, pdf, transcript, pdf];
     });
     expect(html).toContain(
-      '<a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-transcript-2" href="#representation-transcript-2">Transcript</a><a class="meeting-tab" id="tab-representation-pages" href="#representation-pages">Document</a><a class="meeting-tab" id="tab-representation-pages-2" href="#representation-pages-2">Document</a>',
+      '<a class="meeting-tab" id="tab-representation-transcript" href="#representation-transcript">Transcript</a><a class="meeting-tab" id="tab-representation-transcript-2" href="#representation-transcript-2">Transcript</a><a class="meeting-tab" id="tab-representation-document" href="#representation-document">Document</a><a class="meeting-tab" id="tab-representation-document-2" href="#representation-document-2">Document</a>',
     );
     expect(html).not.toContain("representation-notes");
     expect(html).toContain('<li class="cue" id="L1-3">');
     expect(html).toContain('<details id="L1-4" open>');
   });
 
-  it("renders no tabs for a meeting with neither note nor document", () => {
+  it("renders no tabs for a meeting with neither note nor document, the callout of its decisions after the header", () => {
     const html = render((props) => {
       props.sections = [];
       props.documents = [];
@@ -156,24 +159,51 @@ describe("MeetingPage", () => {
     expect(html).toContain('</header><div class="meeting-decisions">');
   });
 
-  it("links the decisions the meeting produced in a callout, separated by commas, and draws no callout without any", () => {
+  it("places the callout of a decision under the last cue of the transcript that names it, the decisions no cue names at the head of the transcript, separated by commas, and draws no callout without any", () => {
     expect(render()).toContain(
-      '<div class="meeting-decisions"><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/threshold-applied-in-model/">Threshold applied in model</a></aside></div>',
+      '<p class="cue-text"><b class="cue-speaker">Participant-2</b> — In the canonical model only, when the file is written. The pages display the counts of the model and never recount an occurrence.</p><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/threshold-applied-in-model/">Threshold applied in model</a></aside></li>',
     );
+    expect(render()).not.toContain("meeting-decisions");
     const two = render((props) => {
       props.meeting.decisions = [
-        { label: "Threshold applied in model", href: "../../decisions/threshold/" },
-        { label: "Related relation capped", href: "../../decisions/cap/" },
+        { label: "Threshold applied in model", href: "../../decisions/threshold/", cue: 4 },
+        { label: "Related relation capped", href: "../../decisions/cap/", cue: 4 },
+        { label: "Cue beyond the transcript", href: "../../decisions/beyond/", cue: 9 },
+        { label: "Written elsewhere", href: "../../decisions/elsewhere/" },
       ];
     });
     expect(two).toContain(
-      'Threshold applied in model</a>, <a class="meeting-decision-link" href="../../decisions/cap/">Related relation capped</a>',
+      'Threshold applied in model</a>, <a class="meeting-decision-link" href="../../decisions/cap/">Related relation capped</a></aside></li>',
     );
+    expect(two).toContain(
+      '<section class="meeting-panel" id="representation-transcript" aria-labelledby="tab-representation-transcript"><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/beyond/">Cue beyond the transcript</a>, <a class="meeting-decision-link" href="../../decisions/elsewhere/">Written elsewhere</a></aside><ol class="transcript">',
+    );
+    expect(count(two, 'class="meeting-decision"')).toBe(2);
     expect(
       render((props) => {
         props.meeting.decisions = [];
       }),
     ).not.toContain("meeting-decision");
+  });
+
+  it("draws the callout after the tabs for a meeting without a transcript, and in the first transcript alone when there are two", () => {
+    const deck = fixture.documents?.find((document) => document.unit === "slide") as DocumentView;
+    const noTranscript = render((props) => {
+      props.documents = [deck];
+    });
+    expect(noTranscript).toContain(
+      '</div></div><div class="meeting-decisions"><aside class="meeting-decision" role="note"><span class="meeting-decision-lead">Decision taken here</span> <a class="meeting-decision-link" href="../../decisions/threshold-applied-in-model/">Threshold applied in model</a></aside></div><footer class="entity-footer">',
+    );
+    const twoTranscripts = render((props) => {
+      props.documents = [transcript, transcript];
+    });
+    expect(count(twoTranscripts, 'class="meeting-decision"')).toBe(1);
+    expect(twoTranscripts).toContain(
+      '<li class="cue" id="L4"><a class="cue-time" href="#L4">13:02</a><p class="cue-text"><b class="cue-speaker">Participant-2</b>',
+    );
+    expect(twoTranscripts).toContain(
+      '<li class="cue" id="L4-2"><a class="cue-time" href="#L4-2">13:02</a><p class="cue-text"><b class="cue-speaker">Participant-2</b> — In the canonical model only, when the file is written. The pages display the counts of the model and never recount an occurrence.</p></li>',
+    );
   });
 
   it("lists the date, the duration, the space linking to the file tree and the grouped files in the properties block, the reason under them", () => {
