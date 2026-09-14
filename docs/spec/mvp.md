@@ -307,6 +307,19 @@ As an integrator, I want a domain to be recognised by the name of a folder of th
 
 Depends on: L0-07.
 
+#### L0-15 Emergent domains from the neighbourhood
+
+As the integrator of a corpus nobody filed, I want the tool to propose domains from the neighbourhood graph, every term with enough neighbours becoming a domain and what lies within a distance of it belonging to it, so that I do not classify by hand a corpus I am discovering.
+
+- `inference.domains: { min_neighbours: X, radius: Y }` activates the step; the key is absent by default and validated (integers of at least 1, `radius` at most 3). The pivots are the terms with a note of their own whose degree in the neighbourhood graph, the undirected union of the typed links and the co-occurrence neighbours, reaches `min_neighbours`; stopwords and the `rejected_terms` of the lock file never pivot.
+- Every note no frontmatter, folder or glob files that lies within `radius` edges of a pivot is attached to the closest one; at equal distance to the pivot of highest degree, then to the first in code-unit order of its identifier. The same corpus gives the same result whatever the order of the nodes and the edges; a determinism test verifies it.
+- By default the proposal assigns nothing: one `I-DOMAIN-SUGGESTED` finding per unclassified note a pivot reaches, registered like every check (catalogue, page, family, remediation naming the configuration key and the lock file), and a suggested domains section of the build log (`build.log.json` and the summary) listing each pivot that reaches a note with its degree and the notes. `inference.domains.assign: true` files the unclassified notes only, under the domain named after their pivot, with the origin `inferred`; a note with a declared domain is never touched.
+- Every entity records how its domain was decided under `domain_origin`: `frontmatter`, `folder`, `glob`, `unclassified`, `lock` or `inferred`.
+- An accepted proposal is promoted through the `domains` block of the lock file, note identifier to domain name, applied before the proposal runs and counted with the other decisions, or through an explicit declaration, which always wins over the lock.
+- Schema and generated reference, the configuration guide, the check page and the realistic corpus, which asks for the proposal, promotes one note through the lock and lists the expected suggestions among its findings.
+
+Depends on: L0-07, L1-10, L4-05.
+
 ### L1 — Word and occurrence index
 
 The heart of the product. This batch is what makes an unprepared corpus browsable. Exit criterion: on the golden corpus, every expected occurrence is recorded with its line and context, and no stray occurrence appears inside a code block.
