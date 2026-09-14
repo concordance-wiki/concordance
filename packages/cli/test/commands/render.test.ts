@@ -372,6 +372,29 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(mentions.mentions.length).toBeGreaterThan(1);
   });
 
+  it("passes site.url and site.publish_every_days to the pages: the base of the page served for a missing address, the notice on the age of the site", async () => {
+    const io = corpus(
+      [
+        "version: 1",
+        "project: { name: Wiki }",
+        "sources: [{ name: notes, path: ./notes }]",
+        "site: { url: 'https://example.org/handbook', publish_every_days: 7 }",
+        "",
+      ].join("\n"),
+    );
+    expect(await buildCommand([], io)).toBe(0);
+    const missing = io.fs.readText("/work/dist/404.html");
+    expect(missing).toContain('<base href="/handbook/404.html"/>');
+    expect(missing).toContain("<h1>This address matches no page of the last publication.</h1>");
+    const page = io.fs.readText("/work/dist/notes/b/index.html");
+    expect(page).toContain('<aside class="age-notice" aria-label="Notice" hidden>');
+    expect(page).toContain("Publications are declared every 7 days in the configuration.");
+    const plain = corpus();
+    expect(await buildCommand([], plain)).toBe(0);
+    expect(plain.fs.readText("/work/dist/404.html")).toContain('<base href="/404.html"/>');
+    expect(plain.fs.readText("/work/dist/notes/b/index.html")).not.toContain("age-notice");
+  });
+
   it("links the edit page of the forge from a git source URL on its declared ref when no edit_url is configured", async () => {
     const io = recordedIo({
       "/work/concordance.yaml":

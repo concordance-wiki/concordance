@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { documentPageCorporate } from "../../../src/gallery/fixtures.js";
+import { documentPageCorporate, documentPageNoPreview } from "../../../src/gallery/fixtures.js";
 import { renderSlot } from "../../../src/render.js";
 import type { DocumentPageView, DocumentView, EntityPageProps } from "../../../src/slots.js";
 import {
@@ -287,5 +287,75 @@ describe("The panel: the properties read from the file, the files that make the 
     expect(centralOf([transcript, deck])).toBe(deck);
     expect(centralOf([transcript])).toBeUndefined();
     expect(centralOf([])).toBeUndefined();
+  });
+});
+
+describe("A document whose conversion failed: the fact named in place of the rendering", () => {
+  const failed = documentPageNoPreview.document as DocumentPageView;
+  const bare = documentPageNoPreview.documents?.[0] as DocumentView;
+
+  it("names the fact, says the text was extracted, offers the original and unfolds the finding with the check after the cause", () => {
+    const html = renderSlot("EntityPage", documentPageNoPreview, defaultTheme);
+    expect(html).toContain(
+      '<div class="document-failure"><aside class="document-notice" role="note"><p class="document-notice-lead">The preview of this document could not be generated.</p><p class="document-notice-detail">The text was extracted all the same: it is indexed, cited on the other pages, and readable below.</p>',
+    );
+    expect(html).toContain(
+      '<div class="document-notice-exits"><a class="button-primary" href="2026/transcript-publication-framing.pptx" download="transcript-publication-framing.pptx">Download the original</a><details class="document-why"><summary class="button-secondary">Why this failure?</summary><p>conversion of 2026/transcript-publication-framing.pptx failed: timed out after 120 s <code>W-CONV-FAILED</code></p></details></div></aside>',
+    );
+    expect(html).not.toContain("document-stage");
+    expect(html).not.toContain("document-render");
+    expectBalanced(html);
+  });
+
+  it("lists the extracted text position by position under its heading, indexed and searchable", () => {
+    const html = renderSlot("EntityPage", documentPageNoPreview, defaultTheme);
+    expect(html).toContain(
+      '<section class="document-extracted" aria-labelledby="document-extracted"><header class="document-extracted-head"><h2 id="document-extracted" class="section-label">Extracted text — 24 pages</h2><span class="document-extracted-note">indexed and searchable</span></header><ol class="document-extracted-list"><li><span class="document-extracted-position">slide 1</span><p>Transcript publication framing</p></li>',
+    );
+    expect(count(html, '<li><span class="document-extracted-position">')).toBe(24);
+  });
+
+  it("says the text could not be extracted either when no position was read, and lists nothing", () => {
+    const html = renderSlot(
+      "EntityPage",
+      { ...documentPageNoPreview, documents: [{ ...bare, positions: [] }] },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      '<p class="document-notice-detail">Its text could not be extracted either: the original stays downloadable, and the note that describes it stands among its files.</p>',
+    );
+    expect(html).not.toContain("document-extracted");
+  });
+
+  it("writes the state of every representation in the panel, the one that failed marked, then where the failure is reported", () => {
+    const html = renderSlot("EntityPage", documentPageNoPreview, defaultTheme);
+    expect(html).toContain(
+      '<h2 id="document-representations">State of the representations</h2></summary><ul class="document-states"><li><code>.pptx</code><span>available</span></li><li class="document-state-failed"><code>.pdf preview</code><span>failed</span></li><li><code>text</code><span>extracted</span></li></ul><p class="panel-note">The same finding stands in the publication report and in the linter output: the failure is reported to whoever can fix it.</p>',
+    );
+    const withoutStates = { ...failed };
+    delete withoutStates.representations;
+    const silent = renderSlot(
+      "EntityPage",
+      { ...documentPageNoPreview, document: withoutStates },
+      defaultTheme,
+    );
+    expect(silent).not.toContain("document-states");
+    expect(silent).toContain('<div class="document-failure">');
+  });
+
+  it("words the notice with the theme's own labels when the page gives none", () => {
+    const labels = defaultDocumentPageLabels(2);
+    expect(labels.previewFailed).toBe("The preview of this document could not be generated.");
+    expect(labels.whyFailed).toBe("Why this failure?");
+    expect(labels.extractedTextOf).toBe("Extracted text");
+    expect(labels.representations).toBe("State of the representations");
+    const unworded = { ...failed };
+    delete unworded.labels;
+    const html = renderSlot(
+      "EntityPage",
+      { ...documentPageNoPreview, document: unworded },
+      defaultTheme,
+    );
+    expect(html).toContain('<h2 id="document-extracted" class="section-label">Extracted text</h2>');
   });
 });

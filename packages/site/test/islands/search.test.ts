@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest";
 import {
   citedDetail,
   closestOf,
+  emptyOf,
+  emptySummary,
+  resultsHref,
   disambiguated,
   factsOf,
   hitsOf,
@@ -40,6 +43,7 @@ import {
   type SearchPanel,
   type ShardHost,
 } from "../../src/islands/search.js";
+import { activeFiltersOf } from "../../src/search/facets.js";
 import type { SearchEntry, SearchMeta, ShardData } from "../../src/search/shared.js";
 import type { Suggestion } from "../../src/theme/default/search-suggestions.js";
 import { parseSearchState } from "../../src/search/state.js";
@@ -2104,6 +2108,72 @@ describe("Their row states the number of files, and that no note defines the exp
     expect(resultOf(bare, meta, "").detail).toBe(
       "Used in 0 documents, never defined in the glossary",
     );
+  });
+});
+
+describe("The empty state tells a filtered word apart from a word no file uses", () => {
+  it("offers to lift each filter with the count of what comes back, then the page of the word when the corpus has one", () => {
+    const state = parseSearchState("?q=Keyword+page&type=keyword&nonote=exclude");
+    const active = activeFiltersOf(meta, state, resultsHref);
+    const empty = emptyOf(state, meta.entities, meta, "../", active);
+    expect(empty).toEqual({
+      explanation:
+        "The word exists in the documentation, but on none of the pages the filter keeps.",
+      exits: [
+        { label: "Remove the filter “Keyword”", href: "?q=Keyword+page&nonote=exclude", count: 2 },
+        { label: "Remove the filter “Excluded”", href: "?q=Keyword+page&type=keyword", count: 1 },
+        {
+          label: "See the page of the word",
+          href: "../glossary/keyword-page/index.html",
+          count: 4,
+          secondary: true,
+        },
+      ],
+    });
+    expect(emptySummary(state, meta.entities, meta, active)).toBe(
+      "No result for “Keyword page” with the filters Keyword, Excluded.",
+    );
+    const one = parseSearchState("?q=word+page&type=keyword");
+    const oneFilter = activeFiltersOf(meta, one, resultsHref);
+    expect(emptySummary(one, meta.entities, meta, oneFilter)).toBe(
+      "No result for “word page” with the filter Keyword.",
+    );
+    expect(emptyOf(one, meta.entities, meta, "", oneFilter).exits.at(-1)).toEqual({
+      label: "See the page of the word",
+      href: "glossary/keyword-page/index.html",
+      count: 4,
+      secondary: true,
+    });
+  });
+
+  it("says no file uses the word, with the page of the word when the corpus has one and the note on the prefix search", () => {
+    const state = parseSearchState("?q=zebra&source=specs");
+    const active = activeFiltersOf(meta, state, resultsHref);
+    expect(emptyOf(state, [], meta, "", active)).toEqual({
+      explanation: "No file uses this word.",
+      exits: [],
+      note: "The search matches the start of words: a typo gives zero results and no suggestion.",
+    });
+    expect(emptySummary(state, [], meta, active)).toBe("No result for “zebra”");
+    expect(emptySummary(state, meta.entities, meta, [])).toBe("No result for “zebra”");
+    const keyword = parseSearchState("?q=BUILD+summary");
+    expect(emptyOf(keyword, [], meta, "", []).exits).toEqual([
+      {
+        label: "See the page of the word",
+        href: "keywords/build-summary/index.html",
+        count: 17,
+        secondary: true,
+      },
+    ]);
+    const uncounted = meta.entities.map((entry) => {
+      const bare = { ...entry };
+      delete bare.cited;
+      delete bare.occurrences;
+      return bare;
+    });
+    const bare = { ...meta, entities: uncounted };
+    expect(emptyOf(parseSearchState("?q=keyword+page"), [], bare, "", []).exits[0]?.count).toBe(0);
+    expect(emptyOf(parseSearchState("?q=build+summary"), [], bare, "", []).exits[0]?.count).toBe(0);
   });
 });
 

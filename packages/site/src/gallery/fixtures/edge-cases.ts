@@ -3,7 +3,7 @@
  * address, the results a filter emptied, the document whose conversion failed and the notice on
  * the age of the site, each derived from the corporate fixture of its page.
  */
-import type { DocumentView, SlotProps } from "../../slots.js";
+import type { DocumentPageView, DocumentView, SlotProps } from "../../slots.js";
 import type { AgeNoticeProps } from "../../theme/default/age-notice.js";
 import { documentPageCorporate } from "./document-page.js";
 import { searchResultsCorporate } from "./search-results.js";
@@ -105,6 +105,10 @@ export const searchResultsFiltered: SlotProps["SearchResults"] = {
   ],
 };
 
+// The corporate fixture is a document page: it carries its view and its deck.
+const corporateView = documentPageCorporate.document as DocumentPageView;
+const corporateDocuments = documentPageCorporate.documents as DocumentView[];
+
 /** The framing deck without the preview its conversion did not produce; the text of its slides read all the same. */
 function withoutPreview(document: DocumentView): DocumentView {
   const bare = { ...document };
@@ -125,11 +129,10 @@ function withoutPreview(document: DocumentView): DocumentView {
  */
 export const documentPageNoPreview: SlotProps["EntityPage"] = {
   ...documentPageCorporate,
-  documents: (documentPageCorporate.documents ?? []).map(withoutPreview),
+  documents: corporateDocuments.map(withoutPreview),
   document: {
-    ...documentPageCorporate.document,
-    kind: "Presentation",
-    files: (documentPageCorporate.document?.files ?? []).filter((file) => file.label !== ".pdf"),
+    ...corporateView,
+    files: corporateView.files.filter((file) => file.label !== ".pdf"),
     previewFailure: {
       cause: "conversion of 2026/transcript-publication-framing.pptx failed: timed out after 120 s",
       check: "W-CONV-FAILED",
@@ -140,7 +143,7 @@ export const documentPageNoPreview: SlotProps["EntityPage"] = {
       { label: "text", state: "extracted" },
     ],
     labels: {
-      ...documentPageCorporate.document?.labels,
+      ...corporateView.labels,
       sameDocument: "Same document, 2 files",
       previewFailed: "The preview of this document could not be generated.",
       textExtracted:
