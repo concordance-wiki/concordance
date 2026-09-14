@@ -5,6 +5,13 @@
 # a W-DUP-CANDIDATE names its pair under `entities`, notes sharing a base name across sources (0.5) or close base
 # names in one folder (0.76); the pair the lock file separates, the glossary term and the API sharing the base name
 # canonical-model, is neither merged nor reported.
+# An I-DOMAIN-SUGGESTED names, under `entities`, the unclassified note and the pivot it lies within two edges of:
+# the roles cite the explicit link, the plugin terms cite the source, the cue reaches the twin resources through the
+# transcript; the maintainer role, which the lock file files under quality, is neither unclassified nor suggested.
+- { check: I-DOMAIN-SUGGESTED, path: glossary/contribution-point.md, entities: [glossary/contribution-point, glossary/source], note: "within 1 of the source term, degree 41" }
+- { check: I-DOMAIN-SUGGESTED, path: glossary/cue.md, entities: [glossary/cue, glossary/twin-resources], note: "within 2: the transcript, its only neighbour, is under the threshold" }
+- { check: I-DOMAIN-SUGGESTED, path: glossary/plugin.md, entities: [glossary/plugin, glossary/source] }
+- { check: I-DOMAIN-SUGGESTED, path: specs/roles/author.md, entities: [specs/roles/author, glossary/explicit-link], note: "within 1 of the pivot of highest degree, 65" }
 - { check: I-REL-AMBIGUOUS, path: specs/screens/keyword-page.md, note: "keyword page (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: alphabetical index, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
 - { check: I-TERM-HOMONYM, form: candidate, entities: [glossary/candidate-expression, specs/objects/candidate] }
@@ -26,7 +33,6 @@
 - { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: plugin.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: glossary, path: white-label.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/author.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/maintainer.md }
 - { check: W-DUP-CANDIDATE, path: decisions/suggestions-in-service-deferred.md, entities: [decisions/suggestions-in-service-deferred, decisions/suggestions-in-service-planned], note: "close base names in one folder: the planned decision supersedes the deferred one" }
 - { check: W-DUP-CANDIDATE, path: glossary/alphabetical-index.md, entities: [glossary/alphabetical-index, specs/screens/alphabetical-index] }
 - { check: W-DUP-CANDIDATE, path: glossary/entity.md, entities: [glossary/entity, specs/objects/entity] }

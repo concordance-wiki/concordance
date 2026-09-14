@@ -1,122 +1,122 @@
-# Entities the engine must produce from this corpus, with their type, its origin, their application and their domain.
+# Entities the engine must produce from this corpus, with their type, its origin, their application, their domain and its origin.
 # Sorted by identifier. `application: null` marks the note that resolves to no application on purpose (W-APP-MISSING).
 # Regenerated only through a reviewed pull request.
-- { id: decisions/forge-bridge-exposed, type: decision, type_origin: source, application: concordance-cli, domain: quality }
-- { id: decisions/minhash-for-twin-resources, type: decision, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: decisions/pinned-trail-in-service, type: decision, type_origin: source, application: concordance-cli, domain: publication }
-- { id: decisions/related-relation-capped, type: decision, type_origin: source, application: concordance-cli, domain: inference }
-- { id: decisions/suggestions-in-service-deferred, type: decision, type_origin: source, application: concordance-cli, domain: inference }
-- { id: decisions/suggestions-in-service-planned, type: decision, type_origin: source, application: concordance-cli, domain: inference }
-- { id: decisions/threshold-applied-in-model, type: decision, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: framing/lint-report-study, type: document, type_origin: source, application: concordance-cli, domain: quality }
-- { id: framing/non-goals, type: document, type_origin: source, application: concordance-cli, domain: quality }
-- { id: framing/privacy-framing, type: document, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: framing/vision, type: document, type_origin: source, application: null, domain: publication }
-- { id: glossary/alias, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/alphabetical-index, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/build-log, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/candidate-expression, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/canonical-model, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/check, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/co-occurrence, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/comparison-form, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/confidence, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/contract-import, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/contribution-point, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossary/cue, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossary/determinism, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/dictionary, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/entity, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/explicit-link, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/finding, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/fingerprint-cache, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/forge-report, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/frontmatter-reference, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/homonym, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/identifier, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/island, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/keyword-page, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/language-pack, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/link, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/linter, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/lock-file, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/mention, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/neighbourhood, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/occurrence, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/plugin, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossary/profile, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/provenance, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/pseudonymisation, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/publication-threshold, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: glossary/reader, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/search-index, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/section-mention, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/source, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/staleness, type: term, type_origin: source, application: concordance-cli, domain: quality }
-- { id: glossary/theme, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/transcript, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/twin-resources, type: term, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: glossary/white-label, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: meetings/2026-02-05-transcript-publication-framing, type: meeting, type_origin: source, application: concordance-cli, domain: ingestion }
-- { id: meetings/2026-03-12-keyword-page-threshold-review, type: meeting, type_origin: source, application: concordance-cli, domain: inference/recognition }
-- { id: meetings/2026-04-02-service-scope-review, type: meeting, type_origin: source, application: concordance-cli, domain: publication }
-- { id: meetings/2026-04-23-neighbourhood-cap-review, type: meeting, type_origin: source, application: concordance-cli, domain: inference }
-- { id: meetings/2026-05-14-suggestion-arbitration, type: meeting, type_origin: source, application: concordance-cli, domain: inference }
-- { id: meetings/2026-06-04-lint-follow-up, type: meeting, type_origin: source, application: concordance-cli, domain: quality }
-- { id: specs/api/canonical-model, type: api, type_origin: "rule#2", application: concordance-cli, domain: publication }
-- { id: specs/api/forge-bridge, type: api, type_origin: "rule#2", application: concordance-service, domain: quality }
-- { id: specs/api/model-query, type: api, type_origin: "rule#2", application: concordance-service, domain: publication }
-- { id: specs/batches/cache-pruning, type: batch, type_origin: "rule#6", application: concordance-cli, domain: ingestion }
-- { id: specs/batches/nightly-build, type: batch, type_origin: "rule#6", application: concordance-cli, domain: quality }
-- { id: specs/batches/staleness-report, type: batch, type_origin: "rule#6", application: concordance-cli, domain: quality }
-- { id: specs/endpoints/fetch-findings, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: quality }
-- { id: specs/endpoints/get-entity, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication }
-- { id: specs/endpoints/list-entities, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication }
-- { id: specs/endpoints/notify-build, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: quality }
-- { id: specs/endpoints/read-model, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication }
-- { id: specs/endpoints/search-model, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication }
-- { id: specs/objects/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: quality }
-- { id: specs/objects/candidate, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition }
-- { id: specs/objects/entity, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication }
-- { id: specs/objects/finding, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: quality }
-- { id: specs/objects/keyword-page, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition }
-- { id: specs/objects/link, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
-- { id: specs/objects/neighbourhood, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
-- { id: specs/objects/occurrence, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition }
-- { id: specs/objects/representation, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion }
-- { id: specs/objects/resource, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion }
-- { id: specs/objects/source, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion }
-- { id: specs/objects/suggestion, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
-- { id: specs/processes/add-a-language-pack, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference/recognition }
-- { id: specs/processes/build-pipeline, type: process, type_origin: "rule#4", application: concordance-cli, domain: quality }
-- { id: specs/processes/lint-in-merge-request, type: process, type_origin: "rule#4", application: concordance-cli, domain: quality }
-- { id: specs/processes/onboard-a-repository, type: process, type_origin: "rule#4", application: concordance-cli, domain: ingestion }
-- { id: specs/processes/review-detected-personal-data, type: process, type_origin: "rule#4", application: concordance-cli, domain: ingestion }
-- { id: specs/roles/author, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified }
-- { id: specs/roles/maintainer, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified }
-- { id: specs/roles/quality-owner, type: role, type_origin: "rule#5", application: concordance-cli, domain: quality }
-- { id: specs/rules/cross-source-links-off, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/rules/fail-on-policy, type: rule, type_origin: suffix, application: concordance-cli, domain: quality }
-- { id: specs/rules/identifier-pattern, type: rule, type_origin: suffix, application: concordance-cli, domain: ingestion }
-- { id: specs/rules/keyword-page-identifier, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition }
-- { id: specs/rules/publication-threshold, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition }
-- { id: specs/rules/rejected-terms-never-proposed, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition }
-- { id: specs/rules/related-relation-cap, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/rules/section-heading-match, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/rules/stale-after-180-days, type: rule, type_origin: suffix, application: concordance-cli, domain: quality }
-- { id: specs/rules/twin-size-ratio, type: rule, type_origin: suffix, application: concordance-cli, domain: ingestion }
-- { id: specs/screens/alphabetical-index, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/screens/entity-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/screens/home-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/screens/keyword-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference/recognition }
-- { id: specs/screens/mentions-panel, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/screens/neighbourhood-map, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/screens/search-results, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/screens/service/document-viewer, type: screen, type_origin: "rule#10", application: concordance-service, domain: ingestion }
-- { id: specs/screens/service/pinned-trail, type: screen, type_origin: "rule#10", application: concordance-service, domain: publication }
-- { id: specs/screens/service/suggestion-review, type: screen, type_origin: "rule#10", application: concordance-service, domain: inference }
-- { id: specs/screens/to-do-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: quality }
-- { id: specs/tables/entities, type: data_object, type_origin: suffix, application: concordance-cli, domain: publication }
-- { id: specs/tables/findings, type: data_object, type_origin: suffix, application: concordance-cli, domain: quality }
-- { id: specs/tables/links, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/tables/neighbours, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference }
+- { id: decisions/forge-bridge-exposed, type: decision, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: decisions/minhash-for-twin-resources, type: decision, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: decisions/pinned-trail-in-service, type: decision, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: decisions/related-relation-capped, type: decision, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: decisions/suggestions-in-service-deferred, type: decision, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: decisions/suggestions-in-service-planned, type: decision, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: decisions/threshold-applied-in-model, type: decision, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: framing/lint-report-study, type: document, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: framing/non-goals, type: document, type_origin: source, application: concordance-cli, domain: quality, domain_origin: frontmatter }
+- { id: framing/privacy-framing, type: document, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: framing/vision, type: document, type_origin: source, application: null, domain: publication, domain_origin: frontmatter }
+- { id: glossary/alias, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/alphabetical-index, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/build-log, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/candidate-expression, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/canonical-model, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/check, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/co-occurrence, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/comparison-form, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/confidence, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/contract-import, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/contribution-point, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossary/cue, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossary/determinism, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/dictionary, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/entity, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/explicit-link, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/finding, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/fingerprint-cache, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/forge-report, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/frontmatter-reference, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/homonym, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/identifier, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/island, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/keyword-page, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/language-pack, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/link, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/linter, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/lock-file, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/mention, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/neighbourhood, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/occurrence, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/plugin, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossary/profile, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/provenance, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/pseudonymisation, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/publication-threshold, type: term, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: glossary/reader, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/search-index, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/section-mention, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/source, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/staleness, type: term, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: glossary/theme, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/transcript, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/twin-resources, type: term, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: glossary/white-label, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: meetings/2026-02-05-transcript-publication-framing, type: meeting, type_origin: source, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: meetings/2026-03-12-keyword-page-threshold-review, type: meeting, type_origin: source, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: meetings/2026-04-02-service-scope-review, type: meeting, type_origin: source, application: concordance-cli, domain: publication, domain_origin: frontmatter }
+- { id: meetings/2026-04-23-neighbourhood-cap-review, type: meeting, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: meetings/2026-05-14-suggestion-arbitration, type: meeting, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: meetings/2026-06-04-lint-follow-up, type: meeting, type_origin: source, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/api/canonical-model, type: api, type_origin: "rule#2", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/api/forge-bridge, type: api, type_origin: "rule#2", application: concordance-service, domain: quality, domain_origin: glob }
+- { id: specs/api/model-query, type: api, type_origin: "rule#2", application: concordance-service, domain: publication, domain_origin: glob }
+- { id: specs/batches/cache-pruning, type: batch, type_origin: "rule#6", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/batches/nightly-build, type: batch, type_origin: "rule#6", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/batches/staleness-report, type: batch, type_origin: "rule#6", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/endpoints/fetch-findings, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/endpoints/get-entity, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/endpoints/list-entities, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/endpoints/notify-build, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/endpoints/read-model, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/endpoints/search-model, type: endpoint, type_origin: "rule#7", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/objects/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/objects/candidate, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/objects/entity, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/objects/finding, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/objects/keyword-page, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/objects/link, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/objects/neighbourhood, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/objects/occurrence, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/objects/representation, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/objects/resource, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/objects/source, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/objects/suggestion, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/processes/add-a-language-pack, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/processes/build-pipeline, type: process, type_origin: "rule#4", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/processes/lint-in-merge-request, type: process, type_origin: "rule#4", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/processes/onboard-a-repository, type: process, type_origin: "rule#4", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/processes/review-detected-personal-data, type: process, type_origin: "rule#4", application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/roles/author, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: specs/roles/maintainer, type: role, type_origin: "rule#5", application: concordance-cli, domain: quality, domain_origin: lock }
+- { id: specs/roles/quality-owner, type: role, type_origin: "rule#5", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/rules/cross-source-links-off, type: rule, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/rules/fail-on-policy, type: rule, type_origin: suffix, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/rules/identifier-pattern, type: rule, type_origin: suffix, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/rules/keyword-page-identifier, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/rules/publication-threshold, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/rules/rejected-terms-never-proposed, type: rule, type_origin: suffix, application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/rules/related-relation-cap, type: rule, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/rules/section-heading-match, type: rule, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/rules/stale-after-180-days, type: rule, type_origin: suffix, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/rules/twin-size-ratio, type: rule, type_origin: suffix, application: concordance-cli, domain: ingestion, domain_origin: glob }
+- { id: specs/screens/alphabetical-index, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/screens/entity-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/screens/home-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/screens/keyword-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference/recognition, domain_origin: glob }
+- { id: specs/screens/mentions-panel, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/screens/neighbourhood-map, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/screens/search-results, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/screens/service/document-viewer, type: screen, type_origin: "rule#10", application: concordance-service, domain: ingestion, domain_origin: glob }
+- { id: specs/screens/service/pinned-trail, type: screen, type_origin: "rule#10", application: concordance-service, domain: publication, domain_origin: glob }
+- { id: specs/screens/service/suggestion-review, type: screen, type_origin: "rule#10", application: concordance-service, domain: inference, domain_origin: glob }
+- { id: specs/screens/to-do-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/tables/entities, type: data_object, type_origin: suffix, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/tables/findings, type: data_object, type_origin: suffix, application: concordance-cli, domain: quality, domain_origin: glob }
+- { id: specs/tables/links, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/tables/neighbours, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }

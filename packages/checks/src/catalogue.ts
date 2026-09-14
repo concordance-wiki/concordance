@@ -177,6 +177,13 @@ export const catalogue: readonly CheckDefinition[] = [
     "Declare the domain under domains in concordance.yaml, or name a declared domain by its id or its id path.",
   ),
   step(
+    "I-DOMAIN-SUGGESTED",
+    "info",
+    "vocabulary-and-filing",
+    "An unclassified note lies within the radius of a pivot of the neighbourhood: a candidate for a domain named after it.",
+    "Declare the domain under domains in concordance.yaml with a folder or a glob that claims the note, or record the note under domains in the lock file; inference.domains.assign files every reached note without a decision.",
+  ),
+  step(
     "W-APP-MISSING",
     "warning",
     "vocabulary-and-filing",

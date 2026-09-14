@@ -139,6 +139,7 @@ sources:
 inference:
   cross_source_links: true
   keyword_pages: { min_occurrences: 3, min_files: 2 }
+  domains: { min_neighbours: 10, radius: 2 }
 staleness:
   warn_after_days: { default: 60, glossary: 120 }
 lock: ./concordance.lock.yaml

@@ -36,6 +36,7 @@ const specified = [
   "W-TERM-UNUSED",
   "W-DOMAIN-UNCLASSIFIED",
   "W-DOMAIN-UNKNOWN",
+  "I-DOMAIN-SUGGESTED",
   "W-APP-MISSING",
   "W-APP-UNKNOWN",
   "W-STALE",

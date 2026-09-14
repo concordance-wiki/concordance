@@ -139,7 +139,12 @@ describe("loadLock", () => {
   });
 
   it("counts every entry of the blocks the build applies, the links left aside", () => {
-    expect(lockCountsOf({ version: 1 })).toEqual({ rejected_terms: 0, merged: 0, separated: 0 });
+    expect(lockCountsOf({ version: 1 })).toEqual({
+      rejected_terms: 0,
+      merged: 0,
+      separated: 0,
+      domains: 0,
+    });
     expect(
       lockCountsOf({
         version: 1,
@@ -152,8 +157,9 @@ describe("loadLock", () => {
           ],
         },
         rejected_terms: ["build summary", "merge request", "cold start"],
+        domains: { "specs/objects/check": "quality" },
       }),
-    ).toEqual({ rejected_terms: 3, merged: 1, separated: 2 });
+    ).toEqual({ rejected_terms: 3, merged: 1, separated: 2, domains: 1 });
   });
 });
 
@@ -247,9 +253,11 @@ describe("concordance build reads the lock file the configuration names", () => 
       ...corpus,
     });
     expect(await buildCommand([], io)).toBe(0);
-    expect(io.stdout).toContain("lock decisions applied: rejected_terms 1, merged 0, separated 1");
+    expect(io.stdout).toContain(
+      "lock decisions applied: rejected_terms 1, merged 0, separated 1, domains 0",
+    );
     const log = JSON.parse(io.fs.readText("/work/dist/build.log.json")) as BuildLog;
-    expect(log.summary.lock).toEqual({ rejected_terms: 1, merged: 0, separated: 1 });
+    expect(log.summary.lock).toEqual({ rejected_terms: 1, merged: 0, separated: 1, domains: 0 });
     expect(log.findings.map((finding) => finding.check)).toEqual(["I-TERM-HOMONYM"]);
     expect(io.fs.exists("/work/dist/keywords/build-summary/index.html")).toBe(false);
     expect(io.fs.readText("/work/dist/glossary/note/index.html")).not.toContain(

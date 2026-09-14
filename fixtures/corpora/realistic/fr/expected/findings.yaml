@@ -5,6 +5,12 @@
 # a W-DUP-CANDIDATE names its pair under `entities`, notes sharing a base name across sources (0.5) or close base
 # names in one folder (0.76); the pair the lock file separates, the glossary term and the API sharing the base name
 # canonical-model, is neither merged nor reported.
+# An I-DOMAIN-SUGGESTED names, under `entities`, the unclassified note and the pivot it lies within two edges of;
+# the maintainer role, which the lock file files under qualite, is neither unclassified nor suggested.
+- { check: I-DOMAIN-SUGGESTED, path: glossaire/cue.md, entities: [glossaire/cue, glossaire/ressources-jumelles], note: "within 2: the transcript, its only neighbour, is under the threshold" }
+- { check: I-DOMAIN-SUGGESTED, path: glossaire/plugin.md, entities: [glossaire/plugin, glossaire/source] }
+- { check: I-DOMAIN-SUGGESTED, path: glossaire/point-de-contribution.md, entities: [glossaire/point-de-contribution, glossaire/source], note: "within 1 of the source term, degree 41" }
+- { check: I-DOMAIN-SUGGESTED, path: specs/roles/auteur.md, entities: [specs/roles/auteur, glossaire/lien], note: "within 1 of the pivot of highest degree, 62" }
 - { check: I-REL-AMBIGUOUS, path: specs/ecrans/page-mot-cle.md, note: "page mot-clé (term) mentioned in prose falls back to related" }
 - { check: I-TERM-HOMONYM, form: candidat, entities: [glossaire/expression-candidate, specs/objets/candidat] }
 - { check: I-TERM-HOMONYM, form: constat, entities: [glossaire/constat, specs/objets/constat] }
@@ -26,7 +32,6 @@
 - { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: plugin.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: glossaire, path: point-de-contribution.md }
 - { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/auteur.md }
-- { check: W-DOMAIN-UNCLASSIFIED, source: specs, path: roles/mainteneur.md }
 - { check: W-DUP-CANDIDATE, path: decisions/suggestions-dans-le-service-planifiees.md, entities: [decisions/suggestions-dans-le-service-planifiees, decisions/suggestions-dans-le-service-reportees], note: "close base names in one folder: the planned decision supersedes the deferred one" }
 - { check: W-DUP-CANDIDATE, path: glossaire/constat.md, entities: [glossaire/constat, specs/objets/constat] }
 - { check: W-DUP-CANDIDATE, path: glossaire/entite.md, entities: [glossaire/entite, specs/objets/entite] }

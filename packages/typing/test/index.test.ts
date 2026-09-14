@@ -67,6 +67,7 @@ describe("typeSources", () => {
         locale: "en",
         application: "concordance-cli",
         domain: "inference",
+        domain_origin: "glob",
         status: "draft",
         type_origin: "suffix",
         graph: "full",

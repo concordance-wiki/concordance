@@ -153,6 +153,11 @@
           "domain": {
             "type": "string"
           },
+          "domain_origin": {
+            "type": "string",
+            "enum": ["frontmatter", "folder", "glob", "unclassified", "lock", "inferred"],
+            "description": "what decided the domain: the frontmatter, a folder or a glob of the configuration, nothing, the lock file, or the emergent-domain proposal asked to assign"
+          },
           "status": {
             "type": "string"
           },

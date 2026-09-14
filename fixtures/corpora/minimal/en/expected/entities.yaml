@@ -1,23 +1,23 @@
-# Entities the engine must produce from this corpus, with their type and its origin.
+# Entities the engine must produce from this corpus, with their type and its origin, their domain and its origin.
 # Sorted by identifier. Regenerated only through a reviewed pull request.
-- { id: decisions/cap-checked-upstream, type: decision, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossary/build, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossary/entity, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossary/explicit-link, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/link, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossary/section-mention, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: meetings/2026-03-12-links-workshop, type: meeting, type_origin: source, application: concordance-cli, domain: inference }
-- { id: specs/api/model-query, type: api, type_origin: "rule#2", application: concordance-cli, domain: inference }
-- { id: specs/batches/nightly-build, type: batch, type_origin: "rule#6", application: concordance-cli, domain: inference }
-- { id: specs/objects/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: unclassified }
-- { id: specs/objects/entity, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication }
-- { id: specs/objects/link, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
-- { id: specs/processes/confirm-a-link, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference }
-- { id: specs/quality/determinism/two-builds-compared, type: rule, type_origin: suffix, application: concordance-cli, domain: quality/determinism }
-- { id: specs/quality/fail-on-policy, type: rule, type_origin: suffix, application: concordance-cli, domain: quality }
-- { id: specs/roles/maintainer, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified }
-- { id: specs/rules/related-link-cap, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/screens/entity-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/screens/mentions-panel, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/screens/neighbourhood-map, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/tables/links, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference }
+- { id: decisions/cap-checked-upstream, type: decision, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossary/build, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossary/entity, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossary/explicit-link, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/link, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossary/section-mention, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: meetings/2026-03-12-links-workshop, type: meeting, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/api/model-query, type: api, type_origin: "rule#2", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/batches/nightly-build, type: batch, type_origin: "rule#6", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/objects/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: specs/objects/entity, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/objects/link, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/processes/confirm-a-link, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/quality/determinism/two-builds-compared, type: rule, type_origin: suffix, application: concordance-cli, domain: quality/determinism, domain_origin: folder }
+- { id: specs/quality/fail-on-policy, type: rule, type_origin: suffix, application: concordance-cli, domain: quality, domain_origin: folder }
+- { id: specs/roles/maintainer, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: specs/rules/related-link-cap, type: rule, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/screens/entity-page, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/screens/mentions-panel, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/screens/neighbourhood-map, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/tables/links, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }

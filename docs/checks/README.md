@@ -52,6 +52,7 @@ Every check listed here is registered once, with its default severity, descripti
 | [`W-TERM-UNUSED`](W-TERM-UNUSED.md) | info | A glossary term is never cited anywhere. |
 | [`W-DOMAIN-UNCLASSIFIED`](W-DOMAIN-UNCLASSIFIED.md) | info | A note matches no declared domain. |
 | [`W-DOMAIN-UNKNOWN`](W-DOMAIN-UNKNOWN.md) | warning | A frontmatter `domain` names no declared domain; it is kept as written. |
+| [`I-DOMAIN-SUGGESTED`](I-DOMAIN-SUGGESTED.md) | info | An unclassified note lies within the radius of a pivot of the neighbourhood: a candidate for a domain named after it. |
 | [`W-APP-MISSING`](W-APP-MISSING.md) | warning | An entity resolves to no application. |
 | [`W-APP-UNKNOWN`](W-APP-UNKNOWN.md) | warning | The resolved application is not declared in the configuration; it is kept as written. |
 | [`W-STALE`](W-STALE.md) | warning | A source or a note has not changed for longer than the configured threshold. |
