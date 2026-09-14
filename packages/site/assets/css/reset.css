@@ -16,6 +16,10 @@ html {
 
 body {
   margin: 0;
+  /* The page fills the viewport: the main landmark grows, the footer sits under it, never in the middle of a short page. */
+  min-block-size: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--color-bg);
   color: var(--color-ink);
 }

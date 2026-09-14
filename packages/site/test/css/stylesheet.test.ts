@@ -113,10 +113,10 @@ describe("siteStylesheet", () => {
   it("assembles the two layers into the very bytes of the sheets the files replaced", () => {
     const digest = (css: string): string => createHash("sha256").update(css).digest("hex");
     expect(digest(baseStylesheet())).toBe(
-      "70e53ba8090e7fad7547ca69305dfb3db6972add930540bdbc91a52d5f88017f",
+      "6ba07109011121cc57c8930d4fa6b1bbff6c1e78ba45fc19a6770cbbfbb04a34",
     );
     expect(digest(componentsStylesheet())).toBe(
-      "9c5c015e221859b6a6af5ee57929d95f5682cac27417f6da51df915e83174fde",
+      "58eb11487c84a547a9274e9c94190695aa3ccba556f163ba54588923667b894e",
     );
   });
 });
