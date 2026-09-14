@@ -9,6 +9,7 @@ export const spaceCorporateState: GalleryPage = {
   state: "corporate",
   description:
     "the page of the specifications space in the corporate chrome: the search field confined to the space, the breadcrumb from the spaces page, the badge, the title, the sentence of the configuration and the line counting the pages, naming the repository and dating the newest change; the categories of the repository with their counts, each opening its own list; the pages changed last and the most cited words counted in the space only, one of them without a note; no tree",
+  board: "B12",
   ...chrome,
   header: corporateSpaceHeader,
   footer: corporateFooter,

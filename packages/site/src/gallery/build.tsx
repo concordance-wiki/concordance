@@ -13,6 +13,7 @@ import { pageComponentFor } from "../theme/context.js";
 import type { ResolvedTheme, ThemeOverride } from "../theme/types.js";
 import { footer, galleryTheme, header } from "./fixtures.js";
 import { GalleryIndex } from "./index-page.js";
+import { withoutIslandScripts } from "./no-script.js";
 import { galleryPages, type GalleryPage } from "./pages.js";
 import { typePages, type GalleryTypes, type TypePage } from "./types.js";
 
@@ -65,7 +66,7 @@ function framed(page: GalleryPage, panel: JSX.Element, options: RenderOptions): 
 }
 
 /** A page slot renders as on the site; a panel has no title of its own, so the gallery frames it under one. */
-function body(page: GalleryPage, options: RenderOptions): string {
+function rendered(page: GalleryPage, options: RenderOptions): string {
   const { components } = options.theme;
   switch (page.rendered) {
     case "MentionsPanel":
@@ -75,6 +76,12 @@ function body(page: GalleryPage, options: RenderOptions): string {
     default:
       return renderPage(page.rendered, page.props, options);
   }
+}
+
+/** The document of a state; a state served without scripts loses those of its islands once rendered. */
+function body(page: GalleryPage, options: RenderOptions): string {
+  const html = rendered(page, options);
+  return page.scripts === false ? withoutIslandScripts(html) : html;
 }
 
 interface FixtureChrome {

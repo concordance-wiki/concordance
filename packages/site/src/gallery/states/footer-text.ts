@@ -9,6 +9,7 @@ export const footerTextState: GalleryPage = {
   state: "text",
   description:
     "the footer with a project text, no link and no mention of the tool, below the to-do page",
+  board: "chrome",
   ...chrome,
   footer: footerWithText,
   props: todo,

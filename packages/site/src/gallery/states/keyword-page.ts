@@ -8,6 +8,7 @@ export const keywordPageState: GalleryPage = {
   state: "default",
   description:
     "the notice, the passages by file, the counts, the similar forms and the neighbourhood of its co-occurrences, without a space",
+  board: "B5",
   ...chrome,
   props: keywordPage,
 };

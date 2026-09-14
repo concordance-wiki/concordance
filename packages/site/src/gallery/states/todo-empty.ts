@@ -6,6 +6,7 @@ export const todoEmptyState: GalleryPage = {
   rendered: "Todo",
   state: "empty",
   description: "nothing to do in either list",
+  board: "todo",
   ...chrome,
   props: { documents: [], terms: [] },
 };

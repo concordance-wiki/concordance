@@ -8,6 +8,7 @@ export const entityPageState: GalleryPage = {
   state: "default",
   description:
     "title and badge, two sections, the properties and the table of contents in the panel, one related page, the neighbourhood folded, a source",
+  board: "B2",
   ...chrome,
   props: entityPage,
 };

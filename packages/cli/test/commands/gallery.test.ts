@@ -109,13 +109,14 @@ describe("A concordance gallery command renders every slot with fixture view mod
 
   it("exits 1 and names every problem when a page fails the accessibility checks", async () => {
     const io = recordedIo();
-    // A footer rendering nothing: every page but the entity pages, the thirteen fixture ones and one per core type, which carry their own footer, loses the landmark.
+    // A footer rendering nothing: every page but the entity pages, the fixture ones and one per core type, which carry their own footer, loses the landmark.
     const deps = fakeDependencies(
       { "@example/theme": themePlugin("@example/theme", { Footer: "./footer.js" }) },
       () => null,
     );
     expect(await galleryCommand(["--theme", "@example/theme"], io, deps)).toBe(1);
-    const failing = pageCount - 13 - coreTypePages;
+    const entityPages = galleryPages.filter((page) => page.rendered === "EntityPage").length;
+    const failing = pageCount - entityPages - coreTypePages;
     expect(io.stderr).toHaveLength(failing + 1);
     expect(io.stderr[0]).toBe("category-corporate.html: landmarks: no footer landmark");
     expect(io.stderr.at(-1)).toBe(`gallery failed: ${String(failing)} problem(s)`);

@@ -8,6 +8,7 @@ export const shellRtlState: GalleryPage = {
   state: "rtl",
   description:
     "the home page in a right-to-left locale: lang and dir change, the stylesheet does not",
+  board: "chrome",
   ...chrome,
   locale: "ar",
   props: home,

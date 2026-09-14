@@ -8,6 +8,7 @@ export const homeState: GalleryPage = {
   state: "default",
   description:
     "the question and the search field, the shortcuts, four spaces with their trees folded, one dormant, the latest changes and the alert",
+  board: "B1",
   ...chrome,
   props: home,
 };
