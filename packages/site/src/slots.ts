@@ -539,6 +539,8 @@ export interface DocumentView {
   date?: string;
   /** The page or slide count the file states, when its reader read one. */
   pageCount?: number;
+  /** Whether the positions, and their unit, are those of the PDF preview, the reader of the original having given no text. */
+  positionsFromPreview?: boolean;
 }
 
 /** One file of the document as the panel of the document page lists it: the original, its preview, the note. */
@@ -582,6 +584,8 @@ export interface DocumentPageLabels {
   date: string;
   /** Note under the properties: read from the file, distinct from the repository date. */
   dateNote: string;
+  /** Note under the properties: the size or the page count is that of the PDF preview, the original stating none. */
+  previewNote: string;
   /** Heading of the block listing the files of the document, the count worded: "Same document, three files". */
   sameDocument: string;
   /** Note under the files: grouped by folder, date and textual overlap, one entry in the index. */
@@ -616,6 +620,8 @@ export interface DocumentPageView {
   };
   /** The author the file states; absent when it states none. */
   author?: string;
+  /** Whether the size or the page count was read from the PDF preview, the original stating none: the panel says so. */
+  fromPreview?: boolean;
   /** The files that make the document: the original, its preview when there is one, the note when there is one. */
   files: DocumentTwinFile[];
   labels?: Partial<DocumentPageLabels>;

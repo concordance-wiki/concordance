@@ -34,6 +34,7 @@ export function defaultDocumentPageLabels(files: number): DocumentPageLabels {
     pageCount: labels.pages,
     date: labels.date,
     dateNote: labels.dateNote,
+    previewNote: labels.previewNote,
     sameDocument: `${labels.sameDocument}, ${String(files)} ${files === 1 ? labels.file : labels.filesUnit}`,
     groupedNote: labels.groupedNote,
     noNote: labels.noNote,
@@ -324,6 +325,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
             />
           </dl>
           {view.date?.fromFile === true && <p class="panel-note">{text.dateNote}</p>}
+          {view.fromPreview === true && <p class="panel-note">{text.previewNote}</p>}
         </PanelBlock>
         <PanelBlock
           id="document-files"

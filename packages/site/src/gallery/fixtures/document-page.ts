@@ -332,6 +332,7 @@ export const documentPageCorporate: SlotProps["EntityPage"] = {
       pageCount: "Pages",
       date: "Date",
       dateNote: "Read from the file, distinct from the repository date.",
+      previewNote: "Size and page count of the PDF preview, the original stating none.",
       sameDocument: "Same document, 3 files",
       groupedNote: "Grouped by folder, date and textual overlap — a single entry in the index.",
       noNote: "No note describes this document yet.",

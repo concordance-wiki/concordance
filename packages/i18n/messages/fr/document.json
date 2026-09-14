@@ -16,6 +16,7 @@
   "document.pageCount": "Pages",
   "document.pages": "{count, plural, one {# page} other {# pages}}",
   "document.preview": "Aperçu",
+  "document.previewNote": "Taille et nombre de pages de l’aperçu PDF, l’original ne les indiquant pas.",
   "document.relatedNote": "Un document n’entre pas dans le modèle : ses pages apportent des passages, et la note qui le décrit figure parmi ses fichiers.",
   "document.relatedNotes": "Notes associées",
   "document.roleNotes": "notes de séance",
