@@ -94,7 +94,7 @@ The tool documents itself: the demonstration repositories of the organisation (`
 
 ## Releases
 
-Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`) that names the packages, the bump and one sentence for the changelog. Releases are cut by the maintainers following the [release guide](docs/guides/releasing.md).
+Versions and the changelog are managed by Changesets. Every pull request that changes a published package adds a changeset (`pnpm changeset`) that names the packages, the bump and one sentence for the changelog; the pipeline fails a pull request that changes a package without one, and the label `no-changeset` lifts the check for a change that publishes nothing new, with the reason in the pull request. The merged changesets feed a version pull request; merging it is the release, as the [release guide](docs/guides/releasing.md) describes.
 
 ## Licence
 
