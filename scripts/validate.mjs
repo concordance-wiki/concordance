@@ -5,6 +5,7 @@
 // published one.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { parse as parseYaml } from "yaml";
@@ -14,7 +15,7 @@ import { checkDistribution } from "./check-distribution.mjs";
 import { checkPackaging } from "./check-packaging.mjs";
 import { generateReference } from "./config-reference.mjs";
 
-const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
 const fail = (message) => failures.push(message);
 

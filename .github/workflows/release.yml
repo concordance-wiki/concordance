@@ -11,6 +11,14 @@ on:
   push:
     branches: [main]
     paths: [packages/cli/package.json]
+  # A release run by hand for a version whose tag exists: the assets are rebuilt from the branch
+  # the run is started on, which must carry that version (after a failed run, for instance).
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release again, without its v (its tag must exist)"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -34,13 +42,23 @@ jobs:
           fetch-depth: 2
       - name: Compare the version with the one before this push
         id: version
-        # Empty outputs, and a workflow that stops here, when the manifest changed without its version.
+        # Empty outputs, and a workflow that stops here, when the manifest changed without its
+        # version; a run started by hand names the version and the branch must carry it.
+        env:
+          REQUESTED: ${{ inputs.version }}
         run: |
           current=$(node -p 'require("./packages/cli/package.json").version')
-          previous=$(git show HEAD^:packages/cli/package.json | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')
-          if [ "$current" = "$previous" ]; then
-            echo "version $current unchanged, nothing to release"
-            exit 0
+          if [ -n "$REQUESTED" ]; then
+            if [ "$REQUESTED" != "$current" ]; then
+              echo "::error::the branch carries $current, not the requested $REQUESTED"
+              exit 1
+            fi
+          else
+            previous=$(git show HEAD^:packages/cli/package.json | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')
+            if [ "$current" = "$previous" ]; then
+              echo "version $current unchanged, nothing to release"
+              exit 0
+            fi
           fi
           echo "version=$current" >> "$GITHUB_OUTPUT"
           case "$current" in
@@ -59,10 +77,15 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Annotated tag on the merge commit
-        # Pushing an existing tag on another commit fails here, and nothing below runs.
+        # A run started by hand keeps the tag that exists; on a push, pushing an existing tag on
+        # another commit fails here, and nothing below runs.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+            echo "tag v$VERSION exists, kept as it is"
+            exit 0
+          fi
           git tag -a "v$VERSION" -m "v$VERSION"
           git push origin "refs/tags/v$VERSION"
 

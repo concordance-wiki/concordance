@@ -7,9 +7,10 @@
 // no glossary term. Nothing is built: the script reads sources and markdown.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 
-const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const demoRoot = resolve(root, process.env.DEMO_ROOT ?? "..");
 const gaps = [];
 const gap = (message) => gaps.push(message);

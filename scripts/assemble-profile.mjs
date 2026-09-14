@@ -9,9 +9,10 @@
 // that its own reader assembles the same profile.
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { isMap, isSeq, parse as parseYaml, parseDocument } from "yaml";
 
-const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const baseFile = join(root, "packages/profile/base.yaml");
 export const typesDirectory = join(root, "packages/profile/types");
 export const profileFile = join(root, "packages/profile/default.yaml");
@@ -142,7 +143,7 @@ export function assembleProfileText() {
   return `${HEADER}\n${body}`;
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const text = assembleProfileText();
   writeFileSync(profileFile, text);
   console.log(

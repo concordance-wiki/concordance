@@ -6,8 +6,9 @@
 // three places differ.
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = resolve(dirname(new URL(import.meta.url).pathname), "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const modules = join(root, "packages/profile/types");
 const source = join(root, "docs/templates");
 const copy = join(root, "packages/cli/templates");
