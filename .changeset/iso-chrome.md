@@ -1,6 +1,0 @@
----
-"@concordance-wiki/site": minor
-"@concordance-wiki/i18n": minor
----
-
-Chrome of the default theme after the reference design: the mode switch is a 40 px square drawing the glyph of the current scheme (◐, ☀, ☾), its name and the scheme written for assistive technology alone; the trail folds behind a square button of the bar and unfolds as a popover, the bar showing nothing for an empty trail (the `trail.empty` message is gone with the line that showed it); the layouts change at 700 px (`43.75rem`) and 1100 px (`68.75rem`); on the phone the bar carries the menu button as a 48 px bordered square, the name cut with an ellipsis and a magnifier button unfolding the search field, the folded sections of the panel go table of contents first with sentence-case headings, the related pages show three entries and the others behind their count, the neighbourhood line reads "Neighbourhood map" with the number of pages the map draws, and the legend leaves the foot; on the tablet the search button reads as a small field and the panel takes a narrow column without the table of contents; the table of contents is an island counting its entries and marking the section being read (`aria-current="location"`, the first entry until the observer moves it); the centre column is padded 30 by 40 px on the desktop.

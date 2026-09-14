@@ -1,0 +1,70 @@
+# @concordance-wiki/plugin-reader-vtt
+
+## 0.1.0
+
+### Minor Changes
+
+- 050d8a7: Extracted text indexed: `concordance build` gains a documents step that reads every file a reader or a converter of the plugins accepts, types it as an entity (identifier with its extension, metadata as attributes, the source rules and their `ext` matches applied), converts office documents to PDF in parallel (`conversion.parallelism`, `convert: false` per source) and takes their text from the pages of that PDF only, so that there is a single extraction path; the `convert-libreoffice` plugin produces a `text` representation (`<sha256>.text.json`, one entry per page) next to every PDF and a second converter keeps `.pdf` sources as their own representation; the `reader-vtt` plugin returns `units`, one per speaker turn with its timecode, a new optional field of `ReaderOutput`; the scan, the keyword discovery and the twin reconciliation read the pages of the documents, an occurrence in a document carrying the page, slide or cue number as its line and its label as its section, so that the mentions panel cites `slide 3` or `00:12:05` instead of a line; a document that still has no markdown representation once the twins are reconciled yields `W-DOC-NOMD`; the fragment of an entity lists its `documents` with the text of every page cut at `build.extracted_text_max_chars` and joined as its `text`, and the build keeps the original file and its PDF under `fragments/<id>/` for `render` to place next to the page; a failed conversion counts for `build.fail_on.unconverted_max`.
+- 2fe703f: Lay the page of a meeting out on the shell of the entity page: the tree of a space whose every note is dated drawn by year and month with the breadcrumb naming the month, the line reading the type, the duration (the `duration` attribute, else the last cue of the transcript) and whether the participants are pseudonymised, the representations as anchor tabs the stylesheet shows one at a time without any script, the transcript as timestamped lines naming the speaker of every cue, the callout of the decisions the model links to the meeting, and in the panel the date, the duration, the space and the grouped files with why the build grouped them, read from the duplicates block of the model. A reader unit and the pages of a fragment now carry the `speaker` of a transcript cue, the site receives `privacy.pseudonymize.enabled` as `pseudonymized`, the catalogues gain the `meeting.*` messages and `formatMonthName` names a month alone.
+- c995c47: Pseudonymisation is applied by the build: the dictionary of `privacy.pseudonymize` is read and validated (`W-PRIVACY-DICTIONARY` when it is missing or malformed, an error that fails the build and withholds every transcript when pseudonymisation is enabled), every transcript is pseudonymised before typing in its cues, its metadata and the file offered for download, which readers write back through a new optional `rewrite` (implemented for VTT and SRT; `W-PRIVACY-WITHHELD` for a reader without it), the notes and documents of the scope types are replaced the same way, the real names are rejected from keyword discovery, and transcripts are withheld altogether unless `privacy.publish_transcripts` is true.
+- c1a3598: Readable transcripts: the `reader-vtt` plugin parses VTT and SRT files into cues, speakers, duration and language, renders them as HTML grouped by consecutive speaker with every timecode as an addressable anchor, and returns the spoken text with the character range of every cue. A reader now receives the raw bytes of the file as `payload.bytes`.
+
+### Patch Changes
+
+- 38a63c6: Every published package is ready for a registry: its manifest names the repository folder it comes from, its home page and its issue tracker, the Node.js versions it supports and its public access, ships the licence next to its README and lists only its built code and the data it reads at run time; `pnpm lint` verifies that no tarball would carry tests, sources or fixtures.
+- 55a794d: The count of the filtered related pages and the copied-address notice of the search are `<output>` elements, status regions by nature, instead of spans with a `status` role; the VTT reader leaves the language undefined when the `Language:` header is blank, and keeps an angle bracket that opens no tag in the text of a cue.
+- Updated dependencies [203133d]
+- Updated dependencies [378a546]
+- Updated dependencies [d910b38]
+- Updated dependencies [79c8264]
+- Updated dependencies [ce3bc7c]
+- Updated dependencies [0591795]
+- Updated dependencies [24a33f7]
+- Updated dependencies [f900830]
+- Updated dependencies [2d7b65d]
+- Updated dependencies [af10923]
+- Updated dependencies [b5f0071]
+- Updated dependencies [116aca4]
+- Updated dependencies [050d8a7]
+- Updated dependencies [b17e66c]
+- Updated dependencies [69cf231]
+- Updated dependencies [ee71a72]
+- Updated dependencies [e20e743]
+- Updated dependencies [4154f49]
+- Updated dependencies [a1c0353]
+- Updated dependencies [b9e4031]
+- Updated dependencies [34c5a53]
+- Updated dependencies [4bd6bd7]
+- Updated dependencies [b092a63]
+- Updated dependencies [8ca9305]
+- Updated dependencies [3fb3d96]
+- Updated dependencies [cfc0835]
+- Updated dependencies [efb8c03]
+- Updated dependencies [07c9269]
+- Updated dependencies [2fe703f]
+- Updated dependencies [f34c511]
+- Updated dependencies [38a63c6]
+- Updated dependencies [de7f8a2]
+- Updated dependencies [64664a4]
+- Updated dependencies [d0c0bc5]
+- Updated dependencies [ef6d6fe]
+- Updated dependencies [66d7b33]
+- Updated dependencies [ce3f837]
+- Updated dependencies [676a36a]
+- Updated dependencies [c995c47]
+- Updated dependencies [a5ef5ff]
+- Updated dependencies [84a3d54]
+- Updated dependencies [2922261]
+- Updated dependencies [cc77d53]
+- Updated dependencies [c5048be]
+- Updated dependencies [a814a6e]
+- Updated dependencies [cc3beed]
+- Updated dependencies [a954edf]
+- Updated dependencies [0ef98c5]
+- Updated dependencies [14088cd]
+- Updated dependencies [c623d60]
+- Updated dependencies [1a5f84d]
+- Updated dependencies [c1a3598]
+- Updated dependencies [c54d224]
+- Updated dependencies [223a319]
+  - @concordance-wiki/core@0.1.0

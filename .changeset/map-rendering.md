@@ -1,5 +1,0 @@
----
-"@concordance-wiki/site": minor
----
-
-Readable neighbourhood map: `layoutNeighbourhood` places the centre in the middle and the neighbours on a ring in rank order, clockwise from the top, each label in plain text on the outer side of its node, with a collision pass that pushes overlapping label boxes apart and a viewBox that grows to hold them, every coordinate an integer; a title beyond 28 characters is cut with an ellipsis, the full title kept in a `<title>` and in the list. The default theme tells the type by shape and glyph rather than colour, a circle holding the shape the theme maps to the profile's glyph name (`GLYPH_SHAPES`, `shapeOfGlyph`, the initial when it has none) for an entity and a dashed square with a dashed edge for a noteless word; the `Neighbour` view model gains `kind` and `typeGlyph`, `NeighbourhoodProps` gains `total`, which the build fills with every one-hop neighbour of the model, and when it exceeds the number shown a pointer to the mentions panel replaces the map. The gallery gains the `full` and `overflow` states of the slot.

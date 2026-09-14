@@ -1,5 +1,0 @@
----
-"@concordance-wiki/site": minor
----
-
-Accessibility: `checkContrast` computes the WCAG contrast of every text and background pair a `theme.yaml` produces in both schemes and reports the pairs under 4.5:1 for body, muted and link text or 3:1 for headings and the focus ring, printed as warnings by `concordance gallery`; the light accent of the brand palette darkens to `#B84820` so that links reach the minimum on the page background; the base stylesheet gives every interactive element the same `:focus-visible` ring; the neighbourhood slot renders a star map in a `<figure>` described by the textual list of neighbours; the mentions island's disclosure button carries `aria-expanded` and `aria-controls` and hides or shows the list; the search forms are distinct landmarks; the static checker gains `aria-expanded-on-toggles`, `details-summary`, `tab-roles` and `focusable-has-visible-name`; and the site tests run axe-core over every gallery page in a DOM, failing on any serious or critical violation.

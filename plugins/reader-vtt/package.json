@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/plugin-reader-vtt",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Reader for VTT and SRT transcripts: cues, speakers, duration, language, HTML rendering with addressable timecodes.",
   "license": "GPL-3.0-or-later",
   "repository": {

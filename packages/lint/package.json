@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/lint",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The distributable linter and its packagings.",
   "license": "GPL-3.0-or-later",
   "repository": {
