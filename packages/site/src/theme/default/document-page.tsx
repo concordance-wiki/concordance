@@ -11,6 +11,7 @@ import type {
 } from "../../slots.js";
 import { useSlot } from "../context.js";
 import { DocumentText, positionAnchor, ViewerIsland, viewerPropsOf } from "./document-viewer.js";
+import { DomainRow } from "./attributes.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { GroupedFilesBlock } from "./grouped-files.js";
 import { SidePanel } from "./panel-handle.js";
@@ -412,6 +413,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
                 )
               }
             />
+            <DomainRow entity={entity} attribute={view.domain} />
           </dl>
           {view.date?.fromFile === true && <p class="panel-note">{text.dateNote}</p>}
           {view.fromPreview === true && <p class="panel-note">{text.previewNote}</p>}

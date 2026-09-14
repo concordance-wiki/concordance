@@ -205,6 +205,23 @@ describe("The panel: the properties read from the file, the files the build grou
     );
   });
 
+  it("draws the domain after the date when the build filed the document, and no row otherwise", () => {
+    const html = render({
+      document: {
+        ...view,
+        domain: {
+          name: "domain",
+          label: "Domain",
+          values: [{ text: "Quality", href: "../search/?domain=quality" }],
+        },
+      },
+    });
+    expect(html).toContain(
+      '<div class="attribute"><dt>Date</dt><dd><time datetime="2026-03-12">March 12, 2026</time></dd></div><div class="attribute"><dt>Domain</dt><dd><a class="value" href="../search/?domain=quality">Quality</a></dd></div></dl>',
+    );
+    expect(render()).not.toContain("<dt>Domain</dt>");
+  });
+
   it("keeps the slots of the properties the corpus has no datum for, empty, and drops the note for a date taken from the repository", () => {
     const html = withView({
       date: { date: "2026-03-14", label: "March 14, 2026", fromFile: false },

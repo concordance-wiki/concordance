@@ -968,7 +968,7 @@ export function entityPageOf(
   // The template follows the lead: a note keeps the template of its type and folds its twins
   // under the article; a document without a note, or a note describing one, gets the document page.
   const leads = leadsWithNote(entity) && entity.type !== DOCUMENT_TYPE;
-  const document = leads ? undefined : documentPageOf(context, entity, read);
+  const documentView = leads ? undefined : documentPageOf(context, entity, read);
   const documents = leads && entity.type !== MEETING_TYPE ? foldedDocuments(context, read) : read;
   const contract = contractOf(context, page, entity);
   const notice = contract === undefined ? contractNoticeOf(context, entity) : undefined;
@@ -978,8 +978,14 @@ export function entityPageOf(
   const neighbours = neighbourhoodOf(context, page, entity);
   const attributes = panelOf(context, page, entity);
   const grouping = groupingOf(context, entity);
-  const meeting =
-    entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
+  // The meeting and the document panels draw their own rows, the domain among them when filed.
+  const domain = attributes.find((attribute) => attribute.name === "domain");
+  const withDomain = <T extends object>(view: T | undefined): T | undefined =>
+    view === undefined || domain === undefined ? view : { ...view, domain };
+  const meeting = withDomain(
+    entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined,
+  );
+  const document = withDomain(documentView);
   const decision =
     entity.type === DECISION_TYPE
       ? decisionOf(context, page, entity, (session) =>

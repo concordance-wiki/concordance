@@ -11,6 +11,7 @@ import type {
   Section,
 } from "../../slots.js";
 import { useSlot } from "../context.js";
+import { DomainRow } from "./attributes.js";
 import { DocumentBlock, positionAnchor } from "./document-viewer.js";
 import { GroupedFilesBlock } from "./grouped-files.js";
 import {
@@ -335,6 +336,7 @@ export function MeetingPage({
                 </dd>
               </div>
             )}
+            <DomainRow entity={entity} attribute={meeting.domain} />
           </dl>
           {grouping !== undefined && <GroupedFilesBlock grouping={grouping} />}
           {meeting.groupingNote !== undefined && <p class="panel-note">{meeting.groupingNote}</p>}

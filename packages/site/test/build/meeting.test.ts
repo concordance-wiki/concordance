@@ -585,6 +585,22 @@ describe("entityPageOf on a meeting", () => {
     );
   });
 
+  it("hands the meeting panel the domain row of the entity page when the note is filed, noted when the build proposed it", () => {
+    expect(entityPageOf(context(), review).meeting?.domain).toBeUndefined();
+    const filed = entity({ ...review, domain: "quality", domain_origin: "inferred" });
+    expect(entityPageOf(context(), filed).meeting?.domain).toEqual({
+      name: "domain",
+      label: "Domain",
+      values: [
+        {
+          text: "quality",
+          href: "../../search/index.html?domain=quality",
+          note: "Proposed by the build from the notes this page is close to; nothing declares it.",
+        },
+      ],
+    });
+  });
+
   it("keeps the folder tree and the folder breadcrumb when a note of the space has no date", () => {
     const undated = entity({
       ...capReview,

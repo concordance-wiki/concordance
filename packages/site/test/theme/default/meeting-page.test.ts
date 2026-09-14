@@ -215,6 +215,22 @@ describe("MeetingPage", () => {
     expect(html).not.toContain("<dt>Files</dt>");
   });
 
+  it("draws the domain after the space when the build filed the meeting, in italics with the reason when the build proposed it", () => {
+    const html = render((props) => {
+      props.meeting.domain = {
+        name: "domain",
+        label: "Domain",
+        values: [
+          { text: "Publication", href: "../../search/?domain=publication", note: "Proposed." },
+        ],
+      };
+    });
+    expect(html).toContain(
+      '<div class="attribute"><dt>Space</dt><dd><a href="../../#home-tree">meetings</a></dd></div><div class="attribute"><dt>Domain</dt><dd><a class="value value-noted" href="../../search/?domain=publication" title="Proposed.">Publication</a></dd></div></dl>',
+    );
+    expect(render()).not.toContain("<dt>Domain</dt>");
+  });
+
   it("leaves out the rows the meeting does not give, and the grouping mention with them", () => {
     const html = render((props) => {
       props.space = { name: "meetings", initials: "ME", nodes: [] };
