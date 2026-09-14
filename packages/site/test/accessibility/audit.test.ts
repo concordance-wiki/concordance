@@ -52,8 +52,10 @@ describe("L9-08 audit on every gallery state", () => {
 
   it("runs the automated audit over every state and the index, in the suite that loads a DOM, and fails on any violation", () => {
     const suite = readFileSync(resolve(here, "../a11y/axe.test.ts"), "utf8");
-    // The environment directive is matched anywhere in a file: named here by its parts.
-    expect(suite.split("\n")[0]).toBe(["//", "@vitest-environment", "happy-dom"].join(" "));
+    // The environment directive is matched anywhere in a file: named here by its parts. The
+    // mutation sandbox prepends a type-check directive, so the first line that is not one counts.
+    const header = suite.split("\n").find((line) => !line.startsWith("// @ts-"));
+    expect(header).toBe(["//", "@vitest-environment", "happy-dom"].join(" "));
     expect(suite).toContain("galleryDocuments(defaultTheme, islands)");
     expect(suite).toContain("for (const { path, html } of documents) {");
     expect(suite).toContain("expect(results.violations.map(describeViolation)).toEqual([]);");
