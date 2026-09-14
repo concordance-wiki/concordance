@@ -21,6 +21,8 @@ export interface PluginSourcesInput {
   entities: readonly Entity[];
   /** Absolute root folder of every ingested source, by name. */
   roots: Readonly<Record<string, string>>;
+  /** When every ingested file last changed, by source name then path; a provider dates what it reads next to the notes by it. */
+  dates?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   cacheDirectory: string;
   profile: Profile;
   context: PluginContext;
@@ -66,6 +68,13 @@ export function methodConfidences(profile: Profile): Partial<Record<ProvenanceMe
   return confidences;
 }
 
+/** A copy of the dates a provider may keep: what it receives is its own. */
+function fileDates(
+  dates: Readonly<Record<string, Readonly<Record<string, string>>>>,
+): Record<string, Record<string, string>> {
+  return Object.fromEntries(Object.entries(dates).map(([source, files]) => [source, { ...files }]));
+}
+
 /**
  * Runs every source contribution after typing, so that a plugin reads the typed entities (an
  * `api` note and its `contract` attribute) and adds what it imports: endpoint entities,
@@ -88,6 +97,7 @@ export async function loadPluginSources(input: PluginSourcesInput): Promise<Plug
         roots: { ...input.roots },
         cacheDirectory: input.cacheDirectory,
         confidence: methodConfidences(input.profile),
+        ...(input.dates === undefined ? {} : { dates: fileDates(input.dates) }),
       },
       context: input.context,
     });

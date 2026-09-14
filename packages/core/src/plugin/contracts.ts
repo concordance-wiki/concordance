@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, posix, resolve } from "node:path";
 
 import { slugify } from "../identity/slug.js";
 import type { FileSystem } from "../io/file-system.js";
@@ -8,7 +8,7 @@ import { compareEntities, type Entity } from "../model/entity.js";
 import { compareFindings, type Finding } from "../model/finding.js";
 import type { Link } from "../model/link.js";
 import { compareLinks } from "../model/order.js";
-import type { SourceInput, SourceOutput } from "./api.js";
+import type { SourceInput, SourceOutput, SourcePayload } from "./api.js";
 
 export const CONTRACT_UNREACHABLE = "W-CONTRACT-UNREACHABLE";
 export const CONTRACT_RELATION = "exposes";
@@ -223,6 +223,15 @@ async function fetchContract(
   return { text: input.context.fs.readText(path) };
 }
 
+/**
+ * When a contract read as a file last changed, as the ingest dates the file; nothing for a URL
+ * contract, or when the payload carries no dates.
+ */
+function fileDate({ api, location }: DeclaredContract, payload: SourcePayload): string | undefined {
+  if (isUrl(location)) return undefined;
+  return payload.dates?.[api.source.name]?.[posix.join(posix.dirname(api.source.path), location)];
+}
+
 interface Identified {
   operation: ContractOperation;
   id: string;
@@ -334,6 +343,7 @@ async function loadOne<C extends ContractSummary>(
     output.links.push(exposes(declared, operation, id, confidence));
   }
   output.candidates.push(...candidatesOf(declared, operations));
+  const modified = fileDate(declared, input.payload);
   output.contracts.push({
     api: declared.api.id,
     location: declared.location,
@@ -342,6 +352,8 @@ async function loadOne<C extends ContractSummary>(
     format: reader.format(contract),
     fingerprint,
     imported_at: clock.now().toISOString(),
+    ...(modified === undefined ? {} : { last_modified: modified }),
+    operations: operations.map((operation) => operation.name),
   });
 }
 

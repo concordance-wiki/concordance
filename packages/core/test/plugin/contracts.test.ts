@@ -638,7 +638,7 @@ describe("loadContracts", () => {
     expect(output.entities).toEqual([]);
   });
 
-  it("records the contract title, version and format read with its import date and fingerprint", async () => {
+  it("records the contract title, version and format read with its import date, its fingerprint and its operations in contract order", async () => {
     const { input } = harness(localFile);
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.contracts).toEqual([
@@ -650,9 +650,44 @@ describe("loadContracts", () => {
         format: "lines 1",
         fingerprint,
         imported_at: "2026-09-12T10:00:00.000Z",
+        operations: ["createLink", "getLink"],
       },
     ]);
     expect(fingerprint).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("dates a contract read as a file by the date the ingest gives the file, resolved from the folder of the note, never by the clock", async () => {
+    const dates = {
+      specs: {
+        "api/model-query.lines": "2026-03-04T05:06:07.000Z",
+        "contracts/model-query.lines": "2026-02-01T00:00:00.000Z",
+      },
+    };
+    const { input } = harness({ ...localFile, "/repos/specs/contracts/model-query.lines": text });
+    const next = input([api()]);
+    next.payload.dates = dates;
+    const output = await loadContracts(next, linesReader);
+    expect(output.contracts.map((record) => record.last_modified)).toEqual([
+      "2026-03-04T05:06:07.000Z",
+    ]);
+    const climbing = input([api({ attributes: { contract: "../contracts/model-query.lines" } })]);
+    climbing.payload.dates = dates;
+    const climbed = await loadContracts(climbing, linesReader);
+    expect(climbed.contracts.map((record) => record.last_modified)).toEqual([
+      "2026-02-01T00:00:00.000Z",
+    ]);
+    for (const sparse of [{ specs: {} }, { glossary: dates.specs }]) {
+      const undated = input([api()]);
+      undated.payload.dates = sparse;
+      const unknown = await loadContracts(undated, linesReader);
+      expect(unknown.contracts[0]).not.toHaveProperty("last_modified");
+    }
+    const url = "https://example.invalid/model-query.lines";
+    const { input: fetching } = harness({}, answering({ [url]: text }).fetch);
+    const remote = fetching([api({ attributes: { contract: url } })]);
+    remote.payload.dates = dates;
+    const fetched = await loadContracts(remote, linesReader);
+    expect(fetched.contracts[0]).not.toHaveProperty("last_modified");
   });
 
   it("numbers the identifiers of two operations whose names slugify alike, in contract order", async () => {

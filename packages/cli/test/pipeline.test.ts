@@ -539,7 +539,7 @@ describe("Sources contributions of plugins run after typing and add their endpoi
       "# Search results\n\nCalls listEntities to fill the page.\n",
   };
 
-  it("hands the typed entities, the source roots, the cache and the profile confidences to every provider", async () => {
+  it("hands the typed entities, the source roots, the file dates, the cache and the profile confidences to every provider", async () => {
     const seen: SourceInput[] = [];
     const fetchDouble: typeof fetch = () => Promise.reject(new Error("offline"));
     const { input } = await corpus(apiCorpus, twoSources, {
@@ -554,6 +554,13 @@ describe("Sources contributions of plugins run after typing and add their endpoi
       "specs/screens/search-results",
     ]);
     expect(seen[0]?.payload.roots).toEqual({ glossary: "/work/glossary", specs: "/work/specs" });
+    expect(seen[0]?.payload.dates).toEqual({
+      glossary: { "entity.md": "1970-01-01T00:00:00.000Z" },
+      specs: {
+        "api/model-query.md": "1970-01-01T00:00:00.000Z",
+        "screens/search-results.md": "1970-01-01T00:00:00.000Z",
+      },
+    });
     expect(seen[0]?.payload.cacheDirectory).toBe("/work/.concordance-cache");
     expect(seen[0]?.payload.confidence).toEqual(methodConfidences(profile));
     expect(seen[0]?.context.fetch).toBe(fetchDouble);
@@ -620,8 +627,9 @@ describe("Sources contributions of plugins run after typing and add their endpoi
           findings: [],
         }),
     };
+    const seen: SourceInput[] = [];
     const loaded = await loadPluginSources({
-      providers: [contractProvider([]), second],
+      providers: [contractProvider(seen), second],
       entities: [
         {
           id: "specs/api/model-query",
@@ -652,6 +660,7 @@ describe("Sources contributions of plugins run after typing and add their endpoi
     ]);
     expect(loaded.entities).toHaveLength(1);
     expect(loaded.links).toHaveLength(1);
+    expect(seen[0]?.payload).not.toHaveProperty("dates");
   });
 
   it("gives a provider every scalar confidence of the profile and leaves the glossary scale out", () => {

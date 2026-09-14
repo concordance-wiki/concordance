@@ -145,6 +145,12 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     providers: input.plugins.sources(),
     entities: scoped.entities,
     roots: Object.fromEntries(sources.map((source) => [source.name, source.root])),
+    dates: Object.fromEntries(
+      sources.map((source) => [
+        source.name,
+        Object.fromEntries(source.files.map((file) => [file.path, file.modifiedAt])),
+      ]),
+    ),
     cacheDirectory: input.cacheDirectory,
     profile,
     context: { fs, clock, ...(input.fetch === undefined ? {} : { fetch: input.fetch }) },
