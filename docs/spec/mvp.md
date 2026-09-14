@@ -1227,6 +1227,18 @@ As a reader, I want the page of a deck or a report to open on the document itsel
 
 Depends on: L9-01, L4-05, L4-06, L4-07.
 
+#### L9-14 Component gallery as a workbench
+
+As the author of a theme, I want the gallery to show every board of the reference design at the width it is drawn at, with the cases that degrade it, so that I check a theme against the boards without building a corpus and see at once when a page changes shape.
+
+- One state per board, named after it and rendered in the corporate chrome on the fixtures corpus: the home, the entity page (desktop, phone, tablet and the drawer open), the search results, the keyword page, the meeting page, the API page, the neighbourhood map open, the A–Z index, the spaces, the page of a space, the category list, the screen page, the document page, the to-do page; every page entry names its board, the index groups the states by board in the order of the boards, each with its caption and a link to the screen note of the demonstration.
+- Widths: every entry declares the width of its board, 390 px for a phone, 834 px for a tablet, 1440 px for a desktop (the desktop when absent); the index frames every state at that width and offers three buttons, a classic island served hidden, that set every frame to one width once the script runs; without it each frame keeps its own.
+- Structural snapshots: `skeletonOf` reduces a page to its elements in document order with their classes, role, ARIA attributes and island name, text and hrefs left out, deterministically; one test per state pins that skeleton as a file snapshot under `packages/site/test/gallery/__snapshots__/<state>.skeleton.html`, reviewed at each intentional change, the assertion saying so.
+- Degraded cases as states: every island-bearing page served without the scripts of its islands, captioned "server HTML only"; a corpus fed by one repository; a note without a property; a keyword page whose transcript passages carry no timecode; an API page whose contract could not be fetched.
+- The accessibility audit and the contrast check of the command stay green on every state; the gallery bundles the width switch alone, the site never loads it.
+
+Depends on: L9-01 to L9-13.
+
 ## 5. Working conditions
 
 ### 5.1 Ready
