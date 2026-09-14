@@ -26,6 +26,7 @@ export default defineConfig({
       "packages/*/test/**/*.test.ts",
       "plugins/*/test/**/*.test.ts",
       "presets/*/test/**/*.test.ts",
+      "scripts/test/**/*.test.mjs",
     ],
     coverage: {
       provider: "v8",
