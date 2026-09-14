@@ -15,3 +15,5 @@ packages/profile/types/*/type.yaml
 *.md
 # A byte-for-byte copy of docs/templates, refreshed by scripts/sync-templates.mjs.
 packages/cli/templates/
+# The structural snapshots of the gallery states are written by the tests, one skeleton per state.
+packages/site/test/gallery/__snapshots__/
