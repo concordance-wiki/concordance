@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/ingest",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Git cloning, file reading, markdown and frontmatter parsing.",
   "license": "GPL-3.0-or-later",
   "repository": {
