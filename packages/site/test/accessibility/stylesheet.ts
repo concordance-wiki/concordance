@@ -74,9 +74,14 @@ export function declarationsOf(selector: string): Record<string, string> {
   return found[0]?.declarations ?? {};
 }
 
-/** A length in pixels: rem on the 16 px base of the theme, px as written; anything else is not a length the test reads. */
+/** The spacing tokens of the theme, `--space-1` to `--space-6`, as the tokens layer declares them. */
+const SPACING = ["0.25rem", "0.5rem", "1rem", "1.5rem", "2.5rem", "4rem"];
+
+/** A length in pixels: rem on the 16 px base of the theme, px as written, a spacing token resolved; anything else is not a length the test reads. */
 export function pixels(value: string | undefined): number | undefined {
-  const match = /^([\d.]+)(rem|px)$/.exec(value ?? "");
+  const token = /^var\(--space-([1-6])\)$/.exec(value ?? "");
+  const written = token === null ? value : SPACING[Number(token[1]) - 1];
+  const match = /^([\d.]+)(rem|px)$/.exec(written ?? "");
   if (match === null) return undefined;
   return match[2] === "rem" ? Number(match[1]) * 16 : Number(match[1]);
 }

@@ -81,6 +81,9 @@ tbody .spaces-name {
 }
 
 .spaces-name a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
   color: var(--color-ink);
   text-decoration: none;
 }

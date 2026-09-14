@@ -20,6 +20,9 @@ main {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.5rem;
   padding: var(--space-2) var(--space-3);
   background: var(--color-surface);
   color: var(--color-ink);
