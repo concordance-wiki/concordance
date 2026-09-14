@@ -4,8 +4,9 @@ name: release
 # whatever the merge strategy: this workflow tags that commit v<x.y.z>, builds the standalone
 # binaries and the package tarballs, writes their checksums and the licence inventory, and
 # publishes the GitHub release with the changelog entries of the version. Nothing is pushed
-# to a package registry or an image registry; the image workflow builds the container image
-# on the tag with its publication disabled.
+# to a package registry or an image registry: the publish job below, which would put the
+# tarballs of the release on npm, ships disabled like the publication of the image workflow,
+# which builds the container image on the tag.
 on:
   push:
     branches: [main]
@@ -142,3 +143,197 @@ jobs:
         # A tag pushed with the workflow token triggers no workflow: the image workflow is
         # dispatched on it explicitly, with its publication job disabled as it is on main.
         run: gh workflow run image.yml --ref "v$VERSION"
+
+  publish:
+    # Enabled by the maintainer at the first publication to npm: replace `false` with
+    # `needs.version.outputs.version != ''` once the npm organisation exists and either
+    # trusted publishing (OIDC) is configured for every package or the NPM_TOKEN secret is
+    # set. This workflow runs on main and never on the tag, so a condition on
+    # `startsWith(github.ref, 'refs/tags/v')` would keep it disabled.
+    if: false
+    needs: [version, release]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      CORPUS: fixtures/corpora/faulty/en
+      LINT_OPTIONS: --scope repo --fail-on warning --config ../concordance.yaml --source notes --format json
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: refs/tags/v${{ needs.version.outputs.version }}
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+      - name: npm with trusted publishing
+        run: npm install --global npm@11.19.1
+      - name: Registry credentials when a token is given, trusted publishing otherwise
+        # A token in the configuration takes precedence over the OIDC exchange, so none is written without the secret.
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          fi
+      - name: The tag names the commit whose manifest carries the version
+        run: |
+          test "$(git describe --tags --exact-match)" = "v$VERSION"
+          test "$(node -p 'require("./packages/cli/package.json").version')" = "$VERSION"
+      - name: The tarballs, the checksums and the Linux binary attached to the release
+        run: |
+          mkdir -p "$ASSETS"
+          gh release download "v$VERSION" --dir "$ASSETS" \
+            --pattern '*.tgz' --pattern checksums.txt --pattern concordance-linux-x64
+      - name: The tarballs are the bytes the release carries
+        working-directory: ${{ env.ASSETS }}
+        run: |
+          sha256sum --check --strict --ignore-missing checksums.txt
+          test -f "concordance-wiki-cli-$VERSION.tgz"
+      - name: Publish every tarball in dependency order
+        # A plain version is `latest`; a prerelease is `rc` for an -rc suffix and `next` otherwise.
+        run: |
+          case "$VERSION" in
+            *-rc.*|*-rc) tag=rc ;;
+            *-*) tag=next ;;
+            *) tag=latest ;;
+          esac
+          pnpm --recursive --workspace-concurrency=1 \
+            --filter './packages/**' --filter './plugins/**' --filter './presets/**' \
+            exec node -p 'require("./package.json").name' > "$RUNNER_TEMP/order"
+          while read -r name; do
+            file="$ASSETS/$(echo "${name#@}" | tr / -)-$VERSION.tgz"
+            test -f "$file"
+            npm publish "$file" --provenance --access public --tag "$tag"
+          done < "$RUNNER_TEMP/order"
+      - name: The published command line gives the report of the binary
+        # The same lint as the lint-distribution workflow, through npx from an empty folder once the
+        # registry serves the version, and through the binary of the release; the reports must match.
+        run: |
+          mkdir "$RUNNER_TEMP/smoke"
+          cp -r "$CORPUS" "$RUNNER_TEMP/smoke/repo"
+          chmod +x "$ASSETS/concordance-linux-x64"
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if npm view "@concordance-wiki/cli@$VERSION" version > /dev/null 2>&1; then break; fi
+            test "$attempt" -lt 10
+            sleep 30
+          done
+          cd "$RUNNER_TEMP/smoke/repo/notes"
+          status=0
+          npx --yes "@concordance-wiki/cli@$VERSION" lint $LINT_OPTIONS --output "$RUNNER_TEMP/smoke/npx.json" || status=$?
+          test "$status" -eq 1
+          status=0
+          "$GITHUB_WORKSPACE/$ASSETS/concordance-linux-x64" lint $LINT_OPTIONS --output "$RUNNER_TEMP/smoke/binary.json" || status=$?
+          test "$status" -eq 1
+          node "$GITHUB_WORKSPACE/scripts/compare-distribution.mjs" "$RUNNER_TEMP/smoke/npx.json" "$RUNNER_TEMP/smoke/binary.json"
+
+  notes:
+    # The release notes name what the version is made of on the registries: the npm page of
+    # every package and, when the image workflow has published it already, the digest of the image.
+    needs: [version, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+      IMAGE: concordancewiki/concordance
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: refs/tags/v${{ needs.version.outputs.version }}
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+      - name: Package pages and image digest appended to the release notes
+        run: |
+          gh release view "v$VERSION" --json body --jq .body > "$RUNNER_TEMP/notes.md"
+          {
+            echo
+            echo "### Packages on npm"
+            echo
+            pnpm --recursive --workspace-concurrency=1 \
+              --filter './packages/**' --filter './plugins/**' --filter './presets/**' \
+              exec node -p 'require("./package.json").name' | LC_ALL=C sort \
+              | while read -r name; do
+                echo "- [\`$name@$VERSION\`](https://www.npmjs.com/package/$name/v/$VERSION)"
+              done
+            echo
+            echo "### Container image"
+            echo
+            if digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{.Manifest.Digest}}' 2> /dev/null); then
+              echo "\`$IMAGE:$VERSION\` is \`$digest\`."
+            else
+              echo "\`$IMAGE:$VERSION\` was not on the registry when these notes were written; the digest is not recorded."
+            fi
+          } >> "$RUNNER_TEMP/notes.md"
+          gh release edit "v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+
+  mirrors:
+    # The action repository on GitHub and the component project on GitLab take the version once
+    # its package is on npm, each only when its token is a secret of this repository; neither is
+    # ever created here. The secrets context is not available in an `if`, so the tokens go
+    # through the environment of the job and the steps test it.
+    needs: [version, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      LINT_ACTION_TOKEN: ${{ secrets.LINT_ACTION_TOKEN }}
+      GITLAB_LINT_TOKEN: ${{ secrets.GITLAB_LINT_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: refs/tags/v${{ needs.version.outputs.version }}
+      - name: Without a token, nothing is mirrored
+        if: env.LINT_ACTION_TOKEN == '' || env.GITLAB_LINT_TOKEN == ''
+        run: |
+          if [ -z "$LINT_ACTION_TOKEN" ]; then
+            echo "::notice::LINT_ACTION_TOKEN is not set: the action repository is not updated to v$VERSION"
+          fi
+          if [ -z "$GITLAB_LINT_TOKEN" ]; then
+            echo "::notice::GITLAB_LINT_TOKEN is not set: the GitLab component is not released as $VERSION"
+          fi
+      - name: The action repository at the version, with its major tag
+        if: env.LINT_ACTION_TOKEN != ''
+        # The major tag moves to the version, as the tags of an action do; a prerelease leaves it alone.
+        run: |
+          git clone --quiet "https://x-access-token:${LINT_ACTION_TOKEN}@github.com/concordance-wiki/lint-action.git" "$RUNNER_TEMP/lint-action"
+          cp distribution/github-action/action.yml distribution/github-action/README.md "$RUNNER_TEMP/lint-action/"
+          cd "$RUNNER_TEMP/lint-action"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add action.yml README.md
+          git diff --cached --quiet || git commit --quiet -m "chore: v$VERSION"
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push --quiet origin HEAD "refs/tags/v$VERSION"
+          case "$VERSION" in
+            *-*) ;;
+            *)
+              major="v${VERSION%%.*}"
+              git tag --force "$major" "v$VERSION"
+              git push --quiet --force origin "refs/tags/$major"
+              ;;
+          esac
+      - name: The component project at the version, released to the catalog
+        if: env.GITLAB_LINT_TOKEN != ''
+        run: |
+          git clone --quiet "https://oauth2:${GITLAB_LINT_TOKEN}@gitlab.com/concordance-wiki/lint.git" "$RUNNER_TEMP/lint"
+          mkdir -p "$RUNNER_TEMP/lint/templates"
+          cp distribution/gitlab-component/templates/lint.yml "$RUNNER_TEMP/lint/templates/lint.yml"
+          cp distribution/gitlab-component/README.md "$RUNNER_TEMP/lint/README.md"
+          cd "$RUNNER_TEMP/lint"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/lint.yml README.md
+          git diff --cached --quiet || git commit --quiet -m "chore: $VERSION"
+          git tag -a "$VERSION" -m "$VERSION"
+          git push --quiet origin HEAD "refs/tags/$VERSION"
+          curl --fail --silent --show-error --request POST \
+            --header "PRIVATE-TOKEN: $GITLAB_LINT_TOKEN" \
+            --data-urlencode "name=$VERSION" --data-urlencode "tag_name=$VERSION" \
+            "https://gitlab.com/api/v4/projects/concordance-wiki%2Flint/releases" > /dev/null
