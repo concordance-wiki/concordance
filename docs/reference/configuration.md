@@ -236,8 +236,9 @@ Domains proposed from the neighbourhood graph: every term with a note whose degr
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `min_neighbours` (required) | integer | — | at least 1 | Degree in the graph of links and co-occurrences from which a term becomes a pivot; stopwords and the rejected terms of the lock file never do. |
+| `max_neighbours` | integer | — | at least 1 | Degree above which a term is a hub of the corpus rather than a domain, the word every note uses, and never a pivot; unbounded when absent. |
 | `radius` (required) | integer | — | 1 to 3 | Distance, in edges, within which a note belongs to a pivot; a note reached by several is attached to the closest, then to the one of highest degree. |
-| `assign` | boolean | `false` | — | Whether the proposal files the unclassified notes it reaches under the domain named after their pivot, with the origin inferred; a note with a declared domain is never touched. |
+| `assign` | boolean | `false` | — | Whether the proposal files the unclassified notes it reaches under the domain their pivot proposes (the pivot's own domain, else one named after the pivot), with the origin inferred; a note with a declared domain is never touched. |
 
 ## `conversion`
 

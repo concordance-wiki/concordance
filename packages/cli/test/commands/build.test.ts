@@ -1715,8 +1715,18 @@ describe("formatSummary", () => {
         findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
         lock: { rejected_terms: 0, merged: 0, separated: 0, domains: 0 },
         domains: [
-          { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
-          { pivot: "glossary/source", degree: 9, notes: ["glossary/plugin", "glossary/reader"] },
+          {
+            pivot: "glossary/check",
+            degree: 14,
+            domain: "quality",
+            notes: ["specs/roles/maintainer"],
+          },
+          {
+            pivot: "glossary/source",
+            degree: 9,
+            domain: "ingestion",
+            notes: ["glossary/plugin", "glossary/reader"],
+          },
         ],
       }),
     ).toEqual([

@@ -53,6 +53,17 @@ export function domainNamedAfter(pivot: string): string {
   return pivot.slice(pivot.lastIndexOf("/") + 1);
 }
 
+/**
+ * The domain a pivot proposes: its own when something files it (a folder, a glob, its
+ * frontmatter, the lock), so that an unclassified note joins the domain of the terms it is
+ * close to; a domain named after the pivot when the pivot itself is unclassified.
+ */
+export function domainOfPivot(pivot: Entity): { domain: string; own: boolean } {
+  return pivot.domain_origin === "unclassified" || pivot.domain === undefined
+    ? { domain: domainNamedAfter(pivot.id), own: false }
+    : { domain: pivot.domain, own: true };
+}
+
 function filed(entity: Entity, domain: string, origin: DomainOrigin): Entity {
   return { ...entity, domain, domain_origin: origin };
 }
@@ -116,9 +127,16 @@ function edgesOf(links: readonly Link[], neighbourhood: Neighbourhood): DomainEd
   return edges;
 }
 
-function suggestion(entity: Entity, attachment: Attachment, pivot: Pivot): Finding {
+function suggestion(
+  entity: Entity,
+  attachment: Attachment,
+  pivot: Pivot,
+  proposed: { domain: string; own: boolean },
+): Finding {
   const degree = `degree ${String(pivot.degree)}`;
-  const domain = domainNamedAfter(pivot.id);
+  const domain = proposed.own
+    ? `a candidate for its domain "${proposed.domain}"`
+    : `a candidate for a domain named "${proposed.domain}" after it`;
   return {
     check: DOMAIN_SUGGESTED_CHECK,
     severity: "info",
@@ -127,8 +145,8 @@ function suggestion(entity: Entity, attachment: Attachment, pivot: Pivot): Findi
     entity: entity.id,
     message:
       attachment.distance === 0
-        ? `${entity.id} is a pivot of ${degree}: a candidate for a domain named "${domain}" after it`
-        : `${entity.id} lies within ${String(attachment.distance)} of ${pivot.id} (${degree}): a candidate for a domain named "${domain}" after it`,
+        ? `${entity.id} is a pivot of ${degree}: ${domain}`
+        : `${entity.id} lies within ${String(attachment.distance)} of ${pivot.id} (${degree}): ${domain}`,
     remediation: `Declare the domain under domains in concordance.yaml with a folder or a glob that claims the note, or record the note under domains in the lock file; inference.domains.assign files every reached note without a decision.`,
   };
 }
@@ -137,20 +155,31 @@ function suggestion(entity: Entity, attachment: Attachment, pivot: Pivot): Findi
 function sectionOf(
   pivots: readonly Pivot[],
   attachments: readonly Attachment[],
+  byId: ReadonlyMap<string, Entity>,
 ): SuggestedDomain[] {
   return pivots.flatMap((pivot) => {
     const notes = attachments
       .filter((attachment) => attachment.pivot === pivot.id)
       .map((attachment) => attachment.id);
-    return notes.length === 0 ? [] : [{ pivot: pivot.id, degree: pivot.degree, notes }];
+    return notes.length === 0
+      ? []
+      : [
+          {
+            pivot: pivot.id,
+            degree: pivot.degree,
+            domain: domainOfPivot(byId.get(pivot.id) as Entity).domain,
+            notes,
+          },
+        ];
   });
 }
 
 /**
  * Files the notes the lock file promotes, then proposes domains from the neighbourhood graph
  * when `inference.domains` asks for it: every term whose degree reaches the threshold is a
- * pivot, every unclassified note within the radius is reported as a candidate for a domain
- * named after its closest pivot, and, with `assign`, filed there with the origin `inferred`.
+ * pivot, every unclassified note within the radius is reported as a candidate for the domain
+ * of its closest pivot (the pivot's own when something files it, else one named after it), and,
+ * with `assign`, filed there with the origin `inferred`.
  */
 export function proposeDomains(input: ProposeDomainsInput): ProposedDomains {
   const { entities: locked, filed: filedIds } = applyLock(input.entities, input.lock);
@@ -164,6 +193,7 @@ export function proposeDomains(input: ProposeDomainsInput): ProposedDomains {
     options,
   );
   const pivots = new Map(proposal.pivots.map((pivot) => [pivot.id, pivot]));
+  const byId = new Map(locked.map((entity) => [entity.id, entity]));
   const attachments = new Map(
     proposal.attachments.map((attachment) => [attachment.id, attachment]),
   );
@@ -173,15 +203,17 @@ export function proposeDomains(input: ProposeDomainsInput): ProposedDomains {
     if (attachment === undefined) return entity;
     // Every attachment names a pivot the proposal selected.
     const pivot = pivots.get(attachment.pivot) as Pivot;
-    findings.push(suggestion(entity, attachment, pivot));
+    // A pivot is an entity of the model: it is in the map.
+    const proposed = domainOfPivot(byId.get(pivot.id) as Entity);
+    findings.push(suggestion(entity, attachment, pivot, proposed));
     if (!options.assign) return entity;
     filedIds.add(entity.id);
-    return filed(entity, domainNamedAfter(pivot.id), "inferred");
+    return filed(entity, proposed.domain, "inferred");
   });
   return {
     entities,
     findings: findings.sort(compareFindings),
-    suggested: sectionOf(proposal.pivots, proposal.attachments),
+    suggested: sectionOf(proposal.pivots, proposal.attachments, byId),
     filed: filedIds,
   };
 }

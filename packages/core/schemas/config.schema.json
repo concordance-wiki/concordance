@@ -586,6 +586,11 @@
               "type": "integer",
               "minimum": 1
             },
+            "max_neighbours": {
+              "description": "Degree above which a term is a hub of the corpus rather than a domain, the word every note uses, and never a pivot; unbounded when absent.",
+              "type": "integer",
+              "minimum": 1
+            },
             "radius": {
               "description": "Distance, in edges, within which a note belongs to a pivot; a note reached by several is attached to the closest, then to the one of highest degree.",
               "type": "integer",
@@ -593,7 +598,7 @@
               "maximum": 3
             },
             "assign": {
-              "description": "Whether the proposal files the unclassified notes it reaches under the domain named after their pivot, with the origin inferred; a note with a declared domain is never touched.",
+              "description": "Whether the proposal files the unclassified notes it reaches under the domain their pivot proposes (the pivot's own domain, else one named after the pivot), with the origin inferred; a note with a declared domain is never touched.",
               "type": "boolean",
               "default": false
             }

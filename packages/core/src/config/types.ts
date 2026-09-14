@@ -126,6 +126,8 @@ export interface InferenceConfig {
 export interface EmergentDomainsConfig {
   /** Degree from which a term with a note becomes a pivot. */
   min_neighbours: number;
+  /** Degree above which a term is a hub of the corpus, not a domain: never a pivot. Unbounded by default. */
+  max_neighbours?: number;
   /** Distance, in edges, within which a note belongs to a pivot; 3 at most. */
   radius: number;
   /** Whether the proposal files the unclassified notes it reaches; false by default. */

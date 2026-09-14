@@ -40,6 +40,22 @@ describe("the pivots of the proposal", () => {
     expect(selectPivots(candidates, graph, 4)).toEqual([]);
   });
 
+  it("leaves out a hub, a term whose degree exceeds the bound: it names the corpus, not a domain", () => {
+    const edges = [...star("glossary/finding", 3), ...star("glossary/check", 2)];
+    const nodes = [
+      term("glossary/finding"),
+      term("glossary/check"),
+      ...edges.map((edge) => note(edge.b)),
+    ];
+    const graph = buildGraph(nodes, edges);
+    const candidates = candidatesOf(nodes);
+    expect(selectPivots(candidates, graph, 2, 2)).toEqual([{ id: "glossary/check", degree: 2 }]);
+    expect(selectPivots(candidates, graph, 2, 3)).toEqual([
+      { id: "glossary/finding", degree: 3 },
+      { id: "glossary/check", degree: 2 },
+    ]);
+  });
+
   it("counts distinct neighbours, an edge repeated in both directions once", () => {
     const nodes = [term("glossary/finding"), note("specs/build")];
     const graph = buildGraph(nodes, [

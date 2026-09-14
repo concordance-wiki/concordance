@@ -227,12 +227,13 @@ describe("validateConfig against the published schema", () => {
   it("accepts inference.domains with integer thresholds, the radius at most 3, and rejects the rest", () => {
     const result = validateConfig({
       ...minimal,
-      inference: { domains: { min_neighbours: 4, radius: 3, assign: true } },
+      inference: { domains: { min_neighbours: 4, max_neighbours: 60, radius: 3, assign: true } },
     });
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.config.inference?.domains).toEqual({
         min_neighbours: 4,
+        max_neighbours: 60,
         radius: 3,
         assign: true,
       });

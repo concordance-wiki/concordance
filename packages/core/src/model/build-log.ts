@@ -32,6 +32,8 @@ export interface LockCounts {
 export interface SuggestedDomain {
   pivot: string;
   degree: number;
+  /** The domain proposed: the pivot's own, else one named after it. */
+  domain: string;
   /** In code-unit order. */
   notes: string[];
 }
@@ -143,6 +145,7 @@ function suggestedDomains(domains: readonly SuggestedDomain[]): SuggestedDomain[
   return domains.map((domain) => ({
     pivot: domain.pivot,
     degree: domain.degree,
+    domain: domain.domain,
     notes: [...domain.notes],
   }));
 }

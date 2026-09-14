@@ -15,6 +15,9 @@ describe("the emergent domain options", () => {
       assign: false,
     });
     expect(
+      emergentDomainsOptions({ domains: { min_neighbours: 4, max_neighbours: 40, radius: 2 } }),
+    ).toEqual({ minNeighbours: 4, maxNeighbours: 40, radius: 2, assign: false });
+    expect(
       emergentDomainsOptions({ domains: { min_neighbours: 1, radius: 3, assign: true } }),
     ).toEqual({ minNeighbours: 1, radius: 3, assign: true });
   });

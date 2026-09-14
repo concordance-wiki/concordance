@@ -19,7 +19,7 @@ export function proposeEmergentDomains(
 ): EmergentDomains {
   const graph = buildGraph(input.nodes, input.edges);
   const candidates = new Set(input.nodes.filter((node) => node.candidate).map((node) => node.id));
-  const pivots = selectPivots(candidates, graph, options.minNeighbours);
+  const pivots = selectPivots(candidates, graph, options.minNeighbours, options.maxNeighbours);
   const closest = new Map<string, Attachment>();
   // Pivots are visited best first, so a later pivot only wins a note at a strictly shorter distance.
   for (const pivot of pivots) {

@@ -139,12 +139,19 @@ describe("summarize", () => {
       sources: 1,
       files: 4,
       findings: [],
-      domains: [{ notes: ["specs/roles/maintainer"], degree: 14, pivot: "glossary/check" }],
+      domains: [
+        {
+          notes: ["specs/roles/maintainer"],
+          degree: 14,
+          domain: "quality",
+          pivot: "glossary/check",
+        },
+      ],
     });
     expect(summary.domains).toEqual([
-      { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
+      { pivot: "glossary/check", degree: 14, domain: "quality", notes: ["specs/roles/maintainer"] },
     ]);
-    expect(Object.keys(summary.domains?.[0] ?? {})).toEqual(["pivot", "degree", "notes"]);
+    expect(Object.keys(summary.domains?.[0] ?? {})).toEqual(["pivot", "degree", "domain", "notes"]);
     expect("domains" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
   });
 
@@ -335,13 +342,15 @@ describe("serializeBuildLog", () => {
   });
 
   it("writes the suggested domains after the lock counts only when the summary holds them", () => {
-    const domains = [{ notes: ["specs/roles/maintainer"], degree: 14, pivot: "glossary/check" }];
+    const domains = [
+      { notes: ["specs/roles/maintainer"], degree: 14, domain: "quality", pivot: "glossary/check" },
+    ];
     const text = serializeBuildLog({ ...log, summary: { ...log.summary, domains } });
     expect(text).toContain(
-      '    "domains": [\n      {\n        "pivot": "glossary/check",\n        "degree": 14,\n        "notes": [\n          "specs/roles/maintainer"\n        ]\n      }\n    ]\n  },\n',
+      '    "domains": [\n      {\n        "pivot": "glossary/check",\n        "degree": 14,\n        "domain": "quality",\n        "notes": [\n          "specs/roles/maintainer"\n        ]\n      }\n    ]\n  },\n',
     );
     expect(parse(text).summary.domains).toEqual([
-      { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
+      { pivot: "glossary/check", degree: 14, domain: "quality", notes: ["specs/roles/maintainer"] },
     ]);
     expect(serializeBuildLog(log)).not.toContain("domains");
   });
