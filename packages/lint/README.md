@@ -1,6 +1,45 @@
 # @concordance-wiki/lint
 
-The distributable linter: the local check of one knowledge repository, its global check against the published model, its `concordance-lint.yaml` overrides and the reports, readable or for forges.
+The linter of Concordance as a library: the local check of one knowledge repository, its global check against the published model, the `concordance-lint.yaml` overrides, the safe fixes and the reports, readable or for forges. Installed by `@concordance-wiki/cli`, whose `concordance lint` command is the way to run it; you need it only to build on the engine, to embed the same checks in another tool for instance.
+
+## Install
+
+```bash
+npm install @concordance-wiki/lint
+```
+
+## Use
+
+The same findings `concordance lint --scope repo` prints, on a folder of notes:
+
+```ts
+import { nodeFileSystem } from "@concordance-wiki/core";
+import { formatFindings, hasFindingAtOrAbove, lintRepository } from "@concordance-wiki/lint";
+
+const findings = lintRepository({ root: "/srv/wiki/specs", fs: nodeFileSystem });
+for (const line of formatFindings(findings)) console.log(line);
+// error: checks/link-broken.md:3: E-LINK-BROKEN: link "finding.md" in checks/link-broken.md points to no file of source repo (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
+// 1 finding: 1 error, 0 warnings, 0 info
+process.exitCode = hasFindingAtOrAbove(findings, "warning") ? 1 : 0;
+```
+
+## What it contains
+
+- `lintRepository`, `lintedFiles`, `LOCAL_CHECKS`: the local scope, encoding, frontmatter, identifiers and internal links, without any network access, the findings enriched by the check registry and sorted.
+- `lintGlobal`, `globalFindings`, `loadPublishedModel`, `mergeFindings`, `GLOBAL_CHECKS`: the global scope against the published `model.json`, cached, degraded to the local checks when the model is out of reach.
+- `fixRepository`, `normalizeFrontmatter`, `rewriteRenamedLinks`, `deduceType`: the safe fixes, announced before the first write, never a link added or removed.
+- `formatFindings`, `formatFindingsAs`, `formatJson`, `formatSarif`, `formatJunit`, `hasFindingAtOrAbove`: the text, JSON, SARIF 2.1.0 and JUnit reports and the `--fail-on` verdict.
+- `readLintConfig`, `readLintOverrides`, `parseLintConfig`, `resolveGlobalConfig`: the `exclude`, `checks` and `global` blocks of `concordance-lint.yaml`.
+
+## Documentation
+
+- [Command line](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/command-line.md), the `lint` command
+- [Distributing the linter](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/lint-distribution.md): `npx`, binary, GitHub action, GitLab component, container image, pre-commit hook
+- [Pipelines](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/pipelines.md)
+- [The checks](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/README.md)
+- [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/lint/CHANGELOG.md)
+
+## Inside
 
 | Export | Effect |
 |---|---|
@@ -10,7 +49,7 @@ The distributable linter: the local check of one knowledge repository, its globa
 | `fixRepository({ root, source?, config?, fs, dryRun, announce?, gitignore? })` | runs the safe fixers over every markdown file `lintedFiles` lists: `rewriteRenamedLinks` on the text as written, then `normalizeFrontmatter` with the type `deduceType` gives; calls `announce` with every change before the first write, writes only the files whose text changed and only when `dryRun` is false; returns the changes (files in path order, changes in file order), the refusals and the number of files changed |
 | `normalizeFrontmatter(text, { path, deducedType? })` | adds `type: <deducedType>` to a valid frontmatter block that has none, orders its keys (`CANONICAL_KEY_ORDER`, then alphabetically), keeps comments and value styles, and returns the body byte for byte; a file without frontmatter, an invalid YAML block, a non-mapping or a duplicate key leaves the text untouched |
 | `rewriteRenamedLinks(text, { path, sourceFiles })` | for every link to a missing file, when exactly one file carries the same name and extension, replaces the destination characters with the path relative to the note, anchor kept; several such files are a refusal naming them, none leaves the finding; a destination written between angle brackets is refused too |
-| `deduceType({ path, frontmatter, source })` | the type the source gives a file, by increasing precedence `default_type`, `type`, then the `rules` in order (`path` glob, `suffix`, `ext`, `frontmatter` key; every written criterion must hold; the last match wins); nothing without a declared source. A small local cascade over `SourceConfig.rules`: the typing package does not yet ship its cascade, and this one moves there when it does |
+| `deduceType({ path, frontmatter, source })` | the type the source gives a file, by increasing precedence `default_type`, `type`, then the `rules` in order (`path` glob, `suffix`, `ext`, `frontmatter` key; every written criterion must hold; the last match wins); nothing without a declared source. A small local cascade over `SourceConfig.rules`, kept next to the fixers that need it |
 | `lintGlobal({ root, source?, config?, overrides, fs, clock, fetch?, profile, gitignore? })` | the global scope: resolves the `global` block of `concordance-lint.yaml` (`resolveGlobalConfig`), loads the published model (`loadPublishedModel`: a path is read as it is; a URL is served from `<cache_dir>/model.json` while `model.meta.json` says it is younger than `max_age_hours`, else fetched again with `If-None-Match` and `If-Modified-Since`, a `304` renewing the copy, a failed refresh keeping the stale copy with its age), then runs `globalFindings` over the local notes and the remote entities: `E-LINK-BROKEN` for a `<source>:` or `../<source>/` link to a note the model does not know, `W-LINK-CROSS-SOURCE` for one it knows when `build.cross_source_links` is false, `E-META-REL` for a frontmatter reference whose type pair the profile forbids for the key's relation, `I-TERM-HOMONYM` for a title or alias a remote entity of another type carries (`GLOBAL_CHECKS` lists them). Returns the enriched findings and the model's origin, or `degraded: { reason }` with no finding when no model could be read; never throws for that, never rebuilds, writes the cache only |
 | `mergeFindings(local, global)` | the local findings plus the global ones that do not repeat one (same check, path, line and entity), sorted canonically |
 | `readLintConfig(fs, root)`, `readLintOverrides(fs, root)`, `parseLintConfig(text)` | re-exported from the core: the `exclude`, `checks` and `global` blocks of `concordance-lint.yaml` (`model`, `cache_dir`, `max_age_hours`, `profile`), validated against `lint.schema.json`, whose `checks` is the block of the configuration schema; a faulty file throws `LintConfigError` |
@@ -20,4 +59,4 @@ The distributable linter: the local check of one knowledge repository, its globa
 
 Only `lintGlobal` opens a network connection, through the `fetch` it is given, and only to read the published model; `fixRepository` writes what it announced and `lintGlobal` writes its cache, nothing else writes. The fixers never add or remove a link and never write an inferred relation: a fixed file differs from the original in its frontmatter block and in existing link destinations only, and a second pass changes nothing. The checks that depend on the type cascade join the local lint with the typing package.
 
-Part of [Concordance](../../README.md).
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.

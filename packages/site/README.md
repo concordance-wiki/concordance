@@ -1,8 +1,48 @@
 # @concordance-wiki/site
 
-Site generation: the slots of the site and their view models, the default theme, the islands and their bundles, the document viewer, the stylesheet, the page budget, the markdown renderer, the search index and the site build that `concordance build` and `concordance render` run.
+The site generator of Concordance: the slots of a page and their view models, the default theme with its islands and stylesheet, the markdown renderer, the search index, the page budget and the accessibility checks, and the site build that `concordance build` and `concordance render` run. Installed by `@concordance-wiki/cli`; you need it only to build on the engine, to write a theme or a UI component as a plugin for instance.
 
-## Today
+## Install
+
+```bash
+npm install @concordance-wiki/site
+```
+
+## Use
+
+A note rendered the way an entity page shows it, then checked against the accessibility rules the build applies to every page:
+
+```ts
+import { checkAccessibility, renderMarkdown } from "@concordance-wiki/site";
+
+const note = "# Occurrence scan\n\nThe scan reads every note.\n\n## Findings\n\nOne `E-LINK-BROKEN` per missing target.\n";
+const rendered = renderMarkdown(note);
+rendered.title; // "Occurrence scan"
+rendered.sections.map((section) => section.heading); // [undefined, "Findings"]: the lead, then one section per H2
+checkAccessibility("<html><body><main><h1>Occurrence scan</h1></main></body></html>");
+// [{ rule: "html-lang", message: "the html element carries no lang attribute" }, { rule: "landmarks", ... }]
+```
+
+A theme plugin overrides a slot with its own component and ships its tokens; the theming guide shows the whole contribution.
+
+## What it contains
+
+- `SLOT_NAMES`, `SlotProps`, `defaultComponents`, `renderPage`, `renderSlot`, `useSlot`, `resolveTheme`: the slots of the site, the default theme in Preact rendered to static HTML, and the resolution of the components a theme or a type module overrides.
+- `loadTheme`, `chromeOf`, `writeThemeAssets`, `tokensStylesheet`, `siteStylesheet`, `projectStylesheet`, `paletteColours`: the `theme.yaml` of a project, the palette derived from its six colours and the layered stylesheet.
+- `island`, `mountIslands`, `bundleIslands`, `defaultIslands`, `mergeIslands`: the interactive parts of a page, hydrated in the browser from one hashed bundle each.
+- `renderMarkdown`, `serializeFragment`, `parseFragment`: a note as sanitised HTML sections with its written links and recognised words marked, and the `fragments/<id>.json` the build leaves next to the model.
+- `buildSite`, `siteDocuments`, `assemblePages` and the path helpers (`relativeHref`, `entityHref`, `fragmentPath`, ...): the whole site written from a model, every href relative so that it works over `file://`.
+- `buildGallery`, `galleryPages`, `typePages`, `skeletonOf`: the static page set of `concordance gallery`, every slot in every state.
+- `measureBudget`, `checkAccessibility`, `checkContrast`, `contrastRatio`, `SITE_PAGE_BUDGET`: the 150 kB budget and the structural, ARIA and contrast checks every page passes.
+
+## Documentation
+
+- [Theming](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/theming.md)
+- [Accessibility](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/accessibility.md)
+- [Command line](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/command-line.md), the `build`, `render` and `gallery` commands
+- [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/site/CHANGELOG.md)
+
+## Inside
 
 ### Slots and themes
 
@@ -106,9 +146,9 @@ The to-do page lists the entities the `W-DOC-NOMD` findings name and the keyword
 
 ### The gallery and the checks
 
-one state per board of the reference design (`GALLERY_BOARDS`, the index grouping the states by board, each framed at the width of its board through a width switch island the gallery alone bundles) with the degraded cases beside them, and `typePages` renders every registered type it is given from its note template, through its dedicated component when the theme resolved one. `skeletonOf` reduces a page to its structure, the elements with their classes, role, ARIA attributes and island name, which one file snapshot per state pins under `test/gallery/__snapshots__`. `measureBudget` reports the pages over 150 kB and the size of each island. `checkAccessibility` runs thirteen structural and ARIA accessibility rules on any page without a browser, from `contrastRatio` and `relativeLuminance`. `galleryFixtures`, `galleryPages`, `galleryDocuments` and `buildGallery` render every slot with representative data into the static page set of `concordance gallery`, and `typePages` renders every registered type it is given from its note template, through its dedicated component when the theme resolved one. `measureBudget` reports the pages over 150 kB and the size of each island. `checkAccessibility` runs thirteen structural and ARIA accessibility rules on any page without a browser, and `checkContrast` reports the text and background pairs of a `theme.yaml` (`contrastPairs`: ink, muted, label and accent text over the page, a surface and the soft surface, ink over the highlight of a mark, in both schemes) under 4.5:1 for body text or 3:1 for headings, from `contrastRatio` and `relativeLuminance`. The tests under `test/accessibility/` verify six criteria on every page of the gallery, the type pages included: contrasts, colour never alone, targets of 40 px, text first, headings and keyboard, the audit on every state; the [accessibility guide](../../docs/guides/accessibility.md) says what each one checks and what a theme author must keep.
+`galleryFixtures`, `galleryPages`, `galleryDocuments` and `buildGallery` render every slot with representative data into the static page set of `concordance gallery`, one state per board of the reference design (`GALLERY_BOARDS`, the index grouping the states by board, each framed at the width of its board through a width switch island the gallery alone bundles) with the degraded cases beside them, and `typePages` renders every registered type it is given from its note template, through its dedicated component when the theme resolved one. `skeletonOf` reduces a page to its structure, the elements with their classes, role, ARIA attributes and island name, which one file snapshot per state pins under `test/gallery/__snapshots__`. `measureBudget` reports the pages over 150 kB and the size of each island. `checkAccessibility` runs thirteen structural and ARIA accessibility rules on any page without a browser, and `checkContrast` reports the text and background pairs of a `theme.yaml` (`contrastPairs`: ink, muted, label and accent text over the page, a surface and the soft surface, ink over the highlight of a mark, in both schemes) under 4.5:1 for body text or 3:1 for headings, from `contrastRatio` and `relativeLuminance`. The tests under `test/accessibility/` verify six criteria on every page of the gallery, the type pages included: contrasts, colour never alone, targets of 40 px, text first, headings and keyboard, the audit on every state; the [accessibility guide](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/accessibility.md) says what each one checks and what a theme author must keep.
 
-## Dependencies
+### Dependencies
 
 | Package | Why |
 |---|---|
@@ -127,4 +167,4 @@ Development only:
 | `happy-dom` | the DOM axe-core needs, as a Vitest environment; no layout engine, so the contrast rules are disabled there and the palette is checked by numbers instead |
 | `@types/mdast` | the types of the markdown syntax tree the renderer splits into sections |
 
-See the [theming guide](../../docs/guides/theming.md). Part of [Concordance](../../README.md).
+Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
