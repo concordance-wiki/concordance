@@ -21,6 +21,13 @@ export const referencePages = [
     guide: "../guides/configuration.md",
   },
   {
+    schema: "lint.schema.json",
+    page: "docs/reference/lint.md",
+    title: "Lint configuration reference",
+    file: "concordance-lint.yaml",
+    guide: "../guides/configuration.md#concordance-lintyaml",
+  },
+  {
     schema: "theme.schema.json",
     page: "docs/reference/theme.md",
     title: "Theme reference",

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/lint.schema.json",
+  "title": "Concordance lint configuration",
+  "description": "Schema of concordance-lint.yaml, read at the root of a knowledge repository by concordance lint and by the build that declares the repository as a source: the files the repository keeps out of the checks, the local overrides of the check registry and where the global scope finds the published model.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "exclude": {
+      "description": "Globs of the files never read, never counted and never reported, relative to the root of the repository, with the same syntax as privacy.exclude in concordance.yaml; the build applies them too when it reads the repository as a source.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checks": {
+      "$ref": "https://concordance-wiki.github.io/concordance/schemas/config.schema.json#/$defs/checks"
+    },
+    "global": {
+      "description": "Where the global scope finds the published model of the wiki and how long its copy lives; without a model, --scope global degrades to the local checks.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "description": "The published model.json: a URL (https://…/model.json) fetched and cached, or a path relative to the repository read as it is.",
+          "type": "string",
+          "minLength": 1
+        },
+        "cache_dir": {
+          "description": "Folder of the cached model and of its metadata, relative to the repository.",
+          "type": "string",
+          "minLength": 1,
+          "default": ".concordance-cache/lint"
+        },
+        "max_age_hours": {
+          "description": "Hours during which the cached model is reused without any request; 0 revalidates on every run.",
+          "type": "number",
+          "minimum": 0,
+          "default": 24
+        },
+        "profile": {
+          "description": "A project profile, relative to the repository, merged over the default one for the relation matrix and the types of the global checks.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

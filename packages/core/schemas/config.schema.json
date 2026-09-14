@@ -638,6 +638,15 @@
       }
     },
     "checks": {
+      "$ref": "#/$defs/checks"
+    },
+    "lock": {
+      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; accepted but not read by the build in this version.",
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "checks": {
       "description": "Overrides of the check registry, by check identifier: disable a check or change the severity of its findings. An identifier no loaded check registers is an execution error.",
       "type": "object",
       "propertyNames": {
@@ -661,12 +670,6 @@
         }
       }
     },
-    "lock": {
-      "description": "Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; accepted but not read by the build in this version.",
-      "type": "string"
-    }
-  },
-  "$defs": {
     "domain": {
       "type": "object",
       "additionalProperties": false,

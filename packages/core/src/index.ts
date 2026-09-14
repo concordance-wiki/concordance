@@ -1,3 +1,13 @@
+export {
+  LINT_CONFIG_FILE,
+  LintConfigError,
+  parseLintConfig,
+  readLintConfig,
+  readLintOverrides,
+  type GlobalLintConfig,
+  type LintConfigValidation,
+  type LintOverrides,
+} from "./config/lint.js";
 export { parseConfig, parseTheme, parseYaml } from "./config/load.js";
 export { formatIssue, formatValidation } from "./config/report.js";
 export { readSchema, type SchemaName } from "./config/schema.js";

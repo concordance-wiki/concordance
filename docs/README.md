@@ -29,6 +29,7 @@ Generated from the JSON schemas of [`packages/core/schemas`](../packages/core/sc
 | Page | File it describes |
 |---|---|
 | [Configuration reference](reference/configuration.md) | `concordance.yaml` |
+| [Lint configuration reference](reference/lint.md) | `concordance-lint.yaml` |
 | [Theme reference](reference/theme.md) | `theme.yaml` |
 | [Profile reference](reference/profile.md) | `profile.yaml` and the default profile |
 | [Lock file reference](reference/lock.md) | `concordance.lock.yaml` |
