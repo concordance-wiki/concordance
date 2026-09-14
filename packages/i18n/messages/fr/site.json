@@ -1,4 +1,5 @@
 {
+  "site.darkMode": "Mode sombre",
   "site.generatedAt": "Généré le {date, date, long}",
   "site.home": "Accueil",
   "site.index": "Index",

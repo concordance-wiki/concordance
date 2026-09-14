@@ -2,17 +2,26 @@ import { runInNewContext } from "node:vm";
 
 import { describe, expect, it } from "vitest";
 
+import type { ColourScheme } from "../../src/css/tokens.js";
 import {
   applyChoice,
-  nextChoice,
-  readChoice,
+  displayedScheme,
+  toggleChoice,
   wireModeSwitch,
   type ModeRoot,
   type ModeStorage,
   type ModeSwitchButton,
   type ModeSwitchElement,
+  type SchemeView,
 } from "../../src/islands/mode-switch.js";
-import { MODE_GLYPHS, MODE_SCRIPT, MODE_STORAGE_KEY, MODES } from "../../src/mode.js";
+import {
+  MODE_SCRIPT,
+  MODE_STORAGE_KEY,
+  MODES,
+  otherScheme,
+  SCHEME_GLYPHS,
+  switchGlyph,
+} from "../../src/mode.js";
 import { componentsStylesheet } from "../../src/css/stylesheet.js";
 import { renderSlot } from "../../src/render.js";
 import { header } from "../../src/gallery/fixtures.js";
@@ -50,26 +59,23 @@ interface FakeButton extends ModeSwitchButton {
   attributes: Record<string, string>;
   listeners: (() => void)[];
   glyph: { textContent: string | null } | null;
-  text: { textContent: string | null } | null;
   click: () => void;
 }
 
-function button(withText = true): FakeButton {
-  const glyph = withText ? { textContent: "" } : null;
-  const text = withText ? { textContent: "" } : null;
+function button(withGlyph = true): FakeButton {
+  const glyph = withGlyph ? { textContent: "" } : null;
   const fake: FakeButton = {
     hidden: true,
     attributes: {},
     listeners: [],
     glyph,
-    text,
     setAttribute(name, value) {
       fake.attributes[name] = value;
     },
     addEventListener(_type, listener) {
       fake.listeners.push(listener);
     },
-    querySelector: (selector) => (selector === ".mode-switch-glyph" ? glyph : text),
+    querySelector: () => glyph,
     click: () => {
       for (const listener of fake.listeners) listener();
     },
@@ -77,30 +83,53 @@ function button(withText = true): FakeButton {
   return fake;
 }
 
-function element(
-  target: ModeSwitchButton | null,
-  props: string | null = JSON.stringify({
-    name: "Colour scheme",
-    labels: { system: "automatic", light: "light", dark: "dark" },
-  }),
-): ModeSwitchElement {
-  return { getAttribute: () => props, querySelector: () => target };
+function element(target: ModeSwitchButton | null): ModeSwitchElement {
+  return { querySelector: () => target };
 }
 
-describe("Light and dark modes, following the system preference and remembered", () => {
-  it("cycles through automatic, light and dark, in that order", () => {
+/**
+ * A page as the tokens layer displays it: the theme's default or the system preference while
+ * the root carries no `data-mode`, the forced scheme otherwise; the preference can change.
+ */
+function page(
+  root: ModeRoot,
+  preference: ColourScheme,
+): SchemeView & { prefer: (scheme: ColourScheme) => void } {
+  let current = preference;
+  const listeners: (() => void)[] = [];
+  return {
+    displayed: () => {
+      const forced = root.dataset.mode;
+      return forced === "dark" || forced === "light" ? forced : current;
+    },
+    onPreferenceChange: (listener) => {
+      listeners.push(listener);
+    },
+    prefer: (scheme) => {
+      current = scheme;
+      for (const listener of listeners) listener();
+    },
+  };
+}
+
+describe("Light and dark modes: the toggle draws the scheme it switches to, follows the system preference and remembers a choice", () => {
+  it("keeps the three choices a reader can hold, the two schemes and none", () => {
     expect(MODES).toEqual(["system", "light", "dark"]);
-    expect(nextChoice("system")).toBe("light");
-    expect(nextChoice("light")).toBe("dark");
-    expect(nextChoice("dark")).toBe("system");
+    expect(otherScheme("light")).toBe("dark");
+    expect(otherScheme("dark")).toBe("light");
   });
 
-  it("reads a stored light or dark choice and treats anything else, or an unreadable storage, as automatic", () => {
-    expect(readChoice(storage({ [MODE_STORAGE_KEY]: "dark" }))).toBe("dark");
-    expect(readChoice(storage({ [MODE_STORAGE_KEY]: "light" }))).toBe("light");
-    expect(readChoice(storage({ [MODE_STORAGE_KEY]: "sepia" }))).toBe("system");
-    expect(readChoice(storage())).toBe("system");
-    expect(readChoice(broken)).toBe("system");
+  it("draws a moon over a light page and a sun over a dark one, the glyph of the scheme it switches to", () => {
+    expect(SCHEME_GLYPHS).toEqual({ light: "☀", dark: "☾" });
+    expect(switchGlyph("light")).toBe("☾");
+    expect(switchGlyph("dark")).toBe("☀");
+  });
+
+  it("reads the scheme in force from the custom property of the root, light when it names none", () => {
+    expect(displayedScheme(() => "dark")).toBe("dark");
+    expect(displayedScheme(() => " dark ")).toBe("dark");
+    expect(displayedScheme(() => "light")).toBe("light");
+    expect(displayedScheme(() => "")).toBe("light");
   });
 
   it("applies a choice to data-mode on the root and remembers it under the namespaced key", () => {
@@ -122,68 +151,77 @@ describe("Light and dark modes, following the system preference and remembered",
     expect(root.dataset.mode).toBeUndefined();
   });
 
-  it("draws a half disc for the system preference, a sun for light and a moon for dark", () => {
-    expect(MODE_GLYPHS).toEqual({ system: "◐", light: "☀", dark: "☾" });
+  it("stores the other scheme when the page would not display it on its own, and nothing when the system already gives it", () => {
+    const root: ModeRoot = { dataset: {} };
+    expect(toggleChoice(page(root, "light"), root)).toBe("dark");
+    root.dataset.mode = "dark";
+    expect(toggleChoice(page(root, "light"), root)).toBe("system");
+    root.dataset.mode = "light";
+    expect(toggleChoice(page(root, "dark"), root)).toBe("system");
+    expect(root.dataset.mode).toBeUndefined();
+    expect(toggleChoice(page(root, "dark"), root)).toBe("light");
   });
 
-  it("reveals the served button, draws and names the current choice and presses it only when a scheme is forced", () => {
+  it("reveals the served button, presses it over a dark page and toggles the scheme, remembering the choice that departs from the system", () => {
     const target = button();
     const store = storage();
     const root: ModeRoot = { dataset: {} };
-    expect(wireModeSwitch(element(target), store, root)).toBe(true);
+    const view = page(root, "light");
+    expect(wireModeSwitch(element(target), store, root, view)).toBe(true);
     expect(target.hidden).toBe(false);
     expect(target.attributes["aria-pressed"]).toBe("false");
-    expect(target.attributes["aria-label"]).toBe("Colour scheme: automatic");
-    expect(target.attributes["title"]).toBe("Colour scheme: automatic");
-    expect(target.glyph?.textContent).toBe("◐");
-    expect(target.text?.textContent).toBe("automatic");
-    target.click();
-    expect(root.dataset.mode).toBe("light");
-    expect(target.attributes["aria-pressed"]).toBe("true");
-    expect(target.attributes["aria-label"]).toBe("Colour scheme: light");
-    expect(target.glyph?.textContent).toBe("☀");
-    expect(target.text?.textContent).toBe("light");
+    expect(target.glyph?.textContent).toBe("☾");
     target.click();
     expect(root.dataset.mode).toBe("dark");
-    expect(target.attributes["title"]).toBe("Colour scheme: dark");
-    expect(target.glyph?.textContent).toBe("☾");
-    expect(target.text?.textContent).toBe("dark");
     expect(store.items.get(MODE_STORAGE_KEY)).toBe("dark");
+    expect(target.attributes["aria-pressed"]).toBe("true");
+    expect(target.glyph?.textContent).toBe("☀");
+    target.click();
+    expect(root.dataset.mode).toBeUndefined();
+    expect(store.items.size).toBe(0);
+    expect(target.attributes["aria-pressed"]).toBe("false");
+    expect(target.glyph?.textContent).toBe("☾");
+  });
+
+  it("follows the system preference while no choice is stored, and stops following it once one is", () => {
+    const target = button();
+    const root: ModeRoot = { dataset: {} };
+    const view = page(root, "light");
+    wireModeSwitch(element(target), storage(), root, view);
+    view.prefer("dark");
+    expect(target.attributes["aria-pressed"]).toBe("true");
+    expect(target.glyph?.textContent).toBe("☀");
+    target.click();
+    expect(root.dataset.mode).toBe("light");
+    view.prefer("light");
+    expect(target.attributes["aria-pressed"]).toBe("false");
+    view.prefer("dark");
+    expect(target.attributes["aria-pressed"]).toBe("false");
+    expect(target.glyph?.textContent).toBe("☾");
+  });
+
+  it("starts from the scheme the page displays, a remembered dark choice included, and does without a glyph element", () => {
+    const target = button(false);
+    const root: ModeRoot = { dataset: { mode: "dark" } };
+    expect(wireModeSwitch(element(target), broken, root, page(root, "light"))).toBe(true);
+    expect(target.attributes["aria-pressed"]).toBe("true");
     target.click();
     expect(root.dataset.mode).toBeUndefined();
     expect(target.attributes["aria-pressed"]).toBe("false");
-    expect(target.glyph?.textContent).toBe("◐");
-    expect(target.text?.textContent).toBe("automatic");
-  });
-
-  it("starts from the remembered choice and falls back to the mode name without labels, glyph or value element", () => {
-    const target = button(false);
-    expect(
-      wireModeSwitch(element(target, null), storage({ [MODE_STORAGE_KEY]: "dark" }), {
-        dataset: {},
-      }),
-    ).toBe(true);
-    expect(target.attributes["aria-pressed"]).toBe("true");
-    expect(target.attributes["aria-label"]).toBe(": dark");
-    const labelled = button();
-    wireModeSwitch(element(labelled, "{}"), storage({ [MODE_STORAGE_KEY]: "dark" }), {
-      dataset: {},
-    });
-    expect(labelled.glyph?.textContent).toBe("☾");
-    expect(labelled.text?.textContent).toBe("dark");
   });
 
   it("leaves an island without a button alone", () => {
-    expect(wireModeSwitch(element(null), storage(), { dataset: {} })).toBe(false);
+    const root: ModeRoot = { dataset: {} };
+    expect(wireModeSwitch(element(null), storage(), root, page(root, "light"))).toBe(false);
   });
 
-  it("serves the switch hidden with its labels serialised, a square drawing the glyph, its name and the choice written for assistive technology alone", () => {
+  it("serves the switch hidden with its label serialised, a square drawing the moon, named for assistive technology alone", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain(
-      '<concordance-island data-island="mode-switch" data-props="{&quot;name&quot;:&quot;Colour scheme&quot;,&quot;labels&quot;:{&quot;system&quot;:&quot;automatic&quot;,&quot;light&quot;:&quot;light&quot;,&quot;dark&quot;:&quot;dark&quot;}}">',
+      '<concordance-island data-island="mode-switch" data-props="{&quot;label&quot;:&quot;Dark mode&quot;}">',
     );
     expect(html).toContain(
-      '<button type="button" class="mode-switch" aria-pressed="false" aria-label="Colour scheme: automatic" title="Colour scheme: automatic" hidden><span class="mode-switch-glyph" aria-hidden="true">◐</span><span class="visually-hidden"><span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span></span></button>',
+      '<button type="button" class="mode-switch" aria-pressed="false" title="Dark mode" hidden><span class="mode-switch-glyph" aria-hidden="true">☾</span><span class="visually-hidden">Dark mode</span></button>',
     );
     const css = componentsStylesheet();
     expect(css).toContain(

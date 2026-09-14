@@ -191,10 +191,10 @@ describe("The accent colour never carries information on its own", () => {
     expect(meeting).toContain('<a class="cue-time" href="#L1-2">11:48</a>');
   });
 
-  it("names the colour scheme in the mode switch instead of showing a coloured state alone", () => {
+  it("names the mode switch and tells its state by aria-pressed instead of showing a coloured state alone", () => {
     for (const [file, page] of pages) {
       expect(page, file).toContain(
-        '<span class="visually-hidden"><span class="mode-switch-label">Colour scheme</span> <span class="mode-switch-value">automatic</span></span>',
+        '<button type="button" class="mode-switch" aria-pressed="false" title="Dark mode" hidden><span class="mode-switch-glyph" aria-hidden="true">☾</span><span class="visually-hidden">Dark mode</span></button>',
       );
     }
   });

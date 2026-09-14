@@ -209,6 +209,7 @@ function chromeFor(
     labels: {
       menu: message(context, "drawer.menu"),
       search: message(context, "site.search"),
+      darkMode: message(context, "site.darkMode"),
     },
   };
   if (chrome.logo !== undefined) {

@@ -195,6 +195,8 @@ export interface HeaderLabels {
   menu: string;
   /** The search button of the tablet bar, which unfolds the field. */
   search: string;
+  /** The mode switch, a toggle pressed while the dark scheme is displayed. */
+  darkMode: string;
 }
 
 export interface HeaderProps {
