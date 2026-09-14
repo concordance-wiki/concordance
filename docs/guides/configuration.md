@@ -1,6 +1,6 @@
 # Configuration
 
-Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`config.schema.json`](../../packages/core/schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected, then a verdict line. Exit codes: 0 valid, 1 invalid, 2 file not found. Beyond the schema, it rejects a source name used twice, a malformed domain glob and pseudonymisation enabled without a dictionary, and it warns about keys that are accepted but ignored in this version (`lock`, tracker sources) and about transcripts published without pseudonymisation. `--config` (or `-c`) points at another file; the default is `concordance.yaml` in the current directory.
+Everything lives in a configuration repository: `concordance.yaml`, an optional `profile.yaml`, a `theme.yaml`, stopword files, `concordance.lock.yaml`, and, never versioned in a public repository, `pseudonyms.yaml`. `concordance validate-config` checks `concordance.yaml` against [`config.schema.json`](../../packages/core/schemas/config.schema.json) and prints the path of any faulty key, the value received and the values expected, then a verdict line. Exit codes: 0 valid, 1 invalid, 2 file not found. Beyond the schema, it rejects a source name used twice, a malformed domain glob and pseudonymisation enabled without a dictionary, and it warns about what is accepted but ignored in this version (the `links` of the lock file, tracker sources) and about transcripts published without pseudonymisation. `--config` (or `-c`) points at another file; the default is `concordance.yaml` in the current directory.
 
 This guide follows the order of the file and says how the keys work together, with examples. The exhaustive tables, every key with its type, default, allowed values and description, are generated from the schemas and never diverge from them: [configuration reference](../reference/configuration.md), [lint configuration reference](../reference/lint.md), [theme reference](../reference/theme.md), [profile reference](../reference/profile.md), [lock file reference](../reference/lock.md). Every key not marked required is optional.
 
@@ -275,7 +275,23 @@ Any other top-level key, an empty glob under `exclude`, a key that is not a chec
 
 ## `lock`
 
-Path to `concordance.lock.yaml`, the record of human decisions ([lock file reference](../reference/lock.md)): `rejected_terms`, the expressions the keyword discovery must not propose; under `duplicates`, `merged`, pairs of resource identifiers that merge whatever their score, and `separated`, pairs that never merge and produce no finding; under `links`, the promoted and rejected links. The engine applies the rejected terms and the duplicate pairs it is given (`resolveDuplicateResources` of the inference package); the build of this version accepts the key without reading the file, and `validate-config` says so.
+Path to `concordance.lock.yaml`, relative to the configuration, the record of human decisions ([lock file reference](../reference/lock.md)). The build reads the file, validates it against [`lock.schema.json`](../../packages/core/schemas/lock.schema.json) and applies two of its blocks:
+
+- `rejected_terms`, the expressions the keyword discovery must not propose: no candidate, no [`W-TERM-UNDEFINED`](../checks/W-TERM-UNDEFINED.md), no keyword page, no mark in the text, no line on the to-do page. An expression is compared on its normalised form, the one the language pack gives the text, so `Merge Request` rejects `merge request` and `merge requests` alike.
+- `duplicates`: `merged`, pairs of resource identifiers that merge into one entity whatever their score, the criterion recorded as `lock file` in `grouped_by`; `separated`, pairs that never merge and produce no [`W-DUP-CANDIDATE`](../checks/W-DUP-CANDIDATE.md).
+
+`links`, the promoted and rejected links, is recorded, not read: the build of this version produces no `lock_promoted` link, and `validate-config` says so with a warning on the `lock` key. A missing or invalid lock file is a configuration error: the build stops with exit code 1, naming the file and the faulty key, so that a decision is never silently dropped; a configuration without `lock` applies none. The end-of-build summary and `build.log.json` count the decisions applied under `lock` (`rejected_terms`, `merged`, `separated`: the entries of each block).
+
+```yaml
+version: 1
+rejected_terms:
+  - Merge Request
+duplicates:
+  separated:
+    - [glossary/canonical-model, specs/api/canonical-model]
+```
+
+Each entry answers a finding of an earlier build: the remediation of `W-TERM-UNDEFINED` and `W-DUP-CANDIDATE` names the block to write it in. The file lives next to the configuration, versioned and reviewed like any change; nothing is ever written into a knowledge repository.
 
 ## `theme.yaml`
 
