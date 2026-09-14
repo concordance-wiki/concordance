@@ -51,6 +51,7 @@ const WHOLE = [
   "search/highlight.js",
   "theme/default/result-list.js",
   "theme/default/api-page.js",
+  "theme/default/decision-page.js",
 ];
 
 /** The modules the index re-exports in part, with the names it takes from each. */

@@ -608,7 +608,7 @@ describe("entityPageOf on a meeting", () => {
   });
 
   it("gives every other type the generic view model, its related note untouched", () => {
-    const props = entityPageOf(context(), decision);
+    const props = entityPageOf(context(), batch);
     expect(props.meeting).toBeUndefined();
     expect(props.mentions.labels?.orderNote).toContain(
       "Ordered by number of passages, written and recognised together",

@@ -774,6 +774,62 @@ export interface MeetingProps {
   labels?: Partial<MeetingLabels>;
 }
 
+/** The headings and notes the page of a decision adds itself, in the language of the site; the theme's own English when absent. */
+export interface DecisionLabels {
+  /** The rows of the properties block. */
+  status: string;
+  decidedOn: string;
+  supersedes: string;
+  supersededBy: string;
+  session: string;
+  /** Under the properties: "4 keys: the status and the date are authoritative.", the count worded. */
+  keysNote: string;
+  /** First sentence of the callout, the day of the session filled in: "Decided in session on 12 March." */
+  sessionDated: string;
+  /** First sentence of the callout for a session without a date. */
+  sessionUndated: string;
+  /** Second sentence of the callout, the `{minutes}` placeholder standing for the link to the meeting, the time filled in: "The exact passage is in {minutes}, at 13:02." */
+  sessionPassage: string;
+  /** Second sentence of the callout when no cue names the decision, the `{minutes}` placeholder standing for the link to the meeting. */
+  sessionSee: string;
+  /** The words of the link to the meeting: "the minutes". */
+  sessionMinutes: string;
+  /** Under the related pages: that a decision cites what it changes. */
+  relatedNote: string;
+}
+
+/** The status of a decision: its value as the note writes it, and how the site words it. */
+export interface DecisionStatus {
+  value: string;
+  label: string;
+}
+
+/** A meeting the decision was taken in, and the cue of its transcript the decision was recognised in. */
+export interface DecisionSession extends Link {
+  /** The day of the meeting, worded without its year: "12 March"; absent when its note carries none. */
+  date?: string;
+  /** The cue of the transcript that names the decision: its timecode worded and the anchor of the cue on the page of the meeting; absent when no cue does. */
+  cue?: { time: string; href: string };
+}
+
+/**
+ * What the page of a decision lays out beyond the generic view model: its status, the day it
+ * was decided, the decision it supersedes and the one that supersedes it, the sessions it was
+ * taken in. Its presence makes the default theme lay the page out as a decision page.
+ */
+export interface DecisionProps {
+  status: DecisionStatus;
+  /** The `date` attribute of the note, worded; absent without one. */
+  date?: MeetingDate;
+  /** The decision this one replaces, as the model links them. */
+  supersedes?: Link;
+  /** The decision that replaces this one, as the model links them. */
+  supersededBy?: Link;
+  /** The meetings the model ties to the decision, by identifier; empty when none is linked. */
+  sessions: DecisionSession[];
+  labels?: Partial<DecisionLabels>;
+}
+
 export interface EntityPageProps {
   entity: EntityRef;
   /** The results page filtered on the type of the page, where the type chip leads; absent, the chip is plain text. */
@@ -815,6 +871,8 @@ export interface EntityPageProps {
   meeting?: MeetingProps;
   /** What lays the page out as the page of an office document; absent for every other page. */
   document?: DocumentPageView;
+  /** What the page of a `decision` entity lays out beyond the generic template; absent for every other page. */
+  decision?: DecisionProps;
 }
 
 export interface Passage {

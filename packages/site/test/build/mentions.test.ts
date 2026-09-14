@@ -574,9 +574,10 @@ describe("evokedMentionsOf", () => {
 });
 
 describe("relatedViewOf", () => {
-  it("takes a keyword page, a meeting and a document page outside the model, a note with a transcript or with notes alone inside it", () => {
+  it("takes a keyword page, a meeting and a document page outside the model, a decision citing what it changes, a note with a transcript or with notes alone inside it", () => {
     expect(relatedViewOf(context(), orphanKeyword)).toBe("evoked");
     expect(relatedViewOf(context(), review)).toBe("evoked");
+    expect(relatedViewOf(context(), { ...term, type: "decision" })).toBe("evoked");
     expect(relatedViewOf(context(), term)).toBe("citing");
     const deck: FragmentDocument = { ...transcript, unit: "slide", format: "pptx" };
     const withDeck = evoking([], [deck]);

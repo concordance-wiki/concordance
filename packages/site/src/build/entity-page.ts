@@ -5,6 +5,7 @@ import { byCodeUnit } from "../order.js";
 import type {
   Attribute,
   AttributeValue,
+  BreadcrumbItem,
   ChangeDate,
   ContractLabels,
   ContractOperationItem,
@@ -23,9 +24,11 @@ import type {
   NeighbourhoodProps,
   Section,
   SourceRef,
+  SpaceTree,
   TypeDeclaration,
 } from "../slots.js";
 import { OPERATION_TYPE } from "../slots.js";
+import { DECISION_TYPE, decisionOf, yearBreadcrumbOf, yearSpaceOf } from "./decision.js";
 import type { FragmentDocument } from "./fragments.js";
 import {
   editHref,
@@ -818,11 +821,51 @@ export function entityPageLabels(
   };
 }
 
+/** How the tree and the breadcrumb of a page are drawn: by folder, by year and month for a meeting or a document of a dated space, by year alone for a decision of one. */
+type TreeShape = "folders" | "months" | "years";
+
+function treeShapeOf(context: SiteContext, entity: Entity, dated: boolean): TreeShape {
+  if (!dated || !isDatedSpace(context, entity.source.name)) return "folders";
+  return entity.type === DECISION_TYPE ? "years" : "months";
+}
+
+function spaceByShape(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+  shape: TreeShape,
+): SpaceTree {
+  switch (shape) {
+    case "folders":
+      return spaceOf(context, page, entity);
+    case "months":
+      return datedSpaceOf(context, page, entity);
+    case "years":
+      return yearSpaceOf(context, page, entity);
+  }
+}
+
+function breadcrumbByShape(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+  shape: TreeShape,
+): BreadcrumbItem[] {
+  switch (shape) {
+    case "folders":
+      return breadcrumbOf(context, page, entity);
+    case "months":
+      return datedBreadcrumbOf(context, page, entity);
+    case "years":
+      return yearBreadcrumbOf(context, page, entity);
+  }
+}
+
 /**
  * The view model of the page of a typed entity, its sections and documents read from its
- * fragment. A meeting or a document carries what its own template lays out on top: when every
- * note of its space is dated, the tree is drawn by year and month and the breadcrumb names the
- * month.
+ * fragment. A meeting, a document or a decision carries what its own template lays out on top:
+ * when every note of its space is dated, the tree is drawn by year and month and the breadcrumb
+ * names the month, by year alone for a decision.
  */
 export function entityPageOf(
   context: SiteContext,
@@ -840,8 +883,17 @@ export function entityPageOf(
   const attributes = panelOf(context, page, entity);
   const meeting =
     entity.type === MEETING_TYPE ? meetingOf(context, page, entity, documents) : undefined;
-  const dated =
-    (meeting !== undefined || document !== undefined) && isDatedSpace(context, entity.source.name);
+  const decision =
+    entity.type === DECISION_TYPE
+      ? decisionOf(context, page, entity, (session) =>
+          documentsOf(context, pagePath(session.id), session, options.viewer),
+        )
+      : undefined;
+  const shape = treeShapeOf(
+    context,
+    entity,
+    meeting !== undefined || document !== undefined || decision !== undefined,
+  );
   // On an interface the operations lead: the served slice of the mentions starts with them.
   const mentions = mentionsPanelOf(
     context,
@@ -860,10 +912,8 @@ export function entityPageOf(
     },
     typeHref: searchFilterHref(page, "type", entity.type),
     ...(declaration === undefined ? {} : { declaration }),
-    space: dated ? datedSpaceOf(context, page, entity) : spaceOf(context, page, entity),
-    breadcrumb: dated
-      ? datedBreadcrumbOf(context, page, entity)
-      : breadcrumbOf(context, page, entity),
+    space: spaceByShape(context, page, entity, shape),
+    breadcrumb: breadcrumbByShape(context, page, entity, shape),
     ...(changed === undefined ? {} : { changed }),
     highlights: highlightsOf(context, page, entity),
     sections: sectionsOf(context, entity),
@@ -882,5 +932,6 @@ export function entityPageOf(
     ...(contract === undefined ? {} : { contract }),
     ...(meeting === undefined ? {} : { meeting }),
     ...(document === undefined ? {} : { document }),
+    ...(decision === undefined ? {} : { decision }),
   };
 }

@@ -91,6 +91,7 @@ describe("The accent colour never carries information on its own", () => {
       ".cue-time",
       ".spaces-row.stale .spaces-date",
       ".document-page .document-rail a.current",
+      ".decision-session",
     ]);
   });
 
@@ -151,6 +152,16 @@ describe("The accent colour never carries information on its own", () => {
     );
     expect(ruleFor(components, ".passage-at").body).toContain("text-decoration: underline;");
     expect(keyword).toContain('<a class="passage-at" href="../build-pipeline/#L12">line 12</a>');
+  });
+
+  it("gives the accent-bordered callout of a decision page a text of its own, the link to the minutes leading to the cue that names the decision", () => {
+    const decision = pages.get("decision-page-corporate.html") ?? "";
+    expect(decision).toContain(
+      '<aside class="decision-session" role="note">Decided in session on May 14. The exact passage is in <a class="decision-session-link" href="../../meetings/2026-05-14-suggestion-arbitration/#L6">the minutes</a>, at 41:07.</aside>',
+    );
+    expect(ruleFor(components, ".decision-session").body).toContain(
+      "border-inline-start: 3px solid var(--color-accent);",
+    );
   });
 
   it("draws the current position in the accent on the map and in the mark of the fold line, and the mark of every neighbour row, the words of the line and of the list saying what they are", () => {

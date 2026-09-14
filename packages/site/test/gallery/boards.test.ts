@@ -8,7 +8,7 @@ const BOARD_IDS = GALLERY_BOARDS.map((board) => board.id);
 describe("The gallery has one state per board of the reference design, named after it", () => {
   it("lists the boards in their order, then the to-do page, the panels and the chrome", () => {
     expect(BOARD_IDS).toEqual([
-      ...Array.from({ length: 15 }, (_, index) => `B${String(index + 1)}`),
+      ...Array.from({ length: 16 }, (_, index) => `B${String(index + 1)}`),
       "B20",
       "todo",
       "panels",

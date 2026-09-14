@@ -1241,17 +1241,17 @@ As a reader, I want the page of a deck or a report to open on the document itsel
 
 Depends on: L9-01, L4-05, L4-06, L4-07.
 
-#### L9-14 Component gallery as a workbench
+#### L9-14 Architecture decision page
 
-As the author of a theme, I want the gallery to show every board of the reference design at the width it is drawn at, with the cases that degrade it, so that I check a theme against the boards without building a corpus and see at once when a page changes shape.
+As a reader, I want the page of a decision to be short, dated and to name its consequences so that I check in ten seconds whether it holds, since when, and what it changed.
 
-- One state per board, named after it and rendered in the corporate chrome on the fixtures corpus: the home, the entity page (desktop, phone, tablet and the drawer open), the search results, the keyword page, the meeting page, the API page, the neighbourhood map open, the A–Z index, the spaces, the page of a space, the category list, the screen page, the document page, the to-do page; every page entry names its board, the index groups the states by board in the order of the boards, each with its caption and a link to the screen note of the demonstration.
-- Widths: every entry declares the width of its board, 390 px for a phone, 834 px for a tablet, 1440 px for a desktop (the desktop when absent); the index frames every state at that width and offers three buttons, a classic island served hidden, that set every frame to one width once the script runs; without it each frame keeps its own.
-- Structural snapshots: `skeletonOf` reduces a page to its elements in document order with their classes, role, ARIA attributes and island name, text and hrefs left out, deterministically; one test per state pins that skeleton as a file snapshot under `packages/site/test/gallery/__snapshots__/<state>.skeleton.html`, reviewed at each intentional change, the assertion saying so.
-- Degraded cases as states: every island-bearing page served without the scripts of its islands, captioned "server HTML only"; a corpus fed by one repository; a note without a property; a keyword page whose transcript passages carry no timecode; an API page whose contract could not be fetched.
-- The accessibility audit and the contrast check of the command stay green on every state; the gallery bundles the width switch alone, the site never loads it.
+- The tree of a decisions space whose every note is dated groups the notes by year, newest first, each year counting its notes and leading to its list; the year of the page is open on its notes in date order, the page marked; a space with an undated note keeps its folder tree. The breadcrumb reads "Space › 2026 › title".
+- Under the title, one chip reads the type and the status, "Decision · accepted", the status worded from the profile (proposed, accepted, superseded) and kept as written otherwise; then the identifier of the note in the monospace family and the day of the decision from its `date` attribute, each left out when the corpus has none. Nothing else stands on the line: no change date, no space.
+- The note as written, section by section, the three sections the convention asks for, context, decision and consequences, coming from the file; under it, one callout per meeting the model ties to the decision at either end of a link: "Decided in session on 12 March. The exact passage is in the minutes, at 13:02.", the day of the meeting from its note, the link leading to the last cue of the transcript of the meeting that names the decision, at the timecode the sentence quotes, to the page of the meeting when no cue does ("See the minutes."), the day left out for a meeting without one; the callout never copies what was said. The foot of the article carries the path of the file and its edit link, without the legend of the marks, which the page does not draw.
+- Panel: "Properties" with the status and the date first, then "Supersedes" and "Superseded by" from the `supersedes` links of the model at either end, so that both pages of a supersession name the other whichever note wrote the reference, the `superseded_by` key of the note standing in when no note says `supersedes`, then "Session" naming the meetings; under the rows "4 keys: the status and the date are authoritative.", the count being that of the rows shown. "Related pages" lists the pages the decision cites with the pages that cite it, most passages first, under the note "A decision affects pages without being affected by them: its relations are almost all written."; then the neighbourhood map folded behind its line.
+- Gallery state `decision-page-corporate` on a decision of the fixtures corpus that replaces an earlier one and was taken in a working session; the accessibility checker and the contrast checker pass on it.
 
-Depends on: L9-01 to L9-13.
+Depends on: L9-01, L9-05.
 
 #### L9-18 Dark mode
 
@@ -1265,7 +1265,19 @@ As a reader who works in the dark, I want the site in a second palette made for 
 - Gallery: the dark board has two states, `entity-page-dark` and `home-dark`, the dark scheme forced on their root without the boot script that would apply a remembered choice, so that a viewer sees them dark whatever they prefer; the accessibility audit and the contrast check stay green on them.
 - Documentation: the theming guide names the dark palette, the tokens of the scheme and the shadow, and the toggle; the screen note of the colour scheme in the demonstration and the glossary term "colour scheme".
 
-Depends on: L9-01, L9-08, L9-14.
+Depends on: L9-01, L9-08, L9-22.
+
+#### L9-22 Component gallery as a workbench
+
+As the author of a theme, I want the gallery to show every board of the reference design at the width it is drawn at, with the cases that degrade it, so that I check a theme against the boards without building a corpus and see at once when a page changes shape.
+
+- One state per board, named after it and rendered in the corporate chrome on the fixtures corpus: the home, the entity page (desktop, phone, tablet and the drawer open), the search results, the keyword page, the meeting page, the API page, the neighbourhood map open, the A–Z index, the spaces, the page of a space, the category list, the screen page, the document page, the decision page, the to-do page; every page entry names its board, the index groups the states by board in the order of the boards, each with its caption and a link to the screen note of the demonstration.
+- Widths: every entry declares the width of its board, 390 px for a phone, 834 px for a tablet, 1440 px for a desktop (the desktop when absent); the index frames every state at that width and offers three buttons, a classic island served hidden, that set every frame to one width once the script runs; without it each frame keeps its own.
+- Structural snapshots: `skeletonOf` reduces a page to its elements in document order with their classes, role, ARIA attributes and island name, text and hrefs left out, deterministically; one test per state pins that skeleton as a file snapshot under `packages/site/test/gallery/__snapshots__/<state>.skeleton.html`, reviewed at each intentional change, the assertion saying so.
+- Degraded cases as states: every island-bearing page served without the scripts of its islands, captioned "server HTML only"; a corpus fed by one repository; a note without a property; a keyword page whose transcript passages carry no timecode; an API page whose contract could not be fetched.
+- The accessibility audit and the contrast check of the command stay green on every state; the gallery bundles the width switch alone, the site never loads it.
+
+Depends on: L9-01 to L9-14.
 
 ## 5. Working conditions
 

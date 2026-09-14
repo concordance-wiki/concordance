@@ -4,6 +4,7 @@ import type { EntityPageProps } from "../../slots.js";
 import type { SlotComponents } from "../types.js";
 import { CategoryList } from "./category-list.js";
 import { TypedEntityPage } from "./api-page.js";
+import { DecisionPage } from "./decision-page.js";
 import { DocumentPage } from "./document-page.js";
 import { Footer } from "./footer.js";
 import { Header } from "./header.js";
@@ -21,12 +22,14 @@ import { Todo } from "./todo.js";
 
 /**
  * The entity page of the default theme: the meeting template when the view model carries a
- * meeting, the document template when it carries a document, the API template when it carries
- * an imported contract, the generic template otherwise.
+ * meeting, the document template when it carries a document, the decision template when it
+ * carries a decision, the API template when it carries an imported contract, the generic
+ * template otherwise.
  */
 export function EntityPage(props: EntityPageProps): JSX.Element {
   if (props.meeting !== undefined) return h(MeetingPage, { ...props, meeting: props.meeting });
   if (props.document !== undefined) return h(DocumentPage, { ...props, document: props.document });
+  if (props.decision !== undefined) return h(DecisionPage, { ...props, decision: props.decision });
   return h(TypedEntityPage, props);
 }
 

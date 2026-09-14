@@ -28,6 +28,15 @@ export function formatMonth(locale: Locale, date: Date, options: DateOptions = {
   }).format(date);
 }
 
+/** The day of a date without its year, "March 12", in the words of the locale, for a sentence that names a session. */
+export function formatDay(locale: Locale, date: Date, options: DateOptions = {}): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "long",
+    timeZone: options.timeZone ?? "UTC",
+  }).format(date);
+}
+
 /** The month of a date alone, "March", in the words of the locale, for a tree that already names the year. */
 export function formatMonthName(locale: Locale, date: Date, options: DateOptions = {}): string {
   return new Intl.DateTimeFormat(locale, {

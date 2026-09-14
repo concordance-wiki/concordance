@@ -1,0 +1,17 @@
+{
+  "decision.decidedOn": "Décidée le",
+  "decision.keysNote": "{count, plural, one {# clé} other {# clés}} : le statut et la date font foi.",
+  "decision.relatedNote": "Une décision affecte des pages sans être affectée par elles : ses relations sont presque toutes écrites.",
+  "decision.session": "Séance",
+  "decision.sessionDated": "Décision prise en séance le {date}.",
+  "decision.sessionMinutes": "le compte rendu",
+  "decision.sessionPassage": "Le passage exact figure dans '{minutes}', à {time}.",
+  "decision.sessionSee": "Voir '{minutes}'.",
+  "decision.sessionUndated": "Décision prise en séance.",
+  "decision.status": "Statut",
+  "decision.status.accepted": "Acceptée",
+  "decision.status.proposed": "Proposée",
+  "decision.status.superseded": "Remplacée",
+  "decision.supersededBy": "Remplacée par",
+  "decision.supersedes": "Remplace"
+}

@@ -222,6 +222,7 @@ describe("L9-08 colour never carries information alone", () => {
       ".cue-time",
       ".spaces-row.stale .spaces-date",
       ".document-page .document-rail a.current",
+      ".decision-session",
     ]);
     expect(baseStylesheet()).toContain("a {\n  color: var(--color-accent);");
   });

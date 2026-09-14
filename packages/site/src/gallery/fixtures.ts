@@ -20,3 +20,4 @@ export * from "./fixtures/category-list.js";
 export * from "./fixtures/document-page.js";
 export * from "./fixtures/spaces.js";
 export * from "./fixtures/degraded.js";
+export * from "./fixtures/decision-page.js";
