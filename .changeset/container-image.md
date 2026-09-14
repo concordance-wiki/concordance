@@ -1,5 +1,5 @@
 ---
-"concordance": minor
+"@concordance-wiki/concordance": minor
 "@concordance-wiki/cli": minor
 ---
 
