@@ -1,5 +1,13 @@
 # @concordance-wiki/checks
 
+## 0.3.0
+
+### Patch Changes
+
+- Updated dependencies [7c56d0a]
+  - @concordance-wiki/core@0.3.0
+  - @concordance-wiki/profile@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

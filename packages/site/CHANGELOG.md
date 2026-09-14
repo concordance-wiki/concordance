@@ -1,5 +1,18 @@
 # @concordance-wiki/site
 
+## 0.3.0
+
+### Minor Changes
+
+- 08e61ba: On the desktop the tree of the space and the right panel stay in view while the text scrolls, each no taller than the viewport and scrolling on its own when it holds more; the handle that folds a panel stands fixed at the edge of its column.
+
+### Patch Changes
+
+- Updated dependencies [7c56d0a]
+  - @concordance-wiki/core@0.3.0
+  - @concordance-wiki/i18n@0.3.0
+  - @concordance-wiki/profile@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

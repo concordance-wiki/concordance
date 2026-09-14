@@ -1,5 +1,11 @@
 # @concordance-wiki/core
 
+## 0.3.0
+
+### Patch Changes
+
+- 7c56d0a: Git never waits for anyone: Git Credential Manager is told not to ask, ssh runs in batch mode unless the caller names its own command, and a command that stalls is stopped after fifteen minutes, or the seconds `CONCORDANCE_GIT_TIMEOUT` gives; a source behind an unknown host key is reported without credentials.
+
 ## 0.2.0
 
 ### Minor Changes

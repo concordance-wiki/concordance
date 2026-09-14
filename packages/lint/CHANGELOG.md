@@ -1,5 +1,19 @@
 # @concordance-wiki/lint
 
+## 0.3.0
+
+### Patch Changes
+
+- f8aad74: A local source, a stopword file and the locations of the global lint block are resolved as the platform resolves paths: on Windows a `path` source relative to the configuration was reported unreachable.
+- Updated dependencies [7c56d0a]
+- Updated dependencies [f8aad74]
+  - @concordance-wiki/core@0.3.0
+  - @concordance-wiki/ingest@0.3.0
+  - @concordance-wiki/nlp@0.3.0
+  - @concordance-wiki/checks@0.3.0
+  - @concordance-wiki/profile@0.3.0
+  - @concordance-wiki/typing@0.3.0
+
 ## 0.2.0
 
 ### Patch Changes

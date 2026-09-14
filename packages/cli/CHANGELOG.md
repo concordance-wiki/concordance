@@ -1,5 +1,22 @@
 # @concordance-wiki/cli
 
+## 0.3.0
+
+### Patch Changes
+
+- Updated dependencies [7c56d0a]
+- Updated dependencies [08e61ba]
+- Updated dependencies [f8aad74]
+  - @concordance-wiki/core@0.3.0
+  - @concordance-wiki/ingest@0.3.0
+  - @concordance-wiki/site@0.3.0
+  - @concordance-wiki/nlp@0.3.0
+  - @concordance-wiki/lint@0.3.0
+  - @concordance-wiki/checks@0.3.0
+  - @concordance-wiki/inference@0.3.0
+  - @concordance-wiki/profile@0.3.0
+  - @concordance-wiki/typing@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
