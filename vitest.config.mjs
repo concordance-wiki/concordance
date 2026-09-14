@@ -22,6 +22,18 @@ export default defineConfig({
     // The corpus builds of a few beforeAll hooks take more than the default ten seconds on a
     // loaded runner; the tests themselves keep the default budget.
     hookTimeout: 60_000,
+    // A page loaded into the DOM of a test is read as markup: its scripts and stylesheets are
+    // never fetched from the closed port the DOM would otherwise hit, and a script tag a test
+    // injects loads silently; the test fires the outcome it wants on it.
+    environmentOptions: {
+      happyDOM: {
+        settings: {
+          disableJavaScriptFileLoading: true,
+          disableCSSFileLoading: true,
+          handleDisabledFileLoadingAsSuccess: true,
+        },
+      },
+    },
     include: [
       "packages/*/test/**/*.test.ts",
       "plugins/*/test/**/*.test.ts",

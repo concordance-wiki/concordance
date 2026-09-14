@@ -58,7 +58,13 @@ jobs:
       - name: Test with full coverage
         env:
           CONCORDANCE_INTEGRATION: "1"
-        run: pnpm test
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee test.log
+      - name: A green run traces nothing
+        # A rejected request, an aborted frame or a bundler warning in the log of a passing run reads
+        # as a failure to whoever opens it: the tests inject what they need and the DOM fetches nothing.
+        run: node scripts/check-quiet-log.mjs test.log
       - name: Publish coverage report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
