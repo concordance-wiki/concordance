@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { h, type JSX } from "preact";
 
 import type { FileSystem } from "@concordance-wiki/core";
@@ -5,7 +7,7 @@ import type { FileSystem } from "@concordance-wiki/core";
 import type { ContrastFinding } from "../a11y/contrast.js";
 import type { BudgetReport } from "../budget.js";
 import { assemblePages, assemblySummary, type PageReport } from "../build/assemble.js";
-import type { IslandBundle } from "../islands/bundle.js";
+import { defaultIslands, type IslandBundle, type IslandEntry } from "../islands/bundle.js";
 import { renderDocument, renderPage, type RenderOptions } from "../render.js";
 import type { SlotProps } from "../slots.js";
 import { chromeOf, type ThemeChrome } from "../theme/chrome.js";
@@ -16,6 +18,7 @@ import { GalleryIndex } from "./index-page.js";
 import { withoutIslandScripts } from "./no-script.js";
 import { galleryPages, type GalleryPage } from "./pages.js";
 import { typePages, type GalleryTypes, type TypePage } from "./types.js";
+import { GALLERY_WIDTH_ISLAND } from "./width-switch.js";
 
 export const GALLERY_PAGE_BUDGET = 150_000;
 
@@ -107,6 +110,18 @@ function typeBody(page: TypePage, options: RenderOptions): string {
   return renderDocument(h(pageComponentFor(options.theme, page.type), page.props), options);
 }
 
+/** The islands of the site, then the width switch of the index, which only the gallery bundles. */
+export function galleryIslands(): IslandEntry[] {
+  return [
+    ...defaultIslands(),
+    // No extension: the bundler picks the compiled module in a build and the source under test.
+    {
+      name: GALLERY_WIDTH_ISLAND,
+      entry: fileURLToPath(new URL("./width.client", import.meta.url)),
+    },
+  ];
+}
+
 /** Every page of the gallery and its index, rendered through the theme against the given bundles. */
 export function galleryDocuments(
   theme: ResolvedTheme,
@@ -156,6 +171,7 @@ export async function buildGallery(options: GalleryOptions): Promise<GalleryRepo
     // The palette checked for contrast is the one the stylesheet is written from.
     fallback: galleryTheme,
     maxPageBytes: options.maxPageBytes ?? GALLERY_PAGE_BUDGET,
+    islands: galleryIslands(),
     documents: (islands) =>
       galleryDocuments(theme, islands, options.types).map(({ path, html }) => ({
         path,

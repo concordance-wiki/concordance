@@ -7,6 +7,7 @@ import { defaultTheme } from "../../src/theme/resolve.js";
 const islands = [
   { name: "contract-viewer", file: "contract-viewer-00000000.js", bytes: 0 },
   { name: "document-viewer", file: "document-viewer-00000000.js", bytes: 0 },
+  { name: "gallery-width", file: "gallery-width-00000000.js", bytes: 0 },
   { name: "mentions-panel", file: "mentions-panel-00000000.js", bytes: 0 },
   { name: "mode-switch", file: "mode-switch-00000000.js", bytes: 0 },
   { name: "search", file: "search-00000000.js", bytes: 0 },
