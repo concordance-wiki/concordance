@@ -1616,4 +1616,24 @@ describe("formatSummary", () => {
       "findings: error 0, warning 0, info 0",
     ]);
   });
+
+  it("reports the decisions of the lock file applied, after the twin statistics, when the summary holds them", () => {
+    expect(
+      formatSummary({
+        sources: 1,
+        files: 3,
+        entities: {},
+        links: {},
+        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+        lock: { rejected_terms: 12, merged: 1, separated: 4 },
+      }),
+    ).toEqual([
+      "sources: 1",
+      "files: 3",
+      "entities: 0",
+      "links: 0",
+      "lock decisions applied: rejected_terms 12, merged 1, separated 4",
+      "findings: error 0, warning 0, info 0",
+    ]);
+  });
 });

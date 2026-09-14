@@ -11,6 +11,7 @@ import type {
   Finding,
   KeywordCounts,
   Link,
+  LockFile,
   Neighbours,
   PluginRegistry,
 } from "@concordance-wiki/core";
@@ -60,6 +61,8 @@ export interface PipelineInput {
   fetch?: typeof fetch;
   /** How many documents are converted at a time; one when unset. */
   parallelism?: number;
+  /** The decisions of `concordance.lock.yaml`, read and validated by the command; none without a `lock` key. */
+  lock?: LockFile;
 }
 
 export interface PipelineResult {
@@ -189,6 +192,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     config,
     profile,
     rejected: pseudonymization.names,
+    ...(input.lock === undefined ? {} : { lock: input.lock }),
   });
   entities = [...entities, ...keywords.entities];
   const twins = reconcileTwins({
@@ -201,6 +205,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     config,
     profile,
     clock,
+    ...(input.lock?.duplicates === undefined ? {} : { lock: input.lock.duplicates }),
   });
   const checked = runModelChecks({
     registry: input.checks,
