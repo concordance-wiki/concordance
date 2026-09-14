@@ -1,0 +1,62 @@
+{
+  "decision.decidedOn": {
+    "defaultMessage": "Decided on",
+    "description": "Row of the properties block of a decision: the date it was taken."
+  },
+  "decision.keysNote": {
+    "defaultMessage": "{count, plural, one {# key} other {# keys}}: the status and the date are authoritative.",
+    "description": "Note under the properties of a decision, counting its rows."
+  },
+  "decision.relatedNote": {
+    "defaultMessage": "A decision affects pages without being affected by them: its relations are almost all written.",
+    "description": "Note under the related pages of a decision."
+  },
+  "decision.session": {
+    "defaultMessage": "Session",
+    "description": "Row of the properties block of a decision: the meeting it was taken in."
+  },
+  "decision.sessionDated": {
+    "defaultMessage": "Decided in session on {date}.",
+    "description": "First sentence of the callout under the text of a decision, naming the day of the meeting it was taken in."
+  },
+  "decision.sessionMinutes": {
+    "defaultMessage": "the minutes",
+    "description": "The words of the link to the meeting in the callout of a decision."
+  },
+  "decision.sessionPassage": {
+    "defaultMessage": "The exact passage is in '{minutes}', at {time}.",
+    "description": "Second sentence of the callout of a decision, the quoted placeholder standing for the link to the meeting, the time being the timecode of the cue the decision was recognised in."
+  },
+  "decision.sessionSee": {
+    "defaultMessage": "See '{minutes}'.",
+    "description": "Second sentence of the callout of a decision when no cue of the transcript names it, the quoted placeholder standing for the link to the meeting."
+  },
+  "decision.sessionUndated": {
+    "defaultMessage": "Decided in session.",
+    "description": "First sentence of the callout of a decision taken in a meeting whose note carries no date."
+  },
+  "decision.status": {
+    "defaultMessage": "Status",
+    "description": "Row of the properties block of a decision."
+  },
+  "decision.status.accepted": {
+    "defaultMessage": "Accepted",
+    "description": "The accepted status of a decision, as the chip and the properties word it."
+  },
+  "decision.status.proposed": {
+    "defaultMessage": "Proposed",
+    "description": "The proposed status of a decision, as the chip and the properties word it."
+  },
+  "decision.status.superseded": {
+    "defaultMessage": "Superseded",
+    "description": "The superseded status of a decision, as the chip and the properties word it."
+  },
+  "decision.supersededBy": {
+    "defaultMessage": "Superseded by",
+    "description": "Row of the properties block of a decision: the decision that replaces it."
+  },
+  "decision.supersedes": {
+    "defaultMessage": "Supersedes",
+    "description": "Row of the properties block of a decision: the decision it replaces."
+  }
+}

@@ -112,6 +112,12 @@ const boards = [
     screen: "pages/document-page",
   },
   {
+    id: "B16",
+    title: "Decision page",
+    caption: "An architecture decision: short, dated, with its consequences.",
+    screen: "pages/decision-page",
+  },
+  {
     id: "B20",
     title: "Dark mode",
     caption:

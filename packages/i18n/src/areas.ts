@@ -1,5 +1,6 @@
 import { apiMessages } from "./areas/api.js";
 import { categoryMessages } from "./areas/category.js";
+import { decisionMessages } from "./areas/decision.js";
 import { documentMessages } from "./areas/document.js";
 import { drawerMessages } from "./areas/drawer.js";
 import { entityMessages } from "./areas/entity.js";
@@ -26,6 +27,7 @@ import { transcriptMessages } from "./areas/transcript.js";
 export const AREAS = [
   apiMessages,
   categoryMessages,
+  decisionMessages,
   documentMessages,
   drawerMessages,
   entityMessages,

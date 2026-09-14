@@ -12,6 +12,7 @@ import type { Mention, MentionsPanelProps, RelatedLabels } from "../slots.js";
 import { groupByPage, RELATED_INLINE } from "../theme/default/mention-list.js";
 import { fileKey, message, typeLabel, type SiteContext } from "./context.js";
 import type { FragmentPassage } from "./fragments.js";
+import { DECISION_TYPE } from "./decision.js";
 import { MEETING_TYPE } from "./meeting.js";
 import { exposedOperations } from "./operations.js";
 import { entityHref, mentionsFragmentPath, relativeHref } from "./paths.js";
@@ -404,11 +405,13 @@ export function evokedMentionsOf(context: SiteContext, page: string, entity: Ent
 /**
  * Which view the related pages of an entity take: a keyword page, a meeting and a document page
  * (an entity whose documents are a deck, a PDF, never a transcript) stand outside the model,
- * so their panel lists the pages their passages evoke; every other page lists the pages that
- * cite it.
+ * so their panel lists the pages their passages evoke; a decision cites what it changes, so
+ * its panel lists them too; every other page lists the pages that cite it.
  */
 export function relatedViewOf(context: SiteContext, entity: Entity): RelatedView {
-  if (entity.keyword === true || entity.type === MEETING_TYPE) return "evoked";
+  if (entity.keyword === true || entity.type === MEETING_TYPE || entity.type === DECISION_TYPE) {
+    return "evoked";
+  }
   const documents = context.fragments.get(entity.id)?.documents ?? [];
   return documents.length > 0 && documents.every((document) => document.unit !== "cue")
     ? "evoked"
@@ -445,13 +448,14 @@ export function citingPages(context: SiteContext, entity: Entity): number {
 }
 
 /**
- * The note under the list, by page: how a keyword page, a meeting or a document page relates to
- * the model, else how the entries are ordered; the page of an interface says why the operations
- * lead in its own template.
+ * The note under the list, by page: how a keyword page, a meeting, a decision or a document page
+ * relates to the model, else how the entries are ordered; the page of an interface says why the
+ * operations lead in its own template.
  */
 function orderNoteOf(context: SiteContext, entity: Entity): string {
   if (entity.keyword === true) return message(context, "keyword.relatedNote");
   if (entity.type === MEETING_TYPE) return message(context, "meeting.relatedNote");
+  if (entity.type === DECISION_TYPE) return message(context, "decision.relatedNote");
   return relatedViewOf(context, entity) === "evoked"
     ? message(context, "document.relatedNote")
     : message(context, "related.orderNote");

@@ -1,0 +1,6 @@
+---
+"@concordance-wiki/site": minor
+"@concordance-wiki/i18n": minor
+---
+
+Decision page: the page of a `decision` gets a template of its own on the shell of the entity page, `DecisionPage`, served by the default `EntityPage` when the view model carries `decision` (`decisionOf`): the tree of a dated decisions space by year with the breadcrumb naming the year (`yearSpaceOf`, `yearBreadcrumbOf`), one chip reading the type and the status worded from the profile (`statusOf`, the `decision.status.*` messages), the identifier and the day of the decision under the title, the note as written, then a callout per meeting the model ties to the decision leading to the last cue of its transcript that names it, at its timecode (`sessionsOf`), the path of the file without the legend; in the panel the status and the date first, the decision it supersedes and the one that supersedes it from the `supersedes` links at either end or the `superseded_by` key (`supersessionOf`), its session, and the note counting the keys; the related pages of a decision list the pages it cites with the pages citing it, under the note that its relations are almost all written. The i18n package gains the `decision` area and `formatDay`, the day of a date without its year. Gallery state `decision-page-corporate` under the new board B16; stylesheet `pages/decision-page.css`.

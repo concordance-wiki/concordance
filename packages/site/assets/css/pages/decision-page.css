@@ -1,0 +1,43 @@
+/* Decision page: one chip reading the type and the status, the identifier and the day of the decision on the line under the title, the callout of the session after the text, the properties of the decision. */
+
+/* The chip: the type, which keeps its link to the pages of the type, the separator and the status in lowercase, read in the words of the site. */
+
+.decision-chip {
+  font-size: 0.8125rem;
+}
+
+.decision-type {
+  color: inherit;
+  text-decoration: none;
+}
+
+.decision-type:hover {
+  text-decoration: underline;
+}
+
+.decision-status {
+  text-transform: lowercase;
+}
+
+.decision-id {
+  font-size: 0.8125rem;
+}
+
+/* The callout of a session: the surface colour framed by a rule, the accent on its start side as the notice of a keyword page, its words saying what it points at; the link to the minutes reads as every link and leads to the cue that names the decision. */
+
+.decision-session {
+  margin-block: var(--space-4) 0;
+  padding: 0.8125rem 1.0625rem;
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent);
+  border-start-end-radius: calc(var(--radius) * 1.25);
+  border-end-end-radius: calc(var(--radius) * 1.25);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.90625rem;
+  line-height: 1.7;
+}
+
+.decision-properties dd time {
+  font-weight: 500;
+}

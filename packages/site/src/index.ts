@@ -237,5 +237,6 @@ export * from "./search/highlight.js";
 export * from "./theme/default/result-list.js";
 export type { SiteFolders, SiteNames } from "./build/context.js";
 export * from "./theme/default/api-page.js";
+export * from "./theme/default/decision-page.js";
 export { OPERATION_UNMATCHED, exposedOperations, unmatchedOperations } from "./build/operations.js";
 export type { ExposedOperation } from "./build/operations.js";

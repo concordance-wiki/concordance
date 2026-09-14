@@ -36,6 +36,7 @@ import { categoryCorporateState } from "./states/category-corporate.js";
 import { screenPageCorporateState } from "./states/screen-page-corporate.js";
 import { documentPageCorporateState } from "./states/document-page-corporate.js";
 import { documentPageNoScriptState } from "./states/document-page-no-script.js";
+import { decisionPageCorporateState } from "./states/decision-page-corporate.js";
 import { todoState } from "./states/todo.js";
 import { todoEmptyState } from "./states/todo-empty.js";
 import { todoCorporateState } from "./states/todo-corporate.js";
@@ -94,6 +95,7 @@ export const galleryPages: readonly GalleryPage[] = [
   screenPageCorporateState,
   documentPageCorporateState,
   documentPageNoScriptState,
+  decisionPageCorporateState,
   entityPageDarkState,
   homeDarkState,
   todoState,

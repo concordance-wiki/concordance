@@ -10,6 +10,7 @@ describe("@concordance-wiki/i18n", () => {
       "argumentNames",
       "argumentsOf",
       "formatDate",
+      "formatDay",
       "formatMessage",
       "formatMonth",
       "formatMonthName",
