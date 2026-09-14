@@ -21,6 +21,7 @@ import {
   Source,
 } from "./entity-page.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs, type Tab } from "./tabs.js";
@@ -271,6 +272,7 @@ export function MeetingPage({
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
           <h1>{entity.title}</h1>
+          <PinButton />
           <p class="entity-badge">
             <span class="badge">{entity.typeLabel}</span>
             {meeting.duration !== undefined && (

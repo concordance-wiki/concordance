@@ -1,0 +1,13 @@
+{
+  "pins.all": "Toutes les épinglées",
+  "pins.confirmRemoveAll": "Retirer toutes les pages épinglées ?",
+  "pins.countMany": "'{count}' épinglées",
+  "pins.countOne": "'{count}' épinglée",
+  "pins.filter": "Filtrer",
+  "pins.label": "Épinglées",
+  "pins.pages": "Pages épinglées",
+  "pins.pin": "Épingler",
+  "pins.pinned": "Épinglée",
+  "pins.removeAll": "Tout retirer",
+  "pins.unpin": "Retirer '{title}'"
+}

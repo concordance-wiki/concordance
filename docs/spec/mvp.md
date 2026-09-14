@@ -577,6 +577,8 @@ As an investigator, I want to keep track of the path I followed so that I can re
 - A pinned trail is kept locally between visits.
 - The trail is bounded in length, the oldest entries being condensed.
 
+Superseded by L9-20: the trail had no rule to start over, so it grew and repeated itself; the pinned pages, chosen by hand, replace it.
+
 Depends on: L2-03.
 
 #### L2-11 To-do page
@@ -1253,32 +1255,6 @@ As a reader, I want the page of a decision to be short, dated and to name its co
 
 Depends on: L9-01, L9-05.
 
-#### L9-18 Dark mode
-
-As a reader who works in the dark, I want the site in a second palette made for it so that every page reads as well as in the light one, with the same controls in the same places.
-
-- Not an inversion: the dark palette is a second set of nine colours, the ground under the surface as in the light scheme, the soft ground above it; the page `#0F1113`, a surface `#181B1E`, the soft surfaces `#22262A`, a rule `#282C31`, the text `#ECEAE6`, secondary text `#A8AEB6`, the lightest labels `#8D939B`, the accent `#E8703A`, a marked passage `#4A2A1B`; the brand file and the default theme carry it alike, and the demonstration wiki's `theme.yaml` follows it.
-- The accent rises in lightness, `#E8703A` instead of `#A8431C`, so that a link holds 4.5:1 over every dark ground; every component reads its colours from the tokens, so that the chips, the marks, the three underlines, the map, the viewer chrome, the code blocks, the tables, a `mark` and the focus ring take the dark palette whole, with no colour written in a component (the paper of a document page apart, which stays white).
-- The contrasts of the dark scheme are measured on their own: the checker lists every dark pair with its ratio, none deduced from the light scheme, and a test pins them, the lightest at 4.92:1; the five reference ratios are pinned in both schemes; a dark palette that kept the light accent is reported pair by pair.
-- The choice follows the system preference, stays remembered, and the switch stays in the same place: the header button draws the glyph of the scheme it switches to, ☾ over a light page, ☀ over a dark one, is named "Dark mode" for assistive technology alone and pressed while the dark scheme is displayed; it reads the scheme in force from the tokens (`--scheme` on the root) and hears the system preference change while no choice is stored; pressing it stores the other scheme, or nothing when the system already gives it, so that the page follows the system again; without JavaScript the theme's default and the system preference apply.
-- No drop shadow in the dark scheme: the hierarchy passes through the grounds and the rules; the tokens set the shadow of what floats over the page to none in the dark palette blocks, and every rule that casts one reads that token.
-- Gallery: the dark board has two states, `entity-page-dark` and `home-dark`, the dark scheme forced on their root without the boot script that would apply a remembered choice, so that a viewer sees them dark whatever they prefer; the accessibility audit and the contrast check stay green on them.
-- Documentation: the theming guide names the dark palette, the tokens of the scheme and the shadow, and the toggle; the screen note of the colour scheme in the demonstration and the glossary term "colour scheme".
-
-Depends on: L9-01, L9-08, L9-22.
-
-#### L9-22 Component gallery as a workbench
-
-As the author of a theme, I want the gallery to show every board of the reference design at the width it is drawn at, with the cases that degrade it, so that I check a theme against the boards without building a corpus and see at once when a page changes shape.
-
-- One state per board, named after it and rendered in the corporate chrome on the fixtures corpus: the home, the entity page (desktop, phone, tablet and the drawer open), the search results, the keyword page, the meeting page, the API page, the neighbourhood map open, the A–Z index, the spaces, the page of a space, the category list, the screen page, the document page, the decision page, the to-do page; every page entry names its board, the index groups the states by board in the order of the boards, each with its caption and a link to the screen note of the demonstration.
-- Widths: every entry declares the width of its board, 390 px for a phone, 834 px for a tablet, 1440 px for a desktop (the desktop when absent); the index frames every state at that width and offers three buttons, a classic island served hidden, that set every frame to one width once the script runs; without it each frame keeps its own.
-- Structural snapshots: `skeletonOf` reduces a page to its elements in document order with their classes, role, ARIA attributes and island name, text and hrefs left out, deterministically; one test per state pins that skeleton as a file snapshot under `packages/site/test/gallery/__snapshots__/<state>.skeleton.html`, reviewed at each intentional change, the assertion saying so.
-- Degraded cases as states: every island-bearing page served without the scripts of its islands, captioned "server HTML only"; a corpus fed by one repository; a note without a property; a keyword page whose transcript passages carry no timecode; an API page whose contract could not be fetched.
-- The accessibility audit and the contrast check of the command stay green on every state; the gallery bundles the width switch alone, the site never loads it.
-
-Depends on: L9-01 to L9-14.
-
 #### L9-16 Footer and legal pages
 
 As a reader, I want the footer of every page to tell me where the content comes from, when it was published and under which licence the tool runs, and to distinguish that from what the organisation declares, so that I never mistake a statement of the tool for a commitment of the organisation, nor the reverse.
@@ -1303,6 +1279,20 @@ As a reader who wonders whether what I read is current, I want one page saying w
 
 Depends on: L9-01, L9-16.
 
+#### L9-18 Dark mode
+
+As a reader who works in the dark, I want the site in a second palette made for it so that every page reads as well as in the light one, with the same controls in the same places.
+
+- Not an inversion: the dark palette is a second set of nine colours, the ground under the surface as in the light scheme, the soft ground above it; the page `#0F1113`, a surface `#181B1E`, the soft surfaces `#22262A`, a rule `#282C31`, the text `#ECEAE6`, secondary text `#A8AEB6`, the lightest labels `#8D939B`, the accent `#E8703A`, a marked passage `#4A2A1B`; the brand file and the default theme carry it alike, and the demonstration wiki's `theme.yaml` follows it.
+- The accent rises in lightness, `#E8703A` instead of `#A8431C`, so that a link holds 4.5:1 over every dark ground; every component reads its colours from the tokens, so that the chips, the marks, the three underlines, the map, the viewer chrome, the code blocks, the tables, a `mark` and the focus ring take the dark palette whole, with no colour written in a component (the paper of a document page apart, which stays white).
+- The contrasts of the dark scheme are measured on their own: the checker lists every dark pair with its ratio, none deduced from the light scheme, and a test pins them, the lightest at 4.92:1; the five reference ratios are pinned in both schemes; a dark palette that kept the light accent is reported pair by pair.
+- The choice follows the system preference, stays remembered, and the switch stays in the same place: the header button draws the glyph of the scheme it switches to, ☾ over a light page, ☀ over a dark one, is named "Dark mode" for assistive technology alone and pressed while the dark scheme is displayed; it reads the scheme in force from the tokens (`--scheme` on the root) and hears the system preference change while no choice is stored; pressing it stores the other scheme, or nothing when the system already gives it, so that the page follows the system again; without JavaScript the theme's default and the system preference apply.
+- No drop shadow in the dark scheme: the hierarchy passes through the grounds and the rules; the tokens set the shadow of what floats over the page to none in the dark palette blocks, and every rule that casts one reads that token.
+- Gallery: the dark board has two states, `entity-page-dark` and `home-dark`, the dark scheme forced on their root without the boot script that would apply a remembered choice, so that a viewer sees them dark whatever they prefer; the accessibility audit and the contrast check stay green on them.
+- Documentation: the theming guide names the dark palette, the tokens of the scheme and the shadow, and the toggle; the screen note of the colour scheme in the demonstration and the glossary term "colour scheme".
+
+Depends on: L9-01, L9-08, L9-22.
+
 #### L9-19 Collapsible side panels
 
 As a reader on a desk, I want to fold the tree and the right panel behind a discreet handle so that a wide table, a figure or a code block gets the room, and to find them folded again on the next page.
@@ -1315,6 +1305,32 @@ As a reader on a desk, I want to fold the tree and the right panel behind a disc
 - Gallery: a state named `entity-page-panel-folded`, the entity page with both panels served folded, framed at the desktop width; the accessibility checker and the contrast checker pass on it.
 
 Depends on: L9-01.
+
+#### L9-20 Pinned pages
+
+As a reader who keeps a few pages at hand, I want to pin a page from its header and find it as a tab under the bar on every page, until I remove it, so that the pages I keep are the ones I chose and never a path that grows on its own.
+
+- The exploration trail of L2-10 disappears, with its button of the bar, its fragment and its storage: it had no rule to start over. One breadcrumb remains, the one of the filing of the page.
+- The header of every entity page carries a "Pin" button after the title, a chip with the pin glyph, pressed and reading "Pinned" while the page is pinned; a second press unpins it; the same page is never pinned twice. Without JavaScript neither the button nor the row is there, and the page stays whole.
+- The row under the bar exists only once a page is pinned: the label "Pinned", one chip per page in the order of pinning, never reordered on its own, the current page filled and marked current, each chip a link to its page with a cross that removes it; the count "N pinned" at the end. Navigating leaves the row as it is; a reload, a new tab and a new session find it again: the pins live in the storage of the browser, never in the address, and never expire on their own.
+- No cap: the row shows the chips that fit and folds the others behind "+N", a summary opening the full list: the heading "All pinned" with the count, a filter on the title and the space, every pin as a row with its title, the space its identifier starts with and its cross, and "Remove all", the one destructive action, asked for a confirmation. The chips are measured again when the window resizes.
+- The stored entry of a pin is the identifier of the page and its title at the time of pinning, so that the chip still reads once the page is gone from a later publication.
+- Wording in English and French: the labels of the button, the row, the crosses, the menu, the filter and the confirmation come from the catalogue; the counts are filled in the browser.
+- Gallery: a state named `entity-page-pins`, the entity page with five pinned pages served in the row and its button pressed, framed at the desktop width; the accessibility checker and the contrast checker pass on it.
+
+Depends on: L9-01.
+
+#### L9-22 Component gallery as a workbench
+
+As the author of a theme, I want the gallery to show every board of the reference design at the width it is drawn at, with the cases that degrade it, so that I check a theme against the boards without building a corpus and see at once when a page changes shape.
+
+- One state per board, named after it and rendered in the corporate chrome on the fixtures corpus: the home, the entity page (desktop, phone, tablet and the drawer open), the search results, the keyword page, the meeting page, the API page, the neighbourhood map open, the A–Z index, the spaces, the page of a space, the category list, the screen page, the document page, the decision page, the to-do page; every page entry names its board, the index groups the states by board in the order of the boards, each with its caption and a link to the screen note of the demonstration.
+- Widths: every entry declares the width of its board, 390 px for a phone, 834 px for a tablet, 1440 px for a desktop (the desktop when absent); the index frames every state at that width and offers three buttons, a classic island served hidden, that set every frame to one width once the script runs; without it each frame keeps its own.
+- Structural snapshots: `skeletonOf` reduces a page to its elements in document order with their classes, role, ARIA attributes and island name, text and hrefs left out, deterministically; one test per state pins that skeleton as a file snapshot under `packages/site/test/gallery/__snapshots__/<state>.skeleton.html`, reviewed at each intentional change, the assertion saying so.
+- Degraded cases as states: every island-bearing page served without the scripts of its islands, captioned "server HTML only"; a corpus fed by one repository; a note without a property; a keyword page whose transcript passages carry no timecode; an API page whose contract could not be fetched.
+- The accessibility audit and the contrast check of the command stay green on every state; the gallery bundles the width switch alone, the site never loads it.
+
+Depends on: L9-01 to L9-14.
 
 ## 5. Working conditions
 

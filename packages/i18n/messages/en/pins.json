@@ -1,0 +1,46 @@
+{
+  "pins.all": {
+    "defaultMessage": "All pinned",
+    "description": "Heading of the menu listing every pinned page, and name of the summary that opens it from the row of pins."
+  },
+  "pins.confirmRemoveAll": {
+    "defaultMessage": "Remove every pinned page?",
+    "description": "Question asked before the pinned pages are all removed, the only destructive action of the row."
+  },
+  "pins.countMany": {
+    "defaultMessage": "'{count}' pinned",
+    "description": "Count at the end of the row of pins, for several pages, the quoted placeholder being filled in the browser."
+  },
+  "pins.countOne": {
+    "defaultMessage": "'{count}' pinned",
+    "description": "Count at the end of the row of pins, for one page, the quoted placeholder being filled in the browser."
+  },
+  "pins.filter": {
+    "defaultMessage": "Filter",
+    "description": "Placeholder and name of the field filtering the menu of the pinned pages."
+  },
+  "pins.label": {
+    "defaultMessage": "Pinned",
+    "description": "Small capital label opening the row of the pinned pages under the bar."
+  },
+  "pins.pages": {
+    "defaultMessage": "Pinned pages",
+    "description": "Accessible name of the row of the pinned pages under the bar."
+  },
+  "pins.pin": {
+    "defaultMessage": "Pin",
+    "description": "Button of the page header that pins the page, while it is not pinned."
+  },
+  "pins.pinned": {
+    "defaultMessage": "Pinned",
+    "description": "The same button, pressed, while the page is pinned; pressing it again unpins the page."
+  },
+  "pins.removeAll": {
+    "defaultMessage": "Remove all",
+    "description": "Button at the foot of the menu of the pinned pages that removes every pin, after confirmation."
+  },
+  "pins.unpin": {
+    "defaultMessage": "Unpin '{title}'",
+    "description": "Accessible name of the cross removing one pinned page, the quoted placeholder being filled in the browser with the title of the page."
+  }
+}

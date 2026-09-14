@@ -145,7 +145,7 @@
   border-block-start: 1px solid var(--color-border);
 }
 
-/* Open, the drawer takes the whole screen: the bar stays at the top with ✕ and the name, the search field comes first, then the spaces, the tree and the links, the mode switch at the foot. The button of the trail waits behind it. The drawer exists under the width where the bar has room for everything. */
+/* Open, the drawer takes the whole screen: the bar stays at the top with ✕ and the name, the search field comes first, then the spaces, the tree and the links, the mode switch at the foot. The drawer exists under the width where the bar has room for everything. */
 
 @media (width < 68.75rem) {
   .site-header:has(.site-drawer[open]) {
@@ -157,10 +157,6 @@
 
   body:has(.site-drawer[open]) {
     overflow: hidden;
-  }
-
-  .site-drawer[open] ~ concordance-island[data-island="trail"] {
-    display: none;
   }
 
   /* The summary and the content of the open drawer lay out as two items of the bar: the button in the first row, the content after the search field. */

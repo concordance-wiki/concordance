@@ -38,7 +38,7 @@ const islands = [
   { name: "tabs", file: "tabs-00000000.js", bytes: 0 },
   { name: "toc", file: "toc-00000000.js", bytes: 0 },
   { name: "panels", file: "panels-00000000.js", bytes: 0 },
-  { name: "trail", file: "trail-00000000.js", bytes: 0 },
+  { name: "pins", file: "pins-00000000.js", bytes: 0 },
 ];
 
 /** Loads a rendered page into the test document, root attributes included, so that axe sees the page as served. */

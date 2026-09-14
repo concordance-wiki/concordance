@@ -21,7 +21,7 @@ const islands = [
   { name: "tabs", file: "tabs-00000000.js", bytes: 0 },
   { name: "toc", file: "toc-00000000.js", bytes: 0 },
   { name: "panels", file: "panels-00000000.js", bytes: 0 },
-  { name: "trail", file: "trail-00000000.js", bytes: 0 },
+  { name: "pins", file: "pins-00000000.js", bytes: 0 },
 ];
 
 describe("skeletonOf keeps the structure of a page and drops its content", () => {

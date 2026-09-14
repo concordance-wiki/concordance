@@ -11,11 +11,11 @@ import { DOCUMENT_VIEWER_ISLAND } from "../theme/default/document-viewer.js";
 import { MENTIONS_ISLAND } from "../theme/default/mentions-island.js";
 import { MODE_SWITCH_ISLAND } from "../theme/default/mode-switch.js";
 import { PANELS_ISLAND } from "../theme/default/panel-handle.js";
+import { PINS_ISLAND } from "../theme/default/pins.js";
 import { SEARCH_ISLAND } from "../search/shared.js";
 import { defaultUiComponents } from "../theme/default/plugin.js";
 import { TABS_ISLAND } from "../theme/default/tabs.js";
 import { TOC_ISLAND } from "../theme/default/toc.js";
-import { TRAIL_ISLAND } from "../theme/default/trail.js";
 
 /** The bundle of the PDF viewer, imported on demand by the document island, never by a page. */
 export const VIEWER_ISLAND = "viewer-pdf";
@@ -79,6 +79,10 @@ export function defaultIslands(): IslandEntry[] {
       entry: fileURLToPath(new URL("./panels.client", import.meta.url)),
     },
     {
+      name: PINS_ISLAND,
+      entry: fileURLToPath(new URL("./pins.client", import.meta.url)),
+    },
+    {
       name: SEARCH_ISLAND,
       entry: fileURLToPath(new URL("./search.client", import.meta.url)),
     },
@@ -89,10 +93,6 @@ export function defaultIslands(): IslandEntry[] {
     {
       name: TOC_ISLAND,
       entry: fileURLToPath(new URL("./toc.client", import.meta.url)),
-    },
-    {
-      name: TRAIL_ISLAND,
-      entry: fileURLToPath(new URL("./trail.client", import.meta.url)),
     },
     ...defaultUiComponents().map(islandOf),
   ];

@@ -4,6 +4,7 @@ import type { KeywordPageLabels, KeywordPageProps, Passage, PassageGroup } from 
 import { useSlot } from "../context.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 
@@ -124,6 +125,7 @@ export function KeywordPage({
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
           <h1 class="keyword-title">{entity.title}</h1>
+          <PinButton />
           <p class="entity-badge">
             <span class="badge badge-noteless">{text.noDefinition}</span>
             {usedSince !== undefined && (

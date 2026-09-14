@@ -21,7 +21,7 @@ export const CSS_FILES = {
     "chrome/search-field.css",
     "chrome/links.css",
     "chrome/mode-switch.css",
-    "chrome/trail.css",
+    "chrome/pins.css",
     "chrome/footer.css",
     "chrome/measure.css",
     "pages/entity-page.css",

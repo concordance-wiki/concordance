@@ -43,6 +43,11 @@
     pointer-events: auto;
   }
 
+  /* Served hidden until its script wires it: no dead control shows without JavaScript. */
+  .panel-handle[hidden] {
+    display: none;
+  }
+
   .panel-handle:hover {
     color: var(--color-ink);
   }

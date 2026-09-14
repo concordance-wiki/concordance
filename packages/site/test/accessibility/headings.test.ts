@@ -119,7 +119,6 @@ describe("L9-08 headings, skip link, focus, tab order and keyboard shortcuts on 
           '<details class="site-drawer"',
           '<a class="site-title"',
           '<details class="site-search-fold">',
-          '<concordance-island data-island="trail"',
           '<concordance-island data-island="mode-switch"',
           '<main id="main">',
           "</main>",
@@ -166,10 +165,10 @@ describe("L9-08 headings, skip link, focus, tab order and keyboard shortcuts on 
           "1",
           "@media (width < 43.75rem)",
         ],
-        // The desktop bar: the links of the drawer after the field, the trail and the switch at the end.
+        // The desktop bar: the links of the drawer after the field, the switch at the end.
         [".site-drawer", "1", "@media (min-width: 68.75rem)"],
         [
-          '.site-nav > concordance-island[data-island="trail"], .site-nav > concordance-island[data-island="mode-switch"]',
+          '.site-nav > concordance-island[data-island="mode-switch"]',
           "2",
           "@media (min-width: 68.75rem)",
         ],

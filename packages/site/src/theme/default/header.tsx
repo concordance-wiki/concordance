@@ -5,8 +5,8 @@ import { defaultHeaderLabels, Drawer } from "./drawer.js";
 import { labels } from "./labels.js";
 import { ModeSwitch } from "./mode-switch.js";
 import { Panels } from "./panel-handle.js";
+import { Pins } from "./pins.js";
 import { SearchGlyph, SearchIsland } from "./search-island.js";
-import { Trail } from "./trail.js";
 
 /** The logo is decorative: the site title follows it as text, so an inline SVG is hidden from assistive technology. */
 function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
@@ -20,9 +20,9 @@ function Logo({ logo }: { logo: HeaderLogo }): JSX.Element {
 /**
  * The bar: the drawer button, the mark and the site name, the search field folded behind a
  * button where the bar is too narrow for it (the magnifier alone on the phone, the word with it
- * on the tablet), the trail folded behind its button once its script lists a page, the mode
- * switch; the links stand in the drawer, which the stylesheet keeps in view in the bar where it
- * has room. After the bar, the empty island whose script folds the side panels of the page.
+ * on the tablet), the mode switch; the links stand in the drawer, which the stylesheet keeps in
+ * view in the bar where it has room. After the bar, the island whose script draws the row of
+ * the pages the reader pinned, and the empty one whose script folds the side panels of the page.
  */
 export function Header({
   siteTitle,
@@ -32,7 +32,7 @@ export function Header({
   spaces,
   space,
   search,
-  trail,
+  pins,
   panels,
   drawerOpen = false,
   labels: given = {},
@@ -64,9 +64,9 @@ export function Header({
             />
           </details>
         )}
-        <Trail {...(trail === undefined ? {} : { trail })} />
         <ModeSwitch label={text.darkMode} />
       </nav>
+      <Pins {...(pins === undefined ? {} : { pins })} />
       <Panels {...(panels === undefined ? {} : { panels })} />
     </header>
   );

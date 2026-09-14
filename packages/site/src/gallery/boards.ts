@@ -145,6 +145,13 @@ const boards = [
     screen: "panels/side-panel",
   },
   {
+    id: "B22",
+    title: "Pinned pages",
+    caption:
+      "The pages the reader chose to keep, as a row of tabs under the bar, pinned and unpinned by hand.",
+    screen: "panels/pinned-pages",
+  },
+  {
     id: "todo",
     title: "To-do page",
     caption:

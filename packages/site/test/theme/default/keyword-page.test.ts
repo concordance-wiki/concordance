@@ -7,6 +7,7 @@ import type { EntityPageProps, KeywordPageProps } from "../../../src/slots.js";
 import { KeywordPage, markedContext } from "../../../src/theme/default/keyword-page.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
 import { corporateKeywordPage, entityPage, keywordPage } from "../../../src/gallery/fixtures.js";
+import { PIN_BUTTON } from "../../helpers/handles.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 import { NEIGHBOURHOOD_ICON } from "../../helpers/neighbourhood-icon.js";
 
@@ -118,7 +119,7 @@ describe("KeywordPage", () => {
   it("dots the title, marks the line under it as having no definition and says since when the word is used", () => {
     const html = renderCorporate();
     expect(html).toContain(
-      '<h1 class="keyword-title">build summary</h1><p class="entity-badge"><span class="badge badge-noteless">No definition</span><time class="keyword-since" datetime="2026-03-12">Used since March 2026</time></p>',
+      `<h1 class="keyword-title">build summary</h1>${PIN_BUTTON}<p class="entity-badge"><span class="badge badge-noteless">No definition</span><time class="keyword-since" datetime="2026-03-12">Used since March 2026</time></p>`,
     );
     expect(render()).toContain(
       '<p class="entity-badge"><span class="badge badge-noteless">No definition</span></p>',

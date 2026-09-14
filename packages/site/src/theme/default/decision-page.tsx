@@ -20,6 +20,7 @@ import {
 } from "./entity-page.js";
 import { fill } from "./mention-list.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** The page of a decision: the same view model, the decision always there. */
@@ -169,6 +170,7 @@ export function DecisionPage({
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
           <h1>{entity.title}</h1>
+          <PinButton />
           <p class="entity-badge">
             <span class="badge decision-chip">
               {typeHref === undefined ? (

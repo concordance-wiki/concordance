@@ -12,6 +12,7 @@ import { useSlot } from "../context.js";
 import { DocumentText, positionAnchor, ViewerIsland, viewerPropsOf } from "./document-viewer.js";
 import { Breadcrumb, NeighbourhoodFold, PanelBlock } from "./entity-page.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { labels } from "./labels.js";
 import { SpaceTree } from "./space-tree.js";
 import { Tabs } from "./tabs.js";
@@ -226,6 +227,7 @@ export function DocumentPage(props: EntityPageProps & { document: DocumentPageVi
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={breadcrumbLabel} />}
         <header class="entity-header">
           <h1>{entity.title}</h1>
+          <PinButton />
           <p class="entity-badge document-line">
             <span class="badge">{view.kind}</span>
             {view.pages !== undefined && (

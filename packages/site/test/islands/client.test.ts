@@ -343,3 +343,57 @@ describe("the panels entry", () => {
     expect(handle.attributes["aria-expanded"]).toBe("false");
   });
 });
+
+describe("the pins entry", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it("wires every pins island of the document with the local storage and the window, drawing the stored pins", async () => {
+    const selectors: string[] = [];
+    let drawn = "";
+    const island = {
+      firstElementChild: null,
+      getAttribute: () =>
+        JSON.stringify({
+          base: "../",
+          labels: {
+            pin: "Pin",
+            pinned: "Pinned",
+            label: "Pinned",
+            pages: "Pinned pages",
+            countOne: "{count} pinned",
+            countMany: "{count} pinned",
+            unpin: "Unpin {title}",
+            all: "All pinned",
+            filter: "Filter",
+            removeAll: "Remove all",
+            confirmRemoveAll: "Remove every pinned page?",
+          },
+        }),
+      set innerHTML(value: string) {
+        drawn = value;
+      },
+      querySelector: () => null,
+      addEventListener: () => undefined,
+    };
+    vi.stubGlobal("document", {
+      querySelectorAll: (selector: string) => {
+        selectors.push(selector);
+        return [island];
+      },
+      querySelector: () => null,
+    });
+    vi.stubGlobal("localStorage", {
+      getItem: () => JSON.stringify({ entries: [{ id: "glossary/source", title: "Source" }] }),
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+    vi.stubGlobal("window", { addEventListener: () => undefined, confirm: () => false });
+    await import("../../src/islands/pins.client.js");
+    expect(selectors).toEqual(['concordance-island[data-island="pins"]']);
+    expect(drawn).toContain('<nav class="pins" aria-label="Pinned pages">');
+    expect(drawn).toContain('<a href="../glossary/source/index.html">Source</a>');
+  });
+});

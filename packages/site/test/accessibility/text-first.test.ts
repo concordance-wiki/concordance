@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_MENTIONS_INLINE } from "../../src/build/mentions.js";
-import { withoutHandles } from "../helpers/handles.js";
+import { withoutHiddenControls } from "../helpers/handles.js";
 import { count } from "../helpers/html.js";
 import { documents, mainOf, states, textOf, withoutIslands, withoutScripts } from "./pages.js";
 
@@ -179,7 +179,7 @@ describe("L9-08 text first: the main content of every page in the served HTML, r
       const keyword = states.find((state) => state.path === "keyword-page-corporate.html");
       const main = mainOf(withoutScripts(keyword?.html ?? ""));
       expect(main).toContain('<details class="passage-more">');
-      expect(withoutHandles(main)).not.toContain("<button");
+      expect(withoutHiddenControls(main)).not.toContain("<button");
     });
   });
 });

@@ -39,7 +39,7 @@ export function paletteColours(palette: ThemePalette): Record<PaletteColour, str
   };
 }
 
-/** The shadow of what floats over the page, the live results or the trail; none in the dark scheme, where the hierarchy is carried by the grounds and the rules alone. */
+/** The shadow of what floats over the page, the live results or the menu of the pinned pages; none in the dark scheme, where the hierarchy is carried by the grounds and the rules alone. */
 const FLOAT_SHADOW: Readonly<Record<ColourScheme, string>> = {
   light: "0 6px 18px rgb(0 0 0 / 10%)",
   dark: "none",
