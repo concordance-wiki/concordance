@@ -16,6 +16,7 @@ import { useSectionPart, useSlot } from "../context.js";
 import { AttributeList } from "./attributes.js";
 import { DocumentBlock } from "./document-viewer.js";
 import { labels } from "./labels.js";
+import { PageNotice } from "./page-notice.js";
 import { fill } from "./mention-list.js";
 import { NeighbourhoodIcon } from "./neighbourhood.js";
 import { PanelBlock } from "./panel-block.js";
@@ -298,6 +299,7 @@ export function EntityPage({
   mapOpen = false,
   folded = [],
   pinned = false,
+  notice,
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
@@ -333,6 +335,7 @@ export function EntityPage({
             {space !== undefined && <SpaceMark space={space} label={text.inSpace} />}
           </p>
         </header>
+        {notice !== undefined && <PageNotice {...notice} />}
         <article class="entity-body">
           {sections.map((section) => (
             <NoteSection

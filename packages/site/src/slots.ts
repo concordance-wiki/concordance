@@ -706,6 +706,30 @@ export interface DocumentPageLabels {
   reportedNote: string;
 }
 
+/** One exit of a notice: a link, drawn filled for the first and bordered for the others; `download` makes it save the file. */
+export interface NoticeExit extends Link {
+  download?: string;
+}
+
+/**
+ * A notice on a page whose datum is missing, the only banner the site allows: the fact in
+ * plain words, what stays reachable, the exits, and the finding the build recorded behind a
+ * disclosure, the cause first and the check identifier after it.
+ */
+export interface PageNotice {
+  lead: string;
+  detail: string;
+  exits: NoticeExit[];
+  finding?: {
+    /** The control unfolding the finding: "Why this failure?". */
+    label: string;
+    /** The cause as the build worded it. */
+    cause: string;
+    /** The identifier of the check, written after the cause, never alone. */
+    check: string;
+  };
+}
+
 /** One representation of a document as the panel of the representations lists it: its name, its state. */
 export interface DocumentRepresentation {
   /** `.pptx`, `.pdf preview`, `text`. */
@@ -1007,6 +1031,8 @@ export interface EntityPageProps {
   document?: DocumentPageView;
   /** What the page of a `decision` entity lays out beyond the generic template; absent for every other page. */
   decision?: DecisionProps;
+  /** The notice under the title when a datum of the page is missing: an `api` whose declared contract could not be read. */
+  notice?: PageNotice;
 }
 
 export interface Passage {

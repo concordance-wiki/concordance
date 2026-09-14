@@ -23,6 +23,8 @@ import type {
   Neighbour,
   NeighbourhoodLabels,
   NeighbourhoodProps,
+  NoticeExit,
+  PageNotice,
   PreviewFailure,
   Section,
   SourceRef,
@@ -932,6 +934,36 @@ function breadcrumbByShape(
  * when every note of its space is dated, the tree is drawn by year and month and the breadcrumb
  * names the month, by year alone for a decision.
  */
+/** The check the contract import reports an `api` whose declared contract it could not read under. */
+export const CONTRACT_UNREACHABLE = "W-CONTRACT-UNREACHABLE";
+
+/**
+ * The notice of an `api` whose declared contract the build could not read, from the finding it
+ * recorded for the entity: the fact, what remains, the declared address as an exit when it is
+ * one, the finding behind its disclosure; none for any other page.
+ */
+export function contractNoticeOf(context: SiteContext, entity: Entity): PageNotice | undefined {
+  const finding = context.model.findings.find(
+    (candidate) => candidate.check === CONTRACT_UNREACHABLE && candidate.entity === entity.id,
+  );
+  if (finding === undefined) return undefined;
+  const location = entity.attributes["contract"];
+  const exits: NoticeExit[] =
+    typeof location === "string" && isContractUrl(location)
+      ? [{ label: message(context, "api.openContract"), href: location }]
+      : [];
+  return {
+    lead: message(context, "api.contractUnreachable"),
+    detail: message(context, "api.contractUnreachableDetail"),
+    exits,
+    finding: {
+      label: message(context, "document.whyFailed"),
+      cause: finding.message,
+      check: finding.check,
+    },
+  };
+}
+
 export function entityPageOf(
   context: SiteContext,
   entity: Entity,
@@ -941,6 +973,7 @@ export function entityPageOf(
   const documents = documentsOf(context, page, entity, options.viewer);
   const document = documentPageOf(context, entity, documents);
   const contract = contractOf(context, page, entity);
+  const notice = contract === undefined ? contractNoticeOf(context, entity) : undefined;
   const declaration = declarationOf(context, entity.type);
   const otherAttributes = othersOf(context, entity);
   const changed = changedOf(context, entity);
@@ -998,5 +1031,6 @@ export function entityPageOf(
     ...(meeting === undefined ? {} : { meeting }),
     ...(document === undefined ? {} : { document }),
     ...(decision === undefined ? {} : { decision }),
+    ...(notice === undefined ? {} : { notice }),
   };
 }

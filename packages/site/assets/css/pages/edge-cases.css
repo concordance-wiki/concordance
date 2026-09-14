@@ -207,15 +207,9 @@ summary.button-secondary::before {
   line-height: 1.6;
 }
 
-/* The document whose conversion failed: the notice ruled in the accent, then the extracted text page by page. */
+/* The notice of a page whose datum is missing, ruled in the accent: under the title of an interface whose contract could not be read, in place of the rendering of a document whose conversion failed. */
 
-.document-failure {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.document-notice {
+.page-notice {
   display: flex;
   flex-direction: column;
   gap: 0.5625rem;
@@ -228,53 +222,65 @@ summary.button-secondary::before {
   background: var(--color-surface);
 }
 
-.document-notice p {
+.page-notice p {
   margin: 0;
 }
 
-.document-notice-lead {
+.page-notice-lead {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.45;
 }
 
-.document-notice-detail {
+.page-notice-detail {
   color: var(--color-muted);
   font-size: 0.875rem;
   line-height: 1.7;
 }
 
-.document-notice-exits {
+.page-notice-exits {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5625rem;
   margin-block-start: 0.125rem;
 }
 
-.document-notice-exits .button-primary,
-.document-notice-exits .button-secondary {
+.page-notice-exits .button-primary,
+.page-notice-exits .button-secondary {
   min-block-size: 2.5rem;
   padding: 0 0.9375rem;
   font-size: 0.8125rem;
 }
 
-.document-why {
+.page-notice-why {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5625rem;
 }
 
-.document-why > p {
+.page-notice-why > p {
   flex-basis: 100%;
   color: var(--color-muted);
   font-size: 0.8125rem;
   line-height: 1.6;
 }
 
-.document-why code {
+.page-notice-why code {
   color: var(--color-label);
   font-size: 0.8125rem;
+}
+
+/* The notice under the title of an entity page keeps the measure of the text; the block of a document whose conversion failed stacks it over the extracted text. */
+
+.entity-header + .page-notice {
+  margin-block: 0 var(--space-4);
+}
+
+.document-failure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .document-extracted {
