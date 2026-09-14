@@ -142,6 +142,17 @@ jobs:
       - run: pnpm build
       - name: Pack every published package
         run: pnpm -r --filter './packages/**' --filter './plugins/**' --filter './presets/**' pack --pack-destination "$GITHUB_WORKSPACE/$ASSETS"
+      - name: No workspace protocol left in a packed manifest
+        # pnpm pack rewrites the workspace:* pins to the version; a tarball that still carries
+        # one cannot be installed by npm, and must never reach the release nor the registry.
+        working-directory: ${{ env.ASSETS }}
+        run: |
+          for tarball in *.tgz; do
+            if tar -xzOf "$tarball" package/package.json | grep -q '"workspace:'; then
+              echo "::error::$tarball carries a workspace: dependency"
+              exit 1
+            fi
+          done
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: binary-*
