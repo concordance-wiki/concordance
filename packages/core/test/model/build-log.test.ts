@@ -122,11 +122,30 @@ describe("summarize", () => {
       sources: 1,
       files: 4,
       findings: [],
-      lock: { separated: 4, merged: 1, rejected_terms: 12 },
+      lock: { domains: 2, separated: 4, merged: 1, rejected_terms: 12 },
     });
-    expect(Object.keys(summary.lock ?? {})).toEqual(["rejected_terms", "merged", "separated"]);
-    expect(summary.lock).toEqual({ rejected_terms: 12, merged: 1, separated: 4 });
+    expect(Object.keys(summary.lock ?? {})).toEqual([
+      "rejected_terms",
+      "merged",
+      "separated",
+      "domains",
+    ]);
+    expect(summary.lock).toEqual({ rejected_terms: 12, merged: 1, separated: 4, domains: 2 });
     expect("lock" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
+  });
+
+  it("carries the suggested domains, copied with their keys in order, only when the build proposed some", () => {
+    const summary = summarize({
+      sources: 1,
+      files: 4,
+      findings: [],
+      domains: [{ notes: ["specs/roles/maintainer"], degree: 14, pivot: "glossary/check" }],
+    });
+    expect(summary.domains).toEqual([
+      { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
+    ]);
+    expect(Object.keys(summary.domains?.[0] ?? {})).toEqual(["pivot", "degree", "notes"]);
+    expect("domains" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
   });
 
   it("counts entities per type and links per method, keys sorted, a method once per link", () => {
@@ -301,13 +320,30 @@ describe("serializeBuildLog", () => {
   });
 
   it("writes the lock counts after the duplicate counts only when the summary holds them", () => {
-    const lock = { separated: 4, merged: 1, rejected_terms: 12 };
+    const lock = { domains: 2, separated: 4, merged: 1, rejected_terms: 12 };
     const text = serializeBuildLog({ ...log, summary: { ...log.summary, lock } });
     expect(text).toContain(
-      '    "lock": {\n      "rejected_terms": 12,\n      "merged": 1,\n      "separated": 4\n    }\n  },\n',
+      '    "lock": {\n      "rejected_terms": 12,\n      "merged": 1,\n      "separated": 4,\n      "domains": 2\n    }\n  },\n',
     );
-    expect(parse(text).summary.lock).toEqual({ rejected_terms: 12, merged: 1, separated: 4 });
+    expect(parse(text).summary.lock).toEqual({
+      rejected_terms: 12,
+      merged: 1,
+      separated: 4,
+      domains: 2,
+    });
     expect(serializeBuildLog(log)).not.toContain("lock");
+  });
+
+  it("writes the suggested domains after the lock counts only when the summary holds them", () => {
+    const domains = [{ notes: ["specs/roles/maintainer"], degree: 14, pivot: "glossary/check" }];
+    const text = serializeBuildLog({ ...log, summary: { ...log.summary, domains } });
+    expect(text).toContain(
+      '    "domains": [\n      {\n        "pivot": "glossary/check",\n        "degree": 14,\n        "notes": [\n          "specs/roles/maintainer"\n        ]\n      }\n    ]\n  },\n',
+    );
+    expect(parse(text).summary.domains).toEqual([
+      { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
+    ]);
+    expect(serializeBuildLog(log)).not.toContain("domains");
   });
 
   it("writes the summary and severity keys in a fixed order whatever the input order", () => {

@@ -139,11 +139,12 @@ describe("buildEntity", () => {
     ]);
   });
 
-  it("files the entity under its application and domain and keeps a rule's application out of the attributes", () => {
+  it("files the entity under its application and domain, the origin of the domain recorded, and keeps a rule's application out of the attributes", () => {
     const built = build();
-    expect([built.entity.application, built.entity.domain]).toEqual([
+    expect([built.entity.application, built.entity.domain, built.entity.domain_origin]).toEqual([
       "concordance-cli",
       "inference/recognition",
+      "glob",
     ]);
     expect(Object.keys(built.entity)).toEqual([
       "id",
@@ -153,6 +154,7 @@ describe("buildEntity", () => {
       "locale",
       "application",
       "domain",
+      "domain_origin",
       "status",
       "type_origin",
       "graph",
@@ -166,10 +168,11 @@ describe("buildEntity", () => {
         frontmatter: { application: "concordance-service", domain: "quality" },
       }),
     });
-    expect([declared.entity.application, declared.entity.domain]).toEqual([
-      "concordance-service",
-      "quality",
-    ]);
+    expect([
+      declared.entity.application,
+      declared.entity.domain,
+      declared.entity.domain_origin,
+    ]).toEqual(["concordance-service", "quality", "frontmatter"]);
     expect(declared.findings).toEqual([]);
   });
 
@@ -180,7 +183,10 @@ describe("buildEntity", () => {
       document: document({ frontmatter: { type: "gadget", colour: "blue" } }),
     });
     expect("application" in orphan.entity).toBe(false);
-    expect(orphan.entity.domain).toBe("unclassified");
+    expect([orphan.entity.domain, orphan.entity.domain_origin]).toEqual([
+      "unclassified",
+      "unclassified",
+    ]);
     expect(orphan.findings.map((finding) => [finding.check, finding.entity])).toEqual([
       ["W-TYPE-UNKNOWN", undefined],
       ["W-ATTRIBUTE-UNKNOWN", "specs/misc/thing"],

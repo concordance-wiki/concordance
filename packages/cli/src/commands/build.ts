@@ -16,6 +16,7 @@ import {
   type ModelSource,
   type PluginLoaderDependencies,
   type PluginRegistry,
+  type SuggestedDomain,
 } from "@concordance-wiki/core";
 import { formatDuplicateStats } from "@concordance-wiki/inference";
 import { ingestSources, type IngestedSource } from "@concordance-wiki/ingest";
@@ -78,9 +79,20 @@ function countLines(counts: Record<string, number>): string[] {
   return Object.entries(counts).map(([key, count]) => `  ${key}: ${String(count)}`);
 }
 
+/** The suggested domains section: every pivot that reaches an unclassified note, with its degree and the notes. */
+function formatSuggestedDomains(domains: readonly SuggestedDomain[]): string[] {
+  return [
+    `suggested domains: ${String(domains.length)}`,
+    ...domains.map(
+      ({ pivot, degree, notes }) =>
+        `  ${pivot} (degree ${String(degree)}): ${String(notes.length)} note(s): ${notes.join(", ")}`,
+    ),
+  ];
+}
+
 export function formatSummary(summary: BuildLog["summary"]): string[] {
   const { bySeverity, byCheck } = summary.findings;
-  const { keywords, duplicates, lock } = summary;
+  const { keywords, duplicates, lock, domains } = summary;
   const total = (counts: Record<string, number>): number =>
     Object.values(counts).reduce((sum, count) => sum + count, 0);
   return [
@@ -101,8 +113,9 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
     ...(lock === undefined
       ? []
       : [
-          `lock decisions applied: rejected_terms ${String(lock.rejected_terms)}, merged ${String(lock.merged)}, separated ${String(lock.separated)}`,
+          `lock decisions applied: rejected_terms ${String(lock.rejected_terms)}, merged ${String(lock.merged)}, separated ${String(lock.separated)}, domains ${String(lock.domains)}`,
         ]),
+    ...(domains === undefined ? [] : formatSuggestedDomains(domains)),
     `findings: error ${String(bySeverity.error)}, warning ${String(bySeverity.warning)}, info ${String(bySeverity.info)}`,
     ...countLines(byCheck),
   ];
@@ -260,6 +273,7 @@ export async function buildCommand(
       keywords: result.keywords,
       duplicates: result.duplicates,
       ...(lock.lock === undefined ? {} : { lock: lockCountsOf(lock.lock) }),
+      ...(result.suggestedDomains === undefined ? {} : { domains: result.suggestedDomains }),
     }),
     ...(result.contracts.length === 0 ? {} : { contracts: result.contracts }),
     findings: result.findings,

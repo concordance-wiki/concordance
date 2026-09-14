@@ -51,6 +51,7 @@ describe("buildResourceEntity", () => {
       locale: "en",
       application: "concordance-cli",
       domain: "inference/recognition",
+      domain_origin: "glob",
       status: "draft",
       type_origin: "source",
       graph: "documents-only",

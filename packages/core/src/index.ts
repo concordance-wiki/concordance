@@ -64,6 +64,7 @@ export {
   type DuplicateCounts,
   type KeywordCounts,
   type LockCounts,
+  type SuggestedDomain,
 } from "./model/build-log.js";
 export {
   compareContracts,
@@ -74,6 +75,7 @@ export {
 } from "./model/contract.js";
 export {
   compareEntities,
+  type DomainOrigin,
   type Entity,
   type EntityGraph,
   type EntityRepresentation,

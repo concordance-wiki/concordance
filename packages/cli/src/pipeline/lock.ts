@@ -45,5 +45,6 @@ export function lockCountsOf(lock: LockFile): LockCounts {
     rejected_terms: lock.rejected_terms?.length ?? 0,
     merged: lock.duplicates?.merged?.length ?? 0,
     separated: lock.duplicates?.separated?.length ?? 0,
+    domains: Object.keys(lock.domains ?? {}).length,
   };
 }

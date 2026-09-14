@@ -4,6 +4,13 @@ import type { Locale } from "../config/types.js";
 export type TypeOrigin =
   "source" | `rule#${number}` | "suffix" | "frontmatter" | "contract" | "default";
 
+/**
+ * How the domain of an entity was decided, the `domain_origin` enumeration of the model schema:
+ * the frontmatter, a folder or a glob of the configuration, nothing (`unclassified`), the lock
+ * file, or the proposal of the emergent domains once asked to assign.
+ */
+export type DomainOrigin = "frontmatter" | "folder" | "glob" | "unclassified" | "lock" | "inferred";
+
 /** How the entity enters the graph: `documents-only` types are only ever the source of a `documents` relation. */
 export type EntityGraph = "full" | "documents-only";
 
@@ -39,6 +46,8 @@ export interface Entity {
   locale: Locale;
   application?: string;
   domain?: string;
+  /** Absent for an entity without a note of its own, a keyword page or an operation. */
+  domain_origin?: DomainOrigin;
   status: string;
   summary?: string;
   type_origin: TypeOrigin;

@@ -14,6 +14,7 @@ import type {
   LockFile,
   Neighbours,
   PluginRegistry,
+  SuggestedDomain,
 } from "@concordance-wiki/core";
 import { neighbourhoodOptions, neighbourhoodToModel } from "@concordance-wiki/inference";
 import type { IngestedSource } from "@concordance-wiki/ingest";
@@ -25,6 +26,7 @@ import { combineProducedLinks } from "./combine.js";
 import { keywordNeighbours } from "./companions.js";
 import { buildDictionaries, corpusStopwords } from "./dictionary.js";
 import { displayedNeighbourhoodBlock } from "./display.js";
+import { proposeDomains, withoutAnswered } from "./domains.js";
 import {
   documentsWithoutMarkdown,
   readDocuments,
@@ -91,14 +93,16 @@ export interface PipelineResult {
   unconverted: number;
   /** The text of every note pseudonymisation rewrote, by `<source>/<path>`, which the fragments render in place of the file. */
   notes: Map<string, string>;
+  /** The domains the neighbourhood proposes; absent while `inference.domains` is unset. */
+  suggestedDomains?: SuggestedDomain[];
 }
 
 /**
  * The inference chain, from the ingested sources to the blocks of the model, each step a pure
  * function of the previous ones: parse, documents, transcripts pseudonymised, type, notes and
  * documents of the scope pseudonymised, plugin sources, operation notes, twin resources,
- * dictionary, scan, links, combination, relation typing, keywords, documents without a note,
- * model checks, displayed neighbourhood.
+ * dictionary, scan, links, combination, relation typing, keywords, domains promoted or
+ * proposed, documents without a note, model checks, displayed neighbourhood.
  */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
   const { config, profile, sources, fs, clock } = input;
@@ -221,9 +225,17 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   });
   const entities = [...twins.entities, ...keywords.entities];
   const links = repointLinks(refined.links, twins.folded, profile);
+  const domains = proposeDomains({
+    entities,
+    links,
+    neighbourhood: produced.neighbourhood,
+    config,
+    dictionaries: dictionaries.byLocale,
+    ...(input.lock === undefined ? {} : { lock: input.lock }),
+  });
   const checked = runModelChecks({
     registry: input.checks,
-    entities,
+    entities: domains.entities,
     links,
     sources,
     profile,
@@ -237,7 +249,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...read.findings,
       ...pseudonymization.findings,
       ...transcripts.findings,
-      ...typed.findings,
+      ...withoutAnswered(typed.findings, domains.filed),
       ...contributed.findings,
       ...attached.findings,
       ...twins.findings,
@@ -245,14 +257,15 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       ...produced.findings,
       ...refined.findings,
       ...keywords.findings,
-      ...documentsWithoutMarkdown(twins.entities, scoped.resources),
+      ...domains.findings,
+      ...documentsWithoutMarkdown(domains.entities, scoped.resources),
       ...checked,
     ],
     config.checks,
   );
   return {
     files: sources.reduce((count, source) => count + source.files.length, 0),
-    entities,
+    entities: domains.entities,
     links,
     findings,
     candidates: {
@@ -270,7 +283,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       }),
     },
     displayedNeighbourhood: displayedNeighbourhoodBlock({
-      entities,
+      entities: domains.entities,
       links,
       config,
       profile,
@@ -285,5 +298,6 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     documents: scoped.resources,
     unconverted: read.unconverted,
     notes: scoped.notes,
+    ...(domains.suggested === undefined ? {} : { suggestedDomains: domains.suggested }),
   };
 }

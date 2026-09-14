@@ -1,23 +1,23 @@
-# Entities the engine must produce from this corpus, with their type and its origin.
+# Entities the engine must produce from this corpus, with their type and its origin, their domain and its origin.
 # Same structure as the English corpus; identifiers differ, types and origins do not.
-- { id: decisions/plafond-controle-en-amont, type: decision, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossaire/build, type: term, type_origin: source, application: concordance-cli, domain: unclassified }
-- { id: glossaire/entite, type: term, type_origin: source, application: concordance-cli, domain: publication }
-- { id: glossaire/lien, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossaire/lien-explicite, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: glossaire/mention-de-section, type: term, type_origin: source, application: concordance-cli, domain: inference }
-- { id: reunions/2026-03-12-atelier-liens, type: meeting, type_origin: source, application: concordance-cli, domain: inference }
-- { id: specs/api/requete-de-modele, type: api, type_origin: "rule#2", application: concordance-cli, domain: inference }
-- { id: specs/batchs/build-nocturne, type: batch, type_origin: "rule#6", application: concordance-cli, domain: inference }
-- { id: specs/ecrans/carte-de-voisinage, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/ecrans/page-entite, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication }
-- { id: specs/ecrans/panneau-des-mentions, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference }
-- { id: specs/objets/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: unclassified }
-- { id: specs/objets/entite, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication }
-- { id: specs/objets/lien, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference }
-- { id: specs/processus/confirmer-un-lien, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference }
-- { id: specs/qualite/determinisme/deux-builds-compares, type: rule, type_origin: suffix, application: concordance-cli, domain: qualite/determinisme }
-- { id: specs/qualite/politique-fail-on, type: rule, type_origin: suffix, application: concordance-cli, domain: qualite }
-- { id: specs/regles/plafond-du-lien-connexe, type: rule, type_origin: suffix, application: concordance-cli, domain: inference }
-- { id: specs/roles/mainteneur, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified }
-- { id: specs/tables/liens, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference }
+- { id: decisions/plafond-controle-en-amont, type: decision, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossaire/build, type: term, type_origin: source, application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: glossaire/entite, type: term, type_origin: source, application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: glossaire/lien, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossaire/lien-explicite, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: glossaire/mention-de-section, type: term, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: reunions/2026-03-12-atelier-liens, type: meeting, type_origin: source, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/api/requete-de-modele, type: api, type_origin: "rule#2", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/batchs/build-nocturne, type: batch, type_origin: "rule#6", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/ecrans/carte-de-voisinage, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/ecrans/page-entite, type: screen, type_origin: "rule#1", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/ecrans/panneau-des-mentions, type: screen, type_origin: "rule#1", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/objets/build, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: specs/objets/entite, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: publication, domain_origin: glob }
+- { id: specs/objets/lien, type: business_object, type_origin: "rule#3", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/processus/confirmer-un-lien, type: process, type_origin: "rule#4", application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/qualite/determinisme/deux-builds-compares, type: rule, type_origin: suffix, application: concordance-cli, domain: qualite/determinisme, domain_origin: folder }
+- { id: specs/qualite/politique-fail-on, type: rule, type_origin: suffix, application: concordance-cli, domain: qualite, domain_origin: folder }
+- { id: specs/regles/plafond-du-lien-connexe, type: rule, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }
+- { id: specs/roles/mainteneur, type: role, type_origin: "rule#5", application: concordance-cli, domain: unclassified, domain_origin: unclassified }
+- { id: specs/tables/liens, type: data_object, type_origin: suffix, application: concordance-cli, domain: inference, domain_origin: glob }

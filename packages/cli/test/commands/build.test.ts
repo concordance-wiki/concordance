@@ -1028,6 +1028,7 @@ describe("concordance build", () => {
       type_origin: string;
       application: string | null;
       domain: string;
+      domain_origin: string;
     }
     interface ExpectedLink {
       /** The note that carries the link; with `inverse`, the relation reads from `to` to `from`. */
@@ -1080,6 +1081,7 @@ describe("concordance build", () => {
       "E-ID-INVALID",
       "E-LINK-BROKEN",
       "E-TYPE-CONFLICT",
+      "I-DOMAIN-SUGGESTED",
       "I-REL-AMBIGUOUS",
       "I-TERM-HOMONYM",
       "W-API-CONSUMER-MISMATCH",
@@ -1230,15 +1232,16 @@ describe("concordance build", () => {
         expect(built.stderr.some((line) => line.startsWith("warning: accessibility"))).toBe(false);
       });
 
-      it("writes the entities of expected/entities.yaml with their type, origin, application and domain", () => {
+      it("writes the entities of expected/entities.yaml with their type, origin, application, domain and its origin", () => {
         const notes = built.model.entities.filter((entity) => entity.keyword !== true);
         expect(
-          notes.map(({ id, type, type_origin, application, domain }) => ({
+          notes.map(({ id, type, type_origin, application, domain, domain_origin }) => ({
             id,
             type,
             type_origin,
             application: application ?? null,
             domain: domain ?? "unclassified",
+            domain_origin: domain_origin ?? "unclassified",
           })),
         ).toEqual(expected(corpus, "entities.yaml") as ExpectedEntity[]);
       });
@@ -1516,7 +1519,19 @@ describe("concordance build", () => {
         const verdict = built.stdout.findIndex((line) => line.endsWith(": valid configuration"));
         expect(modelLines(built.stdout).slice(verdict + 1)).toEqual(formatSummary(summary));
         expect(summary.lock).toEqual(
-          corpus === "realistic/en" ? { rejected_terms: 1, merged: 0, separated: 1 } : undefined,
+          corpus === "realistic/en"
+            ? { rejected_terms: 1, merged: 0, separated: 1, domains: 1 }
+            : undefined,
+        );
+        // The realistic corpus asks for the proposal: three glossary terms reach the notes nobody filed.
+        expect(summary.domains?.map((domain) => [domain.pivot, domain.notes])).toEqual(
+          corpus === "realistic/en"
+            ? [
+                ["glossary/explicit-link", ["specs/roles/author"]],
+                ["glossary/source", ["glossary/contribution-point", "glossary/plugin"]],
+                ["glossary/twin-resources", ["glossary/cue"]],
+              ]
+            : undefined,
         );
         expect(Object.values(summary.entities).reduce((a, b) => a + b, 0)).toBe(
           built.model.entities.length,
@@ -1678,14 +1693,41 @@ describe("formatSummary", () => {
         entities: {},
         links: {},
         findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
-        lock: { rejected_terms: 12, merged: 1, separated: 4 },
+        lock: { rejected_terms: 12, merged: 1, separated: 4, domains: 2 },
       }),
     ).toEqual([
       "sources: 1",
       "files: 3",
       "entities: 0",
       "links: 0",
-      "lock decisions applied: rejected_terms 12, merged 1, separated 4",
+      "lock decisions applied: rejected_terms 12, merged 1, separated 4, domains 2",
+      "findings: error 0, warning 0, info 0",
+    ]);
+  });
+
+  it("lists the suggested domains after the lock decisions, each pivot with its degree and the notes it reaches", () => {
+    expect(
+      formatSummary({
+        sources: 1,
+        files: 3,
+        entities: {},
+        links: {},
+        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+        lock: { rejected_terms: 0, merged: 0, separated: 0, domains: 0 },
+        domains: [
+          { pivot: "glossary/check", degree: 14, notes: ["specs/roles/maintainer"] },
+          { pivot: "glossary/source", degree: 9, notes: ["glossary/plugin", "glossary/reader"] },
+        ],
+      }),
+    ).toEqual([
+      "sources: 1",
+      "files: 3",
+      "entities: 0",
+      "links: 0",
+      "lock decisions applied: rejected_terms 0, merged 0, separated 0, domains 0",
+      "suggested domains: 2",
+      "  glossary/check (degree 14): 1 note(s): specs/roles/maintainer",
+      "  glossary/source (degree 9): 2 note(s): glossary/plugin, glossary/reader",
       "findings: error 0, warning 0, info 0",
     ]);
   });

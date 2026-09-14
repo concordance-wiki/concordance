@@ -16,6 +16,8 @@ export interface BuildSummary {
   duplicates?: DuplicateCounts;
   /** The decisions of the lock file the build applied; absent when the configuration names no lock file. */
   lock?: LockCounts;
+  /** The domains the neighbourhood proposes, the pivots that reach a note best first; absent while `inference.domains` is unset. */
+  domains?: SuggestedDomain[];
 }
 
 /** The entries of `concordance.lock.yaml` the build applied, block by block. */
@@ -23,6 +25,15 @@ export interface LockCounts {
   rejected_terms: number;
   merged: number;
   separated: number;
+  domains: number;
+}
+
+/** One domain the neighbourhood proposes: its pivot, the pivot's degree, and the unclassified notes within the radius, at least one. */
+export interface SuggestedDomain {
+  pivot: string;
+  degree: number;
+  /** In code-unit order. */
+  notes: string[];
 }
 
 export interface KeywordCounts {
@@ -84,6 +95,7 @@ export function summarize(input: {
   keywords?: KeywordCounts;
   duplicates?: DuplicateCounts;
   lock?: LockCounts;
+  domains?: readonly SuggestedDomain[];
   entities?: readonly { type: string }[];
   links?: readonly { provenance: readonly { method: string }[] }[];
 }): BuildSummary {
@@ -112,6 +124,7 @@ export function summarize(input: {
         }),
     ...(input.duplicates === undefined ? {} : { duplicates: duplicateCounts(input.duplicates) }),
     ...(input.lock === undefined ? {} : { lock: lockCounts(input.lock) }),
+    ...(input.domains === undefined ? {} : { domains: suggestedDomains(input.domains) }),
   };
 }
 
@@ -121,7 +134,17 @@ function lockCounts(counts: LockCounts): LockCounts {
     rejected_terms: counts.rejected_terms,
     merged: counts.merged,
     separated: counts.separated,
+    domains: counts.domains,
   };
+}
+
+/** The proposals copied with their keys in a fixed order, the notes as listed. */
+function suggestedDomains(domains: readonly SuggestedDomain[]): SuggestedDomain[] {
+  return domains.map((domain) => ({
+    pivot: domain.pivot,
+    degree: domain.degree,
+    notes: [...domain.notes],
+  }));
 }
 
 /** The counts in a fixed key order, so that the log never depends on the producer's. */
@@ -210,6 +233,9 @@ export function serializeBuildLog(log: BuildLog): string {
         ? {}
         : { duplicates: duplicateCounts(log.summary.duplicates) }),
       ...(log.summary.lock === undefined ? {} : { lock: lockCounts(log.summary.lock) }),
+      ...(log.summary.domains === undefined
+        ? {}
+        : { domains: suggestedDomains(log.summary.domains) }),
     },
     contracts: log.contracts === undefined ? undefined : [...log.contracts].sort(compareContracts),
     // Absent keys stay absent: JSON.stringify drops undefined values.

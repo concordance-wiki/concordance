@@ -127,6 +127,7 @@ export function buildResourceEntity(input: BuildResourceEntityInput): BuiltResou
     locale: source.locale,
     ...(application.application === undefined ? {} : { application: application.application }),
     domain: domain.domain,
+    domain_origin: domain.origin,
     status: statusOf(profile),
     type_origin: resolved.origin,
     graph: profile.types[resolved.type]?.graph ?? "full",

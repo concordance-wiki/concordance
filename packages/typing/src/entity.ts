@@ -166,6 +166,7 @@ export function buildEntity(input: BuildEntityInput): BuiltEntity {
     locale: source.locale,
     ...(application.application === undefined ? {} : { application: application.application }),
     domain: domain.domain,
+    domain_origin: domain.origin,
     status: statusOf(frontmatter, profile),
     type_origin: resolved.origin,
     graph: profile.types[resolved.type]?.graph ?? "full",
