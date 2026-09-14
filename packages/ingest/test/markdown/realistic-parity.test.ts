@@ -251,6 +251,7 @@ describe("the expected results of the realistic corpus have the same structure i
     const english = checks("en");
     expect(checks("fr")).toEqual(english);
     expect([...new Set(english)]).toEqual([
+      "I-DOMAIN-SUGGESTED",
       "I-REL-AMBIGUOUS",
       "I-TERM-HOMONYM",
       "W-API-CONSUMER-MISMATCH",
