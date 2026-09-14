@@ -24,7 +24,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | `build` | object | — | — | Where the build writes, what its pages embed and when it fails. See [`build`](#build). |
 | `site` | object | — | — | Options of the generated pages. See [`site`](#site). |
 | `checks` | map of object | — | keys: pattern `^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$` | Overrides of the check registry, by check identifier: disable a check or change the severity of its findings. An identifier no loaded check registers is an execution error. See [`checks.*`](#checks). |
-| `lock` | string | — | — | Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; accepted but not read by the build in this version. |
+| `lock` | string | — | — | Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms and duplicates and stops on a missing or invalid file; its links are recorded, not read. |
 
 ## `project`
 

@@ -386,14 +386,15 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
-  it("accepts the lock key with a warning that it is ignored", () => {
+  it("accepts the lock key with a warning saying which blocks of the file are applied", () => {
     const result = validateConfig({ ...minimal, lock: "./concordance.lock.yaml" });
     expect(result.ok).toBe(true);
     expect(result.issues).toEqual([
       {
         severity: "warning",
         path: "lock",
-        message: expect.stringContaining("accepted but ignored") as string,
+        message:
+          "rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
       },
     ]);
   });
