@@ -222,7 +222,7 @@
 
 .space-word-list .chip {
   gap: var(--space-2);
-  min-block-size: 2.25rem;
+  min-block-size: 2.5rem;
   padding-inline: 0.75rem;
   font-size: 0.8125rem;
 }

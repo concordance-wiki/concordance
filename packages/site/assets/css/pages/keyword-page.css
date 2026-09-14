@@ -90,7 +90,7 @@
   align-items: center;
   gap: 0.625rem;
   margin: 0;
-  padding: var(--space-2) 0.9375rem;
+  padding: 0 0.9375rem;
   border-block-end: 1px solid var(--color-soft);
   background: var(--color-soft);
   font-size: 0.84375rem;
@@ -106,12 +106,14 @@
   line-height: 1;
 }
 
+/* The head of a page keeps its 40 px: the title is the target, the row carries no padding of its own. */
+
 .passage-title {
   flex: 1;
   min-inline-size: 0;
   display: inline-flex;
   align-items: center;
-  min-block-size: 1.5rem;
+  min-block-size: 2.5rem;
   color: var(--color-ink);
   font-weight: 600;
   line-height: 1.3;
