@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { checkPackaging, entryPoints, packList } from "../check-packaging.mjs";
+import { checkPackaging, entryPoints, packList, pnpmCommand } from "../check-packaging.mjs";
 
 const repository = join(import.meta.dirname, "../..");
 const licence = "GNU GENERAL PUBLIC LICENSE\n";
@@ -253,5 +253,33 @@ describe("packList", () => {
     expect(files).toContain("README.md");
     expect(files).toContain("LICENSE");
     expect(files).toContain("bin/concordance.js");
+  });
+});
+
+describe("pnpmCommand", () => {
+  it("runs the pnpm that runs the script, as node plus its entry file", () => {
+    expect(pnpmCommand({ npm_execpath: "/tools/pnpm/bin/pnpm.cjs" }, "/usr/bin/node")).toEqual([
+      "/usr/bin/node",
+      "/tools/pnpm/bin/pnpm.cjs",
+    ]);
+  });
+
+  it("ignores another package manager and falls back to the corepack next to node", () => {
+    expect(pnpmCommand({ npm_execpath: "/tools/npm/bin/npm-cli.js" }, "/usr/bin/node")).toEqual([
+      "/usr/bin/corepack",
+      "pnpm",
+    ]);
+    expect(pnpmCommand({}, "/usr/bin/node")).toEqual(["/usr/bin/corepack", "pnpm"]);
+  });
+
+  it("takes the pnpm of PNPM_HOME when it exists there", () => {
+    const home = mkdtempSync(join(tmpdir(), "pnpm-home-"));
+    writeFileSync(join(home, "pnpm"), "");
+    expect(pnpmCommand({ PNPM_HOME: home }, "/usr/bin/node")).toEqual([join(home, "pnpm")]);
+    expect(pnpmCommand({ PNPM_HOME: join(home, "absent") }, "/usr/bin/node")).toEqual([
+      "/usr/bin/corepack",
+      "pnpm",
+    ]);
+    rmSync(home, { recursive: true });
   });
 });
