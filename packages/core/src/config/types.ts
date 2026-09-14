@@ -119,6 +119,17 @@ export interface InferenceConfig {
   neighbours?: { k?: number };
   candidate_score?: number;
   duplicates?: DuplicatesConfig;
+  domains?: EmergentDomainsConfig;
+}
+
+/** `inference.domains`: domains proposed from the neighbourhood graph; absent, the step does not run. */
+export interface EmergentDomainsConfig {
+  /** Degree from which a term with a note becomes a pivot. */
+  min_neighbours: number;
+  /** Distance, in edges, within which a note belongs to a pivot; 3 at most. */
+  radius: number;
+  /** Whether the proposal files the unclassified notes it reaches; false by default. */
+  assign?: boolean;
 }
 
 /** `inference.duplicates`: how twin resources of one document are reconciled. */
@@ -260,6 +271,8 @@ export interface LockFile {
   links?: { accepted?: LockAcceptedLink[]; rejected?: LockRejectedLink[] };
   duplicates?: { merged?: [string, string][]; separated?: [string, string][] };
   rejected_terms?: string[];
+  /** The domain of a note by its identifier: a proposal promoted; an explicit declaration still wins. */
+  domains?: Record<string, string>;
 }
 
 export type LockValidation =

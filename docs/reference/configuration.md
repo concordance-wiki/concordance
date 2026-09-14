@@ -24,7 +24,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | `build` | object | — | — | Where the build writes, what its pages embed and when it fails. See [`build`](#build). |
 | `site` | object | — | — | Options of the generated pages. See [`site`](#site). |
 | `checks` | map of object | — | keys: pattern `^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$` | Overrides of the check registry, by check identifier: disable a check or change the severity of its findings. An identifier no loaded check registers is an execution error. See [`checks.*`](#checks). |
-| `lock` | string | — | — | Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms and duplicates and stops on a missing or invalid file; its links are recorded, not read. |
+| `lock` | string | — | — | Path of concordance.lock.yaml, the record of human decisions, relative to this configuration; the build applies its rejected_terms, duplicates and domains and stops on a missing or invalid file; its links are recorded, not read. |
 
 ## `project`
 
@@ -184,6 +184,7 @@ Thresholds and options of the recognition dictionary, the link producers, the ke
 | `neighbours` | object | — | — | Bound of the co-occurrence neighbourhood accumulated per node. See [`inference.neighbours`](#inferenceneighbours). |
 | `candidate_score` | number | `4` | at least 0 | Score from which a candidate expression yields W-TERM-UNDEFINED: the C-value of the expression multiplied by its IDF. |
 | `duplicates` | object | — | — | How the twin resources of one document (a deck, its notes, its transcript) are reconciled: the signals of a pair are added, capped at 1, and the total decides between a merge and a W-DUP-CANDIDATE finding. See [`inference.duplicates`](#inferenceduplicates). |
+| `domains` | object | — | — | Domains proposed from the neighbourhood graph: every term with a note whose degree reaches min_neighbours is a pivot, and every unclassified note within radius edges of one is a candidate for a domain named after it, reported as I-DOMAIN-SUGGESTED and listed in the build log. Absent, nothing is proposed. See [`inference.domains`](#inferencedomains). |
 
 ### `inference.ngrams`
 
@@ -227,6 +228,16 @@ How the twin resources of one document (a deck, its notes, its transcript) are r
 | `minhash_functions` | integer | `128` | at least 4 | Hash functions of a MinHash signature, four per LSH band. |
 | `merge_above` | number | `0.9` | 0 to 1 | Score strictly above which two resources merge into one entity with several representations. |
 | `candidate_above` | number | `0.5` | 0 to 1 | Score from which a pair that does not merge yields a W-DUP-CANDIDATE finding. |
+
+### `inference.domains`
+
+Domains proposed from the neighbourhood graph: every term with a note whose degree reaches min_neighbours is a pivot, and every unclassified note within radius edges of one is a candidate for a domain named after it, reported as I-DOMAIN-SUGGESTED and listed in the build log. Absent, nothing is proposed.
+
+| Key | Type | Default | Allowed values | Description |
+|---|---|---|---|---|
+| `min_neighbours` (required) | integer | — | at least 1 | Degree in the graph of links and co-occurrences from which a term becomes a pivot; stopwords and the rejected terms of the lock file never do. |
+| `radius` (required) | integer | — | 1 to 3 | Distance, in edges, within which a note belongs to a pivot; a note reached by several is attached to the closest, then to the one of highest degree. |
+| `assign` | boolean | `false` | — | Whether the proposal files the unclassified notes it reaches under the domain named after their pivot, with the origin inferred; a note with a declared domain is never touched. |
 
 ## `conversion`
 

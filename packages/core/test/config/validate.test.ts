@@ -224,6 +224,41 @@ describe("validateConfig against the published schema", () => {
     ]);
   });
 
+  it("accepts inference.domains with integer thresholds, the radius at most 3, and rejects the rest", () => {
+    const result = validateConfig({
+      ...minimal,
+      inference: { domains: { min_neighbours: 4, radius: 3, assign: true } },
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.config.inference?.domains).toEqual({
+        min_neighbours: 4,
+        radius: 3,
+        assign: true,
+      });
+    }
+    expect(issuesOf({ ...minimal, inference: { domains: { min_neighbours: 2 } } })).toEqual([
+      { path: "inference.domains.radius", message: "required key is missing", severity: "error" },
+    ]);
+    expect(
+      issuesOf({ ...minimal, inference: { domains: { min_neighbours: 0, radius: 4 } } }),
+    ).toEqual([
+      { path: "inference.domains.min_neighbours", message: "must be >= 1", severity: "error" },
+      { path: "inference.domains.radius", message: "must be <= 3", severity: "error" },
+    ]);
+    expect(
+      issuesOf({ ...minimal, inference: { domains: { min_neighbours: 1.5, radius: 0 } } }),
+    ).toEqual([
+      {
+        path: "inference.domains.min_neighbours",
+        message: "wrong type",
+        severity: "error",
+        expected: "integer",
+      },
+      { path: "inference.domains.radius", message: "must be >= 1", severity: "error" },
+    ]);
+  });
+
   it("accepts build.mentions_inline from zero up and rejects a negative or fractional count", () => {
     for (const count of [0, 1, 20, 500]) {
       const result = validateConfig({ ...minimal, build: { mentions_inline: count } });
@@ -477,7 +512,7 @@ describe("validateConfig beyond the schema", () => {
         severity: "warning",
         path: "lock",
         message:
-          "rejected_terms and duplicates of the lock file are applied; links are recorded, not read",
+          "rejected_terms, duplicates and domains of the lock file are applied; links are recorded, not read",
       },
     ]);
   });
