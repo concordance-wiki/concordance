@@ -9,7 +9,16 @@ export {
   schemaIssues,
   validateConfig,
 } from "./config/validate.js";
+export {
+  compileGitignore,
+  GITIGNORE_FILE,
+  parseGitignore,
+  readGitignore,
+  type GitignoreRule,
+  type GitignoreSource,
+} from "./glob/gitignore.js";
 export { compileGlobs, type PathMatcher } from "./glob/index.js";
+export { repositoryFiles, type RepositoryFilesInput } from "./glob/repository.js";
 export { resolveDuplicates, type Identified } from "./identity/duplicates.js";
 export {
   identifierFor,
