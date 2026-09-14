@@ -147,7 +147,7 @@ describe("KeywordPage", () => {
     expect(plain).not.toContain("create-note");
   });
 
-  it("lists the passages in corpus order under their summary, grouped by file with its type, its title and its count, each passage where it stands with the expression marked", () => {
+  it("lists the passages in corpus order under their summary, grouped by page with its type, its title and its count, each passage where it stands with the expression marked", () => {
     const html = renderCorporate();
     expectInOrder(html, [
       '<section class="keyword-body" aria-labelledby="passages-title"><h2 id="passages-title">The passages, in corpus order</h2><p class="keyword-summary">6 files.</p>',
@@ -155,12 +155,18 @@ describe("KeywordPage", () => {
       '<li class="passage"><a class="passage-at" href="../../glossary/build-log/#L6">line 6</a><q class="passage-text">The build log is the file; the <mark>build summary</mark> is what the command prints from it at the end.</q></li>',
       '<span class="badge">Meeting</span><a class="passage-title" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/">Keyword page threshold review</a><span class="passage-count">5</span>',
       '<a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L31">12:04</a>',
+      '<a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L58">22:40</a>',
+      '</ul><details class="passage-more"><summary>3 other passages</summary><ul class="passage-list"><li class="passage"><a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L73">28:17</a>',
       '<a class="passage-at" href="../../specs/meetings/2026-03-12-keyword-page-threshold-review/#L90">34:51</a><q class="passage-text">Participant-2: the <mark>Build summaries</mark> of the nightly build',
       '<span class="badge">Document</span><a class="passage-title" href="../../framing/roadmap-outline/">Roadmap outline</a>',
       '<a class="passage-at" href="../../framing/roadmap-outline/#L12">p. 12</a>',
     ]);
     expect(count(html, '<section class="passage-group">')).toBe(6);
     expect(count(html, '<li class="passage">')).toBe(17);
+    // The count of a page adds the folded passages to the two in view; a page of two or fewer has no fold.
+    expect(count(html, '<details class="passage-more">')).toBe(3);
+    expect(html).toContain("<summary>1 other passage</summary>");
+    expect(html).not.toContain('<details class="passage-files-more">');
     // A group without a title or a type, a passage without a worded location: the file label and the line stand in.
     const bare = render();
     expect(bare).toContain(
@@ -173,6 +179,21 @@ describe("KeywordPage", () => {
     expect(render({ passages: [], summary: "0 files." })).toContain(
       '<p class="keyword-summary">0 files.</p></section>',
     );
+  });
+
+  it("puts the files beyond the pages in view behind a disclosure worded as the button that shows them", () => {
+    const [first, second, ...rest] = corporateKeywordPage.passages;
+    const html = renderCorporate({
+      passages: first === undefined || second === undefined ? [] : [first, second],
+      morePassages: { label: "Show the 4 other files", groups: rest },
+    });
+    expect(count(html, '<section class="passage-group">')).toBe(6);
+    expect(html).toContain(
+      '</section><details class="passage-files-more"><summary>Show the 4 other files</summary><section class="passage-group">',
+    );
+    expect(html).toContain('<span class="passage-count">5</span>');
+    expectInOrder(html, ["Build log", "Nightly build", "passage-files-more", "Roadmap outline"]);
+    expectBalanced(html);
   });
 
   it("marks the expression only where the context holds it as written", () => {

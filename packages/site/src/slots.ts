@@ -793,13 +793,30 @@ export interface Passage {
   location?: string;
 }
 
+/** The passages of a page beyond the ones in view, behind a fold worded by its label. */
+export interface PassageFold {
+  /** The line that unfolds them, already localised: "3 other passages". */
+  label: string;
+  passages: Passage[];
+}
+
 export interface PassageGroup {
   file: Link;
   /** The title of the page the file belongs to; the file label stands in when absent. */
   title?: string;
   /** The label of the type of that page in the language of the site. */
   typeLabel?: string;
+  /** The passages in view: the first ones of the page, two when the page builder groups them. */
   passages: Passage[];
+  /** The passages beyond those in view; the count of the group adds them to the ones in view. */
+  folded?: PassageFold;
+}
+
+/** The pages beyond the ones in view, behind a disclosure worded as the button that shows them. */
+export interface PassageGroupFold {
+  /** The line that unfolds them, already localised: "Show the 4 other files". */
+  label: string;
+  groups: PassageGroup[];
 }
 
 /** The lead to write the missing note: its label, and the new-file page of the glossary on its forge, else the contribution address of the project; without an address the theme shows no lead. */
@@ -863,7 +880,10 @@ export interface KeywordPageProps {
   /** The sentence under the passages heading, "6 files.", already localised. */
   summary: string;
   /** Grouped by file, in corpus order. */
+  /** The passages grouped by page in corpus order, the first pages in view. */
   passages: PassageGroup[];
+  /** The pages beyond the ones in view, when the page builder folds them. */
+  morePassages?: PassageGroupFold;
   /** Expressions with a similar form, offered as a lead. */
   similar: SimilarExpression[];
   /** The note under that lead, already localised, which asserts no relation. */

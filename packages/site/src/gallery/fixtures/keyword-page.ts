@@ -280,13 +280,24 @@ const corporateFiles: { page: CitingPage; passages: LocatedPassage[] }[] = [
   },
 ];
 
-/** The passages grouped by file, each group with the title and the type of its page. */
-const corporatePassages: PassageGroup[] = corporateFiles.map(({ page, passages }) => ({
-  file: { label: page.path, href: `../../${page.id}/` },
-  title: page.title,
-  typeLabel: page.typeLabel,
-  passages,
-}));
+/** The passages grouped by page, each group with the title and the type of its page, two passages in view and the others folded under their count. */
+const corporatePassages: PassageGroup[] = corporateFiles.map(({ page, passages }) => {
+  const folded = passages.slice(2);
+  return {
+    file: { label: page.path, href: `../../${page.id}/` },
+    title: page.title,
+    typeLabel: page.typeLabel,
+    passages: passages.slice(0, 2),
+    ...(folded.length === 0
+      ? {}
+      : {
+          folded: {
+            label: `${String(folded.length)} other passage${folded.length === 1 ? "" : "s"}`,
+            passages: folded,
+          },
+        }),
+  };
+});
 
 /** The pages of the fixtures corpus that use the expression, every mention recognised: no note writes a link to a word without a page of its own. */
 export const corporateKeywordMentions: Mention[] = corporateFiles.flatMap(({ page, passages }) =>

@@ -41,50 +41,58 @@ function sourceRank(context: SiteContext, source: string): number {
 
 export { passageLocationOf } from "./mentions.js";
 
+/** How many passages of a page a keyword page shows in view; the others fold under their count. */
+export const PASSAGES_IN_VIEW = 2;
+
+/** How many pages a keyword page shows in view; the other files stand behind a disclosure. */
+export const PASSAGE_GROUPS_IN_VIEW = 6;
+
 /** A group of passages with the source it comes from, which orders the groups and names the spaces. */
 export interface LocatedGroup {
   source: string;
+  /** The first file of the page in path order, which orders the groups of a source. */
   path: string;
   group: PassageGroup;
 }
 
+/** Where a passage stands in the corpus: its file, then its line. */
+function byFileThenLine(a: FragmentPassage, b: FragmentPassage): number {
+  return byCodeUnit(a.path, b.path) || a.line - b.line;
+}
+
 /**
- * Passages grouped by file in corpus order, sources in declaration order then paths, the
- * passages of a file by line, each group carrying the title and the type of its page and each
- * passage where it stands; a file that is no page of the site is left out.
+ * Passages grouped by page in corpus order, sources in declaration order then paths, the
+ * passages of a page by file then line, each group carrying the title and the type of its page
+ * and each passage where it stands; the notes and the documents of one page (the notes and the
+ * transcript of a meeting) make one group, and a file that is no page of the site is left out.
  */
 export function locatedGroupsOf(
   context: SiteContext,
   page: string,
   passages: readonly FragmentPassage[],
 ): LocatedGroup[] {
-  const groups = new Map<string, LocatedGroup>();
+  const groups = new Map<string, LocatedGroup & { note: Entity; found: FragmentPassage[] }>();
   for (const passage of passages) {
-    const key = fileKey(passage.source, passage.path);
-    const note = context.byFile.get(key);
+    const note = context.byFile.get(fileKey(passage.source, passage.path));
     if (note === undefined) continue;
-    let entry = groups.get(key);
+    let entry = groups.get(note.id);
     if (entry === undefined) {
-      const href = entityHref(page, note.id);
       entry = {
         source: passage.source,
         path: passage.path,
+        note,
+        found: [],
         group: {
-          file: { label: passage.path, href },
+          file: { label: note.source.path, href: entityHref(page, note.id) },
           title: note.title,
           typeLabel: typeLabel(context, note.type),
           passages: [],
         },
       };
-      groups.set(key, entry);
+      groups.set(note.id, entry);
     }
-    entry.group.passages.push({
-      context: passage.context,
-      ...(passage.text === undefined ? {} : { text: passage.text }),
-      line: passage.line,
-      href: `${entry.group.file.href}#L${String(passage.line)}`,
-      location: passageLocationOf(context, note, passage),
-    });
+    entry.found.push(passage);
+    if (byCodeUnit(passage.path, entry.path) < 0) entry.path = passage.path;
   }
   return [...groups.values()]
     .sort(
@@ -93,19 +101,66 @@ export function locatedGroupsOf(
         byCodeUnit(a.source, b.source) ||
         byCodeUnit(a.path, b.path),
     )
-    .map((entry) => ({
-      ...entry,
-      group: { ...entry.group, passages: entry.group.passages.toSorted((a, b) => a.line - b.line) },
-    }));
+    .map(({ note, found, ...entry }) => {
+      const passages = found.toSorted(byFileThenLine).map((passage) => ({
+        context: passage.context,
+        ...(passage.text === undefined ? {} : { text: passage.text }),
+        line: passage.line,
+        href: `${entry.group.file.href}#L${String(passage.line)}`,
+        location: passageLocationOf(context, note, passage),
+      }));
+      return { ...entry, group: { ...entry.group, passages } };
+    });
 }
 
-/** The passages grouped by file in corpus order, as the page lists them. */
+/** A group with its first passages in view and the others folded under their count, when it holds more than the view. */
+export function foldedGroupOf(context: SiteContext, group: PassageGroup): PassageGroup {
+  if (group.passages.length <= PASSAGES_IN_VIEW) return group;
+  const folded = group.passages.slice(PASSAGES_IN_VIEW);
+  return {
+    ...group,
+    passages: group.passages.slice(0, PASSAGES_IN_VIEW),
+    folded: {
+      label: formatMessage(context.catalogue, "keyword.otherPassages", { count: folded.length }),
+      passages: folded,
+    },
+  };
+}
+
+/** The passages grouped by page in corpus order, as the page lists them, every group folded past its first passages. */
 export function passageGroupsOf(
   context: SiteContext,
   page: string,
   passages: readonly FragmentPassage[],
 ): PassageGroup[] {
-  return locatedGroupsOf(context, page, passages).map((entry) => entry.group);
+  return locatedGroupsOf(context, page, passages).map((entry) =>
+    foldedGroupOf(context, entry.group),
+  );
+}
+
+/**
+ * The passages block of the page: the first pages in view, each folded past its first passages,
+ * and the other files behind a disclosure worded with their count when there are more.
+ */
+export function passageBlocksOf(
+  context: SiteContext,
+  groups: readonly LocatedGroup[],
+): Pick<KeywordPageProps, "passages" | "morePassages"> {
+  const folded = groups.map((entry) => foldedGroupOf(context, entry.group));
+  const beyond = folded.slice(PASSAGE_GROUPS_IN_VIEW);
+  return {
+    passages: folded.slice(0, PASSAGE_GROUPS_IN_VIEW),
+    ...(beyond.length === 0
+      ? {}
+      : {
+          morePassages: {
+            label: formatMessage(context.catalogue, "keyword.showOtherFiles", {
+              count: beyond.length,
+            }),
+            groups: beyond,
+          },
+        }),
+  };
 }
 
 /**
@@ -285,7 +340,7 @@ export function keywordPageOf(
       spaceTitle(context, source),
     ),
     summary: formatMessage(context.catalogue, "keyword.filesSummary", { count: files }),
-    passages: groups.map((group) => group.group),
+    ...passageBlocksOf(context, groups),
     similar: similarOf(context, page, entity),
     similarLead: message(context, "keyword.similarLead"),
     neighbours: neighbourhood,
