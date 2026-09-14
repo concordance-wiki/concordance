@@ -24,6 +24,7 @@ import {
   TypeBadge,
 } from "./entity-page.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { SpaceTree } from "./space-tree.js";
 
 /** How many properties the panel of an API page shows: the operations carry the rest. */
@@ -92,6 +93,7 @@ export function ApiPage({
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
           <h1>{entity.title}</h1>
+          <PinButton />
           <p class="entity-badge">
             <TypeBadge
               label={entity.typeLabel}

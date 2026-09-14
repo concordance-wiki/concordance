@@ -157,27 +157,46 @@ export interface NavigationItem extends Link {
 /** The logo of the header: an image by href, or the markup of an SVG inlined so that it can follow the current colour. */
 export type HeaderLogo = { src: string; alt: string } | { svg: string };
 
-export interface TrailLabels {
-  /** Accessible name of the trail region and of the button unfolding it. */
-  title: string;
+/** The labels the pins island writes, in the language of the site, once its script runs. */
+export interface PinsLabels {
+  /** The button of the page header while the page is not pinned: "Pin". */
   pin: string;
+  /** The same button, pressed, while the page is pinned: "Pinned". */
+  pinned: string;
+  /** The small capital label opening the row: "Pinned". */
+  label: string;
+  /** Accessible name of the row: "Pinned pages". */
+  pages: string;
+  /** The count at the end of the row, `'{count}' pinned`, for one page and for several. */
+  countOne: string;
+  countMany: string;
+  /** Accessible name of the cross removing a pin, `Unpin '{title}'`. */
   unpin: string;
-  /** Follows the number of condensed entries: "… 5 earlier pages". */
-  earlier: string;
+  /** Heading of the menu listing every pin, and name of the summary opening it: "All pinned". */
+  all: string;
+  /** Placeholder and name of the filter of the menu: "Filter". */
+  filter: string;
+  /** The button at the foot of the menu: "Remove all". */
+  removeAll: string;
+  /** The question asked before removing every pin. */
+  confirmRemoveAll: string;
 }
 
-export interface TrailPage {
+/** A page a reader pinned: its identifier and its title at the time it was pinned, so that it reads even once the page is gone. */
+export interface PinnedPage {
   id: string;
   title: string;
 }
 
-/** The navigation trail folded behind a button of the bar: the pages the reader visited, carried in the URL fragment. */
-export interface TrailProps {
+/** The pinned pages as a row of tabs under the bar, chosen by the reader and kept in the browser. */
+export interface PinsProps {
   /** Prefix of the hrefs from the page to the site root, `../../` for instance; empty at the root. */
   base: string;
-  /** The entity of the page, appended to the trail; absent on the home, index and to-do pages, which carry the trail without entering it. */
-  current?: TrailPage;
-  labels: TrailLabels;
+  /** The entity of the page, which the button of its header pins; absent on the home, index and to-do pages, which show the row without a button. */
+  current?: PinnedPage;
+  labels: PinsLabels;
+  /** The pins served in the row, to preview it; the script then leaves the island alone. A page of the site serves none: the row is drawn from the browser's storage. */
+  pinned?: PinnedPage[];
 }
 
 /** The labels the panels island writes on the handles of the side panels once its script runs. */
@@ -234,8 +253,8 @@ export interface HeaderProps {
   /** The tree of the space of the page, unfolded in the drawer of the narrow layouts; absent on a page without a space. */
   space?: SpaceTree;
   search?: SearchField;
-  /** Absent, the default theme renders the trail with its own English labels and records no page. */
-  trail?: TrailProps;
+  /** Absent, the default theme renders the pins island with its own English labels and gives the page no pin button. */
+  pins?: PinsProps;
   /** Absent, the default theme renders the panels island with its own English labels. */
   panels?: PanelsProps;
   /** Whether the drawer of the narrow layouts is served open, to preview it; a page of the site never is. */
@@ -933,6 +952,8 @@ export interface EntityPageProps {
   mapOpen?: boolean;
   /** The side panels served folded behind their handles, as a reader who folded them sees the page; every panel open when absent. */
   folded?: FoldablePanel[];
+  /** The pin button of the header served shown and pressed, to preview a pinned page; served hidden and unpressed when absent. */
+  pinned?: boolean;
   /** What the page of a `meeting` entity lays out beyond the generic template; absent for every other page. */
   meeting?: MeetingProps;
   /** What lays the page out as the page of an office document; absent for every other page. */

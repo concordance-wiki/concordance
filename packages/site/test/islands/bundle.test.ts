@@ -16,7 +16,7 @@ import {
 import { defaultUiComponents } from "../../src/theme/default/plugin.js";
 
 describe("defaultIslands", () => {
-  it("declares the category list, document viewer, mentions panel, mode switch, panels, search, tabs, table of contents and trail islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
+  it("declares the category list, document viewer, mentions panel, mode switch, panels, pins, search, tabs and table of contents islands with their entries next to the bundler, none a module, then the UI components of the default theme", () => {
     const islands = defaultIslands();
     expect(islands.map((island) => island.name)).toEqual([
       "category-list",
@@ -24,10 +24,10 @@ describe("defaultIslands", () => {
       "mentions-panel",
       "mode-switch",
       "panels",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
       "contract-viewer",
     ]);
     expect(islands[0]?.entry.endsWith("/src/islands/category-list.client")).toBe(true);
@@ -35,10 +35,10 @@ describe("defaultIslands", () => {
     expect(islands[2]?.entry.endsWith("/src/islands/mentions-panel.client")).toBe(true);
     expect(islands[3]?.entry.endsWith("/src/islands/mode-switch.client")).toBe(true);
     expect(islands[4]?.entry.endsWith("/src/islands/panels.client")).toBe(true);
-    expect(islands[5]?.entry.endsWith("/src/islands/search.client")).toBe(true);
-    expect(islands[6]?.entry.endsWith("/src/islands/tabs.client")).toBe(true);
-    expect(islands[7]?.entry.endsWith("/src/islands/toc.client")).toBe(true);
-    expect(islands[8]?.entry.endsWith("/src/islands/trail.client")).toBe(true);
+    expect(islands[5]?.entry.endsWith("/src/islands/pins.client")).toBe(true);
+    expect(islands[6]?.entry.endsWith("/src/islands/search.client")).toBe(true);
+    expect(islands[7]?.entry.endsWith("/src/islands/tabs.client")).toBe(true);
+    expect(islands[8]?.entry.endsWith("/src/islands/toc.client")).toBe(true);
     expect(islands[9]?.entry.endsWith("/src/islands/contract-viewer.client")).toBe(true);
     expect(islands[9]).toEqual(islandOf(defaultUiComponents()[0] ?? { slot: "", bundle: "" }));
     expect(islands.map((island) => island.module)).toEqual(Array.from({ length: 10 }));
@@ -113,10 +113,10 @@ describe("bundleIslands", () => {
       "mentions-panel",
       "mode-switch",
       "panels",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
     ]);
     expect(bundle?.file).toMatch(/^mentions-panel-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/site/assets/${bundle?.file ?? ""}`);
@@ -221,18 +221,16 @@ describe("bundleIslands", () => {
     expect(written).not.toContain("fetch(");
   });
 
-  it("bundles the trail without any framework, under four kilobytes", async () => {
+  it("bundles the pins without any framework, under six kilobytes", async () => {
     const fileSystem = memoryFileSystem();
     const bundles = await bundleIslands({ outDir: "/out", islands: defaultIslands(), fileSystem });
-    const bundle = bundles.find((candidate) => candidate.name === "trail");
-    expect(bundle?.file).toMatch(/^trail-[A-Z0-9]{8}\.js$/);
+    const bundle = bundles.find((candidate) => candidate.name === "pins");
+    expect(bundle?.file).toMatch(/^pins-[A-Z0-9]{8}\.js$/);
     const written = fileSystem.readText(`/out/${bundle?.file ?? ""}`);
-    expect(bundle?.bytes).toBeLessThan(4_000);
-    expect(written).toContain('"concordance-trail"');
-    expect(written).toContain('[data-island="trail"]');
-    expect(written).toContain('"trail"');
-    expect(written).toContain("encodeURIComponent");
-    expect(written).toContain("replaceState");
+    expect(bundle?.bytes).toBeLessThan(6_000);
+    expect(written).toContain('"concordance-pins"');
+    expect(written).toContain('[data-island="pins"]');
+    expect(written).toContain("pins-remove-all");
     expect(written).toContain("aria-pressed");
     expect(written).not.toContain("preact");
     expect(written).not.toContain("fetch(");

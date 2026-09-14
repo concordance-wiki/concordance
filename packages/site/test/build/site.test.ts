@@ -30,7 +30,7 @@ import { SEARCH_META, type SearchMeta, type ShardData } from "../../src/search/s
 import type { EntityPageProps } from "../../src/slots.js";
 import { defaultTheme } from "../../src/theme/resolve.js";
 import type { ResolvedTheme } from "../../src/theme/types.js";
-import { withoutHandles } from "../helpers/handles.js";
+import { withoutHiddenControls } from "../helpers/handles.js";
 import { count, expectBalanced } from "../helpers/html.js";
 import { localTargets, references } from "../helpers/links.js";
 import { fragments, model, profile, screen as screenEntity, term, tokenize } from "./fixture.js";
@@ -157,10 +157,10 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       "mentions-panel",
       "mode-switch",
       "panels",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
     ]);
   });
 
@@ -644,10 +644,10 @@ describe("A page weighs under 150 KB excluding previews", () => {
       "mode-switch",
       "panels",
       "pdf-viewer",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
     ]);
     const viewer = report.budget.islands.find((island) => island.name === "contract-viewer");
     expect(fileSystem.readText(`/dist/assets/${viewer?.file ?? ""}`)).toContain(
@@ -741,7 +741,7 @@ describe("Without JavaScript, the first twenty mentions remain readable and the 
     expect(html).toContain('<a href="../../fragments/glossary/keyword-page.mentions.json">');
     // The header carries the mode switch button on every page, and the panels their hidden handles: the rest of the main landmark is inspected.
     expect(
-      withoutHandles(html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"))),
+      withoutHiddenControls(html.slice(html.indexOf('<main id="main">'), html.indexOf("</main>"))),
     ).not.toContain("<button");
     const written = new Set(fileSystem.listFiles("/dist"));
     for (const { reference, target } of localTargets(path, html)) {
@@ -909,7 +909,7 @@ describe("siteDocuments", () => {
     { name: "search", file: "search-0123ABCD.js", bytes: 1 },
     { name: "toc", file: "toc-789ABC.js", bytes: 1 },
     { name: "panels", file: "panels-789ABC.js", bytes: 1 },
-    { name: "trail", file: "trail-789ABC.js", bytes: 1 },
+    { name: "pins", file: "pins-789ABC.js", bytes: 1 },
   ];
 
   it("renders the same documents as the build, in a fixed order, from the bundles it is given", () => {
@@ -1036,33 +1036,46 @@ describe("siteDocuments", () => {
     expect(render()).toContain('<span class="badge">Meeting</span></p>');
   });
 
-  it("gives the trail of every page its labels in the site language, the way to the root and, on an entity page, the page itself", () => {
+  it("gives the pins island of every page its labels in the site language, the way to the root and, on an entity page, the page its button pins, and the panels island the wording of the handles", () => {
     const { documents } = siteDocuments(options({ locale: "fr" }), bundles);
-    const trailOf = (path: string): unknown => {
+    const islandOf = (path: string, island: string): unknown => {
       const html = documents.find((document) => document.path === path)?.content ?? "";
-      const match =
-        /<concordance-island data-island="trail" data-props="([^"]*)"><\/concordance-island>/.exec(
-          html,
-        );
+      const match = new RegExp(
+        `<concordance-island data-island="${island}" data-props="([^"]*)"></concordance-island>`,
+      ).exec(html);
       return JSON.parse((match?.[1] ?? "null").replaceAll("&quot;", '"'));
     };
     const labels = {
-      title: "Parcours",
       pin: "Épingler",
-      unpin: "Désépingler",
-      earlier: "pages précédentes",
+      pinned: "Épinglée",
+      label: "Épinglées",
+      pages: "Pages épinglées",
+      countOne: "{count} épinglée",
+      countMany: "{count} épinglées",
+      unpin: "Retirer {title}",
+      all: "Toutes les épinglées",
+      filter: "Filtrer",
+      removeAll: "Tout retirer",
+      confirmRemoveAll: "Retirer toutes les pages épinglées ?",
     };
-    expect(trailOf(HOME_PAGE)).toEqual({ base: "", labels });
-    expect(trailOf(TODO_PAGE)).toEqual({ base: "../", labels });
-    expect(trailOf("glossary/keyword-page/index.html")).toEqual({
+    expect(islandOf(HOME_PAGE, "pins")).toEqual({ base: "", labels });
+    expect(islandOf(TODO_PAGE, "pins")).toEqual({ base: "../", labels });
+    expect(islandOf("glossary/keyword-page/index.html", "pins")).toEqual({
       base: "../../",
       labels,
       current: { id: "glossary/keyword-page", title: "Keyword page" },
     });
-    expect(trailOf("specs/screens/mentions-panel/index.html")).toEqual({
+    expect(islandOf("specs/screens/mentions-panel/index.html", "pins")).toEqual({
       base: "../../../",
       labels,
       current: { id: "specs/screens/mentions-panel", title: "Mentions panel" },
+    });
+    expect(islandOf(HOME_PAGE, "panels")).toEqual({
+      labels: {
+        fold: "Replier ou déplier",
+        tree: "Arborescence de l’espace",
+        panel: "Volet de droite",
+      },
     });
     expect(siteRootOf("index.html")).toBe("");
     expect(siteRootOf("todo/index.html")).toBe("../");

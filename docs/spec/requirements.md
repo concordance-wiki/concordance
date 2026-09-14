@@ -238,7 +238,7 @@ Checks do not wait for the global build: every knowledge repository runs them lo
 ## 10. Site
 
 - Read before navigating: every page starts with the note content; views come after.
-- Zero hidden state: filters, selected node, tab and trail are encoded in the URL.
+- Zero hidden state: filters, selected node and tab are encoded in the URL; what a reader chooses for themself, the colour scheme, the folded panels and the pinned pages, lives in the storage of the browser and never in the address.
 - Progressive: notes and the index are readable without JavaScript; interactive views activate with it.
 - Accessibility: AA contrasts, full keyboard navigation, visible focus, textual alternative for every diagram, no information carried by colour alone.
 - Theme: `theme.yaml` provides the name, logo, favicon, accent, fonts, radius, default mode and footer; a project stylesheet can follow the tool's; the default theme is neutral.

@@ -97,7 +97,7 @@ describe("L9-08 colour never carries information alone", () => {
   });
 
   describe("the current page: a rule, the bold weight and aria-current", () => {
-    it("marks the current page of the tree by a rule and the bold weight, of the breadcrumb and the trail by the weight, of the contents, the letters, the pages and the tabs by a rule or a fill and the weight", () => {
+    it("marks the current page of the tree by a rule and the bold weight, of the breadcrumb by the weight, of the pins by a fill and the weight, of the contents, the letters, the pages and the tabs by a rule or a fill and the weight", () => {
       expect(declarationsOf(".space-current > span")).toMatchObject({
         "border-inline-start": "3px solid var(--color-accent)",
         "font-weight": "600",
@@ -109,7 +109,8 @@ describe("L9-08 colour never carries information alone", () => {
         "border-inline-start-color": "var(--color-accent)",
         "font-weight": "500",
       });
-      expect(declarationsOf('.trail-list a[aria-current="page"]')).toMatchObject({
+      expect(declarationsOf(".pin-current")).toMatchObject({
+        background: "var(--color-ink)",
         "font-weight": "600",
       });
       expect(declarationsOf('.letter[aria-current="page"]')).toMatchObject({
@@ -205,6 +206,7 @@ describe("L9-08 colour never carries information alone", () => {
     expect(accent).toEqual([
       "a",
       "a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible",
+      ".pins-remove-all",
       ".space-current > span",
       ".markdown .written",
       ".markdown .recognised, .markdown .recognised-keyword",

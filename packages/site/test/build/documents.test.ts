@@ -95,10 +95,10 @@ describe("A document page: download link, viewer on demand, extracted text", () 
       "mentions-panel",
       "mode-switch",
       "panels",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
       "viewer-pdf",
       "viewer-pdf-worker",
     ]);
@@ -202,10 +202,10 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       "mentions-panel",
       "mode-switch",
       "panels",
+      "pins",
       "search",
       "tabs",
       "toc",
-      "trail",
     ]);
     const html = site.fileSystem.readText(`/dist/${page}`);
     expect(html).not.toContain('data-island="document-viewer"');
@@ -224,7 +224,7 @@ describe("The viewer bundles are built only for a site with a PDF to show", () =
       { name: "search", file: "search-00000000.js", bytes: 1 },
       { name: "toc", file: "toc-00000000.js", bytes: 1 },
       { name: "panels", file: "panels-00000000.js", bytes: 1 },
-      { name: "trail", file: "trail-00000000.js", bytes: 1 },
+      { name: "pins", file: "pins-00000000.js", bytes: 1 },
     ]);
     const html = documents.find((document) => document.path === page)?.content ?? "";
     expect(html).toContain('class="document-pdf"');

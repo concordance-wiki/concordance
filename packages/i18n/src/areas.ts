@@ -14,6 +14,7 @@ import { mentionsMessages } from "./areas/mentions.js";
 import { navMessages } from "./areas/nav.js";
 import { neighbourhoodMessages } from "./areas/neighbourhood.js";
 import { panelsMessages } from "./areas/panels.js";
+import { pinsMessages } from "./areas/pins.js";
 import { relatedMessages } from "./areas/related.js";
 import { resultsMessages } from "./areas/results.js";
 import { searchMessages } from "./areas/search.js";
@@ -22,7 +23,6 @@ import { spaceMessages } from "./areas/space.js";
 import { spacesMessages } from "./areas/spaces.js";
 import { timeMessages } from "./areas/time.js";
 import { todoMessages } from "./areas/todo.js";
-import { trailMessages } from "./areas/trail.js";
 import { transcriptMessages } from "./areas/transcript.js";
 
 /** Every area of the catalogues, one per identifier prefix, in the order of the prefixes. */
@@ -43,6 +43,7 @@ export const AREAS = [
   navMessages,
   neighbourhoodMessages,
   panelsMessages,
+  pinsMessages,
   relatedMessages,
   resultsMessages,
   searchMessages,
@@ -51,6 +52,5 @@ export const AREAS = [
   spacesMessages,
   timeMessages,
   todoMessages,
-  trailMessages,
   transcriptMessages,
 ] as const;

@@ -13,7 +13,7 @@ const bundles: IslandBundle[] = [
   { name: "search", file: "search-0123ABCD.js", bytes: 1 },
   { name: "toc", file: "toc-789ABC.js", bytes: 1 },
   { name: "panels", file: "panels-789ABC.js", bytes: 1 },
-  { name: "trail", file: "trail-789ABC.js", bytes: 1 },
+  { name: "pins", file: "pins-789ABC.js", bytes: 1 },
 ];
 
 const subjects = [

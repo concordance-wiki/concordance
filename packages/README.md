@@ -13,7 +13,7 @@ Core packages, published under `@concordance-wiki/*`. Each one compiles and expo
 | `checks` | check registry shared by build and linter | core, profile |
 | `i18n` | message catalogues of the site (`en`, `fr`), typed identifiers, build-time resolution, platform date, number and relative time formatting | core |
 | `site` | slots and view models, default theme, islands and their bundles, stylesheet layers, page budget; later the i18n catalogue and the search index | core, profile |
-| `ui` | client components: mentions panel, mini-map, viewer slots, trail | — |
+| `ui` | client components: mentions panel, mini-map, viewer slots, pinned pages | — |
 | `cli` | `build`, `render`, `init`, `validate-config`, `lint` | all |
 | `lint` | distributable linter and its packagings | core, profile, typing, checks, ingest |
 

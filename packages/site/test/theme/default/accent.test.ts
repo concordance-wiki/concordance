@@ -74,6 +74,7 @@ describe("The accent colour never carries information on its own", () => {
   it("uses the accent in a known, documented set of places and nowhere else: links and the current position, never a status or a decoration", () => {
     expect(base.map((rule) => rule.selector)).toEqual(["a", FOCUS_RING]);
     expect(components.map((rule) => rule.selector)).toEqual([
+      ".pins-remove-all",
       ".space-current > span",
       ".markdown .written",
       ".markdown .recognised,\n.markdown .recognised-keyword",

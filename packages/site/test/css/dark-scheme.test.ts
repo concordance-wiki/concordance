@@ -23,7 +23,7 @@ describe("L9-18 dark mode: every component reads the scheme from the tokens, so 
       .map((rule) => `${rule.selector}: ${rule.declarations["box-shadow"] ?? ""}`);
     expect(shadows).toEqual([
       ".search-suggestions: var(--shadow-float)",
-      ".trail: var(--shadow-float)",
+      ".pins-menu: var(--shadow-float)",
       ".related-type-menu: var(--shadow-float)",
       ".index-filters-menu: var(--shadow-float)",
       ".home-suggestions: none",

@@ -20,7 +20,7 @@
     <text x="1104" y="34" font-size="13" fill="#8B9199">To do</text>
     <rect x="1148" y="24" width="8" height="8" rx="4" fill="#E8703A"/><text x="1162" y="34" font-size="13" fill="#8B9199">12</text>
 
-    <!-- trail -->
+    <!-- breadcrumb -->
     <text x="40" y="92" font-size="12" fill="#6B7280">glossary / keyword-page.md</text>
 
     <!-- badge -->

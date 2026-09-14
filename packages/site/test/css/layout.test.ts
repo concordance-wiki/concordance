@@ -139,6 +139,8 @@ describe("Targets of 40 to 44 pixels, text never under 13 pixels", () => {
     ].map((match) => (match[1] ?? "").trim());
     expect(monospace).toEqual([
       ".count",
+      ".pins-count",
+      ".pins-menu-count",
       ".site-footer-card > .site-footer-build",
       ".related-count",
       ".letter",
@@ -231,22 +233,6 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     expect(phone).toContain(".entity-edit-short {\n    display: inline;\n  }");
   });
 
-  it("folds the trail behind a square button of the bar, the island hidden while its script lists no page, the list unfolded under the bar", () => {
-    expect(components).toContain(
-      'concordance-island[data-island="trail"] {\n  position: relative;\n  flex: none;\n}\n\nconcordance-island[data-island="trail"]:empty {\n  display: none;\n}',
-    );
-    expect(components).toContain(
-      ".trail-button {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  inline-size: 2.5rem;\n  block-size: 2.5rem;",
-    );
-    expect(components).toContain(".trail-button::before {\n  content: none;\n}");
-    expect(components).toContain(
-      ".trail {\n  position: absolute;\n  inset-inline-end: 0;\n  inset-block-start: calc(100% + var(--space-1));\n  z-index: 3;",
-    );
-    expect(components).toContain(
-      ".trail-list a {\n  display: flex;\n  align-items: center;\n  min-block-size: 2.5rem;",
-    );
-  });
-
   it("gives every entry of the drawer a 48 px target and hides the tree of the column, the breadcrumb ancestors, the space and the long date on the phone", () => {
     expect(components).toContain(
       ".drawer-spaces-title,\n.drawer-space-list a,\n.drawer .site-links a {\n  display: flex;\n  align-items: center;\n  gap: var(--space-2);\n  min-block-size: 3rem;",
@@ -267,7 +253,7 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     );
   });
 
-  it("opens the drawer over the whole screen under the desktop width: the header fixed, the search field first, the content then the mode switch, the button of the trail hidden", () => {
+  it("opens the drawer over the whole screen under the desktop width: the header fixed, the search field first, the content then the mode switch", () => {
     const narrow = media(components, "(width < 68.75rem)");
     expect(narrow).toContain(
       ".site-header:has(.site-drawer[open]) {\n    position: fixed;\n    inset: 0;\n    z-index: 3;\n    overflow-y: auto;\n  }",
@@ -285,9 +271,6 @@ describe("Mobile first: the base layer is the phone's, the tablet and the deskto
     );
     expect(narrow).toContain(
       '.site-drawer[open] ~ concordance-island[data-island="mode-switch"] {\n    display: block;\n    flex-basis: 100%;\n    order: 3;\n  }',
-    );
-    expect(narrow).toContain(
-      '.site-drawer[open] ~ concordance-island[data-island="trail"] {\n    display: none;\n  }',
     );
     // The magnifier of a closed drawer unfolds the field under itself, on the phone as on the tablet.
     expect(narrow).toContain(

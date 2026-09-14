@@ -281,7 +281,6 @@
     display: none;
   }
 
-  .site-nav > concordance-island[data-island="trail"],
   .site-nav > concordance-island[data-island="mode-switch"] {
     order: 2;
   }

@@ -38,6 +38,7 @@ import { documentPageCorporateState } from "./states/document-page-corporate.js"
 import { documentPageNoScriptState } from "./states/document-page-no-script.js";
 import { decisionPageCorporateState } from "./states/decision-page-corporate.js";
 import { entityPagePanelFoldedState } from "./states/entity-page-panel-folded.js";
+import { entityPagePinsState } from "./states/entity-page-pins.js";
 import { todoState } from "./states/todo.js";
 import { todoEmptyState } from "./states/todo-empty.js";
 import { todoCorporateState } from "./states/todo-corporate.js";
@@ -108,6 +109,7 @@ export const galleryPages: readonly GalleryPage[] = [
   entityPageDarkState,
   homeDarkState,
   entityPagePanelFoldedState,
+  entityPagePinsState,
   todoState,
   todoEmptyState,
   todoCorporateState,

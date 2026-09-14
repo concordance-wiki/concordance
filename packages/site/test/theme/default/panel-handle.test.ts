@@ -14,7 +14,12 @@ import { renderSlot } from "../../../src/render.js";
 import { entityClasses } from "../../../src/theme/default/entity-page.js";
 import { defaultPanelsLabels, PANELS_ISLAND } from "../../../src/theme/default/panel-handle.js";
 import { defaultTheme } from "../../../src/theme/resolve.js";
-import { PANEL_HANDLE, TREE_HANDLE } from "../../helpers/handles.js";
+import {
+  PANEL_HANDLE,
+  PIN_BUTTON,
+  TREE_HANDLE,
+  withoutHiddenControls,
+} from "../../helpers/handles.js";
 import { count, expectBalanced } from "../../helpers/html.js";
 
 describe("The handles folding the side panels of the entity page", () => {
@@ -24,6 +29,7 @@ describe("The handles folding the side panels of the entity page", () => {
       `<nav class="space" aria-label="Tree of the space">${TREE_HANDLE}<a class=`,
     );
     expect(html).toContain(`<div class="entity-side">${PANEL_HANDLE}<section class=`);
+    expect(html).toContain(`</h1>${PIN_BUTTON}<p class="entity-badge">`);
     expect(count(html, "panel-handle-track")).toBe(2);
     expect(html).toContain('<div class="entity entity-with-space">');
     expectBalanced(html);
@@ -44,7 +50,7 @@ describe("The handles folding the side panels of the entity page", () => {
     expect(html).toContain(
       '<div class="panel-handle-track"><span class="panel-handle panel-handle-folded" data-panel="panel" aria-hidden="true"></span></div>',
     );
-    expect(html).not.toContain("<button");
+    expect(withoutHiddenControls(html)).not.toContain("<button");
     const tree = renderSlot(
       "EntityPage",
       { ...corporateEntityPage, folded: ["tree"] },
@@ -69,7 +75,7 @@ describe("The handles folding the side panels of the entity page", () => {
   it("carries the labels of the handles in an empty island after the bar, the English of the default theme when the header receives none", () => {
     const html = renderSlot("Header", header, defaultTheme);
     expect(html).toContain(
-      `</nav><concordance-island data-island="${PANELS_ISLAND}" data-props="{&quot;labels&quot;:{&quot;fold&quot;:&quot;Fold or unfold&quot;,&quot;tree&quot;:&quot;Tree of the space&quot;,&quot;panel&quot;:&quot;Right panel&quot;}}"></concordance-island></header>`,
+      `</concordance-island><concordance-island data-island="${PANELS_ISLAND}" data-props="{&quot;labels&quot;:{&quot;fold&quot;:&quot;Fold or unfold&quot;,&quot;tree&quot;:&quot;Tree of the space&quot;,&quot;panel&quot;:&quot;Right panel&quot;}}"></concordance-island></header>`,
     );
     expect(defaultPanelsLabels).toEqual({
       fold: "Fold or unfold",
@@ -101,6 +107,7 @@ describe("The handles folding the side panels of the entity page", () => {
       "  .panel-handle {\n    position: absolute;\n    inset-block-start: 0;\n    inset-inline-end: -0.8125rem;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    inline-size: 1.625rem;\n    block-size: 2.5rem;\n    padding: 0 0 0 0.8125rem;\n    border: 1px solid var(--color-border);\n    border-radius: var(--radius);\n    background: var(--color-soft);\n    color: var(--color-label);",
     );
     expect(css).toContain("    clip-path: inset(-0.375rem -0.375rem -0.375rem 0.8125rem);");
+    expect(css).toContain("  .panel-handle[hidden] {\n    display: none;\n  }");
     expect(css).toContain('  .panel-handle::before {\n    content: "‹" / "";\n  }');
     expect(css).toContain(
       '  .panel-handle[aria-expanded="false"]::before,\n  .panel-handle-folded::before {\n    content: "›" / "";\n  }',

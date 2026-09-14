@@ -26,7 +26,7 @@ import {
   searchLabels,
   type SearchTokenizer,
 } from "../search/build.js";
-import type { SearchField, SlotProps, SpaceTree, TrailPage } from "../slots.js";
+import type { PinnedPage, SearchField, SlotProps, SpaceTree } from "../slots.js";
 import { chromeOf, SITE_STYLESHEET, type ThemeChrome } from "../theme/chrome.js";
 import { pageComponentFor } from "../theme/context.js";
 import { SearchIsland } from "../theme/default/search-island.js";
@@ -174,9 +174,9 @@ function themeChrome(input: SiteInput, assetsBase: string): ThemeChrome {
     : chromeOf(input.theme.config, assetsBase);
 }
 
-/** What a page tells its chrome beyond the site: its place in the trail, its space, its search field. */
+/** What a page tells its chrome beyond the site: the page its pin button pins, its space, its search field. */
 interface PageExtras {
-  current?: TrailPage;
+  current?: PinnedPage;
   /** The tree of the space of an entity page or of a category list, for the drawer. */
   space?: SpaceTree | undefined;
   /** The space a space page confines the search field to. */
@@ -235,13 +235,20 @@ function chromeFor(
       panel: message(context, "panels.panel"),
     },
   };
-  header.trail = {
+  header.pins = {
     base: siteRootOf(page),
     labels: {
-      title: message(context, "trail.title"),
-      pin: message(context, "trail.pin"),
-      unpin: message(context, "trail.unpin"),
-      earlier: message(context, "trail.earlier"),
+      pin: message(context, "pins.pin"),
+      pinned: message(context, "pins.pinned"),
+      label: message(context, "pins.label"),
+      pages: message(context, "pins.pages"),
+      countOne: message(context, "pins.countOne"),
+      countMany: message(context, "pins.countMany"),
+      unpin: message(context, "pins.unpin"),
+      all: message(context, "pins.all"),
+      filter: message(context, "pins.filter"),
+      removeAll: message(context, "pins.removeAll"),
+      confirmRemoveAll: message(context, "pins.confirmRemoveAll"),
     },
     ...(current === undefined ? {} : { current }),
   };
@@ -374,7 +381,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
   const viewer = viewerBundlesOf(islands);
   const entityPage = (entity: Entity): WrittenDocument => {
     const page = pagePath(entity.id);
-    const current: TrailPage = { id: entity.id, title: entity.title };
+    const current: PinnedPage = { id: entity.id, title: entity.title };
     // The drawer of the page carries the same tree as its left column.
     if (entity.keyword === true) {
       const props = keywordPageOf(context, entity, mentionsOptions);

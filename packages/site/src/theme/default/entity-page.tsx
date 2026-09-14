@@ -20,6 +20,7 @@ import { fill } from "./mention-list.js";
 import { NeighbourhoodIcon } from "./neighbourhood.js";
 import { PanelBlock } from "./panel-block.js";
 import { SidePanel } from "./panel-handle.js";
+import { PinButton } from "./pins.js";
 import { SpaceTree } from "./space-tree.js";
 import { TableOfContents } from "./toc.js";
 
@@ -296,6 +297,7 @@ export function EntityPage({
   documents = [],
   mapOpen = false,
   folded = [],
+  pinned = false,
 }: EntityPageProps): JSX.Element {
   const MentionsPanel = useSlot("MentionsPanel");
   const text: EntityPageLabels = {
@@ -316,6 +318,7 @@ export function EntityPage({
         {breadcrumb.length > 0 && <Breadcrumb items={breadcrumb} label={text.breadcrumb} />}
         <header class="entity-header">
           <h1>{entity.title}</h1>
+          <PinButton pinned={pinned} />
           <p class="entity-badge">
             <TypeBadge
               label={entity.typeLabel}

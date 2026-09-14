@@ -13,6 +13,7 @@ describe("The gallery has one state per board of the reference design, named aft
       "B19",
       "B20",
       "B21",
+      "B22",
       "todo",
       "panels",
       "chrome",

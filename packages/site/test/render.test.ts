@@ -15,7 +15,7 @@ const bundle: IslandBundle = { name: "mentions-panel", file: "mentions-panel-ABC
 const modeBundle: IslandBundle = { name: "mode-switch", file: "mode-switch-DEF456.js", bytes: 1 };
 const searchBundle: IslandBundle = { name: "search", file: "search-0123ABCD.js", bytes: 1 };
 const tocBundle: IslandBundle = { name: "toc", file: "toc-456DEF.js", bytes: 1 };
-const trailBundle: IslandBundle = { name: "trail", file: "trail-789ABC.js", bytes: 1 };
+const pinsBundle: IslandBundle = { name: "pins", file: "pins-789ABC.js", bytes: 1 };
 const panelsBundle: IslandBundle = { name: "panels", file: "panels-789ABC.js", bytes: 1 };
 
 function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
@@ -24,7 +24,7 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     locale: "en",
     title: "Keyword page",
     stylesheets: ["../assets/site.css"],
-    islands: [bundle, modeBundle, searchBundle, tocBundle, trailBundle, panelsBundle],
+    islands: [bundle, modeBundle, searchBundle, tocBundle, pinsBundle, panelsBundle],
     assetsBase: "../assets/",
     header,
     footer,
@@ -58,7 +58,7 @@ describe("renderPage", () => {
   /** An entity nobody cites: its panel carries no island. */
   const uncited = { ...entityPage, mentions: { mentions: [], initial: 20 } };
 
-  it("loads no bundle but the mode switch, the search field, the trail and the panels of the header, and the table of contents, for a page without another island", () => {
+  it("loads no bundle but the mode switch, the search field, the pins and the panels of the header, and the table of contents, for a page without another island", () => {
     const html = renderPage("EntityPage", uncited, options());
     expect(html).not.toContain("mentions-panel-ABC123.js");
     expect(count(html, "<concordance-island")).toBe(5);
@@ -66,7 +66,7 @@ describe("renderPage", () => {
     expect(html).toContain('<script defer src="../assets/mode-switch-DEF456.js"></script>');
     expect(html).toContain('<script defer src="../assets/search-0123ABCD.js"></script>');
     expect(html).toContain('<script defer src="../assets/toc-456DEF.js"></script>');
-    expect(html).toContain('<script defer src="../assets/trail-789ABC.js"></script>');
+    expect(html).toContain('<script defer src="../assets/pins-789ABC.js"></script>');
     expect(html).toContain('<script defer src="../assets/panels-789ABC.js"></script>');
   });
 
@@ -90,7 +90,7 @@ describe("renderPage", () => {
           modeBundle,
           searchBundle,
           tocBundle,
-          trailBundle,
+          pinsBundle,
           panelsBundle,
         ],
       }),
@@ -169,7 +169,7 @@ describe("renderPage", () => {
       renderPage(
         "EntityPage",
         page,
-        options({ islands: [modeBundle, searchBundle, tocBundle, trailBundle, panelsBundle] }),
+        options({ islands: [modeBundle, searchBundle, tocBundle, pinsBundle, panelsBundle] }),
       ),
     ).toThrow("renderPage: island mentions-panel has no bundle");
   });
