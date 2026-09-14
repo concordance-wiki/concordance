@@ -22,7 +22,8 @@
     "measure": "node scripts/measure.mjs",
     "walkthrough": "node scripts/walkthrough.mjs",
     "parity": "node scripts/parity.mjs",
-    "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/walkthrough.mjs && node scripts/hygiene.mjs && pnpm licenses:check"
+    "check": "pnpm lint && pnpm build && pnpm test && pnpm mutation && node scripts/determinism.mjs && node scripts/walkthrough.mjs && node scripts/hygiene.mjs && pnpm licenses:check",
+    "release:version": "changeset version && pnpm install --lockfile-only && node scripts/sync-distribution-versions.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.2",
