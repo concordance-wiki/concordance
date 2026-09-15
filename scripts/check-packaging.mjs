@@ -3,7 +3,8 @@
 // shows, its entry points and its `files` stay under the built and shipped
 // folders, its licence is the one of the repository, its README carries no
 // relative link, and the tarball `pnpm pack --dry-run` would write holds
-// neither tests, nor sources, nor fixtures.
+// neither tests, nor sources, nor fixtures; and every published package
+// carries the one version of the fixed group.
 // Run through scripts/validate.mjs; the pack itself is injectable for tests.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -155,6 +156,32 @@ function checkTarball(root, pkg, files, fail) {
     if (forbidden.some((pattern) => pattern.test(path)))
       fail(`${directory}: the tarball would ship ${path}`);
   }
+}
+
+/**
+ * The failure messages when the published packages do not all carry one version: the
+ * `fixed` group of .changeset/config.json bumps them together, so a manifest at another
+ * version was edited by hand or left out of the group. Empty when they agree.
+ */
+export function checkVersions(root) {
+  const packages = publishedPackages(root);
+  const versions = new Map();
+  for (const pkg of packages) {
+    const names = versions.get(pkg.version) ?? [];
+    names.push(pkg.name);
+    versions.set(pkg.version, names);
+  }
+  if (versions.size <= 1) return [];
+  // The version most packages carry is the one of the release; the others diverged.
+  const [expected] = [...versions.entries()].sort(
+    (a, b) => b[1].length - a[1].length || byCodeUnit(a[0], b[0]),
+  )[0];
+  return packages
+    .filter((pkg) => pkg.version !== expected)
+    .map(
+      (pkg) =>
+        `${relative(root, pkg.dir)}/package.json: version ${pkg.version} differs from ${expected}, the one of the fixed group`,
+    );
 }
 
 /** The failure messages of every published package; an empty list when they are all ready to publish. */

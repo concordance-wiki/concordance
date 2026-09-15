@@ -82,7 +82,7 @@ A pull request from a fork runs every blocking test without any secret or privat
 
 ## Review
 
-- Every pull request needs a green pipeline and one approval from a maintainer before it is merged. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
+- Every pull request needs a green pipeline and one approval from a maintainer before it is merged. `.github/CODEOWNERS` requests that review automatically: the maintainer owns every path, and the pipeline, the scripts, the container image, the security policy, the licence and the changeset configuration are listed on their own so that a change to them is never merged without the maintainer's approval. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
 - Expect a first answer within a week. A pull request without activity for a month is closed and can be reopened.
 - Reviewers check the acceptance criteria against the tests first, then the documentation, then the code. A comment says whether it blocks the merge or is a suggestion.
 - Discussions about the design happen in the issue, before the code; the review is about whether the code delivers what the issue agreed on.

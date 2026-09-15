@@ -1,0 +1,12 @@
+# Review ownership. Every path falls back to the maintainer; the governance,
+# pipeline, build and release inputs are listed on their own so that a change
+# to them always requests the maintainer's review, whatever else the pull
+# request touches.
+* @qnjoly
+
+/.github/ @qnjoly
+/scripts/ @qnjoly
+/Dockerfile @qnjoly
+/SECURITY.md @qnjoly
+/LICENSE @qnjoly
+/.changeset/config.json @qnjoly
