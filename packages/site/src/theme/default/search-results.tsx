@@ -27,9 +27,31 @@ function follow(
   };
 }
 
-/** The id of the box of a facet value, what its label points at. */
-function boxId(facet: Facet, value: FacetValue): string {
-  return `facet-${facet.name}-${value.value}`;
+/** Lowercase ASCII slug of a facet value: accents removed, any other run of characters one `-`, none at either end. */
+function slug(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/**
+ * The values of a facet each with the id of its box, what its label points at: `facet-`, the
+ * facet, then the slug of the value, which a configured name with a space or a quote would
+ * otherwise leave invalid; a value slugging like an earlier one takes its rank. The slug is
+ * computed here, not taken from the core package, which the island bundle cannot carry.
+ */
+function boxes(facet: Facet): { value: FacetValue; id: string }[] {
+  const taken = new Set<string>();
+  return facet.values.map((value) => {
+    const base = `facet-${facet.name}-${slug(value.value)}`;
+    let id = base;
+    for (let rank = 2; taken.has(id); rank += 1) id = `${base}-${String(rank)}`;
+    taken.add(id);
+    return { value, id };
+  });
 }
 
 /**
@@ -38,15 +60,16 @@ function boxId(facet: Facet, value: FacetValue): string {
  * of stays listed at 0, disabled.
  */
 function FacetBox({
+  id,
   facet,
   value,
   navigate,
 }: {
+  id: string;
   facet: Facet;
   value: FacetValue;
   navigate: Navigate;
 }): JSX.Element {
-  const id = boxId(facet, value);
   const classes = ["facet-value"];
   if (value.active === true) classes.push("facet-active");
   if (value.disabled === true) classes.push("facet-disabled");
@@ -85,8 +108,8 @@ function FacetGroup({ facet, navigate }: { facet: Facet; navigate: Navigate }): 
         <h2>{facet.label}</h2>
       </summary>
       <ul class="facet-values">
-        {facet.values.map((value) => (
-          <FacetBox key={value.value} facet={facet} value={value} navigate={navigate} />
+        {boxes(facet).map(({ value, id }) => (
+          <FacetBox key={value.value} id={id} facet={facet} value={value} navigate={navigate} />
         ))}
       </ul>
     </details>
