@@ -381,6 +381,57 @@ describe("ResultList", () => {
     );
   });
 
+  it("slugs the value in the id of its box, the label still pointing at it, the name and the value kept as configured", () => {
+    const html = renderSlot(
+      "SearchResults",
+      {
+        query: "",
+        total: 0,
+        results: [],
+        facets: [
+          {
+            name: "application",
+            label: "Application",
+            values: [{ value: "Concordance's Wïki", count: 3, href: "?application=..." }],
+          },
+        ],
+      },
+      defaultTheme,
+    );
+    expect(html).toContain(
+      `<input type="checkbox" id="facet-application-concordance-s-wiki" name="application" value="Concordance's Wïki"/><label for="facet-application-concordance-s-wiki"><span class="facet-label">Concordance's Wïki</span>`,
+    );
+  });
+
+  it("ranks the ids of the values of a facet slugging alike, in the order of the values", () => {
+    const html = renderSlot(
+      "SearchResults",
+      {
+        query: "",
+        total: 0,
+        results: [],
+        facets: [
+          {
+            name: "source",
+            label: "Space",
+            values: [
+              { value: "Demo specs", count: 2, href: "?source=Demo+specs" },
+              { value: "demo-specs", count: 1, href: "?source=demo-specs" },
+              { value: "demo specs!", count: 1, href: "?source=demo+specs%21" },
+              { value: "demo-specs-2", count: 1, href: "?source=demo-specs-2" },
+            ],
+          },
+        ],
+      },
+      defaultTheme,
+    );
+    expect(html).toContain('id="facet-source-demo-specs" name="source" value="Demo specs"');
+    expect(html).toContain('id="facet-source-demo-specs-2" name="source" value="demo-specs"');
+    expect(html).toContain('id="facet-source-demo-specs-3" name="source" value="demo specs!"');
+    expect(html).toContain('id="facet-source-demo-specs-2-2" name="source" value="demo-specs-2"');
+    expect(html).toContain('<label for="facet-source-demo-specs-2-2">');
+  });
+
   it("is what the results slot lists", () => {
     const html = renderSlot(
       "SearchResults",
