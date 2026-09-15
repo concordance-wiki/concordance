@@ -1,5 +1,24 @@
 # @concordance-wiki/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- 6a4fcf6: The `duplicates` block of `build.log.json` no longer carries `timeMs`, so that nothing in the log depends on the clock but its `at` field; the console summary still prints the measured duration of the twin-resource reconciliation. A missing theme file is told apart from an invalid one by a `missing` flag on the failed load rather than by the text of its message; the exit codes and the messages are unchanged.
+- Updated dependencies [6a4fcf6]
+- Updated dependencies [456a5a0]
+- Updated dependencies [0a4f169]
+- Updated dependencies [2f3037c]
+  - @concordance-wiki/core@0.3.1
+  - @concordance-wiki/site@0.3.1
+  - @concordance-wiki/lint@0.3.1
+  - @concordance-wiki/checks@0.3.1
+  - @concordance-wiki/inference@0.3.1
+  - @concordance-wiki/ingest@0.3.1
+  - @concordance-wiki/nlp@0.3.1
+  - @concordance-wiki/profile@0.3.1
+  - @concordance-wiki/typing@0.3.1
+
 ## 0.3.0
 
 ### Patch Changes

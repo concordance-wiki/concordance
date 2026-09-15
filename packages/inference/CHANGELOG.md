@@ -1,5 +1,14 @@
 # @concordance-wiki/inference
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [6a4fcf6]
+  - @concordance-wiki/core@0.3.1
+  - @concordance-wiki/ingest@0.3.1
+  - @concordance-wiki/profile@0.3.1
+
 ## 0.3.0
 
 ### Patch Changes

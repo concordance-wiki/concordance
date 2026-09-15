@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/nlp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Normalisation, Aho-Corasick, n-grams, C-value, MinHash and the language packs.",
   "license": "GPL-3.0-or-later",
   "repository": {
