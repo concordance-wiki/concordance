@@ -97,9 +97,8 @@ export function projectTheme(
   for (const issue of loaded.issues) {
     io.err(formatIssue(issue, path));
   }
-  const missing = loaded.issues.some((issue) => issue.message === "theme file not found");
   io.err(`${command} stopped: fix ${path} first`);
-  return { exit: missing ? exitCodes.failure : exitCodes.invalid };
+  return { exit: loaded.missing === true ? exitCodes.failure : exitCodes.invalid };
 }
 
 /** The plugins declared, loaded with the default theme registered first; loading findings go to stderr. */

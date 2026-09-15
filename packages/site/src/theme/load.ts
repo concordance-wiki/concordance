@@ -38,7 +38,12 @@ export interface ResolvedThemeConfig {
 
 export type ThemeLoad =
   | { ok: true; theme: ResolvedThemeConfig; issues: ConfigIssue[] }
-  | { ok: false; issues: ConfigIssue[] };
+  | {
+      ok: false;
+      issues: ConfigIssue[];
+      /** Set when the file itself is absent, which a command tells apart from a file it could read and refuses. */
+      missing?: true;
+    };
 
 /** What a plugin's theme contribution adds around its `theme.yaml`, as absolute paths. */
 export interface ThemeContributionFiles {
@@ -156,6 +161,7 @@ export function loadTheme(
   if (!fileSystem.exists(file)) {
     return {
       ok: false,
+      missing: true,
       issues: [{ severity: "error", path: "", message: "theme file not found", received: file }],
     };
   }

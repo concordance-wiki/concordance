@@ -87,6 +87,8 @@ export interface PipelineResult {
   /** The recognised words of every note by `<source>/<path>`, which its fragment links in the text. */
   recognised: Map<string, RecognisedWord[]>;
   duplicates: DuplicateCounts;
+  /** The measured duration of the twin-resource reconciliation, in milliseconds, which the console summary prints and the log leaves out. */
+  duplicateTimeMs: number;
   /** The documents that are not notes, read once, with their pages and PDF representation, for the fragments. */
   documents: ReadDocument[];
   /** Documents a converter could not convert, which `build.fail_on.unconverted_max` counts. */
@@ -295,6 +297,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     takenOver: keywords.takenOver,
     recognised: recognisedWords({ occurrences, documents: scoped.documents, sources }),
     duplicates: twins.counts,
+    duplicateTimeMs: twins.timeMs,
     documents: scoped.resources,
     unconverted: read.unconverted,
     notes: scoped.notes,

@@ -87,7 +87,6 @@ describe("summarize", () => {
       files: 4,
       findings: [],
       duplicates: {
-        timeMs: 3,
         candidates: 1,
         merged: 2,
         exactVerifications: 4,
@@ -103,7 +102,6 @@ describe("summarize", () => {
       "exactVerifications",
       "merged",
       "candidates",
-      "timeMs",
     ]);
     expect(summary.duplicates).toEqual({
       resources: 7,
@@ -112,7 +110,6 @@ describe("summarize", () => {
       exactVerifications: 4,
       merged: 2,
       candidates: 1,
-      timeMs: 3,
     });
     expect("duplicates" in summarize({ sources: 1, files: 1, findings: [] })).toBe(false);
   });
@@ -316,11 +313,10 @@ describe("serializeBuildLog", () => {
       exactVerifications: 4,
       merged: 2,
       candidates: 1,
-      timeMs: 0,
     };
     const text = serializeBuildLog({ ...log, summary: { ...log.summary, duplicates } });
     expect(text).toContain(
-      '    "duplicates": {\n      "resources": 7,\n      "candidatePairs": 6,\n      "scoredPairs": 5,\n      "exactVerifications": 4,\n      "merged": 2,\n      "candidates": 1,\n      "timeMs": 0\n    }\n  },\n',
+      '    "duplicates": {\n      "resources": 7,\n      "candidatePairs": 6,\n      "scoredPairs": 5,\n      "exactVerifications": 4,\n      "merged": 2,\n      "candidates": 1\n    }\n  },\n',
     );
     expect(parse(text).summary.duplicates).toEqual(duplicates);
     expect(serializeBuildLog(log)).not.toContain("duplicates");

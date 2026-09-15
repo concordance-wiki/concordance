@@ -387,7 +387,6 @@ describe("concordance build", () => {
           exactVerifications: 0,
           merged: 0,
           candidates: 0,
-          timeMs: 0,
         },
       });
     });
@@ -1517,7 +1516,9 @@ describe("concordance build", () => {
         const summary = built.log.summary;
         // The validation prints its warnings, the lock one for the realistic corpus, then its verdict line.
         const verdict = built.stdout.findIndex((line) => line.endsWith(": valid configuration"));
-        expect(modelLines(built.stdout).slice(verdict + 1)).toEqual(formatSummary(summary));
+        expect(modelLines(built.stdout).slice(verdict + 1)).toEqual(
+          formatSummary(summary, { duplicatesMs: 0 }),
+        );
         expect(summary.lock).toEqual(
           corpus === "realistic/en"
             ? { rejected_terms: 1, merged: 0, separated: 1, domains: 1 }
@@ -1639,16 +1640,19 @@ describe("formatFinding", () => {
 describe("formatSummary", () => {
   it("prints one line per count and one indented line per check", () => {
     expect(
-      formatSummary({
-        sources: 2,
-        files: 5,
-        entities: { screen: 2, term: 1 },
-        links: { explicit_link: 4 },
-        findings: {
-          bySeverity: { error: 1, warning: 2, info: 0 },
-          byCheck: { "E-X": 1, "W-Y": 2 },
+      formatSummary(
+        {
+          sources: 2,
+          files: 5,
+          entities: { screen: 2, term: 1 },
+          links: { explicit_link: 4 },
+          findings: {
+            bySeverity: { error: 1, warning: 2, info: 0 },
+            byCheck: { "E-X": 1, "W-Y": 2 },
+          },
         },
-      }),
+        { duplicatesMs: 0 },
+      ),
     ).toEqual([
       "sources: 2",
       "files: 5",
@@ -1665,14 +1669,17 @@ describe("formatSummary", () => {
 
   it("reports the keyword pages generated, the expressions discarded and those set aside by confidence when the summary holds them", () => {
     expect(
-      formatSummary({
-        sources: 1,
-        files: 3,
-        entities: {},
-        links: {},
-        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
-        keywords: { published: 12, discarded: 340, withheld: 25 },
-      }),
+      formatSummary(
+        {
+          sources: 1,
+          files: 3,
+          entities: {},
+          links: {},
+          findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+          keywords: { published: 12, discarded: 340, withheld: 25 },
+        },
+        { duplicatesMs: 0 },
+      ),
     ).toEqual([
       "sources: 1",
       "files: 3",
@@ -1685,16 +1692,52 @@ describe("formatSummary", () => {
     ]);
   });
 
+  it("prints the twin statistics with the measured duration, which the summary itself leaves out", () => {
+    expect(
+      formatSummary(
+        {
+          sources: 1,
+          files: 3,
+          entities: {},
+          links: {},
+          findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+          duplicates: {
+            resources: 3,
+            candidatePairs: 2,
+            scoredPairs: 1,
+            exactVerifications: 1,
+            merged: 1,
+            candidates: 0,
+          },
+        },
+        { duplicatesMs: 42 },
+      ),
+    ).toEqual([
+      "sources: 1",
+      "files: 3",
+      "entities: 0",
+      "links: 0",
+      "duplicate candidate pairs: 2 by content, 1 scored, of 3 resources",
+      "duplicate exact verifications: 1",
+      "duplicates merged: 1, candidates: 0",
+      "duplicate detection time: 42 ms",
+      "findings: error 0, warning 0, info 0",
+    ]);
+  });
+
   it("reports the decisions of the lock file applied, after the twin statistics, when the summary holds them", () => {
     expect(
-      formatSummary({
-        sources: 1,
-        files: 3,
-        entities: {},
-        links: {},
-        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
-        lock: { rejected_terms: 12, merged: 1, separated: 4, domains: 2 },
-      }),
+      formatSummary(
+        {
+          sources: 1,
+          files: 3,
+          entities: {},
+          links: {},
+          findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+          lock: { rejected_terms: 12, merged: 1, separated: 4, domains: 2 },
+        },
+        { duplicatesMs: 0 },
+      ),
     ).toEqual([
       "sources: 1",
       "files: 3",
@@ -1707,28 +1750,31 @@ describe("formatSummary", () => {
 
   it("lists the suggested domains after the lock decisions, each pivot with its degree and the notes it reaches", () => {
     expect(
-      formatSummary({
-        sources: 1,
-        files: 3,
-        entities: {},
-        links: {},
-        findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
-        lock: { rejected_terms: 0, merged: 0, separated: 0, domains: 0 },
-        domains: [
-          {
-            pivot: "glossary/check",
-            degree: 14,
-            domain: "quality",
-            notes: ["specs/roles/maintainer"],
-          },
-          {
-            pivot: "glossary/source",
-            degree: 9,
-            domain: "ingestion",
-            notes: ["glossary/plugin", "glossary/reader"],
-          },
-        ],
-      }),
+      formatSummary(
+        {
+          sources: 1,
+          files: 3,
+          entities: {},
+          links: {},
+          findings: { bySeverity: { error: 0, warning: 0, info: 0 }, byCheck: {} },
+          lock: { rejected_terms: 0, merged: 0, separated: 0, domains: 0 },
+          domains: [
+            {
+              pivot: "glossary/check",
+              degree: 14,
+              domain: "quality",
+              notes: ["specs/roles/maintainer"],
+            },
+            {
+              pivot: "glossary/source",
+              degree: 9,
+              domain: "ingestion",
+              notes: ["glossary/plugin", "glossary/reader"],
+            },
+          ],
+        },
+        { duplicatesMs: 0 },
+      ),
     ).toEqual([
       "sources: 1",
       "files: 3",
