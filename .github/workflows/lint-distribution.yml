@@ -2,9 +2,10 @@ name: lint-distribution
 
 # Every form of the linter runs the same command line on the same repository
 # and must produce the same report. The forms continuous integration can run
-# end to end lint the faulty corpus and their JSON reports are compared byte
-# for byte; the GitLab component and the pre-commit hook are checked
-# structurally, with the version pin that ties every form to packages/cli.
+# end to end lint the faulty corpus and their JSON reports, then their SARIF
+# logs, are compared byte for byte; the GitLab component and the pre-commit
+# hook are checked structurally, with the version pin that ties every form to
+# packages/cli.
 
 on:
   pull_request:
@@ -33,7 +34,7 @@ concurrency:
 env:
   # The source of the faulty corpus every form lints, with the configuration that declares it.
   REPOSITORY: fixtures/corpora/faulty/en/notes
-  LINT_OPTIONS: --config ../concordance.yaml --source notes --format json
+  LINT_OPTIONS: --config ../concordance.yaml --source notes
 
 jobs:
   same-output:
@@ -54,9 +55,11 @@ jobs:
       - name: Built command line
         working-directory: ${{ env.REPOSITORY }}
         run: |
-          set +e
-          node "$GITHUB_WORKSPACE/packages/cli/dist/bin.js" lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/cli.json"
-          test $? -eq 1
+          for format in json sarif; do
+            status=0
+            node "$GITHUB_WORKSPACE/packages/cli/dist/bin.js" lint $LINT_OPTIONS --format "$format" --output "$GITHUB_WORKSPACE/reports/cli.$format" || status=$?
+            test "$status" -eq 1
+          done
 
       - name: npx package
         # The package as npm installs it: deployed with its production dependencies, installed
@@ -69,18 +72,22 @@ jobs:
           npm install --no-save --offline --no-audit --no-fund --ignore-scripts "$RUNNER_TEMP/runtime"
           cp -r "$GITHUB_WORKSPACE/fixtures/corpora/faulty/en" repo
           cd repo/notes
-          set +e
-          npx --no-install concordance lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/npx.json"
-          test $? -eq 1
+          for format in json sarif; do
+            status=0
+            npx --no-install concordance lint $LINT_OPTIONS --format "$format" --output "$GITHUB_WORKSPACE/reports/npx.$format" || status=$?
+            test "$status" -eq 1
+          done
 
       - name: Standalone binary
         run: pnpm build:binary
       - name: Standalone binary on the faulty corpus
         working-directory: ${{ env.REPOSITORY }}
         run: |
-          set +e
-          "$GITHUB_WORKSPACE/dist-bin/concordance-linux-x64" lint $LINT_OPTIONS --output "$GITHUB_WORKSPACE/reports/binary.json"
-          test $? -eq 1
+          for format in json sarif; do
+            status=0
+            "$GITHUB_WORKSPACE/dist-bin/concordance-linux-x64" lint $LINT_OPTIONS --format "$format" --output "$GITHUB_WORKSPACE/reports/binary.$format" || status=$?
+            test "$status" -eq 1
+          done
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: concordance-linux-x64
@@ -92,7 +99,7 @@ jobs:
       # - name: Container image
       #   run: |
       #     set +e
-      #     docker run --rm -v "$PWD/fixtures/corpora/faulty/en:/wiki" -w /wiki/notes concordancewiki/concordance lint $LINT_OPTIONS --output /wiki/image.json
+      #     docker run --rm -v "$PWD/fixtures/corpora/faulty/en:/wiki" -w /wiki/notes concordancewiki/concordance lint $LINT_OPTIONS --format json --output /wiki/image.json
       #     test $? -eq 1
       #     mv fixtures/corpora/faulty/en/image.json reports/image.json
 
@@ -113,9 +120,24 @@ jobs:
           test "${{ steps.action.outcome }}" = failure
           test "${{ steps.action.outputs.exit-code }}" = 1
           test "${{ steps.action.outputs.report }}" = "$GITHUB_WORKSPACE/reports/action.json"
+      - name: GitHub action, SARIF log
+        id: action-sarif
+        uses: ./distribution/github-action
+        continue-on-error: true
+        with:
+          command: node ${{ github.workspace }}/packages/cli/dist/bin.js
+          working-directory: ${{ env.REPOSITORY }}
+          config: ../concordance.yaml
+          source: notes
+          format: sarif
+          output: ${{ github.workspace }}/reports/action.sarif
+          upload: "false"
+      - run: test "${{ steps.action-sarif.outcome }}" = failure
 
-      - name: Compare the reports
+      - name: Compare the JSON reports
         run: node scripts/compare-distribution.mjs reports/cli.json reports/npx.json reports/binary.json reports/action.json
+      - name: Compare the SARIF logs
+        run: node scripts/compare-distribution.mjs reports/cli.sarif reports/npx.sarif reports/binary.sarif reports/action.sarif
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
