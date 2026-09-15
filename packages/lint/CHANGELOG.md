@@ -1,5 +1,18 @@
 # @concordance-wiki/lint
 
+## 0.3.1
+
+### Patch Changes
+
+- 0a4f169: The SARIF log no longer carries `originalUriBaseIds`: the base URI named the folder of the machine that ran the lint, so two checkouts of the same tree gave different logs. Artifact locations keep their `uriBaseId` of `%SRCROOT%`, which the forges resolve against their checkout.
+- Updated dependencies [6a4fcf6]
+  - @concordance-wiki/core@0.3.1
+  - @concordance-wiki/checks@0.3.1
+  - @concordance-wiki/ingest@0.3.1
+  - @concordance-wiki/nlp@0.3.1
+  - @concordance-wiki/profile@0.3.1
+  - @concordance-wiki/typing@0.3.1
+
 ## 0.3.0
 
 ### Patch Changes

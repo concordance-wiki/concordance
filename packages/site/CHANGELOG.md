@@ -1,5 +1,18 @@
 # @concordance-wiki/site
 
+## 0.3.1
+
+### Patch Changes
+
+- 6a4fcf6: The `duplicates` block of `build.log.json` no longer carries `timeMs`, so that nothing in the log depends on the clock but its `at` field; the console summary still prints the measured duration of the twin-resource reconciliation. A missing theme file is told apart from an invalid one by a `missing` flag on the failed load rather than by the text of its message; the exit codes and the messages are unchanged.
+- 456a5a0: The box of a facet value takes its id from a slug of the value, so that a source, an application or a domain named with a space or a quote gives a valid id and its label still selects it; two values of a facet slugging alike are told apart by a rank.
+- 2f3037c: The results page as served no longer announces "0 results": its status region says that the search runs in the browser and needs JavaScript, a sentence of the message catalogue (`results.noScript`) the island replaces once it mounts. The writing direction of a page now comes from the locale's script through `textDirection` of the i18n package, so that Pashto, Sorani or Divehi pages read right to left like Arabic, Hebrew, Persian and Urdu ones.
+- Updated dependencies [6a4fcf6]
+- Updated dependencies [2f3037c]
+  - @concordance-wiki/core@0.3.1
+  - @concordance-wiki/i18n@0.3.1
+  - @concordance-wiki/profile@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes
