@@ -250,6 +250,7 @@ export function searchLabels(catalogue: Catalogue): SearchLabels {
     clear: plain(catalogue, "search.clear"),
     noResult: plain(catalogue, "search.noResult"),
     noResultFor: plain(catalogue, "results.noResultFor"),
+    noScript: plain(catalogue, "results.noScript"),
     results: pluralForms(catalogue, "search.results"),
     countersNote: plain(catalogue, "results.countersNote"),
     noteless: {

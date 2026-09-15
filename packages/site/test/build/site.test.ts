@@ -266,9 +266,13 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     );
   });
 
-  it("serves the results page empty, the field of the header carrying the root of the site and the results island waiting for the query", () => {
+  it("serves the results page empty, its status line saying that the search needs JavaScript, the field of the header carrying the root of the site and the results island waiting for the query", () => {
     const page = fileSystem.readText(`/dist/${SEARCH_PAGE}`);
     expect(page).toContain("<title>Search – Concordance notes</title>");
+    expect(page).toContain(
+      '<p class="search-summary" role="status">The search runs in the browser and needs JavaScript.</p>',
+    );
+    expect(page).not.toContain("0 results");
     expect(page).toContain(
       '<concordance-island data-island="search" data-props="{&quot;root&quot;:&quot;../&quot;,&quot;results&quot;:',
     );

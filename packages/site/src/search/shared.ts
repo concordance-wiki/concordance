@@ -95,6 +95,8 @@ export interface SearchLabels {
   noResult: string;
   /** "No result for {query}", the placeholder filled in the browser. */
   noResultFor: string;
+  /** The status line of the results page as served: the search runs in the browser and needs JavaScript. */
+  noScript: string;
   /** "N results, most cited first", by plural category. */
   results: PluralForms;
   /** The note under the facets: that the counters are set at publication and the filtering runs in the browser. */

@@ -18,6 +18,7 @@ export const resultsMessages = {
     "results.noFileUses": {},
     "results.noResultFiltered": { count: "plural" },
     "results.noResultFor": {},
+    "results.noScript": {},
     "results.noteless": {},
     "results.notelessNote": {},
     "results.prefixNote": {},

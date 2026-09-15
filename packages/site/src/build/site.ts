@@ -470,12 +470,14 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
     Buffer.byteLength(render(INDEX_PAGE, "Index", props, indexTitle, input.locale).content),
   );
   const searchTitle = message(context, "site.search");
-  // The results page is served empty: the island fills it from the query of the address.
+  const labels = searchLabels(catalogue);
+  // The results page is served empty, its status line saying that the search needs JavaScript:
+  // the island fills it from the query of the address.
   const searchPage = document(
     SEARCH_PAGE,
     h(SearchIsland, {
       root: siteRootOf(SEARCH_PAGE),
-      results: { query: "", total: 0, results: [], facets: [] },
+      results: { query: "", total: 0, results: [], facets: [], summary: labels.noScript },
     }),
     searchTitle,
     input.locale,
@@ -486,7 +488,7 @@ export function siteDocuments(input: SiteInput, islands: IslandBundle[]): SiteDo
       fragments: input.fragments,
       tokenize: input.tokenize,
       typeLabel: (type) => searchTypeLabel(context, type),
-      labels: searchLabels(catalogue),
+      labels,
       locale: catalogue.locale,
       ...(input.names === undefined ? {} : { names: input.names }),
       ...(input.glossarySources === undefined ? {} : { glossarySources: input.glossarySources }),

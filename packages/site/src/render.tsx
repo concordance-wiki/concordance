@@ -1,3 +1,4 @@
+import { textDirection } from "@concordance-wiki/i18n";
 import { h, type JSX } from "preact";
 import { renderToString } from "preact-render-to-string";
 
@@ -6,7 +7,7 @@ import type { IslandBundle } from "./islands/bundle.js";
 import { islandsUsed } from "./islands/island.js";
 import { MODE_SCRIPT } from "./mode.js";
 import { PANELS_SCRIPT } from "./panels.js";
-import type { HeadAssets, SlotName, SlotProps, TextDirection } from "./slots.js";
+import type { HeadAssets, SlotName, SlotProps } from "./slots.js";
 import { ThemeContext } from "./theme/context.js";
 import type { ResolvedTheme } from "./theme/types.js";
 
@@ -37,12 +38,6 @@ export interface RenderOptions {
   notice?: JSX.Element;
 }
 
-const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
-
-export function directionOf(locale: string): TextDirection {
-  return RTL_LANGUAGES.has(locale.toLowerCase().replace(/-[^]*/, "")) ? "rtl" : "ltr";
-}
-
 /** A slot alone, inside the theme, for tests and galleries. */
 export function renderSlot<S extends SlotName>(
   slot: S,
@@ -59,7 +54,7 @@ function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): 
   const page: JSX.Element = (
     <Shell
       locale={options.locale}
-      direction={directionOf(options.locale)}
+      direction={textDirection(options.locale)}
       title={options.title}
       head={head}
       {...(options.scheme === undefined ? {} : { scheme: options.scheme })}
