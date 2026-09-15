@@ -35,5 +35,8 @@
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
     "@concordance-wiki/profile": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }

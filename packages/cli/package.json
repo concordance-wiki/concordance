@@ -57,6 +57,8 @@
     "@concordance-wiki/plugin-convert-libreoffice": "workspace:*",
     "@concordance-wiki/plugin-reader-office": "workspace:*",
     "@concordance-wiki/plugin-reader-vtt": "workspace:*",
-    "preact": "10.29.8"
+    "preact": "10.29.8",
+    "vitest": "4.1.11",
+    "yaml": "2.8.1"
   }
 }

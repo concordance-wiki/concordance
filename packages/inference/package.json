@@ -41,6 +41,8 @@
     "@concordance-wiki/nlp": "workspace:*",
     "@concordance-wiki/plugin-contract-openapi": "workspace:*",
     "@concordance-wiki/plugin-contract-wsdl": "workspace:*",
-    "@concordance-wiki/typing": "workspace:*"
+    "@concordance-wiki/typing": "workspace:*",
+    "vitest": "4.1.11",
+    "yaml": "2.8.1"
   }
 }

@@ -39,5 +39,8 @@
     "@concordance-wiki/core": "workspace:*",
     "ajv": "8.17.1",
     "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }

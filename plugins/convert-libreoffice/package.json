@@ -35,5 +35,8 @@
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
     "pdfjs-dist": "6.3.289"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }
