@@ -82,7 +82,7 @@ A pull request from a fork runs every blocking test without any secret or privat
 
 ## Review
 
-- Every pull request needs a green pipeline and one approval from a maintainer before it is merged. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
+- Every pull request needs a green pipeline and one approval from the maintainer named in `.github/CODEOWNERS` before it is merged; that review is required on every path of the repository. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
 - Expect a first answer within a week. A pull request without activity for a month is closed and can be reopened.
 - Reviewers check the acceptance criteria against the tests first, then the documentation, then the code. A comment says whether it blocks the merge or is a suggestion.
 - Discussions about the design happen in the issue, before the code; the review is about whether the code delivers what the issue agreed on.
@@ -98,4 +98,6 @@ Versions and the changelog are managed by Changesets. Every pull request that ch
 
 ## Licence
 
-By contributing you agree that your contribution is licensed under the [GNU General Public License, version 3 or later](LICENSE), like the rest of the project.
+Every contribution is published under the [GNU General Public License, version 3 or later](LICENSE), like the rest of the project, and the project will stay free software.
+
+On your first pull request you are asked to sign the [contributor licence agreement](CLA.md). It is not an assignment: you keep the copyright on what you write and you stay free to use it anywhere. It grants the maintainer a licence broad enough to defend the code, answer for its provenance and adapt how the project is licensed without tracking down every past author, which is what keeps one legal basis under a project that many hands touch. You sign it once, by a comment on the pull request; a check reminds you and holds the merge until the signature is recorded. If you contribute for an employer, the employer signs it as an entity.
