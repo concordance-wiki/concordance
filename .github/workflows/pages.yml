@@ -5,10 +5,13 @@ name: pages
 # gallery/, rendered by the command line from the fixtures so that every slot,
 # state and width of the theme can be looked at without a build of one's own.
 # One human step, once: in the settings of the repository, Pages → Source →
-# "GitHub Actions".
+# "GitHub Actions". The site follows main only once the ci workflow has passed there,
+# so that a commit the checks reject is never the one published.
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
     branches: [main]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -20,7 +23,9 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write
@@ -29,6 +34,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # The workflow_run event stands on the default branch; the site is built from main either way.
+          ref: main
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
