@@ -35,5 +35,8 @@
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
     "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }

@@ -36,5 +36,8 @@
     "@concordance-wiki/core": "workspace:*",
     "fast-xml-parser": "5.11.1",
     "fflate": "0.8.3"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }

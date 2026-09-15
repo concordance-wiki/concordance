@@ -37,6 +37,7 @@
     "fast-xml-parser": "5.11.1"
   },
   "devDependencies": {
-    "@concordance-wiki/plugin-contract-openapi": "workspace:*"
+    "@concordance-wiki/plugin-contract-openapi": "workspace:*",
+    "vitest": "4.1.11"
   }
 }

@@ -1,6 +1,11 @@
 import { extname } from "node:path";
 
-import { definePlugin, type ReaderInput, type ReaderOutput } from "@concordance-wiki/core";
+import {
+  definePlugin,
+  PLUGIN_API_VERSION,
+  type ReaderInput,
+  type ReaderOutput,
+} from "@concordance-wiki/core";
 
 import { readFailure } from "./failure.js";
 import { readOoxml, type OoxmlKind } from "./ooxml.js";
@@ -38,6 +43,6 @@ export function read({ path, payload }: ReaderInput): ReaderOutput {
 export default definePlugin({
   name: "@concordance-wiki/plugin-reader-office",
   version: "0.0.0",
-  apiVersion: "1",
+  apiVersion: PLUGIN_API_VERSION,
   contributes: { readers: [{ extensions, read }] },
 });

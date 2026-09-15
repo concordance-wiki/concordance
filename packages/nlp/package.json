@@ -39,6 +39,7 @@
     "yaml": "2.8.1"
   },
   "devDependencies": {
-    "@concordance-wiki/ingest": "workspace:*"
+    "@concordance-wiki/ingest": "workspace:*",
+    "vitest": "4.1.11"
   }
 }

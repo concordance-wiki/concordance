@@ -31,5 +31,8 @@
   ],
   "scripts": {
     "typecheck": "tsc -b tsconfig.json"
+  },
+  "devDependencies": {
+    "vitest": "4.1.11"
   }
 }
