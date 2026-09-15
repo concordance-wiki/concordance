@@ -10,6 +10,7 @@
   "results.noFileUses": "Aucun fichier n’emploie ce mot.",
   "results.noResultFiltered": "{count, plural, one {Aucun résultat pour « '{query}' » avec le filtre '{filters}'.} other {Aucun résultat pour « '{query}' » avec les filtres '{filters}'.}}",
   "results.noResultFor": "Aucun résultat pour « '{query}' »",
+  "results.noScript": "La recherche s’exécute dans le navigateur et nécessite JavaScript.",
   "results.noteless": "Sans définition",
   "results.notelessNote": "Les mots employés mais non définis apparaissent avec les autres, en trait pointillé. C'est ainsi qu'on repère ce qui manque au glossaire.",
   "results.prefixNote": "La recherche étant à préfixe, une faute de frappe donne zéro résultat sans suggestion.",

@@ -4,7 +4,7 @@ import type { IslandBundle } from "../src/islands/bundle.js";
 import { h } from "preact";
 import { MODE_SCRIPT } from "../src/mode.js";
 import { PANELS_SCRIPT } from "../src/panels.js";
-import { directionOf, renderPage, renderSlot, type RenderOptions } from "../src/render.js";
+import { renderPage, renderSlot, type RenderOptions } from "../src/render.js";
 import { defaultComponents } from "../src/theme/default/index.js";
 import { defaultTheme } from "../src/theme/resolve.js";
 import type { ResolvedTheme } from "../src/theme/types.js";
@@ -189,9 +189,34 @@ describe("renderPage", () => {
     expect(count(html, "<script defer")).toBe(6);
   });
 
-  it("writes dir=rtl for a right-to-left locale", () => {
-    const html = renderPage("Home", home, options({ locale: "ar" }));
-    expect(html).toContain('<html lang="ar" dir="rtl">');
+  it("writes dir=rtl for a right-to-left locale, whatever its region or case, and ltr otherwise", () => {
+    expect(renderPage("Home", home, options({ locale: "ar" }))).toContain(
+      '<html lang="ar" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "HE-IL" }))).toContain(
+      '<html lang="HE-IL" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "fa" }))).toContain(
+      '<html lang="fa" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "ur" }))).toContain(
+      '<html lang="ur" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "fr-CA" }))).toContain(
+      '<html lang="fr-CA" dir="ltr">',
+    );
+  });
+
+  it("follows the script of the locale: Pashto and Sorani are written right to left, romanised Arabic is not", () => {
+    expect(renderPage("Home", home, options({ locale: "ps" }))).toContain(
+      '<html lang="ps" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "ckb" }))).toContain(
+      '<html lang="ckb" dir="rtl">',
+    );
+    expect(renderPage("Home", home, options({ locale: "ar-Latn" }))).toContain(
+      '<html lang="ar-Latn" dir="ltr">',
+    );
   });
 
   it("gives the same bytes for the same page twice", () => {
@@ -199,20 +224,6 @@ describe("renderPage", () => {
     expect(renderPage("EntityPage", page, options())).toBe(
       renderPage("EntityPage", page, options()),
     );
-  });
-});
-
-describe("directionOf", () => {
-  it("answers rtl for the right-to-left languages, whatever the region or the case", () => {
-    expect(directionOf("ar")).toBe("rtl");
-    expect(directionOf("HE-IL")).toBe("rtl");
-    expect(directionOf("fa")).toBe("rtl");
-    expect(directionOf("ur")).toBe("rtl");
-  });
-
-  it("answers ltr for every other tag, the empty one included", () => {
-    expect(directionOf("fr-CA")).toBe("ltr");
-    expect(directionOf("")).toBe("ltr");
   });
 });
 

@@ -9,6 +9,7 @@ export const searchLabels: SearchLabels = {
   clear: "Clear filters",
   noResult: "No result",
   noResultFor: "No result for “{query}”",
+  noScript: "The search runs in the browser and needs JavaScript.",
   results: { one: "# result, most cited first", other: "# results, most cited first" },
   countersNote:
     "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",

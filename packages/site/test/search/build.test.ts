@@ -400,6 +400,7 @@ describe("searchLabels and pluralForms", () => {
       clear: "Clear filters",
       noResult: "No result",
       noResultFor: "No result for “{query}”",
+      noScript: "The search runs in the browser and needs JavaScript.",
       results: { one: "# result, most cited first", other: "# results, most cited first" },
       countersNote:
         "The counters are set when the site is published. Filtering happens in the browser, without a round trip.",
@@ -435,6 +436,7 @@ describe("searchLabels and pluralForms", () => {
       other: "Aucun résultat pour « {query} » avec les filtres {filters}.",
     });
     expect(fr.noFileUses).toBe("Aucun fichier n’emploie ce mot.");
+    expect(fr.noScript).toBe("La recherche s’exécute dans le navigateur et nécessite JavaScript.");
     expect(fr.showNext).toEqual({
       many: "Afficher les # suivants",
       one: "Afficher le suivant",

@@ -43,6 +43,10 @@
     "defaultMessage": "No result for “'{query}'”",
     "description": "Notice shown when a search with words matches nothing, the quoted placeholder being filled in the browser."
   },
+  "results.noScript": {
+    "defaultMessage": "The search runs in the browser and needs JavaScript.",
+    "description": "Status line of the results page as served, before the search island replaces it with the results of the query in the address; what a reader without JavaScript sees."
+  },
   "results.noteless": {
     "defaultMessage": "Without a definition",
     "description": "Label of the words without a note in the type facet of the results page and on the chip of their rows, in place of a type name."
