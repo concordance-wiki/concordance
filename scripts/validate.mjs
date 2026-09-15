@@ -2,7 +2,7 @@
 // schemas themselves, the default profile, the brand theme, the fixture
 // configurations, the note templates, the relative links of the docs, the
 // licence of every workspace package, the manifest and the tarball of every
-// published one.
+// published one, the one version they all carry.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,7 @@ import { parse as parseYaml } from "yaml";
 
 import { assembleProfileText, profileFile, typesDirectory } from "./assemble-profile.mjs";
 import { checkDistribution } from "./check-distribution.mjs";
-import { checkPackaging } from "./check-packaging.mjs";
+import { checkPackaging, checkVersions } from "./check-packaging.mjs";
 import { generateReference } from "./config-reference.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -483,11 +483,15 @@ if (yamlBlocks === 0) fail("docs/guides/pipelines.md: no YAML block found");
 //     at them, and the tarball pnpm would pack holds nothing else (scripts/check-packaging.mjs).
 for (const message of checkPackaging(root)) fail(message);
 
+// 16. Every published package carries the same version: they form the `fixed` group of
+//     .changeset/config.json and a release bumps them together (scripts/check-packaging.mjs).
+for (const message of checkVersions(root)) fail(message);
+
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
   console.error(`${failures.length} validation failure(s)`);
   process.exit(1);
 }
 console.log(
-  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples and package manifests are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, package manifests and versions are valid",
 );

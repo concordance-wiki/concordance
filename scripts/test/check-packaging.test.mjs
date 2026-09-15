@@ -4,7 +4,13 @@ import { join } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { checkPackaging, entryPoints, packList, relativeLinks } from "../check-packaging.mjs";
+import {
+  checkPackaging,
+  checkVersions,
+  entryPoints,
+  packList,
+  relativeLinks,
+} from "../check-packaging.mjs";
 
 const repository = join(import.meta.dirname, "../..");
 const licence = "GNU GENERAL PUBLIC LICENSE\n";
@@ -299,5 +305,41 @@ describe("packList", () => {
     expect(files).toContain("README.md");
     expect(files).toContain("LICENSE");
     expect(files).toContain("bin/concordance.js");
+  });
+});
+
+describe("checkVersions", () => {
+  it("accepts published packages at one version, whatever a private one carries", () => {
+    const root = workspace([
+      manifest("core"),
+      manifest("cli"),
+      manifest("fixture", { private: true, version: "9.9.9" }),
+    ]);
+    expect(checkVersions(root)).toEqual([]);
+  });
+
+  it("accepts a workspace without a published package", () => {
+    const root = workspace([manifest("fixture", { private: true })]);
+    expect(checkVersions(root)).toEqual([]);
+  });
+
+  it("names every package whose version differs from the one most packages carry", () => {
+    const root = workspace([
+      manifest("core"),
+      manifest("cli"),
+      manifest("lint", { version: "0.2.0" }),
+      manifest("ui", { version: "0.0.9" }),
+    ]);
+    expect(checkVersions(root)).toEqual([
+      "packages/lint/package.json: version 0.2.0 differs from 0.1.0, the one of the fixed group",
+      "packages/ui/package.json: version 0.0.9 differs from 0.1.0, the one of the fixed group",
+    ]);
+  });
+
+  it("takes the lowest version as the reference when none has a majority", () => {
+    const root = workspace([manifest("core"), manifest("cli", { version: "0.2.0" })]);
+    expect(checkVersions(root)).toEqual([
+      "packages/cli/package.json: version 0.2.0 differs from 0.1.0, the one of the fixed group",
+    ]);
   });
 });
