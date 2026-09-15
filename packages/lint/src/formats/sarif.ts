@@ -1,6 +1,3 @@
-import { join, sep } from "node:path";
-import { pathToFileURL } from "node:url";
-
 import type { Finding, Severity } from "@concordance-wiki/core";
 
 import { documentationOf } from "../report.js";
@@ -8,7 +5,11 @@ import { REPOSITORY_URL, scopeOf, sortFindings, TOOL_NAME, type FormatContext } 
 
 export const SARIF_SCHEMA_URL = "https://json.schemastore.org/sarif-2.1.0.json";
 
-/** The base identifier the forges resolve against the checked-out repository. */
+/**
+ * The base identifier the forges resolve against the checked-out repository. The log leaves
+ * it unresolved: a base URI would name the folder of the machine that ran the lint, and the
+ * same tree must give the same log wherever it is linted.
+ */
 export const SOURCE_ROOT_ID = "%SRCROOT%";
 
 type SarifLevel = "error" | "warning" | "note";
@@ -45,7 +46,6 @@ export interface SarifLog {
       tool: {
         driver: { name: string; version: string; informationUri: string; rules: SarifRule[] };
       };
-      originalUriBaseIds: Record<string, { uri: string }>;
       results: SarifResult[];
       /** The scope of the run, and whether the global scope was degraded, as a SARIF property bag. */
       properties: ReturnType<typeof scopeOf>;
@@ -115,10 +115,6 @@ export function formatSarif(findings: readonly Finding[], context: FormatContext
             informationUri: REPOSITORY_URL,
             rules,
           },
-        },
-        // A base URI ends with a slash; `join` gives the root exactly one.
-        originalUriBaseIds: {
-          [SOURCE_ROOT_ID]: { uri: pathToFileURL(join(context.root, sep)).href },
         },
         results,
         properties: scopeOf(context),

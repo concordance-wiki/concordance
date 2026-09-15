@@ -330,10 +330,10 @@ describe("concordance lint", () => {
     it("Each SARIF finding points to the file and line, for display in the diff margin", async () => {
       const io = repository();
       await lintCommand(["--format", "sarif"], io);
-      expect(parse(io)).toMatchObject({
+      const sarif = parse(io);
+      expect(sarif).toMatchObject({
         runs: [
           {
-            originalUriBaseIds: { "%SRCROOT%": { uri: "file:///work/" } },
             results: [
               {
                 ruleId: "E-LINK-BROKEN",
@@ -351,6 +351,8 @@ describe("concordance lint", () => {
           },
         ],
       });
+      // The forges resolve %SRCROOT% themselves: the log names no folder of the machine.
+      expect(io.stdout.join("\n")).not.toContain("/work");
     });
 
     it("Exit codes: 0 when no finding is above the threshold, 1 otherwise, 2 on execution error", async () => {

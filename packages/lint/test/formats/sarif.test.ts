@@ -44,7 +44,7 @@ describe("formatSarif", () => {
         },
       ],
     });
-    expect(log.runs[0].originalUriBaseIds).toEqual({ "%SRCROOT%": { uri: "file:///work/" } });
+    expect(log.runs[0]).not.toHaveProperty("originalUriBaseIds");
   });
 
   it("points each finding to its file and line so that the forge shows it in the diff margin", () => {
@@ -131,6 +131,13 @@ describe("formatSarif", () => {
     expect(document).toContain('"text": "source <notes> & \\"friends\\" could not be read"');
     expect(document.endsWith("}\n")).toBe(true);
     expect(formatSarif([broken, unreachable], context)).toBe(document);
+  });
+
+  it("names no folder of the machine, so that two checkouts of the same tree give the same log", () => {
+    const document = formatSarif(findings, context);
+    expect(document).not.toContain(context.root);
+    expect(document).not.toContain("file:");
+    expect(formatSarif(findings, { ...context, root: "/elsewhere/checkout" })).toBe(document);
   });
 
   it("prints no rule and no result when there is no finding", () => {
