@@ -90,7 +90,13 @@ function formatSuggestedDomains(domains: readonly SuggestedDomain[]): string[] {
   ];
 }
 
-export function formatSummary(summary: BuildLog["summary"]): string[] {
+/** What the console summary prints beyond the log: the durations, which the log leaves out so that it never depends on the clock. */
+export interface SummaryTiming {
+  /** The measured duration of the twin-resource reconciliation, in milliseconds. */
+  duplicatesMs: number;
+}
+
+export function formatSummary(summary: BuildLog["summary"], timing: SummaryTiming): string[] {
   const { bySeverity, byCheck } = summary.findings;
   const { keywords, duplicates, lock, domains } = summary;
   const total = (counts: Record<string, number>): number =>
@@ -109,7 +115,9 @@ export function formatSummary(summary: BuildLog["summary"]): string[] {
           `expressions under the threshold: ${String(keywords.discarded)}`,
           `expressions set aside by confidence: ${String(keywords.withheld)}`,
         ]),
-    ...(duplicates === undefined ? [] : formatDuplicateStats(duplicates)),
+    ...(duplicates === undefined
+      ? []
+      : formatDuplicateStats({ ...duplicates, timeMs: timing.duplicatesMs })),
     ...(lock === undefined
       ? []
       : [
@@ -323,7 +331,7 @@ export async function buildCommand(
   for (const finding of log.findings) {
     io.err(formatFinding(finding));
   }
-  for (const line of formatSummary(log.summary)) {
+  for (const line of formatSummary(log.summary, { duplicatesMs: result.duplicateTimeMs })) {
     io.out(line);
   }
   const rendered = await renderSite(io, themeDependencies(deps), {

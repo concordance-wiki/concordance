@@ -1129,6 +1129,8 @@ describe("twin-resource reconciliation over the markdown notes", () => {
       grouped_by: "declared in frontmatter",
     });
     expect(result.counts).toMatchObject({ resources: 3, merged: 1, candidates: 0 });
+    expect("timeMs" in result.counts).toBe(false);
+    expect(result.timeMs).toBe(0);
     expect(result.findings).toEqual([]);
   });
 

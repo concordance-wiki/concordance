@@ -46,7 +46,7 @@ export interface KeywordCounts {
   withheld: number;
 }
 
-/** The statistics of the twin-resource reconciliation, as the inference step reports them. */
+/** The counts of the twin-resource reconciliation, as the inference step reports them; its duration is left out so that the log never depends on the clock. */
 export interface DuplicateCounts {
   resources: number;
   /** Pairs brought together by the content banding. */
@@ -56,7 +56,6 @@ export interface DuplicateCounts {
   exactVerifications: number;
   merged: number;
   candidates: number;
-  timeMs: number;
 }
 
 /** What `dist/build.log.json` holds; the same `findings` array goes into `model.json`. */
@@ -159,7 +158,6 @@ function duplicateCounts(counts: DuplicateCounts): DuplicateCounts {
     exactVerifications: counts.exactVerifications,
     merged: counts.merged,
     candidates: counts.candidates,
-    timeMs: counts.timeMs,
   };
 }
 

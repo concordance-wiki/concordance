@@ -94,6 +94,7 @@ describe("The project name, logo, accent colour, corner radius and font families
   it("reports a missing theme file, and YAML that cannot be parsed", () => {
     expect(loadTheme(memoryFileSystem(), "/t/theme.yaml")).toEqual({
       ok: false,
+      missing: true,
       issues: [
         { severity: "error", path: "", message: "theme file not found", received: "/t/theme.yaml" },
       ],
@@ -103,6 +104,7 @@ describe("The project name, logo, accent colour, corner radius and font families
       "/t/theme.yaml",
     );
     expect(result.ok).toBe(false);
+    expect("missing" in result).toBe(false);
     expect(result.issues[0]?.message).toMatch(/^not valid YAML: /);
   });
 

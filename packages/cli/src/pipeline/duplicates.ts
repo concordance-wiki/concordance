@@ -61,6 +61,8 @@ export interface ReconciledTwins {
   /** Every scored pair, as the `candidates.duplicates` block records it. */
   candidates: DuplicateCandidate[];
   counts: DuplicateCounts;
+  /** The measured duration of the reconciliation, in milliseconds, for the console summary alone: the log never depends on the clock. */
+  timeMs: number;
 }
 
 /** The file name without its extension; every resource is a file with one. */
@@ -139,7 +141,6 @@ function addCounts(total: DuplicateCounts, stats: DuplicateStats): void {
   total.exactVerifications += stats.exactVerifications;
   total.merged += stats.merged;
   total.candidates += stats.candidates;
-  total.timeMs += stats.timeMs;
 }
 
 /** The identifier every member of a merged group now answers to. */
@@ -220,8 +221,8 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
     exactVerifications: 0,
     merged: 0,
     candidates: 0,
-    timeMs: 0,
   };
+  let timeMs = 0;
   const read = new Map(
     (input.resources ?? []).map((document) => [
       documentKey(document.source, document.path),
@@ -253,11 +254,13 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
       })),
     );
     addCounts(counts, result.stats);
+    timeMs += result.stats.timeMs;
   }
   return {
     ...mergeEntities(input.entities, groups),
     findings: findings.toSorted(compareFindings),
     candidates,
     counts,
+    timeMs,
   };
 }
