@@ -38,6 +38,7 @@ env:
 jobs:
   version:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       version: ${{ steps.version.outputs.version }}
       prerelease: ${{ steps.version.outputs.prerelease }}
@@ -75,6 +76,7 @@ jobs:
     needs: version
     if: needs.version.outputs.version != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     env:
@@ -108,6 +110,7 @@ jobs:
           - os: windows-latest
             target: win32-x64
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
@@ -130,6 +133,7 @@ jobs:
     needs: [version, tag, binaries]
     if: always() && needs.version.outputs.version != '' && needs.tag.result == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       actions: write
@@ -206,6 +210,7 @@ jobs:
     if: always() && needs.version.outputs.version != '' && needs.release.result == 'success'
     needs: [version, release]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: read
@@ -300,6 +305,7 @@ jobs:
     # every package and, when the image workflow has published it already, the digest of the image.
     needs: [version, publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     env:
@@ -345,6 +351,7 @@ jobs:
     # through the environment of the job and the steps test it.
     needs: [version, publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     env:
