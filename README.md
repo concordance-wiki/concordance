@@ -129,4 +129,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The bar is high on purpose: stric
 
 ## Licence
 
-[GNU General Public License, version 3 or later](LICENSE), for every package of this repository. The [licence inventory](docs/licenses.md) lists the third-party dependencies and their licences.
+[GNU General Public License, version 3 or later](LICENSE), for every package of this repository. The [licence inventory](docs/licenses.md) lists the third-party dependencies and their licences. Contributions are accepted under the [contributor licence agreement](CLA.md): you keep your copyright, the project keeps one legal basis.

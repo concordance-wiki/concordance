@@ -24,6 +24,7 @@ const allowedUppercaseMarkdown = new Set([
   "README.md",
   "CHANGELOG.md",
   "CONTRIBUTING.md",
+  "CLA.md",
   "CODE_OF_CONDUCT.md",
   "SECURITY.md",
   "LICENSE.md",
