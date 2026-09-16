@@ -11,6 +11,7 @@ Everything a reader, an integrator or a contributor needs, in English, next to t
 | [Configuration](guides/configuration.md) | integrator | how the keys of `concordance.yaml`, `theme.yaml`, `profile.yaml` and `concordance-lint.yaml` work together, with examples |
 | [The command line](guides/command-line.md) | integrator | what `init`, `validate-config`, `build`, `query`, `render`, `export`, `lint` and `gallery` read, write and return |
 | [Reading the model from the command line](guides/querying.md) | integrator, agent harness | `concordance query`: the questions it answers in one invocation, the model it reads, how to give it to an agent |
+| [The server for agent harnesses](guides/mcp.md) | integrator, agent harness | `concordance mcp`: the questions of `query` as tools of the model context protocol, over the standard input, with nothing else |
 | [Pipelines](guides/pipelines.md) | integrator | build and publish on GitHub Pages and GitLab Pages, lint in a merge request, with or without the container image; copyable |
 | [Operations](guides/operations.md) | maintainer of a wiki | build time and weight to expect, what `dist/` and the cache hold, the container image, reproducible builds, exit codes, the human steps |
 | [What the tool does not do](guides/limits.md) | everyone | the limits by design and the state of this version, one line each |

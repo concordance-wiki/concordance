@@ -62,6 +62,7 @@ Ask the built model what it knows, without the site, for a person at a terminal 
 concordance query "keyword page"
 concordance query --search "threshold" --type rule
 concordance query --text "we agreed to"
+concordance mcp --model dist/model.json
 ```
 
 A plugin declared under `plugins:` in `concordance.yaml` is resolved by its package name from where the command is installed: `npm install --save-dev @concordance-wiki/plugin-reader-vtt` in the same project puts it where the command finds it.
@@ -71,6 +72,7 @@ A plugin declared under `plugins:` in `concordance.yaml` is resolved by its pack
 - **`build`**: validates the configuration, fetches the sources, runs the whole inference chain and writes `model.json`, `build.log.json`, the fragments and the site, a static folder that works over `file://`.
 - **`lint`**: the local checks of one repository, or the global ones against the published model; text, JSON, SARIF or JUnit; the safe fixes announced before they are written.
 - **`query`**: what the model knows about an expression, the note, where it is used, what it is linked to, the decisions that touched it; the search of the site, the lists, the counts, what nobody defined, what changed, where a phrase was spoken; text for a context or JSON under a published schema.
+- **`mcp`**: the questions of `query` served to an agent harness as tools of the model context protocol, over the standard input, one message per line; no state, no key, no network.
 - **`render`** and **`export`**: the site again from an existing model without touching a source, and the model as a Cypher script.
 - **`init`** and **`validate-config`**: a minimal, commented `concordance.yaml` with the note templates of every type, and every problem of a configuration with its path, received value and expectation.
 - **`gallery`**: every slot of the site in every state, for the author of a theme.

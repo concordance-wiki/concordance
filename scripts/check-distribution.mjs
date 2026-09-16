@@ -14,11 +14,13 @@ const files = {
   action: "distribution/github-action/action.yml",
   component: "distribution/gitlab-component/templates/lint.yml",
   hooks: ".pre-commit-hooks.yaml",
+  mcp: "distribution/mcp/mcp.json",
 };
 const pins = [
   { file: files.action, pattern: /(\n {2}version:\n(?: {4}.*\n)*? {4}default: ")[^"]*(")/u },
   { file: files.component, pattern: /(\n {4}version:\n(?: {6}.*\n)*? {6}default: ")[^"]*(")/u },
   { file: files.hooks, pattern: /(@concordance-wiki\/cli@)[^"\s]*/u },
+  { file: files.mcp, pattern: /(@concordance-wiki\/cli@)[^"\s]*/u },
 ];
 
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);

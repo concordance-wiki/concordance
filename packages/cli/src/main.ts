@@ -3,6 +3,7 @@ import { exportCommand } from "./commands/export.js";
 import { galleryCommand } from "./commands/gallery.js";
 import { initCommand } from "./commands/init.js";
 import { lintCommand } from "./commands/lint.js";
+import { mcpCommand } from "./commands/mcp.js";
 import { queryCommand } from "./commands/query.js";
 import { renderCommand } from "./commands/render.js";
 import { validateConfigCommand } from "./commands/validate-config.js";
@@ -16,6 +17,7 @@ const commands: Record<string, Command> = {
   gallery: galleryCommand,
   init: initCommand,
   lint: lintCommand,
+  mcp: mcpCommand,
   query: queryCommand,
   render: renderCommand,
   "validate-config": validateConfigCommand,
@@ -35,6 +37,8 @@ export const usage = [
   "  lint [--scope repo|global] [--source name] [--config file] [--fail-on error|warning|info]",
   "       [--format text|json|sarif|junit] [--output file]",
   "                                        check the current repository alone, or against the published model",
+  "  mcp [--model dist/model.json] [--config file]",
+  "                                        serve the questions of query to an agent over standard input, one tool per family",
   "  query <expression> [--occurrences] [--links] [--related] [--path <target>]",
   "  query --list [--type t] [--domain d] [--application a] [--source s]",
   "                                        what the model knows about an expression, a list of its entities, or the way between two",
