@@ -486,3 +486,10 @@ describe("searchLabels and pluralForms", () => {
     });
   });
 });
+
+describe("the labels of the index", () => {
+  it("take those of the English catalogue when the caller gives none", () => {
+    const { labels: given, ...rest } = input();
+    expect(buildSearchIndex(rest).meta.labels).toEqual(given);
+  });
+});

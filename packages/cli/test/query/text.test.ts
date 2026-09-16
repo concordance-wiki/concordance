@@ -6,6 +6,7 @@ import {
   formatAnswer,
   formatCandidates,
   formatPath,
+  formatSearch,
   headline,
   shorten,
 } from "../../src/query/text.js";
@@ -171,6 +172,48 @@ describe("formatAnswer", () => {
       "  notes/b — B [term]",
       "    ← affects 0.70",
       "  notes/c — C [decision]",
+    ]);
+  });
+
+  it("writes the results of a search, a keyword page named as such, the rest counted, the facets after them", () => {
+    expect(
+      formatSearch(base.model, {
+        query: "cue",
+        words: ["cue"],
+        origin: "site",
+        hits: [
+          {
+            entry: {
+              id: "keywords/cue",
+              title: "cue",
+              type: "keyword",
+              url: "keywords/cue/",
+              status: "valid",
+              source: "keywords",
+              keyword: true,
+            },
+            score: 3,
+          },
+        ],
+        more: 2,
+        facets: {
+          type: { keyword: 1, term: 2 },
+          source: { keywords: 1, notes: 2 },
+          domain: {},
+          application: {},
+          nonote: { only: 1, exclude: 2 },
+        },
+      }),
+    ).toEqual([
+      "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)",
+      "",
+      '3 results for "cue" (the index of the site)',
+      "  keywords/cue — cue [keyword page] 3.00",
+      "  … 2 more",
+      "",
+      "facets",
+      "  type keyword 1, term 2",
+      "  source keywords 1, notes 2",
     ]);
   });
 });
