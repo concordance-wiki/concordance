@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
-import type { GitClient } from "@concordance-wiki/core";
 import { epochClock } from "@concordance-wiki/core";
 import { describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
@@ -25,18 +24,10 @@ interface Question {
   args: string[];
 }
 
-/** Every source of the corpus is a local folder: git is never called. */
-const noGit: GitClient = {
-  clone: () => Promise.reject(new Error("unexpected clone")),
-  update: () => Promise.reject(new Error("unexpected update")),
-  head: () => Promise.reject(new Error("unexpected head")),
-  history: () => Promise.reject(new Error("unexpected history")),
-};
-
 /** The corpus read into a file system kept in memory, the clock at the epoch: no date of the machine, no commit, enters the answers. */
 function corpusInMemory(): RecordedIo {
+  // Every source of the corpus is a local folder: the fake git is never asked to clone.
   const io = recordedIo({}, CORPUS_ROOT);
-  io.git = noGit;
   io.clock = epochClock(0);
   const walk = (directory: string): void => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
