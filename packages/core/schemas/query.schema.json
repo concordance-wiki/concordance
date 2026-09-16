@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concordance-wiki.github.io/concordance/schemas/query.schema.json",
+  "title": "Concordance query answer",
+  "description": "Schema of the JSON answer of concordance query: the model it was read from, the entity the expression names, where the entity is used, what it is linked to, and the decisions and sessions among those links.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["model", "entity", "occurrences", "links", "related"],
+  "properties": {
+    "model": {
+      "description": "The model the answer was read from.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "at", "tool", "sources"],
+      "properties": {
+        "file": {
+          "description": "The model file as named on the command line.",
+          "type": "string"
+        },
+        "at": {
+          "description": "ISO 8601 date of the build that wrote the model.",
+          "type": "string"
+        },
+        "tool": {
+          "description": "Version of the command line that wrote the model.",
+          "type": "string"
+        },
+        "sources": {
+          "description": "The sources of the model, `name@commit` when the build recorded a commit.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "age": {
+          "description": "The age of the model worded from the clock of the command; absent with --no-age.",
+          "type": "string"
+        }
+      }
+    },
+    "entity": {
+      "description": "The entity the expression names, exactly as `model.json` serialises it under `entities` (see the model schema).",
+      "type": "object"
+    },
+    "occurrences": {
+      "description": "Where the entity is named, grouped by the note whose files hold the occurrences.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["notes", "more_notes", "total"],
+      "properties": {
+        "notes": {
+          "description": "The notes listed under the bound, by source then identifier.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "occurrences", "more"],
+            "properties": {
+              "source": {
+                "description": "Name of the source holding the files.",
+                "type": "string"
+              },
+              "note": {
+                "description": "The note whose files hold the occurrences; absent when no note of the model owns the file.",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "title", "type"],
+                "properties": {
+                  "id": {
+                    "description": "Identifier of the note.",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "Title of the note.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "Type of the note.",
+                    "type": "string"
+                  }
+                }
+              },
+              "occurrences": {
+                "description": "The occurrences listed under the bound, by path then line.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["path", "line", "context"],
+                  "properties": {
+                    "path": {
+                      "description": "Forward-slash path of the file relative to its source.",
+                      "type": "string"
+                    },
+                    "line": {
+                      "description": "Line of the occurrence, 1-based.",
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "context": {
+                      "description": "The text around the occurrence.",
+                      "type": "string"
+                    },
+                    "method": {
+                      "description": "The method of the link that recorded the occurrence; absent for a passage of a keyword page.",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "more": {
+                "description": "Occurrences of the note the bound left out.",
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "more_notes": {
+          "description": "Notes the bound left out.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "description": "Every occurrence, listed or not.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "links": {
+      "description": "The entities linked to the queried one, best confidence first.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "more"],
+      "properties": {
+        "entries": {
+          "description": "The links listed under the bound.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/linked"
+          }
+        },
+        "more": {
+          "description": "Links the bound left out.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "related": {
+      "description": "The decisions and the sessions linked to the entity, every one of them, best confidence first.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/linked"
+      }
+    }
+  },
+  "$defs": {
+    "linked": {
+      "description": "One entity linked to the queried one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "type", "relation", "direction", "confidence", "methods"],
+      "properties": {
+        "id": {
+          "description": "Identifier of the linked entity.",
+          "type": "string"
+        },
+        "title": {
+          "description": "Title of the linked entity.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of the linked entity.",
+          "type": "string"
+        },
+        "domain": {
+          "description": "Domain of the linked entity, when it has one.",
+          "type": "string"
+        },
+        "relation": {
+          "description": "Relation of the link, a slug of the profile.",
+          "type": "string"
+        },
+        "direction": {
+          "description": "`out` when the queried entity is the source of the link, `in` when it is the target.",
+          "enum": ["out", "in"]
+        },
+        "confidence": {
+          "description": "Combined confidence of the link, in [0, 1].",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "methods": {
+          "description": "The methods that claim the link, in code-unit order.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

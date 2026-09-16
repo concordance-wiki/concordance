@@ -139,6 +139,18 @@ concordance export --format cypher --output graph.cypher
 
 `export` reads `dist/model.json` (`--model` names another file), validates it against the published schema, and writes a Cypher script: one `MERGE` per entity with its properties, one per link with its confidence and methods. Without `--output` the script goes to stdout, so `concordance export | cypher-shell` loads the graph directly. Exit codes: 0 written, 1 when the model does not match the schema, 2 when the file is missing or the format is not `cypher`, the only one in this version.
 
+## `query`
+
+```bash
+concordance query "keyword page"
+concordance query glossary/inference/recognition/keyword --format json
+concordance query keyword --model ../wiki/dist/model.json --limit 5 --context 2
+```
+
+`query` reads `dist/model.json` (`--model` names another file, anywhere, so that a checkout without a wiki of its own can ask the wiki that covers it) and prints what the model knows about an expression, without the site and without reading a source. The expression is resolved the way the recognition reads it: an identifier as written, then a title or an alias as written, then the same compared without case, accents and inflections (`Keyword Pages` finds the note titled "Keyword page"), then a prefix of those forms. When one step names several entities, a term among them wins, since the glossary defines the vocabulary; otherwise the candidates are listed with their identifier and the command exits 1, so that nothing is guessed. An expression that names nothing exits 1 with `nothing under "…"`.
+
+The text answer, meant for a person at a terminal or for the context of an agent, reads in this order: the model (its file, the instant of the build, its age from the clock of the command, its sources with their commits), the note (identifier, title, type, domain, status when it is not the usual one, aliases, file and line, the summary cut to three hundred characters), where it is used (grouped by the note whose files hold the occurrences, a session's minutes and transcript together, each occurrence as `path:line` and its context; a keyword page, which no link points at, takes its passages from the fragment written next to the model), what it is linked to (best confidence first, the relation, the direction as an arrow and the methods that claim the link), and the decisions and sessions among those links, every one of them. Every list is bounded and the rest is counted, never cut in silence: `--limit` (10) bounds the notes and the links, `--context` (3) the occurrences per note. `--format json` gives the same content under the [query answer schema](../reference/query.md). `--no-age` leaves the age out, which makes two answers on the same model identical to the byte; the age is the only part of an answer that depends on the clock. Exit codes: 0 found, 1 nothing or several candidates, 2 missing or invalid model, or bad options.
+
 ## `lint`
 
 Each source can check itself before pushing, without the global build. From the root of the repository:
