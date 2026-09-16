@@ -64,7 +64,8 @@ export function createRegistry(
   contributed: readonly CheckContribution[] = [],
 ): CheckRegistry {
   const byId = index([...definitions, ...contributed.map(fromContribution)]);
-  const sorted = [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));
+  // Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+  const sorted = [...byId.values()].sort((a, b) => Number(a.id > b.id) - Number(a.id < b.id));
 
   const definitionOf = (id: string): CheckDefinition => {
     const definition = byId.get(id);

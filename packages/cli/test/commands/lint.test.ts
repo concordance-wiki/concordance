@@ -228,8 +228,8 @@ describe("concordance lint", () => {
         "would fix: notes/entry.md:1: order the frontmatter keys: id, status",
         'would fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
       ]);
-      expect(io.stdout[2]).toMatch(/^error: notes\/entry\.md:7: E-LINK-BROKEN: /);
-      expect(io.stdout[3]).toMatch(/^error: README\.md:3: E-LINK-BROKEN: /);
+      expect(io.stdout[2]).toMatch(/^error: README\.md:3: E-LINK-BROKEN: /);
+      expect(io.stdout[3]).toMatch(/^error: notes\/entry\.md:7: E-LINK-BROKEN: /);
       expect(write).not.toHaveBeenCalled();
     });
 

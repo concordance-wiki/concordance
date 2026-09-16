@@ -13,13 +13,18 @@ export interface Finding {
   entity?: string;
 }
 
-/** Canonical order: check, source, path, line, message. */
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
+/** Canonical order: check, source, path, line, message, each compared code unit by code unit. */
 export function compareFindings(a: Finding, b: Finding): number {
   return (
-    a.check.localeCompare(b.check) ||
-    (a.source ?? "").localeCompare(b.source ?? "") ||
-    (a.path ?? "").localeCompare(b.path ?? "") ||
+    byCodeUnit(a.check, b.check) ||
+    byCodeUnit(a.source ?? "", b.source ?? "") ||
+    byCodeUnit(a.path ?? "", b.path ?? "") ||
     (a.line ?? 0) - (b.line ?? 0) ||
-    a.message.localeCompare(b.message)
+    byCodeUnit(a.message, b.message)
   );
 }

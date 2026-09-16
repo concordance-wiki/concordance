@@ -219,7 +219,7 @@ function referenceAttributes(profile: Profile, type: string): [string, Attribute
         (definition.type === "ref" || definition.type === "ref[]") &&
         definition.relation !== undefined,
     )
-    .sort(([a], [b]) => a.localeCompare(b));
+    .sort(([a], [b]) => Number(a > b) - Number(a < b));
 }
 
 function referencedIds(value: unknown): string[] {

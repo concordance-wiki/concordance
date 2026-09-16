@@ -71,7 +71,7 @@ describe("resolveDuplicates", () => {
     expect(findings.map((finding) => finding.path)).toEqual(["two.md", "two.rule.md"]);
   });
 
-  it("sorts the findings canonically even where that differs from the code-unit order", () => {
+  it("sorts the findings code unit by code unit, a capital before a small letter, whatever the locale", () => {
     const entries = [
       { id: "n/x", source: "notes", path: "A.md" },
       { id: "n/x", source: "notes", path: "C.md" },
@@ -79,7 +79,7 @@ describe("resolveDuplicates", () => {
     ];
     const { kept, findings } = resolveDuplicates(entries);
     expect(kept.map((entry) => entry.path)).toEqual(["A.md"]);
-    expect(findings.map((finding) => finding.path)).toEqual(["b.md", "C.md"]);
+    expect(findings.map((finding) => finding.path)).toEqual(["C.md", "b.md"]);
   });
 
   it("does not mutate its input", () => {

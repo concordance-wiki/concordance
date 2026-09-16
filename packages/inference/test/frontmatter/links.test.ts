@@ -319,13 +319,14 @@ describe("frontmatterLinks", () => {
     });
     const { links, findings } = frontmatterLinks({ entities: [screen, role], profile });
     expect(links.map((link) => link.from)).toEqual(["specs/roles/maintainer"]);
+    // Code-unit order of the messages: the digit of `42` sorts before the brace of the object.
     expect(findings).toEqual([
+      unresolved(screen, "rules", "value 42 is neither a string nor a list of strings"),
       unresolved(
         screen,
         "roles",
         'value {"id":"roles/maintainer"} is neither a string nor a list of strings',
       ),
-      unresolved(screen, "rules", "value 42 is neither a string nor a list of strings"),
     ]);
   });
 
