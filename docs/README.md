@@ -34,6 +34,7 @@ Generated from the JSON schemas of [`packages/core/schemas`](../packages/core/sc
 | [Profile reference](reference/profile.md) | `profile.yaml` and the default profile |
 | [Lock file reference](reference/lock.md) | `concordance.lock.yaml` |
 | [Type module reference](reference/type-module.md) | `type.yaml` of a type module |
+| [Query answer reference](reference/query.md) | the JSON answer of `concordance query` |
 
 ## Checks
 

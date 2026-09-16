@@ -55,6 +55,13 @@ export const referencePages = [
     file: "type.yaml",
     guide: "../guides/adding-a-type.md",
   },
+  {
+    schema: "query.schema.json",
+    page: "docs/reference/query.md",
+    title: "Query answer reference",
+    file: "concordance query --format json",
+    guide: "../guides/command-line.md#query",
+  },
 ];
 
 const SCHEMA_BASE = "https://concordance-wiki.github.io/concordance/schemas/";

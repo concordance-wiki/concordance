@@ -3,6 +3,7 @@ import { exportCommand } from "./commands/export.js";
 import { galleryCommand } from "./commands/gallery.js";
 import { initCommand } from "./commands/init.js";
 import { lintCommand } from "./commands/lint.js";
+import { queryCommand } from "./commands/query.js";
 import { renderCommand } from "./commands/render.js";
 import { validateConfigCommand } from "./commands/validate-config.js";
 import { exitCodes, type CommandIo, type ExitCode } from "./io.js";
@@ -15,6 +16,7 @@ const commands: Record<string, Command> = {
   gallery: galleryCommand,
   init: initCommand,
   lint: lintCommand,
+  query: queryCommand,
   render: renderCommand,
   "validate-config": validateConfigCommand,
 };
@@ -32,6 +34,8 @@ export const usage = [
   "  lint [--scope repo|global] [--source name] [--config file] [--fail-on error|warning|info]",
   "       [--format text|json|sarif|junit] [--output file]",
   "                                        check the current repository alone, or against the published model",
+  "  query <expression> [--model dist/model.json] [--format text|json] [--limit n] [--context n]",
+  "                                        what the model knows about an expression: its note, where it is used, what it is linked to",
   "  render [--model dist/model.json] [--output dir] [--config file]",
   "                                        render the site again from an existing model, without the sources",
   "  validate-config [--config file]       check the configuration and report its errors",
