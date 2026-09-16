@@ -1,4 +1,5 @@
 import { pagePath, type CanonicalModel, type Entity, type Locale } from "@concordance-wiki/core";
+import { loadCatalogue } from "@concordance-wiki/i18n";
 import {
   formatMessage,
   formatNumber,
@@ -72,8 +73,8 @@ export interface SearchIndexInput {
   tokenize: SearchTokenizer;
   /** The label of a type in the site language, `keyword` included. */
   typeLabel: (type: string) => string;
-  /** The strings of the results page, from `searchLabels`. */
-  labels: SearchLabels;
+  /** The strings of the results page, from `searchLabels`; those of the English catalogue when absent, for an index nobody renders. */
+  labels?: SearchLabels;
   /** The locale the counts are pluralised in. */
   locale: Locale;
   names?: SiteNames;
@@ -344,7 +345,7 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
       ),
       glossary: [...new Set(input.glossarySources ?? [])].sort(byCodeUnit),
       counts: countFacets(entries, emptyState()),
-      labels: input.labels,
+      labels: input.labels ?? searchLabels(loadCatalogue("en")),
       locale: input.locale,
       bytes,
     },

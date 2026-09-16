@@ -23,11 +23,13 @@ import {
 } from "../query/list.js";
 import { locateModel, type LocatedModel } from "../query/locate.js";
 import { resolveExpression, type Resolution } from "../query/resolve.js";
+import { loadSearchIndex, searchIndex, type SearchOptions } from "../query/search.js";
 import {
   ageOf,
   formatAnswer,
   formatCandidates,
   formatPath,
+  formatSearch,
   headline,
   type Section,
 } from "../query/text.js";
@@ -76,6 +78,7 @@ function passagesOf(io: CommandIo, directory: string | undefined, id: string): K
 export const queryUsage = [
   "usage: concordance query <expression> [--occurrences] [--links] [--related] [--path <target> [--max-depth n]]",
   "       concordance query --list [--type t] [--domain d] [--application a] [--source s] [--status st] [--all]",
+  "       concordance query --search <words> [--type t] [--domain d] [--application a] [--source s] [--keywords-only | --no-keywords]",
   "       options: [--model file] [--config file] [--format text|json] [--limit n] [--context n] [--no-age]",
 ];
 
@@ -104,6 +107,8 @@ interface Parsed {
   sections: Set<Section>;
   list: boolean;
   all: boolean;
+  search?: string;
+  noteless: SearchOptions["noteless"];
   filters: ListFilters;
   path?: string;
   maxDepth: number;
@@ -130,6 +135,9 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       "max-depth": { type: "string" },
       list: { type: "boolean", default: false },
       all: { type: "boolean", default: false },
+      search: { type: "string" },
+      "keywords-only": { type: "boolean", default: false },
+      "no-keywords": { type: "boolean", default: false },
       type: { type: "string" },
       domain: { type: "string" },
       application: { type: "string" },
@@ -164,19 +172,37 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   if (values["max-depth"] !== undefined && values.path === undefined) {
     errors.push("--max-depth goes with --path");
   }
-  if (values.list) {
-    if (expression !== "")
+  const searching = values.search !== undefined;
+  if (values["keywords-only"] && values["no-keywords"]) {
+    errors.push("--keywords-only and --no-keywords do not go together");
+  }
+  if ((values["keywords-only"] || values["no-keywords"]) && !searching) {
+    errors.push("--keywords-only and --no-keywords go with --search");
+  }
+  if (searching && values.list) errors.push("--search and --list do not go together");
+  if (searching && values.status !== undefined) {
+    errors.push("--status goes with --list; the search has no such facet");
+  }
+  if (values.list || searching) {
+    const mode = values.list ? "--list" : "--search";
+    if (expression !== "") {
       errors.push(
-        "--list takes no expression; filter with --type, --domain, --application, --source or --status",
+        `${mode} takes no expression; filter with --type, --domain, --application or --source`,
       );
-    if (values.path !== undefined) errors.push("--list and --path do not go together");
-    if (sections.size > 0)
-      errors.push("--list lists entities; --occurrences, --links and --related read one");
+    }
+    if (values.path !== undefined) errors.push(`${mode} and --path do not go together`);
+    if (sections.size > 0) {
+      errors.push(`${mode} finds entities; --occurrences, --links and --related read one`);
+    }
+    if (searching && values.all) errors.push("--all goes with --list");
   } else {
     if (expression === "") errors.push(...queryUsage);
     if (values.all) errors.push("--all goes with --list");
-    if (hasFilter(filters))
-      errors.push("--type, --domain, --application, --source and --status go with --list");
+    if (hasFilter(filters)) {
+      errors.push(
+        "--type, --domain, --application, --source and --status go with --list or --search",
+      );
+    }
     if (values.path !== undefined && sections.size > 0) {
       errors.push("--path walks to another entity; --occurrences, --links and --related read one");
     }
@@ -199,6 +225,8 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       sections,
       list: values.list,
       all: values.all,
+      ...(values.search === undefined ? {} : { search: values.search }),
+      noteless: values["keywords-only"] ? "only" : values["no-keywords"] ? "exclude" : "any",
       filters,
       ...(values.path === undefined ? {} : { path: values.path }),
       maxDepth,
@@ -269,7 +297,26 @@ function walk(
   return exitCodes.ok;
 }
 
-/** What the model knows about an expression: the note it names, where it is used, what it is linked to; or a list, or a path. */
+function search(io: CommandIo, located: LocatedModel, parsed: Parsed, query: string): ExitCode {
+  const answer = searchIndex(loadSearchIndex(io, located), query, {
+    filters: parsed.filters,
+    noteless: parsed.noteless,
+    limit: parsed.bounds.limit,
+  });
+  if (answer.words.length === 0) {
+    io.err(`--search needs a word of two characters at least; "${query}" holds none`);
+    return exitCodes.failure;
+  }
+  const header = modelOf(located, io, parsed.age);
+  if (parsed.format === "json") {
+    io.out(JSON.stringify({ model: header, search: answer }, null, 2));
+  } else {
+    for (const line of formatSearch(header, answer)) io.out(line);
+  }
+  return answer.hits.length === 0 ? exitCodes.invalid : exitCodes.ok;
+}
+
+/** What the model knows about an expression: the note it names, where it is used, what it is linked to; or a list, a search, or a path. */
 export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
   const options = parse(argv);
   if ("errors" in options) {
@@ -286,6 +333,7 @@ export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitC
     return exitCodes.failure;
   }
   if (parsed.list) return list(io, located, parsed);
+  if (parsed.search !== undefined) return search(io, located, parsed, parsed.search);
   const entity = resolveOrList(io, located.model, parsed.expression);
   if (entity === undefined) return exitCodes.invalid;
   if (parsed.path !== undefined) return walk(io, located, parsed, entity, parsed.path);

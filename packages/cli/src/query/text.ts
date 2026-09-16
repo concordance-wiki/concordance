@@ -2,6 +2,7 @@ import type { Entity } from "@concordance-wiki/core";
 
 import type { Answer, Linked } from "./answer.js";
 import type { Path } from "./graph.js";
+import type { SearchAnswer } from "./search.js";
 
 /** The parts of an answer the options may keep alone. */
 export type Section = "occurrences" | "links" | "related";
@@ -120,5 +121,39 @@ export function formatPath(model: Answer["model"], from: Entity, to: Entity, pat
     }
     lines.push(`  ${headline(entity, false)}`);
   });
+  return lines;
+}
+
+const INDEX_ORIGINS: Record<SearchAnswer["origin"], string> = {
+  site: "the index of the site",
+  fragments: "an index built from the model and its fragments",
+  model: "an index of the titles, aliases and summaries alone: no fragment next to the model",
+};
+
+/** The results of a search, one line each, then the counts of every facet value over the whole result. */
+export function formatSearch(model: Answer["model"], answer: SearchAnswer): string[] {
+  const lines = [modelLine(model), ""];
+  const total = answer.hits.length + answer.more;
+  lines.push(`${String(total)} results for "${answer.query}" (${INDEX_ORIGINS[answer.origin]})`);
+  for (const hit of answer.hits) {
+    const { entry } = hit;
+    const kind = entry.keyword === true ? "keyword page" : entry.type;
+    const domain = entry.domain === undefined ? "" : ` · ${entry.domain}`;
+    lines.push(`  ${entry.id} — ${entry.title} [${kind}${domain}] ${hit.score.toFixed(2)}`);
+  }
+  if (answer.more > 0) lines.push(`  … ${String(answer.more)} more`);
+  const facets = (["type", "source", "domain", "application"] as const)
+    .map((name) => {
+      const counts = Object.entries(answer.facets[name]);
+      return counts.length === 0
+        ? undefined
+        : `${name} ${counts.map(([value, count]) => `${value} ${String(count)}`).join(", ")}`;
+    })
+    .filter((line): line is string => line !== undefined);
+  if (facets.length > 0) {
+    lines.push("");
+    lines.push("facets");
+    for (const facet of facets) lines.push(`  ${facet}`);
+  }
   return lines;
 }

@@ -7,6 +7,7 @@ import {
   parseModel,
   readLintConfig,
   type CanonicalModel,
+  type Config,
 } from "@concordance-wiki/core";
 import { loadPublishedModel, resolveGlobalConfig } from "@concordance-wiki/lint";
 
@@ -35,6 +36,8 @@ export interface LocatedModel {
   origin: ModelOrigin;
   /** The directory the fragments of the model are written next to; absent for a published model read remotely. */
   directory?: string;
+  /** The configuration the model was found through, whose names and sources shape the search index; absent otherwise. */
+  config?: Config;
 }
 
 export type Location = LocatedModel | { ok: false; lines: string[] };
@@ -67,7 +70,14 @@ function throughConfiguration(io: CommandIo, file: string): Location {
   }
   const read = readModelFile(io, model);
   return "model" in read
-    ? { ok: true, model: read.model, file: model, origin: "configuration", directory: output }
+    ? {
+        ok: true,
+        model: read.model,
+        file: model,
+        origin: "configuration",
+        directory: output,
+        config: validation.config,
+      }
     : { ok: false, lines: read.lines };
 }
 

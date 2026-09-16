@@ -117,7 +117,7 @@ describe("concordance query answers what the model knows about an expression", (
     const io = await builtCorpus();
     expect(await queryCommand([], io)).toBe(2);
     expect(io.stderr[0]).toMatch(/^usage: concordance query <expression>/);
-    expect(io.stderr).toHaveLength(3);
+    expect(io.stderr).toHaveLength(4);
     expect(await queryCommand(["bee", "--format", "yaml"], io)).toBe(2);
     expect(io.stderr).toContain("--format yaml is not available; expected text, json");
     expect(await queryCommand(["bee", "--limit", "0"], io)).toBe(2);
@@ -255,9 +255,9 @@ describe("concordance query answers what the model knows about an expression", (
     io.stderr.splice(0);
     expect(await queryCommand(["--list", "bee", "--path", "x", "--links"], io)).toBe(2);
     expect(io.stderr).toEqual([
-      "--list takes no expression; filter with --type, --domain, --application, --source or --status",
+      "--list takes no expression; filter with --type, --domain, --application or --source",
       "--list and --path do not go together",
-      "--list lists entities; --occurrences, --links and --related read one",
+      "--list finds entities; --occurrences, --links and --related read one",
     ]);
     io.stderr.splice(0);
     expect(
@@ -269,7 +269,7 @@ describe("concordance query answers what the model knows about an expression", (
     expect(io.stderr).toEqual([
       "--max-depth takes a positive integer",
       "--all goes with --list",
-      "--type, --domain, --application, --source and --status go with --list",
+      "--type, --domain, --application, --source and --status go with --list or --search",
       "--path walks to another entity; --occurrences, --links and --related read one",
     ]);
     io.stderr.splice(0);
@@ -342,6 +342,11 @@ describe("concordance query answers what the model knows about an expression", (
       fetch: (() =>
         Promise.resolve(new Response(JSON.stringify(model), { status: 200 }))) as typeof fetch,
     };
+    expect(await queryCommand(["--search", "term", "--no-age"], served)).toBe(0);
+    expect(served.stdout[2]).toBe(
+      '1 results for "term" (an index of the titles, aliases and summaries alone: no fragment next to the model)',
+    );
+    served.stdout.splice(0);
     expect(await queryCommand(["keywords/bee", "--no-age"], served)).toBe(0);
     expect(served.stdout[0]).toBe(
       "model https://wiki.example/model.json (built 2026-09-12T12:00:00.000Z; sources notes)",
@@ -351,6 +356,91 @@ describe("concordance query answers what the model knows about an expression", (
     expect(await queryCommand(["bee"], nowhere)).toBe(2);
     expect(nowhere.stderr[0]).toBe(
       "no model to read: name one with --model, or run the command where concordance.yaml stands",
+    );
+  });
+
+  it("searches the index as the results page does, in text and in JSON, and refuses what does not go with --search", async () => {
+    const io = await builtCorpus();
+    expect(await queryCommand(["--search", "term", "--no-age"], io)).toBe(0);
+    expect(io.stdout).toEqual([
+      "model /work/dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes)",
+      "",
+      '1 results for "term" (the index of the site)',
+      "  notes/b — Term B [term · notes] 9.00",
+      "",
+      "facets",
+      "  type term 1",
+      "  source notes 1",
+      "  domain notes 1",
+      "  application wiki 1",
+    ]);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(
+        ["--search", "screen", "--format", "json", "--no-age", "--type", "screen"],
+        io,
+      ),
+    ).toBe(0);
+    const answer = JSON.parse(io.stdout.join("\n")) as {
+      search: { origin: string; hits: { entry: { id: string } }[] };
+    };
+    expect(answer.search.origin).toBe("site");
+    expect(answer.search.hits.map((hit) => hit.entry.id)).toEqual(["notes/a"]);
+    io.stdout.splice(0);
+    expect(await queryCommand(["--search", "zzz", "--no-age"], io)).toBe(1);
+    expect(io.stdout[2]).toBe('0 results for "zzz" (the index of the site)');
+    io.stdout.splice(0);
+    expect(await queryCommand(["--search", "zzz", "--format", "json", "--no-age"], io)).toBe(1);
+    io.stdout.splice(0);
+    expect(await queryCommand(["--search", "a"], io)).toBe(2);
+    expect(io.stderr).toEqual(['--search needs a word of two characters at least; "a" holds none']);
+    io.stderr.splice(0);
+    expect(
+      await queryCommand(
+        [
+          "bee",
+          "--search",
+          "term",
+          "--list",
+          "--status",
+          "valid",
+          "--path",
+          "x",
+          "--links",
+          "--all",
+          "--keywords-only",
+          "--no-keywords",
+        ],
+        io,
+      ),
+    ).toBe(2);
+    expect(io.stderr).toEqual([
+      "--keywords-only and --no-keywords do not go together",
+      "--search and --list do not go together",
+      "--status goes with --list; the search has no such facet",
+      "--list takes no expression; filter with --type, --domain, --application or --source",
+      "--list and --path do not go together",
+      "--list finds entities; --occurrences, --links and --related read one",
+      "--all goes with --list",
+    ]);
+    io.stderr.splice(0);
+    expect(await queryCommand(["--search", "term", "--all", "--keywords-only"], io)).toBe(2);
+    expect(io.stderr).toEqual(["--all goes with --list"]);
+    io.stdout.splice(0);
+    expect(await queryCommand(["--search", "term", "--keywords-only", "--no-age"], io)).toBe(1);
+    expect(io.stdout[2]).toBe('0 results for "term" (the index of the site)');
+    io.stderr.splice(0);
+    expect(await queryCommand(["bee", "--no-keywords"], io)).toBe(2);
+    expect(io.stderr).toEqual(["--keywords-only and --no-keywords go with --search"]);
+    io.stderr.splice(0);
+    io.stdout.splice(0);
+    for (const name of io.fs.listFiles("/work/dist/search"))
+      io.fs.remove(`/work/dist/search/${name}`);
+    for (const name of io.fs.listFiles("/work/dist/fragments"))
+      io.fs.remove(`/work/dist/fragments/${name}`);
+    expect(await queryCommand(["--search", "term", "--no-age", "--no-keywords"], io)).toBe(0);
+    expect(io.stdout[2]).toBe(
+      '1 results for "term" (an index of the titles, aliases and summaries alone: no fragment next to the model)',
     );
   });
 });
