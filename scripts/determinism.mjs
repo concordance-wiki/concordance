@@ -6,12 +6,13 @@
 // or any differing file, fails the step. A tree without the pages of the site
 // fails too: the rendering is part of what determinism covers.
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { compareTrees } from "./compare-builds.mjs";
+import { readQuestions } from "./query-fixtures.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const bin = resolve(root, "packages/cli/dist/bin.js");
@@ -21,6 +22,23 @@ function build(corpus, output) {
   const config = resolve(root, "fixtures/corpora", corpus, "concordance.yaml");
   return spawnSync(process.execPath, [bin, "build", "--config", config, "--output", output], {
     cwd: root,
+    encoding: "utf8",
+    env: { ...process.env, SOURCE_DATE_EPOCH: "0" },
+  });
+}
+
+/** The questions recorded for a corpus; none when it records none. */
+function questionsOf(corpus) {
+  const directory = resolve(root, "fixtures/corpora", corpus);
+  return existsSync(join(directory, "expected/query/questions.yaml"))
+    ? readQuestions(directory)
+    : [];
+}
+
+/** One question asked of a built output through the command line, the age left out. */
+function ask(output, args) {
+  return spawnSync(process.execPath, [bin, "query", ...args, "--model", "model.json", "--no-age"], {
+    cwd: output,
     encoding: "utf8",
     env: { ...process.env, SOURCE_DATE_EPOCH: "0" },
   });
@@ -56,6 +74,23 @@ for (const corpus of corpora) {
     console.log(
       `determinism: two builds of ${corpus} are byte-identical (${String(paths.length)} file(s) compared)`,
     );
+    // The answers of `query` on the two builds must not differ either: the command adds nothing of its own.
+    let answered = 0;
+    for (const question of questionsOf(corpus)) {
+      const answers = outputs.map((output) => ask(output, question.args));
+      if (answers[0].stdout !== answers[1].stdout || answers[0].status !== answers[1].status) {
+        console.error(
+          `determinism: query ${question.slug} answers differently on two builds of ${corpus}`,
+        );
+        process.exit(1);
+      }
+      answered += 1;
+    }
+    if (answered > 0) {
+      console.log(
+        `determinism: ${String(answered)} query answers are identical on both builds of ${corpus}`,
+      );
+    }
   } finally {
     for (const output of outputs) rmSync(output, { recursive: true, force: true });
   }

@@ -19,6 +19,7 @@
     "licenses:update": "node scripts/licenses.mjs",
     "licenses:check": "node scripts/licenses.mjs --check",
     "reference:update": "node scripts/config-reference.mjs",
+    "query-fixtures:update": "node scripts/query-fixtures.mjs",
     "measure": "node scripts/measure.mjs",
     "walkthrough": "node scripts/walkthrough.mjs",
     "parity": "node scripts/parity.mjs",

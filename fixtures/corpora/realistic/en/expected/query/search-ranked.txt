@@ -1,0 +1,16 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+13 results for "publication threshold" (the index of the site)
+  glossary/publication-threshold — Publication threshold [term · inference/recognition] 14.00
+  specs/rules/publication-threshold — Publication threshold [rule · inference/recognition] 13.00
+  decisions/threshold-applied-in-model — Threshold applied in model [decision · inference/recognition] 11.00
+  meetings/2026-03-12-keyword-page-threshold-review — Keyword page threshold review [meeting · inference/recognition] 11.00
+  specs/api/canonical-model — Canonical model API [api · publication] 7.00
+  … 8 more
+
+facets
+  type api 1, business_object 1, decision 2, meeting 2, rule 3, screen 1, term 3
+  source decisions 2, glossary 3, meetings 2, specs 6
+  domain inference 3, inference/recognition 9, publication 1
+  application concordance-cli 13

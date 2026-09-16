@@ -1,0 +1,81 @@
+# The questions an agent asks of a wiki, each answered by one invocation of `concordance query`
+# on the realistic corpus, with the answer recorded next to this file (`<slug>.txt`, the exit
+# code on its first line). `pnpm query-fixtures:update` regenerates the answers from the built
+# command line; the test compares them to the byte, the determinism check compares two builds.
+# A question that needs two invocations is a defect of the grammar, not a note here.
+questions:
+  - slug: lookup-by-title
+    asks: What is a keyword page, and where is it used?
+    args: ["keyword page"]
+  - slug: lookup-by-alias
+    asks: Which note is called "word page"?
+    args: ["word page"]
+  - slug: lookup-by-inflected-form
+    asks: Find the note for "Keyword Pages", whatever its exact title.
+    args: ["Keyword Pages"]
+  - slug: ambiguous-expression
+    asks: What answers to "threshold" — one note or several?
+    args: ["threshold"]
+  - slug: nothing-under-a-name
+    asks: Is there anything under "quantum"?
+    args: ["quantum"]
+  - slug: occurrences-alone
+    asks: Where exactly is the keyword page named, file and line?
+    args: ["glossary/keyword-page", "--occurrences", "--limit", "5", "--context", "2"]
+  - slug: incoming-links
+    asks: What points at the keyword page?
+    args: ["glossary/keyword-page", "--direction", "in", "--limit", "5"]
+  - slug: decisions-and-sessions
+    asks: Which decisions and sessions touch the keyword page?
+    args: ["glossary/keyword-page", "--related"]
+  - slug: near-within-two
+    asks: What lies within two links of the keyword page?
+    args: ["glossary/keyword-page", "--near", "--radius", "2", "--limit", "8"]
+  - slug: explain-a-link
+    asks: Why are the keyword page and the entity linked?
+    args: ["glossary/keyword-page", "--explain", "glossary/entity", "--context", "1"]
+  - slug: path-to-a-decision
+    asks: How does one get from the keyword page to the decision that applied the threshold in the model?
+    args: ["glossary/keyword-page", "--path", "Threshold applied in model"]
+  - slug: search-ranked
+    asks: Which pages talk about the publication threshold, best first?
+    args: ["--search", "publication threshold", "--limit", "5"]
+  - slug: search-keywords-only
+    asks: Which recurring expressions without a note mention the build?
+    args: ["--search", "build", "--keywords-only", "--limit", "5"]
+  - slug: list-decisions
+    asks: List every decision of the wiki.
+    args: ["--list", "--type", "decision"]
+  - slug: list-a-source
+    asks: What does the meetings space hold?
+    args: ["--list", "--source", "meetings"]
+  - slug: stats
+    asks: How big is this wiki, and of what?
+    args: ["--stats"]
+  - slug: sources
+    asks: Which spaces make up the wiki, and when did each last move?
+    args: ["--sources"]
+  - slug: domains
+    asks: Which domains file the notes?
+    args: ["--domains"]
+  - slug: undefined-expressions
+    asks: Which expressions recur in at least three files without a note?
+    args: ["--undefined", "--min-files", "3", "--limit", "5"]
+  - slug: undefined-expression
+    asks: Where is "build summary" written, given that no note defines it?
+    args: ["--undefined", "build summary", "--limit", "3"]
+  - slug: recent
+    asks: What changed most recently, in the meetings?
+    args: ["--recent", "--source", "meetings", "--limit", "3"]
+  - slug: changed-with
+    asks: What changed together with the threshold review?
+    args: ["Keyword page threshold review", "--changed-with"]
+  - slug: findings-under-a-check
+    asks: Which findings did the build record under W-TERM-UNDEFINED?
+    args: ["--findings", "--check", "W-TERM-UNDEFINED", "--limit", "3"]
+  - slug: passages
+    asks: Where is "build summary" written or spoken, sections and documents alike?
+    args: ["--text", "build summary", "--limit", "4"]
+  - slug: json-answer
+    asks: The same answer as data, for a program.
+    args: ["glossary/keyword-page", "--format", "json", "--limit", "2", "--context", "1"]

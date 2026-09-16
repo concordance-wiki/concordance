@@ -1,0 +1,10 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+2 results for "build" (the index of the site)
+  keywords/build-summary — build summary [keyword page] 5.00
+  keywords/build-write — build writes [keyword page] 5.00
+
+facets
+  type keyword 2
+  source framing 1, glossary 1

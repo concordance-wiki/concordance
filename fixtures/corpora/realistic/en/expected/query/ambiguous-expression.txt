@@ -1,0 +1,47 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+glossary/publication-threshold — Publication threshold [term · domain inference/recognition]
+aliases: threshold
+file: glossary/publication-threshold.md:1
+The minimum a candidate expression must reach to get a keyword page: three occurrences across two files by default. Applied once, when the canonical model is written.
+
+used in 8 notes, 11 occurrences
+  decisions/related-relation-capped — Related relation capped [decision]
+    related-relation-capped.md:8  …lied in the same place as the publication threshold. Decided during the neighbou…
+  decisions/threshold-applied-in-model — Threshold applied in model [decision]
+    threshold-applied-in-model.md:8  The publication threshold is applied once, when the canonical model is written. …
+    threshold-applied-in-model.md:14  Publication threshold
+  glossary/candidate-expression — Candidate expression [term]
+    candidate-expression.md:6  …pread across files. Above the publication threshold it gets a keyword page and a…
+    publication-threshold.md:6  The minimum a candidate expression must reach to get a keyword page: three occur…
+  glossary/canonical-model — Canonical model [term]
+    publication-threshold.md:6  … across two files by default. Applied once, when the canonical model is written.
+  glossary/keyword-page — Keyword page [term]
+    keyword-page.md:6  …e expression that crosses the publication threshold without any note defining it…
+    publication-threshold.md:6  …te expression must reach to get a keyword page: three occurrences across two fil…
+  glossary/occurrence — Occurrence [term]
+    publication-threshold.md:6  …reach to get a keyword page: three occurrences across two files by default. Appl…
+  meetings/2026-03-12-keyword-page-threshold-review — Keyword page threshold review [meeting]
+    2026-03-12-keyword-page-threshold-review.md:8  …Participant-3 asked where the publication threshold lives; Participant-2 answere…
+  meetings/2026-04-23-neighbourhood-cap-review — Neighbourhood cap review [meeting]
+    2026-04-23-neighbourhood-cap-review.md:8  … Canonical model API like the publication threshold: see related relation capped…
+
+linked to 37 entities
+  ← decisions/threshold-applied-in-model — Threshold applied in model [decision] affects 0.87 (cooccurrence, glossary_occurrence, section_mention)
+  ← glossary/candidate-expression — Candidate expression [term] specializes 0.79 (cooccurrence, glossary_occurrence)
+  ← glossary/canonical-model — Canonical model [term] specializes 0.76 (cooccurrence, glossary_occurrence)
+  → glossary/staleness — Staleness [term] specializes 0.76 (cooccurrence, glossary_occurrence)
+  → specs/objects/source — Source [business_object] represents 0.76 (cooccurrence, glossary_occurrence)
+  → specs/screens/keyword-page — Keyword page [screen] related 0.64 (cooccurrence, glossary_occurrence)
+  ← glossary/keyword-page — Keyword page [term] specializes 0.61 (cooccurrence, glossary_occurrence)
+  → specs/objects/keyword-page — Keyword page [business_object] represents 0.61 (cooccurrence, glossary_occurrence)
+  → specs/rules/publication-threshold — Publication threshold [rule] related 0.61 (cooccurrence, glossary_occurrence)
+  → specs/rules/stale-after-180-days — Stale after 180 days [rule] related 0.60 (glossary_occurrence)
+  … 27 more
+
+decisions and sessions: 4
+  ← decisions/threshold-applied-in-model — Threshold applied in model [decision] affects 0.87 (cooccurrence, glossary_occurrence, section_mention)
+  ← decisions/related-relation-capped — Related relation capped [decision] affects 0.58 (cooccurrence, glossary_occurrence)
+  ← meetings/2026-03-12-keyword-page-threshold-review — Keyword page threshold review [meeting] documents 0.58 (cooccurrence, glossary_occurrence)
+  ← meetings/2026-04-23-neighbourhood-cap-review — Neighbourhood cap review [meeting] documents 0.58 (cooccurrence, glossary_occurrence)

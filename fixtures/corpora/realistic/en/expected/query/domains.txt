@@ -1,0 +1,11 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+7 domains
+  (none) — 171 entities
+  inference — 27 entities · 1970-01-01
+  inference/recognition — 19 entities · 1970-01-01
+  ingestion — 19 entities · 1970-01-01
+  publication — 23 entities · 1970-01-01
+  quality — 26 entities · 1970-01-01
+  unclassified — 5 entities · 1970-01-01
