@@ -4,6 +4,7 @@ import type { Answer, ExplainedLink, Linked } from "./answer.js";
 import type { Counts, DomainRow, SourceRow, Stats } from "./corpus.js";
 import type { Path, Reached } from "./graph.js";
 import { listLine } from "./list.js";
+import type { Passage } from "./passages.js";
 import type { SearchAnswer } from "./search.js";
 
 /** The parts of an answer the options may keep alone. */
@@ -366,5 +367,29 @@ export function formatFindings(
     lines.push(`  ${finding.severity} ${finding.check}${place}: ${finding.message}`);
   }
   if (findings.length > limit) lines.push(`  … ${String(findings.length - limit)} more`);
+  return lines;
+}
+
+/** The passages a phrase was found in, one per position or section, the rest counted. */
+export function formatPassages(
+  model: Answer["model"],
+  phrase: string,
+  passages: readonly Passage[],
+  limit: number,
+): string[] {
+  const lines = [modelLine(model), "", `${String(passages.length)} passages hold "${phrase}"`];
+  let current: string | undefined;
+  for (const passage of passages.slice(0, limit)) {
+    if (passage.entity !== current) {
+      current = passage.entity;
+      lines.push(`  ${passage.entity} — ${passage.title} [${passage.type}]`);
+    }
+    const place =
+      "section" in passage
+        ? `${passage.path} § ${passage.section}`
+        : `${passage.path}${passage.position.unit === "cue" ? "@" : "#"}${passage.position.label}${passage.position.speaker === undefined ? "" : ` ${passage.position.speaker}`}`;
+    lines.push(`    ${place}  ${shorten(passage.excerpt, 200)}`);
+  }
+  if (passages.length > limit) lines.push(`  … ${String(passages.length - limit)} more`);
   return lines;
 }
