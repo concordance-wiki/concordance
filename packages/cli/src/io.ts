@@ -10,6 +10,8 @@ export interface CommandIo {
   cwd: string;
   out: (line: string) => void;
   err: (line: string) => void;
+  /** The lines the command reads from its standard input, for the commands that serve a protocol over it; absent otherwise. */
+  input?: AsyncIterable<string>;
 }
 
 export const exitCodes = {

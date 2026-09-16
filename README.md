@@ -83,6 +83,8 @@ npx @concordance-wiki/concordance query --text "we agreed to"   # where a phrase
 
 Tell your agent to run it before answering about a term or editing a note: [reading the model from the command line](docs/guides/querying.md).
 
+A harness that speaks the model context protocol gets the same answers as tools: `concordance mcp` serves them over its standard input, without a network connection, a key or a dependency; [the server for agent harnesses](docs/guides/mcp.md) says what to copy into the harness.
+
 ## Zero configuration by default, structure when you want it
 
 **Day one.** Declare your repositories, build. Concordance maps and aggregates everything: it finds the words people actually use, gives each one a page, links every file that mentions it, previews your Word, PowerPoint and PDF documents, makes transcripts readable, and shows you where the gaps are: words nobody defined, documents nobody summarised.

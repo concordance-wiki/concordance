@@ -1368,6 +1368,12 @@ Depends on: L9-01 to L9-14.
 - One verb, options for what is read: `--occurrences`, `--links`, `--related` keep a section; `--direction` and `--relation` narrow the links; `--near --radius` lists what lies within a few links; `--explain <target>` shows every provenance of every link between two notes; `--path <target>` walks the fewest links, ties broken by the confidences then the identifiers; `--search <words>` runs the search of the site with its ranking and facets, from the index the site wrote, else from the model and its fragments, else from the model alone; `--list` with `--type`, `--domain`, `--application`, `--source`, `--status`; `--stats`, `--sources`, `--domains`, `--undefined`, `--recent --since`, `--changed-with`, `--findings --check`; `--text <phrase>` finds a phrase in the positions of the documents and the transcripts and in the sections of the notes. Options that do not go together are refused, each refusal naming the option.
 - Every list is bounded (`--limit`, `--context`) and the rest is counted, never cut in silence. The text answer is a contract under semver; the answers to the recorded questions of the realistic corpus (`fixtures/corpora/realistic/en/expected/query/`) are compared to the byte by the tests and by the determinism check, and every recorded question is answered by one invocation.
 
+### L14 — The server for agent harnesses
+
+- `concordance mcp` serves the questions of `query` as tools of the model context protocol, over its standard input and output, one JSON-RPC message per line: `initialize`, `ping`, `tools/list`, `tools/call`, nothing else. It keeps no state, holds no key, opens no network connection and depends on no library: every tool is a call of `query` with the same options, and returns the text a person reads at the terminal, or the JSON under `query.schema.json` when the call asks for it.
+- The tools are `lookup`, `search`, `relations`, `list`, `corpus` and `passages`, each documented with the options of `query` it maps; what `query` refuses, the tool refuses with the same words, as an error of the call and never of the protocol.
+- The model is located as `query` locates it; `distribution/mcp/mcp.json` is the configuration a harness copies, pinned to a version of the command line and checked with the other distribution manifests.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

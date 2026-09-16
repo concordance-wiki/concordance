@@ -11,6 +11,7 @@ const manifests = [
   "distribution/github-action/action.yml",
   "distribution/gitlab-component/templates/lint.yml",
   ".pre-commit-hooks.yaml",
+  "distribution/mcp/mcp.json",
 ];
 const roots = [];
 
@@ -38,6 +39,8 @@ describe("syncDistributionVersions", () => {
     const action = readFileSync(join(root, manifests[0]), "utf8");
     const component = readFileSync(join(root, manifests[1]), "utf8");
     const hooks = readFileSync(join(root, manifests[2]), "utf8");
+    const mcp = readFileSync(join(root, manifests[3]), "utf8");
+    expect(mcp).toContain('"@concordance-wiki/cli@1.2.3"');
     expect(action).toMatch(/\n {2}version:\n(?: {4}.*\n)*? {4}default: "1\.2\.3"/u);
     expect(component).toMatch(/\n {4}version:\n(?: {6}.*\n)*? {6}default: "1\.2\.3"/u);
     expect(hooks).toContain('additional_dependencies: ["@concordance-wiki/cli@1.2.3"]');
