@@ -1,0 +1,8 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+1 links between glossary/keyword-page and glossary/entity
+  ← specializes 0.58, from 2 provenances
+    cooccurrence 0.40 (7 paragraphs)
+    glossary_occurrence 0.30 keyword-page.md:10 "entity"
+      :10  The entity page, which describes an entity that a note defines; a keyword page o…

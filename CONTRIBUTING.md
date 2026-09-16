@@ -24,6 +24,7 @@ pnpm check
 |---|---|
 | `pnpm build` | compile every package (`tsc -b`) |
 | `pnpm test` | every test with coverage; fails under 100% lines, branches, functions and statements |
+| `pnpm query-fixtures:update` | regenerates the recorded answers of `concordance query` to the questions of the realistic corpus (`fixtures/corpora/realistic/en/expected/query/`), after a change to the corpus or to the wording of an answer |
 | `pnpm lint` | ESLint, Prettier, type check of sources and tests, schema and fixture validation, distribution manifests |
 | `pnpm build:binary` | the standalone binary of the command line for the current platform, under `dist-bin/` (after `pnpm build`) |
 | `pnpm mutation` | Stryker on `core`, `typing`, `nlp`, `inference` and `checks`; fails under 85%; see [Mutation testing](#mutation-testing) for what the pipeline runs |

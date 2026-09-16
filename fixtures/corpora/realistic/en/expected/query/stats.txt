@@ -1,0 +1,15 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+290 entities, 171 keyword pages
+  by type: api 3, batch 3, business_object 12, data_object 4, decision 7, document 4, endpoint 6, meeting 6, process 5, role 3, rule 10, screen 11, term 216
+  by domain: (none) 171, inference 27, inference/recognition 19, ingestion 19, publication 23, quality 26, unclassified 5
+  by source: decisions 53, framing 24, glossary 121, meetings 16, specs 76
+  by application: (none) 172, concordance-cli 113, concordance-service 5
+1271 links
+  by relation: accesses 137, affects 73, assigned_to 21, constrains 56, documents 83, exposes 1, flows_to 4, related 343, represents 214, serves 23, specializes 291, supersedes 1, triggers 24
+  by method: cooccurrence 861, explicit_link 195, frontmatter_ref 55, glossary_occurrence 582, section_mention 163
+434 findings
+  by severity: info 234, warning 200
+  by check: I-DOMAIN-SUGGESTED 4, I-REL-AMBIGUOUS 203, I-TERM-HOMONYM 11, W-API-CONSUMER-MISMATCH 1, W-API-NOCONSUMER 1, W-APP-MISSING 1, W-ATTRIBUTE-UNKNOWN 1, W-DOMAIN-UNCLASSIFIED 5, W-DUP-CANDIDATE 11, W-TERM-UNDEFINED 196
+235 recurring expressions without a note, 171 with a page, 64 withheld; 12 duplicate candidates

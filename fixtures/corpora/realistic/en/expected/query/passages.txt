@@ -1,0 +1,10 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+3 passages hold "build summary"
+  framing/lint-report-study — Lint report study [document]
+    lint-report-study.md § Lint report study  Sizes the posting of the build summary (7 passages, no note) to the forge (20 passages, no note). Today the build summ…
+  framing/non-goals — Non-goals [document]
+    non-goals.md § Non-goals  What the first version does not do: no build summary (7 passages, no note) posted to the forge (20 passages, no note), no incrementa…
+  meetings/2026-06-04-lint-follow-up — Lint follow-up [meeting]
+    2026-06-04-lint-follow-up.md § Lint follow-up  Participant-1 (5 passages, no note) reported (4 passages, no note) that the build summary (7 passages, no note) is still assembled by hand by the quality owner (note: Qu…

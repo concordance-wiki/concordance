@@ -1,0 +1,13 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+112 entities within 2 links of glossary/keyword-page
+  1  decisions/threshold-applied-in-model — Threshold applied in model [decision · domain inference/recognition]
+  1  glossary/candidate-expression — Candidate expression [term · domain inference/recognition]
+  1  specs/roles/maintainer — Maintainer [role · domain quality]
+  1  specs/screens/entity-page — Entity page [screen · domain publication]
+  1  specs/screens/keyword-page — Keyword page [screen · domain inference/recognition]
+  1  specs/objects/keyword-page — Keyword page [business_object · domain inference/recognition]
+  1  specs/rules/publication-threshold — Publication threshold [rule · domain inference/recognition]
+  1  specs/api/canonical-model — Canonical model API [api · domain publication]
+  … 104 more

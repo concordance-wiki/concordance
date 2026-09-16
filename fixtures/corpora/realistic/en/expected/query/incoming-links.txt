@@ -1,0 +1,15 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+glossary/keyword-page — Keyword page [term · domain inference/recognition]
+aliases: word page
+file: glossary/keyword-page.md:1
+The page built for a candidate expression that crosses the publication threshold without any note defining it. A keyword page gathers the passages where the expression occurs and invites the maintainer to define it or to reject it.
+
+linked to 15 entities
+  ← decisions/threshold-applied-in-model — Threshold applied in model [decision] affects 0.82 (cooccurrence, section_mention)
+  ← glossary/candidate-expression — Candidate expression [term] specializes 0.79 (cooccurrence, glossary_occurrence)
+  ← glossary/canonical-model — Canonical model [term] specializes 0.58 (cooccurrence, glossary_occurrence)
+  ← glossary/entity — Entity [term] specializes 0.58 (cooccurrence, glossary_occurrence)
+  ← decisions/suggestions-in-service-planned — Suggestions in service planned [decision] affects 0.40 (cooccurrence)
+  … 10 more

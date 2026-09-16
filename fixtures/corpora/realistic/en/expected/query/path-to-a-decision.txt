@@ -1,0 +1,7 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+1 links from glossary/keyword-page to decisions/threshold-applied-in-model
+  glossary/keyword-page — Keyword page [term · domain inference/recognition]
+    ← affects 0.82
+  decisions/threshold-applied-in-model — Threshold applied in model [decision · domain inference/recognition]

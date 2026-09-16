@@ -1,0 +1,11 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+7 entities
+  decisions/forge-bridge-exposed — Forge bridge exposed [decision · quality] · 1970-01-01
+  decisions/minhash-for-twin-resources — MinHash for twin resources [decision · ingestion] · 1970-01-01
+  decisions/pinned-trail-in-service — Pinned trail in service [decision · publication] · 1970-01-01
+  decisions/related-relation-capped — Related relation capped [decision · inference] · 1970-01-01
+  decisions/suggestions-in-service-deferred — Suggestions in service deferred [decision · inference] · 1970-01-01
+  decisions/suggestions-in-service-planned — Suggestions in service planned [decision · inference] · 1970-01-01
+  decisions/threshold-applied-in-model — Threshold applied in model [decision · inference/recognition] · 1970-01-01

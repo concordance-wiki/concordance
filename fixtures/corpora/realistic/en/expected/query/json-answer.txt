@@ -1,0 +1,160 @@
+exit 0
+{
+  "model": {
+    "file": "model.json",
+    "at": "1970-01-01T00:00:00.000Z",
+    "tool": "0.3.1",
+    "sources": [
+      "decisions",
+      "framing",
+      "glossary",
+      "meetings",
+      "specs"
+    ]
+  },
+  "entity": {
+    "aliases": [
+      "word page"
+    ],
+    "application": "concordance-cli",
+    "attributes": {},
+    "domain": "inference/recognition",
+    "domain_origin": "glob",
+    "graph": "full",
+    "id": "glossary/keyword-page",
+    "locale": "en",
+    "source": {
+      "last_modified": "1970-01-01T00:00:00.000Z",
+      "line": 1,
+      "name": "glossary",
+      "path": "keyword-page.md"
+    },
+    "status": "valid",
+    "summary": "The page built for a candidate expression that crosses the publication threshold without any note defining it. A keyword page gathers the passages where the expression occurs and invites the maintainer to define it or to reject it.",
+    "title": "Keyword page",
+    "type": "term",
+    "type_origin": "source"
+  },
+  "occurrences": {
+    "notes": [
+      {
+        "source": "decisions",
+        "note": {
+          "id": "decisions/threshold-applied-in-model",
+          "title": "Threshold applied in model",
+          "type": "decision"
+        },
+        "occurrences": [
+          {
+            "path": "threshold-applied-in-model.md",
+            "line": 13,
+            "context": "Keyword page",
+            "method": "section_mention"
+          }
+        ],
+        "more": 0
+      },
+      {
+        "source": "framing",
+        "note": {
+          "id": "framing/vision",
+          "title": "Vision",
+          "type": "document"
+        },
+        "occurrences": [
+          {
+            "path": "vision.md",
+            "line": 7,
+            "context": "…age, every recurring expression a keyword page, every doubt a finding. Every rul…",
+            "method": "glossary_occurrence"
+          }
+        ],
+        "more": 0
+      }
+    ],
+    "more_notes": 5,
+    "total": 9
+  },
+  "links": {
+    "entries": [
+      {
+        "id": "decisions/threshold-applied-in-model",
+        "title": "Threshold applied in model",
+        "type": "decision",
+        "domain": "inference/recognition",
+        "relation": "affects",
+        "direction": "in",
+        "confidence": 0.82,
+        "methods": [
+          "cooccurrence",
+          "section_mention"
+        ]
+      },
+      {
+        "id": "glossary/candidate-expression",
+        "title": "Candidate expression",
+        "type": "term",
+        "domain": "inference/recognition",
+        "relation": "specializes",
+        "direction": "in",
+        "confidence": 0.79,
+        "methods": [
+          "cooccurrence",
+          "glossary_occurrence"
+        ]
+      }
+    ],
+    "more": 39
+  },
+  "related": [
+    {
+      "id": "decisions/threshold-applied-in-model",
+      "title": "Threshold applied in model",
+      "type": "decision",
+      "domain": "inference/recognition",
+      "relation": "affects",
+      "direction": "in",
+      "confidence": 0.82,
+      "methods": [
+        "cooccurrence",
+        "section_mention"
+      ]
+    },
+    {
+      "id": "decisions/suggestions-in-service-planned",
+      "title": "Suggestions in service planned",
+      "type": "decision",
+      "domain": "inference",
+      "relation": "affects",
+      "direction": "in",
+      "confidence": 0.4,
+      "methods": [
+        "cooccurrence"
+      ]
+    },
+    {
+      "id": "meetings/2026-03-12-keyword-page-threshold-review",
+      "title": "Keyword page threshold review",
+      "type": "meeting",
+      "domain": "inference/recognition",
+      "relation": "documents",
+      "direction": "in",
+      "confidence": 0.4,
+      "methods": [
+        "glossary_occurrence"
+      ]
+    },
+    {
+      "id": "meetings/2026-05-14-suggestion-arbitration",
+      "title": "Suggestion arbitration",
+      "type": "meeting",
+      "domain": "inference",
+      "relation": "documents",
+      "direction": "in",
+      "confidence": 0.3,
+      "methods": [
+        "glossary_occurrence"
+      ]
+    }
+  ]
+}

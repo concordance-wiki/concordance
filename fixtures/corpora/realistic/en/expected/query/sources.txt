@@ -1,0 +1,9 @@
+exit 0
+model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, glossary, meetings, specs)
+
+5 sources
+  decisions — 53 entities, 7 files · 1970-01-01
+  framing — 24 entities, 4 files · 1970-01-01
+  glossary — 121 entities, 45 files · 1970-01-01
+  meetings — 16 entities, 6 files · 1970-01-01
+  specs — 76 entities, 61 files · 1970-01-01
