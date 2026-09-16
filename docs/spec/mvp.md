@@ -1360,6 +1360,14 @@ As the author of a theme, I want the gallery to show every board of the referenc
 
 Depends on: L9-01 to L9-14.
 
+### L13 — Reading the model from the command line
+
+- `concordance query <expression>` reads `model.json` and prints what the model knows about the expression, without the site and without a source: the note it names, where it is used, what it is linked to, the decisions and sessions among those links; text for a person or a context, JSON under `query.schema.json`.
+- The model is found in this order and the answer says which: `--model`; the output of `concordance.yaml` of the working directory or of `--config`; the published model `concordance-lint.yaml` names for the linter, read with the linter's loader. The first line gives the instant of the build and its age; `--no-age` leaves the age out, the only part of an answer that depends on the clock.
+- An expression is resolved as the recognition reads a note: identifier, title or alias as written, the same without case, accents and inflections, then a prefix; a term wins among several notes; otherwise the candidates are listed with exit code 1, and nothing is guessed.
+- One verb, options for what is read: `--occurrences`, `--links`, `--related` keep a section; `--direction` and `--relation` narrow the links; `--near --radius` lists what lies within a few links; `--explain <target>` shows every provenance of every link between two notes; `--path <target>` walks the fewest links, ties broken by the confidences then the identifiers; `--search <words>` runs the search of the site with its ranking and facets, from the index the site wrote, else from the model and its fragments, else from the model alone; `--list` with `--type`, `--domain`, `--application`, `--source`, `--status`; `--stats`, `--sources`, `--domains`, `--undefined`, `--recent --since`, `--changed-with`, `--findings --check`; `--text <phrase>` finds a phrase in the positions of the documents and the transcripts and in the sections of the notes. Options that do not go together are refused, each refusal naming the option.
+- Every list is bounded (`--limit`, `--context`) and the rest is counted, never cut in silence. The text answer is a contract under semver; the answers to the recorded questions of the realistic corpus (`fixtures/corpora/realistic/en/expected/query/`) are compared to the byte by the tests and by the determinism check, and every recorded question is answered by one invocation.
+
 ## 5. Working conditions
 
 ### 5.1 Ready

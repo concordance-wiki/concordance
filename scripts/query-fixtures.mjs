@@ -115,6 +115,23 @@ export async function askQuestion(fs, output, args) {
   return `exit ${String(status)}\n${io.stdout.map((line) => `${line}\n`).join("")}${io.stderr.map((line) => `${line}\n`).join("")}`;
 }
 
+/** The table of the questions and their invocations, written between the markers of the querying guide. */
+export function writeGuideTable(guideFile, questions) {
+  const rows = questions.map(
+    (question) =>
+      `| ${question.asks} | \`concordance query ${question.args.map((arg) => (/[\s"]/u.test(arg) ? `"${arg.replaceAll('"', '\\"')}"` : arg)).join(" ")}\` |`,
+  );
+  const table = ["| An agent asks | It runs |", "|---|---|", ...rows].join("\n");
+  const guide = readFileSync(guideFile, "utf8");
+  const start = "<!-- questions:start -->";
+  const end = "<!-- questions:end -->";
+  const from = guide.indexOf(start);
+  const to = guide.indexOf(end);
+  if (from < 0 || to < from) throw new Error(`${guideFile}: the question markers are missing`);
+  const updated = `${guide.slice(0, from + start.length)}\n${table}\n${guide.slice(to)}`;
+  if (updated !== guide) writeFileSync(guideFile, updated);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const corpus = process.argv[2] ?? "realistic/en";
   const corpusDirectory = resolve(root, "fixtures/corpora", corpus);
@@ -129,5 +146,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     }
     console.log(`${question.slug}: ${String(answer.length)} characters`);
   }
+  writeGuideTable(resolve(root, "docs/guides/querying.md"), readQuestions(corpusDirectory));
   if (defects > 0) process.exit(1);
 }
