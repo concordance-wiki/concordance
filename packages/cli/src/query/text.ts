@@ -1,7 +1,9 @@
-import type { Entity, Provenance } from "@concordance-wiki/core";
+import type { Entity, Finding, Provenance, TermCandidate } from "@concordance-wiki/core";
 
 import type { Answer, ExplainedLink, Linked } from "./answer.js";
+import type { Counts, DomainRow, SourceRow, Stats } from "./corpus.js";
 import type { Path, Reached } from "./graph.js";
+import { listLine } from "./list.js";
 import type { SearchAnswer } from "./search.js";
 
 /** The parts of an answer the options may keep alone. */
@@ -217,5 +219,152 @@ export function formatExplain(
       }
     }
   }
+  return lines;
+}
+
+function countLine(label: string, counts: Counts): string {
+  const parts = Object.entries(counts).map(([key, count]) => `${key} ${String(count)}`);
+  return `  ${label}: ${parts.length === 0 ? "none" : parts.join(", ")}`;
+}
+
+/** The counts of the model, the way the summary of the build reads them. */
+export function formatStats(model: Answer["model"], stats: Stats): string[] {
+  return [
+    modelLine(model),
+    "",
+    `${String(stats.entities.total)} entities, ${String(stats.entities.keyword_pages)} keyword pages`,
+    countLine("by type", stats.entities.by_type),
+    countLine("by domain", stats.entities.by_domain),
+    countLine("by source", stats.entities.by_source),
+    countLine("by application", stats.entities.by_application),
+    `${String(stats.links.total)} links`,
+    countLine("by relation", stats.links.by_relation),
+    countLine("by method", stats.links.by_method),
+    `${String(stats.findings.total)} findings`,
+    countLine("by severity", stats.findings.by_severity),
+    countLine("by check", stats.findings.by_check),
+    `${String(stats.candidates.terms)} recurring expressions without a note, ${String(stats.candidates.with_page)} with a page, ${String(stats.candidates.withheld)} withheld; ${String(stats.candidates.duplicates)} duplicate candidates`,
+  ];
+}
+
+function day(date: string | undefined): string {
+  return date === undefined ? "" : ` · ${date.slice(0, 10)}`;
+}
+
+/** The spaces of the model, one line each: name, commit, entities, last change, description. */
+export function formatSources(model: Answer["model"], sources: readonly SourceRow[]): string[] {
+  const lines = [modelLine(model), "", `${String(sources.length)} sources`];
+  for (const source of sources) {
+    const commit = source.commit === undefined ? "" : `@${source.commit.slice(0, 7)}`;
+    const files = source.files === undefined ? "" : `, ${String(source.files)} files`;
+    lines.push(
+      `  ${source.name}${commit} — ${String(source.entities)} entities${files}${day(source.last_changed)}`,
+    );
+    if (source.description !== undefined) lines.push(`    ${source.description}`);
+  }
+  return lines;
+}
+
+/** The domains of the model, one line each: identifier, title, entities, last change. */
+export function formatDomains(model: Answer["model"], domains: readonly DomainRow[]): string[] {
+  const lines = [modelLine(model), "", `${String(domains.length)} domains`];
+  for (const domain of domains) {
+    const title = domain.title === undefined ? "" : ` — ${domain.title}`;
+    lines.push(
+      `  ${domain.id}${title} — ${String(domain.entities)} entities${day(domain.last_changed)}`,
+    );
+  }
+  return lines;
+}
+
+/** The recurring expressions without a note, one line each, the rest counted. */
+export function formatUndefined(
+  model: Answer["model"],
+  terms: readonly TermCandidate[],
+  limit: number,
+): string[] {
+  const lines = [
+    modelLine(model),
+    "",
+    `${String(terms.length)} recurring expressions without a note`,
+  ];
+  for (const term of terms.slice(0, limit)) {
+    const state = term.withheld === true ? " · withheld" : term.page === true ? " · page" : "";
+    const confidence =
+      term.confidence === undefined ? "" : ` · confidence ${term.confidence.toFixed(2)}`;
+    lines.push(
+      `  ${term.text} — ${String(term.documents)} files, ${String(term.occurrences)} occurrences${confidence}${state}`,
+    );
+  }
+  if (terms.length > limit) lines.push(`  … ${String(terms.length - limit)} more`);
+  return lines;
+}
+
+/** One recurring expression without a note and where it was read. */
+export function formatUndefinedTerm(
+  model: Answer["model"],
+  term: TermCandidate,
+  limit: number,
+): string[] {
+  const contexts = term.contexts ?? [];
+  const lines = [
+    modelLine(model),
+    "",
+    `${term.text} — no note; ${String(term.documents)} files, ${String(term.occurrences)} occurrences${term.page === true ? ", a keyword page" : ""}`,
+  ];
+  for (const context of contexts.slice(0, limit)) {
+    lines.push(`  ${context.path}:${String(context.line)}  ${shorten(context.context, 160)}`);
+  }
+  if (contexts.length > limit) lines.push(`  … ${String(contexts.length - limit)} more`);
+  return lines;
+}
+
+/** The notes changed since a day, newest first, the rest counted. */
+export function formatRecent(
+  model: Answer["model"],
+  since: string | undefined,
+  entities: readonly Entity[],
+  limit: number,
+): string[] {
+  const when = since === undefined ? "" : ` since ${since}`;
+  const lines = [modelLine(model), "", `${String(entities.length)} notes changed${when}`];
+  for (const entity of entities.slice(0, limit)) lines.push(`  ${listLine(entity)}`);
+  if (entities.length > limit) lines.push(`  … ${String(entities.length - limit)} more`);
+  return lines;
+}
+
+/** The notes whose last commit is that of an entity. */
+export function formatChangedWith(
+  model: Answer["model"],
+  entity: Entity,
+  entities: readonly Entity[],
+  limit: number,
+): string[] {
+  const lines = [
+    modelLine(model),
+    "",
+    `${String(entities.length)} notes changed with ${entity.id} (commit ${(entity.source.commit ?? "").slice(0, 7)})`,
+  ];
+  for (const other of entities.slice(0, limit)) lines.push(`  ${listLine(other)}`);
+  if (entities.length > limit) lines.push(`  … ${String(entities.length - limit)} more`);
+  return lines;
+}
+
+/** The findings the build recorded, one line each: severity, check, place, message. */
+export function formatFindings(
+  model: Answer["model"],
+  about: string,
+  findings: readonly Finding[],
+  limit: number,
+): string[] {
+  const lines = [modelLine(model), "", `${String(findings.length)} findings ${about}`];
+  for (const finding of findings.slice(0, limit)) {
+    const place =
+      finding.path === undefined
+        ? ""
+        : ` ${finding.source === undefined ? "" : `${finding.source}/`}${finding.path}${finding.line === undefined ? "" : `:${String(finding.line)}`}`;
+    lines.push(`  ${finding.severity} ${finding.check}${place}: ${finding.message}`);
+  }
+  if (findings.length > limit) lines.push(`  … ${String(findings.length - limit)} more`);
   return lines;
 }

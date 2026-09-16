@@ -16,6 +16,16 @@ import {
   type KeywordPassage,
   type LinkFilter,
 } from "../query/answer.js";
+import {
+  changedWith,
+  domainsOf,
+  findingsOf,
+  recentEntities,
+  sourcesOf,
+  statsOf,
+  undefinedTerm,
+  undefinedTerms,
+} from "../query/corpus.js";
 import { shortestPath, within } from "../query/graph.js";
 import {
   hasFilter,
@@ -31,9 +41,17 @@ import {
   ageOf,
   formatAnswer,
   formatCandidates,
+  formatChangedWith,
+  formatDomains,
   formatExplain,
+  formatFindings,
   formatNear,
   formatPath,
+  formatRecent,
+  formatSources,
+  formatStats,
+  formatUndefined,
+  formatUndefinedTerm,
   formatSearch,
   headline,
   type Section,
@@ -85,11 +103,30 @@ export const queryUsage = [
   "       concordance query <expression> --path <target> [--max-depth n] | --near [--radius n] | --explain <target>",
   "       concordance query --list [--type t] [--domain d] [--application a] [--source s] [--status st] [--all]",
   "       concordance query --search <words> [--type t] [--domain d] [--application a] [--source s] [--keywords-only | --no-keywords]",
+  "       concordance query --stats | --sources | --domains | --undefined [<expression>] [--min-files n] | --recent [--since day] [--source s]",
+  "       concordance query <expression> --changed-with | --findings [<expression>] [--check id]",
   "       options: [--model file] [--config file] [--format text|json] [--limit n] [--context n] [--no-age]",
 ];
 
 const DEFAULT_MAX_DEPTH = 4;
 const DEFAULT_RADIUS = 1;
+
+/** The questions asked of the whole corpus rather than of one entity. */
+const CORPUS_MODES = [
+  "stats",
+  "sources",
+  "domains",
+  "undefined",
+  "recent",
+  "changed-with",
+  "findings",
+] as const;
+type CorpusMode = (typeof CORPUS_MODES)[number];
+
+/** A day as `YYYY-MM-DD`, the way `--since` takes it; nothing for anything else. */
+function dayOf(value: string): string | undefined {
+  return /^\d{4}-\d{2}-\d{2}$/u.test(value) && !Number.isNaN(Date.parse(value)) ? value : undefined;
+}
 const MAX_RADIUS = 3;
 
 /** What the answer says about the model it was read from. */
@@ -124,6 +161,10 @@ interface Parsed {
   radius: number;
   explain?: string;
   links: LinkFilter;
+  corpus?: CorpusMode;
+  minFiles: number;
+  since?: string;
+  check?: string;
   model?: string;
   config?: string;
 }
@@ -150,6 +191,16 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       explain: { type: "string" },
       direction: { type: "string" },
       relation: { type: "string" },
+      stats: { type: "boolean", default: false },
+      sources: { type: "boolean", default: false },
+      domains: { type: "boolean", default: false },
+      undefined: { type: "boolean", default: false },
+      recent: { type: "boolean", default: false },
+      "changed-with": { type: "boolean", default: false },
+      findings: { type: "boolean", default: false },
+      "min-files": { type: "string" },
+      since: { type: "string" },
+      check: { type: "string" },
       list: { type: "boolean", default: false },
       all: { type: "boolean", default: false },
       search: { type: "string" },
@@ -213,6 +264,43 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   ) {
     errors.push("--direction and --relation narrow the links of one entity");
   }
+  const corpusModes = CORPUS_MODES.filter((mode) => values[mode]);
+  const [corpus] = corpusModes;
+  if (corpusModes.length > 1) {
+    errors.push(`${corpusModes.map((mode) => `--${mode}`).join(", ")} do not go together`);
+  }
+  const minFiles = values["min-files"] === undefined ? 1 : boundOf(values["min-files"]);
+  if (minFiles === undefined) errors.push("--min-files takes a positive integer");
+  if (values["min-files"] !== undefined && !values.undefined)
+    errors.push("--min-files goes with --undefined");
+  const since = values.since === undefined ? undefined : dayOf(values.since);
+  if (values.since !== undefined && since === undefined)
+    errors.push("--since takes a day as YYYY-MM-DD");
+  if (values.since !== undefined && !values.recent) errors.push("--since goes with --recent");
+  if (values.check !== undefined && !values.findings) errors.push("--check goes with --findings");
+  if (corpus !== undefined) {
+    const takesExpression =
+      corpus === "undefined" || corpus === "findings" || corpus === "changed-with";
+    if (expression !== "" && !takesExpression) errors.push(`--${corpus} takes no expression`);
+    if (expression === "" && corpus === "changed-with")
+      errors.push("--changed-with needs the expression of a note");
+    if (expression === "" && corpus === "findings" && values.check === undefined) {
+      errors.push("--findings needs an expression or --check");
+    }
+    if (values.list || values.search !== undefined || walking > 0 || sections.size > 0) {
+      errors.push(
+        `--${corpus} asks the whole model; --list, --search, --path, --near, --explain, --occurrences, --links and --related do not go with it`,
+      );
+    }
+    if (
+      hasFilter(filters) &&
+      !(corpus === "recent" && Object.keys(filters).every((key) => key === "source"))
+    ) {
+      errors.push(
+        `--type, --domain, --application, --source and --status do not go with --${corpus}${corpus === "recent" ? " but --source" : ""}`,
+      );
+    }
+  }
   const searching = values.search !== undefined;
   if (values["keywords-only"] && values["no-keywords"]) {
     errors.push("--keywords-only and --no-keywords do not go together");
@@ -224,7 +312,9 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   if (searching && values.status !== undefined) {
     errors.push("--status goes with --list; the search has no such facet");
   }
-  if (values.list || searching) {
+  if (corpus !== undefined) {
+    // The corpus question was checked above; the entity and list rules do not apply.
+  } else if (values.list || searching) {
     const mode = values.list ? "--list" : "--search";
     if (expression !== "") {
       errors.push(
@@ -256,6 +346,7 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
     context === undefined ||
     maxDepth === undefined ||
     radius === undefined ||
+    minFiles === undefined ||
     !isFormat(values.format)
   ) {
     return { errors };
@@ -278,6 +369,10 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       radius,
       ...(values.explain === undefined ? {} : { explain: values.explain }),
       links,
+      ...(corpus === undefined ? {} : { corpus }),
+      minFiles,
+      ...(since === undefined ? {} : { since }),
+      ...(values.check === undefined ? {} : { check: values.check }),
       ...(values.model === undefined ? {} : { model: values.model }),
       ...(values.config === undefined ? {} : { config: values.config }),
     },
@@ -364,6 +459,104 @@ function search(io: CommandIo, located: LocatedModel, parsed: Parsed, query: str
   return answer.hits.length === 0 ? exitCodes.invalid : exitCodes.ok;
 }
 
+/** A question asked of the whole model: its counts, its spaces, its domains, what nobody defined, what changed. */
+function corpusQuestion(
+  io: CommandIo,
+  located: LocatedModel,
+  parsed: Parsed,
+  mode: CorpusMode,
+): ExitCode {
+  const { model, config } = located;
+  const header = modelOf(located, io, parsed.age);
+  const { limit } = parsed.bounds;
+  const emit = (json: Record<string, unknown>, text: string[]): void => {
+    if (parsed.format === "json") {
+      io.out(JSON.stringify({ model: header, ...json }, null, 2));
+    } else {
+      for (const line of text) io.out(line);
+    }
+  };
+  switch (mode) {
+    case "stats": {
+      const stats = statsOf(model);
+      emit({ stats }, formatStats(header, stats));
+      return exitCodes.ok;
+    }
+    case "sources": {
+      const sources = sourcesOf(model, config);
+      emit({ sources }, formatSources(header, sources));
+      return exitCodes.ok;
+    }
+    case "domains": {
+      const domains = domainsOf(model, config);
+      emit({ domains }, formatDomains(header, domains));
+      return exitCodes.ok;
+    }
+    case "undefined": {
+      if (parsed.expression === "") {
+        const terms = undefinedTerms(model, parsed.minFiles);
+        emit(
+          { undefined: terms.slice(0, limit), more: Math.max(0, terms.length - limit) },
+          formatUndefined(header, terms, limit),
+        );
+        return exitCodes.ok;
+      }
+      const term = undefinedTerm(model, parsed.expression);
+      if (term === undefined) {
+        io.out(`no recurring expression without a note under "${parsed.expression}"`);
+        return exitCodes.invalid;
+      }
+      emit({ undefined: term }, formatUndefinedTerm(header, term, limit));
+      return exitCodes.ok;
+    }
+    case "recent": {
+      const entities = recentEntities(model, parsed.since, parsed.filters.source);
+      emit(
+        {
+          since: parsed.since ?? null,
+          recent: entities.slice(0, limit),
+          more: Math.max(0, entities.length - limit),
+        },
+        formatRecent(header, parsed.since, entities, limit),
+      );
+      return exitCodes.ok;
+    }
+    case "changed-with": {
+      const entity = resolveOrList(io, model, parsed.expression);
+      if (entity === undefined) return exitCodes.invalid;
+      const others = changedWith(model, entity);
+      if (others === undefined) {
+        io.out(`the model records no commit for ${entity.id}`);
+        return exitCodes.invalid;
+      }
+      emit(
+        {
+          entity: entity.id,
+          changed_with: others.slice(0, limit),
+          more: Math.max(0, others.length - limit),
+        },
+        formatChangedWith(header, entity, others, limit),
+      );
+      return exitCodes.ok;
+    }
+    case "findings": {
+      const entity =
+        parsed.expression === "" ? undefined : resolveOrList(io, model, parsed.expression);
+      if (parsed.expression !== "" && entity === undefined) return exitCodes.invalid;
+      const findings = findingsOf(model, entity, parsed.check);
+      const about = [
+        ...(entity === undefined ? [] : [`about ${entity.id}`]),
+        ...(parsed.check === undefined ? [] : [`under ${parsed.check}`]),
+      ].join(" ");
+      emit(
+        { findings: findings.slice(0, limit), more: Math.max(0, findings.length - limit) },
+        formatFindings(header, about, findings, limit),
+      );
+      return exitCodes.ok;
+    }
+  }
+}
+
 /** What the model knows about an expression: the note it names, where it is used, what it is linked to; or a list, a search, or a path. */
 export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitCode> {
   const options = parse(argv);
@@ -380,6 +573,7 @@ export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitC
     for (const line of located.lines) io.err(line);
     return exitCodes.failure;
   }
+  if (parsed.corpus !== undefined) return corpusQuestion(io, located, parsed, parsed.corpus);
   if (parsed.list) return list(io, located, parsed);
   if (parsed.search !== undefined) return search(io, located, parsed, parsed.search);
   const entity = resolveOrList(io, located.model, parsed.expression);

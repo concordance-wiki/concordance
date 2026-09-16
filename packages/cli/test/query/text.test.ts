@@ -1,11 +1,21 @@
 import { describe, expect, it } from "vitest";
 
+import type { TermCandidate } from "@concordance-wiki/core";
+
 import type { Answer } from "../../src/query/answer.js";
 import {
   ageOf,
   formatAnswer,
   formatCandidates,
+  formatChangedWith,
+  formatDomains,
   formatExplain,
+  formatFindings,
+  formatRecent,
+  formatSources,
+  formatStats,
+  formatUndefined,
+  formatUndefinedTerm,
   formatNear,
   formatPath,
   formatSearch,
@@ -283,5 +293,176 @@ describe("formatAnswer", () => {
       "    cooccurrence 0.40 (2 paragraphs)",
       "    frontmatter_ref 0.50 a.md",
     ]);
+  });
+
+  it("words the answers to the questions of the corpus, the rest counted", () => {
+    const head = "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)";
+    expect(
+      formatStats(base.model, {
+        entities: {
+          total: 2,
+          keyword_pages: 1,
+          by_type: { term: 2 },
+          by_domain: {},
+          by_source: { notes: 2 },
+          by_application: {},
+        },
+        links: { total: 0, by_relation: {}, by_method: {} },
+        findings: { total: 1, by_severity: { info: 1 }, by_check: { "I-X": 1 } },
+        candidates: { terms: 1, with_page: 0, withheld: 1, duplicates: 0 },
+      }),
+    ).toEqual([
+      head,
+      "",
+      "2 entities, 1 keyword pages",
+      "  by type: term 2",
+      "  by domain: none",
+      "  by source: notes 2",
+      "  by application: none",
+      "0 links",
+      "  by relation: none",
+      "  by method: none",
+      "1 findings",
+      "  by severity: info 1",
+      "  by check: I-X 1",
+      "1 recurring expressions without a note, 0 with a page, 1 withheld; 0 duplicate candidates",
+    ]);
+    expect(
+      formatSources(base.model, [
+        {
+          name: "notes",
+          commit: "0123456789abcdef",
+          files: 3,
+          entities: 2,
+          last_changed: "2026-03-12T10:00:00Z",
+          description: "The notes.",
+        },
+        { name: "specs", entities: 0 },
+      ]),
+    ).toEqual([
+      head,
+      "",
+      "2 sources",
+      "  notes@0123456 — 2 entities, 3 files · 2026-03-12",
+      "    The notes.",
+      "  specs — 0 entities",
+    ]);
+    expect(
+      formatDomains(base.model, [
+        { id: "inference", title: "Inference", entities: 1, last_changed: "2026-03-12T10:00:00Z" },
+        { id: "(none)", entities: 1 },
+      ]),
+    ).toEqual([
+      head,
+      "",
+      "2 domains",
+      "  inference — Inference — 1 entities · 2026-03-12",
+      "  (none) — 1 entities",
+    ]);
+    const terms: TermCandidate[] = [
+      { text: "mint", score: 1, occurrences: 4, documents: 2, page: true, confidence: 0.8 },
+      { text: "band", score: 1, occurrences: 3, documents: 2, withheld: true },
+      { text: "cue", score: 1, occurrences: 3, documents: 2 },
+      { text: "dot", score: 1, occurrences: 2, documents: 2 },
+    ];
+    expect(formatUndefined(base.model, terms, 3)).toEqual([
+      head,
+      "",
+      "4 recurring expressions without a note",
+      "  mint — 2 files, 4 occurrences · confidence 0.80 · page",
+      "  band — 2 files, 3 occurrences · withheld",
+      "  cue — 2 files, 3 occurrences",
+      "  … 1 more",
+    ]);
+    const [mint, , cue] = terms;
+    if (mint === undefined || cue === undefined) throw new Error("terms");
+    expect(
+      formatUndefinedTerm(
+        base.model,
+        {
+          ...mint,
+          contexts: [
+            { path: "a.md", line: 3, context: "a mint" },
+            { path: "b.md", line: 1, context: "b" },
+          ],
+        },
+        1,
+      ),
+    ).toEqual([
+      head,
+      "",
+      "mint — no note; 2 files, 4 occurrences, a keyword page",
+      "  a.md:3  a mint",
+      "  … 1 more",
+    ]);
+    expect(formatUndefinedTerm(base.model, cue, 1)).toEqual([
+      head,
+      "",
+      "cue — no note; 2 files, 3 occurrences",
+    ]);
+    const a = entity("notes/a", {
+      title: "A",
+      source: { name: "notes", path: "a.md", line: 1, commit: "0123456789abcdef" },
+    });
+    const b = entity("notes/b", { title: "B" });
+    expect(formatRecent(base.model, "2026-03-01", [a, b], 1)).toEqual([
+      head,
+      "",
+      "2 notes changed since 2026-03-01",
+      "  notes/a — A [term]",
+      "  … 1 more",
+    ]);
+    expect(formatRecent(base.model, undefined, [], 1)).toEqual([head, "", "0 notes changed"]);
+    expect(formatChangedWith(base.model, a, [b], 5)).toEqual([
+      head,
+      "",
+      "1 notes changed with notes/a (commit 0123456)",
+      "  notes/b — B [term]",
+    ]);
+    expect(formatChangedWith(base.model, b, [a, b], 1)).toEqual([
+      head,
+      "",
+      "2 notes changed with notes/b (commit )",
+      "  notes/a — A [term]",
+      "  … 1 more",
+    ]);
+    expect(
+      formatFindings(
+        base.model,
+        "about notes/a",
+        [
+          {
+            check: "W-X",
+            severity: "warning",
+            message: "m",
+            remediation: "r",
+            source: "notes",
+            path: "a.md",
+            line: 2,
+          },
+          { check: "I-Y", severity: "info", message: "n", remediation: "r", path: "b.md" },
+          { check: "I-Z", severity: "info", message: "o", remediation: "r" },
+        ],
+        3,
+      ),
+    ).toEqual([
+      head,
+      "",
+      "3 findings about notes/a",
+      "  warning W-X notes/a.md:2: m",
+      "  info I-Y b.md: n",
+      "  info I-Z: o",
+    ]);
+    expect(
+      formatFindings(
+        base.model,
+        "under W-X",
+        [
+          { check: "W-X", severity: "warning", message: "m", remediation: "r" },
+          { check: "W-X", severity: "warning", message: "n", remediation: "r" },
+        ],
+        1,
+      ).slice(2),
+    ).toEqual(["2 findings under W-X", "  warning W-X: m", "  … 1 more"]);
   });
 });
