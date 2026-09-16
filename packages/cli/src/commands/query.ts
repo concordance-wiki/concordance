@@ -27,6 +27,7 @@ import {
   undefinedTerms,
 } from "../query/corpus.js";
 import { shortestPath, within } from "../query/graph.js";
+import { findPassages, hasFragments } from "../query/passages.js";
 import {
   hasFilter,
   LIST_WITHOUT_FILTER_LIMIT,
@@ -46,6 +47,7 @@ import {
   formatExplain,
   formatFindings,
   formatNear,
+  formatPassages,
   formatPath,
   formatRecent,
   formatSources,
@@ -105,6 +107,7 @@ export const queryUsage = [
   "       concordance query --search <words> [--type t] [--domain d] [--application a] [--source s] [--keywords-only | --no-keywords]",
   "       concordance query --stats | --sources | --domains | --undefined [<expression>] [--min-files n] | --recent [--since day] [--source s]",
   "       concordance query <expression> --changed-with | --findings [<expression>] [--check id]",
+  "       concordance query --text <phrase> [--source s]",
   "       options: [--model file] [--config file] [--format text|json] [--limit n] [--context n] [--no-age]",
 ];
 
@@ -162,6 +165,7 @@ interface Parsed {
   explain?: string;
   links: LinkFilter;
   corpus?: CorpusMode;
+  text?: string;
   minFiles: number;
   since?: string;
   check?: string;
@@ -199,6 +203,7 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       "changed-with": { type: "boolean", default: false },
       findings: { type: "boolean", default: false },
       "min-files": { type: "string" },
+      text: { type: "string" },
       since: { type: "string" },
       check: { type: "string" },
       list: { type: "boolean", default: false },
@@ -264,6 +269,22 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   ) {
     errors.push("--direction and --relation narrow the links of one entity");
   }
+  if (values.text !== undefined) {
+    if (values.text.trim().length < 3)
+      errors.push("--text needs a phrase of three characters at least");
+    if (expression !== "") errors.push("--text takes no expression");
+    const others = Object.keys(filters).filter((key) => key !== "source");
+    if (
+      others.length > 0 ||
+      values.list ||
+      values.search !== undefined ||
+      walking > 0 ||
+      sections.size > 0 ||
+      CORPUS_MODES.some((mode) => values[mode])
+    ) {
+      errors.push("--text searches the passages; only --source goes with it");
+    }
+  }
   const corpusModes = CORPUS_MODES.filter((mode) => values[mode]);
   const [corpus] = corpusModes;
   if (corpusModes.length > 1) {
@@ -312,8 +333,8 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   if (searching && values.status !== undefined) {
     errors.push("--status goes with --list; the search has no such facet");
   }
-  if (corpus !== undefined) {
-    // The corpus question was checked above; the entity and list rules do not apply.
+  if (corpus !== undefined || values.text !== undefined) {
+    // The corpus question or the passages were checked above; the entity and list rules do not apply.
   } else if (values.list || searching) {
     const mode = values.list ? "--list" : "--search";
     if (expression !== "") {
@@ -370,6 +391,7 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       ...(values.explain === undefined ? {} : { explain: values.explain }),
       links,
       ...(corpus === undefined ? {} : { corpus }),
+      ...(values.text === undefined ? {} : { text: values.text.trim() }),
       minFiles,
       ...(since === undefined ? {} : { since }),
       ...(values.check === undefined ? {} : { check: values.check }),
@@ -572,6 +594,33 @@ export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitC
   if (!located.ok) {
     for (const line of located.lines) io.err(line);
     return exitCodes.failure;
+  }
+  if (parsed.text !== undefined) {
+    const { directory } = located;
+    if (directory === undefined || !hasFragments(io, directory)) {
+      io.err("passages need the fragments next to the model; none were found");
+      return exitCodes.invalid;
+    }
+    const passages = findPassages(io, located.model, directory, parsed.text, parsed.filters.source);
+    const header = modelOf(located, io, parsed.age);
+    const { limit } = parsed.bounds;
+    if (parsed.format === "json") {
+      io.out(
+        JSON.stringify(
+          {
+            model: header,
+            phrase: parsed.text,
+            passages: passages.slice(0, limit),
+            more: Math.max(0, passages.length - limit),
+          },
+          null,
+          2,
+        ),
+      );
+    } else {
+      for (const line of formatPassages(header, parsed.text, passages, limit)) io.out(line);
+    }
+    return passages.length === 0 ? exitCodes.invalid : exitCodes.ok;
   }
   if (parsed.corpus !== undefined) return corpusQuestion(io, located, parsed, parsed.corpus);
   if (parsed.list) return list(io, located, parsed);

@@ -17,6 +17,7 @@ import {
   formatUndefined,
   formatUndefinedTerm,
   formatNear,
+  formatPassages,
   formatPath,
   formatSearch,
   headline,
@@ -464,5 +465,51 @@ describe("formatAnswer", () => {
         1,
       ).slice(2),
     ).toEqual(["2 findings under W-X", "  warning W-X: m", "  … 1 more"]);
+  });
+
+  it("lists the passages under their note, a cue by its timecode and speaker, a page by its label, a section by its heading", () => {
+    const head = "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)";
+    const passages = [
+      {
+        entity: "notes/b",
+        title: "B",
+        type: "meeting",
+        source: "notes",
+        path: "b.vtt",
+        position: { unit: "cue", label: "00:00:04", number: 1, speaker: "P-1" },
+        excerpt: "A mint in the cue.",
+      },
+      {
+        entity: "notes/b",
+        title: "B",
+        type: "meeting",
+        source: "notes",
+        path: "b.pdf",
+        position: { unit: "page", label: "page 3", number: 3 },
+        excerpt: "Mint on a slide.",
+      },
+      {
+        entity: "notes/a",
+        title: "A",
+        type: "term",
+        source: "notes",
+        path: "a.md",
+        section: "Detail",
+        excerpt: "A second mint.",
+      },
+    ];
+    expect(formatPassages(base.model, "mint", passages, 2)).toEqual([
+      head,
+      "",
+      '3 passages hold "mint"',
+      "  notes/b — B [meeting]",
+      "    b.vtt@00:00:04 P-1  A mint in the cue.",
+      "    b.pdf#page 3  Mint on a slide.",
+      "  … 1 more",
+    ]);
+    expect(formatPassages(base.model, "mint", passages.slice(2), 5).slice(3)).toEqual([
+      "  notes/a — A [term]",
+      "    a.md § Detail  A second mint.",
+    ]);
   });
 });

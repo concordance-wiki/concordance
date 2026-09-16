@@ -117,7 +117,7 @@ describe("concordance query answers what the model knows about an expression", (
     const io = await builtCorpus();
     expect(await queryCommand([], io)).toBe(2);
     expect(io.stderr[0]).toMatch(/^usage: concordance query <expression>/);
-    expect(io.stderr).toHaveLength(7);
+    expect(io.stderr).toHaveLength(8);
     expect(await queryCommand(["bee", "--format", "yaml"], io)).toBe(2);
     expect(io.stderr).toContain("--format yaml is not available; expected text, json");
     expect(await queryCommand(["bee", "--limit", "0"], io)).toBe(2);
@@ -666,6 +666,53 @@ describe("concordance query answers what the model knows about an expression", (
     expect(await queryCommand(["--recent", "--domain", "x"], io)).toBe(2);
     expect(io.stderr).toEqual([
       "--type, --domain, --application, --source and --status do not go with --recent but --source",
+    ]);
+  });
+
+  it("finds the passages a phrase is written or spoken in, and says when the fragments are missing", async () => {
+    const io = await builtCorpus();
+    expect(await queryCommand(["--text", "Shows", "--no-age"], io)).toBe(0);
+    expect(io.stdout.slice(2)).toEqual([
+      '1 passages hold "Shows"',
+      "  notes/a — Screen A [screen]",
+      "    a.md § Screen A  Shows B.",
+    ]);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(
+        ["--text", "shows", "--format", "json", "--source", "notes", "--no-age"],
+        io,
+      ),
+    ).toBe(0);
+    expect(JSON.parse(io.stdout.join("\n"))).toMatchObject({ phrase: "shows", more: 0 });
+    io.stdout.splice(0);
+    expect(await queryCommand(["--text", "zzz zzz", "--no-age"], io)).toBe(1);
+    expect(io.stdout[2]).toBe('0 passages hold "zzz zzz"');
+    io.stderr.splice(0);
+    expect(await queryCommand(["--text", "ab", "bee", "--type", "term", "--list"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--text needs a phrase of three characters at least",
+      "--text takes no expression",
+      "--text searches the passages; only --source goes with it",
+    ]);
+    io.stderr.splice(0);
+    for (const name of io.fs.listFiles("/work/dist/fragments"))
+      io.fs.remove(`/work/dist/fragments/${name}`);
+    expect(await queryCommand(["--text", "Shows"], io)).toBe(1);
+    expect(io.stderr).toEqual(["passages need the fragments next to the model; none were found"]);
+    io.stderr.splice(0);
+    const remote = recordedIo(
+      { "/repo/concordance-lint.yaml": "global: { model: https://wiki.example/model.json }\n" },
+      "/repo",
+    );
+    const text = io.fs.readText("/work/dist/model.json");
+    const served = {
+      ...remote,
+      fetch: (() => Promise.resolve(new Response(text, { status: 200 }))) as typeof fetch,
+    };
+    expect(await queryCommand(["--text", "Shows"], served)).toBe(1);
+    expect(served.stderr).toEqual([
+      "passages need the fragments next to the model; none were found",
     ]);
   });
 });
