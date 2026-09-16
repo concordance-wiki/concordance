@@ -24,6 +24,20 @@ describe("compareFindings", () => {
     ]);
   });
 
+  it("compares code unit by code unit, a capital before a small letter, whatever the locale of the runtime", () => {
+    const findings: Finding[] = [
+      { ...base, path: "b.md" },
+      { ...base, path: "C.md" },
+      { ...base, check: "W-b", path: "a.md" },
+      { ...base, check: "W-B", path: "a.md" },
+    ];
+    expect(
+      [...findings]
+        .sort(compareFindings)
+        .map((finding) => `${finding.check} ${finding.path ?? ""}`),
+    ).toEqual(["W-B a.md", "W-STALE C.md", "W-STALE b.md", "W-b a.md"]);
+  });
+
   it("treats two identical findings as equal", () => {
     expect(compareFindings(base, { ...base })).toBe(0);
   });
