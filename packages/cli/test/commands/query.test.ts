@@ -117,7 +117,7 @@ describe("concordance query answers what the model knows about an expression", (
     const io = await builtCorpus();
     expect(await queryCommand([], io)).toBe(2);
     expect(io.stderr[0]).toMatch(/^usage: concordance query <expression>/);
-    expect(io.stderr).toHaveLength(5);
+    expect(io.stderr).toHaveLength(7);
     expect(await queryCommand(["bee", "--format", "yaml"], io)).toBe(2);
     expect(io.stderr).toContain("--format yaml is not available; expected text, json");
     expect(await queryCommand(["bee", "--limit", "0"], io)).toBe(2);
@@ -522,6 +522,150 @@ describe("concordance query answers what the model knows about an expression", (
     expect(io.stderr).toEqual([
       "--direction and --relation narrow the links of one entity",
       "--list and --path, --near or --explain do not go together",
+    ]);
+  });
+
+  it("answers the questions of the corpus, in text and in JSON, and refuses what does not go with them", async () => {
+    const io = await builtCorpus();
+    expect(await queryCommand(["--stats", "--no-age"], io)).toBe(0);
+    expect(io.stdout[2]).toBe("2 entities, 0 keyword pages");
+    io.stdout.splice(0);
+    expect(await queryCommand(["--sources", "--no-age"], io)).toBe(0);
+    expect(io.stdout.slice(2)).toEqual(["1 sources", "  notes — 2 entities, 2 files · 1970-01-01"]);
+    io.stdout.splice(0);
+    expect(await queryCommand(["--domains", "--format", "json", "--no-age"], io)).toBe(0);
+    expect(
+      (JSON.parse(io.stdout.join("\n")) as { domains: { id: string }[] }).domains.map(
+        (domain) => domain.id,
+      ),
+    ).toEqual(["notes"]);
+    io.stdout.splice(0);
+    expect(await queryCommand(["--undefined", "--no-age"], io)).toBe(0);
+    expect(io.stdout[2]).toBe("0 recurring expressions without a note");
+    io.stdout.splice(0);
+    expect(await queryCommand(["--undefined", "zzz", "--no-age"], io)).toBe(1);
+    expect(io.stdout).toEqual(['no recurring expression without a note under "zzz"']);
+    io.stdout.splice(0);
+    const mint = recordedIo({
+      "/work/concordance.yaml": validConfig.replace(
+        "sources:",
+        "inference: { keyword_pages: { min_occurrences: 2, min_files: 2 } }\nsources:",
+      ),
+      "/work/notes/threshold.md":
+        "---\ntype: term\n---\n# Threshold\n\nThe publication threshold of a keyword page, a mint rule.\n",
+      "/work/notes/rule.md":
+        "---\ntype: rule\n---\n# Threshold rule\n\nA rule about the threshold and the mint.\n",
+      "/work/notes/screen.md":
+        "---\ntype: screen\n---\n# Results\n\nThe mint page shows the threshold.\n",
+    });
+    await buildCommand([], mint);
+    mint.stdout.splice(0);
+    expect(await queryCommand(["--undefined", "--min-files", "2", "--no-age"], mint)).toBe(0);
+    expect(mint.stdout[2]).toMatch(/^\d+ recurring expressions without a note$/);
+    expect(mint.stdout.some((line) => line.startsWith("  mint — "))).toBe(true);
+    mint.stdout.splice(0);
+    expect(await queryCommand(["--undefined", "Mint", "--no-age"], mint)).toBe(0);
+    expect(mint.stdout[2]).toMatch(/^mint — no note; 3 files, 3 occurrences/);
+    mint.stdout.splice(0);
+    expect(await queryCommand(["--undefined", "mint", "--format", "json", "--no-age"], mint)).toBe(
+      0,
+    );
+    expect(JSON.parse(mint.stdout.join("\n"))).toHaveProperty(["undefined", "text"], "mint");
+    io.stdout.splice(0);
+    expect(await queryCommand(["--recent", "--format", "json", "--no-age"], io)).toBe(0);
+    expect(JSON.parse(io.stdout.join("\n"))).toHaveProperty("since", null);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(
+        ["--recent", "--since", "1970-01-01", "--source", "notes", "--no-age"],
+        io,
+      ),
+    ).toBe(0);
+    expect(io.stdout[2]).toBe("2 notes changed since 1970-01-01");
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--changed-with", "--no-age"], io)).toBe(1);
+    expect(io.stdout).toEqual(["the model records no commit for notes/b"]);
+    io.stdout.splice(0);
+    const model = JSON.parse(io.fs.readText("/work/dist/model.json")) as {
+      entities: { source: Record<string, unknown> }[];
+    };
+    for (const entry of model.entities) {
+      entry.source = { ...entry.source, commit: "0123456789abcdef0123456789abcdef01234567" };
+    }
+    io.fs.writeText("/work/dist/model.json", JSON.stringify(model));
+    expect(await queryCommand(["bee", "--changed-with", "--no-age"], io)).toBe(0);
+    expect(io.stdout.slice(2)).toEqual([
+      "1 notes changed with notes/b (commit 0123456)",
+      "  notes/a — Screen A [screen · notes] · 1970-01-01",
+    ]);
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--changed-with", "--format", "json", "--no-age"], io)).toBe(
+      0,
+    );
+    expect(JSON.parse(io.stdout.join("\n"))).toHaveProperty("entity", "notes/b");
+    io.stdout.splice(0);
+    expect(await queryCommand(["zzz", "--changed-with"], io)).toBe(1);
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--findings", "--no-age"], io)).toBe(0);
+    expect(io.stdout[2]).toMatch(/^\d+ findings about notes\/b$/);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(
+        ["--findings", "--check", "W-TERM-UNDEFINED", "--format", "json", "--no-age"],
+        io,
+      ),
+    ).toBe(0);
+    expect(JSON.parse(io.stdout.join("\n"))).toHaveProperty("findings");
+    io.stdout.splice(0);
+    expect(await queryCommand(["zzz", "--findings"], io)).toBe(1);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(
+        [
+          "bee",
+          "--stats",
+          "--sources",
+          "--min-files",
+          "0",
+          "--since",
+          "yesterday",
+          "--check",
+          "W-X",
+          "--list",
+          "--type",
+          "term",
+        ],
+        io,
+      ),
+    ).toBe(2);
+    expect(io.stderr).toEqual([
+      "--stats, --sources do not go together",
+      "--min-files takes a positive integer",
+      "--min-files goes with --undefined",
+      "--since takes a day as YYYY-MM-DD",
+      "--since goes with --recent",
+      "--check goes with --findings",
+      "--stats takes no expression",
+      "--stats asks the whole model; --list, --search, --path, --near, --explain, --occurrences, --links and --related do not go with it",
+      "--type, --domain, --application, --source and --status do not go with --stats",
+    ]);
+    io.stderr.splice(0);
+    expect(await queryCommand(["--changed-with", "--findings", "--type", "term"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--changed-with, --findings do not go together",
+      "--changed-with needs the expression of a note",
+      "--type, --domain, --application, --source and --status do not go with --changed-with",
+    ]);
+    io.stderr.splice(0);
+    expect(await queryCommand(["--findings", "--domain", "x"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--findings needs an expression or --check",
+      "--type, --domain, --application, --source and --status do not go with --findings",
+    ]);
+    io.stderr.splice(0);
+    expect(await queryCommand(["--recent", "--domain", "x"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--type, --domain, --application, --source and --status do not go with --recent but --source",
     ]);
   });
 });
