@@ -117,7 +117,7 @@ describe("concordance query answers what the model knows about an expression", (
     const io = await builtCorpus();
     expect(await queryCommand([], io)).toBe(2);
     expect(io.stderr[0]).toMatch(/^usage: concordance query <expression>/);
-    expect(io.stderr).toHaveLength(4);
+    expect(io.stderr).toHaveLength(5);
     expect(await queryCommand(["bee", "--format", "yaml"], io)).toBe(2);
     expect(io.stderr).toContain("--format yaml is not available; expected text, json");
     expect(await queryCommand(["bee", "--limit", "0"], io)).toBe(2);
@@ -256,7 +256,7 @@ describe("concordance query answers what the model knows about an expression", (
     expect(await queryCommand(["--list", "bee", "--path", "x", "--links"], io)).toBe(2);
     expect(io.stderr).toEqual([
       "--list takes no expression; filter with --type, --domain, --application or --source",
-      "--list and --path do not go together",
+      "--list and --path, --near or --explain do not go together",
       "--list finds entities; --occurrences, --links and --related read one",
     ]);
     io.stderr.splice(0);
@@ -270,7 +270,7 @@ describe("concordance query answers what the model knows about an expression", (
       "--max-depth takes a positive integer",
       "--all goes with --list",
       "--type, --domain, --application, --source and --status go with --list or --search",
-      "--path walks to another entity; --occurrences, --links and --related read one",
+      "--path, --near and --explain walk the links; --occurrences, --links and --related read one",
     ]);
     io.stderr.splice(0);
     expect(await queryCommand(["bee", "--max-depth", "2"], io)).toBe(2);
@@ -419,7 +419,7 @@ describe("concordance query answers what the model knows about an expression", (
       "--search and --list do not go together",
       "--status goes with --list; the search has no such facet",
       "--list takes no expression; filter with --type, --domain, --application or --source",
-      "--list and --path do not go together",
+      "--list and --path, --near or --explain do not go together",
       "--list finds entities; --occurrences, --links and --related read one",
       "--all goes with --list",
     ]);
@@ -442,5 +442,86 @@ describe("concordance query answers what the model knows about an expression", (
     expect(io.stdout[2]).toBe(
       '1 results for "term" (an index of the titles, aliases and summaries alone: no fragment next to the model)',
     );
+  });
+
+  it("lists what lies near an entity, explains a link, narrows the links, and refuses what does not go together", async () => {
+    const io = await builtCorpus();
+    expect(await queryCommand(["bee", "--near", "--no-age"], io)).toBe(0);
+    expect(io.stdout).toEqual([
+      "model /work/dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes)",
+      "",
+      "1 entities within 1 links of notes/b",
+      "  1  notes/a — Screen A [screen · domain notes]",
+    ]);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(["bee", "--near", "--radius", "2", "--format", "json", "--no-age"], io),
+    ).toBe(0);
+    const near = JSON.parse(io.stdout.join("\n")) as {
+      near: { radius: number; reached: { depth: number }[] };
+    };
+    expect(near.near).toMatchObject({ radius: 2, reached: [{ depth: 1 }] });
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--explain", "Screen A", "--no-age"], io)).toBe(0);
+    expect(io.stdout).toEqual([
+      "model /work/dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes)",
+      "",
+      "1 links between notes/b and notes/a",
+      "  ← related 0.60, from 1 provenances",
+      '    explicit_link 1.00 a.md:6 "B"',
+    ]);
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(["bee", "--explain", "Screen A", "--format", "json", "--no-age"], io),
+    ).toBe(0);
+    const explained = JSON.parse(io.stdout.join("\n")) as {
+      explain: { other: string; links: unknown[] };
+    };
+    expect(explained.explain.other).toBe("notes/a");
+    expect(explained.explain.links).toHaveLength(1);
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--explain", "bee", "--no-age"], io)).toBe(1);
+    expect(io.stdout[2]).toBe("no link between notes/b and notes/b");
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--explain", "zzz"], io)).toBe(1);
+    expect(io.stdout).toEqual(['nothing under "zzz"']);
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--direction", "in", "--no-age"], io)).toBe(0);
+    expect(io.stdout.slice(-2)).toEqual([
+      "linked to 1 entities",
+      "  ← notes/a — Screen A [screen] related 0.60 (explicit_link)",
+    ]);
+    expect(io.stdout).not.toContain("used in 1 notes, 1 occurrences");
+    io.stdout.splice(0);
+    expect(
+      await queryCommand(["bee", "--relation", "related", "--direction", "out", "--no-age"], io),
+    ).toBe(0);
+    expect(io.stdout.at(-1)).toBe("linked to 0 entities");
+    io.stdout.splice(0);
+    expect(await queryCommand(["bee", "--relation", "cites"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--relation cites names no relation of the model; it holds related",
+    ]);
+    io.stderr.splice(0);
+    expect(
+      await queryCommand(
+        ["bee", "--radius", "4", "--direction", "up", "--path", "x", "--explain", "y", "--links"],
+        io,
+      ),
+    ).toBe(2);
+    expect(io.stderr).toEqual([
+      "--radius takes an integer from 1 to 3",
+      "--radius goes with --near",
+      "--direction takes in or out",
+      "--path, --near and --explain do not go together",
+      "--direction and --relation narrow the links of one entity",
+      "--path, --near and --explain walk the links; --occurrences, --links and --related read one",
+    ]);
+    io.stderr.splice(0);
+    expect(await queryCommand(["--list", "--near", "--relation", "related"], io)).toBe(2);
+    expect(io.stderr).toEqual([
+      "--direction and --relation narrow the links of one entity",
+      "--list and --path, --near or --explain do not go together",
+    ]);
   });
 });
