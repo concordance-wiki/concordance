@@ -5,7 +5,7 @@
   "description": "Schema of the JSON answer of concordance query: the model it was read from, the entity the expression names, where the entity is used, what it is linked to, and the decisions and sessions among those links.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["model", "entity", "occurrences", "links", "related"],
+  "required": ["model", "entity"],
   "properties": {
     "model": {
       "description": "The model the answer was read from.",
@@ -43,7 +43,7 @@
       "type": "object"
     },
     "occurrences": {
-      "description": "Where the entity is named, grouped by the note whose files hold the occurrences.",
+      "description": "Where the entity is named, grouped by the note whose files hold the occurrences; absent when another section alone was asked for.",
       "type": "object",
       "additionalProperties": false,
       "required": ["notes", "more_notes", "total"],
@@ -129,7 +129,7 @@
       }
     },
     "links": {
-      "description": "The entities linked to the queried one, best confidence first.",
+      "description": "The entities linked to the queried one, best confidence first; absent when another section alone was asked for.",
       "type": "object",
       "additionalProperties": false,
       "required": ["entries", "more"],
@@ -149,7 +149,7 @@
       }
     },
     "related": {
-      "description": "The decisions and the sessions linked to the entity, every one of them, best confidence first.",
+      "description": "The decisions and the sessions linked to the entity, every one of them, best confidence first; absent when another section alone was asked for.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/linked"

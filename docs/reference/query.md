@@ -12,9 +12,9 @@ A key marked (required) must be present; every other key is optional and takes t
 |---|---|---|---|---|
 | `model` (required) | object | — | — | The model the answer was read from. See [`model`](#model). |
 | `entity` (required) | object | — | — | The entity the expression names, exactly as `model.json` serialises it under `entities` (see the model schema). |
-| `occurrences` (required) | object | — | — | Where the entity is named, grouped by the note whose files hold the occurrences. See [`occurrences`](#occurrences). |
-| `links` (required) | object | — | — | The entities linked to the queried one, best confidence first. See [`links`](#links). |
-| `related` (required) | object[] | — | — | The decisions and the sessions linked to the entity, every one of them, best confidence first. See [`related[]`](#related). |
+| `occurrences` | object | — | — | Where the entity is named, grouped by the note whose files hold the occurrences; absent when another section alone was asked for. See [`occurrences`](#occurrences). |
+| `links` | object | — | — | The entities linked to the queried one, best confidence first; absent when another section alone was asked for. See [`links`](#links). |
+| `related` | object[] | — | — | The decisions and the sessions linked to the entity, every one of them, best confidence first; absent when another section alone was asked for. See [`related[]`](#related). |
 
 ## `model`
 
@@ -30,7 +30,7 @@ The model the answer was read from.
 
 ## `occurrences`
 
-Where the entity is named, grouped by the note whose files hold the occurrences.
+Where the entity is named, grouped by the note whose files hold the occurrences; absent when another section alone was asked for.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
@@ -72,7 +72,7 @@ The occurrences listed under the bound, by path then line.
 
 ## `links`
 
-The entities linked to the queried one, best confidence first.
+The entities linked to the queried one, best confidence first; absent when another section alone was asked for.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
