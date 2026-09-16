@@ -58,7 +58,7 @@ export function corpusInMemory(corpusDirectory) {
         walk(absolute);
         continue;
       }
-      const path = `${CORPUS_ROOT}/${relative(corpusDirectory, absolute).split("\\").join("/")}`;
+      const path = `${CORPUS_ROOT}/${relative(corpusDirectory, absolute).replaceAll("\\", "/")}`;
       if (TEXT_EXTENSIONS.has(extname(entry.name))) {
         fs.writeText(path, readFileSync(absolute, "utf8"));
       } else {
