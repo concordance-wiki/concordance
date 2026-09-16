@@ -5,7 +5,7 @@
 // `expected/query/questions.yaml` is run from the output folder and its answer written to
 // `expected/query/<slug>.txt`: the exit code on the first line, the standard output, then the
 // standard error. Usage: node scripts/query-fixtures.mjs [corpus]   (default realistic/en)
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -38,9 +38,12 @@ export function readQuestions(corpusDirectory) {
   return document.questions;
 }
 
-/** A plugin of the workspace by its package name, from its built output. */
+/** A plugin of the workspace by its package name, from its built output; only the names of the workspace are looked up. */
 async function loadPlugin(name) {
   const short = name.replace("@concordance-wiki/plugin-", "");
+  if (!/^[a-z0-9-]+$/u.test(short) || !existsSync(resolve(root, "plugins", short))) {
+    throw new Error(`no plugin of the workspace is named ${name}`);
+  }
   const module = await import(resolve(root, "plugins", short, "dist/index.js"));
   return module.default;
 }
@@ -112,15 +115,17 @@ export async function buildInMemory(corpusDirectory) {
 export async function askQuestion(fs, output, args) {
   const io = ioOver(fs, output);
   const status = await queryCommand([...args, "--model", "model.json", "--no-age"], io);
-  return `exit ${String(status)}\n${io.stdout.map((line) => `${line}\n`).join("")}${io.stderr.map((line) => `${line}\n`).join("")}`;
+  const streams = [...io.stdout, ...io.stderr].map((line) => `${line}\n`).join("");
+  return `exit ${String(status)}\n${streams}`;
 }
 
 /** The table of the questions and their invocations, written between the markers of the querying guide. */
 export function writeGuideTable(guideFile, questions) {
-  const rows = questions.map(
-    (question) =>
-      `| ${question.asks} | \`concordance query ${question.args.map((arg) => (/[\s"]/u.test(arg) ? `"${arg.replaceAll('"', '\\"')}"` : arg)).join(" ")}\` |`,
-  );
+  const quoted = (arg) => (/[\s"]/u.test(arg) ? `"${arg.replaceAll('"', String.raw`\"`)}"` : arg);
+  const rows = questions.map((question) => {
+    const command = question.args.map(quoted).join(" ");
+    return `| ${question.asks} | \`concordance query ${command}\` |`;
+  });
   const table = ["| An agent asks | It runs |", "|---|---|", ...rows].join("\n");
   const guide = readFileSync(guideFile, "utf8");
   const start = "<!-- questions:start -->";
@@ -134,6 +139,9 @@ export function writeGuideTable(guideFile, questions) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const corpus = process.argv[2] ?? "realistic/en";
+  // A corpus is a folder of the fixtures named `<name>/<locale>`, nothing else is read.
+  if (!/^[a-z]+\/[a-z]{2}$/u.test(corpus))
+    throw new Error(`not a corpus of the fixtures: ${corpus}`);
   const corpusDirectory = resolve(root, "fixtures/corpora", corpus);
   const { fs, output } = await buildInMemory(corpusDirectory);
   let defects = 0;
