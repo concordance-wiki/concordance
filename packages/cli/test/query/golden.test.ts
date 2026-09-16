@@ -98,5 +98,13 @@ describe("The questions an agent asks are answered in one invocation each, as re
         .filter((name) => name.endsWith(".txt"))
         .sort(),
     ).toEqual(asked.map((question) => `${question.slug}.txt`).sort());
+    // The guide publishes the same list: what the tests answer is what the reader is promised.
+    const guide = readFileSync(
+      resolve(import.meta.dirname, "../../../../docs/guides/querying.md"),
+      "utf8",
+    );
+    for (const question of asked) {
+      expect(guide, `${question.slug}: not in the guide`).toContain(`| ${question.asks} | `);
+    }
   });
 });

@@ -71,6 +71,18 @@ npx @concordance-wiki/concordance lint       # checks one repository before you 
 
 `dist/` is a static folder. Drop it on GitHub Pages, GitLab Pages or a bucket. It works over `file://` too.
 
+## For your agents
+
+The same model the site is rendered from answers from the command line, without the site: what a term is, where it is used with file and line, what it is linked to and how sure the model is, what nobody defined, what changed, where a phrase was spoken. One invocation per question, a compact answer made for a context, every fact with its place.
+
+```bash
+npx @concordance-wiki/concordance query "keyword page"          # the note, its uses, its links, the decisions that touched it
+npx @concordance-wiki/concordance query --search "threshold"    # the search of the site, ranked and facetted
+npx @concordance-wiki/concordance query --text "we agreed to"   # where a phrase is written or spoken, timecode included
+```
+
+Tell your agent to run it before answering about a term or editing a note: [reading the model from the command line](docs/guides/querying.md).
+
 ## Zero configuration by default, structure when you want it
 
 **Day one.** Declare your repositories, build. Concordance maps and aggregates everything: it finds the words people actually use, gives each one a page, links every file that mentions it, previews your Word, PowerPoint and PDF documents, makes transcripts readable, and shows you where the gaps are: words nobody defined, documents nobody summarised.
@@ -95,12 +107,13 @@ sources:
 - **Document previews**: Word, PowerPoint, PDF, VTT transcripts, reconciled with their markdown twins; transcripts are pseudonymised at build and published only on [explicit request](docs/guides/publishing-transcripts.md).
 - **A to-do page**: words without a note, documents without markdown. The shortest path to a better corpus.
 - **A linter for your CI**: broken links, duplicate identifiers, invalid frontmatter, undefined terms, annotated in the merge request.
+- **A query for your agents**: the model read from the command line, one invocation per question, every fact with its file and line.
 - **Your brand**: name, logo, colours, light and dark. No mention of the tool unless you want one.
 - **Evidence everywhere**: every link says where it comes from. Written links always beat inferred ones.
 
 ## Status
 
-Version 0.1.x is published on npm: [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance), the command with every official plugin, and [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli), the command alone, with the [engine packages](packages/README.md) and the plugins next to them. The [demo wiki](https://concordance-wiki.github.io/demo-wiki/) is built from this project's own repositories, the [gallery](https://concordance-wiki.github.io/concordance/gallery/) shows every slot of the default theme in every state, and each version has its [release notes](https://github.com/concordance-wiki/concordance/releases) on GitHub.
+The 0.x versions are published on npm: [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance), the command with every official plugin, and [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli), the command alone, with the [engine packages](packages/README.md) and the plugins next to them. The [demo wiki](https://concordance-wiki.github.io/demo-wiki/) is built from this project's own repositories, the [gallery](https://concordance-wiki.github.io/concordance/gallery/) shows every slot of the default theme in every state, and each version has its [release notes](https://github.com/concordance-wiki/concordance/releases) on GitHub.
 
 The project's own wiki is built with Concordance from its [glossary](https://github.com/concordance-wiki/demo-glossary) and [specifications](https://github.com/concordance-wiki/demo-specs), configured by [demo-wiki](https://github.com/concordance-wiki/demo-wiki). Copy that repository to start yours.
 
@@ -110,6 +123,7 @@ The project's own wiki is built with Concordance from its [glossary](https://git
 - [Writing notes](docs/guides/writing-notes.md): what a note is, what frontmatter adds, which sections mean something.
 - [Configuration](docs/guides/configuration.md) and the [configuration reference](docs/reference/configuration.md): sources, typing rules, domains, thresholds, checks; every key, generated from the schema.
 - [The command line](docs/guides/command-line.md): what each command reads, writes and returns.
+- [Reading the model from the command line](docs/guides/querying.md): `concordance query` for people at a terminal and for agents, with the questions it answers.
 - [Pipelines](docs/guides/pipelines.md): build and publish on GitHub Pages and GitLab Pages, lint in a merge request, copyable.
 - [Operations](docs/guides/operations.md): build time and weight to expect, the cache, the container image, the human steps.
 - [What the tool does not do](docs/guides/limits.md): the limits, one line each.
