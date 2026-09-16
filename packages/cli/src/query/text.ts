@@ -1,6 +1,10 @@
 import type { Entity } from "@concordance-wiki/core";
 
 import type { Answer, Linked } from "./answer.js";
+import type { Path } from "./graph.js";
+
+/** The parts of an answer the options may keep alone. */
+export type Section = "occurrences" | "links" | "related";
 
 /** The age of the model worded for the head of the answer: minutes under an hour, hours under two days, days beyond. */
 export function ageOf(at: string, now: Date): string {
@@ -43,18 +47,39 @@ export function formatCandidates(expression: string, candidates: readonly Entity
   ];
 }
 
-/** The answer as text: compact, in canonical order, meant to be read by a person or put in a context. */
-export function formatAnswer(answer: Answer): string[] {
+/** The first line of every answer: the model it was read from and its age. */
+export function modelLine(model: Answer["model"]): string {
+  const age = model.age === undefined ? "" : `, ${model.age}`;
+  return `model ${model.file} (built ${model.at}${age}; sources ${model.sources.join(", ")})`;
+}
+
+const EVERY_SECTION: ReadonlySet<Section> = new Set(["occurrences", "links", "related"]);
+
+/** The answer as text: compact, in canonical order, meant to be read by a person or put in a context; the sections asked for, all of them by default. */
+export function formatAnswer(
+  answer: Answer,
+  sections: ReadonlySet<Section> = EVERY_SECTION,
+): string[] {
   const { entity, model } = answer;
   const lines: string[] = [];
-  const age = model.age === undefined ? "" : `, ${model.age}`;
-  lines.push(`model ${model.file} (built ${model.at}${age}; sources ${model.sources.join(", ")})`);
+  lines.push(modelLine(model));
   lines.push("");
   lines.push(headline(entity));
   if (entity.aliases.length > 0) lines.push(`aliases: ${entity.aliases.join(", ")}`);
   lines.push(`file: ${entity.source.name}/${entity.source.path}:${String(entity.source.line)}`);
   if (entity.summary !== undefined) lines.push(shorten(entity.summary, 300));
-  lines.push("");
+  if (sections.has("occurrences")) lines.push(...occurrenceLines(answer));
+  if (sections.has("links")) lines.push(...linkLines(answer));
+  if (sections.has("related") && (answer.related.length > 0 || sections.size === 1)) {
+    lines.push("");
+    lines.push(`decisions and sessions: ${String(answer.related.length)}`);
+    for (const linked of answer.related) lines.push(linkedLine(linked));
+  }
+  return lines;
+}
+
+function occurrenceLines(answer: Answer): string[] {
+  const lines: string[] = [""];
   const { notes, more_notes: moreNotes, total } = answer.occurrences;
   lines.push(`used in ${String(notes.length + moreNotes)} notes, ${String(total)} occurrences`);
   for (const note of notes) {
@@ -71,15 +96,29 @@ export function formatAnswer(answer: Answer): string[] {
     if (note.more > 0) lines.push(`    … ${String(note.more)} more in this note`);
   }
   if (moreNotes > 0) lines.push(`  … ${String(moreNotes)} more notes`);
-  lines.push("");
+  return lines;
+}
+
+function linkLines(answer: Answer): string[] {
+  const lines: string[] = [""];
   const { entries, more } = answer.links;
   lines.push(`linked to ${String(entries.length + more)} entities`);
   for (const linked of entries) lines.push(linkedLine(linked));
   if (more > 0) lines.push(`  … ${String(more)} more`);
-  if (answer.related.length > 0) {
-    lines.push("");
-    lines.push(`decisions and sessions: ${String(answer.related.length)}`);
-    for (const linked of answer.related) lines.push(linkedLine(linked));
-  }
+  return lines;
+}
+
+/** The way from one entity to another: each entity on its line, each link walked between them with its relation and confidence. */
+export function formatPath(model: Answer["model"], from: Entity, to: Entity, path: Path): string[] {
+  const lines = [modelLine(model), ""];
+  lines.push(`${String(path.steps.length)} links from ${from.id} to ${to.id}`);
+  path.entities.forEach((entity, index) => {
+    const step = path.steps[index - 1];
+    if (step !== undefined) {
+      const arrow = step.direction === "out" ? "→" : "←";
+      lines.push(`    ${arrow} ${step.relation} ${step.confidence.toFixed(2)}`);
+    }
+    lines.push(`  ${headline(entity, false)}`);
+  });
   return lines;
 }

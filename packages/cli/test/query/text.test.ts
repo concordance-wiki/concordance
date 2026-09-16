@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { Answer } from "../../src/query/answer.js";
-import { ageOf, formatAnswer, formatCandidates, headline, shorten } from "../../src/query/text.js";
+import {
+  ageOf,
+  formatAnswer,
+  formatCandidates,
+  formatPath,
+  headline,
+  shorten,
+} from "../../src/query/text.js";
 import { entity } from "./fixture.js";
 
 const now = new Date("2026-09-12T12:00:00Z");
@@ -140,6 +147,30 @@ describe("formatAnswer", () => {
       "",
       "decisions and sessions: 1",
       "  → specs/decisions/d — D [decision] affects 0.70 (section_mention)",
+    ]);
+  });
+
+  it("writes the way from one entity to another, each link with its direction, relation and confidence", () => {
+    const a = entity("notes/a", { title: "A" });
+    const b = entity("notes/b", { title: "B" });
+    const c = entity("notes/c", { title: "C", type: "decision" });
+    expect(
+      formatPath(base.model, a, c, {
+        entities: [a, b, c],
+        steps: [
+          { from: a.id, to: b.id, relation: "cites", confidence: 0.6, direction: "out" },
+          { from: b.id, to: c.id, relation: "affects", confidence: 0.7, direction: "in" },
+        ],
+      }),
+    ).toEqual([
+      "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)",
+      "",
+      "2 links from notes/a to notes/c",
+      "  notes/a — A [term]",
+      "    → cites 0.60",
+      "  notes/b — B [term]",
+      "    ← affects 0.70",
+      "  notes/c — C [decision]",
     ]);
   });
 });
