@@ -1,7 +1,7 @@
-import type { Entity } from "@concordance-wiki/core";
+import type { Entity, Provenance } from "@concordance-wiki/core";
 
-import type { Answer, Linked } from "./answer.js";
-import type { Path } from "./graph.js";
+import type { Answer, ExplainedLink, Linked } from "./answer.js";
+import type { Path, Reached } from "./graph.js";
 import type { SearchAnswer } from "./search.js";
 
 /** The parts of an answer the options may keep alone. */
@@ -154,6 +154,68 @@ export function formatSearch(model: Answer["model"], answer: SearchAnswer): stri
     lines.push("");
     lines.push("facets");
     for (const facet of facets) lines.push(`  ${facet}`);
+  }
+  return lines;
+}
+
+/** The entities within a radius, one line each with their distance, the closest first; the rest counted. */
+export function formatNear(
+  model: Answer["model"],
+  from: Entity,
+  radius: number,
+  reached: readonly Reached[],
+  limit: number,
+): string[] {
+  const lines = [modelLine(model), ""];
+  lines.push(`${String(reached.length)} entities within ${String(radius)} links of ${from.id}`);
+  for (const reach of reached.slice(0, limit)) {
+    lines.push(`  ${String(reach.depth)}  ${headline(reach.entity, false)}`);
+  }
+  if (reached.length > limit) lines.push(`  … ${String(reached.length - limit)} more`);
+  return lines;
+}
+
+function provenanceLine(provenance: Provenance): string {
+  const where =
+    provenance.path === undefined
+      ? provenance.line === undefined
+        ? ""
+        : ` :${String(provenance.line)}`
+      : ` ${provenance.path}${provenance.line === undefined ? "" : `:${String(provenance.line)}`}`;
+  const count = provenance.count === undefined ? "" : ` (${String(provenance.count)} paragraphs)`;
+  const text = provenance.text === undefined ? "" : ` "${provenance.text}"`;
+  return `    ${provenance.method} ${provenance.confidence.toFixed(2)}${where}${count}${text}`;
+}
+
+/** Why two entities are linked: every link between them, each provenance with its method, confidence, place and context. */
+export function formatExplain(
+  model: Answer["model"],
+  entity: Entity,
+  other: Entity,
+  links: readonly ExplainedLink[],
+  context: number,
+): string[] {
+  const lines = [modelLine(model), ""];
+  if (links.length === 0) {
+    lines.push(`no link between ${entity.id} and ${other.id}`);
+    return lines;
+  }
+  lines.push(`${String(links.length)} links between ${entity.id} and ${other.id}`);
+  for (const link of links) {
+    const arrow = link.direction === "out" ? "→" : "←";
+    lines.push(
+      `  ${arrow} ${link.relation} ${link.confidence.toFixed(2)}, from ${String(link.provenance.length)} provenances`,
+    );
+    for (const provenance of link.provenance) {
+      lines.push(provenanceLine(provenance));
+      const occurrences = provenance.occurrences ?? [];
+      for (const occurrence of occurrences.slice(0, context)) {
+        lines.push(`      :${String(occurrence.line)}  ${shorten(occurrence.context, 160)}`);
+      }
+      if (occurrences.length > context) {
+        lines.push(`      … ${String(occurrences.length - context)} more`);
+      }
+    }
   }
   return lines;
 }

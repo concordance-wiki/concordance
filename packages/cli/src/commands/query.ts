@@ -6,14 +6,17 @@ import { fragmentPath } from "@concordance-wiki/site";
 
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import {
+  explainLinks,
   linkedTo,
   linksOf,
   occurrencesIn,
+  relationsOf,
   type Answer,
   type Bounds,
   type KeywordPassage,
+  type LinkFilter,
 } from "../query/answer.js";
-import { shortestPath } from "../query/graph.js";
+import { shortestPath, within } from "../query/graph.js";
 import {
   hasFilter,
   LIST_WITHOUT_FILTER_LIMIT,
@@ -28,6 +31,8 @@ import {
   ageOf,
   formatAnswer,
   formatCandidates,
+  formatExplain,
+  formatNear,
   formatPath,
   formatSearch,
   headline,
@@ -76,13 +81,16 @@ function passagesOf(io: CommandIo, directory: string | undefined, id: string): K
 }
 
 export const queryUsage = [
-  "usage: concordance query <expression> [--occurrences] [--links] [--related] [--path <target> [--max-depth n]]",
+  "usage: concordance query <expression> [--occurrences] [--links [--direction in|out] [--relation slug]] [--related]",
+  "       concordance query <expression> --path <target> [--max-depth n] | --near [--radius n] | --explain <target>",
   "       concordance query --list [--type t] [--domain d] [--application a] [--source s] [--status st] [--all]",
   "       concordance query --search <words> [--type t] [--domain d] [--application a] [--source s] [--keywords-only | --no-keywords]",
   "       options: [--model file] [--config file] [--format text|json] [--limit n] [--context n] [--no-age]",
 ];
 
 const DEFAULT_MAX_DEPTH = 4;
+const DEFAULT_RADIUS = 1;
+const MAX_RADIUS = 3;
 
 /** What the answer says about the model it was read from. */
 function modelOf(located: LocatedModel, io: CommandIo, age: boolean): Answer["model"] {
@@ -112,6 +120,10 @@ interface Parsed {
   filters: ListFilters;
   path?: string;
   maxDepth: number;
+  near: boolean;
+  radius: number;
+  explain?: string;
+  links: LinkFilter;
   model?: string;
   config?: string;
 }
@@ -133,6 +145,11 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       related: { type: "boolean", default: false },
       path: { type: "string" },
       "max-depth": { type: "string" },
+      near: { type: "boolean", default: false },
+      radius: { type: "string" },
+      explain: { type: "string" },
+      direction: { type: "string" },
+      relation: { type: "string" },
       list: { type: "boolean", default: false },
       all: { type: "boolean", default: false },
       search: { type: "string" },
@@ -172,6 +189,30 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
   if (values["max-depth"] !== undefined && values.path === undefined) {
     errors.push("--max-depth goes with --path");
   }
+  const radius = values.radius === undefined ? DEFAULT_RADIUS : boundOf(values.radius);
+  if (radius === undefined || radius > MAX_RADIUS) {
+    errors.push(`--radius takes an integer from 1 to ${String(MAX_RADIUS)}`);
+  }
+  if (values.radius !== undefined && !values.near) errors.push("--radius goes with --near");
+  if (values.direction !== undefined && values.direction !== "in" && values.direction !== "out") {
+    errors.push("--direction takes in or out");
+  }
+  const links: LinkFilter = {
+    ...(values.direction === "in" || values.direction === "out"
+      ? { direction: values.direction }
+      : {}),
+    ...(values.relation === undefined ? {} : { relation: values.relation }),
+  };
+  const walking = [values.path !== undefined, values.near, values.explain !== undefined].filter(
+    Boolean,
+  ).length;
+  if (walking > 1) errors.push("--path, --near and --explain do not go together");
+  if (
+    (values.direction !== undefined || values.relation !== undefined) &&
+    (walking > 0 || values.list || values.search !== undefined)
+  ) {
+    errors.push("--direction and --relation narrow the links of one entity");
+  }
   const searching = values.search !== undefined;
   if (values["keywords-only"] && values["no-keywords"]) {
     errors.push("--keywords-only and --no-keywords do not go together");
@@ -190,7 +231,7 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
         `${mode} takes no expression; filter with --type, --domain, --application or --source`,
       );
     }
-    if (values.path !== undefined) errors.push(`${mode} and --path do not go together`);
+    if (walking > 0) errors.push(`${mode} and --path, --near or --explain do not go together`);
     if (sections.size > 0) {
       errors.push(`${mode} finds entities; --occurrences, --links and --related read one`);
     }
@@ -203,8 +244,10 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
         "--type, --domain, --application, --source and --status go with --list or --search",
       );
     }
-    if (values.path !== undefined && sections.size > 0) {
-      errors.push("--path walks to another entity; --occurrences, --links and --related read one");
+    if (walking > 0 && sections.size > 0) {
+      errors.push(
+        "--path, --near and --explain walk the links; --occurrences, --links and --related read one",
+      );
     }
   }
   if (
@@ -212,6 +255,7 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
     limit === undefined ||
     context === undefined ||
     maxDepth === undefined ||
+    radius === undefined ||
     !isFormat(values.format)
   ) {
     return { errors };
@@ -230,6 +274,10 @@ function parse(argv: string[]): { parsed: Parsed } | { errors: string[] } {
       filters,
       ...(values.path === undefined ? {} : { path: values.path }),
       maxDepth,
+      near: values.near,
+      radius,
+      ...(values.explain === undefined ? {} : { explain: values.explain }),
+      links,
       ...(values.model === undefined ? {} : { model: values.model }),
       ...(values.config === undefined ? {} : { config: values.config }),
     },
@@ -337,15 +385,53 @@ export async function queryCommand(argv: string[], io: CommandIo): Promise<ExitC
   const entity = resolveOrList(io, located.model, parsed.expression);
   if (entity === undefined) return exitCodes.invalid;
   if (parsed.path !== undefined) return walk(io, located, parsed, entity, parsed.path);
+  if (parsed.near) {
+    const reached = within(located.model, entity, parsed.radius);
+    const header = modelOf(located, io, parsed.age);
+    if (parsed.format === "json") {
+      io.out(JSON.stringify({ model: header, near: { radius: parsed.radius, reached } }, null, 2));
+    } else {
+      for (const line of formatNear(header, entity, parsed.radius, reached, parsed.bounds.limit)) {
+        io.out(line);
+      }
+    }
+    return exitCodes.ok;
+  }
+  if (parsed.explain !== undefined) {
+    const other = resolveOrList(io, located.model, parsed.explain);
+    if (other === undefined) return exitCodes.invalid;
+    const links = explainLinks(located.model, entity, other);
+    const header = modelOf(located, io, parsed.age);
+    if (parsed.format === "json") {
+      io.out(JSON.stringify({ model: header, explain: { other: other.id, links } }, null, 2));
+    } else {
+      for (const line of formatExplain(header, entity, other, links, parsed.bounds.context)) {
+        io.out(line);
+      }
+    }
+    return links.length === 0 ? exitCodes.invalid : exitCodes.ok;
+  }
+  if (parsed.links.relation !== undefined) {
+    const relations = relationsOf(located.model);
+    if (!relations.includes(parsed.links.relation)) {
+      io.err(
+        `--relation ${parsed.links.relation} names no relation of the model; it holds ${relations.join(", ")}`,
+      );
+      return exitCodes.failure;
+    }
+  }
   const passages = entity.keyword === true ? passagesOf(io, located.directory, entity.id) : [];
   const answer: Answer = {
     model: modelOf(located, io, parsed.age),
     entity,
     occurrences: occurrencesIn(located.model, entity, passages, parsed.bounds),
-    ...linksOf(linkedTo(located.model, entity), parsed.bounds),
+    ...linksOf(linkedTo(located.model, entity, parsed.links), parsed.bounds),
   };
+  const narrowed = parsed.links.direction !== undefined || parsed.links.relation !== undefined;
   const sections: Set<Section> =
-    parsed.sections.size === 0 ? new Set(["occurrences", "links", "related"]) : parsed.sections;
+    parsed.sections.size === 0
+      ? new Set(narrowed ? ["links"] : ["occurrences", "links", "related"])
+      : parsed.sections;
   if (parsed.format === "json") {
     const kept: Partial<Answer> & Pick<Answer, "model" | "entity"> = {
       model: answer.model,

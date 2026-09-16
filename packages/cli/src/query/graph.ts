@@ -111,3 +111,43 @@ export function shortestPath(
   ];
   return { entities, steps };
 }
+
+/** An entity reached from another within a radius: how many links away, and the best way's sum of confidences. */
+export interface Reached {
+  entity: Entity;
+  depth: number;
+  score: number;
+}
+
+/**
+ * Every entity within a radius of one, walking the links in either direction, the closest
+ * first, then the best sum of confidences, then the identifiers; the entity itself left out.
+ */
+export function within(model: CanonicalModel, from: Entity, radius: number): Reached[] {
+  const byId = new Map(model.entities.map((entity) => [entity.id, entity]));
+  const edges = edgesOf(model);
+  const reached = new Map<string, Reached>([[from.id, { entity: from, depth: 0, score: 0 }]]);
+  let frontier: Reached[] = [{ entity: from, depth: 0, score: 0 }];
+  for (let depth = 1; depth <= radius && frontier.length > 0; depth += 1) {
+    const next: Reached[] = [];
+    for (const here of frontier.sort((a, b) => byCodeUnit(a.entity.id, b.entity.id))) {
+      for (const { other, step } of edges.get(here.entity.id) ?? []) {
+        const entity = byId.get(other);
+        if (entity === undefined) continue;
+        const score = here.score + step.confidence;
+        const known = reached.get(other);
+        if (known === undefined) {
+          const reach = { entity, depth, score };
+          reached.set(other, reach);
+          next.push(reach);
+        } else if (known.depth === depth && known.score < score) {
+          known.score = score;
+        }
+      }
+    }
+    frontier = next;
+  }
+  return [...reached.values()]
+    .filter((reach) => reach.entity.id !== from.id)
+    .sort((a, b) => a.depth - b.depth || b.score - a.score || byCodeUnit(a.entity.id, b.entity.id));
+}

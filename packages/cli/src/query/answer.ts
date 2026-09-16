@@ -224,13 +224,21 @@ function methodsOf(link: Link): string[] {
   return [...new Set(link.provenance.map((provenance) => provenance.method))].sort(byCodeUnit);
 }
 
-/** Every entity linked to the queried one, in either direction, best confidence first. */
-export function linkedTo(model: CanonicalModel, entity: Entity): Linked[] {
+/** What narrows the links listed: the direction they are read in, the relation they carry. */
+export interface LinkFilter {
+  direction?: "in" | "out";
+  relation?: string;
+}
+
+/** Every entity linked to the queried one, in either direction unless one is asked, best confidence first. */
+export function linkedTo(model: CanonicalModel, entity: Entity, filter: LinkFilter = {}): Linked[] {
   const byId = new Map(model.entities.map((candidate) => [candidate.id, candidate]));
   const entries: Linked[] = [];
   for (const link of model.links) {
     if (link.from !== entity.id && link.to !== entity.id) continue;
     const direction = link.from === entity.id ? "out" : "in";
+    if (filter.direction !== undefined && filter.direction !== direction) continue;
+    if (filter.relation !== undefined && filter.relation !== link.relation) continue;
     const other = byId.get(direction === "out" ? link.to : link.from);
     if (other === undefined) continue;
     entries.push({
@@ -259,4 +267,39 @@ export function linksOf(
     },
     related: linked.filter((entry) => RELATED_TYPES.has(entry.type)),
   };
+}
+
+/** The relations the links of a model carry, each once, in code-unit order: what `--relation` may name. */
+export function relationsOf(model: CanonicalModel): string[] {
+  return [...new Set(model.links.map((link) => link.relation))].sort(byCodeUnit);
+}
+
+/** One link between two entities with everything the model recorded about it. */
+export interface ExplainedLink {
+  relation: string;
+  /** `out` when the link goes from the queried entity to the other. */
+  direction: "out" | "in";
+  confidence: number;
+  provenance: Provenance[];
+}
+
+/** Every link between two entities, in either direction, as the model records them: the way to see why they are linked. */
+export function explainLinks(
+  model: CanonicalModel,
+  entity: Entity,
+  other: Entity,
+): ExplainedLink[] {
+  return model.links
+    .filter(
+      (link) =>
+        (link.from === entity.id && link.to === other.id) ||
+        (link.from === other.id && link.to === entity.id),
+    )
+    .map((link): ExplainedLink => ({
+      relation: link.relation,
+      direction: link.from === entity.id ? "out" : "in",
+      confidence: link.confidence,
+      provenance: link.provenance,
+    }))
+    .sort((a, b) => b.confidence - a.confidence || byCodeUnit(a.relation, b.relation));
 }

@@ -5,6 +5,8 @@ import {
   ageOf,
   formatAnswer,
   formatCandidates,
+  formatExplain,
+  formatNear,
   formatPath,
   formatSearch,
   headline,
@@ -214,6 +216,72 @@ describe("formatAnswer", () => {
       "facets",
       "  type keyword 1, term 2",
       "  source keywords 1, notes 2",
+    ]);
+  });
+
+  it("lists the entities within a radius with their distance, the rest counted", () => {
+    const a = entity("notes/a", { title: "A" });
+    const b = entity("notes/b", { title: "B", type: "screen" });
+    const reached = [
+      { entity: b, depth: 1, score: 0.6 },
+      { entity: entity("notes/c", { title: "C" }), depth: 2, score: 1 },
+    ];
+    expect(formatNear(base.model, a, 2, reached, 1)).toEqual([
+      "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)",
+      "",
+      "2 entities within 2 links of notes/a",
+      "  1  notes/b — B [screen]",
+      "  … 1 more",
+    ]);
+  });
+
+  it("explains a link by its provenances, each with its place, count, text and occurrences under the bound", () => {
+    const a = entity("notes/a", { title: "A" });
+    const b = entity("notes/b", { title: "B" });
+    expect(formatExplain(base.model, a, b, [], 3)).toEqual([
+      "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)",
+      "",
+      "no link between notes/a and notes/b",
+    ]);
+    expect(
+      formatExplain(
+        base.model,
+        a,
+        b,
+        [
+          {
+            relation: "cites",
+            direction: "out",
+            confidence: 0.8,
+            provenance: [
+              { method: "explicit_link", confidence: 0.6, path: "a.md", line: 4, text: "B" },
+              {
+                method: "glossary_occurrence",
+                confidence: 0.3,
+                line: 9,
+                occurrences: [
+                  { line: 9, context: "first" },
+                  { line: 12, context: "second" },
+                ],
+              },
+              { method: "cooccurrence", confidence: 0.4, count: 2 },
+              { method: "frontmatter_ref", confidence: 0.5, path: "a.md", attribute: "cites" },
+            ],
+          },
+        ],
+        1,
+      ),
+    ).toEqual([
+      "model dist/model.json (built 2026-09-12T12:00:00.000Z; sources notes@0123456)",
+      "",
+      "1 links between notes/a and notes/b",
+      "  → cites 0.80, from 4 provenances",
+      '    explicit_link 0.60 a.md:4 "B"',
+      "    glossary_occurrence 0.30 :9",
+      "      :9  first",
+      "      … 1 more",
+      "    cooccurrence 0.40 (2 paragraphs)",
+      "    frontmatter_ref 0.50 a.md",
     ]);
   });
 });

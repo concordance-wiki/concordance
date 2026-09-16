@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { linkedTo, linksOf, occurrencesIn, type Bounds } from "../../src/query/answer.js";
+import {
+  explainLinks,
+  linkedTo,
+  linksOf,
+  occurrencesIn,
+  relationsOf,
+  type Bounds,
+} from "../../src/query/answer.js";
 import { entity, link, model } from "./fixture.js";
 
 const bounds: Bounds = { limit: 10, context: 3 };
@@ -235,5 +242,58 @@ describe("linkedTo lists every link of the note in either direction", () => {
       links: { entries: linked.slice(0, 1), more: 2 },
       related: linked.slice(0, 1),
     });
+  });
+
+  it("narrows the links to a direction or a relation, and names the relations of the model", () => {
+    const decision = entity("specs/decisions/threshold", { title: "Threshold", type: "decision" });
+    const graph = model(
+      [term, screen, decision],
+      [
+        link(term.id, screen.id, [{ method: "explicit_link", confidence: 0.6 }], {
+          relation: "describes",
+        }),
+        link(decision.id, term.id, [{ method: "section_mention", confidence: 0.5 }], {
+          relation: "affects",
+          confidence: 0.7,
+        }),
+      ],
+    );
+    expect(linkedTo(graph, term, { direction: "in" }).map((linked) => linked.id)).toEqual([
+      decision.id,
+    ]);
+    expect(linkedTo(graph, term, { direction: "out" }).map((linked) => linked.id)).toEqual([
+      screen.id,
+    ]);
+    expect(linkedTo(graph, term, { relation: "affects" }).map((linked) => linked.id)).toEqual([
+      decision.id,
+    ]);
+    expect(linkedTo(graph, term, { relation: "affects", direction: "out" })).toEqual([]);
+    expect(relationsOf(graph)).toEqual(["affects", "describes"]);
+  });
+});
+
+describe("explainLinks shows every link between two entities as the model records it", () => {
+  it("keeps both directions, best confidence first, and nothing for two entities the model never linked", () => {
+    const provenance = [{ method: "section_mention" as const, confidence: 0.5, line: 3 }];
+    const graph = model(
+      [term, screen],
+      [
+        link(term.id, screen.id, provenance, { relation: "describes", confidence: 0.5 }),
+        link(screen.id, term.id, [{ method: "explicit_link", confidence: 0.6 }], {
+          relation: "cites",
+          confidence: 0.5,
+        }),
+      ],
+    );
+    expect(explainLinks(graph, term, screen)).toEqual([
+      {
+        relation: "cites",
+        direction: "in",
+        confidence: 0.5,
+        provenance: [{ method: "explicit_link", confidence: 0.6 }],
+      },
+      { relation: "describes", direction: "out", confidence: 0.5, provenance },
+    ]);
+    expect(explainLinks(graph, term, entity("specs/other"))).toEqual([]);
   });
 });

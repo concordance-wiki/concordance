@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { shortestPath } from "../../src/query/graph.js";
+import { shortestPath, within } from "../../src/query/graph.js";
 import { entity, link, model } from "./fixture.js";
 
 const a = entity("notes/a");
@@ -75,5 +75,29 @@ describe("shortestPath walks the links in either direction", () => {
     expect(shortestPath(graph, a, c, 2)?.steps).toHaveLength(2);
     expect(shortestPath(graph, a, e, 4)).toBeUndefined();
     expect(shortestPath(graph, e, a, 4)).toBeUndefined();
+  });
+
+  it("lists what lies within a radius, the closest first, the best way's confidences deciding among equals", () => {
+    const graph = model(
+      [a, b, c, d, e],
+      [
+        link(a.id, b.id, provenance, { confidence: 0.4 }),
+        link(c.id, a.id, provenance, { confidence: 0.9 }),
+        link(b.id, d.id, provenance, { confidence: 0.5 }),
+        link(c.id, d.id, provenance, { confidence: 0.5 }),
+        link(d.id, "gone/note", provenance),
+        link(d.id, e.id, provenance),
+      ],
+    );
+    expect(within(graph, a, 2).map((reach) => [reach.entity.id, reach.depth, reach.score])).toEqual(
+      [
+        [c.id, 1, 0.9],
+        [b.id, 1, 0.4],
+        [d.id, 2, 1.4],
+      ],
+    );
+    expect(within(graph, a, 1).map((reach) => reach.entity.id)).toEqual([c.id, b.id]);
+    expect(within(graph, e, 3).map((reach) => reach.entity.id)).toEqual([d.id, b.id, c.id, a.id]);
+    expect(within(model([a, e]), e, 2)).toEqual([]);
   });
 });
