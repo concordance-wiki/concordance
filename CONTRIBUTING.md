@@ -62,7 +62,7 @@ A mutant gets the time its covering tests took, times `timeoutFactor`, plus `tim
 The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict, type-checked), `.prettierrc`, `.editorconfig`. Beyond that:
 
 - Comment only when the "why" is not obvious. No docstring that repeats the signature. No file header summarising the file.
-- Names are explicit English. Check identifiers follow `E-`, `W-` or `I-` plus `AREA-SUBJECT`.
+- Names are explicit English. Check identifiers follow `E-`, `W-` or `I-` plus `AREA-SUBJECT`; the prefix names the severity the check was designed for, and a check whose default differs is listed as such in the README of the checks and in the catalogue test.
 - Documentation is short sentences in the active voice. A README says what the tool does, not how it was made. A key of a schema is documented in the schema itself (`description`), from which `pnpm reference:update` generates the reference pages; the guides explain how the keys work together and link the reference for the tables.
 
 ## Commits and branches

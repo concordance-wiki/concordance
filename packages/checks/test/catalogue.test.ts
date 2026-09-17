@@ -83,6 +83,26 @@ describe("catalogue", () => {
     }
   });
 
+  it("defaults to the severity its prefix names, the four checks the README lists apart", () => {
+    const designed = { E: "error", W: "warning", I: "info" } as const;
+    const lookedAtNotFixed = new Set([
+      "W-DOC-NOMD",
+      "W-DUP-CANDIDATE",
+      "W-TERM-UNUSED",
+      "W-DOMAIN-UNCLASSIFIED",
+    ]);
+    for (const definition of catalogue) {
+      const prefix = definition.id.charAt(0);
+      const expected = lookedAtNotFixed.has(definition.id)
+        ? "info"
+        : designed[prefix as keyof typeof designed];
+      expect({ id: definition.id, severity: definition.severity }).toEqual({
+        id: definition.id,
+        severity: expected,
+      });
+    }
+  });
+
   it("agrees with each page on the default severity and the family", () => {
     for (const definition of catalogue) {
       expect({ id: definition.id, ...header(definition.id) }).toEqual({

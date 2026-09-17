@@ -1,6 +1,6 @@
 # Checks
 
-Every finding produced by the build or the linter carries one of these identifiers. Severity prefixes: `E-` error, `W-` warning, `I-` info. Each page shows the situation before and after the fix.
+Every finding produced by the build or the linter carries one of these identifiers. The prefix says what the check was designed for: `E-` an error, `W-` a warning, `I-` an information. Four checks of the `W-` family default to `info` all the same, because what they name is worth a look rather than a fix (`W-DOC-NOMD`, `W-DUP-CANDIDATE`, `W-TERM-UNUSED`, `W-DOMAIN-UNCLASSIFIED`); the default of every check is on its page. Each page shows the situation before and after the fix.
 
 Severities can be overridden under `checks:` in `concordance.yaml` or, per repository, in `concordance-lint.yaml`; see the [configuration guide](../guides/configuration.md#checks) for what `enabled` and `severity` do. The build fails according to `build.fail_on`; the linter fails according to `--fail-on`, `error` by default.
 
