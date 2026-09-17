@@ -76,6 +76,7 @@ function dictionarySource(entity: Entity, id: string): DictionarySource {
   return {
     id,
     source: entity.source.name,
+    path: entity.source.path,
     type: entity.type,
     title: entity.title,
     aliases: entity.aliases,
