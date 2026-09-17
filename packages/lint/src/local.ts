@@ -4,6 +4,7 @@ import { createRegistry, type CheckId, type StepFinding } from "@concordance-wik
 import {
   identifierFor,
   readLintConfig,
+  type LintOverrides,
   resolveDuplicates,
   type Config,
   type FileSystem,
@@ -45,6 +46,8 @@ export interface LintRepositoryInput {
   fs: FileSystem;
   /** Whether the files git ignores are left out; they are unless this is false. */
   gitignore?: boolean;
+  /** The content of `concordance-lint.yaml`, when the caller read it already; read here otherwise. */
+  overrides?: LintOverrides;
 }
 
 function typeSuffixes(source: SourceConfig | undefined): string[] {
@@ -90,7 +93,7 @@ function brokenLinks(
 export function lintRepository(input: LintRepositoryInput): Finding[] {
   const { root, fs } = input;
   const source = input.source?.name ?? DEFAULT_SOURCE_NAME;
-  const local = readLintConfig(fs, root);
+  const local = input.overrides ?? readLintConfig(fs, root);
   const overrides = { ...input.config?.checks, ...local.checks };
   const suffixes = typeSuffixes(input.source);
   const files = lintedFiles({ ...input, overrides: local });

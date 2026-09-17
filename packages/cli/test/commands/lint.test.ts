@@ -482,6 +482,18 @@ describe("concordance lint", () => {
       ]);
     });
 
+    it("reads concordance-lint.yaml once for the run: the fixes, the local checks and the global scope share it", async () => {
+      const state = online(specs());
+      const original = state.io.fs.readText.bind(state.io.fs);
+      let reads = 0;
+      state.io.fs.readText = (path) => {
+        if (path.endsWith("concordance-lint.yaml")) reads += 1;
+        return original(path);
+      };
+      await lintCommand(["--scope", "global", "--source", "specs", "--dry-run"], state.io);
+      expect(reads).toBe(1);
+    });
+
     it("adds the global findings to the local ones, sorted, and prints them like any other", async () => {
       const state = online(specs());
       expect(await lintCommand(["--scope", "global", "--source", "specs"], state.io)).toBe(1);

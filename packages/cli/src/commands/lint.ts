@@ -7,6 +7,7 @@ import {
   parseConfig,
   type Config,
   type Finding,
+  type LintOverrides,
   type Severity,
   type SourceConfig,
 } from "@concordance-wiki/core";
@@ -140,8 +141,11 @@ function sourceOf(
   return source;
 }
 
+/** What one run of the linter reads: the repository input, its lint configuration read once. */
+type LintRun = LintRepositoryInput & { overrides: LintOverrides };
+
 /** The repository to check, with its configuration and source when named; nothing once a problem has been reported. */
-function repositoryOf(io: CommandIo, options: LintOptions): LintRepositoryInput | undefined {
+function repositoryOf(io: CommandIo, options: LintOptions): LintRun | undefined {
   const config = options.config === undefined ? undefined : readConfig(io, options.config);
   if (options.config !== undefined && config === undefined) return undefined;
   const source = options.source === undefined ? undefined : sourceOf(io, config, options.source);
@@ -152,6 +156,8 @@ function repositoryOf(io: CommandIo, options: LintOptions): LintRepositoryInput 
     ...(config === undefined ? {} : { config }),
     ...(options.gitignore ? {} : { gitignore: false }),
     fs: io.fs,
+    // Read once for the run: the fixes, the local checks and the global scope share it.
+    overrides: readLintConfig(io.fs, io.cwd),
   };
 }
 
@@ -184,13 +190,13 @@ function fix(io: CommandIo, repository: LintRepositoryInput, dryRun: boolean): v
 /** The global checks over the published model, degraded to the local ones when the model cannot be read. */
 async function lintGlobally(
   io: CommandIo,
-  repository: LintRepositoryInput,
+  repository: LintRun,
   local: Finding[],
   projectProfile: string | undefined,
 ): Promise<{ findings: Finding[]; scope: ReportScope }> {
   const global = await lintGlobal({
     ...repository,
-    overrides: readLintConfig(io.fs, io.cwd),
+    overrides: repository.overrides,
     clock: io.clock,
     ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
     profile: loadDefaultProfile(),
