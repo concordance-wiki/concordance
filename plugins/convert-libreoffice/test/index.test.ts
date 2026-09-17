@@ -40,10 +40,12 @@ describe("@concordance-wiki/plugin-convert-libreoffice", () => {
     ]);
   });
 
-  it("declares LibreOffice as the system dependency detected through soffice, so that the registry disables the plugin with a finding when it is missing", () => {
+  it("declares LibreOffice as an optional system dependency detected through soffice, so that the registry keeps the plugin and the PDF converter when it is missing", () => {
     expect(plugin.name).toBe("@concordance-wiki/plugin-convert-libreoffice");
     expect(plugin.apiVersion).toBe("1");
-    expect(plugin.systemDependencies).toEqual([{ name: "LibreOffice", check: "soffice" }]);
+    expect(plugin.systemDependencies).toEqual([
+      { name: "LibreOffice", check: "soffice", optional: true },
+    ]);
   });
 
   it("contributes a converter for docx, pptx and xlsx and one for pdf, both producing pdf and text", () => {

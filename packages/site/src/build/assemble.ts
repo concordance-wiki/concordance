@@ -76,7 +76,11 @@ export async function assemblePages(options: AssembleOptions): Promise<Assembled
     ...writeThemeAssets(source, fileSystem, assets).map((file) => `${ASSETS_DIRECTORY}/${file}`),
   ];
   const pages: PageReport[] = [];
+  const written = new Set<string>();
   for (const { path, content } of options.documents(islands)) {
+    // Two documents at one path would overwrite each other in silence: a bug of the site, never of the content.
+    if (written.has(path)) throw new Error(`assemblePages: two documents share the path ${path}`);
+    written.add(path);
     fileSystem.writeText(`${output}/${path}`, content);
     files.push(path);
     if (path.endsWith(".html")) {

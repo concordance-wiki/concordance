@@ -111,7 +111,7 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
-| `name` (required) | string | — | pattern `^[a-z0-9][a-z0-9-]*$` | Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens. |
+| `name` (required) | string | — | pattern `^[a-z0-9][a-z0-9-]*$` | Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens; never a folder the site reserves (about, assets, fragments, index, keywords, search, spaces, todo). |
 | `git` | string | — | non-empty | URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; exclusive with path. |
 | `ref` | string | `"main"` | — | Branch, tag or commit of the git repository to read. |
 | `path` | string | — | non-empty | Local folder, relative to this configuration, read in place; exclusive with git. |

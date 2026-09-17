@@ -16,6 +16,7 @@ describe("@concordance-wiki/core", () => {
       "PLUGIN_API_VERSION",
       "PluginDefinitionError",
       "PluginLoadError",
+      "RESERVED_SOURCE_NAMES",
       "TRUSTED_DIRECTORIES",
       "assembleModel",
       "cachedContractPath",

@@ -144,6 +144,37 @@ function describeKeyError(error: ErrorObject, document: unknown): ConfigIssue {
   return { ...issue, path, message: "key is not allowed", received: error.propertyName };
 }
 
+/**
+ * The folders of the site that are not a source's: a source of that name would write its space
+ * page and its entity pages over them in silence.
+ */
+export const RESERVED_SOURCE_NAMES: readonly string[] = [
+  "about",
+  "assets",
+  "fragments",
+  "index",
+  "keywords",
+  "search",
+  "spaces",
+  "todo",
+];
+
+function reservedSources(config: Config): ConfigIssue[] {
+  return config.sources.flatMap((source, index) =>
+    RESERVED_SOURCE_NAMES.includes(source.name)
+      ? [
+          {
+            severity: "error" as const,
+            path: `sources[${String(index)}].name`,
+            message: "source name is a folder the site reserves",
+            received: source.name,
+            expected: `a name other than ${RESERVED_SOURCE_NAMES.join(", ")}`,
+          },
+        ]
+      : [],
+  );
+}
+
 function duplicateSources(config: Config): ConfigIssue[] {
   const seen = new Map<string, number>();
   const issues: ConfigIssue[] = [];
@@ -261,6 +292,7 @@ export function validateConfig(document: unknown): ConfigValidation {
   const config = document as Config;
   const errors = [
     ...duplicateSources(config),
+    ...reservedSources(config),
     ...malformedGlobs(config.domains ?? [], "domains"),
     ...missingDictionary(config),
   ];
