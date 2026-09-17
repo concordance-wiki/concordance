@@ -2,6 +2,7 @@ import { posix } from "node:path";
 
 import {
   readLintConfig,
+  type LintOverrides,
   type Config,
   type FileSystem,
   type SourceConfig,
@@ -29,6 +30,8 @@ export interface FixRepositoryInput {
   dryRun: boolean;
   /** Called with every change, in order, before the first file is written. */
   announce?: (change: FixChange) => void;
+  /** The content of `concordance-lint.yaml`, when the caller read it already; read here otherwise. */
+  overrides?: LintOverrides;
 }
 
 export interface FixRepositoryResult {
@@ -57,7 +60,7 @@ function decode(bytes: Uint8Array): string | undefined {
  */
 export function fixRepository(input: FixRepositoryInput): FixRepositoryResult {
   const { root, fs } = input;
-  const files = lintedFiles({ ...input, overrides: readLintConfig(fs, root) });
+  const files = lintedFiles({ ...input, overrides: input.overrides ?? readLintConfig(fs, root) });
   const sourceFiles = new Set(files);
   const applied: FixChange[] = [];
   const refused: FixRefusal[] = [];
