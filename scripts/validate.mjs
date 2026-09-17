@@ -478,6 +478,25 @@ for (const match of pipelines.matchAll(/```ya?ml\n([\s\S]*?)```/g)) {
 }
 if (yamlBlocks === 0) fail("docs/guides/pipelines.md: no YAML block found");
 
+// 15. The usage block of the command-line guide is the one `concordance --help` prints.
+const mainSource = readFileSync(join(root, "packages/cli/src/main.ts"), "utf8");
+const usageArray = mainSource.slice(
+  mainSource.indexOf("export const usage = ["),
+  mainSource.indexOf("];", mainSource.indexOf("export const usage = [")),
+);
+const usageLines = [...usageArray.matchAll(/^\s*"((?:[^"\\]|\\.)*)",?\s*$/gm)].map((match) =>
+  match[1].replaceAll('\\"', '"'),
+);
+const commandLineGuide = readFileSync(join(root, "docs/guides/command-line.md"), "utf8");
+const usageBlock = /```\n(usage: concordance[\s\S]*?)```/.exec(commandLineGuide);
+if (usageBlock === null) {
+  fail("docs/guides/command-line.md: no usage block found");
+} else if (usageBlock[1] !== `${usageLines.join("\n")}\n`) {
+  fail(
+    "docs/guides/command-line.md: the usage block differs from the usage of packages/cli/src/main.ts",
+  );
+}
+
 // 15. A published package ships neither its tests, nor its sources, nor its fixtures: its
 //     manifest carries the registry fields, lists only the built and shipped folders, points
 //     at them, and the tarball pnpm would pack holds nothing else (scripts/check-packaging.mjs).
@@ -493,5 +512,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, package manifests and versions are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, usage text, package manifests and versions are valid",
 );

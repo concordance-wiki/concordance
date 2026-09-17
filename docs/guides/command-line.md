@@ -6,15 +6,21 @@
 usage: concordance <command> [options]
 
 commands:
-  build [--config file] [--output dir]  validate the configuration, build the model and render the site
+  build [--config file] [--output dir] [--timings]
+                                        validate the configuration, build the model and render the site; --timings prints where the time went
   export [--format cypher] [--model dist/model.json] [--output file]
                                         turn the model into a Cypher script (stdout by default)
   gallery [--output dir] [--theme plugin] [--config file]
                                         render every slot with fixture data through the theme
   init [directory] [--templates]        write a minimal configuration file, and the note templates
   lint [--scope repo|global] [--source name] [--config file] [--fail-on error|warning|info]
-       [--format text|json|sarif|junit] [--output file]
+       [--format text|json|sarif|junit] [--output file] [--fix] [--dry-run]
                                         check the current repository alone, or against the published model
+  mcp [--model dist/model.json] [--config file]
+                                        serve the questions of query to an agent over standard input, one tool per family
+  query <expression> [--occurrences] [--links] [--related] [--path <target>]
+  query --list [--type t] [--domain d] [--application a] [--source s]
+                                        what the model knows about an expression, a list of its entities, or the way between two
   render [--model dist/model.json] [--output dir] [--config file]
                                         render the site again from an existing model, without the sources
   validate-config [--config file]       check the configuration and report its errors

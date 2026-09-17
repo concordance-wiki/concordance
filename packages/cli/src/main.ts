@@ -35,7 +35,7 @@ export const usage = [
   "                                        render every slot with fixture data through the theme",
   "  init [directory] [--templates]        write a minimal configuration file, and the note templates",
   "  lint [--scope repo|global] [--source name] [--config file] [--fail-on error|warning|info]",
-  "       [--format text|json|sarif|junit] [--output file]",
+  "       [--format text|json|sarif|junit] [--output file] [--fix] [--dry-run]",
   "                                        check the current repository alone, or against the published model",
   "  mcp [--model dist/model.json] [--config file]",
   "                                        serve the questions of query to an agent over standard input, one tool per family",
