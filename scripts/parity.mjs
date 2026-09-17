@@ -136,6 +136,13 @@ const families = [...new Set(checks.flatMap((c) => (c.family ? [c.family] : []))
 const slotsSource = readFileSync(join(root, "packages/site/src/slots.ts"), "utf8");
 const slotList = /SLOT_NAMES = \[([^\]]*)\]/.exec(slotsSource);
 const slots = slotList ? [...slotList[1].matchAll(/"([A-Za-z]+)"/g)].map((m) => m[1]) : [];
+// An empty list would make every slot check pass for nothing: the source moved, the script must say so.
+if (slots.length === 0) {
+  console.error(
+    "packages/site/src/slots.ts: SLOT_NAMES not found; the parity check cannot read the slots",
+  );
+  process.exit(1);
+}
 const pageSlots = slots.filter((slot) => !CHROME_SLOTS.has(slot));
 
 const profile = readYaml(join(root, "packages/profile/default.yaml"));
