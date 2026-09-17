@@ -63,7 +63,7 @@ export function transcriptSubstitution(
   dictionary: PseudonymDictionary,
   options: PseudonymizeOptions,
 ): TranscriptSubstitution {
-  const numbering = createSpeakerNumbering();
+  const numbering = createSpeakerNumbering(options.locale);
   const speakerOptions = { ...options, numbering };
   const speaker = (name: string): string => pseudonymizeSpeaker(name, dictionary, speakerOptions);
   for (const name of speakers) speaker(name);
