@@ -44,8 +44,6 @@ export const modelFile = "model.json";
 
 /** Module loading and network access, injected so that tests run plugins, contracts and themes against doubles. */
 export interface BuildDependencies extends PluginLoaderDependencies {
-  /** Absent when the build must not touch the network. */
-  fetch?: typeof fetch;
   /** Loads a theme component; the real importer when absent. */
   loadTheme?: ThemeDependencies["loadTheme"];
   /** Loads a component file of a type module; the modules' components are left aside when absent. */
@@ -58,7 +56,6 @@ export interface BuildDependencies extends PluginLoaderDependencies {
 
 const nodeDependencies: BuildDependencies = {
   ...nodeThemeDependencies,
-  fetch: globalThis.fetch,
   parallelism: availableParallelism(),
 };
 
@@ -280,7 +277,8 @@ export async function buildCommand(
     checks,
     fs: io.fs,
     clock: io.clock,
-    ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
+    // The network the caller gave, or none: a caller that omits `io.fetch` forbids every connection.
+    ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
     parallelism: config.conversion?.parallelism ?? deps.parallelism ?? 1,
     ...(lock.lock === undefined ? {} : { lock: lock.lock }),
   });
