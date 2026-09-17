@@ -1,0 +1,18 @@
+# Weekly proposals for the pinned dependencies, the actions and the base image: one pull request
+# per update, reviewed and queued like any other; nothing merges on its own.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly

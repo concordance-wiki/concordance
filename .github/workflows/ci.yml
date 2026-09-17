@@ -87,6 +87,9 @@ jobs:
         run: node scripts/hygiene.mjs
       - name: Licences
         run: pnpm licenses:check
+      - name: Advisories
+        # The pinned production dependencies against the advisory database: a known vulnerability fails the run.
+        run: pnpm audit --prod --audit-level=moderate
       - name: Wiki parity
         # The project wiki keeps pace with the tool: every check, page slot, active type,
         # configuration key and check family has its note in the demonstration repositories.
