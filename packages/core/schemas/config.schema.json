@@ -618,7 +618,7 @@
           "default": 120
         },
         "max_size_mb": {
-          "description": "Size in megabytes above which a document is not converted and yields W-CONV-FAILED.",
+          "description": "Size in megabytes above which a document is not converted and yields W-CONV-FAILED; such a document is not even read or hashed, its size being checked first.",
           "type": "integer",
           "minimum": 1,
           "default": 50

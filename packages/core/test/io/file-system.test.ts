@@ -40,6 +40,12 @@ describe("nodeFileSystem", () => {
     expect(nodeFileSystem.readText(file)).toBe("3");
   });
 
+  it("gives the size of a file in bytes without reading it", () => {
+    const file = join(directory, "sized.bin");
+    writeFileSync(file, Uint8Array.from([1, 2, 3, 4, 5]));
+    expect(nodeFileSystem.size(file)).toBe(5);
+  });
+
   it("reads the raw bytes of a file", () => {
     const file = join(directory, "raw.bin");
     writeFileSync(file, Uint8Array.from([0x61, 0xff, 0x62]));
@@ -91,6 +97,14 @@ describe("memoryFileSystem", () => {
     expect(fs.readText("/a.txt")).toBe("a");
     fs.writeText("/b.txt", "b");
     expect(fs.files.get("/b.txt")).toBe("b");
+  });
+
+  it("sizes a text by its UTF-8 bytes and a blob by its length, and throws on a missing file", () => {
+    const fs = memoryFileSystem({ "/a.txt": "été" });
+    fs.writeBytes("/b.bin", Uint8Array.from([0, 1, 2]));
+    expect(fs.size("/a.txt")).toBe(5);
+    expect(fs.size("/b.bin")).toBe(3);
+    expect(() => fs.size("/none")).toThrow("ENOENT");
   });
 
   it("throws like the real file system on a missing file", () => {

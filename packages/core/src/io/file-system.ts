@@ -25,6 +25,8 @@ export interface FileSystem {
   listFiles(directory: string): string[];
   /** ISO 8601 modification date of a file. */
   modifiedAt(path: string): string;
+  /** Size of a file in bytes, without reading it. */
+  size(path: string): number;
 }
 
 /** Folders never read: a repository's own history and installed packages, whose READMEs are not notes. */
@@ -85,6 +87,7 @@ export const nodeFileSystem: FileSystem = {
     return files.sort(byCodeUnit);
   },
   modifiedAt: (path) => statSync(path).mtime.toISOString(),
+  size: (path) => statSync(path).size,
 };
 
 export interface MemoryFileSystem extends FileSystem {
@@ -155,5 +158,12 @@ export function memoryFileSystem(
         .sort(byCodeUnit);
     },
     modifiedAt: (path) => stamps.get(path) ?? "1970-01-01T00:00:00.000Z",
+    size: (path) => {
+      const bytes = blobs.get(path);
+      if (bytes !== undefined) return bytes.byteLength;
+      const content = store.get(path);
+      if (content === undefined) throw missing(path);
+      return encoder.encode(content).byteLength;
+    },
   };
 }

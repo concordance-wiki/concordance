@@ -247,7 +247,7 @@ Office document conversion: its limits, its cache and its parallelism.
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `timeout_s` | integer | `120` | at least 1 | Seconds allowed per document; a document past it yields W-CONV-FAILED and stays downloadable. |
-| `max_size_mb` | integer | `50` | at least 1 | Size in megabytes above which a document is not converted and yields W-CONV-FAILED. |
+| `max_size_mb` | integer | `50` | at least 1 | Size in megabytes above which a document is not converted and yields W-CONV-FAILED; such a document is not even read or hashed, its size being checked first. |
 | `cache` | string | `".concordance-cache"` | — | Cache folder, relative to this configuration and never published: the clones of the git sources under sources/, the converted documents under convert/ keyed by the SHA-256 of their source. |
 | `parallelism` | integer | — | at least 1 | Concurrent conversions, the number of processor cores by default; changes the build time, never the output. |
 
