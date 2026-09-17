@@ -36,7 +36,6 @@ const { values: options } = parseArgs({
 });
 
 const fuse = "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2";
-const postject = "postject@1.0.0-alpha.6";
 const skippedDirectories = new Set([".bin", ".pnpm", ".modules.yaml"]);
 const skippedSuffixes = [".d.ts", ".d.ts.map", ".js.map"];
 
@@ -136,9 +135,10 @@ try {
   copyFileSync(options.node, binary);
   chmodSync(binary, 0o755);
   if (process.platform === "darwin") run("codesign", ["--remove-signature", binary]);
-  run("npx", [
-    "--yes",
-    postject,
+  // postject is a pinned devDependency: it comes from the lockfile, never from the registry at build time.
+  pnpm([
+    "exec",
+    "postject",
     binary,
     "NODE_SEA_BLOB",
     blob,
