@@ -19,6 +19,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      # Whether the Sonar step runs: a boolean, so that the token itself reaches that step alone.
+      SONAR_AVAILABLE: ${{ secrets.SONAR_TOKEN != '' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -75,7 +78,7 @@ jobs:
         # Reads sonar-project.properties and the coverage report of the step above; skipped when the
         # token is absent (a fork, a local run), and the analysis of the dashboard then waits for main.
         # The token reaches this step alone: never the install, the tests or the scripts of the repository.
-        if: ${{ secrets.SONAR_TOKEN != '' }}
+        if: env.SONAR_AVAILABLE == 'true'
         uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
