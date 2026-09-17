@@ -13,19 +13,41 @@ function declaredConsumers(entity: CheckEntity): string[] | undefined {
     : undefined;
 }
 
+/** What the two checks look up, built once per run: the identifiers, the entities and the `serves` links by API. */
+interface Indexed {
+  known: ReadonlySet<string>;
+  byId: ReadonlyMap<string, CheckEntity>;
+  /** The `serves` links leaving each entity, in model order. */
+  serves: ReadonlyMap<string, readonly CheckLink[]>;
+}
+
+function indexOf(input: CheckInput): Indexed {
+  const serves = new Map<string, CheckLink[]>();
+  for (const link of input.links) {
+    if (link.relation !== SERVES) continue;
+    const leaving = serves.get(link.from);
+    if (leaving === undefined) serves.set(link.from, [link]);
+    else leaving.push(link);
+  }
+  return {
+    known: new Set(input.entities.map((entity) => entity.id)),
+    byId: new Map(input.entities.map((entity) => [entity.id, entity])),
+    serves,
+  };
+}
+
 /**
  * A declared consumer as the identifier it names: written in full, or relative to the source of
  * the API note; a value that names no entity is kept as written and reported as stale.
  */
-function resolveConsumer(value: string, api: CheckEntity, input: CheckInput): string {
+function resolveConsumer(value: string, api: CheckEntity, index: Indexed): string {
   const relative = `${api.source.name}/${value}`;
-  const known = new Set(input.entities.map((entity) => entity.id));
-  return !known.has(value) && known.has(relative) ? relative : value;
+  return !index.known.has(value) && index.known.has(relative) ? relative : value;
 }
 
 /** Whether any `serves` link leaves the entity: a consumer the model knows, declared or cited. */
-function serves(entity: CheckEntity, input: CheckInput): boolean {
-  return input.links.some((link) => link.from === entity.id && link.relation === SERVES);
+function serves(entity: CheckEntity, index: Indexed): boolean {
+  return (index.serves.get(entity.id) ?? []).length > 0;
 }
 
 /**
@@ -43,13 +65,9 @@ function cites(link: CheckLink, consumer: CheckEntity | undefined): boolean {
 }
 
 /** Targets of the `serves` links the consumer's own note wrote, the consumers that cite the API. */
-function citingConsumers(entity: CheckEntity, input: CheckInput): string[] {
-  const byId = new Map(input.entities.map((candidate) => [candidate.id, candidate]));
-  return input.links
-    .filter(
-      (link) =>
-        link.from === entity.id && link.relation === SERVES && cites(link, byId.get(link.to)),
-    )
+function citingConsumers(entity: CheckEntity, index: Indexed): string[] {
+  return (index.serves.get(entity.id) ?? [])
+    .filter((link) => cites(link, index.byId.get(link.to)))
     .map((link) => link.to);
 }
 
@@ -61,9 +79,9 @@ function declares(link: CheckLink, api: CheckEntity): boolean {
 }
 
 /** Targets of the `serves` links the API's own mapped section produced. */
-function sectionConsumers(entity: CheckEntity, input: CheckInput): string[] {
-  return input.links
-    .filter((link) => link.from === entity.id && link.relation === SERVES && declares(link, entity))
+function sectionConsumers(entity: CheckEntity, index: Indexed): string[] {
+  return (index.serves.get(entity.id) ?? [])
+    .filter((link) => declares(link, entity))
     .map((link) => link.to);
 }
 
@@ -89,8 +107,9 @@ function finding(
 }
 
 export function apiWithoutConsumer(input: CheckInput): Finding[] {
+  const index = indexOf(input);
   return apis(input)
-    .filter((api) => !serves(api, input) && (declaredConsumers(api) ?? []).length === 0)
+    .filter((api) => !serves(api, index) && (declaredConsumers(api) ?? []).length === 0)
     .map((api) =>
       finding(
         "W-API-NOCONSUMER",
@@ -104,6 +123,7 @@ export function apiWithoutConsumer(input: CheckInput): Finding[] {
 export function apiConsumerMismatch(input: CheckInput): Finding[] {
   const remediation =
     "Reconcile the two notes: remove the stale consumer or add the missing mention.";
+  const index = indexOf(input);
   return apis(input).flatMap((api) => {
     const written = declaredConsumers(api);
     if (written === undefined) {
@@ -112,11 +132,11 @@ export function apiConsumerMismatch(input: CheckInput): Finding[] {
     // The attribute asks for the reconciliation; the section adds to what the note declares.
     const declared = [
       ...new Set([
-        ...written.map((value) => resolveConsumer(value, api, input)),
-        ...sectionConsumers(api, input),
+        ...written.map((value) => resolveConsumer(value, api, index)),
+        ...sectionConsumers(api, index),
       ]),
     ];
-    const served = citingConsumers(api, input);
+    const served = citingConsumers(api, index);
     const stale = declared
       .filter((consumer) => !served.includes(consumer))
       .map((consumer) =>
