@@ -27,13 +27,13 @@
     "release:version": "changeset version && pnpm install --lockfile-only && node scripts/sync-distribution-versions.mjs"
   },
   "devDependencies": {
-    "@changesets/cli": "3.0.2",
+    "@changesets/cli": "3.0.3",
     "@eslint/js": "10.0.1",
     "@stryker-mutator/core": "10.0.0",
     "@stryker-mutator/vitest-runner": "10.0.0",
     "@types/node": "22.20.2",
     "@vitest/coverage-v8": "4.1.11",
-    "ajv": "8.18.0",
+    "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "eslint": "10.10.0",
     "postject": "1.0.0-alpha.6",
@@ -41,6 +41,6 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.0",
     "vitest": "4.1.11",
-    "yaml": "2.8.3"
+    "yaml": "2.9.1"
   }
 }

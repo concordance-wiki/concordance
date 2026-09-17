@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
-    "ajv": "8.18.0",
-    "yaml": "2.8.3"
+    "ajv": "8.20.0",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@concordance-wiki/ingest": "workspace:*",

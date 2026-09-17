@@ -50,11 +50,11 @@ Every package of this repository is published under the [GNU General Public Lice
 | @bcoe/v8-coverage | 1.0.2 | MIT | development | <https://github.com/bcoe/v8-coverage> |
 | @cacheable/memory | 2.2.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
 | @cacheable/utils | 2.5.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| @changesets/apply-release-plan | 8.1.0 | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/apply-release-plan | 8.1.1 | MIT | development | <https://github.com/changesets/changesets> |
 | @changesets/assemble-release-plan | 7.0.0 | MIT | development | <https://github.com/changesets/changesets> |
 | @changesets/changelog-git | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/cli | 3.0.2 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/config | 4.0.0 | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/cli | 3.0.3 | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/config | 4.0.1 | MIT | development | <https://github.com/changesets/changesets> |
 | @changesets/errors | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
 | @changesets/format | 0.1.2 | MIT | development | <https://github.com/changesets/format> |
 | @changesets/get-dependents-graph | 3.0.0 | MIT | development | <https://github.com/changesets/changesets> |
@@ -159,7 +159,6 @@ Every package of this repository is published under the [GNU General Public Lice
 | acorn | 8.18.0 | MIT | development | <https://github.com/acornjs/acorn> |
 | acorn-jsx | 5.3.2 | MIT | development | <https://github.com/acornjs/acorn-jsx> |
 | ajv | 6.15.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
-| ajv | 8.18.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
 | ajv | 8.20.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
 | ajv-formats | 3.0.1 | MIT | development | <https://github.com/ajv-validator/ajv-formats> |
 | angular-html-parser | 10.11.0 | MIT | development | <https://github.com/prettier/angular-html-parser> |
@@ -188,6 +187,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | cli-width | 4.1.0 | ISC | development | <https://github.com/knownasilya/cli-width> |
 | comma-separated-tokens | 2.0.3 | MIT | runtime | <https://github.com/wooorm/comma-separated-tokens> |
 | commander | 14.0.3 | MIT | development | <https://github.com/tj/commander.js> |
+| commander | 9.5.0 | MIT | development | <https://github.com/tj/commander.js> |
 | convert-source-map | 2.0.0 | MIT | development | <https://github.com/thlorenz/convert-source-map> |
 | cross-spawn | 7.0.6 | MIT | development | <https://github.com/moxystudio/node-cross-spawn> |
 | debug | 4.4.3 | MIT | runtime | <https://github.com/debug-js/debug> |
@@ -373,6 +373,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | picocolors | 1.1.1 | ISC | development | <https://github.com/alexeyraspopov/picocolors> |
 | picomatch | 4.0.7 | MIT | runtime | <https://github.com/micromatch/picomatch> |
 | postcss | 8.5.28 | MIT | development | <https://github.com/postcss/postcss> |
+| postject | 1.0.0-alpha.6 | MIT | development | <https://github.com/nodejs/postject> |
 | preact | 10.29.8 | MIT | runtime | <https://github.com/preactjs/preact> |
 | preact-render-to-string | 6.7.0 | MIT | runtime | <https://github.com/preactjs/preact-render-to-string> |
 | prelude-ls | 1.2.1 | MIT | development | <https://github.com/gkz/prelude-ls> |
@@ -452,7 +453,6 @@ Every package of this repository is published under the [GNU General Public Lice
 | word-wrap | 1.2.5 | MIT | development | <https://github.com/jonschlinkert/word-wrap> |
 | ws | 8.21.3 | MIT | development | <https://github.com/websockets/ws> |
 | xml-naming | 0.3.0 | MIT | runtime | <https://github.com/NaturalIntelligence/xml-naming> |
-| yaml | 2.8.3 | ISC | runtime | <https://github.com/eemeli/yaml> |
 | yaml | 2.9.1 | ISC | runtime | <https://github.com/eemeli/yaml> |
 | yocto-queue | 0.1.0 | MIT | development | <https://github.com/sindresorhus/yocto-queue> |
 | yoctocolors | 2.2.0 | MIT | development | <https://github.com/sindresorhus/yoctocolors> |
