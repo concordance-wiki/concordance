@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/plugin-contract-wsdl",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Source of endpoint entities from WSDL 1.1 and 2.0 contracts declared by API notes, cached by fingerprint.",
   "license": "GPL-3.0-or-later",
   "repository": {

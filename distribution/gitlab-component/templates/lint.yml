@@ -2,7 +2,7 @@ spec:
   inputs:
     version:
       description: Version of @concordance-wiki/cli to run. The default is the version this component was released with; every form of the linter pins the same one.
-      default: "0.4.0"
+      default: "0.4.1"
     fail_on:
       description: Severity from which a finding fails the job.
       default: error

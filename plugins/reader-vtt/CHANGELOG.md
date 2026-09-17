@@ -1,5 +1,12 @@
 # @concordance-wiki/plugin-reader-vtt
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [2772a81]
+  - @concordance-wiki/core@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes
