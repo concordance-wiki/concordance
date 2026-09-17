@@ -2,6 +2,11 @@ import { identifierFor } from "@concordance-wiki/core";
 
 import type { LinkableEntity } from "../explicit/types.js";
 
+// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
+function byCodeUnit(a: string, b: string): number {
+  return Number(a > b) - Number(a < b);
+}
+
 /** Lookups built once over every entity: a reference is tried by identifier, by path, then by title. */
 export interface EntityIndex {
   byId: ReadonlyMap<string, LinkableEntity>;
@@ -63,7 +68,8 @@ function byTitle(value: string, context: ResolveContext): ReferenceResolution {
   if (single === undefined) return { kind: "unresolved" };
   return candidates.length === 1
     ? { kind: "resolved", entity: single, by: "title" }
-    : { kind: "ambiguous", candidates };
+    : // In identifier order, whatever the order the entities came in: the message names them.
+      { kind: "ambiguous", candidates: [...candidates].sort((a, b) => byCodeUnit(a.id, b.id)) };
 }
 
 /**

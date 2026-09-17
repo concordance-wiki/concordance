@@ -27,9 +27,13 @@ describe("slugify", () => {
     expect(slugify(" .hidden ")).toBe("hidden");
   });
 
-  it("yields an empty slug when nothing remains", () => {
-    expect(slugify("")).toBe("");
-    expect(slugify("---")).toBe("");
+  it("names a segment with no letter or digit left after a stable hash, never empty, so that the identifier stays valid", () => {
+    expect(slugify("日本語")).toMatch(/^u[0-9a-f]{8}$/);
+    expect(slugify("日本語")).toBe(slugify("日本語"));
+    expect(slugify("日本語")).not.toBe(slugify("---"));
+    expect(slugify("---")).toMatch(/^u[0-9a-f]{8}$/);
+    expect(slugify("")).toMatch(/^u[0-9a-f]{8}$/);
+    expect(slugify("日本語")).not.toBe(slugify("中文"));
   });
 
   it("is idempotent and never yields a character outside [a-z0-9-]", () => {
