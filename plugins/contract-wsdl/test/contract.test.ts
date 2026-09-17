@@ -254,6 +254,20 @@ describe("readWsdl", () => {
     });
   });
 
+  it("refuses a document with a DOCTYPE before expanding anything, the entity bomb the parser would otherwise throw on", () => {
+    const entities = Array.from({ length: 1001 }, (_, i) => `<!ENTITY e${String(i)} "x">`).join("");
+    const bomb = `<!DOCTYPE definitions [${entities}]><definitions xmlns="http://schemas.xmlsoap.org/wsdl/"/>`;
+    expect(readWsdl(bomb, "bomb.wsdl")).toEqual({
+      error: "bomb.wsdl is not well-formed XML: DOCTYPE declarations are not read",
+    });
+    expect(
+      readWsdl(
+        '<!doctype definitions><definitions xmlns="http://schemas.xmlsoap.org/wsdl/"/>',
+        "d.wsdl",
+      ),
+    ).toEqual({ error: "d.wsdl is not well-formed XML: DOCTYPE declarations are not read" });
+  });
+
   it("refuses a well-formed XML document that is not a WSDL", () => {
     expect(readWsdl('<?xml version="1.0"?>\n<xs:schema xmlns:xs="x"/>', "types.xsd")).toEqual({
       error:

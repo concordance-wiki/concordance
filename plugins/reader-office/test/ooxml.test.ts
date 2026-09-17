@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readOoxml } from "../src/ooxml.js";
+import { PART_SIZE_LIMIT, readOoxml } from "../src/ooxml.js";
 import { coreXml, docx, docxAppXml, pptx, shape, slideXml, xlsx, zip } from "./fixtures.js";
 
 describe("readOoxml", () => {
@@ -17,6 +17,31 @@ describe("readOoxml", () => {
       words: 3456,
       application: "Example Writer",
     });
+  });
+
+  it("inflates the property and slide parts alone, none above the size limit, so that media and an entry that inflates to gigabytes stay compressed", () => {
+    const heavy = zip({
+      "docProps/core.xml": coreXml,
+      "docProps/app.xml": docxAppXml,
+      "word/media/image1.png": "\u0000".repeat(50_000),
+      "word/document.xml": "<w:document/>",
+    });
+    expect(readOoxml(heavy, "docx")).toMatchObject({ title: "Quarterly review & outlook" });
+    const bloated = zip({
+      "docProps/core.xml":
+        "<cp:coreProperties>" + " ".repeat(PART_SIZE_LIMIT) + "</cp:coreProperties>",
+      "docProps/app.xml": docxAppXml,
+    });
+    expect(readOoxml(bloated, "docx").title).toBeUndefined();
+    expect(readOoxml(bloated, "docx").pages).toBeDefined();
+  });
+
+  it("refuses a part that declares a DOCTYPE, so that no entity is ever expanded", () => {
+    const bomb = zip({
+      "docProps/core.xml":
+        '<!DOCTYPE cp [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">]><cp:coreProperties><dc:title>&b;</dc:title></cp:coreProperties>',
+    });
+    expect(() => readOoxml(bomb, "docx")).toThrow("DOCTYPE declarations are not read");
   });
 
   it("reads the slide count and the slide titles of a pptx", () => {

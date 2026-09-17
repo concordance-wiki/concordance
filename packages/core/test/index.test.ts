@@ -83,6 +83,7 @@ describe("@concordance-wiki/core", () => {
       "readLintOverrides",
       "readSchema",
       "refusedContractUrl",
+      "refusedXml",
       "relationshipType",
       "repositoryFiles",
       "requireExecutable",

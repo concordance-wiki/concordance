@@ -74,7 +74,7 @@ Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL 
 
 ### Contribution
 
-One `source` of kind `wsdl`, with no system dependency. For every `api` entity whose `contract` attribute names a WSDL document, as a URL or as a path relative to the note, the source produces:
+One `source` of kind `wsdl`, with no system dependency. A document that declares a DOCTYPE is refused before anything is expanded: a contract declares no entity of its own, and an entity bomb would otherwise stop the build. For every `api` entity whose `contract` attribute names a WSDL document, as a URL or as a path relative to the note, the source produces:
 
 - one `endpoint` entity per operation of every port type (WSDL 1.1) or interface (WSDL 2.0), identified as `<api id>/<operation name>` slugified, titled `operation (port)`, with `type_origin: contract` and the attributes `operation_id`, `port`, `binding`, `soap_action`, `summary` and `style: soap`; the operation name is an alias, so that a note that names it is recognised;
 - one `exposes` link from the API to each endpoint, at the `contract_import` confidence of the profile (0.95), with a provenance that carries the contract location and the operation name;
