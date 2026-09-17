@@ -352,6 +352,28 @@ describe("validateConfig beyond the schema", () => {
     ]);
   });
 
+  it("rejects a malformed glob under privacy.exclude and under a rule's match.path, which would silently match nothing", () => {
+    const result = validateConfig({
+      ...minimal,
+      privacy: { exclude: ["drafts/**", "{a"] },
+      sources: [
+        {
+          name: "notes",
+          path: "./notes",
+          rules: [
+            { match: { path: "ok/**" }, set: { type: "rule" } },
+            { match: { path: "[bad" }, set: { type: "rule" } },
+          ],
+        },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues.map((issue) => `${issue.path}=${String(issue.received)}`)).toEqual([
+      "privacy.exclude[1]={a",
+      "sources[0].rules[1].match.path=[bad",
+    ]);
+  });
+
   it("accepts a domain folder as true or as a single path segment, and rejects anything else", () => {
     expect(
       validateConfig({

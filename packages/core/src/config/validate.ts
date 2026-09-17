@@ -208,22 +208,49 @@ export function isWellFormedGlob(pattern: string): boolean {
   return braces === 0 && brackets === 0;
 }
 
+/** One issue per malformed glob of a list, at `<prefix>[<index>]`: a malformed glob matches nothing and says nothing. */
+function malformedPatterns(patterns: readonly string[], prefix: string): ConfigIssue[] {
+  return patterns.flatMap((pattern, index) =>
+    isWellFormedGlob(pattern)
+      ? []
+      : [
+          {
+            severity: "error" as const,
+            path: `${prefix}[${String(index)}]`,
+            message: "glob pattern is malformed",
+            received: pattern,
+            expected: "balanced braces and brackets",
+          },
+        ],
+  );
+}
+
 function malformedGlobs(domains: DomainConfig[], prefix: string): ConfigIssue[] {
   const issues: ConfigIssue[] = [];
   domains.forEach((domain, index) => {
     const path = `${prefix}[${String(index)}]`;
-    (domain.match ?? []).forEach((pattern, patternIndex) => {
-      if (!isWellFormedGlob(pattern)) {
+    issues.push(...malformedPatterns(domain.match ?? [], `${path}.match`));
+    issues.push(...malformedGlobs(domain.subdomains ?? [], `${path}.subdomains`));
+  });
+  return issues;
+}
+
+/** The globs of `privacy.exclude` and of every `rules[].match.path`, checked like those of the domains. */
+function malformedExcludesAndRules(config: Config): ConfigIssue[] {
+  const issues = malformedPatterns(config.privacy?.exclude ?? [], "privacy.exclude");
+  config.sources.forEach((source, sourceIndex) => {
+    (source.rules ?? []).forEach((rule, ruleIndex) => {
+      const path = rule.match.path;
+      if (path !== undefined && !isWellFormedGlob(path)) {
         issues.push({
           severity: "error",
-          path: `${path}.match[${String(patternIndex)}]`,
+          path: `sources[${String(sourceIndex)}].rules[${String(ruleIndex)}].match.path`,
           message: "glob pattern is malformed",
-          received: pattern,
+          received: path,
           expected: "balanced braces and brackets",
         });
       }
     });
-    issues.push(...malformedGlobs(domain.subdomains ?? [], `${path}.subdomains`));
   });
   return issues;
 }
@@ -293,6 +320,7 @@ export function validateConfig(document: unknown): ConfigValidation {
     ...duplicateSources(config),
     ...reservedSources(config),
     ...malformedGlobs(config.domains ?? [], "domains"),
+    ...malformedExcludesAndRules(config),
     ...missingDictionary(config),
   ];
   if (errors.length > 0) {
