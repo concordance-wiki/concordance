@@ -49,25 +49,48 @@ export function renderSlot<S extends SlotName>(
   );
 }
 
-function document(body: JSX.Element, options: RenderOptions, head: HeadAssets): string {
-  const { Shell, Header, Footer } = options.theme.components;
-  const page: JSX.Element = (
-    <Shell
-      locale={options.locale}
-      direction={textDirection(options.locale)}
-      title={options.title}
-      head={head}
-      {...(options.scheme === undefined ? {} : { scheme: options.scheme })}
-    >
+/**
+ * Where the shell writes its children: a text no shell writes on its own, replaced by the body
+ * rendered once. The body is rendered before the shell, so that the islands it uses are known
+ * when the head is written, and the shell alone is rendered around it: a page costs one render
+ * of its content, not two.
+ */
+const BODY_MARK = "\u0000concordance:body\u0000";
+
+/** The header, the notice, the main landmark holding the body and the footer, rendered once. */
+function content(body: JSX.Element, options: RenderOptions): string {
+  const { Header, Footer } = options.theme.components;
+  return renderToString(
+    <ThemeContext.Provider value={options.theme}>
       <Header {...options.header} />
       {options.notice}
       <main id="main">{body}</main>
       <Footer {...options.footer} />
-    </Shell>
+    </ThemeContext.Provider>,
   );
-  return renderToString(
-    <ThemeContext.Provider value={options.theme}>{page}</ThemeContext.Provider>,
+}
+
+/** The shell around the mark, split where the content goes. */
+function frame(options: RenderOptions, head: HeadAssets): [string, string] {
+  const { Shell } = options.theme.components;
+  const shell = renderToString(
+    <ThemeContext.Provider value={options.theme}>
+      <Shell
+        locale={options.locale}
+        direction={textDirection(options.locale)}
+        title={options.title}
+        head={head}
+        {...(options.scheme === undefined ? {} : { scheme: options.scheme })}
+      >
+        {BODY_MARK}
+      </Shell>
+    </ThemeContext.Provider>,
   );
+  const [before, after, ...rest] = shell.split(BODY_MARK);
+  if (before === undefined || after === undefined || rest.length > 0) {
+    throw new Error("renderDocument: the shell must write its children exactly once");
+  }
+  return [before, after];
 }
 
 function bundlesFor(names: string[], options: RenderOptions): IslandBundle[] {
@@ -87,36 +110,31 @@ function hrefsOf(bundles: IslandBundle[], options: RenderOptions): string[] {
 
 /** A complete HTML document around any body: the shell, the header, the main landmark holding the body, the footer. */
 export function renderDocument(body: JSX.Element, options: RenderOptions): string {
-  const head: HeadAssets = {
-    inlineScripts: [...(options.scheme === undefined ? [MODE_SCRIPT] : []), PANELS_SCRIPT],
-    stylesheets: options.stylesheets,
-    modulePreloads: [],
-    scripts: [],
-    ...(options.favicon === undefined ? {} : { favicon: options.favicon }),
-    ...(options.redirect === undefined ? {} : { redirect: options.redirect }),
-    ...(options.base === undefined ? {} : { base: options.base }),
-  };
-  const first = document(body, options, head);
-  const islands = islandsUsed(first);
-  const bundles = bundlesFor(islands, options);
+  const inner = content(body, options);
+  const bundles = bundlesFor(islandsUsed(inner), options);
   const modules = hrefsOf(
     bundles.filter((bundle) => bundle.module === true),
     options,
   );
-  // Components are pure: rendering again with the scripts known gives the same body.
-  const html =
-    islands.length === 0
-      ? first
-      : document(body, options, {
-          ...head,
-          modulePreloads: modules,
-          scripts: modules,
+  const head: HeadAssets = {
+    inlineScripts: [...(options.scheme === undefined ? [MODE_SCRIPT] : []), PANELS_SCRIPT],
+    stylesheets: options.stylesheets,
+    modulePreloads: modules,
+    scripts: modules,
+    ...(bundles.length === 0
+      ? {}
+      : {
           classicScripts: hrefsOf(
             bundles.filter((bundle) => bundle.module !== true),
             options,
           ),
-        });
-  return `<!doctype html>\n${html}\n`;
+        }),
+    ...(options.favicon === undefined ? {} : { favicon: options.favicon }),
+    ...(options.redirect === undefined ? {} : { redirect: options.redirect }),
+    ...(options.base === undefined ? {} : { base: options.base }),
+  };
+  const [before, after] = frame(options, head);
+  return `<!doctype html>\n${before}${inner}${after}\n`;
 }
 
 /** The complete HTML document of a page; a page without an island carries no script. */
