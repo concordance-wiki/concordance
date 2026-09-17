@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import {
@@ -107,7 +107,7 @@ async function contributedModules(
     return undefined;
   }
   const { registry, findings } = await loadPlugins(validation.config.plugins ?? [], {
-    load: (name) => deps.load(specifier(name, io.cwd)),
+    load: (name) => deps.load(specifier(name, dirname(file))),
     commandAvailable: deps.commandAvailable,
     builtin: [defaultThemeManifest()],
   });

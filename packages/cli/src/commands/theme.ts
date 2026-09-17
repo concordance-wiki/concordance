@@ -69,9 +69,10 @@ export const nodeThemeDependencies: ThemeDependencies = {
 };
 
 /** A plugin named on the command line is a package name, or a path to its module when it starts with `.` or `/`. */
-export function specifier(theme: string, cwd: string): string {
+/** A package name as written; a path (`./plugins/theme/index.js`, `/opt/theme`) as a file URL resolved against `base`, the folder of the configuration. */
+export function specifier(theme: string, base: string): string {
   return theme.startsWith(".") || theme.startsWith("/")
-    ? pathToFileURL(resolve(cwd, theme)).href
+    ? pathToFileURL(resolve(base, theme)).href
     : theme;
 }
 
@@ -101,14 +102,15 @@ export function projectTheme(
   return { exit: loaded.missing === true ? exitCodes.failure : exitCodes.invalid };
 }
 
-/** The plugins declared, loaded with the default theme registered first; loading findings go to stderr. */
+/** The plugins declared, loaded with the default theme registered first, a path resolved against `base`; loading findings go to stderr. */
 export async function pluginsOf(
   declarations: PluginConfig[],
   io: CommandIo,
   deps: PluginLoaderDependencies,
+  base: string,
 ): Promise<PluginRegistry> {
   const { registry, findings } = await loadPlugins(declarations, {
-    load: (name) => deps.load(specifier(name, io.cwd)),
+    load: (name) => deps.load(specifier(name, base)),
     commandAvailable: deps.commandAvailable,
     builtin: [defaultThemeManifest()],
   });

@@ -1,3 +1,4 @@
+import { pathToFileURL } from "node:url";
 import { definePlugin, parseModel, type PluginManifest } from "@concordance-wiki/core";
 import { defaultComponents } from "@concordance-wiki/site";
 import { h, type JSX } from "preact";
@@ -651,6 +652,23 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(io.stderr).toEqual([
       "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency a tool is missing, command a-tool is not available",
     ]);
+  });
+
+  it("resolves a plugin declared by a path against the folder of the configuration, never against the working directory", async () => {
+    const asked: string[] = [];
+    const io = recordedIo({
+      "/elsewhere/c.yaml": `${validConfig}plugins: ["./plugins/theme/index.js"]\n`,
+    });
+    const deps: ThemeDependencies = {
+      load: (name) => {
+        asked.push(name);
+        return Promise.resolve(themePlugin());
+      },
+      commandAvailable: () => Promise.resolve(true),
+      loadTheme: () => Promise.resolve(undefined),
+    };
+    await renderCommand(["--config", "/elsewhere/c.yaml"], io, deps);
+    expect(asked).toEqual([pathToFileURL("/elsewhere/plugins/theme/index.js").href]);
   });
 
   it("reports an accessibility finding of a page as a warning on stderr and in the summary, without failing", async () => {

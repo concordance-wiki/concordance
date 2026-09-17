@@ -80,7 +80,7 @@
       "type": "string"
     },
     "plugins": {
-      "description": "Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them.",
+      "description": "Plugins to load, in order: a package name, a path to a module relative to this configuration file (./plugins/theme/index.js), or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them.",
       "type": "array",
       "items": {
         "oneOf": [

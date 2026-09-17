@@ -20,7 +20,7 @@ Path to the project profile, merged over the default profile key by key. See [wr
 
 ## `plugins`
 
-List of plugins to load, in order. Each entry is a package name or an object `{ name, options }`. The `@concordance-wiki/concordance` preset loads every official plugin by default; list them explicitly to restrict or reorder.
+List of plugins to load, in order. Each entry is a package name, a path to a module relative to this configuration file (`./plugins/theme/index.js`), or an object `{ name, options }`. The `@concordance-wiki/concordance` preset loads every official plugin by default; list them explicitly to restrict or reorder.
 
 ```yaml
 plugins:

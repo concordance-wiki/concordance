@@ -13,7 +13,7 @@ A key marked (required) must be present; every other key is optional and takes t
 | `version` (required) | constant | — | `1` | Version of this schema; always 1. |
 | `project` (required) | object | — | — | The project: its name, its interface language, its theme file, its edit link, the pages the organisation declares and the file that extends the about page. See [`project`](#project). |
 | `profile` | string | — | — | Path of the project profile, relative to this configuration, merged key by key over the default profile. |
-| `plugins` | (string \| object)[] | — | each: non-empty | Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them. See [`plugins[]`](#plugins). |
+| `plugins` | (string \| object)[] | — | each: non-empty | Plugins to load, in order: a package name, a path to a module relative to this configuration file (./plugins/theme/index.js), or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them. See [`plugins[]`](#plugins). |
 | `applications` | object[] | — | — | First-level containers every entity is resolved to, through its source, a typing rule or its frontmatter. An identifier not declared here yields W-APP-UNKNOWN; an entity without one yields W-APP-MISSING. See [`applications[]`](#applications). |
 | `domains` | object[] | — | — | Global business domains, orthogonal to the sources, resolved by the folders and the globs on the path of every file relative to its source root. A frontmatter domain overrides them; a note no domain claims goes to unclassified. See [`domains[]`](#domains). |
 | `privacy` | object | — | — | What is never read, whether transcripts are pseudonymised and whether they are published. See [`privacy`](#privacy). |
@@ -53,7 +53,7 @@ What only the organisation that publishes the site can declare: its legal notice
 
 ## `plugins[]`
 
-Plugins to load, in order: a package name, or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them.
+Plugins to load, in order: a package name, a path to a module relative to this configuration file (./plugins/theme/index.js), or an object with the name and its options. The concordance preset loads every official plugin; list them here to restrict or reorder them.
 
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
