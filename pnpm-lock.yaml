@@ -46,10 +46,10 @@ importers:
         version: 8.70.0(eslint@10.10.0)(typescript@5.9.3)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
 
   fixtures/plugins/example:
     dependencies:
@@ -141,10 +141,10 @@ importers:
         version: 10.29.8(preact-render-to-string@6.7.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
 
   packages/core:
     dependencies:
@@ -155,15 +155,15 @@ importers:
         specifier: 4.0.7
         version: 4.0.7
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/picomatch':
         specifier: 4.0.3
         version: 4.0.3
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/i18n:
     dependencies:
@@ -207,10 +207,10 @@ importers:
         version: link:../typing
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
 
   packages/ingest:
     dependencies:
@@ -233,15 +233,15 @@ importers:
         specifier: 5.1.0
         version: 5.1.0
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/mdast':
         specifier: 4.0.4
         version: 4.0.4
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/lint:
     dependencies:
@@ -264,12 +264,12 @@ importers:
         specifier: workspace:*
         version: link:../typing
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/nlp:
     dependencies:
@@ -280,15 +280,15 @@ importers:
         specifier: 8.18.0
         version: 8.18.0
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       '@concordance-wiki/ingest':
         specifier: workspace:*
         version: link:../ingest
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/profile:
     dependencies:
@@ -299,12 +299,12 @@ importers:
         specifier: 8.18.0
         version: 8.18.0
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/site:
     dependencies:
@@ -371,10 +371,10 @@ importers:
         version: 20.14.5
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
 
   packages/typing:
     dependencies:
@@ -390,10 +390,10 @@ importers:
     devDependencies:
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
 
   packages/ui:
     devDependencies:
@@ -407,12 +407,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
       yaml:
-        specifier: 2.8.3
-        version: 2.8.3
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+        version: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   plugins/contract-wsdl:
     dependencies:
@@ -2769,11 +2769,6 @@ packages:
     resolution: {integrity: sha512-ghig2TBE/H11aOVgmahA3MhimvkBr6JIYknH/Dhdk10nXwdbIqBJsbfMxpvFPG8bAw77gN29aQWvKpmVoPlvPQ==}
     engines: {node: '>=16.0.0'}
 
-  yaml@2.8.3:
-    resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
-    engines: {node: '>= 14.6'}
-    hasBin: true
-
   yaml@2.9.1:
     resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
     engines: {node: '>= 14.6'}
@@ -3625,7 +3620,7 @@ snapshots:
       '@stryker-mutator/util': 10.0.0
       semver: 7.8.5
       tslib: 2.8.1
-      vitest: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+      vitest: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   '@types/chai@5.2.3':
     dependencies:
@@ -3777,7 +3772,7 @@ snapshots:
       obug: 2.2.1
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
+      vitest: 4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))
 
   '@vitest/expect@4.1.11':
     dependencies:
@@ -3787,14 +3782,6 @@ snapshots:
       '@vitest/utils': 4.1.11
       chai: 6.2.2
       tinyrainbow: 3.1.1
-
-  '@vitest/mocker@4.1.11(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))':
-    dependencies:
-      '@vitest/spy': 4.1.11
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3)
 
   '@vitest/mocker@4.1.11(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1))':
     dependencies:
@@ -5137,19 +5124,6 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3):
-    dependencies:
-      lightningcss: 1.33.0
-      picomatch: 4.0.7
-      postcss: 8.5.28
-      rolldown: 1.2.8
-      tinyglobby: 0.2.17
-    optionalDependencies:
-      '@types/node': 22.20.2
-      esbuild: 0.28.2
-      fsevents: 2.3.3
-      yaml: 2.8.3
-
   vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
@@ -5162,35 +5136,6 @@ snapshots:
       esbuild: 0.28.2
       fsevents: 2.3.3
       yaml: 2.9.1
-
-  vitest@4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3)):
-    dependencies:
-      '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3))
-      '@vitest/pretty-format': 4.1.11
-      '@vitest/runner': 4.1.11
-      '@vitest/snapshot': 4.1.11
-      '@vitest/spy': 4.1.11
-      '@vitest/utils': 4.1.11
-      es-module-lexer: 2.3.2
-      expect-type: 1.4.0
-      magic-string: 0.30.21
-      obug: 2.2.1
-      pathe: 2.0.3
-      picomatch: 4.0.7
-      std-env: 4.2.0
-      tinybench: 2.9.0
-      tinyexec: 1.3.1
-      tinyglobby: 0.2.17
-      tinyrainbow: 3.1.1
-      vite: 8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.8.3)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/node': 22.20.2
-      '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
-      happy-dom: 20.14.5
-    transitivePeerDependencies:
-      - msw
 
   vitest@4.1.11(@types/node@22.20.2)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@22.20.2)(esbuild@0.28.2)(yaml@2.9.1)):
     dependencies:
@@ -5239,8 +5184,6 @@ snapshots:
   ws@8.21.3: {}
 
   xml-naming@0.3.0: {}
-
-  yaml@2.8.3: {}
 
   yaml@2.9.1: {}
 
