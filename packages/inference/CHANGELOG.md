@@ -1,5 +1,39 @@
 # @concordance-wiki/inference
 
+## 0.4.0
+
+### Patch Changes
+
+- 2f298b0: The union-find of the duplicate resolution finds the root of a component by a loop with path compression, so that thousands of resources merged in a chain cost no stack; the PDF reader takes the last Info object when an update rewrote it under the same number; the OpenAPI reader follows a path item given as a local `$ref` and lists under `unresolvedPaths` those it cannot follow, instead of dropping the path in silence.
+- 594a75f: Two mentions of one term in one paragraph are two provenances of the link, both kept and both counted, instead of one: the combination of links tells provenances apart by their position in the paragraph, not by their line alone, so that every passage reaches the mentions panel and the confidence grows with the mentions as documented.
+- 7953b7d: A path segment with no letter or digit left (a name in another script, an emoji) is named after a stable hash instead of an empty slug that made the identifier invalid; the candidates of an ambiguous frontmatter reference are named in identifier order whatever the order of the entities; two cues of a transcript starting at the same instant get distinct anchors (`t-12000`, `t-12000-2`), so that every cue stays addressable.
+- 4833f68: `yaml` is pinned to 2.8.3 and `ajv` to 8.18.0, the versions that close the two moderate advisories `pnpm audit` reported (a stack overflow on a nested sequence of a few kilobytes, which the frontmatter of any note could carry; a ReDoS on `$data` references, unused here).
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [a5ca382]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+  - @concordance-wiki/ingest@0.4.0
+  - @concordance-wiki/profile@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

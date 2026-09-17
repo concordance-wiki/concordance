@@ -1,5 +1,42 @@
 # @concordance-wiki/site
 
+## 0.4.0
+
+### Patch Changes
+
+- 524f45d: The alphabetical index, the category lists and the dated spaces are ordered by a collation computed from the options of the language pack (`collation` in the core package: accents and case set aside, digits compared by value), never from the collation data of the runtime: two builds on two versions of Node.js order the same titles the same way. A language pack exposes the `collation` options it compares with in place of an `Intl.Collator`.
+- 4a5bb95: The mentions of an entity's own page are computed once per build and shared by its panel, its fragment and the count of its citing pages, instead of three times; a pivot entity cited by thousands of passages no longer pays that work three times over.
+- a470bd4: A schema error under a key carrying a slash, as every identifier of a model does, is described with its path and its value instead of failing; a `$` in an alias, a search query, a pinned title or a mention count is written as it is in the labels of the site; the edit links to the forge encode every segment of the path, so that `#`, `?`, `%` and spaces reach it.
+- 6c7d540: `concordance query --search <words>` runs the search of the site from the command line, with the same ranking and facets as the results page, from the index the site wrote, else from the model and its fragments, else from the model alone; `--keywords-only` and `--no-keywords` filter the keyword pages. The search index takes the English labels when nobody gives it any.
+- 0d9a39b: A page is rendered once, the shell around its content, instead of twice to learn which islands it uses; the accessibility checker walks the tree of a page once per rule instead of once per element. The site is the same byte for byte and builds in a third less time on the golden corpus.
+- 7359a7b: The validation refuses a source named after a folder the site reserves (`about`, `assets`, `fragments`, `index`, `keywords`, `search`, `spaces`, `todo`; `RESERVED_SOURCE_NAMES` in the core package), and the assembly of the site fails on two documents at one path instead of writing one over the other; LibreOffice is an optional dependency of its plugin, so that a PDF source is still read without it and an office document gets a finding naming the missing command instead of a silent loss.
+- 64ca6e5: An SVG logo is inlined on every page, so a file carrying a script, an event handler, an embedded document or a reference to another site is refused when the theme loads, with an issue naming what it carries.
+- 4833f68: `yaml` is pinned to 2.8.3 and `ajv` to 8.18.0, the versions that close the two moderate advisories `pnpm audit` reported (a stack overflow on a nested sequence of a few kilobytes, which the frontmatter of any note could carry; a ReDoS on `$data` references, unused here).
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+  - @concordance-wiki/profile@0.4.0
+  - @concordance-wiki/i18n@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

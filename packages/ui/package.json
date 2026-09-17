@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/ui",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Client components: mentions panel, mini-map, viewer slots, trail.",
   "license": "GPL-3.0-or-later",
   "repository": {

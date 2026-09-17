@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/plugin-reader-office",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Metadata reader for docx, pptx, xlsx and pdf files: properties, dates, counts and slide titles.",
   "license": "GPL-3.0-or-later",
   "repository": {
