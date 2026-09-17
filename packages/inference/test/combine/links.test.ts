@@ -50,6 +50,9 @@ function glossary(line: number, extra: Partial<Provenance> = {}): Provenance {
   return { method: "glossary_occurrence", confidence: 0.6, path: "specs/entry.md", line, ...extra };
 }
 
+const positionOfTest = (provenance: Provenance): number | undefined =>
+  provenance.occurrences?.[0]?.position;
+
 describe("the combination of links", () => {
   it("retains 1 − Π(1 − cᵢ), capped at 1, when several methods yield the same triple", () => {
     const [two] = combineLinks([link("uses", [frontmatter]), link("uses", [glossary(3)])], options);
@@ -173,6 +176,25 @@ describe("the combination of links", () => {
     expect(combined?.confidence).toBe(0.973);
     const [reversed] = combineLinks([link("uses", [section, bare, other])], options);
     expect(reversed?.provenance).toEqual([bare, section, other]);
+  });
+
+  it("keeps two mentions of one term in one paragraph as two provenances that both count", () => {
+    const at = (position: number): Provenance =>
+      glossary(7, { occurrences: [{ line: 7, position, context: "…" }] });
+    const [combined] = combineLinks([link("related", [at(3)]), link("related", [at(40)])], options);
+    expect(combined?.provenance.map(positionOfTest)).toEqual([3, 40]);
+    const [once] = combineLinks([link("related", [at(3)])], options);
+    expect(combined?.confidence).toBeGreaterThan(once?.confidence ?? 1);
+    const [same] = combineLinks([link("related", [at(3)]), link("related", [at(3)])], options);
+    expect(same?.provenance).toHaveLength(1);
+    const [reversed] = combineLinks([link("related", [at(40)]), link("related", [at(3)])], options);
+    expect(reversed?.provenance.map(positionOfTest)).toEqual([3, 40]);
+    const unplaced = glossary(7, { occurrences: [] });
+    const [empty] = combineLinks(
+      [link("related", [unplaced]), link("related", [glossary(7)])],
+      options,
+    );
+    expect(empty?.provenance).toHaveLength(1);
   });
 
   it("preserves the count of provenances minus the exact duplicates", () => {
