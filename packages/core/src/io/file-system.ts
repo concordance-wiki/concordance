@@ -1,8 +1,10 @@
+import { randomBytes } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -45,17 +47,34 @@ function walk(root: string, directory: string, out: string[]): void {
   }
 }
 
+/**
+ * Writes next to the destination, then renames: a build interrupted while writing leaves the
+ * previous file whole or nothing, never a truncated file a later build would read back.
+ */
+function atomically(path: string, write: (temporary: string) => void): void {
+  mkdirSync(dirname(path), { recursive: true });
+  const temporary = `${path}.${String(process.pid)}.${randomBytes(4).toString("hex")}.tmp`;
+  try {
+    write(temporary);
+    renameSync(temporary, path);
+  } finally {
+    rmSync(temporary, { force: true });
+  }
+}
+
 export const nodeFileSystem: FileSystem = {
   exists: (path) => existsSync(path),
   readText: (path) => readFileSync(path, "utf8"),
   readBytes: (path) => readFileSync(path),
   writeText: (path, content) => {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, content, "utf8");
+    atomically(path, (temporary) => {
+      writeFileSync(temporary, content, "utf8");
+    });
   },
   writeBytes: (path, bytes) => {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, bytes);
+    atomically(path, (temporary) => {
+      writeFileSync(temporary, bytes);
+    });
   },
   remove: (path) => {
     rmSync(path, { recursive: true, force: true });

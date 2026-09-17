@@ -241,7 +241,10 @@ describe("loadContracts", () => {
     const output = await loadContracts(input([api()]));
     const fingerprint = fingerprintOf(orders);
     const cached = fs.files.get(`/pipeline/.concordance-cache/contracts/${fingerprint}.json`);
-    expect(JSON.parse(cached ?? "")).toMatchObject({ wsdl: "1.1", title: "Orders API" });
+    expect(JSON.parse(cached ?? "")).toMatchObject({
+      version: "2",
+      contract: { wsdl: "1.1", title: "Orders API" },
+    });
     expect(output.contracts).toEqual([
       {
         api: "specs/api/orders",
@@ -258,13 +261,16 @@ describe("loadContracts", () => {
 
   it("reads the extracted contract from the cache on a fingerprint hit", async () => {
     const cached = JSON.stringify({
-      wsdl: "1.1",
-      title: "Cached",
-      version: "",
-      operations: [
-        { name: "cachedOp", interface: "P", port: "Q", binding: "B", types: [], faults: [] },
-      ],
-      types: [],
+      version: "2",
+      contract: {
+        wsdl: "1.1",
+        title: "Cached",
+        version: "",
+        operations: [
+          { name: "cachedOp", interface: "P", port: "Q", binding: "B", types: [], faults: [] },
+        ],
+        types: [],
+      },
     });
     const { input } = harness({
       ...localFile,

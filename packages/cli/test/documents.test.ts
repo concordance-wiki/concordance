@@ -153,6 +153,40 @@ describe("readDocuments", () => {
     ]);
   });
 
+  it("reports a text representation it cannot read, a cache truncated by an interrupted build for instance, and keeps the document without pages", async () => {
+    const fs = memoryFileSystem({ "/work/specs/decks/threshold.pptx": "deck" });
+    const truncated: Converter = {
+      extensions: [".pptx"],
+      produces: ["pdf", "text"],
+      convert: ({ payload }) => {
+        const pdf = `${payload.cacheDirectory}/convert/${payload.sha256}.pdf`;
+        const text = `${payload.cacheDirectory}/convert/${payload.sha256}.text.json`;
+        fs.writeBytes(pdf, encoder.encode("%PDF"));
+        fs.writeText(text, "{");
+        return Promise.resolve({
+          representations: { pdf: { path: pdf }, text: { path: text } },
+          findings: [],
+        });
+      },
+    };
+    const output = await readDocuments({
+      sources: [source("specs", ["decks/threshold.pptx"])],
+      readers: [reader],
+      converters: [truncated],
+      config: baseConfig,
+      cacheDirectory: "/work/.concordance-cache",
+      parallelism: 1,
+      fs,
+    });
+    expect(output.documents.map((document) => document.pages)).toEqual([[]]);
+    expect(output.findings.map((finding) => [finding.check, finding.source, finding.path])).toEqual(
+      [["W-CONV-FAILED", "specs", expect.stringMatching(/\.text\.json$/)]],
+    );
+    expect(output.findings[0]?.message).toMatch(
+      /^the text representation .*\.text\.json is not readable: /,
+    );
+  });
+
   it("takes the text of an office document from the PDF the converter produced, never from its reader", async () => {
     const fs = memoryFileSystem({ "/work/specs/decks/threshold.pptx": "deck" });
     const output = await readDocuments({

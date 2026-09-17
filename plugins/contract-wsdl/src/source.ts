@@ -54,6 +54,8 @@ export const wsdlReader: ContractReader<WsdlContract> = {
   format: (contract) => `${SOURCE_KIND} ${contract.wsdl}`,
   operations: (contract) => contract.operations.map(operationOf),
   schemas: (contract) => contract.types,
+  // Bumped when the shape of WsdlContract changes: a cache of a previous shape is read again.
+  cacheVersion: "2",
 };
 
 /**

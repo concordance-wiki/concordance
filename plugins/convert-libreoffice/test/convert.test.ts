@@ -119,6 +119,31 @@ describe("convertToPdf", () => {
     expect(JSON.parse(fs.readText(textOf(helloSha)))).toEqual({ pages: ["page one", "page two"] });
   });
 
+  it("extracts the text again when the cached text is not what this module writes, a file truncated by an interrupted build for instance", async () => {
+    const { fs, deps, extracted } = harness(undefined, ["page one"]);
+    fs.writeBytes(`${cacheDirectory}/convert/${helloSha}.pdf`, PDF_BYTES);
+    fs.writeText(textOf(helloSha), "{");
+    const output = await convertToPdf({ path: "/repo/a.docx", bytes: hello }, options, deps);
+    expect(extracted).toHaveLength(1);
+    expect(output.representations.text?.path).toBe(textOf(helloSha));
+    expect(JSON.parse(fs.readText(textOf(helloSha)))).toEqual({ pages: ["page one"] });
+    fs.writeText(textOf(helloSha), JSON.stringify({ pages: [1] }));
+    await convertToPdf({ path: "/repo/a.docx", bytes: hello }, options, deps);
+    expect(extracted).toHaveLength(2);
+    fs.writeText(textOf(helloSha), "null");
+    await convertToPdf({ path: "/repo/a.docx", bytes: hello }, options, deps);
+    expect(extracted).toHaveLength(3);
+  });
+
+  it("removes the work folder of a conversion whatever happened in it, a runner that fails outright included", async () => {
+    const { fs, deps } = harness();
+    const failing = { ...deps, runner: { run: () => Promise.reject(new Error("no such binary")) } };
+    await expect(
+      convertToPdf({ path: "/repo/a.docx", bytes: hello }, options, failing),
+    ).rejects.toThrow("no such binary");
+    expect(fs.listFiles(`${cacheDirectory}/convert/work`)).toEqual([]);
+  });
+
   it("keeps a PDF source as its own representation and extracts its text without running LibreOffice, so that every text comes from one path", async () => {
     const { fs, runner, deps, extracted } = harness(undefined, ["Build summary"]);
     const pdf = encoder.encode("%PDF-1.4 source");

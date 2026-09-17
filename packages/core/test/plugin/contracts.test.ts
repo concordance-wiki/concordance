@@ -17,6 +17,7 @@ import {
   DEFAULT_CONTRACT_CONFIDENCE,
   fingerprintOf,
   loadContracts,
+  cacheVersionOf,
   readCachedContract,
   readCachedContractView,
   writeCachedContract,
@@ -200,7 +201,7 @@ describe("the contract cache", () => {
     const path = cachedContractPath("/cache", fingerprintOf("x"));
     expect(readCachedContract(fs, path)).toBeUndefined();
     writeCachedContract(fs, path, contract);
-    expect(fs.files.get(path)).toBe(`${JSON.stringify(contract, null, 2)}\n`);
+    expect(fs.files.get(path)).toBe(`${JSON.stringify({ version: "1", contract }, null, 2)}\n`);
     expect(readCachedContract(fs, path)).toEqual(contract);
   });
 
@@ -465,7 +466,18 @@ describe("loadContracts", () => {
     const { fs, input } = harness(localFile);
     await loadContracts(input([api()]), linesReader);
     expect(fs.files.get(cachePath)).toBe(
-      `${JSON.stringify({ title: "Lines", version: "1", lines: ["createLink|Create a link|Link,Entity", "getLink||Link"] }, null, 2)}\n`,
+      `${JSON.stringify(
+        {
+          version: "1",
+          contract: {
+            title: "Lines",
+            version: "1",
+            lines: ["createLink|Create a link|Link,Entity", "getLink||Link"],
+          },
+        },
+        null,
+        2,
+      )}\n`,
     );
   });
 
@@ -490,7 +502,10 @@ describe("loadContracts", () => {
   });
 
   it("reads the extracted contract from the cache on a fingerprint hit instead of parsing the bytes again", async () => {
-    const cached = JSON.stringify({ title: "Cached", version: "9", lines: ["cachedOp"] });
+    const cached = JSON.stringify({
+      version: "1",
+      contract: { title: "Cached", version: "9", lines: ["cachedOp"] },
+    });
     const { fs, input } = harness({ ...localFile, [cachePath]: cached });
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.entities.map((entity) => entity.title)).toEqual(["cachedOp (lines)"]);
@@ -501,6 +516,39 @@ describe("loadContracts", () => {
     expect(readCachedContractView(fs, viewPath)?.operations.map((o) => o.name)).toEqual([
       "cachedOp",
     ]);
+  });
+
+  it.each([
+    ["is not JSON", "{"],
+    [
+      "is not what the loader writes",
+      JSON.stringify({ title: "Old", version: "9", lines: ["old"] }),
+    ],
+    [
+      "was written for another version of the reader",
+      JSON.stringify({ version: "0", contract: { title: "Old", version: "9", lines: ["old"] } }),
+    ],
+    ["holds no contract", JSON.stringify({ version: "1", contract: { title: 1 } })],
+  ])(
+    "reads the contract again and rewrites the cache when the cached file %s",
+    async (_, stale) => {
+      const { fs, input } = harness({ ...localFile, [cachePath]: stale });
+      const output = await loadContracts(input([api()]), linesReader);
+      expect(output.contracts.map((record) => record.title)).toEqual(["Lines"]);
+      expect(readCachedContract(fs, cachePath)?.title).toBe("Lines");
+    },
+  );
+
+  it("reads a contract cached under the version its reader declares, and again under another", async () => {
+    const versioned = { ...linesReader, cacheVersion: "7" };
+    const { fs, input } = harness(localFile);
+    await loadContracts(input([api()]), versioned);
+    expect(readCachedContract(fs, cachePath, "7")?.title).toBe("Lines");
+    expect(readCachedContract(fs, cachePath)).toBeUndefined();
+    expect(cacheVersionOf(versioned)).toBe("7");
+    expect(cacheVersionOf(linesReader)).toBe("1");
+    fs.writeText(viewPath, "{");
+    expect(readCachedContractView(fs, viewPath)).toBeUndefined();
   });
 
   it("leaves a contract the reader does not accept alone: nothing imported, nothing cached, nothing reported", async () => {
