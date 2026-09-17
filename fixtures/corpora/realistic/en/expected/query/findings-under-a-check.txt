@@ -3,6 +3,6 @@ model model.json (built 1970-01-01T00:00:00.000Z; sources decisions, framing, gl
 
 196 findings under W-TERM-UNDEFINED
   warning W-TERM-UNDEFINED decisions/forge-bridge-exposed.md:9: "API" is used 22 times in 18 files (score 28.4145) without a note defining it
+  warning W-TERM-UNDEFINED decisions/forge-bridge-exposed.md:9: "SOAP" is used 3 times in 3 files (score 11.1162) without a note defining it
   warning W-TERM-UNDEFINED decisions/forge-bridge-exposed.md:9: "bridge" is used 9 times in 6 files (score 12.1462) without a note defining it
-  warning W-TERM-UNDEFINED decisions/forge-bridge-exposed.md:9: "forge" is used 20 times in 11 files (score 39.5142) without a note defining it
   … 193 more
