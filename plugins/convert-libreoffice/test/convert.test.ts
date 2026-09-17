@@ -135,6 +135,30 @@ describe("convertToPdf", () => {
     expect(extracted).toHaveLength(3);
   });
 
+  it("converts two identical documents under two paths at once with one run, the second waiting for the first", async () => {
+    const { fs, runner, deps } = harness();
+    const [first, second] = await Promise.all([
+      convertToPdf({ path: "/repo/a/deck.pptx", bytes: hello }, options, deps),
+      convertToPdf({ path: "/repo/b/deck.pptx", bytes: hello }, options, deps),
+    ]);
+    expect(runner.calls).toHaveLength(1);
+    expect(first.findings).toEqual([]);
+    expect(second.findings).toEqual([]);
+    expect(second.representations.pdf?.path).toBe(first.representations.pdf?.path);
+    expect(fs.exists(`${cacheDirectory}/convert/work/${helloSha}`)).toBe(false);
+  });
+
+  it("runs the conversion of the second identical document itself when the first run failed, so that the failure names its path", async () => {
+    const { runner, deps } = harness({ kind: "nothing" });
+    const [first, second] = await Promise.all([
+      convertToPdf({ path: "/repo/a/deck.pptx", bytes: hello }, options, deps),
+      convertToPdf({ path: "/repo/b/deck.pptx", bytes: hello }, options, deps),
+    ]);
+    expect(runner.calls).toHaveLength(2);
+    expect(first.findings.map((finding) => finding.path)).toEqual(["/repo/a/deck.pptx"]);
+    expect(second.findings.map((finding) => finding.path)).toEqual(["/repo/b/deck.pptx"]);
+  });
+
   it("removes the work folder of a conversion whatever happened in it, a runner that fails outright included", async () => {
     const { fs, deps } = harness();
     const failing = { ...deps, runner: { run: () => Promise.reject(new Error("no such binary")) } };

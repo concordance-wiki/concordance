@@ -81,23 +81,18 @@ async function ingestGit(
 ): Promise<Outcome> {
   const ref = source.ref ?? DEFAULT_REF;
   const root = join(deps.cacheDirectory, "sources", source.name);
+  // Only what git does can make a source unreachable; anything else that throws is a bug, and surfaces.
+  let commit: string;
+  let history: ReadonlyMap<string, FileHistory>;
   try {
     if (deps.fs.exists(root)) {
       await deps.git.update(root, ref);
     } else {
       await deps.git.clone(url, ref, root);
     }
-    const commit = await deps.git.head(root);
-    const history = await deps.git.history(root);
-    const files = keptFiles(deps, root, excluded).map((path): IngestedFile => {
-      const absolutePath = join(root, path);
-      // An untracked file has no history: it belongs to the checked-out commit as far as the build knows.
-      const known = history.get(path) ?? { commit, modifiedAt: deps.fs.modifiedAt(absolutePath) };
-      return { path, absolutePath, commit: known.commit, modifiedAt: known.modifiedAt };
-    });
-    return { source: { name: source.name, locale, root, commit, files: files.toSorted(byPath) } };
+    commit = await deps.git.head(root);
+    history = await deps.git.history(root);
   } catch (error) {
-    if (error instanceof LintConfigError) return { finding: unreadable(source.name, error) };
     return {
       finding: unreachable(
         source.name,
@@ -105,6 +100,20 @@ async function ingestGit(
       ),
     };
   }
+  let kept: string[];
+  try {
+    kept = keptFiles(deps, root, excluded);
+  } catch (error) {
+    if (error instanceof LintConfigError) return { finding: unreadable(source.name, error) };
+    throw error;
+  }
+  const files = kept.map((path): IngestedFile => {
+    const absolutePath = join(root, path);
+    // An untracked file has no history: it belongs to the checked-out commit as far as the build knows.
+    const known = history.get(path) ?? { commit, modifiedAt: deps.fs.modifiedAt(absolutePath) };
+    return { path, absolutePath, commit: known.commit, modifiedAt: known.modifiedAt };
+  });
+  return { source: { name: source.name, locale, root, commit, files: files.toSorted(byPath) } };
 }
 
 /**

@@ -196,6 +196,42 @@ async function pagesOf(
   return pages;
 }
 
+/** The conversions under way, by fingerprint: two identical documents under two paths share one run. */
+const underWay = new Map<string, Promise<{ pdf: Uint8Array } | { failure: ConverterOutput }>>();
+
+/**
+ * Produces the PDF of a fingerprint once at a time: a second document with the same bytes,
+ * converted in parallel, waits for the first run instead of sharing its work folder and its
+ * profile. A run that fails is not shared, so that a failure names the path of each document.
+ */
+async function producedOnce(
+  source: ConvertSource,
+  sha256: string,
+  options: ConvertOptions,
+  deps: ConvertDependencies,
+): Promise<{ pdf: Uint8Array } | { failure: ConverterOutput }> {
+  const shared = underWay.get(sha256);
+  if (shared !== undefined) {
+    const result = await shared;
+    if ("pdf" in result) return result;
+  }
+  const work = join(deps.cacheDirectory, "convert", "work", sha256);
+  const run = (async () => {
+    try {
+      return await produce(source, work, options, deps);
+    } finally {
+      // The work folder never outlives the conversion, whatever happened in it.
+      deps.fs.remove(work);
+    }
+  })();
+  underWay.set(sha256, run);
+  try {
+    return await run;
+  } finally {
+    if (underWay.get(sha256) === run) underWay.delete(sha256);
+  }
+}
+
 /**
  * Converts one office document to PDF through headless LibreOffice and extracts the text of
  * every page of the PDF, both keyed in the cache by the SHA-256 of the source: an unchanged
@@ -231,14 +267,7 @@ export async function convertToPdf(
     pdf = source.bytes;
     deps.fs.writeBytes(cached, pdf);
   } else {
-    const work = join(deps.cacheDirectory, "convert", "work", sha256);
-    let produced: Awaited<ReturnType<typeof produce>>;
-    try {
-      produced = await produce(source, work, options, deps);
-    } finally {
-      // The work folder never outlives the conversion, whatever happened in it.
-      deps.fs.remove(work);
-    }
+    const produced = await producedOnce(source, sha256, options, deps);
     if ("failure" in produced) {
       return produced.failure;
     }
