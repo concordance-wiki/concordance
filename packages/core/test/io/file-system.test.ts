@@ -1,4 +1,12 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -21,6 +29,15 @@ describe("nodeFileSystem", () => {
     nodeFileSystem.writeText(file, "content");
     expect(nodeFileSystem.exists(file)).toBe(true);
     expect(nodeFileSystem.readText(file)).toBe("content");
+  });
+
+  it("writes next to the destination and renames, leaving no temporary file and replacing a file whole", () => {
+    const file = join(directory, "cache/entry.json");
+    nodeFileSystem.writeText(file, "first");
+    nodeFileSystem.writeText(file, "second");
+    nodeFileSystem.writeBytes(file, Uint8Array.from([0x33]));
+    expect(readdirSync(join(directory, "cache"))).toEqual(["entry.json"]);
+    expect(nodeFileSystem.readText(file)).toBe("3");
   });
 
   it("reads the raw bytes of a file", () => {

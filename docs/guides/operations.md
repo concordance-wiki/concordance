@@ -56,6 +56,8 @@ Copy the first four rows to publish the site alone; copy everything to be able t
 
 ## The cache
 
+Every file of the cache is written next to its destination and renamed into place, so an interrupted build leaves a file whole or absent; a cache file that is not what the build writes (truncated, or written by a previous version of a reader) reads as absent and is produced again, the build reporting a text representation it cannot read rather than stopping on it.
+
 `.concordance-cache/` next to `concordance.yaml` (`conversion.cache` moves it) holds the clones of the git sources under `sources/<name>/`, made with the whole history but without the blobs (`--filter=blob:none`, so that `git log` dates every file by its last commit and the checkout fetches only the files of the tip; a server that ignores the filter gives a full clone, which works the same), updated on the next build and completed when an earlier version left them shallow, and will hold the converted documents under `convert/`, keyed by the SHA-256 of their source so that an unchanged document is never reconverted, even when it moves. Nothing in it is needed to publish; nothing in it is secret either, beyond what the sources themselves contain. Keep it out of the configuration repository (`.gitignore`) and inside the pipeline cache (the [pipeline examples](pipelines.md) do), and delete it to force fresh clones and a full reconversion. The linter keeps its own cache, the published model of the global scope, under `.concordance-cache/lint` of the knowledge repository.
 
 ## Container image

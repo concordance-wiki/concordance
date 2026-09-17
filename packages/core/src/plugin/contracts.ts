@@ -86,6 +86,8 @@ export interface ContractReader<C extends ContractSummary> {
   operations: (contract: C) => ContractOperation[];
   /** The schemas or types the operations reference, for the contract viewer; none when the format keeps no definition. */
   schemas?: (contract: C) => ContractSchema[];
+  /** The version of the shape `read` extracts, `1` when absent: a contract cached under another version is read again. */
+  cacheVersion?: string;
 }
 
 export interface DeclaredContract {
@@ -125,15 +127,57 @@ export function cachedContractPath(cacheDirectory: string, fingerprint: string):
   return join(cacheDirectory, "contracts", `${fingerprint}.json`);
 }
 
-/** The extracted contract kept for a fingerprint, or nothing when the contract was never read. */
-export function readCachedContract(fs: FileSystem, path: string): ContractSummary | undefined {
-  if (!fs.exists(path)) return undefined;
-  // The cache holds what writeCachedContract serialised: the extracted contract itself.
-  return JSON.parse(fs.readText(path)) as ContractSummary;
+const DEFAULT_CACHE_VERSION = "1";
+
+/** The version a reader gives the shape it extracts. */
+export function cacheVersionOf(reader: { cacheVersion?: string }): string {
+  return reader.cacheVersion ?? DEFAULT_CACHE_VERSION;
 }
 
-export function writeCachedContract(fs: FileSystem, path: string, contract: ContractSummary): void {
-  fs.writeText(path, `${JSON.stringify(contract, null, 2)}\n`);
+/** The document parsed, or nothing when the file is not JSON: a truncated cache reads as absent. */
+function parsedJson(fs: FileSystem, path: string): unknown {
+  try {
+    return JSON.parse(fs.readText(path));
+  } catch {
+    return undefined;
+  }
+}
+
+function isSummary(value: unknown): value is ContractSummary {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof Reflect.get(value, "title") === "string" &&
+    typeof Reflect.get(value, "version") === "string"
+  );
+}
+
+/**
+ * The extracted contract kept for a fingerprint, or nothing when the contract was never read,
+ * when the file is not what `writeCachedContract` writes, or when it was written for another
+ * version of the reader: the contract is then read again and the cache rewritten.
+ */
+export function readCachedContract(
+  fs: FileSystem,
+  path: string,
+  version: string = DEFAULT_CACHE_VERSION,
+): ContractSummary | undefined {
+  if (!fs.exists(path)) return undefined;
+  const envelope = parsedJson(fs, path);
+  if (typeof envelope !== "object" || envelope === null) return undefined;
+  if (Reflect.get(envelope, "version") !== version) return undefined;
+  const contract: unknown = Reflect.get(envelope, "contract");
+  return isSummary(contract) ? contract : undefined;
+}
+
+/** The contract under the version of its reader, so that a reader of another version reads it again. */
+export function writeCachedContract(
+  fs: FileSystem,
+  path: string,
+  contract: ContractSummary,
+  version: string = DEFAULT_CACHE_VERSION,
+): void {
+  fs.writeText(path, `${JSON.stringify({ version, contract }, null, 2)}\n`);
 }
 
 /** Where the view of a contract, what the site shows of it, lives under the pipeline cache. */
@@ -141,11 +185,12 @@ export function cachedContractViewPath(cacheDirectory: string, fingerprint: stri
   return join(cacheDirectory, "contracts", `${fingerprint}.view.json`);
 }
 
-/** The view kept for a fingerprint, or nothing when the contract was never loaded by this version. */
+/** The view kept for a fingerprint, or nothing when the contract was never loaded by this version or the file is not JSON. */
 export function readCachedContractView(fs: FileSystem, path: string): ContractView | undefined {
   if (!fs.exists(path)) return undefined;
-  // The cache holds what writeCachedContractView serialised.
-  return JSON.parse(fs.readText(path)) as ContractView;
+  const view = parsedJson(fs, path);
+  // The cache holds what writeCachedContractView serialised; anything else reads as absent.
+  return typeof view === "object" && view !== null ? (view as ContractView) : undefined;
 }
 
 export function writeCachedContractView(fs: FileSystem, path: string, view: ContractView): void {
@@ -321,14 +366,14 @@ async function loadOne<C extends ContractSummary>(
   const fingerprint = fingerprintOf(fetched.text);
   const cached = cachedContractPath(input.payload.cacheDirectory, fingerprint);
   // The same bytes were read by the same reader: the cache holds what it extracted.
-  let contract = readCachedContract(fs, cached) as C | undefined;
+  let contract = readCachedContract(fs, cached, cacheVersionOf(reader)) as C | undefined;
   if (contract === undefined) {
     const read = reader.read(fetched.text, declared.location);
     if ("error" in read) {
       output.findings.push(unreachable(declared, read.error));
       return;
     }
-    writeCachedContract(fs, cached, read);
+    writeCachedContract(fs, cached, read, cacheVersionOf(reader));
     contract = read;
   }
   const confidence = input.payload.confidence.contract_import ?? DEFAULT_CONTRACT_CONFIDENCE;

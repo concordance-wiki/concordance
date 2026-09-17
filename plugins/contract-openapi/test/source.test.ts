@@ -219,18 +219,24 @@ describe("loadContracts", () => {
       `${JSON.stringify(JSON.parse(fs.files.get(cachePath) ?? ""), null, 2)}\n`,
     );
     expect(JSON.parse(fs.files.get(cachePath) ?? "")).toMatchObject({
-      openapi: "3.1.0",
-      title: "Payments API",
-      version: "2.0.0",
+      version: "2",
+      contract: {
+        openapi: "3.1.0",
+        title: "Payments API",
+        version: "2.0.0",
+      },
     });
   });
 
   it("reads the extracted contract from the cache on a fingerprint hit instead of parsing the bytes again", async () => {
     const cached = JSON.stringify({
-      openapi: "3.1.0",
-      title: "Cached title",
-      version: "9.9.9",
-      operations: [{ method: "get", path: "/cached", tags: [], schemas: [] }],
+      version: "2",
+      contract: {
+        openapi: "3.1.0",
+        title: "Cached title",
+        version: "9.9.9",
+        operations: [{ method: "get", path: "/cached", tags: [], schemas: [] }],
+      },
     });
     const url = "https://example.invalid/openapi.json";
     const fetched = stubFetch({ [url]: contractText });

@@ -165,9 +165,22 @@ function suspectFindings(
   ];
 }
 
-/** Reads a text representation back; a file the cache holds was written by this module. */
-function readExtractedText(fs: FileSystem, path: string): string[] {
-  return (JSON.parse(fs.readText(path)) as ExtractedText).pages;
+/**
+ * Reads a text representation back, or nothing when the file is not what this module writes: a
+ * cache truncated by an interrupted build reads as absent and the text is extracted again.
+ */
+function readExtractedText(fs: FileSystem, path: string): string[] | undefined {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(fs.readText(path));
+  } catch {
+    return undefined;
+  }
+  const pages: unknown =
+    typeof parsed === "object" && parsed !== null ? Reflect.get(parsed, "pages") : undefined;
+  return Array.isArray(pages) && pages.every((page): page is string => typeof page === "string")
+    ? pages
+    : undefined;
 }
 
 /** The pages of the PDF, extracted once per fingerprint and kept next to it. */
@@ -176,9 +189,8 @@ async function pagesOf(
   path: string,
   deps: ConvertDependencies,
 ): Promise<string[]> {
-  if (deps.fs.exists(path)) {
-    return readExtractedText(deps.fs, path);
-  }
+  const kept = deps.fs.exists(path) ? readExtractedText(deps.fs, path) : undefined;
+  if (kept !== undefined) return kept;
   const pages = await deps.extractPages(pdf);
   deps.fs.writeText(path, canonicalJson({ pages }));
   return pages;
@@ -220,8 +232,13 @@ export async function convertToPdf(
     deps.fs.writeBytes(cached, pdf);
   } else {
     const work = join(deps.cacheDirectory, "convert", "work", sha256);
-    const produced = await produce(source, work, options, deps);
-    deps.fs.remove(work);
+    let produced: Awaited<ReturnType<typeof produce>>;
+    try {
+      produced = await produce(source, work, options, deps);
+    } finally {
+      // The work folder never outlives the conversion, whatever happened in it.
+      deps.fs.remove(work);
+    }
     if ("failure" in produced) {
       return produced.failure;
     }

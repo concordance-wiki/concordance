@@ -51,6 +51,8 @@ export const openApiReader: ContractReader<OpenApiContract> = {
   format: formatOf,
   operations: (contract) => contract.operations.map(operationOf),
   schemas: (contract) => contract.schemas,
+  // Bumped when the shape of OpenApiContract changes: a cache of a previous shape is read again.
+  cacheVersion: "2",
 };
 
 /**

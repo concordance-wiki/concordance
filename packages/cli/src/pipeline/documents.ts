@@ -141,20 +141,47 @@ function readWith(
   }
 }
 
-/** The pages of a `text` representation: `{ pages: string[] }`, as the plugin API documents it. */
-function pagesOfText(fs: FileSystem, path: string, unit: PositionUnit): DocumentPage[] {
-  const parsed: unknown = JSON.parse(fs.readText(path));
+/**
+ * The pages of a `text` representation: `{ pages: string[] }`, as the plugin API documents it.
+ * A file that is not JSON, a cache truncated by an interrupted build for instance, gives no page
+ * and a finding naming it, never an exception.
+ */
+function pagesOfText(
+  fs: FileSystem,
+  path: string,
+  unit: PositionUnit,
+  source: string,
+): { pages: DocumentPage[]; finding?: Finding } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(fs.readText(path));
+  } catch (error) {
+    return {
+      pages: [],
+      finding: {
+        check: "W-CONV-FAILED",
+        severity: "warning",
+        source,
+        path,
+        message: `the text representation ${path} is not readable: ${errorMessage(error)}`,
+        remediation:
+          "remove the file from the cache folder; the next build extracts the text again",
+      },
+    };
+  }
   // A representation written by a converter that follows the API holds a list; anything else reads as no page.
   const listed =
     typeof parsed === "object" && parsed !== null
       ? (parsed as { pages?: unknown }).pages
       : undefined;
   const pages: unknown[] = Array.isArray(listed) ? listed : [];
-  return pages.map((text, index) => ({
-    number: index + 1,
-    label: `${unit} ${String(index + 1)}`,
-    text: typeof text === "string" ? text : "",
-  }));
+  return {
+    pages: pages.map((text, index) => ({
+      number: index + 1,
+      label: `${unit} ${String(index + 1)}`,
+      text: typeof text === "string" ? text : "",
+    })),
+  };
 }
 
 function pagesOfReader(output: ReaderOutput): DocumentPage[] {
@@ -225,7 +252,11 @@ async function readOne(
     } else {
       document.pdf = pdf.path;
     }
-    if (text !== undefined) document.pages = pagesOfText(input.fs, text.path, document.unit);
+    if (text !== undefined) {
+      const read = pagesOfText(input.fs, text.path, document.unit, source.name);
+      document.pages = read.pages;
+      if (read.finding !== undefined) findings.push(read.finding);
+    }
   }
   return { document, findings, unconverted };
 }
