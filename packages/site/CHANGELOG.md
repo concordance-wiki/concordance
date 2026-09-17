@@ -1,5 +1,16 @@
 # @concordance-wiki/site
 
+## 0.4.1
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- 4f15eff: The islands read the `hidden` flag of an element as the platform now types it (a boolean or the `until-found` keyword), so that the site builds under TypeScript 6; nothing changes in a page.
+- Updated dependencies [2772a81]
+  - @concordance-wiki/core@0.4.1
+  - @concordance-wiki/profile@0.4.1
+  - @concordance-wiki/i18n@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @concordance-wiki/ingest
 
+## 0.4.1
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- Updated dependencies [2772a81]
+  - @concordance-wiki/core@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes

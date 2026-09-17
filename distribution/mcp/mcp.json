@@ -2,7 +2,7 @@
   "mcpServers": {
     "concordance": {
       "command": "npx",
-      "args": ["--yes", "@concordance-wiki/cli@0.4.0", "mcp", "--model", "./dist/model.json"]
+      "args": ["--yes", "@concordance-wiki/cli@0.4.1", "mcp", "--model", "./dist/model.json"]
     }
   }
 }
