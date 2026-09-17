@@ -203,6 +203,10 @@ interface ReadOutcome {
   unconverted: boolean;
 }
 
+function megabytes(bytes: number): string {
+  return (bytes / (1024 * 1024)).toFixed(1);
+}
+
 /** Slides for a presentation, pages for any other paged document, cues for a transcript. */
 function unitOf(format: string, paged: boolean): PositionUnit {
   if (!paged) return "cue";
@@ -216,9 +220,40 @@ async function readOne(
   reader: Reader | undefined,
   converter: Converter | undefined,
 ): Promise<ReadOutcome> {
-  const bytes = input.fs.readBytes(file.absolutePath);
   const format = extensionOf(file.path).slice(1);
   const findings: Finding[] = [];
+  const limits = conversionLimits(input.config);
+  const size = input.fs.size(file.absolutePath);
+  // A document the converter would refuse for its size is never read nor hashed: the finding comes first.
+  if (
+    converter !== undefined &&
+    conversionEnabled(input.config, source.name) &&
+    size > limits.maxSizeBytes
+  ) {
+    findings.push({
+      check: "W-CONV-FAILED",
+      severity: "warning",
+      source: source.name,
+      path: file.path,
+      message: `conversion of ${file.path} failed: the document weighs ${megabytes(size)} MB, above the maximum of ${megabytes(limits.maxSizeBytes)} MB`,
+      remediation: "reduce the document or raise conversion.max_size_mb",
+    });
+    return {
+      document: {
+        source: source.name,
+        path: file.path,
+        absolutePath: file.absolutePath,
+        format,
+        size,
+        metadata: {},
+        unit: unitOf(format, true),
+        pages: [],
+      },
+      findings,
+      unconverted: true,
+    };
+  }
+  const bytes = input.fs.readBytes(file.absolutePath);
   const read = readWith(reader, file.path, bytes);
   const output: ReaderOutput = "check" in read ? { metadata: {}, text: "" } : read;
   if ("check" in read) findings.push({ ...read, source: source.name });
@@ -242,7 +277,7 @@ async function readOne(
         bytes,
         sha256: createHash("sha256").update(bytes).digest("hex"),
         cacheDirectory: input.cacheDirectory,
-        options: conversionLimits(input.config),
+        options: limits,
       },
     });
     findings.push(...converted.findings.map((finding) => ({ ...finding, source: source.name })));

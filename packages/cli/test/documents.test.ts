@@ -187,6 +187,47 @@ describe("readDocuments", () => {
     );
   });
 
+  it("never reads nor hashes a document over conversion.max_size_mb: the finding comes from its size alone", async () => {
+    const fs = memoryFileSystem({ "/work/specs/decks/huge.pptx": "x".repeat(2 * 1024 * 1024) });
+    const reads: string[] = [];
+    const watched = {
+      ...fs,
+      readBytes: (path: string) => {
+        reads.push(path);
+        return fs.readBytes(path);
+      },
+    };
+    const calls: string[] = [];
+    const converter: Converter = {
+      extensions: [".pptx"],
+      produces: ["pdf", "text"],
+      convert: ({ path }) => {
+        calls.push(path);
+        return Promise.resolve({ representations: {}, findings: [] });
+      },
+    };
+    const output = await readDocuments({
+      sources: [source("specs", ["decks/huge.pptx"])],
+      readers: [reader],
+      converters: [converter],
+      config: config(
+        "version: 1\nproject: { name: W }\nconversion: { max_size_mb: 1 }\nsources:\n  - { name: specs, path: ./specs }\n",
+      ),
+      cacheDirectory: "/work/.concordance-cache",
+      parallelism: 1,
+      fs: watched,
+    });
+    expect(reads).toEqual([]);
+    expect(calls).toEqual([]);
+    expect(output.unconverted).toBe(1);
+    expect(
+      output.documents.map((document) => [document.size, document.pages, document.metadata]),
+    ).toEqual([[2 * 1024 * 1024, [], {}]]);
+    expect(output.findings.map((finding) => finding.message)).toEqual([
+      "conversion of decks/huge.pptx failed: the document weighs 2.0 MB, above the maximum of 1.0 MB",
+    ]);
+  });
+
   it("takes the text of an office document from the PDF the converter produced, never from its reader", async () => {
     const fs = memoryFileSystem({ "/work/specs/decks/threshold.pptx": "deck" });
     const output = await readDocuments({
