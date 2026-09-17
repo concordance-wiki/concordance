@@ -177,7 +177,7 @@ describe("concordance build with pseudonymisation", () => {
     );
     expect(await buildCommand([], malformed, deps)).toBe(1);
     expect(malformed.stderr).toContain(
-      'error: W-PRIVACY-DICTIONARY (./pseudonyms.yaml): error: ./pseudonyms.yaml: people.A B: wrong type; received "Participant-1"; expected object',
+      'error: W-PRIVACY-DICTIONARY (./pseudonyms.yaml): error: ./pseudonyms.yaml: people["A B"]: wrong type; received "Participant-1"; expected object',
     );
     expect(malformed.stderr.at(-1)).toBe("build failed: 1 error finding(s)");
     for (const [path, text] of output(malformed)) {

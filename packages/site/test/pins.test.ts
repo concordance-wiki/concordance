@@ -78,6 +78,7 @@ describe("The pages a reader pins, kept under one key in the order they were pin
       "&lt;b class=&quot;x&quot;&gt;Tom &amp; Jerry&lt;/b&gt;",
     );
     expect(fill("Unpin {title}", "title", "Entity")).toBe("Unpin Entity");
+    expect(fill("Unpin {title}", "title", "$& and $'")).toBe("Unpin $& and $'");
     expect(countLabel(defaultPinsLabels, 1)).toBe("1 pinned");
     expect(countLabel(defaultPinsLabels, 3)).toBe("3 pinned");
     expect(countLabel({ ...defaultPinsLabels, countOne: "{count} épinglée" }, 1)).toBe(

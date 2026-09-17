@@ -98,7 +98,8 @@ export function escape(text: string): string {
 
 /** The placeholder of a label, `{count}` for instance, replaced by its value; the catalogue quotes it so that the build leaves it to the browser. */
 export function fill(label: string, name: string, value: string): string {
-  return label.replaceAll(`{${name}}`, value);
+  // A function, so that a `$` in the value is written as it is.
+  return label.replaceAll(`{${name}}`, () => value);
 }
 
 export interface PinsView {

@@ -87,7 +87,8 @@ export function typeCounts(
 /** A message with `{name}` placeholders, each replaced by the value given. */
 export function fill(pattern: string, values: Record<string, number | string>): string {
   return Object.entries(values).reduce(
-    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+    // A function, so that a `$` in the value is written as it is.
+    (text, [name, value]) => text.replaceAll(`{${name}}`, () => String(value)),
     pattern,
   );
 }
