@@ -4,6 +4,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   utimesSync,
   writeFileSync,
 } from "node:fs";
@@ -79,6 +80,18 @@ describe("nodeFileSystem", () => {
     nodeFileSystem.writeText(join(directory, "a/node_modules/dep/README.md"), "");
     mkdirSync(join(directory, "empty"));
     expect(nodeFileSystem.listFiles(directory)).toEqual(["a.md", "a/b/c.md", "a/z.md", "b.md"]);
+  });
+
+  it("never follows a symbolic link, to a file outside the folder or to a folder, so that a source cannot publish what it does not hold", () => {
+    const outside = join(directory, "outside.txt");
+    writeFileSync(outside, "secret");
+    const source = join(directory, "source");
+    mkdirSync(join(source, "real"), { recursive: true });
+    writeFileSync(join(source, "real/note.md"), "# Note");
+    symlinkSync(outside, join(source, "leak.md"));
+    symlinkSync(join(source, "real"), join(source, "linked"));
+    symlinkSync(directory, join(source, "up"));
+    expect(nodeFileSystem.listFiles(source)).toEqual(["real/note.md"]);
   });
 
   it("reports the modification date of a file in ISO 8601", () => {

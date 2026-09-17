@@ -21,7 +21,7 @@ export interface FileSystem {
   writeBytes(path: string, bytes: Uint8Array): void;
   /** Deletes a file, or a folder with everything under it; a missing path is not an error. */
   remove(path: string): void;
-  /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` and `node_modules` folders are skipped. */
+  /** Files under `directory`, recursively, as sorted forward-slash paths relative to it; `.git` and `node_modules` folders and symbolic links are skipped. */
   listFiles(directory: string): string[];
   /** ISO 8601 modification date of a file. */
   modifiedAt(path: string): string;
@@ -37,9 +37,14 @@ function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
 }
 
+/**
+ * Lists the regular files under a folder. A symbolic link is never followed, whether it points
+ * at a file or a folder: a repository could otherwise publish any file the build can read, the
+ * pseudonym dictionary first.
+ */
 function walk(root: string, directory: string, out: string[]): void {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (SKIPPED_FOLDERS.has(entry.name)) continue;
+    if (SKIPPED_FOLDERS.has(entry.name) || entry.isSymbolicLink()) continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       walk(root, path, out);
