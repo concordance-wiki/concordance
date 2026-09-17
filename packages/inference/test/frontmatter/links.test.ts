@@ -121,14 +121,16 @@ describe("frontmatterLinks", () => {
   it("reports a title shared by several notes, naming the candidates, and gives no link", () => {
     const term = note("link.md", "term", "Link", {}, "glossary");
     const screen = note("screens/entry.md", "screen", "Entry", { writes: "Link" });
+    const finding = unresolved(
+      screen,
+      "writes",
+      'reference "Link" is the title of several notes (glossary/link, specs/objects/link)',
+    );
     const { links, findings } = frontmatterLinks({ entities: [screen, object, term], profile });
     expect(links).toEqual([]);
-    expect(findings).toEqual([
-      unresolved(
-        screen,
-        "writes",
-        'reference "Link" is the title of several notes (specs/objects/link, glossary/link)',
-      ),
+    expect(findings).toEqual([finding]);
+    expect(frontmatterLinks({ entities: [term, object, screen], profile }).findings).toEqual([
+      finding,
     ]);
   });
 

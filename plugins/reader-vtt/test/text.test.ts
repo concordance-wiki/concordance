@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Transcript } from "../src/parse.js";
+import { anchorsOf, renderTranscript } from "../src/render.js";
 import { transcriptText, transcriptUnits } from "../src/text.js";
 
 const transcript: Transcript = {
@@ -49,6 +50,36 @@ describe("transcriptUnits", () => {
       { label: "00:00:00", text: "Hello there. How are you?", anchor: "t-0", speaker: "Alice" },
       { label: "00:00:02", text: "Fine.", anchor: "t-2000", speaker: "Bob" },
       { label: "00:00:03", text: " (laughs)", anchor: "t-3000" },
+    ]);
+  });
+
+  it("keeps every cue addressable when two start at the same instant: the second takes its rank as a suffix", () => {
+    const twice = {
+      format: "vtt" as const,
+      speakers: ["Alice", "Bob"],
+      duration: 4,
+      cues: [
+        { index: 1, start: 1, end: 2, text: "Hello", speaker: "Alice" },
+        { index: 2, start: 1, end: 2.5, text: "Hi", speaker: "Bob" },
+        { index: 3, start: 1, end: 3, text: "there", speaker: "Bob" },
+        { index: 4, start: 3, end: 4, text: "Bye", speaker: "Alice" },
+      ],
+    };
+    expect(transcriptUnits(twice).map((unit) => unit.anchor)).toEqual([
+      "t-1000",
+      "t-1000-2",
+      "t-3000",
+    ]);
+    const html = renderTranscript(twice);
+    expect(html).toContain('<p id="t-1000">');
+    expect(html).toContain('<p id="t-1000-2"><a class="timecode" href="#t-1000-2">');
+    expect(html).toContain('<p id="t-1000-3">');
+    expect(html).toContain('<p id="t-3000">');
+    expect(anchorsOf(twice.cues).map((cue) => cue.anchor)).toEqual([
+      "t-1000",
+      "t-1000-2",
+      "t-1000-3",
+      "t-3000",
     ]);
   });
 

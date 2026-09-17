@@ -111,8 +111,13 @@ describe("resolveReference", () => {
     expect(resolve("related cap")).toEqual({ kind: "unresolved" });
   });
 
-  it("reports a title shared by several notes as ambiguous with every candidate", () => {
-    expect(resolve("Link")).toEqual({ kind: "ambiguous", candidates: [object, term] });
+  it("reports a title shared by several notes as ambiguous with every candidate, in identifier order whatever the order of the entities", () => {
+    expect(resolve("Link")).toEqual({ kind: "ambiguous", candidates: [term, object] });
+    const reversed = resolveReference("Link", {
+      from: screen,
+      index: indexEntities([renamed, term, object, cap, role, screen]),
+    });
+    expect(reversed).toEqual({ kind: "ambiguous", candidates: [term, object] });
   });
 
   it("tries the identifier before the path and the path before the title", () => {
