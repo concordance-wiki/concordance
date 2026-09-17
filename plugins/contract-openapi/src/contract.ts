@@ -47,6 +47,8 @@ export interface OpenApiContract {
   version: string;
   operations: OpenApiOperation[];
   schemas: ContractSchema[];
+  /** The paths whose item is a `$ref` the reader cannot follow, another file for instance: read nothing, lost nowhere. */
+  unresolvedPaths: string[];
 }
 
 type Json = Record<string, unknown>;
@@ -314,9 +316,16 @@ export function readOpenApi(text: string, location: string): OpenApiContract | C
   const info = isObject(document["info"]) ? document["info"] : {};
   const paths = isObject(document["paths"]) ? document["paths"] : {};
   const operations: OpenApiOperation[] = [];
+  const unresolvedPaths: string[] = [];
   for (const path of Object.keys(paths).sort(byCodeUnit)) {
-    const item = paths[path];
-    if (!isObject(item)) continue;
+    const declared = paths[path];
+    if (!isObject(declared)) continue;
+    // A path item may be a reference alone: a local one is followed, any other is reported.
+    const item = dereference(document, declared);
+    if (item === undefined) {
+      unresolvedPaths.push(path);
+      continue;
+    }
     for (const method of HTTP_METHODS) {
       const operation = item[method];
       if (isObject(operation)) {
@@ -330,5 +339,6 @@ export function readOpenApi(text: string, location: string): OpenApiContract | C
     version: stringOf(info["version"]) ?? "",
     operations,
     schemas: schemasOf(document, new Set(operations.flatMap((operation) => operation.schemas))),
+    unresolvedPaths,
   };
 }

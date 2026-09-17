@@ -21,7 +21,7 @@ describe("openApiReader", () => {
   });
 
   it("names the format after the specification version the document declares, without its patch level", () => {
-    const contract = { title: "", version: "", operations: [], schemas: [] };
+    const contract = { title: "", version: "", operations: [], schemas: [], unresolvedPaths: [] };
     expect(openApiReader.format({ ...contract, openapi: "3.1.0" })).toBe("openapi 3.1");
     expect(openApiReader.format({ ...contract, openapi: "3.0.3" })).toBe("openapi 3.0");
     expect(openApiReader.format({ ...contract, openapi: "3.2" })).toBe("openapi 3.2");

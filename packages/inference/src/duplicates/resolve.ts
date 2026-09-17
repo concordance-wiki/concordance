@@ -162,12 +162,20 @@ function representationFormat(path: string): string {
 /**
  * Union-find over the merge edges, the lower identifier as root, so that the root of a component
  * is its lowest identifier whatever the order of the edges. Only non-root identifiers have a parent.
+ * The root is found by a loop, never by recursion, and every identifier on the way is then
+ * pointed at it: a component of thousands of resources merged in a chain costs no stack.
  */
-function components(edges: readonly Edge[]): (id: string) => string {
+export function components(edges: readonly Edge[]): (id: string) => string {
   const parent = new Map<string, string>();
   const rootOf = (id: string): string => {
-    const next = parent.get(id);
-    return next === undefined ? id : rootOf(next);
+    let root = id;
+    for (let next = parent.get(root); next !== undefined; next = parent.get(root)) root = next;
+    let node = id;
+    for (let next = parent.get(node); next !== undefined; next = parent.get(node)) {
+      parent.set(node, root);
+      node = next;
+    }
+    return root;
   };
   for (const edge of edges) {
     const a = rootOf(edge.a);
