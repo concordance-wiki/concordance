@@ -482,6 +482,12 @@ export function readWsdl(text: string, location: string): WsdlContract | Contrac
   }
   const declared = declaredTypes(root);
   const operations = operationsOf(root, dialect, declared);
+  // A deployment document imports the interfaces from another file: nothing read here would be the whole contract.
+  if (operations.length === 0 && childrenNamed(root, "import").length > 0) {
+    return {
+      error: `${location} declares no operation of its own and imports another document, which is not followed: point the note at the document that declares the port types`,
+    };
+  }
   return {
     wsdl: dialect.wsdl,
     title: titleOf(root),

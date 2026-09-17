@@ -10,6 +10,21 @@ function contract(text: string, location = "service.wsdl") {
 }
 
 describe("readWsdl", () => {
+  it("reports a deployment document that imports its port types and declares no operation, instead of an empty contract", () => {
+    const deployment =
+      '<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="urn:x" targetNamespace="urn:x">' +
+      '<import namespace="urn:x" location="core.wsdl"/>' +
+      '<binding name="B" type="tns:P"/>' +
+      '<service name="S"><port name="Q" binding="tns:B"/></service>' +
+      "</definitions>";
+    expect(readWsdl(deployment, "deploy.wsdl")).toEqual({
+      error:
+        "deploy.wsdl declares no operation of its own and imports another document, which is not followed: point the note at the document that declares the port types",
+    });
+    const empty = '<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"></definitions>';
+    expect(contract(empty).operations).toEqual([]);
+  });
+
   it("reads a WSDL 1.1 document: its documentation as title, no version, and one operation per port type operation, sorted", () => {
     const read = contract(orders);
     expect(read.wsdl).toBe("1.1");
