@@ -127,6 +127,44 @@ describe("The project name, logo, accent colour, corner radius and font families
     );
   });
 
+  it.each([
+    ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>', "a script element"],
+    [
+      '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><div/></foreignObject></svg>',
+      "an embedded document",
+    ],
+    [
+      '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><path d="M0 0"/></svg>',
+      "an event handler attribute",
+    ],
+    [
+      '<svg xmlns="http://www.w3.org/2000/svg"><a href="javascript:alert(1)"><path d="M0 0"/></a></svg>',
+      "a script or data address",
+    ],
+    [
+      '<svg xmlns="http://www.w3.org/2000/svg"><use href="https://evil.invalid/x.svg#a"/></svg>',
+      "a reference to another site",
+    ],
+  ])(
+    "refuses an SVG logo that carries active content, since it is inlined on every page: %s",
+    (file, reason) => {
+      const fileSystem = memoryFileSystem({
+        "/t/theme.yaml": theme("logo: mark.svg\n"),
+        "/t/mark.svg": file,
+      });
+      expect(loadTheme(fileSystem, "/t/theme.yaml").issues).toEqual([
+        {
+          severity: "error",
+          path: "logo",
+          message: `the SVG carries ${reason}, which an inline logo never does`,
+          received: "mark.svg",
+          expected:
+            "an SVG holding drawing alone: no script, event handler, embedded document or external reference",
+        },
+      ]);
+    },
+  );
+
   it("refuses an SVG logo file without an svg element", () => {
     const fileSystem = memoryFileSystem({
       "/t/theme.yaml": theme("logo: mark.svg\n"),
