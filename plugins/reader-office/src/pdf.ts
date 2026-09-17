@@ -110,7 +110,10 @@ export function isoDate(value: string): string {
   return `${fields.slice(0, 3).join("-")}T${fields.slice(3).join(":")}${offset(match[2])}`;
 }
 
-/** The body of the last Info object the file references: an update appends a new trailer at the end. */
+/**
+ * The body of the last Info object the file references: an update appends a new trailer at the
+ * end, and may rewrite the object under its own number, so the last object of that number is read.
+ */
 function infoDictionary(text: string): string {
   const references = [...text.matchAll(infoReference)];
   const last = references.at(-1);
@@ -119,9 +122,10 @@ function infoDictionary(text: string): string {
   const generation = group(last, 2);
   const object = new RegExp(
     String.raw`(?:^|\s)${number}\s+${generation}\s+obj\b([\s\S]*?)(?:endobj|$)`,
+    "g",
   );
-  const match = object.exec(text);
-  return match === null ? "" : group(match, 1);
+  const match = [...text.matchAll(object)].at(-1);
+  return match === undefined ? "" : group(match, 1);
 }
 
 /** Reads the native metadata of a PDF: the Info dictionary and the number of page objects. */

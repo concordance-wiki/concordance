@@ -139,6 +139,7 @@ describe("readOpenApi", () => {
         },
       ],
       schemas: [],
+      unresolvedPaths: [],
     });
   });
 
@@ -209,6 +210,26 @@ describe("readOpenApi", () => {
       }),
     );
     expect(read.operations.map((o) => o.path)).toEqual(["/a", "/a/{id}", "/b"]);
+  });
+
+  it("follows a path item given as a local reference and lists the paths whose reference leads elsewhere", () => {
+    const read = contract(
+      JSON.stringify({
+        openapi: "3.1.0",
+        paths: {
+          "/health": { $ref: "#/components/pathItems/Health" },
+          "/legacy": { $ref: "./paths/legacy.yaml" },
+          "/missing": { $ref: "#/components/pathItems/Nowhere" },
+          "/plain": { get: {} },
+        },
+        components: { pathItems: { Health: { get: { operationId: "health" } } } },
+      }),
+    );
+    expect(read.operations.map((o) => [o.path, o.operationId])).toEqual([
+      ["/health", "health"],
+      ["/plain", undefined],
+    ]);
+    expect(read.unresolvedPaths).toEqual(["/legacy", "/missing"]);
   });
 
   it("leaves the operation identifier and the summary absent when the document has none", () => {
@@ -319,6 +340,7 @@ describe("readOpenApi", () => {
       version: "",
       operations: [],
       schemas: [],
+      unresolvedPaths: [],
     });
   });
 

@@ -2,7 +2,11 @@ import type { Clock } from "@concordance-wiki/core";
 import { describe, expect, it, vi } from "vitest";
 
 import * as minhash from "../../src/duplicates/minhash.js";
-import { formatDuplicateStats, resolveDuplicateResources } from "../../src/duplicates/resolve.js";
+import {
+  components,
+  formatDuplicateStats,
+  resolveDuplicateResources,
+} from "../../src/duplicates/resolve.js";
 import type { DuplicateInput, DuplicateResource } from "../../src/duplicates/types.js";
 import { generator, normalize, options, perturb, randomText, resource } from "./fixtures.js";
 
@@ -24,6 +28,20 @@ function resolve(
 
 const REMEDIATION =
   "Declare the twin in the markdown frontmatter under source, or record the pair as merged or separated in the lock file.";
+
+describe("components", () => {
+  it("finds the root of a chain of a hundred thousand merged resources without recursion, the lowest identifier", () => {
+    const id = (rank: number): string => `r${String(rank).padStart(6, "0")}`;
+    const edges = [];
+    for (let rank = 99_999; rank >= 1; rank -= 1)
+      edges.push({ a: id(rank), b: id(rank + 1), criterion: "text" });
+    const rootOf = components(edges);
+    expect(rootOf(id(100_000))).toBe(id(1));
+    expect(rootOf(id(50_000))).toBe(id(1));
+    expect(rootOf(id(1))).toBe(id(1));
+    expect(rootOf("alone")).toBe("alone");
+  });
+});
 
 describe("the three outcomes", () => {
   it("merges above 0.9 into one entity with several representations and no finding", () => {

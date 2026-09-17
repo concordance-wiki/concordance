@@ -47,6 +47,14 @@ describe("readPdf", () => {
     expect(readPdf(updated).title).toBe("Second");
   });
 
+  it("takes the last Info object when an update rewrote it under the same number", () => {
+    const rewritten = pdf(
+      undefined,
+      "5 0 obj << /Title (Rewritten) >> endobj\ntrailer << /Info 5 0 R >>",
+    );
+    expect(readPdf(rewritten).title).toBe("Rewritten");
+  });
+
   it("reads an Info dictionary referenced by a cross-reference stream", () => {
     const bytes = latin1(
       "%PDF-1.5\n1 0 obj << /Title (Streamed) >> endobj\n2 0 obj << /Type /XRef /Info 1 0 R >> stream\nendstream endobj",
