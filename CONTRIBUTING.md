@@ -67,7 +67,7 @@ The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict
 
 ## Commits and branches
 
-- One branch per change: `feat/L1-03-occurrence-scan`, `fix/site-mentions-order`, `docs/getting-started`.
+- One branch per change: `feat/occurrence-scan`, `fix/site-mentions-order`, `docs/getting-started`.
 - Conventional Commits, in English, subject of 72 characters or fewer, factual body when it adds something, no emoji.
 - Author and committer are your own git identity. No attribution trailer of any kind.
 - No direct commit on `main`. No force push.

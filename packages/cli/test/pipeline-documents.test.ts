@@ -178,7 +178,7 @@ const REVIEW = "specs/meetings/threshold-review";
 const VISION = "specs/framing/vision.pdf";
 const TRANSCRIPT = "specs/meetings/neighbourhood-cap.vtt";
 
-describe("L4-07 extracted text indexed", () => {
+describe("extracted text indexed", () => {
   it("extracts the text from the converted PDF, not from the original format, so that there is a single extraction path", async () => {
     const { result, input } = await build();
     const [review] = fragmentsOf({

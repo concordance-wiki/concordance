@@ -7,7 +7,7 @@ import { shipped } from "../accessibility/stylesheet.js";
 /** A colour written as such rather than read from a token: a hex triplet, an rgb() or hsl() function, or a named colour. */
 const LITERAL_COLOUR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(|\b(?:white|black)\b/i;
 
-describe("L9-18 dark mode: every component reads the scheme from the tokens, so that the dark palette reaches it whole", () => {
+describe("dark mode: every component reads the scheme from the tokens, so that the dark palette reaches it whole", () => {
   it("draws every colour of the shipped layers from a token, the paper of a document page apart, which stays white in both schemes", () => {
     const literal = shipped.flatMap((rule) =>
       Object.entries(rule.declarations)

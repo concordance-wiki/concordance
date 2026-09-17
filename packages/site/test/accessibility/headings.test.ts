@@ -26,7 +26,7 @@ function headings(html: string): [number, string][] {
   ]);
 }
 
-describe("L9-08 headings, skip link, focus, tab order and keyboard shortcuts on every gallery state", () => {
+describe("headings, skip link, focus, tab order and keyboard shortcuts on every gallery state", () => {
   describe("one H1 per page, H2s from the markdown, the table of contents mirroring them", () => {
     it("writes exactly one h1 on every page, inside the main landmark, and never skips a heading level", () => {
       for (const { path, html } of documents) {

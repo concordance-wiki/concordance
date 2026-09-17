@@ -108,7 +108,8 @@ plugins:
 - [`@concordance-wiki/plugin-reader-vtt`](https://www.npmjs.com/package/@concordance-wiki/plugin-reader-vtt): reader for `.vtt` and `.srt` transcripts.
 - [`@concordance-wiki/plugin-reader-office`](https://www.npmjs.com/package/@concordance-wiki/plugin-reader-office): metadata reader for `.docx`, `.pptx`, `.xlsx` and `.pdf`.
 - [`@concordance-wiki/plugin-convert-libreoffice`](https://www.npmjs.com/package/@concordance-wiki/plugin-convert-libreoffice): conversion of office documents to PDF and extraction of their text; needs LibreOffice on the machine.
-- The contract plugins, [`@concordance-wiki/plugin-contract-openapi`](https://www.npmjs.com/package/@concordance-wiki/plugin-contract-openapi) and [`@concordance-wiki/plugin-contract-wsdl`](https://www.npmjs.com/package/@concordance-wiki/plugin-contract-wsdl), are not carried: install them next to this package when a wiki declares them.
+- [`@concordance-wiki/plugin-contract-openapi`](https://www.npmjs.com/package/@concordance-wiki/plugin-contract-openapi): import of the OpenAPI 3.x contract an `api` note declares, one page per operation.
+- [`@concordance-wiki/plugin-contract-wsdl`](https://www.npmjs.com/package/@concordance-wiki/plugin-contract-wsdl): import of the WSDL 1.1 and 2.0 contract an `api` note declares, one page per operation.
 - No code of its own.
 
 ## Documentation

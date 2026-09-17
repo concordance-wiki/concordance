@@ -58,7 +58,7 @@ function textPairs(theme: ThemeConfig): ContrastPair[] {
   return contrastPairs(theme).filter((pair) => pair.minimum === BODY_MINIMUM);
 }
 
-describe("L9-08 contrasts: measured by the checker on both palettes, no text under 4.5:1, the light grounds included", () => {
+describe("contrasts: measured by the checker on both palettes, no text under 4.5:1, the light grounds included", () => {
   for (const [name, theme] of Object.entries(PALETTES)) {
     it(`finds no pair below its minimum in the ${name} palette, light and dark`, () => {
       expect(checkContrast(theme)).toEqual([]);
@@ -129,7 +129,7 @@ describe("L9-08 contrasts: measured by the checker on both palettes, no text und
   });
 });
 
-describe("L9-18 dark mode: a second palette measured on its own, never an inversion of the light one", () => {
+describe("dark mode: a second palette measured on its own, never an inversion of the light one", () => {
   const { light, dark } = PALETTES.default;
   const shipped = defaultThemeConfig("Concordance");
 
