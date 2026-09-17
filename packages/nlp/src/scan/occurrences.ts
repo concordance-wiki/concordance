@@ -90,24 +90,64 @@ function automatonOf(dictionary: Dictionary, pack: LanguagePack): Automaton<Dict
   return automaton;
 }
 
+/** The comparison forms of the prefixes, one or several words each, to the type each announces. */
+interface PrefixTypes {
+  /** A prefix listed under several types announces none. */
+  types: ReadonlyMap<string, string | undefined>;
+  /** How many words the longest prefix has: how far before a match the scan looks. */
+  longest: number;
+}
+
 /**
- * Comparison form of every prefix word to the type it announces; a word listed under several
- * types announces none. A prefix is a single word: the token right before the match.
+ * Comparison form of every prefix to the type it announces; a prefix listed under several types
+ * announces none. A prefix is one word or several, the tokens right before the match.
  */
 function prefixTypes(
   typePrefixes: Readonly<Record<string, readonly string[]>>,
   pack: LanguagePack,
-): Map<string, string | undefined> {
+): PrefixTypes {
   const types = new Map<string, string | undefined>();
+  let longest = 0;
   for (const [type, words] of Object.entries(typePrefixes)) {
     for (const prefix of words) {
-      const word = tokenize(prefix, pack)
-        .map((token) => token.word)
-        .join(" ");
+      const tokens = tokenize(prefix, pack).map((token) => token.word);
+      const word = tokens.join(" ");
+      longest = Math.max(longest, tokens.length);
       types.set(word, types.has(word) ? undefined : type);
     }
   }
-  return types;
+  return { types, longest };
+}
+
+const BLANK = /^\s*$/u;
+
+/** Whether nothing but spaces separates the tokens from one another and from the match. */
+function contiguous(text: string, tokens: readonly Token[], matchStart: number): boolean {
+  const ends = tokens.map((token) => token.end);
+  const starts = [...tokens.slice(1).map((token) => token.start), matchStart];
+  return ends.every((end, index) => BLANK.test(text.slice(end, starts[index])));
+}
+
+/**
+ * The type the words right before a match announce, the longest prefix first: `data object
+ * Resource` announces a data object where `object Resource` alone would not. A prefix separated
+ * from the mention by punctuation announces nothing: "of this type. Resource" is two sentences.
+ */
+function announcedType(
+  scan: ParagraphScan,
+  match: RawMatch<unknown>,
+  matchStart: number,
+): string | undefined {
+  const { tokens, prefixes, paragraph } = scan;
+  for (let length = prefixes.longest; length >= 1; length -= 1) {
+    const first = match.start - length;
+    if (first < 0) continue;
+    const before = tokens.slice(first, match.start);
+    if (!contiguous(paragraph.text, before, matchStart)) continue;
+    const type = prefixes.types.get(before.map((token) => token.word).join(" "));
+    if (type !== undefined) return type;
+  }
+  return undefined;
 }
 
 // The automaton only reports spans inside the tokens it read, so the slice is never empty.
@@ -138,16 +178,15 @@ interface ParagraphScan {
   input: ScanDocumentInput;
   paragraph: ScannedParagraph;
   tokens: readonly Token[];
-  prefixes: ReadonlyMap<string, string | undefined>;
+  prefixes: PrefixTypes;
 }
 
 /** The occurrences of one match: one per target of the entry, at the same confidence. */
 function occurrencesOf(scan: ParagraphScan, match: RawMatch<DictionaryEntry>): Occurrence[] {
-  const { input, paragraph, tokens, prefixes } = scan;
+  const { input, paragraph, tokens } = scan;
   const { scale } = input;
   const span = spanOf(tokens, match);
-  const before = tokens[match.start - 1];
-  const expectedType = before === undefined ? undefined : prefixes.get(before.word);
+  const expectedType = announcedType(scan, match, span.start);
   const announced = expectedType === undefined ? 0 : scale.type_prefix_bonus;
   const factor = match.key.homonym ? scale.homonym_factor : 1;
   const base: Omit<Occurrence, "target"> = {

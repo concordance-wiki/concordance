@@ -55,7 +55,8 @@ export async function main(argv: string[], io: CommandIo): Promise<ExitCode> {
     for (const line of usage) io.out(line);
     return name === undefined ? exitCodes.failure : exitCodes.ok;
   }
-  const command = commands[name];
+  // Own keys only: `toString` or `constructor` would otherwise find a method of Object.prototype.
+  const command = Object.hasOwn(commands, name) ? commands[name] : undefined;
   if (command === undefined) {
     io.err(`unknown command: ${name}`);
     for (const line of usage) io.err(line);
