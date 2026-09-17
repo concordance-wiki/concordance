@@ -23,6 +23,15 @@ describe("concordance", () => {
     expect(io.stderr.slice(1)).toEqual(usage);
   });
 
+  it.each(["toString", "constructor", "hasOwnProperty", "__proto__"])(
+    "rejects %s like any unknown command, never a method inherited by the command table",
+    async (name) => {
+      const io = recordedIo();
+      expect(await main([name], io)).toBe(2);
+      expect(io.stderr[0]).toBe(`unknown command: ${name}`);
+    },
+  );
+
   it("dispatches to the named command", async () => {
     const io = recordedIo({ "/work/concordance.yaml": validConfig });
     expect(await main(["validate-config"], io)).toBe(0);

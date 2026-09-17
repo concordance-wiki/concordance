@@ -265,6 +265,22 @@ describe("scanDocument", () => {
     ]);
   });
 
+  it("recognises a prefix of several words, the longest first, and none across punctuation", () => {
+    const typePrefixes = { data_object: ["data object"], business_object: ["object"] };
+    const [twoWords] = scanEn([{ line: 1, text: "The data object Resource is kept." }], {
+      typePrefixes,
+    });
+    expect(twoWords).toMatchObject({ key: "resource", expectedType: "data_object" });
+    const [oneWord] = scanEn([{ line: 1, text: "The object Resource is kept." }], { typePrefixes });
+    expect(oneWord).toMatchObject({ expectedType: "business_object" });
+    const [afterStop] = scanEn([{ line: 1, text: "Of this table. Resource is kept." }]);
+    expect(afterStop).not.toHaveProperty("expectedType");
+    const [comma] = scanEn([{ line: 1, text: "The data, object Resource is kept." }], {
+      typePrefixes,
+    });
+    expect(comma).toMatchObject({ expectedType: "business_object" });
+  });
+
   it("never takes a prefix word that is part of the match as a type prefix", () => {
     const occurrences = scanEn([{ line: 1, text: "Call API mentions to record it." }]);
     expect(occurrences).toEqual([
