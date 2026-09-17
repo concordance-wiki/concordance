@@ -345,7 +345,7 @@ describe("loadContracts", () => {
         check: "W-CONTRACT-UNREACHABLE",
         severity: "warning",
         message:
-          "contract ./orders.wsdl of specs/api/orders could not be read: file /repos/specs/api/orders.wsdl does not exist",
+          "contract ./orders.wsdl of specs/api/orders could not be read: file api/orders.wsdl does not exist",
         remediation:
           "fix the contract URL or path, give the build network access, or check that the file is a contract an enabled plugin reads; the note keeps its manual operations meanwhile",
         source: "specs",

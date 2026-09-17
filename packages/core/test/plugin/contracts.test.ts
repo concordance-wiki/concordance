@@ -18,6 +18,8 @@ import {
   fingerprintOf,
   loadContracts,
   cacheVersionOf,
+  contractPathIn,
+  refusedContractUrl,
   readCachedContract,
   readCachedContractView,
   writeCachedContract,
@@ -644,11 +646,77 @@ describe("loadContracts", () => {
     expect(output.entities).toEqual([]);
   });
 
+  it("refuses a contract path that leaves the source, absolute or climbing, without naming a path of the machine", async () => {
+    const { input } = harness({ "/repos/secrets.lines": text, "/etc/passwd": "root" });
+    const output = await loadContracts(
+      input([
+        api({ id: "specs/api/a", attributes: { contract: "../../secrets.lines" } }),
+        api({ id: "specs/api/b", attributes: { contract: "/etc/passwd" } }),
+        api({ id: "specs/api/c", attributes: { contract: ".." } }),
+      ]),
+      linesReader,
+    );
+    expect(output.entities).toEqual([]);
+    expect(output.findings.map((finding) => finding.message).sort()).toEqual([
+      "contract .. of specs/api/c could not be read: the path leaves the source",
+      "contract ../../secrets.lines of specs/api/a could not be read: the path leaves the source",
+      "contract /etc/passwd of specs/api/b could not be read: the path leaves the source",
+    ]);
+    expect(contractPathIn("/repos/specs", "api/note.md", "../contracts/x.yaml")).toEqual({
+      path: "/repos/specs/contracts/x.yaml",
+    });
+    expect(contractPathIn("/repos/specs", "api/note.md", "../../x.yaml")).toEqual({
+      reason: "the path leaves the source",
+    });
+  });
+
+  it("never fetches a URL that points at the build machine, its link-local neighbours or a private network, and reports a malformed one", async () => {
+    const calls: string[] = [];
+    const stub: typeof fetch = (url) => {
+      calls.push(url instanceof Request ? url.url : url.toString());
+      return Promise.resolve(new Response(text));
+    };
+    const refused = [
+      "http://localhost:9200/openapi.json",
+      "http://127.0.0.1/openapi.json",
+      "http://169.254.169.254/latest/meta-data",
+      "http://10.0.0.5/x",
+      "http://172.16.3.4/x",
+      "http://192.168.1.1/x",
+      "http://[::1]/x",
+      "http://[fe80::1]/x",
+      "http://[fd00::1]/x",
+    ];
+    const { input } = harness({}, stub);
+    const output = await loadContracts(
+      input(
+        refused.map((url, index) =>
+          api({ id: `specs/api/r${String(index)}`, attributes: { contract: url } }),
+        ),
+      ),
+      linesReader,
+    );
+    expect(calls).toEqual([]);
+    expect(new Set(output.findings.map((finding) => finding.message.split(": ").at(-1)))).toEqual(
+      new Set([
+        "the URL points at the build machine or its private network, which a contract never reads",
+      ]),
+    );
+    expect(refusedContractUrl("https://example.invalid/openapi.json")).toBeUndefined();
+    expect(refusedContractUrl("https://127.0.0.1.example.invalid/x")).toBeUndefined();
+    expect(refusedContractUrl("https://8.8.8.8/x")).toBeUndefined();
+    expect(refusedContractUrl("https://172.32.0.1/x")).toBeUndefined();
+    expect(refusedContractUrl("https://[2001:db8::1]/x")).toBeUndefined();
+    expect(refusedContractUrl("http://[::]/x")).toBeDefined();
+    expect(refusedContractUrl("http://0.0.0.0/x")).toBeDefined();
+    expect(refusedContractUrl("http://[::1")).toBe("the URL is malformed");
+  });
+
   it("reports a missing file and a source without root folder", async () => {
     const { input } = harness();
     const output = await loadContracts(input([api()]), linesReader);
     expect(output.findings.map((finding) => finding.message)).toEqual([
-      "contract ./model-query.lines of specs/api/model-query could not be read: file /repos/specs/api/model-query.lines does not exist",
+      "contract ./model-query.lines of specs/api/model-query could not be read: file api/model-query.lines does not exist",
     ]);
     // Only a location starting with the scheme is a URL; anything else is a path, odd as it may look.
     const odd = await loadContracts(
@@ -660,9 +728,9 @@ describe("loadContracts", () => {
       linesReader,
     );
     expect(odd.findings.map((finding) => finding.message)).toEqual([
-      "contract ftp://x.invalid/c of specs/api/c could not be read: file /repos/specs/api/ftp:/x.invalid/c does not exist",
-      "contract https:/x.invalid/b of specs/api/b could not be read: file /repos/specs/api/https:/x.invalid/b does not exist",
-      "contract mirror/https://x.invalid/a of specs/api/a could not be read: file /repos/specs/api/mirror/https:/x.invalid/a does not exist",
+      "contract ftp://x.invalid/c of specs/api/c could not be read: file api/ftp:/x.invalid/c does not exist",
+      "contract https:/x.invalid/b of specs/api/b could not be read: file api/https:/x.invalid/b does not exist",
+      "contract mirror/https://x.invalid/a of specs/api/a could not be read: file api/mirror/https:/x.invalid/a does not exist",
     ]);
     const orphan = input([api()]);
     orphan.payload.roots = {};

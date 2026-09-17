@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { dirname, join, posix, resolve } from "node:path";
+import { dirname, isAbsolute, join, posix, relative, resolve } from "node:path";
 
 import { slugify } from "../identity/slug.js";
 import type { FileSystem } from "../io/file-system.js";
@@ -224,6 +224,63 @@ function isUrl(location: string): boolean {
 }
 
 /**
+ * Whether a literal address is one a contract URL never reaches from a note: the machine itself,
+ * its link-local neighbours (the metadata service of a cloud runner among them) and the private
+ * ranges. A note of a source repository could otherwise make the build read any service the
+ * runner sees. A host name is fetched as written: the build does not resolve names before fetching.
+ */
+function isLocalHost(host: string): boolean {
+  if (host === "localhost") return true;
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}$/u.exec(host);
+  if (v4 !== null) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    return (
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168)
+    );
+  }
+  // An IPv6 literal keeps its brackets in the host of a URL.
+  const v6 = host.startsWith("[") ? host.slice(1, -1).toLowerCase() : undefined;
+  if (v6 === undefined) return false;
+  return v6 === "::1" || v6 === "::" || /^fe[89ab]/u.test(v6) || /^f[cd]/u.test(v6);
+}
+
+/** Why a URL is not fetched: a host the build never reaches, or an address that is not one. */
+export function refusedContractUrl(location: string): string | undefined {
+  let host: string;
+  try {
+    host = new URL(location).hostname;
+  } catch {
+    return "the URL is malformed";
+  }
+  return isLocalHost(host)
+    ? "the URL points at the build machine or its private network, which a contract never reads"
+    : undefined;
+}
+
+/**
+ * The absolute path of a contract declared as a path, from the folder of the note, when it stays
+ * inside the source: a location that climbs out of it, or names an absolute path, is refused so
+ * that a note never makes the build read what the source does not hold.
+ */
+export function contractPathIn(
+  root: string,
+  notePath: string,
+  location: string,
+): { path: string } | { reason: string } {
+  const path = resolve(root, dirname(notePath), location);
+  const inside = relative(root, path);
+  if (inside === "" || inside.startsWith("..") || isAbsolute(inside)) {
+    return { reason: "the path leaves the source" };
+  }
+  return { path };
+}
+
+/**
  * The same finding whichever plugin reports it, so that two contract plugins failing to fetch the
  * same contract produce one finding once the pipeline merges them.
  */
@@ -249,6 +306,8 @@ async function fetchContract(
     if (input.context.fetch === undefined) {
       return { reason: "the build runs without network access" };
     }
+    const refused = refusedContractUrl(location);
+    if (refused !== undefined) return { reason: refused };
     try {
       const response = await input.context.fetch(location);
       if (!response.ok) return { reason: `HTTP ${String(response.status)}` };
@@ -261,11 +320,13 @@ async function fetchContract(
   if (root === undefined) {
     return { reason: `source ${api.source.name} has no root folder` };
   }
-  const path = resolve(root, dirname(api.source.path), location);
-  if (!input.context.fs.exists(path)) {
-    return { reason: `file ${path} does not exist` };
+  const located = contractPathIn(root, api.source.path, location);
+  if ("reason" in located) return located;
+  if (!input.context.fs.exists(located.path)) {
+    // The path relative to the source, never the absolute one: the finding is published.
+    return { reason: `file ${relative(root, located.path)} does not exist` };
   }
-  return { text: input.context.fs.readText(path) };
+  return { text: input.context.fs.readText(located.path) };
 }
 
 /**

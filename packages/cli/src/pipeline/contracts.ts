@@ -1,6 +1,7 @@
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 
 import {
+  contractPathIn,
   cachedContractViewPath,
   canonicalJson,
   readCachedContractView,
@@ -41,9 +42,10 @@ function contractFile(
 ): string | undefined {
   const api = entities.find((entity) => entity.id === record.api);
   const root = sources.find((source) => source.name === api?.source.name)?.root;
-  return api === undefined || root === undefined
-    ? undefined
-    : resolve(root, dirname(api.source.path), record.location);
+  if (api === undefined || root === undefined) return undefined;
+  // The same bound as the loader: a contract outside its source is never copied under the output.
+  const located = contractPathIn(root, api.source.path, record.location);
+  return "reason" in located ? undefined : located.path;
 }
 
 /**
