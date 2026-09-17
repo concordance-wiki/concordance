@@ -2,7 +2,8 @@ name: release-pr
 
 # Every push to main that carries a changeset opens or refreshes one pull request,
 # "chore(release): v<x.y.z>", with the bumped versions, the changelogs, the lockfile and
-# the version pins of the distribution manifests. Merging it is the decision to release,
+# the version pins of the distribution manifests and the licence inventory, which lists the
+# packages of the workspace at their new version. Merging it is the decision to release,
 # taken by a person: the pull request is never merged automatically, and the release
 # workflow tags the merge commit once it lands. Nothing here publishes a package: the
 # action only versions, it has no publish command.
