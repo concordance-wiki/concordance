@@ -132,7 +132,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | @types/json-schema | 7.0.15 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/mdast | 4.0.4 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/ms | 2.1.0 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/node | 22.20.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/node | 26.5.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/picomatch | 4.0.3 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/unist | 3.0.3 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | @types/whatwg-mimetype | 3.0.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
@@ -428,10 +428,10 @@ Every package of this repository is published under the [GNU General Public Lice
 | type-check | 0.4.0 | MIT | development | <https://github.com/gkz/type-check> |
 | typed-inject | 5.0.0 | Apache-2.0 | development | <https://github.com/nicojs/typed-inject> |
 | typed-rest-client | 2.3.1 | MIT | development | <https://github.com/Microsoft/typed-rest-client> |
-| typescript | 5.9.3 | Apache-2.0 | development | <https://github.com/microsoft/TypeScript> |
+| typescript | 6.0.3 | Apache-2.0 | development | <https://github.com/microsoft/TypeScript> |
 | typescript-eslint | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
 | underscore | 1.13.8 | MIT | development | <https://github.com/jashkenas/underscore> |
-| undici-types | 6.21.0 | MIT | development | <https://github.com/nodejs/undici> |
+| undici-types | 8.9.0 | MIT | development | <https://github.com/nodejs/undici> |
 | unicorn-magic | 0.3.0 | MIT | development | <https://github.com/sindresorhus/unicorn-magic> |
 | unified | 11.0.5 | MIT | runtime | <https://github.com/unifiedjs/unified> |
 | unist-util-is | 6.0.1 | MIT | runtime | <https://github.com/syntax-tree/unist-util-is> |

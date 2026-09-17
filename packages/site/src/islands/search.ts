@@ -416,7 +416,8 @@ export function wireArrows(
 
 /** Where a list is drawn: the panel of the live results under a field, or the island of the results page. */
 export interface SearchPanel {
-  hidden: boolean;
+  /** `hidden` as the platform types it: a boolean, or the `until-found` keyword the page never uses. */
+  hidden: boolean | string;
   addEventListener(type: "keydown", listener: (event: KeyEvent) => void): void;
 }
 
@@ -427,7 +428,7 @@ export interface CounterSlot {
 
 /** The button clearing the field, served hidden and shown while the field holds a query. */
 export interface SearchClear {
-  hidden: boolean;
+  hidden: boolean | string;
   addEventListener(type: "click", listener: () => void): void;
 }
 

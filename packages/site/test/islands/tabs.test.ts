@@ -59,7 +59,7 @@ const selected = (tabs: HTMLElement[]): string[] =>
   tabs.map(
     (tab) => `${tab.getAttribute("aria-selected") ?? ""}/${tab.getAttribute("tabindex") ?? ""}`,
   );
-const hidden = (panels: HTMLElement[]): boolean[] => panels.map((panel) => panel.hidden);
+const hidden = (panels: HTMLElement[]): boolean[] => panels.map((panel) => panel.hidden !== false);
 
 describe("the tabs island", () => {
   it("serves the tabs as anchors following the tablist pattern, the first one selected, no tabindex forced", () => {
