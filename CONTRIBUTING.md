@@ -75,7 +75,7 @@ The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict
 
 ## Pull requests
 
-The pull request template carries the checklist. In short: tests named after the acceptance criteria, golden corpus snapshot updated and justified or declared unchanged, no coverage exclusion added, no dependency added without justification, labels through i18n, no proper noun, documentation up to date, changeset present.
+The pull request template carries the checklist. In short: tests named after the acceptance criteria, golden corpus snapshot updated and justified or declared unchanged, no coverage exclusion added, no dependency added without justification, labels through i18n, no proper noun, documentation up to date (the "In this version" list of `docs/guides/limits.md` re-read when a change lifts a limit it names), changeset present.
 
 One pull request does one thing. A pull request that fixes a bug and renames a module is two pull requests. Keep the description factual: what changes, why, and what a reviewer should look at first.
 

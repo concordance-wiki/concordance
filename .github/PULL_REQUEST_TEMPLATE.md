@@ -1,6 +1,6 @@
 ## What
 
-<!-- One paragraph: what changes and why. Reference the story identifier (for example L1-03) when there is one. -->
+<!-- One paragraph: what changes and why. Reference the issue when there is one. -->
 
 ## Checklist
 
@@ -12,7 +12,7 @@ Everything here is public, forever. Every commit is deliverable: it builds, pass
 - [ ] No dependency added without a justification below
 - [ ] Every label shown in the site goes through the i18n catalogue
 - [ ] No proper noun, no internal context, no attribution trailer
-- [ ] Documentation up to date; a check page exists for every added check
+- [ ] Documentation up to date; a check page exists for every added check; the "In this version" list of `docs/guides/limits.md` re-read when the change lifts a limit it names
 - [ ] Changeset present when a published package changes
 
 ## Snapshot and dependency notes
