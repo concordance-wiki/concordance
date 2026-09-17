@@ -28,7 +28,7 @@ describe("resolveGlobalConfig", () => {
     expect(
       resolveGlobalConfig(root, {
         model: "../wiki/dist/model.json",
-        cache_dir: "/tmp/lint-cache",
+        cache_dir: "cache/lint",
         max_age_hours: 0,
         profile: "profile.yaml",
       }),
@@ -37,11 +37,35 @@ describe("resolveGlobalConfig", () => {
       config: {
         model: "/wiki/dist/model.json",
         remote: false,
-        cacheDir: "/tmp/lint-cache",
+        cacheDir: `${root}/cache/lint`,
         maxAgeHours: 0,
         profile: `${root}/profile.yaml`,
       },
     });
+  });
+
+  it("keeps the cache folder and the profile inside the repository, and never reaches a private address, since the file may come from a fork", () => {
+    const base = { model: "https://wiki.example/model.json" };
+    expect(resolveGlobalConfig(root, { ...base, cache_dir: "/tmp/x" })).toEqual({
+      ok: false,
+      reason: "global.cache_dir leaves the repository: /tmp/x",
+    });
+    expect(resolveGlobalConfig(root, { ...base, cache_dir: "../elsewhere" })).toEqual({
+      ok: false,
+      reason: "global.cache_dir leaves the repository: ../elsewhere",
+    });
+    expect(resolveGlobalConfig(root, { ...base, profile: "../../etc/profile.yaml" })).toEqual({
+      ok: false,
+      reason: "global.profile leaves the repository: ../../etc/profile.yaml",
+    });
+    expect(
+      resolveGlobalConfig(root, { model: "http://169.254.169.254/latest/model.json" }),
+    ).toEqual({
+      ok: false,
+      reason:
+        "global.model: the URL points at the build machine or its private network, which a contract never reads",
+    });
+    expect(resolveGlobalConfig(root, { model: "../wiki/dist/model.json" }).ok).toBe(true);
   });
 
   it("tells a URL from a path by its scheme alone", () => {
