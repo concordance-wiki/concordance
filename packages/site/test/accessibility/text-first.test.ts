@@ -73,7 +73,7 @@ const CONTENT: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
-describe("L9-08 text first: the main content of every page in the served HTML, readable without JavaScript", () => {
+describe("text first: the main content of every page in the served HTML, readable without JavaScript", () => {
   for (const { path, html } of documents) {
     describe(path, () => {
       const served = withoutScripts(html);

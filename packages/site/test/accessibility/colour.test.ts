@@ -18,7 +18,7 @@ const corporate = states.filter((state) =>
   /^entity-page-(corporate|phone|drawer|tablet|map)\.html$/.test(state.path),
 );
 
-describe("L9-08 colour never carries information alone", () => {
+describe("colour never carries information alone", () => {
   describe("a word without a note: a dashed underline, and the same information in the title and in hidden text", () => {
     it("draws the mark of a noteless word dashed in the label grey and the mark of a word with a note dotted, the ink for both", () => {
       expect(declarationsOf(".markdown .recognised-keyword")).toEqual({

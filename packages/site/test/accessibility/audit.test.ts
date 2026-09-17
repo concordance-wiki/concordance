@@ -15,7 +15,7 @@ import { coreTypes, documents, states } from "./pages.js";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
 
-describe("L9-08 audit on every gallery state", () => {
+describe("audit on every gallery state", () => {
   it("lists every state file of the gallery in the page list, one page per file, named after it", () => {
     const files = readdirSync(resolve(here, "../../src/gallery/states"))
       .filter((file) => file.endsWith(".ts"))

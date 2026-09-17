@@ -157,7 +157,7 @@ function guaranteedHeight(target: Target, rules: readonly Rule[]): number {
   return paddingBlock(rules) + (target.lines ?? 0) * LINE;
 }
 
-describe("L9-08 targets of 40 px at least on every interactive element, read from the stylesheet rules", () => {
+describe("targets of 40 px at least on every interactive element, read from the stylesheet rules", () => {
   it("names every interactive selector of the shipped stylesheets, none twice", () => {
     expect(new Set(TARGETS.map((target) => target.selector)).size).toBe(TARGETS.length);
     for (const { selector } of TARGETS) {

@@ -474,6 +474,12 @@ importers:
       '@concordance-wiki/cli':
         specifier: workspace:*
         version: link:../../packages/cli
+      '@concordance-wiki/plugin-contract-openapi':
+        specifier: workspace:*
+        version: link:../../plugins/contract-openapi
+      '@concordance-wiki/plugin-contract-wsdl':
+        specifier: workspace:*
+        version: link:../../plugins/contract-wsdl
       '@concordance-wiki/plugin-convert-libreoffice':
         specifier: workspace:*
         version: link:../../plugins/convert-libreoffice

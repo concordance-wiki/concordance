@@ -28,6 +28,8 @@
   ],
   "dependencies": {
     "@concordance-wiki/cli": "workspace:*",
+    "@concordance-wiki/plugin-contract-openapi": "workspace:*",
+    "@concordance-wiki/plugin-contract-wsdl": "workspace:*",
     "@concordance-wiki/plugin-convert-libreoffice": "workspace:*",
     "@concordance-wiki/plugin-reader-office": "workspace:*",
     "@concordance-wiki/plugin-reader-vtt": "workspace:*"

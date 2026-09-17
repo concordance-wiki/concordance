@@ -2,6 +2,7 @@
 // never be published: an attribution trailer in a commit, an unexpected dot
 // file or directory, an uppercase markdown file outside the governance set.
 import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 
 import { systemCommand } from "./executables.mjs";
 
@@ -49,6 +50,23 @@ for (const path of tracked) {
   }
 }
 
+// Words and identifiers of the steering repository, or of a domain the examples left behind, never published.
+const bannedMarkers = [
+  { name: "a decision identifier", pattern: /\bADR-\d/u },
+  // The specification numbers its own stories: the only file where such an identifier is public by design.
+  { name: "a story identifier", pattern: /\bL\d{1,2}-\d{2,3}\b/u, except: ["docs/spec/mvp.md"] },
+  { name: "a word of the former example domain", pattern: /\bversement\b/iu },
+];
+const scannedExtensions = /\.(md|html|ts|tsx|mjs|js|yaml|yml|json|txt|css)$/u;
+for (const path of tracked) {
+  if (!scannedExtensions.test(path) || !existsSync(path)) continue;
+  const text = readFileSync(path, "utf8");
+  for (const marker of bannedMarkers) {
+    if (marker.except?.includes(path)) continue;
+    if (marker.pattern.test(text)) failures.push(`${path} carries ${marker.name}`);
+  }
+}
+
 const range = process.env.HYGIENE_COMMIT_RANGE ?? "HEAD~20..HEAD";
 const commitMessages = (revisions) =>
   execFileSync(GIT, ["log", "--format=%H%n%B%n--end--", ...revisions], {
@@ -83,5 +101,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file",
+  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file, no banned marker",
 );
