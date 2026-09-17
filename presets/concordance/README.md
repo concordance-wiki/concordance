@@ -104,7 +104,7 @@ plugins:
 
 ## What it contains
 
-- `bin/concordance.js`, the `concordance` and `conc` executables, which run the command line of [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli): `build`, `render`, `export`, `init`, `validate-config`, `lint`, `gallery`.
+- `bin/concordance.js`, the `concordance` and `conc` executables, which run the command line of [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli): `build`, `export`, `gallery`, `init`, `lint`, `mcp`, `query`, `render`, `validate-config`.
 - [`@concordance-wiki/plugin-reader-vtt`](https://www.npmjs.com/package/@concordance-wiki/plugin-reader-vtt): reader for `.vtt` and `.srt` transcripts.
 - [`@concordance-wiki/plugin-reader-office`](https://www.npmjs.com/package/@concordance-wiki/plugin-reader-office): metadata reader for `.docx`, `.pptx`, `.xlsx` and `.pdf`.
 - [`@concordance-wiki/plugin-convert-libreoffice`](https://www.npmjs.com/package/@concordance-wiki/plugin-convert-libreoffice): conversion of office documents to PDF and extraction of their text; needs LibreOffice on the machine.
