@@ -51,9 +51,20 @@ function slideTitles(parts: Parts): string[] {
     .map((slide) => slideTitle(slide.bytes));
 }
 
-/** Reads the document properties of a Word, PowerPoint or Excel package; a missing part yields nothing. */
+/** The parts the reader looks at: the two property parts and the slides. Media, fonts and sheets stay compressed. */
+const READ_PARTS = /^(?:docProps\/(?:core|app)\.xml|ppt\/slides\/slide\d+\.xml)$/u;
+/** How large a part the reader inflates: a property or slide part of several megabytes is not one. */
+export const PART_SIZE_LIMIT = 8 * 1024 * 1024;
+
+/**
+ * Reads the document properties of a Word, PowerPoint or Excel package; a missing part yields
+ * nothing. Only the parts the reader looks at are inflated, and none above `PART_SIZE_LIMIT`:
+ * an archive whose small entries inflate to gigabytes never fills the memory of the build.
+ */
 export function readOoxml(bytes: Uint8Array, kind: OoxmlKind): OfficeMetadata {
-  const parts: Parts = unzipSync(bytes);
+  const parts: Parts = unzipSync(bytes, {
+    filter: (file) => READ_PARTS.test(file.name) && file.originalSize <= PART_SIZE_LIMIT,
+  });
   const core = rootChildren(parts, "docProps/core.xml", "coreProperties");
   const app = rootChildren(parts, "docProps/app.xml", "Properties");
   return compact({

@@ -1,3 +1,4 @@
+import { refusedXml } from "@concordance-wiki/core";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 
 /** An element of the document; text nodes are elements named `#text` whose `text` is the content. */
@@ -49,13 +50,16 @@ function elementsOf(nodes: OrderedNode[]): XmlElement[] {
  * an error naming the reason and the line.
  */
 export function parseXml(text: string): { root: XmlElement } | { error: string } {
+  // No contract declares entities of its own: a DOCTYPE is refused before the parser expands anything.
+  const refused = refusedXml(text);
+  if (refused !== undefined) return { error: refused };
   // The validator is deprecated in favour of a separate package; the pinned version still ships it, and a second dependency for well-formedness alone is not worth it.
   // eslint-disable-next-line @typescript-eslint/no-deprecated -- the pinned parser still ships the validator; a second dependency for well-formedness alone is not worth it
   const validation = XMLValidator.validate(text);
   if (validation !== true) {
     return { error: `${validation.err.msg} (line ${String(validation.err.line)})` };
   }
-  // A validated document has a root element, and the parser returns the ordered node list described above.
+  // With no DOCTYPE to expand, what the validator accepts the parser parses: the ordered node list described above.
   const root = elementsOf(parser.parse(text) as OrderedNode[]).find((e) => e.name !== "#text");
   // The validator refuses a document without a root element.
   return { root: root as XmlElement };

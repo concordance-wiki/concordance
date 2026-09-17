@@ -39,7 +39,7 @@ plugins:
   - "@concordance-wiki/plugin-convert-libreoffice"
 ```
 
-Every `.docx`, `.pptx`, `.xlsx` and `.pdf` file of a source becomes a document entity whose properties come from the file.
+Every `.docx`, `.pptx`, `.xlsx` and `.pdf` file of a source becomes a document entity whose properties come from the file. Of a package, only the two property parts and the slide parts are inflated, none above 8 MB: media, fonts and sheets stay compressed, and an archive whose entries inflate to gigabytes never fills the memory of the build; a part that declares a DOCTYPE is refused, so that no entity is expanded.
 
 ## What you get
 

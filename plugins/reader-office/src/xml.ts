@@ -1,3 +1,4 @@
+import { refusedXml } from "@concordance-wiki/core";
 import { XMLParser } from "fast-xml-parser";
 
 /** An element of an XML part; text nodes are elements named `#text` whose `text` is the content. */
@@ -45,10 +46,13 @@ function elementsOf(nodes: OrderedNode[]): XmlElement[] {
   return elements;
 }
 
-/** Namespace prefixes are dropped, so that `dc:title` and `title` are the same element. */
+/** Namespace prefixes are dropped, so that `dc:title` and `title` are the same element; a part with a DOCTYPE is not read. */
 export function parseXml(bytes: Uint8Array): XmlElement[] {
+  const text = decoder.decode(bytes);
+  const refused = refusedXml(text);
+  if (refused !== undefined) throw new Error(refused);
   // The parser returns the ordered node list described above.
-  return elementsOf(parser.parse(decoder.decode(bytes)) as OrderedNode[]);
+  return elementsOf(parser.parse(text) as OrderedNode[]);
 }
 
 export function childNamed(elements: XmlElement[], name: string): XmlElement | undefined {
