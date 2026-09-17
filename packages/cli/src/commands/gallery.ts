@@ -1,7 +1,7 @@
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import { nodeFileSystem, type PluginConfig, type PluginRegistry } from "@concordance-wiki/core";
+import type { PluginConfig, PluginRegistry } from "@concordance-wiki/core";
 import { defaultTypesDirectory, readTypeModules } from "@concordance-wiki/profile";
 import {
   buildGallery,
@@ -126,7 +126,8 @@ export async function galleryCommand(
   if (configured.theme !== undefined) {
     theme = { ...theme, config: configured.theme };
   }
-  const core = readTypeModules(nodeFileSystem, defaultTypesDirectory());
+  // The type modules of the core through the injected file system, like every other read of a command.
+  const core = readTypeModules(deps.pluginFiles ?? io.fs, defaultTypesDirectory());
   const report = await buildGallery({
     output,
     theme,

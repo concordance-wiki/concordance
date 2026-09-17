@@ -674,6 +674,39 @@ describe("concordance build", () => {
       commandAvailable: () => Promise.resolve(true),
     };
 
+    it("hands the source contributions the fetch of the command io, and none when the io gives none", async () => {
+      const seen: (typeof fetch | undefined)[] = [];
+      const watching = definePlugin({
+        name: "example-contracts",
+        version: "1.0.0",
+        apiVersion: "1",
+        contributes: {
+          sources: [
+            {
+              kind: "watching",
+              load: (input) => {
+                seen.push(input.context.fetch);
+                return Promise.resolve({
+                  entities: [],
+                  links: [],
+                  findings: [],
+                  contracts: [],
+                  candidates: [],
+                });
+              },
+            },
+          ],
+        },
+      });
+      const deps = { ...offline, load: () => Promise.resolve(watching) };
+      expect(await buildCommand([], pluginCorpus(), deps)).toBe(0);
+      const online = pluginCorpus();
+      const given: typeof fetch = () => Promise.resolve(new Response(""));
+      online.fetch = given;
+      expect(await buildCommand([], online, deps)).toBe(0);
+      expect(seen).toEqual([undefined, given]);
+    });
+
     function pluginCorpus(): RecordedIo {
       return recordedIo({
         "/work/concordance.yaml": `${validConfig}plugins: [example-contracts]\n`,
