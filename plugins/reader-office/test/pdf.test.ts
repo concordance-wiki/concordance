@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isoDate, readPdf } from "../src/pdf.js";
+import { isoDate, PDF_SCAN_LIMIT_BYTES, readPdf } from "../src/pdf.js";
 import { latin1, pdf } from "./fixtures.js";
 
 describe("readPdf", () => {
@@ -60,6 +60,19 @@ describe("readPdf", () => {
       "%PDF-1.5\n1 0 obj << /Title (Streamed) >> endobj\n2 0 obj << /Type /XRef /Info 1 0 R >> stream\nendstream endobj",
     );
     expect(readPdf(bytes)).toEqual({ title: "Streamed" });
+  });
+
+  it("reads a file over the scan limit from its tail alone, its metadata found, its pages not counted", () => {
+    const head = latin1("%PDF-1.4\n1 0 obj << /Type /Page >> endobj\n");
+    const tail = latin1(
+      "\n5 0 obj << /Title (Huge scan) >> endobj\ntrailer << /Info 5 0 R >>\n%%EOF\n",
+    );
+    const bytes = new Uint8Array(PDF_SCAN_LIMIT_BYTES + 1);
+    bytes.set(head, 0);
+    bytes.set(tail, bytes.byteLength - tail.byteLength);
+    expect(readPdf(bytes)).toEqual({ title: "Huge scan" });
+    const long = "x".repeat(200_000);
+    expect(readPdf(pdf(`/Title (${long})`)).title).toBe(long);
   });
 
   it("yields no property when the file references no Info dictionary or a missing object", () => {

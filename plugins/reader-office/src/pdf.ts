@@ -38,7 +38,8 @@ function latin1(bytes: Uint8Array): string {
 function decodeString(bytes: number[]): string {
   const [first, second] = bytes;
   if (first === 0xfe && second === 0xff) return utf16.decode(Uint8Array.from(bytes.slice(2)));
-  return String.fromCharCode(...bytes);
+  // One character per byte, without spreading the bytes into a call that a long string would overflow.
+  return Buffer.from(bytes).toString("latin1");
 }
 
 /** The escape a backslash at `at` starts: the bytes it stands for and how many characters follow the backslash. */
@@ -128,15 +129,28 @@ function infoDictionary(text: string): string {
   return match === undefined ? "" : group(match, 1);
 }
 
-/** Reads the native metadata of a PDF: the Info dictionary and the number of page objects. */
+/**
+ * How many bytes the scan reads as text. A file this large is a scan or a bundle of images: its
+ * metadata sits in the trailer at its end, so only the tail is read, and no page count is given.
+ */
+export const PDF_SCAN_LIMIT_BYTES = 64 * 1024 * 1024;
+const TAIL_BYTES = 16 * 1024 * 1024;
+
+/**
+ * Reads the native metadata of a PDF: the Info dictionary and the number of page objects. A file
+ * over `PDF_SCAN_LIMIT_BYTES` is read from its tail alone, where an updated file keeps its
+ * trailer and its Info object, and its pages are not counted.
+ */
 export function readPdf(bytes: Uint8Array): OfficeMetadata {
-  const text = latin1(bytes);
-  if (!text.startsWith("%PDF-")) throw new Error("not a PDF file: the header is missing");
+  const header = latin1(bytes.subarray(0, 5));
+  if (header !== "%PDF-") throw new Error("not a PDF file: the header is missing");
+  const whole = bytes.byteLength <= PDF_SCAN_LIMIT_BYTES;
+  const text = latin1(whole ? bytes : bytes.subarray(bytes.byteLength - TAIL_BYTES));
   const info = infoDictionary(text);
   const property = (key: Property) => nonBlank(stringProperty(info, key));
   const created = property("CreationDate");
   const modified = property("ModDate");
-  const pages = [...text.matchAll(pageObject)].length;
+  const pages = whole ? [...text.matchAll(pageObject)].length : 0;
   return compact({
     title: property("Title"),
     author: property("Author"),
