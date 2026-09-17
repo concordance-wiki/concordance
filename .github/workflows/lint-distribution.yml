@@ -160,4 +160,5 @@ jobs:
       - name: Inputs, reports and version pins of the three manifests
         run: node scripts/check-distribution.mjs
       - name: pre-commit manifest
-        run: pipx run pre-commit validate-manifest .pre-commit-hooks.yaml
+        # Pinned: the manifest check runs the same pre-commit at every release, never the latest of the day.
+        run: pipx run pre-commit==4.6.2 validate-manifest .pre-commit-hooks.yaml
