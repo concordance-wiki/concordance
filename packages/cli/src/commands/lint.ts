@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { createRegistry } from "@concordance-wiki/checks";
@@ -155,6 +155,17 @@ function repositoryOf(io: CommandIo, options: LintOptions): LintRepositoryInput 
   };
 }
 
+/** The profile the wiki configuration names, resolved against its folder: what the build reads, so that the global scope agrees with it. */
+function projectProfileOf(
+  io: CommandIo,
+  options: LintOptions,
+  repository: LintRepositoryInput,
+): string | undefined {
+  const profile = repository.config?.profile;
+  if (options.config === undefined || profile === undefined) return undefined;
+  return resolve(dirname(resolve(io.cwd, options.config)), profile);
+}
+
 /** Applies or rehearses the fixes, announcing every change and every refusal. */
 function fix(io: CommandIo, repository: LintRepositoryInput, dryRun: boolean): void {
   const prefix = dryRun ? "would fix" : "fix";
@@ -175,6 +186,7 @@ async function lintGlobally(
   io: CommandIo,
   repository: LintRepositoryInput,
   local: Finding[],
+  projectProfile: string | undefined,
 ): Promise<{ findings: Finding[]; scope: ReportScope }> {
   const global = await lintGlobal({
     ...repository,
@@ -182,6 +194,7 @@ async function lintGlobally(
     clock: io.clock,
     ...(io.fetch === undefined ? {} : { fetch: io.fetch }),
     profile: loadDefaultProfile(),
+    ...(projectProfile === undefined ? {} : { projectProfile }),
   });
   const findings = mergeFindings(local, global.findings);
   if (global.degraded !== undefined) {
@@ -211,7 +224,7 @@ export async function lintCommand(argv: string[], io: CommandIo): Promise<ExitCo
   const local = lintRepository(repository);
   const { findings, scope } =
     options.scope === "global"
-      ? await lintGlobally(io, repository, local)
+      ? await lintGlobally(io, repository, local, projectProfileOf(io, options, repository))
       : { findings: local, scope: { name: options.scope } };
   const document = formatFindingsAs(options.format, findings, {
     root: io.cwd,

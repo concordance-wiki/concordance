@@ -222,7 +222,7 @@ A note that links to another repository, references an entity of it in its front
 npx concordance lint --scope global --source specs
 ```
 
-The model comes from `global.model` in `concordance-lint.yaml`, a URL or a path (see the [configuration guide](configuration.md#concordance-lintyaml)); the local checks run as well, and the report holds both, deduplicated on check, file, line and entity. Three checks run over the local notes and the remote entities, each finding naming the remote entity and the build timestamp of the model it read:
+The model comes from `global.model` in `concordance-lint.yaml`, a URL or a path (see the [configuration guide](configuration.md#concordance-lintyaml)); the relation matrix and the types come from the profile the wiki configuration names when `--config` gives one, as in the build, unless `global.profile` of `concordance-lint.yaml` names another, the types a plugin contributes staying unknown to the linter, which loads no plugin; the local checks run as well, and the report holds both, deduplicated on check, file, line and entity. Three checks run over the local notes and the remote entities, each finding naming the remote entity and the build timestamp of the model it read:
 
 | Check | What is compared |
 |---|---|

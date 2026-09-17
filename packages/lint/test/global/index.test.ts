@@ -128,6 +128,33 @@ describe("--scope global downloads the latest published model.json and checks cr
     expect(result.findings.filter((finding) => finding.check === "E-META-REL")).toHaveLength(1);
   });
 
+  it("reads the profile the wiki configuration names when the lint configuration names none, global.profile replacing it", async () => {
+    const restricting = [
+      "relations:",
+      "  accesses:",
+      "    allowed: [[screen, business_object], [screen, term]]",
+      "",
+    ].join("\n");
+    const fs = repository({ [`${root}/wiki/profile.yaml`]: restricting });
+    const fromWiki = await run({
+      fs,
+      fetch: stubFetch([{ body: modelText() }]).fetch,
+      projectProfile: `${root}/wiki/profile.yaml`,
+    });
+    expect(fromWiki.degraded).toBeUndefined();
+    expect(fromWiki.findings.filter((finding) => finding.check === "E-META-REL")).toHaveLength(1);
+    const replaced = await run({
+      fs,
+      fetch: stubFetch([{ body: modelText() }]).fetch,
+      projectProfile: `${root}/wiki/profile.yaml`,
+      overrides: { checks: {}, global: { model: MODEL_URL, profile: "elsewhere.yaml" } },
+    });
+    expect(replaced).toEqual({
+      findings: [],
+      degraded: { reason: "profile /work/elsewhere.yaml: file not found" },
+    });
+  });
+
   it("merges the type modules of the types_dir the project profile names before its own keys", async () => {
     const fs = repository({
       [`${root}/profile.yaml`]: "types_dir: ./types\n",
