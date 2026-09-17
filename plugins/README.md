@@ -6,10 +6,10 @@ Official plugins, published under `@concordance-wiki/plugin-*`. An example plugi
 |---|---|---|---|
 | [`reader-vtt`](reader-vtt/README.md) | reader for `.vtt` and `.srt`: cues, speakers, duration, language, HTML rendering with addressable timecodes | none | available |
 | [`reader-office`](reader-office/README.md) | metadata reader for `.docx`, `.pptx`, `.xlsx`, `.pdf`: title, author, subject, keywords, dates, page, word and slide counts, slide titles | none | available |
-| [`convert-libreoffice`](convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache; thumbnails and text later | LibreOffice | available |
+| [`convert-libreoffice`](convert-libreoffice/README.md) | converter of `.docx`, `.pptx`, `.xlsx` to PDF with a fingerprint cache, and of `.pdf` sources kept as they are; the text of every page extracted; no thumbnail | LibreOffice, optional | available |
 | [`contract-openapi`](contract-openapi/README.md) | source of `endpoint` entities from the OpenAPI 3.x contract an API note declares, candidate objects from its schemas, cached by fingerprint | none | available |
 | [`contract-wsdl`](contract-wsdl/README.md) | source of `endpoint` entities from the WSDL 1.1 or 2.0 contract an API note declares, candidate objects from its XSD types, cached by fingerprint | none | available |
-| `viewer-pdf` | UI component: pdf.js viewer and thumbnail rail | none | planned |
+| `viewer-pdf` (shipped with the default theme of `@concordance-wiki/site`, not a separate package) | UI component: pdf.js viewer loaded on demand from the page of a document, with a rail of positions | none | available |
 | `viewer-swagger` | UI component: Swagger UI and WSDL rendering | none | planned |
 
 A plugin imports `@concordance-wiki/core` and `@concordance-wiki/profile` only, plus the libraries of its format. It follows the layout of a core package (`src/` compiled to `dist/`, `test/` run by Vitest against the sources, 100% coverage) and its integration tests live in its own folder, skipped when the system dependency is absent. See the [plugin guide](../docs/guides/plugins.md).

@@ -4,7 +4,7 @@
 
 A source or a note has not changed for longer than the configured threshold.
 
-The date comes from git, so it is always right. The threshold is `staleness.warn_after_days`, with a default and per-source overrides.
+Not produced by this version: the home page flags dormant sources with the same thresholds instead ([limits](../guides/limits.md)). The date comes from git, so it is always right. The threshold is `staleness.warn_after_days`, with a default and per-source overrides.
 
 ## Before
 
