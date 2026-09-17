@@ -10,6 +10,8 @@ The examples install the published `concordance` package with npm; the [containe
 
 `.github/workflows/wiki.yml` of the configuration repository. Once, in the settings of the repository, set Pages → Source to "GitHub Actions"; nothing else to configure. The examples name the actions by their major tag for legibility; a repository that must stay reproducible pins each action to a commit (`actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`), as the pipelines of the tool itself do. The `build` job writes `dist/` and hands it to the `deploy` job, which needs the `pages` and `id-token` permissions and nothing more.
 
+Every action is pinned by the commit of its release, the tag in a comment, so that a moved tag never runs something else in your pipeline.
+
 ```yaml
 name: wiki
 on:
@@ -21,14 +23,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22 }
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with: { path: .concordance-cache, key: concordance-cache }
       - run: npm install --global @concordance-wiki/concordance
       - run: concordance build
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with: { path: dist }
   deploy:
     needs: build
@@ -37,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
 ```
 
 The site is served under `https://<owner>.github.io/<repository>/`; every link of the site is relative, so the prefix needs no setting. `actions/cache` keeps `.concordance-cache/` between runs: the clones are refreshed rather than redone, and converted documents will be reused once a converter runs.
@@ -80,16 +82,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions: { contents: read, security-events: write }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # The configuration of the wiki, so that the typing rules and the profile of this source apply.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { repository: your-organisation/wiki, path: .wiki }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 22 }
       - id: lint
         run: npx --yes @concordance-wiki/concordance lint --source glossary --config .wiki/concordance.yaml --format sarif --output concordance.sarif
         continue-on-error: true
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3
         with: { sarif_file: concordance.sarif }
       - if: steps.lint.outcome == 'failure'
         run: exit 1
@@ -133,11 +135,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with: { path: .concordance-cache, key: concordance-cache }
       - run: docker run --rm -v "$PWD:/wiki" concordancewiki/concordance build
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with: { path: dist }
   deploy:
     needs: build
@@ -146,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
 ```
 
 ### GitLab Pages, in the container

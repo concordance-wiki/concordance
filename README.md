@@ -117,7 +117,7 @@ sources:
 
 The 0.x versions are published on npm: [`@concordance-wiki/concordance`](https://www.npmjs.com/package/@concordance-wiki/concordance), the command with every official plugin, and [`@concordance-wiki/cli`](https://www.npmjs.com/package/@concordance-wiki/cli), the command alone, with the [engine packages](packages/README.md) and the plugins next to them. The [demo wiki](https://concordance-wiki.github.io/demo-wiki/) is built from this project's own repositories, the [gallery](https://concordance-wiki.github.io/concordance/gallery/) shows every slot of the default theme in every state, and each version has its [release notes](https://github.com/concordance-wiki/concordance/releases) on GitHub.
 
-The project's own wiki is built with Concordance from its [glossary](https://github.com/concordance-wiki/demo-glossary) and [specifications](https://github.com/concordance-wiki/demo-specs), configured by [demo-wiki](https://github.com/concordance-wiki/demo-wiki). Copy that repository to start yours.
+The project's own wiki is built with Concordance from its [glossary](https://github.com/concordance-wiki/demo-glossary), its [specifications](https://github.com/concordance-wiki/demo-specs) and its [briefs](https://github.com/concordance-wiki/demo-briefs), configured by [demo-wiki](https://github.com/concordance-wiki/demo-wiki). Copy that repository to start yours.
 
 ## Going further
 
