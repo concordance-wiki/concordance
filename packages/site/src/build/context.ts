@@ -7,6 +7,7 @@ import type {
   Locale,
   StalenessConfig,
 } from "@concordance-wiki/core";
+import { collation } from "@concordance-wiki/core";
 import {
   formatMessage,
   type Catalogue,
@@ -48,7 +49,7 @@ export interface SiteContextInput {
   locale?: Locale;
   /** `staleness` of the configuration, which the home page reads to flag dormant sources. */
   staleness?: StalenessConfig;
-  /** The collation of the project locale, the `compare` of its language pack; a collator of the locale when absent. */
+  /** The collation of the project locale, the `compare` of its language pack; the order of the shipped packs when absent. */
   collate?: (a: string, b: string) => number;
   /** The names of the glossary sources, in declaration order; the first with a known forge receives new notes. */
   glossarySources?: string[];
@@ -77,10 +78,9 @@ export interface SiteContext extends SiteContextInput {
   collate: (a: string, b: string) => number;
 }
 
-/** The collation the shipped language packs declare: accent-insensitive, digits compared by value. */
-export function defaultCollation(locale: Locale): (a: string, b: string) => number {
-  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
-  return (a, b) => collator.compare(a, b);
+/** The collation the shipped language packs declare: accents and case set aside, digits compared by value. */
+export function defaultCollation(): (a: string, b: string) => number {
+  return collation({ sensitivity: "base", numeric: true });
 }
 
 export function fileKey(source: string, path: string): string {
@@ -122,7 +122,7 @@ export function siteContext(input: SiteContextInput): SiteContext {
     incoming,
     touching,
     language,
-    collate: input.collate ?? defaultCollation(input.locale ?? language),
+    collate: input.collate ?? defaultCollation(),
   };
 }
 

@@ -90,6 +90,7 @@ export {
   type LinkOrder,
   type ProvenanceOrder,
 } from "./model/order.js";
+export { collation, type CollationOptions } from "./model/collation.js";
 export {
   type Link,
   type Provenance,

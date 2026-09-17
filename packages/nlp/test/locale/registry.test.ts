@@ -11,7 +11,6 @@ import {
 
 // A locale the engine does not ship, as a plugin would bring.
 function fakePack(locale: string): LanguagePack {
-  const collator = new Intl.Collator("en");
   return {
     locale,
     language: "Test",
@@ -20,8 +19,8 @@ function fakePack(locale: string): LanguagePack {
     suffixes: new Set(),
     stopwords: new Set(),
     plural: [],
-    collator,
-    compare: (a, b) => collator.compare(a, b),
+    collation: {},
+    compare: (a, b) => Number(a > b) - Number(a < b),
   };
 }
 
