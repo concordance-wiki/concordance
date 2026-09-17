@@ -100,7 +100,8 @@ async function isShallow(directory: string): Promise<boolean> {
 
 async function fetchAndCheckout(directory: string, ref: string): Promise<void> {
   const unshallow = (await isShallow(directory)) ? ["--unshallow"] : [];
-  await git(directory, ["fetch", promisor, ...unshallow, "origin", ref]);
+  // `--end-of-options`: a ref or a URL from the configuration is never read as an option by git.
+  await git(directory, ["fetch", promisor, ...unshallow, "--end-of-options", "origin", ref]);
   await git(directory, ["checkout", "--detach", "--force", "--quiet", "FETCH_HEAD"]);
 }
 
@@ -124,7 +125,7 @@ export const nodeGit: GitClient = {
     if (commitSha.test(ref)) {
       mkdirSync(directory, { recursive: true });
       await git(directory, ["init", "--quiet"]);
-      await git(directory, ["remote", "add", "origin", url]);
+      await git(directory, ["remote", "add", "--end-of-options", "origin", url]);
       await fetchAndCheckout(directory, ref);
       return;
     }
@@ -137,6 +138,7 @@ export const nodeGit: GitClient = {
       "--branch",
       ref,
       "--single-branch",
+      "--end-of-options",
       url,
       directory,
     ]);

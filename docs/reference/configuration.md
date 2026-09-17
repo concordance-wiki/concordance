@@ -112,8 +112,8 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `name` (required) | string | — | pattern `^[a-z0-9][a-z0-9-]*$` | Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens; never a folder the site reserves (about, assets, fragments, index, keywords, search, spaces, todo). |
-| `git` | string | — | non-empty | URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; exclusive with path. |
-| `ref` | string | `"main"` | — | Branch, tag or commit of the git repository to read. |
+| `git` | string | — | pattern `^(?:https?://\|ssh://\|git@)[^\s]+$`; non-empty | URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; https, ssh or git@ (never a local path, never a value starting with a dash); exclusive with path. |
+| `ref` | string | `"main"` | pattern `^[^-\s][^\s]*$` | Branch, tag or commit of the git repository to read; never starts with a dash, never holds a space. |
 | `path` | string | — | non-empty | Local folder, relative to this configuration, read in place; exclusive with git. |
 | `kind` | enum | — | `git`, `path`, `tracker` | Kind of the source, deduced from git or path; tracker declares an issue tracker source, accepted but not read in this version. |
 | `locale` | string | — | pattern `^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$` | Locale of the source, as a BCP 47 tag; selects its language pack (normalisation, stopwords, plural rules, collation) and the type prefixes of the profile for that language. Defaults to project.locale; the engine ships en and fr, plugins may add others. |

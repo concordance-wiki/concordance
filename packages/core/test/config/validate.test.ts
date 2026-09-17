@@ -126,8 +126,37 @@ describe("validateConfig against the published schema", () => {
   });
 
   it("reports a source that is both git and path once, at the source", () => {
-    const issues = issuesOf({ ...minimal, sources: [{ name: "a", git: "x", path: "y" }] });
+    const issues = issuesOf({
+      ...minimal,
+      sources: [{ name: "a", git: "https://forge.example/x.git", path: "y" }],
+    });
     expect(issues.map((issue) => issue.path)).toEqual(["sources[0]"]);
+  });
+
+  it("refuses a git URL that is not https, ssh or git@, and a ref starting with a dash or holding a space: git would read them as options", () => {
+    for (const git of [
+      "-oProxyCommand=touch pwned",
+      "x",
+      "file:///repos/private.git",
+      "/repos/private.git",
+    ]) {
+      const issues = issuesOf({ ...minimal, sources: [{ name: "a", git }] });
+      expect(issues.map((issue) => issue.path)).toEqual(["sources[0].git"]);
+    }
+    for (const ref of ["--upload-pack=touch pwned", "-x", "main branch"]) {
+      const issues = issuesOf({
+        ...minimal,
+        sources: [{ name: "a", git: "https://forge.example/x.git", ref }],
+      });
+      expect(issues.map((issue) => issue.path)).toEqual(["sources[0].ref"]);
+    }
+    for (const ok of [
+      { git: "https://forge.example/x.git", ref: "v1.2" },
+      { git: "ssh://git@forge.example/x.git", ref: "0123456789abcdef0123456789abcdef01234567" },
+      { git: "git@forge.example:org/x.git", ref: "feature/thing" },
+    ]) {
+      expect(issuesOf({ ...minimal, sources: [{ name: "a", ...ok }] })).toEqual([]);
+    }
   });
 
   it("reports a plugin entry that is neither a name nor an object, without the branch details", () => {
