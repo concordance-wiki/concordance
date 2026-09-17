@@ -1,6 +1,13 @@
 import { readFileSync } from "node:fs";
 
-import { describeSchemaError, formatIssue, readSchema, type Locale } from "@concordance-wiki/core";
+import {
+  collation,
+  describeSchemaError,
+  formatIssue,
+  readSchema,
+  type CollationOptions,
+  type Locale,
+} from "@concordance-wiki/core";
 import { Ajv2020, type ErrorObject } from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
@@ -14,7 +21,7 @@ interface PackDocument {
   locale: string;
   language: string;
   apostrophes?: string[];
-  collation: Intl.CollatorOptions;
+  collation: CollationOptions;
   plural: { ending: string; singular: string; min_length?: number }[];
 }
 
@@ -68,7 +75,7 @@ export function loadLanguagePack(directory: URL): LanguagePack {
   const base = directory.href.endsWith("/") ? directory : new URL(`${directory.href}/`);
   const document = readDocument(base);
   const locale = canonical(document.locale, base);
-  const collator = new Intl.Collator(locale, document.collation);
+  const compare = collation(document.collation);
   const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
   const normalize = normalizer(document.apostrophes ?? []);
   const plural: PluralRule[] = document.plural.map((rule) => ({
@@ -89,7 +96,7 @@ export function loadLanguagePack(directory: URL): LanguagePack {
     stopwords: new Set(loadStopwords(readFileSync(new URL("stopwords.txt", base), "utf8"))),
     suffixes: new Set(loadSuffixes(optionalText(new URL("suffixes.txt", base)), normalize)),
     plural,
-    collator,
-    compare: (a, b) => collator.compare(a, b),
+    collation: document.collation,
+    compare,
   };
 }

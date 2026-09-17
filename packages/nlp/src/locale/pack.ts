@@ -1,3 +1,4 @@
+import type { CollationOptions } from "@concordance-wiki/core";
 import type { Locale } from "@concordance-wiki/core";
 
 /** A suffix rule bringing a plural form back to its singular. */
@@ -29,8 +30,8 @@ export interface LanguagePack {
   /** Endings of the inflected forms of the language, in comparison form; empty when the pack lists none. */
   suffixes: ReadonlySet<string>;
   plural: readonly PluralRule[];
-  /** Locale-aware, accent-insensitive and numeric, for every alphabetical index. */
-  collator: Intl.Collator;
+  /** What every alphabetical index of the locale sets aside, as the pack declares it: accents and case, digits compared by value, for the shipped packs. */
+  collation: CollationOptions;
   /** Usable directly as a sort comparator. */
   compare: (a: string, b: string) => number;
 }

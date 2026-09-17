@@ -21,6 +21,7 @@ describe("@concordance-wiki/core", () => {
       "cachedContractPath",
       "cachedContractViewPath",
       "canonicalJson",
+      "collation",
       "commandExists",
       "compareContracts",
       "compareEntities",

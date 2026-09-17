@@ -119,8 +119,8 @@ describe("filedEntities", () => {
     expect(byLanguage.map(({ entity: filed }) => filed.title)).toEqual(
       collated.map(([title]) => title),
     );
-    expect(defaultCollation("en")("Étude", "etude")).toBe(0);
-    expect(defaultCollation("en")("note 10", "note 9")).toBeGreaterThan(0);
+    expect(defaultCollation()("Étude", "etude")).toBe(0);
+    expect(defaultCollation()("note 10", "note 9")).toBeGreaterThan(0);
   });
 
   it("orders two titles that collate alike by identifier", () => {

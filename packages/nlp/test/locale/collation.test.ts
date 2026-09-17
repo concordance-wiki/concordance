@@ -19,12 +19,12 @@ describe("the fr pack collates with French rules", () => {
     expect(fr.compare("item 2", "item 10")).toBeLessThan(0);
   });
 
-  it("exposes the collator it compares with", () => {
-    expect(fr.collator.resolvedOptions()).toMatchObject({
-      locale: "fr",
-      sensitivity: "base",
-      numeric: true,
-    });
+  it("declares the options it compares with, read by no platform", () => {
+    expect(fr.collation).toEqual({ sensitivity: "base", numeric: true });
+  });
+
+  it("orders the titles of an index without the collation data of the runtime: œuvre after ouvrage, not among the oe", () => {
+    expect(["œuvre", "ouvrage", "oeuvre"].sort(fr.compare)).toEqual(["oeuvre", "ouvrage", "œuvre"]);
   });
 });
 
@@ -45,11 +45,7 @@ describe("the en pack collates with English rules", () => {
     expect(en.compare("Resume", "résumé")).toBe(0);
   });
 
-  it("exposes the collator it compares with", () => {
-    expect(en.collator.resolvedOptions()).toMatchObject({
-      locale: "en",
-      sensitivity: "base",
-      numeric: true,
-    });
+  it("declares the options it compares with", () => {
+    expect(en.collation).toEqual({ sensitivity: "base", numeric: true });
   });
 });
