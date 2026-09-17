@@ -11,7 +11,7 @@ export {
 export { parseConfig, parseLock, parseTheme, parseYaml } from "./config/load.js";
 export { validateLock } from "./config/lock.js";
 export { formatIssue, formatValidation } from "./config/report.js";
-export { readSchema, type SchemaName } from "./config/schema.js";
+export { compiledSchema, readSchema, type SchemaName } from "./config/schema.js";
 export type * from "./config/types.js";
 export { validateTheme } from "./config/theme.js";
 export {

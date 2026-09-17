@@ -1,7 +1,7 @@
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 
 import { formatIssue } from "../config/report.js";
-import { readSchema } from "../config/schema.js";
+import { compiledSchema } from "../config/schema.js";
 import type { ConfigIssue } from "../config/types.js";
 import { describeSchemaError } from "../config/validate.js";
 import type { PluginManifest } from "./api.js";
@@ -21,12 +21,9 @@ export class PluginDefinitionError extends Error {
   }
 }
 
-/** Compiles the published schema; a plugin is defined once per process, so nothing is cached. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction {
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  // The core ships no format library; the documentation URL is checked by the platform parser.
-  ajv.addFormat("uri", (value) => URL.canParse(value));
-  return ajv.compile(readSchema("plugin"));
+  return compiledSchema("plugin");
 }
 
 function labelOf(document: unknown): string {

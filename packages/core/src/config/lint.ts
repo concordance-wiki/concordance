@@ -1,11 +1,11 @@
 import { posix } from "node:path";
 
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
 import type { FileSystem } from "../io/file-system.js";
 import { formatIssue } from "./report.js";
-import { readSchema } from "./schema.js";
+import { compiledSchema } from "./schema.js";
 import type { CheckOverrides, ConfigIssue } from "./types.js";
 import { describeSchemaError } from "./validate.js";
 
@@ -49,11 +49,9 @@ interface LintConfig {
   exclude?: string[];
 }
 
-/** Compiles the published lint schema with the configuration schema it refers to; validation runs once per command, so nothing is cached. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction<LintConfig> {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  ajv.addSchema(readSchema("config"));
-  return ajv.compile<LintConfig>(readSchema("lint"));
+  return compiledSchema<LintConfig>("lint");
 }
 
 function describe(error: ErrorObject, document: unknown): ConfigIssue {
