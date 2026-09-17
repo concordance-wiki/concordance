@@ -68,7 +68,7 @@ Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL 
 | `title`, `author`, `subject`, `keywords` (list) | `docProps/core.xml` | Info dictionary |
 | `created`, `modified` (ISO 8601) | `dcterms:created`, `dcterms:modified` | `CreationDate`, `ModDate`, converted from `D:YYYYMMDDHHmmSS` |
 | `lastModifiedBy` | `cp:lastModifiedBy` | — |
-| `pages`, `words` | `docProps/app.xml` | `pages`: number of page objects |
+| `pages`, `words` | `docProps/app.xml` | `pages`: number of page objects; a PDF over 64 MB is read from its last 16 MB alone, where an updated file keeps its trailer and its Info object, and gets no page count |
 | `slides`, `slideTitles` | pptx only: `Slides` and the title placeholder of every `ppt/slides/slideN.xml`, in slide order; an empty string when a slide has no title | — |
 | `application` | `docProps/app.xml` | — |
 
