@@ -174,6 +174,7 @@ describe("Related pages: one entry per page that evokes the entity, title, type,
     expect(matchesFilter(pages[0] as (typeof pages)[number], "passage 5")).toBe(true);
     expect(matchesFilter(pages[0] as (typeof pages)[number], "note 1")).toBe(false);
     expect(fill("{shown} of {total} pages", { shown: 2, total: 5 })).toBe("2 of 5 pages");
+    expect(fill("{name} of {total}", { name: "$&", total: 1 })).toBe("$& of 1");
   });
 });
 

@@ -220,14 +220,20 @@ function forgeOf(url: string): { forge: Forge; repository: string } | undefined 
  * The edit page of a file on the forge its HTTPS URL names: `<url>/edit/<ref>/<path>` on GitHub,
  * `<url>/-/edit/<ref>/<path>` on GitLab; none for any other URL or a local source.
  */
+/** The path as a URL carries it: every segment encoded, the slashes kept, so that `#`, `?`, `%` and spaces reach the forge. */
+function encodedPath(path: string): string {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
 export function forgeEditHref(url: string, ref: string, path: string): string | undefined {
   const forge = forgeOf(url);
   if (forge === undefined) {
     return undefined;
   }
+  const encoded = encodedPath(path);
   return forge.forge === "github"
-    ? `${forge.repository}/edit/${ref}/${path}`
-    : `${forge.repository}/-/edit/${ref}/${path}`;
+    ? `${forge.repository}/edit/${ref}/${encoded}`
+    : `${forge.repository}/-/edit/${ref}/${encoded}`;
 }
 
 /**
@@ -270,7 +276,7 @@ function patternEditHref(pattern: string, source: Entity["source"]): string | un
   }
   return pattern
     .replaceAll("{source}", source.name)
-    .replaceAll("{path}", source.path)
+    .replaceAll("{path}", encodedPath(source.path))
     .replaceAll("{commit}", source.commit ?? "");
 }
 

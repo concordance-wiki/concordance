@@ -637,6 +637,27 @@ describe("validateConfig beyond the schema", () => {
 });
 
 describe("describeSchemaError", () => {
+  it("reads a pointer whose keys carry slashes, as the keys of a model do, and writes them between brackets", () => {
+    const issue = describeSchemaError(
+      {
+        keyword: "type",
+        instancePath: "/neighbours/specs~1foo/0/count",
+        schemaPath: "#/x",
+        params: { type: "integer" },
+        message: "must be integer",
+      },
+      { neighbours: { "specs/foo": [{ id: "specs/bar", count: "nope" }] } },
+    );
+    expect(issue.path).toBe('neighbours["specs/foo"][0].count');
+    expect(issue.received).toBe("nope");
+    expect(
+      describeSchemaError(
+        { keyword: "type", instancePath: "/a~0b/c", schemaPath: "#/x", params: {}, message: "m" },
+        { "a~b": 1 },
+      ),
+    ).toMatchObject({ path: '["a~b"].c', received: undefined });
+  });
+
   it("falls back to the keyword when the validator gives no message", () => {
     const issue = describeSchemaError(
       { keyword: "custom", instancePath: "/sources/0", schemaPath: "#/x", params: {} },

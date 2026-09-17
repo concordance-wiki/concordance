@@ -119,11 +119,14 @@ export function citedDetail(entry: SearchEntry, meta: SearchMeta): string {
 /** The line under the summary of a note: its space, then its other names and its broader term when it declares them. */
 export function factsOf(entry: SearchEntry, meta: SearchMeta): string[] {
   const facts = [meta.sources[entry.source] ?? entry.source];
-  if (entry.aliases !== undefined && entry.aliases.length > 0) {
-    facts.push(meta.labels.alsoCalled.replace("{aliases}", entry.aliases.join(", ")));
+  // Functions, so that a `$` in an alias or a term is written as it is.
+  const aliases = entry.aliases ?? [];
+  if (aliases.length > 0) {
+    facts.push(meta.labels.alsoCalled.replace("{aliases}", () => aliases.join(", ")));
   }
-  if (entry.broader !== undefined) {
-    facts.push(meta.labels.broader.replace("{term}", entry.broader));
+  const broader = entry.broader;
+  if (broader !== undefined) {
+    facts.push(meta.labels.broader.replace("{term}", () => broader));
   }
   return facts;
 }
@@ -218,7 +221,7 @@ export function emptyOf(
   const word = wordPageExit(state.query, meta, root);
   if (entries.length > 0) {
     const lifts = filters.map((filter): EmptyResultsExit => ({
-      label: meta.labels.liftFilter.replace("{label}", filter.label),
+      label: meta.labels.liftFilter.replace("{label}", () => filter.label),
       href: filter.href,
       count: filterEntries(entries, (entry) => entry, withoutFilter(state, filter)).length,
     }));
@@ -616,11 +619,11 @@ export function emptySummary(
   filters: readonly ActiveFilter[],
 ): string {
   if (entries.length === 0 || filters.length === 0) {
-    return meta.labels.noResultFor.replace("{query}", state.query);
+    return meta.labels.noResultFor.replace("{query}", () => state.query);
   }
   return plural(meta.labels.noResultFiltered, filters.length, meta.locale)
-    .replace("{query}", state.query)
-    .replace("{filters}", filters.map((filter) => filter.label).join(", "));
+    .replace("{query}", () => state.query)
+    .replace("{filters}", () => filters.map((filter) => filter.label).join(", "));
 }
 
 /** A field island once read: its input, its clear button, its panel and counter, and the field it was served with. */

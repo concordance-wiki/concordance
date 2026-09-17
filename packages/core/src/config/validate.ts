@@ -9,11 +9,22 @@ function validator<T>(name: SchemaName): ValidateFunction<T> {
   return ajv.compile<T>(readSchema(name));
 }
 
-function pathOf(error: ErrorObject): string {
-  const segments = error.instancePath
+/** The segments of a JSON pointer, `~1` read back as `/` and `~0` as `~`: the keys of a model carry slashes. */
+function segmentsOf(instancePath: string): string[] {
+  return instancePath
     .split("/")
     .slice(1)
-    .map((segment) => (/^\d+$/.test(segment) ? `[${segment}]` : `.${segment}`));
+    .map((segment) => segment.replaceAll("~1", "/").replaceAll("~0", "~"));
+}
+
+const PLAIN_KEY = /^[\w$-]+$/u;
+
+/** The path as a reader writes it: `build.output`, `sources[0].name`, `checks.W-STALE`, `neighbours["specs/foo"][0]`. */
+function pathOf(error: ErrorObject): string {
+  const segments = segmentsOf(error.instancePath).map((segment) => {
+    if (/^\d+$/.test(segment)) return `[${segment}]`;
+    return PLAIN_KEY.test(segment) ? `.${segment}` : `[${JSON.stringify(segment)}]`;
+  });
   return segments.join("").replace(/^\./, "");
 }
 
@@ -90,10 +101,12 @@ export function describeSchemaError(error: ErrorObject, document: unknown): Conf
 }
 
 /** Follows a JSON pointer produced by the validator; configuration keys never need unescaping. */
+/** The value the pointer names, or nothing as soon as a level is not an object to look into. */
 function valueAt(document: unknown, instancePath: string): unknown {
   let current: unknown = document;
-  for (const segment of instancePath.split("/").slice(1)) {
-    current = (current as Record<string, unknown>)[segment];
+  for (const segment of segmentsOf(instancePath)) {
+    if (typeof current !== "object" || current === null) return undefined;
+    current = Reflect.get(current, segment);
   }
   return current;
 }

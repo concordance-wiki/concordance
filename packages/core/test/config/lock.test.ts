@@ -72,7 +72,7 @@ describe("The lock file is validated against schemas/lock.schema.json before the
       { path: "domains", message: "value does not match the expected format" },
       { path: "domains", message: "property name must be valid" },
       // The slashes of the identifier are escaped the way JSON pointers write them.
-      { path: "domains.specs~1roles~1author", message: "must NOT have fewer than 1 characters" },
+      { path: 'domains["specs/roles/author"]', message: "must NOT have fewer than 1 characters" },
     ]);
   });
 

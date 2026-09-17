@@ -164,6 +164,23 @@ describe("siteContext", () => {
     );
   });
 
+  it("encodes every segment of the path in the edit links, the slashes kept, so that #, ?, % and spaces reach the forge", () => {
+    const odd = {
+      ...screen,
+      source: { ...screen.source, path: "minutes/Meeting #3 – Q&A 100%.docx" },
+    };
+    const encoded = "minutes/Meeting%20%233%20%E2%80%93%20Q%26A%20100%25.docx";
+    expect(editHref(context({ editUrl: "https://forge.example/{source}/{path}" }), odd)).toBe(
+      `https://forge.example/specs/${encoded}`,
+    );
+    expect(forgeEditHref("https://github.com/o/r", "main", odd.source.path)).toBe(
+      `https://github.com/o/r/edit/main/${encoded}`,
+    );
+    expect(forgeEditHref("https://gitlab.com/o/r", "main", odd.source.path)).toBe(
+      `https://gitlab.com/o/r/-/edit/main/${encoded}`,
+    );
+  });
+
   it("builds the edit link from the source URL of the model on GitHub and GitLab, on the declared ref or main, and gives none for a local source", () => {
     const sources = (url: string) =>
       context({

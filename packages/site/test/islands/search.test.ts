@@ -238,6 +238,11 @@ describe("hitsOf and resultOf", () => {
     };
     expect(factsOf(elsewhere, unlabelled)).toEqual(["elsewhere"]);
     expect(factsOf({ ...elsewhere, aliases: [] }, unlabelled)).toEqual(["elsewhere"]);
+    expect(factsOf({ ...elsewhere, aliases: ["$'", "$&"], broader: "$`" }, meta)).toEqual([
+      "elsewhere",
+      "Also called: $', $&",
+      meta.labels.broader.replace("{term}", () => "$`"),
+    ]);
     expect(citedDetail(elsewhere, meta)).toBe("cited in 0 pages");
     // A page nothing cites carries no count at all: neither worded nor bare.
     expect(resultOf(elsewhere, meta, "")).toEqual({
