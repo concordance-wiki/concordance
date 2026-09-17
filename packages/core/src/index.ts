@@ -43,6 +43,14 @@ export { slugify } from "./identity/slug.js";
 export { epochClock, fixedClock, systemClock, type Clock } from "./io/clock.js";
 export { commandExists } from "./io/command.js";
 export {
+  FETCH_MAX_BYTES,
+  FETCH_TIMEOUT_MS,
+  fetchFailure,
+  fetchWithin,
+  readBounded,
+  type BoundedFetchOptions,
+} from "./io/fetch.js";
+export {
   locateExecutable,
   overrideVariable,
   requireExecutable,
