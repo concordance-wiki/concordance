@@ -40,6 +40,11 @@ export interface LintGlobalInput {
   gitignore?: boolean;
   /** The profile the matrix and the types come from; `global.profile` replaces it with a project profile. */
   profile: Profile;
+  /**
+   * Absolute path of the profile the wiki configuration names, when the linter was given one:
+   * the matrix and the types the build uses, read unless `global.profile` names another.
+   */
+  projectProfile?: string;
 }
 
 export interface LintGlobalResult {
@@ -54,24 +59,25 @@ export interface LintGlobalResult {
 type ProfileResolution = { ok: true; profile: Profile } | { ok: false; reason: string };
 
 /**
- * The default profile, or the project profile `global.profile` names, merged over it with the
- * type modules of its `types_dir`; the types the plugins of the wiki contribute are not read
- * here, the linter loading no plugin.
+ * The default profile, or the project profile `global.profile` names, else the one the wiki
+ * configuration names, merged over it with the type modules of its `types_dir`; the types the
+ * plugins of the wiki contribute are not read here, the linter loading no plugin.
  */
 function profileFor(input: LintGlobalInput, config: ResolvedGlobalConfig): ProfileResolution {
-  if (config.profile === undefined) {
+  const path = config.profile ?? input.projectProfile;
+  if (path === undefined) {
     return { ok: true, profile: input.profile };
   }
-  if (!input.fs.exists(config.profile)) {
-    return { ok: false, reason: `profile ${config.profile}: file not found` };
+  if (!input.fs.exists(path)) {
+    return { ok: false, reason: `profile ${path}: file not found` };
   }
-  const text = input.fs.readText(config.profile);
+  const text = input.fs.readText(path);
   const typesDirectory = typesDirectoryOf(text);
   let modules: TypeModule[] = [];
   if (typesDirectory !== undefined) {
-    const directory = resolve(dirname(config.profile), typesDirectory);
+    const directory = resolve(dirname(path), typesDirectory);
     if (!input.fs.exists(directory)) {
-      return { ok: false, reason: `profile ${config.profile}: types_dir: folder not found` };
+      return { ok: false, reason: `profile ${path}: types_dir: folder not found` };
     }
     const read = readTypeModules(input.fs, directory);
     const first = read.issues[0];
@@ -86,7 +92,7 @@ function profileFor(input: LintGlobalInput, config: ResolvedGlobalConfig): Profi
   }
   // A failed resolution always carries at least one issue.
   const first = resolved.issues[0] as ProfileIssue;
-  return { ok: false, reason: `profile ${config.profile}: ${first.path}: ${first.message}` };
+  return { ok: false, reason: `profile ${path}: ${first.path}: ${first.message}` };
 }
 
 function degraded(reason: string): LintGlobalResult {

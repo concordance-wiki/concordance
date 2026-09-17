@@ -464,6 +464,24 @@ describe("concordance lint", () => {
       return state;
     }
 
+    it("reads the profile the configuration given with --config names, resolved against its folder, as the build does", async () => {
+      const io = specs();
+      io.fs.writeText(
+        "/work/wiki/concordance.yaml",
+        "version: 1\nproject: { name: Wiki }\nprofile: ./profiles/main.yaml\napplications: [{ id: wiki }]\nsources: [{ name: specs, path: ../, application: wiki }]\n",
+      );
+      const state = online(io);
+      expect(
+        await lintCommand(
+          ["--scope", "global", "--source", "specs", "--config", "wiki/concordance.yaml"],
+          state.io,
+        ),
+      ).toBe(0);
+      expect(state.io.stderr).toEqual([
+        "global: profile /work/wiki/profiles/main.yaml: file not found; local checks only",
+      ]);
+    });
+
     it("adds the global findings to the local ones, sorted, and prints them like any other", async () => {
       const state = online(specs());
       expect(await lintCommand(["--scope", "global", "--source", "specs"], state.io)).toBe(1);
