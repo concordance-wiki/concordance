@@ -10,9 +10,12 @@
 - { check: W-API-CONSUMER-MISMATCH, source: notes, path: api/mismatch.md }
 - { check: W-API-NOCONSUMER, source: notes, path: api/no-consumer.md }
 - { check: W-APP-MISSING, source: orphan, path: no-application.md, entity: orphan/no-application }
+- { check: W-APP-UNKNOWN, source: notes, path: screens/unknown-application.md, entity: notes/screens/unknown-application }
 - { check: W-ATTRIBUTE-UNKNOWN, source: notes, path: screens/unknown-attribute.md, entity: notes/screens/unknown-attribute }
 - { check: W-DOMAIN-UNCLASSIFIED, source: notes, path: misc/unclassified.md, entity: notes/misc/unclassified }
+- { check: W-DOMAIN-UNKNOWN, source: notes, path: screens/unknown-domain.md, entity: notes/screens/unknown-domain }
 - { check: W-LINK-CROSS-SOURCE, source: notes, path: cross-source.md, line: 3 }
+- { check: W-REF-UNRESOLVED, source: notes, path: screens/unresolved-reference.md, line: 2 }
 - { check: W-TERM-UNDEFINED, text: recurring expression, min_occurrences: 3, min_files: 2 }
 - { check: W-TERM-UNUSED, source: notes, path: terms/never-cited.md }
 - { check: W-TYPE-UNKNOWN, source: notes, path: unknown-type.md }

@@ -282,10 +282,28 @@ for (const id of pages) {
   if (!/^[EWI]-[A-Z0-9]+(-[A-Z0-9]+)*$/.test(id))
     fail(`docs/checks/${id}.md: invalid check identifier`);
 }
+const exercised = new Set();
 for (const path of walk(join(root, "fixtures"), (p) => p.endsWith("findings.yaml"))) {
   for (const finding of readYaml(path) ?? []) {
+    exercised.add(finding.check);
     if (!pages.has(finding.check))
       fail(`${relative(root, path)}: check ${finding.check} has no documentation page`);
+  }
+}
+// Every check has a fixture, or the README of the faulty corpus says why it has none.
+const faultyReadme = readFileSync(join(root, "fixtures/corpora/faulty/en/README.md"), "utf8");
+const notCovered = new Set(
+  [
+    ...(faultyReadme.match(/Not covered here[^\n]*/u)?.[0] ?? "").matchAll(
+      /`([EWI]-[A-Z0-9-]+)`/gu,
+    ),
+  ].map((match) => match[1]),
+);
+for (const id of pages) {
+  if (!exercised.has(id) && !notCovered.has(id)) {
+    fail(
+      `docs/checks/${id}.md: no fixture produces this check and fixtures/corpora/faulty/en/README.md does not list it as not covered`,
+    );
   }
 }
 

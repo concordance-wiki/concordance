@@ -10,9 +10,12 @@
 - { check: W-API-CONSUMER-MISMATCH, source: notes, path: api/desaccord.md }
 - { check: W-API-NOCONSUMER, source: notes, path: api/sans-consommateur.md }
 - { check: W-APP-MISSING, source: orphelin, path: sans-application.md, entity: orphelin/sans-application }
+- { check: W-APP-UNKNOWN, source: notes, path: ecrans/application-inconnue.md, entity: notes/ecrans/application-inconnue }
 - { check: W-ATTRIBUTE-UNKNOWN, source: notes, path: ecrans/attribut-inconnu.md, entity: notes/ecrans/attribut-inconnu }
 - { check: W-DOMAIN-UNCLASSIFIED, source: notes, path: divers/non-classe.md, entity: notes/divers/non-classe }
+- { check: W-DOMAIN-UNKNOWN, source: notes, path: ecrans/domaine-inconnu.md, entity: notes/ecrans/domaine-inconnu }
 - { check: W-LINK-CROSS-SOURCE, source: notes, path: lien-inter-source.md, line: 3 }
+- { check: W-REF-UNRESOLVED, source: notes, path: ecrans/reference-non-resolue.md, line: 2 }
 - { check: W-TERM-UNDEFINED, text: expression récurrente, min_occurrences: 3, min_files: 2 }
 - { check: W-TERM-UNUSED, source: notes, path: termes/jamais-cite.md }
 - { check: W-TYPE-UNKNOWN, source: notes, path: type-inconnu.md }
