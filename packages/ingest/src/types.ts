@@ -31,4 +31,6 @@ export interface IngestDependencies {
   cacheDirectory: string;
   /** Directory of the configuration file, against which `path` sources are resolved. */
   configDirectory: string;
+  /** Where the build writes; a local source holding it never reads it back. */
+  outputDirectory?: string;
 }

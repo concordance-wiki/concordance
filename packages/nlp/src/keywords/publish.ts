@@ -76,8 +76,9 @@ function reachesThreshold(
 /**
  * Splits the candidates into the pages to generate, the expressions the threshold
  * discards and those the confidence withholds. Two keys with the same slug would share an
- * address: the best-scored keeps the plain identifier and the next ones take a numeric
- * suffix, so that no page is lost.
+ * address: the first in code-unit order of the keys keeps the plain identifier and the next
+ * ones take a numeric suffix, so that no page is lost and the address of a key depends on the
+ * published keys alone, never on scores that move from one build to the next.
  */
 export function publishKeywords(
   candidates: readonly KeywordCandidate[],
@@ -86,7 +87,7 @@ export function publishKeywords(
   const published: KeywordPage[] = [];
   const discarded: KeywordCandidate[] = [];
   const withheld: KeywordCandidate[] = [];
-  const taken = new Map<string, number>();
+  const publishable: KeywordCandidate[] = [];
   for (const candidate of [...candidates].sort(compareByScore)) {
     if (!reachesThreshold(candidate, options)) {
       discarded.push(candidate);
@@ -96,6 +97,10 @@ export function publishKeywords(
       withheld.push(candidate);
       continue;
     }
+    publishable.push(candidate);
+  }
+  const taken = new Map<string, number>();
+  for (const candidate of publishable.toSorted((a, b) => byCodeUnit(a.key, b.key))) {
     const base = `keywords/${slugify(candidate.key)}`;
     const rank = (taken.get(base) ?? 0) + 1;
     taken.set(base, rank);

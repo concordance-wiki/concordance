@@ -238,6 +238,24 @@ describe("ingestSources", () => {
   });
 
   describe("local sources", () => {
+    it("never reads back what the build wrote: a source at the root of the project leaves the cache and the output out", async () => {
+      const { fs, deps } = harness();
+      fs.writeText("/project/notes/a.md", "a");
+      fs.writeText(`${deps.cacheDirectory}/sources/other/clone.md`, "cloned");
+      fs.writeText("/project/dist/notes/a/index.html", "<p>page</p>");
+      fs.writeText("/project/dist/fragments/notes/a.json", "{}");
+      const withOutput = { ...deps, outputDirectory: "/project/dist" };
+      const result = await ingestSources(config([{ name: "all", path: "." }]), withOutput);
+      expect(result.findings).toEqual([]);
+      expect(result.sources[0]?.files.map((file) => file.path)).toEqual(["notes/a.md"]);
+      const withoutOutput = await ingestSources(config([{ name: "all", path: "." }]), deps);
+      expect(withoutOutput.sources[0]?.files.map((file) => file.path)).toEqual([
+        "dist/fragments/notes/a.json",
+        "dist/notes/a/index.html",
+        "notes/a.md",
+      ]);
+    });
+
     it("accepts a path source with the file system date in place of the commit", async () => {
       const { fs, deps } = harness();
       fs.writeText("/project/notes/b.md", "b");

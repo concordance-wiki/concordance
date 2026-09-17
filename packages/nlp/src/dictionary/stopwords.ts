@@ -15,7 +15,8 @@ export interface DictionaryStopwordsInput {
 
 /**
  * The stopwords excluded from the dictionary of a locale: the pack's defaults plus every
- * file listed under `inference.stopwords`. A missing file is a configuration mistake.
+ * file listed under `inference.stopwords`. A missing file is a configuration mistake, which the
+ * commands report before a build starts.
  */
 export function dictionaryStopwords(input: DictionaryStopwordsInput): ReadonlySet<string> {
   const words = new Set(languagePack(input.locale).stopwords);

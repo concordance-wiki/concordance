@@ -414,7 +414,7 @@
           }
         },
         "stopwords": {
-          "description": "Extra stopword files, relative to this configuration, one word per line and # for a comment, added to the defaults of the language pack; a title or alias that is a stopword never enters the dictionary. A missing file fails the build.",
+          "description": "Extra stopword files, relative to this configuration, one word per line and # for a comment, added to the defaults of the language pack; a title or alias that is a stopword never enters the dictionary. A missing file is an error of the configuration, reported by validate-config and before a build starts.",
           "type": "array",
           "items": {
             "type": "string"

@@ -106,16 +106,26 @@ describe("publishKeywords", () => {
     ]);
   });
 
-  it("suffixes the identifier of a key whose slug is already taken by a better-scored one", () => {
+  it("suffixes the identifiers of the keys sharing a slug in code-unit order of the keys, whatever their scores", () => {
     const spaced = candidate("web site", { occurrences: 3, documents: 2 }, 6);
     const hyphenated = candidate("web-site", { occurrences: 3, documents: 2 }, 7);
     const third = candidate("web_site", { occurrences: 3, documents: 2 }, 5);
-    const result = publishKeywords([spaced, hyphenated, third], threshold);
-    expect(result.published.map((page) => [page.id, page.key])).toEqual([
-      ["keywords/web-site", "web-site"],
-      ["keywords/web-site-2", "web site"],
+    const expected = [
+      ["keywords/web-site", "web site"],
+      ["keywords/web-site-2", "web-site"],
       ["keywords/web-site-3", "web_site"],
-    ]);
+    ];
+    const result = publishKeywords([spaced, hyphenated, third], threshold);
+    expect(result.published.map((page) => [page.id, page.key])).toEqual(expected);
+    const swapped = publishKeywords(
+      [
+        { ...spaced, score: 1 },
+        { ...hyphenated, score: 2 },
+        { ...third, score: 9 },
+      ],
+      threshold,
+    );
+    expect(swapped.published.map((page) => [page.id, page.key])).toEqual(expected);
   });
 
   it("lists the discarded expressions best score first, then by key", () => {
