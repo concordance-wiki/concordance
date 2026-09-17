@@ -60,10 +60,13 @@ export function entryPoints(manifest) {
   return targets.sort(byCodeUnit);
 }
 
-/** The identity fields of a manifest: description, engines, access, repository, homepage, bugs. */
+/** The identity fields of a manifest: description, engines, access, repository, homepage, bugs, side effects. */
 function checkIdentity(file, directory, manifest, fail) {
   if (typeof manifest.description !== "string" || manifest.description === "")
     fail(`${file}: description is missing`);
+  // A bundler prunes what a package declares free of side effects; every published package says so, or lists its modules.
+  if (typeof manifest.sideEffects !== "boolean" && !Array.isArray(manifest.sideEffects))
+    fail(`${file}: sideEffects must be declared, false or a list of modules`);
   if (typeof manifest.engines?.node !== "string") fail(`${file}: engines.node is missing`);
   if (manifest.publishConfig?.access !== "public")
     fail(`${file}: publishConfig.access must be public`);
