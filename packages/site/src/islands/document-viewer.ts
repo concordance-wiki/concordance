@@ -78,7 +78,7 @@ function fallback(container: HTMLElement, props: DocumentViewerProps): void {
 function inHiddenPanel(panel: HTMLElement | null): panel is HTMLElement {
   return (
     panel !== null &&
-    (panel.hidden || panel.closest(".tabs")?.classList.contains(TABS_SCRIPTED) !== true)
+    (panel.hidden !== false || panel.closest(".tabs")?.classList.contains(TABS_SCRIPTED) !== true)
   );
 }
 
@@ -137,7 +137,7 @@ export function wireDocumentViewer(element: HTMLElement, deps: OpenerDependencie
     if (handle === undefined) {
       void open();
     } else {
-      show(container.hidden);
+      show(container.hidden !== false);
     }
   });
   for (const entry of section.querySelectorAll<HTMLElement>(".document-rail a[data-position]")) {
