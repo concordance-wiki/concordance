@@ -68,6 +68,24 @@ function svgOf(text: string): string | undefined {
   return start < 0 ? undefined : text.slice(start).trim();
 }
 
+/**
+ * What an inline logo never carries: it is written into every page as it is, so a script, an
+ * event handler, an embedded document or a reference to a script address would run on the whole
+ * site. A theme shipped by a plugin follows this path too, so the file is checked, not trusted.
+ */
+const ACTIVE_CONTENT: readonly [RegExp, string][] = [
+  [/<script\b/iu, "a script element"],
+  [/<(?:foreignObject|iframe|object|embed)\b/iu, "an embedded document"],
+  [/\son[a-z]+\s*=/iu, "an event handler attribute"],
+  [/\b(?:href|src)\s*=\s*["']?\s*(?:javascript|data|vbscript):/iu, "a script or data address"],
+  [/\b(?:href|src)\s*=\s*["']?\s*(?:https?:)?\/\//iu, "a reference to another site"],
+];
+
+/** Why an SVG cannot be inlined, or nothing when it carries only drawing. */
+function activeContentOf(svg: string): string | undefined {
+  return ACTIVE_CONTENT.find(([pattern]) => pattern.test(svg))?.[1];
+}
+
 function filesOf(fileSystem: FileSystem, folder: string): ThemeFile[] {
   return fileSystem.listFiles(folder).map((file) => ({ path: `${folder}/${file}`, file }));
 }
@@ -103,9 +121,21 @@ function loadLogo(loading: Loading, declared: string, logo: string): void {
       received: declared,
       expected: "a file holding an <svg> element",
     });
-  } else {
-    theme.logo = { path: logo, file: basename(logo), svg };
+    return;
   }
+  const active = activeContentOf(svg);
+  if (active !== undefined) {
+    issues.push({
+      severity: "error",
+      path: "logo",
+      message: `the SVG carries ${active}, which an inline logo never does`,
+      received: declared,
+      expected:
+        "an SVG holding drawing alone: no script, event handler, embedded document or external reference",
+    });
+    return;
+  }
+  theme.logo = { path: logo, file: basename(logo), svg };
 }
 
 function loadFavicon(loading: Loading, declared: string, favicon: string): void {
