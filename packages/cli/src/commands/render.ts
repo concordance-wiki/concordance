@@ -335,7 +335,7 @@ export async function renderCommand(
   const configDirectory = dirname(loaded.file);
   // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
   const plugins = await loadPlugins(config.plugins ?? [], {
-    load: (name) => deps.load(specifier(name, io.cwd)),
+    load: (name) => deps.load(specifier(name, configDirectory)),
     commandAvailable: deps.commandAvailable,
     builtin: [defaultThemeManifest()],
   });

@@ -32,7 +32,7 @@ import { formatFinding } from "./findings.js";
 import { runPipeline, stepMarker } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
 import { renderSite } from "./render.js";
-import { nodeThemeDependencies, type ThemeDependencies } from "./theme.js";
+import { nodeThemeDependencies, specifier, type ThemeDependencies } from "./theme.js";
 import { pluginTypeModules, projectTypeModules, type TypeModuleDependencies } from "./types.js";
 import { loadConfigFile } from "./validate-config.js";
 
@@ -233,8 +233,10 @@ export async function buildCommand(
     return exitCodes.invalid;
   }
   // A plugin that cannot be loaded is a configuration error: it throws, and the command line reports it.
+  // A plugin declared by a path is resolved against the configuration, as render, init and gallery do.
   const plugins = await loadPlugins(config.plugins ?? [], {
     ...deps,
+    load: (name) => deps.load(specifier(name, configDirectory)),
     builtin: [defaultThemeManifest()],
   });
   const resolved = loadProfile(io, config.profile, configDirectory, {

@@ -1,6 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, posix, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { runInNewContext } from "node:vm";
 
 import {
@@ -644,6 +645,23 @@ describe("concordance build", () => {
           },
         ],
       },
+    });
+
+    it("resolves a plugin declared by a path against the folder of the configuration, as render does, never against the working directory", async () => {
+      const asked: string[] = [];
+      const io = recordedIo({
+        "/elsewhere/c.yaml": `${validConfig}plugins: ["./plugins/contracts/index.js"]\n`,
+        "/elsewhere/notes/model-query.md": "---\ntype: api\n---\n# Model query API\n",
+      });
+      const byPath = {
+        load: (name: string) => {
+          asked.push(name);
+          return Promise.resolve(manifest);
+        },
+        commandAvailable: () => Promise.resolve(true),
+      };
+      expect(await buildCommand(["--config", "/elsewhere/c.yaml"], io, byPath)).toBe(0);
+      expect(asked).toEqual([pathToFileURL("/elsewhere/plugins/contracts/index.js").href]);
     });
 
     /** No network: a contract URL would be reported as unreachable instead of fetched. */

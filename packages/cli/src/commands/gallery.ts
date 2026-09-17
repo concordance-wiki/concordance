@@ -104,7 +104,7 @@ export async function galleryCommand(
   };
   let registry: PluginRegistry;
   try {
-    registry = await pluginsOf(configured.plugins, io, deps);
+    registry = await pluginsOf(configured.plugins, io, deps, configured.configDirectory);
   } catch (error) {
     return failed(error);
   }
