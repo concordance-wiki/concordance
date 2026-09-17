@@ -1,7 +1,7 @@
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 
 import { formatIssue } from "../../config/report.js";
-import { readSchema } from "../../config/schema.js";
+import { compiledSchema } from "../../config/schema.js";
 import type { ConfigIssue } from "../../config/types.js";
 import { describeSchemaError } from "../../config/validate.js";
 import { canonicalJson } from "./json.js";
@@ -21,13 +21,10 @@ export class ModelError extends Error {
 }
 
 /** The `date-time` format of the schema: an ISO 8601 instant with an offset, as the clock writes it. */
-const dateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
-/** Compiles the published schema; a model is parsed once per command, so nothing is cached. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction<CanonicalModel> {
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  ajv.addFormat("date-time", (value) => dateTime.test(value));
-  return ajv.compile<CanonicalModel>(readSchema("model"));
+  return compiledSchema<CanonicalModel>("model");
 }
 
 /** Canonical JSON of the model: keys sorted at every depth, two-space indentation, trailing newline. */

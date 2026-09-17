@@ -31,6 +31,7 @@ describe("@concordance-wiki/core", () => {
       "compareProvenances",
       "compileGitignore",
       "compileGlobs",
+      "compiledSchema",
       "contractViewOf",
       "createSpeakerNumbering",
       "declaredContracts",

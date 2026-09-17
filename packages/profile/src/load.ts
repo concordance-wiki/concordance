@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { readSchema } from "@concordance-wiki/core";
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import { compiledSchema } from "@concordance-wiki/core";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
 import { describeErrors } from "./issues.js";
@@ -93,10 +93,9 @@ export function mergeProfiles(base: Profile, override: PartialProfile): Profile 
   return mergeValues(base, override, []) as Profile;
 }
 
-/** Compiles the published schema; validation runs once per build, so nothing is cached. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction<Profile> {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  return ajv.compile<Profile>(readSchema("profile"));
+  return compiledSchema<Profile>("profile");
 }
 
 function listOf(values: string[]): string {

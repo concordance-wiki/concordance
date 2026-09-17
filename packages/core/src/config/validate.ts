@@ -1,12 +1,11 @@
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 
-import { readSchema, type SchemaName } from "./schema.js";
+import { compiledSchema, type SchemaName } from "./schema.js";
 import type { Config, ConfigIssue, ConfigValidation, DomainConfig } from "./types.js";
 
-/** Compiles a published schema; validation runs once per command, so nothing is cached. */
+/** The validator of a published schema, compiled once per process and shared. */
 function validator<T>(name: SchemaName): ValidateFunction<T> {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  return ajv.compile<T>(readSchema(name));
+  return compiledSchema<T>(name);
 }
 
 /** The segments of a JSON pointer, `~1` read back as `/` and `~0` as `~`: the keys of a model carry slashes. */

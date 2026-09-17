@@ -1,8 +1,8 @@
-import { Ajv2020, type ErrorObject } from "ajv/dist/2020.js";
+import type { ErrorObject } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
 import { formatIssue } from "../config/report.js";
-import { readSchema } from "../config/schema.js";
+import { compiledSchema } from "../config/schema.js";
 import type { ConfigIssue } from "../config/types.js";
 import { describeSchemaError } from "../config/validate.js";
 import { fold, foldSegment, segment } from "./words.js";
@@ -34,8 +34,7 @@ function compareEntries(a: PseudonymEntry, b: PseudonymEntry): number {
 }
 
 function schemaIssues(document: unknown): ConfigIssue[] {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  const validate = ajv.compile<PseudonymsDocument>(readSchema("pseudonyms"));
+  const validate = compiledSchema<PseudonymsDocument>("pseudonyms");
   if (validate(document)) return [];
   // The validator fills `errors` whenever it returns false.
   return (validate.errors as ErrorObject[]).map((error) => describeSchemaError(error, document));

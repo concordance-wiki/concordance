@@ -1,17 +1,14 @@
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 
-import { readSchema } from "./schema.js";
+import { compiledSchema } from "./schema.js";
 import type { LockFile, LockValidation } from "./types.js";
 import { describeSchemaError } from "./validate.js";
 
 /** The `date` format of the schema: the day of a decision, `YYYY-MM-DD`. */
-const date = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Compiles the published schema; the lock file is read once per build, so nothing is cached. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction<LockFile> {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  ajv.addFormat("date", (value) => date.test(value));
-  return ajv.compile<LockFile>(readSchema("lock"));
+  return compiledSchema<LockFile>("lock");
 }
 
 /** Validates a `concordance.lock.yaml` document against the published lock schema; issues name the faulty key. */

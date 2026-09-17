@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 
-import { readSchema, type ConfigIssue, type FileSystem } from "@concordance-wiki/core";
-import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import { compiledSchema, type ConfigIssue, type FileSystem } from "@concordance-wiki/core";
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
 import { describeErrors } from "./issues.js";
@@ -96,11 +96,9 @@ function slugOf(directory: string): string {
   return trimmed.slice(Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\")) + 1);
 }
 
-/** Compiles the published schema with the profile schema it refers to; a module is read once per build. */
+/** The validator of the published schema, compiled once per process and shared. */
 function validator(): ValidateFunction<TypeModuleDeclaration> {
-  const ajv = new Ajv2020({ allErrors: true, allowUnionTypes: true, strict: true });
-  ajv.addSchema(readSchema("profile"));
-  return ajv.compile<TypeModuleDeclaration>(readSchema("type-module"));
+  return compiledSchema<TypeModuleDeclaration>("type-module");
 }
 
 function prefixed(file: string, issue: ConfigIssue): ConfigIssue {

@@ -4,11 +4,11 @@ import {
   collation,
   describeSchemaError,
   formatIssue,
-  readSchema,
+  compiledSchema,
   type CollationOptions,
   type Locale,
 } from "@concordance-wiki/core";
-import { Ajv2020, type ErrorObject } from "ajv/dist/2020.js";
+import type { ErrorObject } from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
 import { normalizer } from "./normalize.js";
@@ -33,8 +33,7 @@ export class LanguagePackError extends Error {
 }
 
 function readDocument(directory: URL): PackDocument {
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  const validate = ajv.compile<PackDocument>(readSchema("language-pack"));
+  const validate = compiledSchema<PackDocument>("language-pack");
   const document: unknown = parse(readFileSync(new URL("pack.yaml", directory), "utf8"));
   if (!validate(document)) {
     // The validator fills `errors` whenever it returns false.
@@ -43,8 +42,7 @@ function readDocument(directory: URL): PackDocument {
       .join("; ");
     throw new LanguagePackError(directory.pathname, detail);
   }
-  // Validated against the schema the type mirrors.
-  return document as PackDocument;
+  return document;
 }
 
 function canonical(tag: string, directory: URL): Locale {
