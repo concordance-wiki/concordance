@@ -72,6 +72,7 @@ The tooling enforces the style: `tsconfig.base.json`, `eslint.config.js` (strict
 - Author and committer are your own git identity. No attribution trailer of any kind.
 - No direct commit on `main`. No force push.
 - Squash fix-up commits before opening the pull request: the history tells a progression, not a struggle.
+- The identifiers of the stories belong to the specification alone: neither a branch, nor a commit, nor a changeset, nor a file names one, and the hygiene scan refuses them in the files.
 
 ## Pull requests
 
