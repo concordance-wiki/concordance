@@ -81,10 +81,13 @@ jobs:
     permissions: { contents: read, security-events: write }
     steps:
       - uses: actions/checkout@v4
+      # The configuration of the wiki, so that the typing rules and the profile of this source apply.
+      - uses: actions/checkout@v4
+        with: { repository: your-organisation/wiki, path: .wiki }
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - id: lint
-        run: npx --yes @concordance-wiki/concordance lint --format sarif --output concordance.sarif
+        run: npx --yes @concordance-wiki/concordance lint --source glossary --config .wiki/concordance.yaml --format sarif --output concordance.sarif
         continue-on-error: true
       - uses: github/codeql-action/upload-sarif@v3
         with: { sarif_file: concordance.sarif }
