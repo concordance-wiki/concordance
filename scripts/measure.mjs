@@ -23,6 +23,9 @@ const { values } = parseArgs({
   options: {
     corpus: { type: "string", default: "fixtures/corpora/realistic/en" },
     json: { type: "boolean", default: false },
+    // Replicates every markdown file of the corpus this many times, so that a larger corpus is measured.
+    // Asks the build where its time went and prints the steps that took a tenth of it or more.
+    steps: { type: "boolean", default: false },
   },
 });
 const corpus = resolve(root, values.corpus);
@@ -40,17 +43,33 @@ const bytesOf = (files) => files.reduce((sum, file) => sum + statSync(file).size
 const megabytes = (bytes) => `${(bytes / 1_000_000).toFixed(1)} MB`;
 const kilobytes = (bytes) => `${Math.round(bytes / 1000)} kB`;
 const seconds = (ms) => `${(ms / 1000).toFixed(1)} s`;
+const share = (ms, total) => `${String(Math.round((100 * ms) / total))} %`;
 
-function build(cwd) {
+/** The lines `build --timings` prints after the summary, as `[step, milliseconds]` pairs. */
+function parseTimings(stdout) {
+  const lines = stdout.split("\n");
+  const start = lines.indexOf("timings:");
+  if (start < 0) return [];
+  return lines
+    .slice(start + 1)
+    .map((line) => /^ {2}(?<step>.+): (?<ms>\d+) ms$/u.exec(line))
+    .filter((match) => match !== null)
+    .map((match) => [match.groups.step, Number(match.groups.ms)]);
+}
+
+function build(cwd, timings = false) {
   const started = performance.now();
-  const result = spawnSync(process.execPath, [bin, "build"], { cwd, encoding: "utf8" });
+  const result = spawnSync(process.execPath, [bin, "build", ...(timings ? ["--timings"] : [])], {
+    cwd,
+    encoding: "utf8",
+  });
   const elapsed = performance.now() - started;
   if (result.status !== 0) {
     console.error(`measure: the build exited with ${String(result.status)}`);
     console.error(result.stdout + result.stderr);
     process.exit(1);
   }
-  return elapsed;
+  return { elapsed, timings: parseTimings(result.stdout) };
 }
 
 const work = mkdtempSync(join(tmpdir(), "concordance-measure-"));
@@ -66,8 +85,8 @@ try {
     statSync(join(work, name)).isDirectory(),
   ).length;
 
-  const first = build(work);
-  const second = build(work);
+  const { elapsed: first } = build(work, values.steps);
+  const { elapsed: second, timings } = build(work, values.steps);
 
   const dist = join(work, "dist");
   const files = walk(dist);
@@ -94,6 +113,7 @@ try {
     },
     firstBuildMs: Math.round(first),
     secondBuildMs: Math.round(second),
+    ...(values.steps ? { steps: Object.fromEntries(timings) } : {}),
     pages: pages.length,
     siteBytes: bytesOf(served),
     pagesBytes: bytesOf(pages),
@@ -135,6 +155,22 @@ try {
     console.log("| Measure | Value |");
     console.log("|---|---|");
     for (const [label, value] of rows) console.log(`| ${label} | ${value} |`);
+    if (values.steps) {
+      // The steps worth a line: a twentieth of the second build or more, the rest summed.
+      // The pipeline phase is the sum of its steps, so it counts once.
+      const steps = timings.filter(([step]) => step !== "pipeline");
+      const total = steps.reduce((sum, [, ms]) => sum + ms, 0);
+      const shown = steps.filter(([, ms]) => ms >= total / 20);
+      const rest = total - shown.reduce((sum, [, ms]) => sum + ms, 0);
+      console.log("");
+      console.log("| Step | Second build | Share |");
+      console.log("|---|---|---|");
+      for (const [step, ms] of shown)
+        console.log(`| ${step} | ${seconds(ms)} | ${share(ms, total)} |`);
+      console.log(
+        `| ${String(steps.length - shown.length)} other steps | ${seconds(rest)} | ${share(rest, total)} |`,
+      );
+    }
   }
 } finally {
   rmSync(work, { recursive: true, force: true });
