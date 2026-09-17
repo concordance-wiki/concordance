@@ -8,7 +8,11 @@ import { systemCommand } from "./executables.mjs";
 
 const failures = [];
 
-const allowedDotPaths = [/^\.github\//, /^\.changeset\//];
+// Under `.github/`, the templates and the workflows alone: no instruction file for any assistant, no agent folder.
+const allowedDotPaths = [
+  /^\.github\/(?:CODEOWNERS|PULL_REQUEST_TEMPLATE\.md|dependabot\.yml|ISSUE_TEMPLATE\/[^/]+\.ya?ml|workflows\/[^/]+\.ya?ml)$/,
+  /^\.changeset\//,
+];
 const allowedDotFiles = new Set([
   ".gitignore",
   ".nvmrc",
@@ -50,6 +54,21 @@ for (const path of tracked) {
   }
 }
 
+// Secrets by their shape: a token of a forge or a registry, a private key, credentials in a URL.
+const secretPatterns = [
+  { name: "a GitHub token", pattern: /\bgh[pousr]_[A-Za-z0-9]{36,}\b/u },
+  { name: "a GitHub fine-grained token", pattern: /\bgithub_pat_[A-Za-z0-9_]{22,}\b/u },
+  { name: "a GitLab token", pattern: /\bglpat-[A-Za-z0-9_-]{20,}\b/u },
+  { name: "an npm token", pattern: /\bnpm_[A-Za-z0-9]{36,}\b/u },
+  { name: "a private key", pattern: /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/u },
+  { name: "an AWS access key", pattern: /\bAKIA[0-9A-Z]{16}\b/u },
+  // A literal password after the user; `${VAR}` is a placeholder the pipeline fills, not a secret.
+  {
+    name: "credentials in a URL",
+    pattern: /\b[a-z][a-z0-9+.-]*:\/\/[^\s/@:]+:(?!\$\{)[^\s/@]+@/iu,
+  },
+];
+
 // Words and identifiers of the steering repository, or of a domain the examples left behind, never published.
 const bannedMarkers = [
   { name: "a decision identifier", pattern: /\bADR-\d/u },
@@ -65,6 +84,9 @@ for (const path of tracked) {
     if (marker.except?.includes(path)) continue;
     if (marker.pattern.test(text)) failures.push(`${path} carries ${marker.name}`);
   }
+  for (const secret of secretPatterns) {
+    if (secret.pattern.test(text)) failures.push(`${path} carries ${secret.name}`);
+  }
 }
 
 const range = process.env.HYGIENE_COMMIT_RANGE ?? "HEAD~20..HEAD";
@@ -73,6 +95,7 @@ const commitMessages = (revisions) =>
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
   });
+// The range of the run, else every commit the clone holds; a log that cannot be read is a failure, never a pass.
 const readMessages = () => {
   try {
     return commitMessages([range]);
@@ -80,6 +103,7 @@ const readMessages = () => {
     try {
       return commitMessages([]);
     } catch {
+      failures.push(`git log could not be read: the commit messages were not checked`);
       return "";
     }
   }
@@ -101,5 +125,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file, no banned marker",
+  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file, no banned marker, no secret",
 );
