@@ -325,7 +325,7 @@ describe("loadContracts", () => {
     const { input } = harness();
     const output = await loadContracts(input([api()]));
     expect(output.findings.map((finding) => finding.message)).toEqual([
-      "contract ./payments.openapi.json of specs/api/payments could not be read: file /repos/specs/api/payments.openapi.json does not exist",
+      "contract ./payments.openapi.json of specs/api/payments could not be read: file api/payments.openapi.json does not exist",
     ]);
     const orphan = input([api()]);
     orphan.payload.roots = {};

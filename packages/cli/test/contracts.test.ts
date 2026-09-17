@@ -153,6 +153,22 @@ describe("The build writes fragments/<api id>.contract.json and keeps a path con
     expect(fs.listFiles("/work/dist")).toEqual(["fragments/specs/api/model-query.contract.json"]);
   });
 
+  it("never copies a path contract that leaves its source under the output", () => {
+    const fs = memoryFileSystem({ "/work/secrets.json": "{}" });
+    const written = writeContractFragments(
+      {
+        contracts: [record("specs/api/model-query", "../../secrets.json", "h".repeat(64))],
+        entities: [api("specs/api/model-query", "api/model-query.md", "../../secrets.json")],
+        sources: [specs],
+        cacheDirectory: CACHE,
+        fs,
+      },
+      "/work/dist",
+    );
+    expect(written.files).toBe(0);
+    expect([...fs.files.keys()].filter((path) => path.startsWith("/work/dist"))).toEqual([]);
+  });
+
   it("skips the copy of a path contract whose api note, source root or file cannot be found", () => {
     const fs = memoryFileSystem({
       "/work/specs/api/contracts/model-query.openapi.json": "{}",

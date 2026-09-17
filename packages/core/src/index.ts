@@ -159,18 +159,20 @@ export {
 export { substituteStrings } from "./privacy/values.js";
 export type * from "./plugin/api.js";
 export {
-  cachedContractPath,
-  cachedContractViewPath,
   CONTRACT_METHOD,
   CONTRACT_RELATION,
   CONTRACT_UNREACHABLE,
+  DEFAULT_CONTRACT_CONFIDENCE,
+  cachedContractPath,
+  cachedContractViewPath,
+  contractPathIn,
   contractViewOf,
   declaredContracts,
-  DEFAULT_CONTRACT_CONFIDENCE,
   fingerprintOf,
   loadContracts,
   readCachedContract,
   readCachedContractView,
+  refusedContractUrl,
   writeCachedContract,
   writeCachedContractView,
   xmlRootOf,
