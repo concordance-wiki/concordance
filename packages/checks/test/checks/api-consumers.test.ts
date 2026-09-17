@@ -158,7 +158,7 @@ describe("W-API-CONSUMER-MISMATCH", () => {
     expect(apiConsumerMismatch(input({ entities: [api, entry], links: [prose] }))).toEqual([]);
   });
 
-  it("reads a section entry of another note, or of another relation, as no declaration of this api", () => {
+  it("reads a section entry of another note, or of another relation, as no declaration of this api, nor a citation by the consumer", () => {
     const api = filed(query.id, "api", { consumers: [] });
     const links = [
       link(query.id, entry.id, "serves", [
@@ -174,9 +174,7 @@ describe("W-API-CONSUMER-MISMATCH", () => {
     const messages = apiConsumerMismatch(input({ entities: [api, entry, search], links })).map(
       (f) => f.message,
     );
-    expect(messages).toEqual([
-      "specs/screens/mentions-panel cites specs/api/model-query, which does not list it among its consumers",
-    ]);
+    expect(messages).toEqual([]);
   });
 
   it("reports every cited consumer when the attribute is an empty list", () => {
@@ -232,6 +230,26 @@ describe("W-API-CONSUMER-MISMATCH", () => {
       { method: "explicit_link", path: "screens/mentions-panel.md" },
     ]);
     expect(apiConsumerMismatch(input({ entities: [api, entry], links: [cited] }))).toEqual([]);
+  });
+
+  it("does not count a serves link read in a third note as a citation by the consumer", () => {
+    const api = filed(query.id, "api", { consumers: [entry.id] });
+    const elsewhere = link(query.id, entry.id, "serves", [
+      { method: "explicit_link", path: "screens/entity-page.md" },
+    ]);
+    expect(
+      apiConsumerMismatch(input({ entities: [api, entry, search], links: [elsewhere] })).map(
+        (f) => f.message,
+      ),
+    ).toEqual([
+      "specs/api/model-query declares consumer specs/screens/mentions-panel, which never cites it",
+    ]);
+    const unknown = link(query.id, "specs/screens/nowhere", "serves", [
+      { method: "explicit_link", path: "screens/nowhere.md" },
+    ]);
+    expect(apiConsumerMismatch(input({ entities: [api, entry], links: [unknown] }))).toHaveLength(
+      1,
+    );
   });
 
   it("ignores a provenance without a path when deciding whether a note cites the api", () => {

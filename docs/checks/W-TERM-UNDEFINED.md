@@ -4,7 +4,7 @@
 
 A recurring expression is used across files without any note defining it.
 
-The expression scores at least `inference.candidate_score` on C-value × IDF, with at least three occurrences in two files (`inference.ngrams`). It has a keyword page built from its passages, but no definition.
+The expression scores at least `inference.candidate_score` on C-value × IDF, with at least three occurrences in two files (`inference.ngrams`). It gets a keyword page built from its passages when it also reaches the publication thresholds of `inference.keyword_pages`; either way, no note defines it.
 
 The C-value of an expression is its number of occurrences, minus the mean occurrences of the longer expressions above the thresholds that contain it, multiplied by log2 of its number of words plus one, so that the words of a frequent expression do not surface on their own. The IDF is ln(1 + files in the corpus / files mentioning the expression): an expression spread over every file weighs less than one concentrated in a few.
 

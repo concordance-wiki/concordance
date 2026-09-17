@@ -30,22 +30,26 @@ function serves(entity: CheckEntity, input: CheckInput): boolean {
 
 /**
  * Whether a `serves` link was written in the note of the consumer: at least one provenance read
- * in another file than the API note, so that the API's own `consumers` attribute and
- * `## Consumers` section do not count as citations of itself.
+ * in the consumer's own note, so that the API's own `consumers` attribute and `## Consumers`
+ * section, or a link read in a third note, do not count as citations by the consumer.
  */
-function cites(link: CheckLink, api: CheckEntity): boolean {
+function cites(link: CheckLink, consumer: CheckEntity | undefined): boolean {
+  if (link.provenance === undefined) return true;
+  // A provenance in a third note is that note's word, not the consumer's.
   return (
-    link.provenance === undefined ||
-    link.provenance.some(
-      (provenance) => provenance.path !== undefined && provenance.path !== api.source.path,
-    )
+    consumer !== undefined &&
+    link.provenance.some((provenance) => provenance.path === consumer.source.path)
   );
 }
 
-/** Targets of the `serves` links that another note wrote, the consumers that cite the API. */
+/** Targets of the `serves` links the consumer's own note wrote, the consumers that cite the API. */
 function citingConsumers(entity: CheckEntity, input: CheckInput): string[] {
+  const byId = new Map(input.entities.map((candidate) => [candidate.id, candidate]));
   return input.links
-    .filter((link) => link.from === entity.id && link.relation === SERVES && cites(link, entity))
+    .filter(
+      (link) =>
+        link.from === entity.id && link.relation === SERVES && cites(link, byId.get(link.to)),
+    )
     .map((link) => link.to);
 }
 
