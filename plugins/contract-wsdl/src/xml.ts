@@ -50,7 +50,7 @@ function elementsOf(nodes: OrderedNode[]): XmlElement[] {
  */
 export function parseXml(text: string): { root: XmlElement } | { error: string } {
   // The validator is deprecated in favour of a separate package; the pinned version still ships it, and a second dependency for well-formedness alone is not worth it.
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- the pinned parser still ships the validator; a second dependency for well-formedness alone is not worth it
   const validation = XMLValidator.validate(text);
   if (validation !== true) {
     return { error: `${validation.err.msg} (line ${String(validation.err.line)})` };

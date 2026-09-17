@@ -620,7 +620,7 @@ describe("loadContracts", () => {
       `contract ${url} of specs/api/model-query could not be read: getaddrinfo ENOTFOUND`,
     ]);
     // A rejection that is not an Error, as a fetch polyfill may produce.
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- a fetch polyfill may reject with a bare value
     const oddly = harness({}, () => Promise.reject("offline"));
     const odd = await loadContracts(
       oddly.input([api({ attributes: { contract: url } })]),

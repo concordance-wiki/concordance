@@ -387,7 +387,7 @@ describe("readDocuments", () => {
       extensions: [".pptx"],
       read: () => {
         // A reader may throw anything; the message names it.
-        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        // eslint-disable-next-line @typescript-eslint/only-throw-error -- a reader may throw anything, and the finding must name it
         throw "corrupt";
       },
     };
