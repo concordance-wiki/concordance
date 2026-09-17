@@ -144,6 +144,33 @@ describe("ingestSources", () => {
       ]);
     });
 
+    it("lets a failure of the file system surface as the bug it is, never as an unreachable source", async () => {
+      const { fs, deps } = harness({
+        [URL]: {
+          commit: COMMIT,
+          files: { "draft.md": { content: "wip", modifiedAt: "2024-06-01T00:00:00.000Z" } },
+        },
+      });
+      const broken: FileSystem = {
+        ...fs,
+        modifiedAt: () => {
+          throw new Error("EISDIR: illegal operation on a directory");
+        },
+      };
+      await expect(
+        ingestSources(config([{ name: "docs", git: URL }]), { ...deps, fs: broken }),
+      ).rejects.toThrow("EISDIR");
+      const unlistable: FileSystem = {
+        ...fs,
+        listFiles: () => {
+          throw new Error("EACCES: permission denied");
+        },
+      };
+      await expect(
+        ingestSources(config([{ name: "docs", git: URL }]), { ...deps, fs: unlistable }),
+      ).rejects.toThrow("EACCES");
+    });
+
     it("sorts files by path whatever order the file system lists them in", async () => {
       const { fs, deps } = harness();
       const listing = ["z.md", "a/b.md", "m.md"];
