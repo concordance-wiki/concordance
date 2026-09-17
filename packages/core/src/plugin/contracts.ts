@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { dirname, isAbsolute, join, posix, relative, resolve } from "node:path";
 
 import { slugify } from "../identity/slug.js";
+import { fetchFailure, fetchWithin, readBounded } from "../io/fetch.js";
 import type { FileSystem } from "../io/file-system.js";
 import { compareContracts, type CandidateObject, type ContractSchema } from "../model/contract.js";
 import { compareEntities, type Entity } from "../model/entity.js";
@@ -309,11 +310,11 @@ async function fetchContract(
     const refused = refusedContractUrl(location);
     if (refused !== undefined) return { reason: refused };
     try {
-      const response = await input.context.fetch(location);
+      const response = await fetchWithin(input.context.fetch, location);
       if (!response.ok) return { reason: `HTTP ${String(response.status)}` };
-      return { text: await response.text() };
+      return { text: await readBounded(response) };
     } catch (error) {
-      return { reason: error instanceof Error ? error.message : String(error) };
+      return { reason: fetchFailure(error) };
     }
   }
   const root = input.payload.roots[api.source.name];

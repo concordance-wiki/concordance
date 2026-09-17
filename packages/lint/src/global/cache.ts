@@ -2,7 +2,10 @@ import { posix } from "node:path";
 
 import {
   canonicalJson,
+  fetchFailure,
+  fetchWithin,
   parseModel,
+  readBounded,
   type CanonicalModel,
   type Clock,
   type ConfigIssue,
@@ -135,7 +138,9 @@ async function fetchModel(
     return { kind: "failed", reason: "no network access" };
   }
   try {
-    const response = await input.fetch(input.config.model, { headers: validators(cached?.meta) });
+    const response = await fetchWithin(input.fetch, input.config.model, {
+      headers: validators(cached?.meta),
+    });
     if (response.status === 304 && cached !== undefined) {
       return { kind: "unchanged", cached };
     }
@@ -146,12 +151,12 @@ async function fetchModel(
     const lastModified = response.headers.get("last-modified");
     return {
       kind: "fresh",
-      text: await response.text(),
+      text: await readBounded(response),
       ...(etag === null ? {} : { etag }),
       ...(lastModified === null ? {} : { lastModified }),
     };
   } catch (error) {
-    return { kind: "failed", reason: error instanceof Error ? error.message : String(error) };
+    return { kind: "failed", reason: fetchFailure(error) };
   }
 }
 
