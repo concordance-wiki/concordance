@@ -29,7 +29,7 @@ import { writeContractFragments } from "../pipeline/contracts.js";
 import { writeFragments } from "../pipeline/fragments.js";
 import { loadLock, lockCountsOf } from "../pipeline/lock.js";
 import { formatFinding } from "./findings.js";
-import { runPipeline } from "../pipeline/run.js";
+import { runPipeline, stepMarker } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
 import { renderSite } from "./render.js";
 import { nodeThemeDependencies, type ThemeDependencies } from "./theme.js";
@@ -202,8 +202,18 @@ export async function buildCommand(
 ): Promise<ExitCode> {
   const { values } = parseArgs({
     args: argv,
-    options: { config: { type: "string", short: "c" }, output: { type: "string", short: "o" } },
+    options: {
+      config: { type: "string", short: "c" },
+      output: { type: "string", short: "o" },
+      timings: { type: "boolean", default: false },
+    },
   });
+  // Where the time went, step by step, printed after the summary on request; never written to an output.
+  const timings: [step: string, milliseconds: number][] = [];
+  const observe = (step: string, milliseconds: number): void => {
+    timings.push([step, milliseconds]);
+  };
+  const phase = stepMarker(values.timings ? observe : undefined);
   const loaded = loadConfigFile(io, values.config);
   if (loaded === undefined) {
     return exitCodes.failure;
@@ -245,13 +255,16 @@ export async function buildCommand(
     config.conversion?.cache ?? defaultCacheDirectory,
   );
   const checks = createRegistry(catalogue, plugins.registry.checks());
+  phase("ingest sources");
   const ingested = await ingestSources(config, {
     fs: io.fs,
     git: io.git,
     configDirectory,
     cacheDirectory,
   });
+  phase("pipeline");
   const result = await runPipeline({
+    ...(values.timings ? { observe } : {}),
     config,
     profile: resolved.profile,
     configDirectory,
@@ -267,6 +280,7 @@ export async function buildCommand(
     ...(lock.lock === undefined ? {} : { lock: lock.lock }),
   });
 
+  phase("write log, model and fragments");
   const at = io.clock.now().toISOString();
   const log: BuildLog = {
     version: 1,
@@ -334,6 +348,7 @@ export async function buildCommand(
   for (const line of formatSummary(log.summary, { duplicatesMs: result.duplicateTimeMs })) {
     io.out(line);
   }
+  phase("render site");
   const rendered = await renderSite(io, themeDependencies(deps), {
     config,
     configFile: loaded.file,
@@ -345,8 +360,13 @@ export async function buildCommand(
     registry: plugins.registry,
     modules: resolved.modules,
   });
+  phase();
   if (rendered !== exitCodes.ok) {
     return rendered;
+  }
+  if (values.timings) {
+    io.out("timings:");
+    for (const [step, milliseconds] of timings) io.out(`  ${step}: ${String(milliseconds)} ms`);
   }
   const verdict = shouldFail(result.findings, config.build?.fail_on, result.unconverted);
   if (verdict.fail) {

@@ -1,3 +1,5 @@
+import { performance } from "node:perf_hooks";
+
 import type { CheckRegistry } from "@concordance-wiki/checks";
 import type {
   Candidates,
@@ -65,6 +67,26 @@ export interface PipelineInput {
   parallelism?: number;
   /** The decisions of `concordance.lock.yaml`, read and validated by the command; none without a `lock` key. */
   lock?: LockFile;
+  /** Told how long each step took, in the order the steps run; a diagnostic that never reaches the outputs. */
+  observe?: StepObserver;
+}
+
+export type StepObserver = (step: string, milliseconds: number) => void;
+
+/**
+ * A marker of the steps: each call closes the step under way, telling the observer its
+ * duration, and opens the next one. The wall clock of the process measures it, not the
+ * injected clock, which a reproducible build pins.
+ */
+export function stepMarker(observe: StepObserver | undefined): (next?: string) => void {
+  let current: string | undefined;
+  let started = performance.now();
+  return (next) => {
+    const now = performance.now();
+    if (current !== undefined) observe?.(current, Math.round(now - started));
+    current = next;
+    started = now;
+  };
 }
 
 export interface PipelineResult {
@@ -108,8 +130,11 @@ export interface PipelineResult {
  */
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
   const { config, profile, sources, fs, clock } = input;
+  const mark = stepMarker(input.observe);
+  mark("parse");
   const parsed = parseSources(sources, fs);
   const readers = input.plugins.readers();
+  mark("read documents");
   const read = await readDocuments({
     sources,
     readers,
@@ -119,11 +144,13 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     parallelism: input.parallelism ?? 1,
     fs,
   });
+  mark("load pseudonymisation");
   const pseudonymization = loadPseudonymization({
     config,
     configDirectory: input.configDirectory,
     fs,
   });
+  mark("pseudonymise transcripts");
   const transcripts = pseudonymizeTranscripts({
     documents: read.documents,
     readers,
@@ -134,6 +161,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     ),
     fs,
   });
+  mark("type notes");
   const typed = typeNotes({
     sources,
     documents: indexDocuments(parsed.documents),
@@ -141,6 +169,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     config,
     profile,
   });
+  mark("scope privacy");
   const scoped = pseudonymizeScope({
     entities: typed.entities,
     documents: parsed.documents,
@@ -149,7 +178,9 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     pseudonymization,
     fs,
   });
+  mark("index documents");
   const documents = indexDocuments(scoped.documents);
+  mark("import contracts");
   const contributed = await loadPluginSources({
     providers: input.plugins.sources(),
     entities: scoped.entities,
@@ -164,6 +195,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     profile,
     context: { fs, clock, ...(input.fetch === undefined ? {} : { fetch: input.fetch }) },
   });
+  mark("attach operations");
   const attached = attachOperationNotes({
     entities: [...scoped.entities, ...contributed.entities],
     links: contributed.links,
@@ -171,6 +203,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     // The same default as the ingest step gives a source without a locale of its own.
     locale: config.project.locale ?? "en",
   });
+  mark("stopwords");
   const stopwords = corpusStopwords({
     sources,
     config,
@@ -178,6 +211,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     fs,
   });
   // Before the dictionary: a twin folded into its note must not enter it as a homonym of the note.
+  mark("reconcile twins");
   const twins = reconcileTwins({
     entities: attached.entities,
     documents,
@@ -189,12 +223,14 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     clock,
     ...(input.lock?.duplicates === undefined ? {} : { lock: input.lock.duplicates }),
   });
+  mark("build dictionaries");
   const dictionaries = buildDictionaries({
     entities: twins.entities,
     folded: twins.folded,
     config,
     stopwords,
   });
+  mark("scan occurrences");
   const occurrences = scanNotes({
     documents: scoped.documents,
     resources: scoped.resources,
@@ -205,6 +241,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   });
   // The files of a folded twin still declare and receive links, moved to its entity once the relations are typed.
   const declaring = [...twins.entities, ...twins.folded.map((twin) => twin.entity)];
+  mark("produce links");
   const produced = produceLinks({
     entities: declaring,
     sources,
@@ -213,8 +250,11 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     profile,
     config,
   });
+  mark("combine links");
   const combined = combineProducedLinks([...produced.links, ...attached.links], profile);
+  mark("refine relations");
   const refined = refineRelations(combined, { profile, entities: declaring });
+  mark("discover keywords");
   const keywords = discoverKeywords({
     documents: scoped.documents,
     resources: scoped.resources,
@@ -226,7 +266,9 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     ...(input.lock === undefined ? {} : { lock: input.lock }),
   });
   const entities = [...twins.entities, ...keywords.entities];
+  mark("repoint links");
   const links = repointLinks(refined.links, twins.folded, profile);
+  mark("propose domains");
   const domains = proposeDomains({
     entities,
     links,
@@ -235,6 +277,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     dictionaries: dictionaries.byLocale,
     ...(input.lock === undefined ? {} : { lock: input.lock }),
   });
+  mark("model checks");
   const checked = runModelChecks({
     registry: input.checks,
     entities: domains.entities,
@@ -243,6 +286,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     profile,
     ...(config.checks === undefined ? {} : { overrides: config.checks }),
   });
+  mark("enrich findings");
   const findings = enrichStepFindings(
     input.checks,
     [
@@ -265,7 +309,8 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     ],
     config.checks,
   );
-  return {
+  mark("assemble result");
+  const result: PipelineResult = {
     files: sources.reduce((count, source) => count + source.files.length, 0),
     entities: domains.entities,
     links,
@@ -303,4 +348,6 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
     notes: scoped.notes,
     ...(domains.suggested === undefined ? {} : { suggestedDomains: domains.suggested }),
   };
+  mark();
+  return result;
 }

@@ -4,27 +4,33 @@ What running Concordance costs and needs: the build time and the weight to expec
 
 ## What to expect
 
-Measured on the golden corpus, `fixtures/corpora/realistic/en`, with `pnpm measure` (`scripts/measure.mjs`: the corpus is copied to a temporary folder, built twice in a row, and the outputs weighed). The figures below are those of a laptop; a pipeline runner is slower by a small factor, not by an order of magnitude.
+Measured on the golden corpus, `fixtures/corpora/realistic/en`, with `pnpm measure --steps` (`scripts/measure.mjs`: the corpus is copied to a temporary folder, built twice in a row with `--timings`, and the outputs weighed; the second table lists the steps that took a twentieth of the build or more). The figures below are those of a laptop; a pipeline runner is slower by a small factor, not by an order of magnitude.
 
-Measured on 2026-09-13 (10 cores, arm64, Node.js 22.17.1).
+Measured on 2026-09-17 (10 cores, arm64, Node.js 22.17.1).
 
 | Measure | Value |
 |---|---|
-| Corpus | 120 markdown files in 5 sources, 53 kB |
-| First build | 1.0 s |
-| Second build, same folder | 1.1 s |
-| Pages | 381 |
-| Site as served (pages, assets, search index, mentions) | 3.9 MB |
-| Pages alone | 3.3 MB, largest 63 kB |
-| Search index | 128 kB |
-| Mentions fragments | 428 kB |
-| `model.json` | 2.1 MB |
+| Corpus | 120 markdown files in 5 sources, 60 kB |
+| First build | 2.2 s |
+| Second build, same folder | 2.1 s |
+| Pages | 512 |
+| Site as served (pages, assets, search index, mentions) | 14.5 MB |
+| Pages alone | 12.7 MB, largest 105 kB |
+| Search index | 148 kB |
+| Mentions fragments | 1265 kB |
+| `model.json` | 2.4 MB |
 | Note fragments | 0.6 MB |
-| `build.log.json` | 192 kB |
-| `dist/` in full | 6.7 MB |
+| `build.log.json` | 188 kB |
+| `dist/` in full | 17.8 MB |
+
+| Step | Second build | Share |
+|---|---|---|
+| render site | 1.5 s | 83 % |
+| 24 other steps | 0.3 s | 17 % |
 
 How to read them:
 
+- Where the time goes: the rendering of the site takes four fifths of a build, the twenty-four steps of the pipeline the rest; `concordance build --timings` prints the same lines for any corpus, after the summary and never in the log. The rendering is linear in the number of pages, a few milliseconds each, so a corpus ten times larger renders in ten times the time.
 - The second build is not incremental: the build recomputes everything from the sources on every run, and the only thing it keeps from one run to the next is the cache folder, the clones of the git sources and, once a converter is wired, the converted documents. Two builds of the same sources therefore cost the same, which is what makes the output reproducible.
 - The pipeline is linear in the volume of text. The occurrence scan reads every note once per locale with one dictionary; the keyword discovery reads the n-grams of every text unit once; the twin-resource pass compares MinHash signatures, so it stays close to linear until thousands of resources. Expect seconds for a few hundred notes and a minute for a few thousand, plus the clone time of the sources on the first run.
 - A page weighs from three to thirty kilobytes: the note, the section headings, the neighbourhood, the first twenty mentions and the mode switch, everything readable without JavaScript. The largest page of the corpus is the alphabetical index, which is split by letter as soon as it would pass 100 kB. The budget is 150 kB per page, checked on every build; an entity cited everywhere is the one that grows.
@@ -32,7 +38,7 @@ How to read them:
 - `model.json` and the note fragments are written for `concordance render` and for the exporters. They ship with `dist/` by default; leave them out of the copy when publishing weight matters, and keep the `fragments/<id>.mentions.json` files, which the mentions panel loads on demand. The next section says which files the site needs.
 - Office conversion, once wired, is the only step that costs seconds per document rather than milliseconds: two to ten seconds per office file on the first build with LibreOffice, nothing on the next ones for unchanged files thanks to the cache.
 
-Refresh the table after a change of the pipeline: `pnpm build && pnpm measure`, then paste the output here with its date.
+Refresh the tables after a change of the pipeline: `pnpm build && pnpm measure --steps`, then paste the output here with its date.
 
 ## What `dist/` holds
 
