@@ -15,6 +15,7 @@ export { readSchema, type SchemaName } from "./config/schema.js";
 export type * from "./config/types.js";
 export { validateTheme } from "./config/theme.js";
 export {
+  RESERVED_SOURCE_NAMES,
   describeSchemaError,
   isWellFormedGlob,
   schemaIssues,

@@ -79,6 +79,7 @@ export default definePlugin({
   name: "@concordance-wiki/plugin-convert-libreoffice",
   version: "0.0.0",
   apiVersion: PLUGIN_API_VERSION,
-  systemDependencies: [{ name: "LibreOffice", check: "soffice" }],
+  // Optional: a PDF source needs no LibreOffice, and an office document without it is a finding, not a silent loss.
+  systemDependencies: [{ name: "LibreOffice", check: "soffice", optional: true }],
   contributes: { converters: [createConverter(), createPdfConverter()] },
 });

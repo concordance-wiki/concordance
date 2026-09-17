@@ -199,7 +199,7 @@
         "required": ["name"],
         "properties": {
           "name": {
-            "description": "Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens.",
+            "description": "Name of the source, unique in the configuration: the first segment of every identifier it yields. Lowercase letters, digits and hyphens; never a folder the site reserves (about, assets, fragments, index, keywords, search, spaces, todo).",
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9-]*$"
           },

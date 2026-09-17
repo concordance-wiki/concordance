@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   describeSchemaError,
+  RESERVED_SOURCE_NAMES,
   isWellFormedGlob,
   validateConfig,
 } from "../../src/config/validate.js";
@@ -311,6 +312,28 @@ describe("validateConfig beyond the schema", () => {
         expected: "a unique name per source",
       },
     ]);
+  });
+
+  it("refuses a source named after a folder the site reserves, naming the folders", () => {
+    const result = validateConfig({
+      ...minimal,
+      sources: [
+        { name: "notes", path: "./a" },
+        { name: "keywords", path: "./b" },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual([
+      {
+        severity: "error",
+        path: "sources[1].name",
+        message: "source name is a folder the site reserves",
+        received: "keywords",
+        expected:
+          "a name other than about, assets, fragments, index, keywords, search, spaces, todo",
+      },
+    ]);
+    expect(RESERVED_SOURCE_NAMES).toEqual([...RESERVED_SOURCE_NAMES].sort());
   });
 
   it("rejects a malformed domain glob, including in a subdomain", () => {

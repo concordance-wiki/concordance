@@ -56,7 +56,7 @@ A source that must stay downloadable without a preview declares `convert: false`
 - **Converted once**: the cache key is the SHA-256 of the source bytes; an unchanged document is never reconverted nor re-read, whatever its path.
 - **Bounded work**: `conversion.timeout_s` and `conversion.max_size_mb` cap each conversion; a failure is a `W-CONV-FAILED` finding and the document stays downloadable.
 - **Suspect output named**: a large source whose PDF holds no text is a `W-CONV-SUSPECT` finding, reproduced on every build.
-- **Graceful without LibreOffice**: when `soffice` is missing the plugin is disabled with a `W-PLUGIN-DISABLED` finding and the build goes on, documents downloadable, PDF sources included.
+- **Graceful without LibreOffice**: LibreOffice is an optional dependency; when `soffice` is missing the build says so once (`W-PLUGIN-DISABLED`, informational), PDF sources are still read, and every office document gets a `W-CONV-FAILED` naming the missing command, downloadable all the same.
 - **Nothing written next to a source**: conversions run in a temporary folder under the cache, with their own user profile, in parallel.
 
 ## Documentation
