@@ -97,16 +97,32 @@ function parse(html: string): Element {
   return root;
 }
 
-function* walk(element: Element): Generator<Element> {
-  for (const child of element.children) {
-    if (typeof child === "string") continue;
-    yield child;
-    yield* walk(child);
+function elementsAmong(children: readonly Node[]): Element[] {
+  return children.filter((child): child is Element => typeof child !== "string");
+}
+
+/** The descendants of every element asked for, kept: the tree never changes once parsed. */
+const descendantsOf = new WeakMap<Element, readonly Element[]>();
+
+/**
+ * Every element under one, in document order, computed once per element and without recursion:
+ * the rules ask for the whole document a dozen times and for the subtree of every link.
+ */
+function walk(element: Element): readonly Element[] {
+  const known = descendantsOf.get(element);
+  if (known !== undefined) return known;
+  const found: Element[] = [];
+  const pending = elementsAmong(element.children).reverse();
+  for (let next = pending.pop(); next !== undefined; next = pending.pop()) {
+    found.push(next);
+    pending.push(...elementsAmong(next.children).reverse());
   }
+  descendantsOf.set(element, found);
+  return found;
 }
 
 function elements(root: Element, tag: string): Element[] {
-  return [...walk(root)].filter((element) => element.tag === tag);
+  return walk(root).filter((element) => element.tag === tag);
 }
 
 function textOf(element: Element): string {
@@ -140,7 +156,7 @@ function checkLang(root: Element): A11yFinding[] {
 
 function checkHeadings(root: Element): A11yFinding[] {
   const findings: A11yFinding[] = [];
-  const headings = [...walk(root)].filter((element) => /^h[1-6]$/.test(element.tag));
+  const headings = walk(root).filter((element) => /^h[1-6]$/.test(element.tag));
   const count = headings.filter((heading) => heading.tag === "h1").length;
   if (count !== 1) {
     findings.push({ rule: "single-h1", message: `${String(count)} h1 elements, expected one` });
@@ -253,14 +269,14 @@ function focusable(element: Element): boolean {
 }
 
 function checkSkipLink(root: Element): A11yFinding[] {
-  const first = [...walk(root)].find(focusable);
+  const first = walk(root).find(focusable);
   if (first === undefined) return [];
   const href = first.attributes["href"] ?? "";
   if (first.tag !== "a" || !href.startsWith("#")) {
     return [{ rule: "skip-link", message: `the first focusable element is ${label(first)}` }];
   }
   const target = href.slice(1);
-  const found = [...walk(root)].some((element) => element.attributes["id"] === target);
+  const found = walk(root).some((element) => element.attributes["id"] === target);
   return found
     ? []
     : [{ rule: "skip-link", message: `the skip link points at #${target}, which does not exist` }];
@@ -346,7 +362,7 @@ function tabPanels(all: readonly Element[]): Map<string, Element> {
 function tabsInLists(all: readonly Element[], findings: A11yFinding[]): Set<Element> {
   const inLists = new Set<Element>();
   for (const list of all.filter((element) => role(element) === "tablist")) {
-    const tabs = [...walk(list)].filter((element) => role(element) === "tab");
+    const tabs = walk(list).filter((element) => role(element) === "tab");
     if (tabs.length === 0) {
       findings.push({ rule: "tab-roles", message: `${label(list)} is a tablist without any tab` });
     }
@@ -387,7 +403,7 @@ function checkTab(
 /** Tabs follow the tablist pattern: tabs inside a tablist, each selected or not and controlling a labelled panel. */
 function checkTabs(root: Element): A11yFinding[] {
   const findings: A11yFinding[] = [];
-  const all = [...walk(root)];
+  const all = walk(root);
   const panels = tabPanels(all);
   const inLists = tabsInLists(all, findings);
   const controlled = new Set<Element>();
