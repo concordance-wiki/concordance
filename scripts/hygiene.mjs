@@ -69,6 +69,12 @@ const secretPatterns = [
   },
 ];
 
+const secretTestFiles = new Set([
+  "packages/cli/test/commands/build.test.ts",
+  "packages/core/test/io/fetch.test.ts",
+  "packages/ingest/test/ingest.test.ts",
+]);
+
 // Words and identifiers of the steering repository, or of a domain the examples left behind, never published.
 const bannedMarkers = [
   { name: "a decision identifier", pattern: /\bADR-\d/u },
@@ -84,6 +90,8 @@ for (const path of tracked) {
     if (marker.except?.includes(path)) continue;
     if (marker.pattern.test(text)) failures.push(`${path} carries ${marker.name}`);
   }
+  // The tests that prove the credentials of a URL are stripped carry one on purpose, under the tests alone.
+  if (secretTestFiles.has(path)) continue;
   for (const secret of secretPatterns) {
     if (secret.pattern.test(text)) failures.push(`${path} carries ${secret.name}`);
   }
