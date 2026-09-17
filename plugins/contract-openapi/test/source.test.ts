@@ -302,7 +302,7 @@ describe("loadContracts", () => {
       `contract ${url} of specs/api/payments could not be read: getaddrinfo ENOTFOUND`,
     ]);
     // A rejection that is not an Error, as a fetch polyfill may produce.
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- a fetch polyfill may reject with a bare value
     const odd: typeof fetch = () => Promise.reject("offline");
     const { input: oddInput } = harness({}, { calls: [], fetch: odd });
     const oddOutput = await loadContracts(oddInput([api({ attributes: { contract: url } })]));
