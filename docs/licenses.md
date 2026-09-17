@@ -159,7 +159,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | acorn | 8.18.0 | MIT | development | <https://github.com/acornjs/acorn> |
 | acorn-jsx | 5.3.2 | MIT | development | <https://github.com/acornjs/acorn-jsx> |
 | ajv | 6.15.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
-| ajv | 8.17.1 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
+| ajv | 8.18.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
 | ajv | 8.20.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
 | ajv-formats | 3.0.1 | MIT | development | <https://github.com/ajv-validator/ajv-formats> |
 | angular-html-parser | 10.11.0 | MIT | development | <https://github.com/prettier/angular-html-parser> |
@@ -452,7 +452,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | word-wrap | 1.2.5 | MIT | development | <https://github.com/jonschlinkert/word-wrap> |
 | ws | 8.21.3 | MIT | development | <https://github.com/websockets/ws> |
 | xml-naming | 0.3.0 | MIT | runtime | <https://github.com/NaturalIntelligence/xml-naming> |
-| yaml | 2.8.1 | ISC | runtime | <https://github.com/eemeli/yaml> |
+| yaml | 2.8.3 | ISC | runtime | <https://github.com/eemeli/yaml> |
 | yaml | 2.9.1 | ISC | runtime | <https://github.com/eemeli/yaml> |
 | yocto-queue | 0.1.0 | MIT | development | <https://github.com/sindresorhus/yocto-queue> |
 | yoctocolors | 2.2.0 | MIT | development | <https://github.com/sindresorhus/yoctocolors> |
