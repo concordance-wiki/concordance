@@ -171,6 +171,19 @@ describe("ingestSources", () => {
       ).rejects.toThrow("EACCES");
     });
 
+    it("never repeats the credentials of a URL git echoes in the finding of an unreachable source", async () => {
+      const { git, deps } = harness();
+      git.fail(
+        "clone",
+        URL,
+        new Error(`fatal: repository 'https://ci:TOKEN@example.invalid/docs.git' not found`),
+      );
+      const result = await ingestSources(config([{ name: "docs", git: URL }]), deps);
+      expect(result.findings.map((finding) => finding.message)).toEqual([
+        `source "docs" could not be fetched: fatal: repository 'https://example.invalid/docs.git' not found`,
+      ]);
+    });
+
     it("sorts files by path whatever order the file system lists them in", async () => {
       const { fs, deps } = harness();
       const listing = ["z.md", "a/b.md", "m.md"];

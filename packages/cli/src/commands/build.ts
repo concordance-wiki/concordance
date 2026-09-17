@@ -17,6 +17,7 @@ import {
   type PluginLoaderDependencies,
   type PluginRegistry,
   type SuggestedDomain,
+  withoutCredentials,
 } from "@concordance-wiki/core";
 import { formatDuplicateStats } from "@concordance-wiki/inference";
 import { ingestSources, type IngestedSource } from "@concordance-wiki/ingest";
@@ -190,7 +191,8 @@ export function modelSources(config: Config, ingested: readonly IngestedSource[]
       name: source.name,
       files: source.files.length,
       ...(source.commit === undefined ? {} : { commit: source.commit }),
-      ...(declared?.git === undefined ? {} : { url: declared.git }),
+      // The model is published with the site: a token written into the URL never travels with it.
+      ...(declared?.git === undefined ? {} : { url: withoutCredentials(declared.git) }),
     };
   });
 }

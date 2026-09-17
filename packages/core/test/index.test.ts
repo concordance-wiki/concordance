@@ -105,6 +105,7 @@ describe("@concordance-wiki/core", () => {
       "validateLock",
       "validateModel",
       "validateTheme",
+      "withoutCredentials",
       "writeCachedContract",
       "writeCachedContractView",
       "xmlRootOf",
