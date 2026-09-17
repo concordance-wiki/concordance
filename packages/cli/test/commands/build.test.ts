@@ -16,6 +16,7 @@ import {
   type Finding,
   type SourceOutput,
 } from "@concordance-wiki/core";
+import { createRegistry } from "@concordance-wiki/checks";
 import { foldHeading } from "@concordance-wiki/inference";
 import { fingerprintProfile, loadDefaultProfile } from "@concordance-wiki/profile";
 import {
@@ -1308,6 +1309,18 @@ describe("concordance build", () => {
           ).toBe(true);
         }
         expect(built.log.findings).toEqual(built.model.findings);
+      });
+
+      it("gives every finding the remediation of its catalogue entry, the checks whose remediation depends on the situation apart", () => {
+        const registry = createRegistry();
+        // These name the situation in their remediation (a missing command, a credential, a proposed domain): each producer words it.
+        const contextual =
+          /^(?:W-SOURCE-UNREACHABLE|W-CONV-FAILED|I-DOMAIN-SUGGESTED|W-PRIVACY-DICTIONARY|W-PRIVACY-WITHHELD)$/u;
+        const divergent = built.model.findings
+          .filter((finding) => !contextual.test(finding.check))
+          .filter((finding) => finding.remediation !== registry.get(finding.check)?.remediation)
+          .map((finding) => `${finding.check}: ${finding.remediation}`);
+        expect([...new Set(divergent)]).toEqual([]);
       });
 
       it("publishes the keyword pages of expected/keywords.yaml and none of the unpublished or withheld expressions", () => {
