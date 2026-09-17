@@ -52,6 +52,8 @@ export interface BuildDependencies extends PluginLoaderDependencies {
   pluginFiles?: ThemeDependencies["pluginFiles"];
   /** The cores available for conversions when `conversion.parallelism` is unset; one when absent. */
   parallelism?: number;
+  /** The version the log and the model record as the tool's; the package's when absent. */
+  tool?: string;
 }
 
 const nodeDependencies: BuildDependencies = {
@@ -287,7 +289,7 @@ export async function buildCommand(
   const at = io.clock.now().toISOString();
   const log: BuildLog = {
     version: 1,
-    tool: toolVersion(),
+    tool: deps.tool ?? toolVersion(),
     at,
     summary: summarize({
       sources: ingested.sources.length,

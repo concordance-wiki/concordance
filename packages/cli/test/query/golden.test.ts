@@ -15,6 +15,8 @@ vi.setConfig({ testTimeout: 120_000, hookTimeout: 180_000 });
 const corpus = resolve(import.meta.dirname, "../../../../fixtures/corpora/realistic/en");
 const CORPUS_ROOT = "/corpus";
 const TEXT = new Set([".md", ".yaml", ".yml", ".json", ".svg", ".txt", ".wsdl", ".xml", ".css"]);
+/** The version the fixtures record as the tool's: a release never changes an answer. */
+const TOOL = "0.0.0";
 /** What one answer may weigh, in characters: what fits in a context with room to spare. */
 const ANSWER_BUDGET = 6000;
 
@@ -24,7 +26,7 @@ interface Question {
   args: string[];
 }
 
-/** The corpus read into a file system kept in memory, the clock at the epoch: no date of the machine, no commit, enters the answers. */
+/** The corpus read into a file system kept in memory, the clock at the epoch: no date of the machine, no commit, no version, enters the answers. */
 function corpusInMemory(): RecordedIo {
   // Every source of the corpus is a local folder: the fake git is never asked to clone.
   const io = recordedIo({}, CORPUS_ROOT);
@@ -70,6 +72,7 @@ describe("The questions an agent asks are answered in one invocation each, as re
           return (await loader()).default;
         },
         commandAvailable: () => Promise.resolve(false),
+        tool: TOOL,
       }),
     ).toBe(0);
     const asked = questions();

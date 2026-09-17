@@ -18,6 +18,8 @@ import { epochClock, memoryFileSystem } from "../packages/core/dist/index.js";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 /** Where the corpus stands in the file system kept in memory. */
 export const CORPUS_ROOT = "/corpus";
+/** The version the fixtures record as the tool's: a release never changes an answer. */
+const TOOL = "0.0.0";
 const TEXT_EXTENSIONS = new Set([
   ".md",
   ".yaml",
@@ -102,6 +104,7 @@ export async function buildInMemory(corpusDirectory) {
   const status = await buildCommand(["--output", output], io, {
     load: loadPlugin,
     commandAvailable: () => Promise.resolve(false),
+    tool: TOOL,
   });
   if (status !== 0) {
     throw new Error(
