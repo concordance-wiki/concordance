@@ -103,6 +103,18 @@ describe("mentionsOf", () => {
     expect(mentionsOf(context(), "keywords/zzz/index.html", orphanKeyword)).toEqual([]);
   });
 
+  it("keeps the list of an entity's own page for the build, and computes it again for another page or another context", () => {
+    const ctx = context();
+    const own = mentionsOf(ctx, pagePath, term);
+    expect(mentionsOf(ctx, pagePath, term)).toBe(own);
+    expect(relatedMentionsOf(ctx, pagePath, term)).toBe(relatedMentionsOf(ctx, pagePath, term));
+    expect(mentionsOf(ctx, "index/index.html", term)).not.toBe(own);
+    expect(mentionsOf(ctx, "index/index.html", term)).toEqual(
+      mentionsOf(ctx, "index/index.html", term),
+    );
+    expect(mentionsOf(context(), pagePath, term)).not.toBe(own);
+  });
+
   it("serves the other passages page by page beyond the first passages of the six pages listed first", () => {
     const many = Array.from({ length: 8 }, (_, index) => ({
       from: `specs/rules/publication-threshold`,

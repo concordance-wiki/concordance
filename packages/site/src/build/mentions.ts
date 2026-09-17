@@ -387,6 +387,33 @@ function evokedMentions(context: SiteContext, page: string, entity: Entity): Loc
   return located;
 }
 
+/**
+ * The mentions computed for the page of an entity, kept for the build: the panel of the page,
+ * its fragment and the count of its citing pages ask for the same list, and a pivot entity is
+ * cited by thousands of passages. Keyed by the context, so that two builds never share a list.
+ */
+const remembered = new WeakMap<SiteContext, Map<string, Mention[]>>();
+
+function remember(
+  context: SiteContext,
+  page: string,
+  entity: Entity,
+  kind: string,
+  leadType: string | undefined,
+  compute: () => Mention[],
+): Mention[] {
+  // Hrefs are relative to the page: only the list of the entity's own page is worth keeping.
+  if (page !== pagePath(entity.id)) return compute();
+  const lists = remembered.get(context) ?? new Map<string, Mention[]>();
+  remembered.set(context, lists);
+  const key = [kind, entity.id, leadType ?? ""].join("\0");
+  const known = lists.get(key);
+  if (known !== undefined) return known;
+  const mentions = compute();
+  lists.set(key, mentions);
+  return mentions;
+}
+
 /** The pages that cite the entity, in the order of the panel: what the related pages of a note of the model list. */
 export function mentionsOf(
   context: SiteContext,
@@ -394,7 +421,9 @@ export function mentionsOf(
   entity: Entity,
   leadType?: string,
 ): Mention[] {
-  return inPanelOrder(citingMentions(context, page, entity), leadType);
+  return remember(context, page, entity, "citing", leadType, () =>
+    inPanelOrder(citingMentions(context, page, entity), leadType),
+  );
 }
 
 /** The pages the passages of the entity evoke, in the order of the panel. */
@@ -429,16 +458,18 @@ export function relatedMentionsOf(
   entity: Entity,
   leadType?: string,
 ): Mention[] {
-  if (entity.keyword === true) {
-    const passages = context.fragments.get(entity.id)?.passages ?? [];
-    return inPanelOrder(
-      passages.flatMap((passage) => keywordMentionOf(context, page, passage) ?? []),
-    );
-  }
-  const citing = citingMentions(context, page, entity);
-  return relatedViewOf(context, entity) === "evoked"
-    ? inPanelOrder([...citing, ...evokedMentions(context, page, entity)], leadType)
-    : inPanelOrder(citing, leadType);
+  return remember(context, page, entity, "related", leadType, () => {
+    if (entity.keyword === true) {
+      const passages = context.fragments.get(entity.id)?.passages ?? [];
+      return inPanelOrder(
+        passages.flatMap((passage) => keywordMentionOf(context, page, passage) ?? []),
+      );
+    }
+    const citing = citingMentions(context, page, entity);
+    return relatedViewOf(context, entity) === "evoked"
+      ? inPanelOrder([...citing, ...evokedMentions(context, page, entity)], leadType)
+      : inPanelOrder(citing, leadType);
+  });
 }
 
 /** How many pages cite an entity: the distinct pages of its mentions, what the related pages block counts. */
