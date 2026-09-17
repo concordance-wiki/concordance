@@ -1,5 +1,35 @@
 # @concordance-wiki/plugin-convert-libreoffice
 
+## 0.4.0
+
+### Patch Changes
+
+- e5ca327: The caches survive an interrupted build: the node file system writes next to the destination and renames, so a file is whole or absent; a text representation or a cached contract that is not JSON reads as absent and is extracted again (the build reports a text representation it cannot read, instead of stopping on the raw error); a contract reader declares the `cacheVersion` of the shape it extracts, and a contract cached under another version is read again; the work folder of a conversion is removed whatever happened in it.
+- a5ca382: A git source is reported unreachable only when git fails: a failure of the file system while listing or dating its files surfaces as the bug it is; two identical office documents under two paths converted in parallel share one LibreOffice run instead of one work folder, so that neither loses its PDF.
+- 7359a7b: The validation refuses a source named after a folder the site reserves (`about`, `assets`, `fragments`, `index`, `keywords`, `search`, `spaces`, `todo`; `RESERVED_SOURCE_NAMES` in the core package), and the assembly of the site fails on two documents at one path instead of writing one over the other; LibreOffice is an optional dependency of its plugin, so that a PDF source is still read without it and an office document gets a finding naming the missing command instead of a silent loss.
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

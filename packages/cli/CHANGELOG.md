@@ -1,5 +1,79 @@
 # @concordance-wiki/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- a851604: `concordance build --timings` prints, after the summary, how long each phase of the build and each step of the pipeline took; the figures never reach the log or the model.
+- 587ea09: `concordance mcp` serves the questions of `query` to an agent over the standard input as tools of the model context protocol, one tool per family (`lookup`, `search`, `relations`, `list`, `corpus`, `passages`), without state, key or network; `distribution/mcp/mcp.json` is the configuration a harness reads to start it.
+- 78f7248: `concordance query <expression>` prints what the model knows about an expression, without the site: the note it names, resolved as the recognition reads it (identifier, title or alias, normalised form, prefix; a term wins among candidates), where it is used with file, line and context, what it is linked to with relation, confidence and methods, and the decisions and sessions among those links; `--format json` follows the new `query.schema.json`.
+- fddad56: `concordance query` answers the questions of the whole corpus: `--stats`, `--sources`, `--domains`, `--undefined [<expression>]` with `--min-files`, `--recent` with `--since` and `--source`, `<expression> --changed-with`, and `--findings` about an entity or under `--check`.
+- 30da51f: `concordance query` reads one section alone (`--occurrences`, `--links`, `--related`), walks the way to another entity (`--path <target>`, `--max-depth`), lists the entities of the model (`--list` with `--type`, `--domain`, `--application`, `--source`, `--status`, `--all`), and finds its model through `concordance.yaml` of the working directory or `--config`, then through the published model of `concordance-lint.yaml`, when `--model` names none; options that do not go together are refused by name.
+- 7d4b9a5: `concordance query --text <phrase>` finds where a phrase is written or spoken: the positions of the converted documents and the transcripts, with page, slide or timecode and speaker, and the sections of the notes, from the fragments next to the model.
+- 2caceac: `concordance query` narrows the links of an entity with `--direction in|out` and `--relation <slug>`, lists what lies within `--radius` links with `--near`, and explains why two entities are linked with `--explain <target>`, every provenance of every link between them shown with its place and context.
+- 6c7d540: `concordance query --search <words>` runs the search of the site from the command line, with the same ranking and facets as the results page, from the index the site wrote, else from the model and its fragments, else from the model alone; `--keywords-only` and `--no-keywords` filter the keyword pages. The search index takes the English labels when nobody gives it any.
+
+### Patch Changes
+
+- 7863128: `concordance build` reaches the network through the `fetch` of the command io alone, as `lint` does: a caller that gives none forbids every connection; the gallery reads the type modules of the core through the injected file system.
+- e5ca327: The caches survive an interrupted build: the node file system writes next to the destination and renames, so a file is whole or absent; a text representation or a cached contract that is not JSON reads as absent and is extracted again (the build reports a text representation it cannot read, instead of stopping on the raw error); a contract reader declares the `cacheVersion` of the shape it extracts, and a contract cached under another version is read again; the work folder of a conversion is removed whatever happened in it.
+- b6a5530: A contract path that leaves its source (absolute, or climbing above the root) is refused with a `W-CONTRACT-UNREACHABLE` whose message names no path of the machine, and is never copied under the output; a contract URL pointing at the build machine, its link-local neighbours or a private network is never fetched. `contractPathIn` and `refusedContractUrl` are exported by the core package.
+- da662fd: The credentials a URL carries never reach a published file: `model.json` records the git URL of a source without them, and the finding of an unreachable source strips them from what git echoed (`withoutCredentials` in the core package).
+- 641870f: `I-TERM-HOMONYM` lands on the note of the first entity sharing the form (glossary first), carries its source, path and identifier, and cites the form as that note writes it instead of the comparison form; `DictionarySource` may carry the `path` of the note.
+- 4234308: Two keywords sharing a slug take their addresses in code-unit order of the keys, never by score, so that the address of a keyword page depends on the published keys alone; a local source holding the cache or the output folder (`path: .`) never reads back what the build wrote; a stopword file the configuration names but does not exist is an error `validate-config` and `build` report before anything starts, instead of an exception of the pipeline.
+- aad2e49: `concordance lint` reads and validates `concordance-lint.yaml` once per run and shares it with the fixes, the local checks and the global scope, instead of reading it in each; `lintRepository` and `fixRepository` accept the overrides already read.
+- 7e7569f: `lint --scope global` reads the profile the wiki configuration names when `--config` gives one, with its `types_dir`, as the build does, so that `E-META-REL` judges the same pairs against the same matrix; `global.profile` of `concordance-lint.yaml` still replaces it.
+- 5e137bf: A plugin declared by a path (`./plugins/theme/index.js`) is resolved against the folder of the configuration file by every command: `build` imported the path as written and failed where `render` succeeded, and `render`, `init --templates` and `gallery` resolved it against the working directory.
+- 070a176: A type prefix of several words (`data object`) announces its type, the longest prefix first, and a prefix separated from the mention by punctuation announces nothing; the context of an occurrence never cuts a surrogate pair or a combining mark at its edges; `concordance toString` is an unknown command, not a stack trace.
+- 23d6f77: A document over `conversion.max_size_mb` is no longer read and hashed before the converter refuses it: the build checks its size first (`size` joins the file system interface) and reports the same `W-CONV-FAILED` without reading a byte.
+- c09877d: `concordance --help` names `--fix` and `--dry-run` among the options of `lint`, and the command-line guide carries the same usage text, checked by the validation.
+- 4833f68: `yaml` is pinned to 2.8.3 and `ajv` to 8.18.0, the versions that close the two moderate advisories `pnpm audit` reported (a stack overflow on a nested sequence of a few kilobytes, which the frontmatter of any note could carry; a ReDoS on `$data` references, unused here).
+- Updated dependencies [e5ca327]
+- Updated dependencies [ea6f439]
+- Updated dependencies [524f45d]
+- Updated dependencies [2f298b0]
+- Updated dependencies [1131d78]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [641870f]
+- Updated dependencies [4234308]
+- Updated dependencies [6e50d62]
+- Updated dependencies [aad2e49]
+- Updated dependencies [7e7569f]
+- Updated dependencies [4a5bb95]
+- Updated dependencies [a5ca382]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [070a176]
+- Updated dependencies [594a75f]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [6c7d540]
+- Updated dependencies [aa89964]
+- Updated dependencies [0d9a39b]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [64ca6e5]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+  - @concordance-wiki/checks@0.4.0
+  - @concordance-wiki/nlp@0.4.0
+  - @concordance-wiki/site@0.4.0
+  - @concordance-wiki/inference@0.4.0
+  - @concordance-wiki/ingest@0.4.0
+  - @concordance-wiki/lint@0.4.0
+  - @concordance-wiki/profile@0.4.0
+  - @concordance-wiki/typing@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

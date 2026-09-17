@@ -1,5 +1,35 @@
 # @concordance-wiki/plugin-contract-wsdl
 
+## 0.4.0
+
+### Patch Changes
+
+- e5ca327: The caches survive an interrupted build: the node file system writes next to the destination and renames, so a file is whole or absent; a text representation or a cached contract that is not JSON reads as absent and is extracted again (the build reports a text representation it cannot read, instead of stopping on the raw error); a contract reader declares the `cacheVersion` of the shape it extracts, and a contract cached under another version is read again; the work folder of a conversion is removed whatever happened in it.
+- ea6f439: `W-API-CONSUMER-MISMATCH` counts a consumer as citing the API only when a `serves` link was read in the consumer's own note, as its page says, never in a third note; the WSDL reader reports a deployment document that imports its port types and declares no operation, instead of an empty contract; the `W-TERM-UNDEFINED` page no longer promises a keyword page the publication thresholds may withhold.
+- ee74348: A WSDL or a package part that declares a DOCTYPE is refused before any entity is expanded, where an entity bomb used to stop the build on an exception; of an office package only the property and slide parts are inflated, none above 8 MB, so that media and an entry that inflates to gigabytes stay compressed.
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

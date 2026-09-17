@@ -1,5 +1,41 @@
 # @concordance-wiki/nlp
 
+## 0.4.0
+
+### Minor Changes
+
+- 524f45d: The alphabetical index, the category lists and the dated spaces are ordered by a collation computed from the options of the language pack (`collation` in the core package: accents and case set aside, digits compared by value), never from the collation data of the runtime: two builds on two versions of Node.js order the same titles the same way. A language pack exposes the `collation` options it compares with in place of an `Intl.Collator`.
+- 641870f: `I-TERM-HOMONYM` lands on the note of the first entity sharing the form (glossary first), carries its source, path and identifier, and cites the form as that note writes it instead of the comparison form; `DictionarySource` may carry the `path` of the note.
+
+### Patch Changes
+
+- 4234308: Two keywords sharing a slug take their addresses in code-unit order of the keys, never by score, so that the address of a keyword page depends on the published keys alone; a local source holding the cache or the output folder (`path: .`) never reads back what the build wrote; a stopword file the configuration names but does not exist is an error `validate-config` and `build` report before anything starts, instead of an exception of the pipeline.
+- 070a176: A type prefix of several words (`data object`) announces its type, the longest prefix first, and a prefix separated from the mention by punctuation announces nothing; the context of an occurrence never cuts a surrogate pair or a combining mark at its edges; `concordance toString` is an unknown command, not a stack trace.
+- ccbf0fc: Every published schema is read and compiled once per process (`compiledSchema` in the core package) and its validator shared: reading the thirty-five type modules of the default profile takes a seventh of the time, validating a configuration a fifth, and every command starts faster; `readSchema` returns the same schema object on every call.
+- 4833f68: `yaml` is pinned to 2.8.3 and `ajv` to 8.18.0, the versions that close the two moderate advisories `pnpm audit` reported (a stack overflow on a nested sequence of a few kilobytes, which the frontmatter of any note could carry; a ReDoS on `$data` references, unused here).
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

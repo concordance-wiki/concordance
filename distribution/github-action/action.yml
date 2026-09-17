@@ -9,7 +9,7 @@ inputs:
   version:
     description: Version of @concordance-wiki/cli to run. The default is the version this action was released with; every form of the linter pins the same one.
     required: false
-    default: "0.3.1"
+    default: "0.4.0"
   fail-on:
     description: "Severity from which a finding fails the step: error, warning or info."
     required: false

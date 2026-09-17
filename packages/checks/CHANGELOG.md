@@ -1,5 +1,37 @@
 # @concordance-wiki/checks
 
+## 0.4.0
+
+### Patch Changes
+
+- ea6f439: `W-API-CONSUMER-MISMATCH` counts a consumer as citing the API only when a `serves` link was read in the consumer's own note, as its page says, never in a third note; the WSDL reader reports a deployment document that imports its port types and declares no operation, instead of an empty contract; the `W-TERM-UNDEFINED` page no longer promises a keyword page the publication thresholds may withhold.
+- 1131d78: The two consumer checks index the entities and the `serves` links once per run instead of rebuilding a set of every identifier for every declared consumer and walking every link three times per API.
+- 6d7208b: The findings, the check registry and the relation attributes of the global lint are ordered code unit by code unit rather than by the collation of the runtime, so that two machines write the same order.
+- aa89964: The catalogue says the same remediation as the build for `I-TERM-HOMONYM`, `W-TERM-UNDEFINED`, `W-LINK-CROSS-SOURCE` and `W-ATTRIBUTE-UNKNOWN`, whose texts had drifted apart; a test over the golden corpora keeps every finding's remediation equal to its catalogue entry, the checks that word their situation apart.
+- Updated dependencies [e5ca327]
+- Updated dependencies [524f45d]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [4234308]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+  - @concordance-wiki/profile@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

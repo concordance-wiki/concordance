@@ -1,5 +1,49 @@
 # @concordance-wiki/lint
 
+## 0.4.0
+
+### Patch Changes
+
+- 8b2155e: A contract fetched by URL and the published model of the global lint scope are read within thirty seconds and fifty megabytes (`fetchWithin`, `readBounded` and `fetchFailure` in the core package): a server that never answers or a response that never ends is reported instead of holding the build, the hook or the pipeline for ever, the linter falling back on its cached copy.
+- 6d7208b: The findings, the check registry and the relation attributes of the global lint are ordered code unit by code unit rather than by the collation of the runtime, so that two machines write the same order.
+- 6e50d62: `concordance-lint.yaml` travels with a pull request, from a fork too: `global.cache_dir` and `global.profile` must stay inside the repository, and a `global.model` URL pointing at the runner, its link-local neighbours or a private network is refused; the global scope degrades with a reason naming the key.
+- aad2e49: `concordance lint` reads and validates `concordance-lint.yaml` once per run and shares it with the fixes, the local checks and the global scope, instead of reading it in each; `lintRepository` and `fixRepository` accept the overrides already read.
+- 7e7569f: `lint --scope global` reads the profile the wiki configuration names when `--config` gives one, with its `types_dir`, as the build does, so that `E-META-REL` judges the same pairs against the same matrix; `global.profile` of `concordance-lint.yaml` still replaces it.
+- 4833f68: `yaml` is pinned to 2.8.3 and `ajv` to 8.18.0, the versions that close the two moderate advisories `pnpm audit` reported (a stack overflow on a nested sequence of a few kilobytes, which the frontmatter of any note could carry; a ReDoS on `$data` references, unused here).
+- Updated dependencies [e5ca327]
+- Updated dependencies [ea6f439]
+- Updated dependencies [524f45d]
+- Updated dependencies [1131d78]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [8b2155e]
+- Updated dependencies [6d7208b]
+- Updated dependencies [7e5a9b1]
+- Updated dependencies [1f66f9f]
+- Updated dependencies [641870f]
+- Updated dependencies [4234308]
+- Updated dependencies [a5ca382]
+- Updated dependencies [5e137bf]
+- Updated dependencies [a470bd4]
+- Updated dependencies [070a176]
+- Updated dependencies [ab7dd44]
+- Updated dependencies [78f7248]
+- Updated dependencies [30da51f]
+- Updated dependencies [aa89964]
+- Updated dependencies [7359a7b]
+- Updated dependencies [ccbf0fc]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [21ea529]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/core@0.4.0
+  - @concordance-wiki/checks@0.4.0
+  - @concordance-wiki/nlp@0.4.0
+  - @concordance-wiki/ingest@0.4.0
+  - @concordance-wiki/profile@0.4.0
+  - @concordance-wiki/typing@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes

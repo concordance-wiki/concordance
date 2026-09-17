@@ -1,5 +1,50 @@
 # @concordance-wiki/concordance
 
+## 0.4.0
+
+### Minor Changes
+
+- 2b05e76: The preset carries the two contract plugins, `@concordance-wiki/plugin-contract-openapi` and `@concordance-wiki/plugin-contract-wsdl`, as the guides promised: a wiki that declares them needs nothing installed next to the preset.
+
+### Patch Changes
+
+- f5e6dd9: The preset declares itself free of side effects, as every published package does.
+- 22af32a: The README of the preset names every command of the command line.
+- Updated dependencies [7863128]
+- Updated dependencies [a851604]
+- Updated dependencies [e5ca327]
+- Updated dependencies [ea6f439]
+- Updated dependencies [2f298b0]
+- Updated dependencies [b6a5530]
+- Updated dependencies [da662fd]
+- Updated dependencies [641870f]
+- Updated dependencies [4234308]
+- Updated dependencies [aad2e49]
+- Updated dependencies [7e7569f]
+- Updated dependencies [587ea09]
+- Updated dependencies [a5ca382]
+- Updated dependencies [e6e4f1b]
+- Updated dependencies [5e137bf]
+- Updated dependencies [070a176]
+- Updated dependencies [78f7248]
+- Updated dependencies [fddad56]
+- Updated dependencies [30da51f]
+- Updated dependencies [7d4b9a5]
+- Updated dependencies [2caceac]
+- Updated dependencies [6c7d540]
+- Updated dependencies [7359a7b]
+- Updated dependencies [23d6f77]
+- Updated dependencies [7953b7d]
+- Updated dependencies [c09877d]
+- Updated dependencies [ee74348]
+- Updated dependencies [4833f68]
+  - @concordance-wiki/cli@0.4.0
+  - @concordance-wiki/plugin-convert-libreoffice@0.4.0
+  - @concordance-wiki/plugin-contract-openapi@0.4.0
+  - @concordance-wiki/plugin-contract-wsdl@0.4.0
+  - @concordance-wiki/plugin-reader-office@0.4.0
+  - @concordance-wiki/plugin-reader-vtt@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes
