@@ -1,3 +1,15 @@
+/** A `user:secret@` between the scheme and the host of a URL, wherever the URL sits in a text. */
+const CREDENTIALS = /(\b[a-z][a-z0-9+.-]*:\/\/)[^\s/@]+@/giu;
+
+/**
+ * The text with the credentials of every URL it carries taken out: what the build writes into
+ * a published file (`model.json`, the log, a finding) never repeats a token a configuration or
+ * a git error message happened to carry.
+ */
+export function withoutCredentials(text: string): string {
+  return text.replace(CREDENTIALS, "$1");
+}
+
 /** How long one network request may take before the build gives up on it. */
 export const FETCH_TIMEOUT_MS = 30_000;
 /** How many bytes a response may carry before the build gives up on it. */

@@ -48,6 +48,7 @@ export {
   fetchFailure,
   fetchWithin,
   readBounded,
+  withoutCredentials,
   type BoundedFetchOptions,
 } from "./io/fetch.js";
 export {

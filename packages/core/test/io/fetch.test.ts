@@ -6,6 +6,7 @@ import {
   fetchFailure,
   fetchWithin,
   readBounded,
+  withoutCredentials,
 } from "../../src/io/fetch.js";
 
 /** A server that never answers but honours the abort signal, as the platform fetch does. */
@@ -42,6 +43,24 @@ describe("fetchWithin", () => {
     expect(seen?.signal).toBeInstanceOf(AbortSignal);
     await fetchWithin(spy, "https://example.invalid/x");
     expect(seen?.headers).toBeUndefined();
+  });
+});
+
+describe("withoutCredentials", () => {
+  it("takes the credentials out of every URL of a text and leaves the rest as it is", () => {
+    expect(withoutCredentials("https://x-access-token:TOKEN@github.com/org/repo.git")).toBe(
+      "https://github.com/org/repo.git",
+    );
+    expect(
+      withoutCredentials(
+        "fatal: repository 'https://user:p%40ss@forge.example/a.git' not found; ssh://git@forge.example/b.git stays",
+      ),
+    ).toBe(
+      "fatal: repository 'https://forge.example/a.git' not found; ssh://forge.example/b.git stays",
+    );
+    expect(withoutCredentials("https://forge.example/a.git and mail@example.invalid")).toBe(
+      "https://forge.example/a.git and mail@example.invalid",
+    );
   });
 });
 

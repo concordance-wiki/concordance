@@ -11,6 +11,7 @@ import {
   type Finding,
   type Locale,
   type SourceConfig,
+  withoutCredentials,
 } from "@concordance-wiki/core";
 
 import type { IngestDependencies, IngestedFile, IngestedSource, IngestResult } from "./types.js";
@@ -22,7 +23,9 @@ type Outcome = { source: IngestedSource } | { finding: Finding };
 const credentialFailure =
   /Authentication failed|could not read Username|Permission denied|terminal prompts disabled|Host key verification failed/;
 
-function unreachable(name: string, message: string): Finding {
+function unreachable(name: string, raw: string): Finding {
+  // Git repeats the URL it was given, credentials included: the finding is published, so they go.
+  const message = withoutCredentials(raw);
   const credentials = credentialFailure.test(message);
   return {
     check: "W-SOURCE-UNREACHABLE",

@@ -958,7 +958,7 @@ describe("concordance build", () => {
         version: 1 as const,
         project: { name: "W" },
         sources: [
-          { name: "b", git: "https://forge.example/b.git" },
+          { name: "b", git: "https://x-access-token:SECRET@forge.example/b.git" },
           { name: "a", path: "./a" },
         ],
       };
