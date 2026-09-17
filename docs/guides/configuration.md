@@ -288,10 +288,10 @@ A `checks` entry replaces the entry of the same check given under `checks` in th
 | Key | Default | Effect |
 |---|---|---|
 | `exclude` | none | globs of the files never read, counted or reported, relative to the repository; honoured by the build too |
-| `global.model` | none | the published `model.json` of the wiki: a URL (`https://…/model.json`) fetched and cached, or a path relative to the repository (`../wiki/dist/model.json`) read as it is; without it `--scope global` degrades to the local checks |
-| `global.cache_dir` | `.concordance-cache/lint` | where the fetched model and its `model.meta.json` (fetch date, source URL, `ETag` and `Last-Modified` when the server gave them) live, relative to the repository |
+| `global.model` | none | the published `model.json` of the wiki: a URL (`https://…/model.json`) fetched and cached, or a path relative to the repository (`../wiki/dist/model.json`) read as it is; a URL pointing at the runner, its link-local neighbours or a private network is refused; without it `--scope global` degrades to the local checks |
+| `global.cache_dir` | `.concordance-cache/lint` | where the fetched model and its `model.meta.json` (fetch date, source URL, `ETag` and `Last-Modified` when the server gave them) live, inside the repository (the file travels with a pull request, from a fork too, so a folder outside it is refused), relative to the repository |
 | `global.max_age_hours` | `24` | how long the cached model is reused without any request; `0` revalidates on every run, with the validators the server gave |
-| `global.profile` | none | a project profile, relative to the repository, merged over the default one for the relation matrix and the types of the global checks |
+| `global.profile` | none | a project profile, inside the repository, merged over the default one for the relation matrix and the types of the global checks |
 
 Any other top-level key, an empty glob under `exclude`, a key that is not a check identifier, an unknown check, a value outside `severity` and `enabled`, an unknown `global` key, an empty `model` or a negative `max_age_hours` stops the linter with an execution error (exit code 2) naming the file and the key.
 

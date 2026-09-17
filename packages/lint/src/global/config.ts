@@ -1,4 +1,6 @@
-import { isAbsolute, join, normalize } from "node:path";
+import { isAbsolute, join, normalize, relative } from "node:path";
+
+import { refusedContractUrl } from "@concordance-wiki/core";
 
 import {
   DEFAULT_CACHE_DIR,
@@ -32,6 +34,23 @@ export function absolutePath(root: string, location: string): string {
   return isAbsolute(location) ? normalize(location) : join(root, location);
 }
 
+/**
+ * A location the block gives, kept inside the repository: `concordance-lint.yaml` travels with a
+ * pull request, from a fork too, so the folder the linter writes into and the profile it reads
+ * never leave the repository it checks. The reason names the key.
+ */
+function confined(
+  root: string,
+  key: string,
+  location: string,
+): { path: string } | { reason: string } {
+  const path = absolutePath(root, location);
+  const inside = relative(root, path);
+  return inside.startsWith("..") || isAbsolute(inside)
+    ? { reason: `global.${key} leaves the repository: ${location}` }
+    : { path };
+}
+
 /** Only `global.model` has no default: without it the global scope has nothing to check against. */
 export function resolveGlobalConfig(
   root: string,
@@ -42,17 +61,22 @@ export function resolveGlobalConfig(
   }
   const { model } = global;
   const remote = isRemote(model);
-  const config: ResolvedGlobalConfig = {
-    model: remote ? model : absolutePath(root, model),
-    remote,
-    cacheDir: absolutePath(root, global.cache_dir ?? DEFAULT_CACHE_DIR),
-    maxAgeHours: global.max_age_hours ?? DEFAULT_MAX_AGE_HOURS,
-  };
+  // The same hosts a contract never reaches: the runner of a fork's pull request sees them too.
+  const refused = remote ? refusedContractUrl(model) : undefined;
+  if (refused !== undefined) return { ok: false, reason: `global.model: ${refused}` };
+  const cacheDir = confined(root, "cache_dir", global.cache_dir ?? DEFAULT_CACHE_DIR);
+  if ("reason" in cacheDir) return { ok: false, reason: cacheDir.reason };
+  const profile =
+    global.profile === undefined ? undefined : confined(root, "profile", global.profile);
+  if (profile !== undefined && "reason" in profile) return { ok: false, reason: profile.reason };
   return {
     ok: true,
-    config:
-      global.profile === undefined
-        ? config
-        : { ...config, profile: absolutePath(root, global.profile) },
+    config: {
+      model: remote ? model : absolutePath(root, model),
+      remote,
+      cacheDir: cacheDir.path,
+      maxAgeHours: global.max_age_hours ?? DEFAULT_MAX_AGE_HOURS,
+      ...(profile === undefined ? {} : { profile: profile.path }),
+    },
   };
 }
