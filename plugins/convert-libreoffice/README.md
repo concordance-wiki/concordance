@@ -82,6 +82,7 @@ Two `converter` contributions, both producing `pdf` and `text`: one for the thre
 - The source is copied to a temporary folder under `<cache>/convert/work/<sha256>/` and `soffice --headless --norestore --convert-to pdf` runs there with its own user profile (`-env:UserInstallation`), so that parallel instances do not block each other; the folder is removed afterwards. Nothing is written next to the source.
 - A document above `maxSizeBytes` is not converted; a conversion past `timeoutMs` is killed. Both yield a `W-CONV-FAILED` finding, as does a non-zero exit (the message carries the exit code and the first line of stderr) or a run that produces no PDF. The output has no representation in that case: the document remains available for download.
 - A source above 100 KiB whose PDF has no extractable text yields a `W-CONV-SUSPECT` finding. The finding is reproduced on cache hits so that a second build reports the same anomalies.
+- The text comes from `pdfjs-dist`, which declares `@napi-rs/canvas` as an optional dependency for drawing; the plugin never draws (it reads `getTextContent` alone), so the native module, installed when a binary exists for the platform and skipped otherwise, is never loaded.
 - `extractPdfPages(bytes)` gives the text of every page in reading order, the items of a page joined by spaces, and no page for bytes that are not a PDF; `extractPdfText` joins them, one line per page.
 - `convertMany(inputs, parallelism, convert)` runs conversions through a small pool and returns the results in input order, whatever the completion order.
 

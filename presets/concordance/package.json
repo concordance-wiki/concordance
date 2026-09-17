@@ -11,6 +11,7 @@
   "homepage": "https://github.com/concordance-wiki/concordance/tree/main/presets/concordance#readme",
   "bugs": "https://github.com/concordance-wiki/concordance/issues",
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=22"
   },

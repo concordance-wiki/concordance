@@ -33,6 +33,7 @@ function manifest(folder, overrides = {}) {
     type: "module",
     engines: { node: ">=22" },
     publishConfig: { access: "public" },
+    sideEffects: false,
     exports: { ".": { types: "./dist/index.d.ts", default: "./dist/index.js" } },
     files: ["dist", "README.md", "LICENSE"],
     ...overrides,
@@ -86,10 +87,12 @@ describe("checkPackaging", () => {
       repository: undefined,
       homepage: "core",
       bugs: undefined,
+      sideEffects: undefined,
     });
     writeFileSync(join(root, "packages/core/package.json"), JSON.stringify(pkg));
     expect(checkPackaging(root, shipped)).toEqual([
       "packages/core/package.json: description is missing",
+      "packages/core/package.json: sideEffects must be declared, false or a list of modules",
       "packages/core/package.json: engines.node is missing",
       "packages/core/package.json: publishConfig.access must be public",
       "packages/core/package.json: repository must be git+https://github.com/concordance-wiki/concordance.git",
