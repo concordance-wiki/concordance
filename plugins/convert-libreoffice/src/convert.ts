@@ -220,16 +220,14 @@ async function producedOnce(
     try {
       return await produce(source, work, options, deps);
     } finally {
-      // The work folder never outlives the conversion, whatever happened in it.
+      // The work folder never outlives the conversion, whatever happened in it; nor does the
+      // entry of the run, cleared before anyone waiting on it goes on and registers its own.
       deps.fs.remove(work);
+      underWay.delete(sha256);
     }
   })();
   underWay.set(sha256, run);
-  try {
-    return await run;
-  } finally {
-    if (underWay.get(sha256) === run) underWay.delete(sha256);
-  }
+  return run;
 }
 
 /**
