@@ -95,6 +95,51 @@ describe("pseudonymizeSpeaker", () => {
     expect(options.numbering.entries()).toEqual([]);
   });
 
+  it("segments the names of the dictionary once per locale, not once per cue: a thousand lookups cost a thousand segmentations", () => {
+    const people = Array.from(
+      { length: 200 },
+      (_, index) => `  "Person Number${String(index)}": { pseudonym: P-${String(index)} }`,
+    );
+    const many = loadPseudonymDictionary(`version: 1\npeople:\n${people.join("\n")}\n`);
+    const Original = Intl.Segmenter;
+    let constructed = 0;
+    class Counting extends Original {
+      constructor(...args: ConstructorParameters<typeof Intl.Segmenter>) {
+        super(...args);
+        constructed += 1;
+      }
+    }
+    Object.defineProperty(Intl, "Segmenter", {
+      value: Counting,
+      configurable: true,
+      writable: true,
+    });
+    try {
+      const options = { keepRoles: false, numbering: createSpeakerNumbering("en"), locale: "en" };
+      for (let cue = 0; cue < 500; cue += 1) {
+        expect(pseudonymizeSpeaker(`person number${String(cue % 200)}`, many, options)).toBe(
+          `P-${String(cue % 200)}`,
+        );
+      }
+      // The 200 names once, then one segmentation per lookup; never 200 per lookup.
+      expect(constructed).toBeLessThanOrEqual(200 + 500);
+    } finally {
+      Object.defineProperty(Intl, "Segmenter", {
+        value: Original,
+        configurable: true,
+        writable: true,
+      });
+    }
+  });
+
+  it("numbers two spellings of one name once, by the key of the locale of the transcript", () => {
+    const numbering = createSpeakerNumbering("fr");
+    expect(numbering.pseudonymFor("Élodie Dupont")).toBe("Speaker-1");
+    expect(numbering.pseudonymFor("ELODIE DUPONT")).toBe("Speaker-1");
+    expect(numbering.pseudonymFor("Bob")).toBe("Speaker-2");
+    expect(numbering.entries().map((entry) => entry.name)).toEqual(["Élodie Dupont", "Bob"]);
+  });
+
   it("keeps the role of a speaker when the configuration asks for it (keep_roles)", () => {
     const options = { keepRoles: true, numbering: createSpeakerNumbering() };
     expect(pseudonymizeSpeaker("Mary Ann Smith", dictionary, options)).toBe("Project lead");

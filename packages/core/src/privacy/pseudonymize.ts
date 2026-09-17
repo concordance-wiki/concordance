@@ -110,11 +110,12 @@ export function pseudonymizeText(
   return { text: apply(text, replacements), replaced: replacements.length };
 }
 
-export function createSpeakerNumbering(): SpeakerNumbering {
+/** Numbers the speakers in order of first appearance, two spellings of one name (by the key of the locale) counting once. */
+export function createSpeakerNumbering(locale?: string): SpeakerNumbering {
   const numbered = new Map<string, PseudonymEntry>();
   return {
     pseudonymFor(name) {
-      const key = nameKey(name);
+      const key = nameKey(name, locale);
       const known = numbered.get(key);
       if (known !== undefined) return known.pseudonym;
       const entry = { name, pseudonym: `Speaker-${String(numbered.size + 1)}` };
@@ -129,14 +130,28 @@ export interface SpeakerOptions extends PseudonymizeOptions {
   numbering: SpeakerNumbering;
 }
 
+/** The people of a dictionary by the key of their name, computed once per dictionary and locale: a transcript looks a speaker up once per cue. */
+const indexes = new WeakMap<PseudonymDictionary, Map<string, Map<string, PseudonymEntry>>>();
+
+function peopleByKey(dictionary: PseudonymDictionary, locale = "en"): Map<string, PseudonymEntry> {
+  const byLocale = indexes.get(dictionary) ?? new Map<string, Map<string, PseudonymEntry>>();
+  indexes.set(dictionary, byLocale);
+  const known = byLocale.get(locale);
+  if (known !== undefined) return known;
+  const index = new Map<string, PseudonymEntry>();
+  // The loader refuses two names with one key: every person has a key of its own.
+  for (const person of dictionary.people) index.set(nameKey(person.name, locale), person);
+  byLocale.set(locale, index);
+  return index;
+}
+
 /** The pseudonym (or role) of a speaker named in the dictionary; a generated `Speaker-<n>` otherwise. */
 export function pseudonymizeSpeaker(
   name: string,
   dictionary: PseudonymDictionary,
   options: SpeakerOptions,
 ): string {
-  const key = nameKey(name, options.locale);
-  const entry = dictionary.people.find((person) => nameKey(person.name, options.locale) === key);
+  const entry = peopleByKey(dictionary, options.locale).get(nameKey(name, options.locale));
   return entry === undefined
     ? options.numbering.pseudonymFor(name)
     : replacementFor(entry, options.keepRoles);
