@@ -164,6 +164,8 @@ const TYPING_CHECKS = new Set([
   "W-ATTRIBUTE-UNKNOWN",
   "W-DOMAIN-UNCLASSIFIED",
   "W-TYPE-UNKNOWN",
+  "W-APP-UNKNOWN",
+  "W-DOMAIN-UNKNOWN",
 ]);
 
 /** The typing findings of expected/findings.yaml, in the canonical order of the file. */
