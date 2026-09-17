@@ -112,9 +112,9 @@ describe("the minimal en corpus", () => {
       ],
     });
     expect(dictionary.findings.map((finding) => finding.message)).toEqual([
-      '"build" is the title or an alias of 2 entities: glossary/build, specs/objects/build',
-      '"entity" is the title or an alias of 2 entities: glossary/entity, specs/objects/entity',
-      '"link" is the title or an alias of 2 entities: glossary/link, specs/objects/link',
+      '"Build" is the title or an alias of 2 entities: glossary/build, specs/objects/build',
+      '"Entity" is the title or an alias of 2 entities: glossary/entity, specs/objects/entity',
+      '"Link" is the title or an alias of 2 entities: glossary/link, specs/objects/link',
     ]);
   });
 
@@ -143,9 +143,9 @@ describe("the minimal fr corpus", () => {
     ]);
     expect(dictionaryOf(corpus, []).entries.has("ms")).toBe(false);
     expect(dictionary.findings.map((finding) => finding.message)).toEqual([
-      '"build" is the title or an alias of 2 entities: glossaire/build, specs/objets/build',
-      '"entite" is the title or an alias of 2 entities: glossaire/entite, specs/objets/entite',
-      '"lien" is the title or an alias of 2 entities: glossaire/lien, specs/objets/lien',
+      '"Build" is the title or an alias of 2 entities: glossaire/build, specs/objets/build',
+      '"Entité" is the title or an alias of 2 entities: glossaire/entite, specs/objets/entite',
+      '"Lien" is the title or an alias of 2 entities: glossaire/lien, specs/objets/lien',
     ]);
     for (const key of [
       "lien explicite",

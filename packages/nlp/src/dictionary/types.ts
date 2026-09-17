@@ -4,6 +4,8 @@ import type { Finding } from "@concordance-wiki/core";
 export interface DictionarySource {
   id: string;
   source: string;
+  /** Path of the note in its source, so that a finding about the entity lands on it. */
+  path?: string;
   type: string;
   title: string;
   aliases: readonly string[];

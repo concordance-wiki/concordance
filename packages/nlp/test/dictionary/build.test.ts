@@ -194,25 +194,42 @@ describe.each(["en", "fr"] as const)("in the %s locale", (locale) => {
       ]);
     });
 
-    it("produces one I-TERM-HOMONYM finding per homonym form, naming the sorted entities", () => {
+    it("produces one I-TERM-HOMONYM finding per homonym form, on the first entity, citing its written form and naming the sorted entities", () => {
       const dictionary = build(locale, entities);
       expect(dictionary.findings).toEqual([
         {
           check: HOMONYM_CHECK,
           severity: "info",
-          message: `"${w.otherKey}" is the title or an alias of 3 entities: decisions/decision, glossary/other, glossary/term`,
+          source: "glossary",
+          entity: "glossary/other",
+          message: `"${w.other}" is the title or an alias of 3 entities: decisions/decision, glossary/other, glossary/term`,
           remediation:
             "Occurrences link to each entity at half confidence. Give the entities distinct titles or aliases, or add a `## Not to be confused with` section to each note so that readers tell them apart.",
         },
         {
           check: HOMONYM_CHECK,
           severity: "info",
-          message: `"${w.objectKey}" is the title or an alias of 2 entities: glossary/term, specs/object`,
+          source: "glossary",
+          entity: "glossary/term",
+          message: `"${w.object.toUpperCase()}" is the title or an alias of 2 entities: glossary/term, specs/object`,
           remediation:
             "Occurrences link to each entity at half confidence. Give the entities distinct titles or aliases, or add a `## Not to be confused with` section to each note so that readers tell them apart.",
         },
       ]);
       expect(HOMONYM_CHECK).toBe("I-TERM-HOMONYM");
+    });
+
+    it("lands the finding on the path of the first entity when the sources carry one", () => {
+      const located = entities.map((entity) => ({
+        ...entity,
+        path: `${entity.id.split("/").at(-1) ?? ""}.md`,
+      }));
+      const dictionary = build(locale, located);
+      expect(dictionary.findings[0]).toMatchObject({
+        source: "glossary",
+        path: "other.md",
+        entity: "glossary/other",
+      });
     });
 
     it("does not flag an entity whose title equals one of its own aliases", () => {
