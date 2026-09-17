@@ -261,6 +261,7 @@ export async function buildCommand(
     git: io.git,
     configDirectory,
     cacheDirectory,
+    outputDirectory: output,
   });
   phase("pipeline");
   const result = await runPipeline({

@@ -175,7 +175,7 @@ Thresholds and options of the recognition dictionary, the link producers, the ke
 | Key | Type | Default | Allowed values | Description |
 |---|---|---|---|---|
 | `glossary_sources` | string[] | — | — | Names of the sources whose entities take priority in the recognition dictionary when one form names several entities. When present, even empty, it replaces the glossary marks of the sources. |
-| `stopwords` | string[] | — | — | Extra stopword files, relative to this configuration, one word per line and # for a comment, added to the defaults of the language pack; a title or alias that is a stopword never enters the dictionary. A missing file fails the build. |
+| `stopwords` | string[] | — | — | Extra stopword files, relative to this configuration, one word per line and # for a comment, added to the defaults of the language pack; a title or alias that is a stopword never enters the dictionary. A missing file is an error of the configuration, reported by validate-config and before a build starts. |
 | `short_terms` | string[] | `[]` | — | Terms whose normalised form is shorter than three characters and that enter the dictionary anyway (FP, VL); every other such title or alias is left out. Compared without regard to case or accents. |
 | `type_prefixes` | map of map of string[] | — | — | Words that announce a type in prose and raise the confidence of the mention that follows, by locale then by type; each list replaces the profile's for that type. |
 | `cross_source_links` | boolean | `false` | — | Whether markdown links across sources, written with a source: prefix or as a relative path climbing into a sibling source, are resolved; otherwise they yield W-LINK-CROSS-SOURCE. |

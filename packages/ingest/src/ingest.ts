@@ -1,4 +1,4 @@
-import { join, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 
 import {
   compareFindings,
@@ -112,6 +112,27 @@ async function ingestGit(
  * changed since, a folder outside any repository or a client that knows nothing of local
  * folders leave the file system date.
  */
+/** Whether a folder holds a path: the same folder, or one above it. */
+function holds(folder: string, path: string): boolean {
+  const between = relative(folder, path);
+  return between === "" || (!between.startsWith("..") && !isAbsolute(between));
+}
+
+/**
+ * Whether a file of a local source is one the build itself writes: the clones and the caches
+ * under the cache folder, the pages and the fragments under the output. A source declared as
+ * `path: .` next to the configuration would otherwise read them back as notes and documents at
+ * the second build, under other identifiers, and grow at every build.
+ */
+function written(deps: IngestDependencies, root: string, relativePath: string): boolean {
+  const path = join(root, relativePath);
+  const folders = [
+    deps.cacheDirectory,
+    ...(deps.outputDirectory === undefined ? [] : [deps.outputDirectory]),
+  ];
+  return folders.some((folder) => holds(folder, path));
+}
+
 async function ingestLocal(
   source: SourceConfig,
   path: string,
@@ -131,7 +152,7 @@ async function ingestLocal(
   }
   let kept: string[];
   try {
-    kept = keptFiles(deps, root, excluded);
+    kept = keptFiles(deps, root, excluded).filter((relative) => !written(deps, root, relative));
   } catch (error) {
     if (error instanceof LintConfigError) return { finding: unreadable(source.name, error) };
     throw error;

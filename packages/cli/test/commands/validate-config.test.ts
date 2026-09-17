@@ -56,6 +56,23 @@ describe("concordance validate-config", () => {
     expect(io.stderr).toEqual([]);
   });
 
+  it("exits 1 when a stopword file the configuration names does not exist, naming the entry", () => {
+    const io = recordedIo({
+      "/work/concordance.yaml": `${validConfig}inference: { stopwords: [./words/ours.txt, ./absent.txt] }\n`,
+      "/work/words/ours.txt": "the\n",
+    });
+    expect(validateConfigCommand([], io)).toBe(1);
+    expect(io.stderr).toEqual([
+      'error: /work/concordance.yaml: inference.stopwords[1]: stopword file not found; received "./absent.txt"; expected the path of a file, relative to the configuration',
+      "/work/concordance.yaml: 1 error(s)",
+    ]);
+    const present = recordedIo({
+      "/work/concordance.yaml": `${validConfig}inference: { stopwords: [./words/ours.txt] }\n`,
+      "/work/words/ours.txt": "the\n",
+    });
+    expect(validateConfigCommand([], present)).toBe(0);
+  });
+
   it("exits 1 when pseudonymisation is enabled without a dictionary", () => {
     const io = recordedIo({
       "/work/concordance.yaml": `${validConfig}privacy: { pseudonymize: { enabled: true } }\n`,
