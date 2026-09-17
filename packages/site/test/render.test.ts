@@ -5,6 +5,7 @@ import { h } from "preact";
 import { MODE_SCRIPT } from "../src/mode.js";
 import { PANELS_SCRIPT } from "../src/panels.js";
 import { renderPage, renderSlot, type RenderOptions } from "../src/render.js";
+import type { ShellProps } from "../src/slots.js";
 import { defaultComponents } from "../src/theme/default/index.js";
 import { defaultTheme } from "../src/theme/resolve.js";
 import type { ResolvedTheme } from "../src/theme/types.js";
@@ -161,6 +162,20 @@ describe("renderPage", () => {
     expect(assetsBase).toBe("../assets/");
     const html = renderPage("EntityPage", page, rest);
     expect(html).toContain('src="mentions-panel-ABC123.js"');
+  });
+
+  it("fails when a theme's shell writes its children twice or not at all, the content being rendered once and placed where the shell puts it", () => {
+    const twice = ({ children }: ShellProps) => h("html", {}, h("body", {}, children, children));
+    const never = () => h("html", {}, h("body", {}, "nothing"));
+    for (const Shell of [twice, never]) {
+      const theme: ResolvedTheme = {
+        components: { ...defaultComponents, Shell },
+        overrides: [{ slot: "Shell", plugin: "@example/odd", theme: "odd" }],
+      };
+      expect(() => renderPage("EntityPage", entityPage, options({ theme }))).toThrow(
+        "renderDocument: the shell must write its children exactly once",
+      );
+    }
   });
 
   it("fails when a page uses an island that was not bundled", () => {
