@@ -48,7 +48,7 @@ export const catalogue: readonly CheckDefinition[] = [
     "warning",
     "links",
     "A markdown link points at a note of another source while cross-source links are disabled.",
-    "Set inference.cross_source_links to true in concordance.yaml, or link to a note of the same source.",
+    "Set inference.cross_source_links to true in concordance.yaml to resolve links across sources, or link to a note of the same source.",
   ),
   step(
     "W-REF-UNRESOLVED",
@@ -69,7 +69,7 @@ export const catalogue: readonly CheckDefinition[] = [
     "warning",
     "identifiers-and-types",
     "A frontmatter attribute is not part of the type's schema; it is kept as written.",
-    "Rename the attribute to one the type declares, or extend the type in the project profile.",
+    "Use an attribute of the type, declare it in the project profile, or remove the key.",
   ),
   step(
     "E-ID-DUP",
@@ -146,14 +146,14 @@ export const catalogue: readonly CheckDefinition[] = [
     "warning",
     "vocabulary-and-filing",
     "A recurring expression is used across files without any note defining it.",
-    "Create a term note in the glossary, or add the expression to rejected_terms in the lock file.",
+    "Create a term note in the glossary, or add the expression to `rejected_terms` in the lock file if it is not a business term.",
   ),
   step(
     "I-TERM-HOMONYM",
     "info",
     "vocabulary-and-filing",
     "Two entities share the same normalised title or alias; occurrences link to each at half confidence.",
-    "Rename one of them, add a distinguishing alias, or accept the shared form and its halved confidence.",
+    "Occurrences link to each entity at half confidence. Give the entities distinct titles or aliases, or add a `## Not to be confused with` section to each note so that readers tell them apart.",
   ),
   step(
     "W-TERM-UNUSED",
