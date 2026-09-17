@@ -204,14 +204,16 @@
             "pattern": "^[a-z0-9][a-z0-9-]*$"
           },
           "git": {
-            "description": "URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; exclusive with path.",
+            "description": "URL of the git repository, cloned on ref with its history and without the blobs, with the credentials of the git environment; https, ssh or git@ (never a local path, never a value starting with a dash); exclusive with path.",
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "pattern": "^(?:https?://|ssh://|git@)[^\\s]+$"
           },
           "ref": {
-            "description": "Branch, tag or commit of the git repository to read.",
+            "description": "Branch, tag or commit of the git repository to read; never starts with a dash, never holds a space.",
             "type": "string",
-            "default": "main"
+            "default": "main",
+            "pattern": "^[^-\\s][^\\s]*$"
           },
           "path": {
             "description": "Local folder, relative to this configuration, read in place; exclusive with git.",

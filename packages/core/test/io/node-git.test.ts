@@ -147,6 +147,20 @@ describe("nodeGit.clone", () => {
     }
   });
 
+  it("ends the options before every positional, so that a ref or a url starting with a dash is never read as an option", async () => {
+    const parent = freshDirectory();
+    const marker = join(parent, "pwned");
+    const pack = `--upload-pack=touch ${marker}`;
+    await expect(nodeGit.clone(origin.url, pack, join(parent, "a"))).rejects.toThrow();
+    expect(existsSync(marker)).toBe(false);
+    await expect(nodeGit.clone(pack, "main", join(parent, "b"))).rejects.toThrow();
+    expect(existsSync(marker)).toBe(false);
+    const cloned = join(parent, "c");
+    await nodeGit.clone(origin.url, "main", cloned);
+    await expect(nodeGit.update(cloned, pack)).rejects.toThrow();
+    expect(existsSync(marker)).toBe(false);
+  });
+
   it("rejects an unreachable url with git's explanation", async () => {
     const directory = freshDirectory();
     const url = pathToFileURL(join(root, "missing")).href;
