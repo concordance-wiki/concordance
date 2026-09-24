@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
-    "@formatjs/icu-messageformat-parser": "3.5.18",
+    "@formatjs/icu-messageformat-parser": "3.5.20",
     "intl-messageformat": "11.2.15"
   },
   "devDependencies": {
