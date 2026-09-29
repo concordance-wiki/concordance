@@ -1,463 +1,451 @@
 # Third-party licences
 
-Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance.
+Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.
 
 `scripts/licenses.mjs` generates this page from the installed dependencies and fails when a licence is outside its allow-list; `pnpm licenses:update` refreshes it, `pnpm licenses:check` verifies it in continuous integration. The scope says whether a package ships with the published packages (runtime) or serves the build, the tests and the linting only (development).
 
-| Package | Version | Licence | Scope | Repository |
-|---|---|---|---|---|
-| @babel/code-frame | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/compat-data | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/core | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/generator | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-annotate-as-pure | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-compilation-targets | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-create-class-features-plugin | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-globals | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-member-expression-to-functions | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-module-imports | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-module-transforms | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-optimise-call-expression | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-plugin-utils | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-replace-supers | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-skip-transparent-expression-wrappers | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-string-parser | 7.29.7 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-string-parser | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-validator-identifier | 7.29.7 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-validator-identifier | 8.0.4 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helper-validator-option | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/helpers | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/parser | 7.29.8 | MIT | development | <https://github.com/babel/babel> |
-| @babel/parser | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-proposal-decorators | 8.0.2 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-syntax-decorators | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-syntax-jsx | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-syntax-typescript | 8.0.3 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-destructuring | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-explicit-resource-management | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-modules-commonjs | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-react-display-name | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-react-jsx | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-react-jsx-development | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-react-pure-annotations | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/plugin-transform-typescript | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/preset-react | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/preset-typescript | 8.0.1 | MIT | development | <https://github.com/babel/babel> |
-| @babel/template | 8.0.0 | MIT | development | <https://github.com/babel/babel> |
-| @babel/traverse | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @babel/types | 7.29.8 | MIT | development | <https://github.com/babel/babel> |
-| @babel/types | 8.0.5 | MIT | development | <https://github.com/babel/babel> |
-| @bcoe/v8-coverage | 1.0.2 | MIT | development | <https://github.com/bcoe/v8-coverage> |
-| @cacheable/memory | 2.2.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| @cacheable/utils | 2.5.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| @changesets/apply-release-plan | 8.1.1 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/assemble-release-plan | 7.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/changelog-git | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/cli | 3.0.3 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/config | 4.0.1 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/errors | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/format | 0.1.2 | MIT | development | <https://github.com/changesets/format> |
-| @changesets/get-dependents-graph | 3.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/git | 4.0.1 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/parse | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/pre | 3.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/read | 1.0.1 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/should-skip-package | 1.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/types | 7.0.0 | MIT | development | <https://github.com/changesets/changesets> |
-| @changesets/write | 1.0.1 | MIT | development | <https://github.com/changesets/changesets> |
-| @clack/core | 1.5.0 | MIT | development | <https://github.com/bombshell-dev/clack> |
-| @clack/prompts | 1.8.0 | MIT | development | <https://github.com/bombshell-dev/clack> |
-| @eslint-community/eslint-utils | 4.10.1 | MIT | development | <https://github.com/eslint-community/eslint-utils> |
-| @eslint-community/regexpp | 4.12.2 | MIT | development | <https://github.com/eslint-community/regexpp> |
-| @eslint/config-array | 0.23.5 | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
-| @eslint/config-helpers | 0.7.0 | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
-| @eslint/core | 1.2.1 | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
-| @eslint/js | 10.0.1 | MIT | development | <https://github.com/eslint/eslint> |
-| @eslint/object-schema | 3.0.5 | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
-| @eslint/plugin-kit | 0.7.3 | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
-| @formatjs/fast-memoize | 3.1.7 | MIT | runtime | <https://github.com/formatjs/formatjs> |
-| @formatjs/icu-messageformat-parser | 3.5.18 | MIT | runtime | <https://github.com/formatjs/formatjs> |
-| @formatjs/icu-skeleton-parser | 2.1.11 | MIT | runtime | <https://github.com/formatjs/formatjs> |
-| @humanfs/core | 0.19.2 | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
-| @humanfs/node | 0.16.8 | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
-| @humanfs/types | 0.15.0 | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
-| @humanwhocodes/module-importer | 1.0.1 | Apache-2.0 | development | <https://github.com/humanwhocodes/module-importer> |
-| @humanwhocodes/retry | 0.4.3 | Apache-2.0 | development | <https://github.com/humanwhocodes/retry> |
-| @inquirer/ansi | 2.0.8 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/checkbox | 5.2.5 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/confirm | 6.3.2 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/core | 12.0.3 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/editor | 5.3.3 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/expand | 5.1.5 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/external-editor | 3.0.5 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/figures | 2.0.9 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/input | 5.1.6 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/number | 4.2.3 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/password | 5.2.2 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/prompts | 8.7.2 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/rawlist | 5.3.5 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/search | 4.3.3 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/select | 5.2.5 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @inquirer/type | 4.1.1 | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
-| @jridgewell/gen-mapping | 0.4.0-beta.0 | MIT | development | <https://github.com/jridgewell/sourcemaps> |
-| @jridgewell/resolve-uri | 3.1.2 | MIT | development | <https://github.com/jridgewell/resolve-uri> |
-| @jridgewell/sourcemap-codec | 1.6.0 | MIT | development | <https://github.com/jridgewell/sourcemaps> |
-| @jridgewell/trace-mapping | 0.3.31 | MIT | development | <https://github.com/jridgewell/sourcemaps> |
-| @keyv/bigmap | 1.3.1 | MIT | development | <https://github.com/jaredwray/keyv> |
-| @keyv/serialize | 1.1.1 | MIT | development | <https://github.com/jaredwray/keyv> |
-| @manypkg/find-root | 3.1.0 | MIT | development | <https://github.com/Thinkmill/manypkg> |
-| @manypkg/get-packages | 3.1.0 | MIT | development | <https://github.com/Thinkmill/manypkg> |
-| @manypkg/tools | 2.1.2 | MIT | development | <https://github.com/Thinkmill/manypkg> |
-| @napi-rs/canvas | 1.0.9 | MIT | runtime | <https://github.com/Brooooooklyn/canvas> |
-| @nodable/entities | 3.0.0 | MIT | runtime | <https://github.com/nodable/val-parsers> |
-| @oxc-project/types | 0.149.0 | MIT | development | <https://github.com/oxc-project/oxc> |
-| @pnpm/deps.graph-sequencer | 1100.0.1 | MIT | development | <https://github.com/pnpm/pnpm/tree/main/pnpm11/deps/graph-sequencer> |
-| @rolldown/pluginutils | 1.0.1 | MIT | development | <https://github.com/rolldown/plugins> |
-| @sec-ant/readable-stream | 0.4.1 | MIT | development | <https://github.com/Sec-ant/readable-stream> |
-| @sindresorhus/merge-streams | 4.0.0 | MIT | development | <https://github.com/sindresorhus/merge-streams> |
-| @standard-schema/spec | 1.1.0 | MIT | development | <https://github.com/standard-schema/standard-schema> |
-| @stryker-mutator/api | 10.0.0 | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
-| @stryker-mutator/core | 10.0.0 | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
-| @stryker-mutator/instrumenter | 10.0.0 | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
-| @stryker-mutator/util | 10.0.0 | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
-| @stryker-mutator/vitest-runner | 10.0.0 | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
-| @types/chai | 5.2.3 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/debug | 4.1.13 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/deep-eql | 4.0.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/esrecurse | 4.3.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/estree | 1.0.9 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/gensync | 1.0.5 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/hast | 3.0.5 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/jsesc | 2.5.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/json-schema | 7.0.15 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/mdast | 4.0.4 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/ms | 2.1.0 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/node | 26.5.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/picomatch | 4.0.3 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/unist | 3.0.3 | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/whatwg-mimetype | 3.0.2 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @types/ws | 8.18.1 | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
-| @typescript-eslint/eslint-plugin | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/parser | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/project-service | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/scope-manager | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/tsconfig-utils | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/type-utils | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/types | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/typescript-estree | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/utils | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @typescript-eslint/visitor-keys | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| @ungap/structured-clone | 1.4.0 | ISC | runtime | <https://github.com/ungap/structured-clone> |
-| @vitest/coverage-v8 | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/expect | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/mocker | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/pretty-format | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/runner | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/snapshot | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/spy | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| @vitest/utils | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| acorn | 8.18.0 | MIT | development | <https://github.com/acornjs/acorn> |
-| acorn-jsx | 5.3.2 | MIT | development | <https://github.com/acornjs/acorn-jsx> |
-| ajv | 6.15.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
-| ajv | 8.20.0 | MIT | runtime | <https://github.com/ajv-validator/ajv> |
-| ajv-formats | 3.0.1 | MIT | development | <https://github.com/ajv-validator/ajv-formats> |
-| angular-html-parser | 10.11.0 | MIT | development | <https://github.com/prettier/angular-html-parser> |
-| anynum | 1.0.1 | MIT | runtime | <https://github.com/NaturalIntelligence/anynum> |
-| assertion-error | 2.0.1 | MIT | development | <https://github.com/chaijs/assertion-error> |
-| ast-v8-to-istanbul | 1.0.6 | MIT | development | <https://github.com/AriPerkkio/ast-v8-to-istanbul> |
-| axe-core | 4.13.0 | MPL-2.0 | development | <https://github.com/dequelabs/axe-core> |
-| bail | 2.0.2 | MIT | runtime | <https://github.com/wooorm/bail> |
-| balanced-match | 4.0.4 | MIT | development | <https://github.com/juliangruber/balanced-match> |
-| baseline-browser-mapping | 2.11.22 | Apache-2.0 | development | <https://github.com/web-platform-dx/baseline-browser-mapping> |
-| brace-expansion | 5.0.9 | MIT | development | <https://github.com/juliangruber/brace-expansion> |
-| browserslist | 4.28.9 | MIT | development | <https://github.com/browserslist/browserslist> |
-| buffer-image-size | 0.6.4 | MIT | development | <https://github.com/evidentpoint/buffer-image-size> |
-| cac | 7.0.0 | MIT | development | <https://github.com/cacjs/cac> |
-| cacheable | 2.5.0 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| call-bind-apply-helpers | 1.0.2 | MIT | development | <https://github.com/ljharb/call-bind-apply-helpers> |
-| call-bound | 1.0.4 | MIT | development | <https://github.com/ljharb/call-bound> |
-| caniuse-lite | 1.0.30001810 | CC-BY-4.0 | development | <https://github.com/browserslist/caniuse-lite> |
-| ccount | 2.0.1 | MIT | runtime | <https://github.com/wooorm/ccount> |
-| chai | 6.2.2 | MIT | development | <https://github.com/chaijs/chai> |
-| chalk | 5.6.2 | MIT | development | <https://github.com/chalk/chalk> |
-| character-entities | 2.0.2 | MIT | runtime | <https://github.com/wooorm/character-entities> |
-| character-entities-html4 | 2.1.0 | MIT | runtime | <https://github.com/wooorm/character-entities-html4> |
-| character-entities-legacy | 3.0.0 | MIT | runtime | <https://github.com/wooorm/character-entities-legacy> |
-| chardet | 2.2.0 | MIT | development | <https://github.com/runk/node-chardet> |
-| cli-width | 4.1.0 | ISC | development | <https://github.com/knownasilya/cli-width> |
-| comma-separated-tokens | 2.0.3 | MIT | runtime | <https://github.com/wooorm/comma-separated-tokens> |
-| commander | 14.0.3 | MIT | development | <https://github.com/tj/commander.js> |
-| commander | 9.5.0 | MIT | development | <https://github.com/tj/commander.js> |
-| convert-source-map | 2.0.0 | MIT | development | <https://github.com/thlorenz/convert-source-map> |
-| cross-spawn | 7.0.6 | MIT | development | <https://github.com/moxystudio/node-cross-spawn> |
-| debug | 4.4.3 | MIT | runtime | <https://github.com/debug-js/debug> |
-| decode-named-character-reference | 1.3.0 | MIT | runtime | <https://github.com/wooorm/decode-named-character-reference> |
-| deep-is | 0.1.4 | MIT | development | <http://github.com/thlorenz/deep-is> |
-| dequal | 2.0.3 | MIT | runtime | <https://github.com/lukeed/dequal> |
-| des.js | 1.1.0 | MIT | development | <https://github.com/indutny/des.js> |
-| detect-libc | 2.1.2 | Apache-2.0 | development | <https://github.com/lovell/detect-libc> |
-| devlop | 1.1.0 | MIT | runtime | <https://github.com/wooorm/devlop> |
-| diff-match-patch | 1.0.5 | Apache-2.0 | development | <https://github.com/JackuB/diff-match-patch> |
-| dunder-proto | 1.0.1 | MIT | development | <https://github.com/es-shims/dunder-proto> |
-| electron-to-chromium | 1.5.427 | ISC | development | <https://github.com/Kilian/electron-to-chromium> |
-| emoji-regex | 10.6.0 | MIT | development | <https://github.com/mathiasbynens/emoji-regex> |
-| empathic | 2.0.1 | MIT | development | <https://github.com/lukeed/empathic> |
-| entities | 7.0.1 | BSD-2-Clause | development | <https://github.com/fb55/entities> |
-| es-define-property | 1.0.1 | MIT | development | <https://github.com/ljharb/es-define-property> |
-| es-errors | 1.3.0 | MIT | development | <https://github.com/ljharb/es-errors> |
-| es-module-lexer | 2.3.2 | MIT | development | <https://github.com/guybedford/es-module-lexer> |
-| es-object-atoms | 1.1.2 | MIT | development | <https://github.com/ljharb/es-object-atoms> |
-| esbuild | 0.28.2 | MIT | runtime | <https://github.com/evanw/esbuild> |
-| escalade | 3.2.0 | MIT | development | <https://github.com/lukeed/escalade> |
-| escape-string-regexp | 4.0.0 | MIT | runtime | <https://github.com/sindresorhus/escape-string-regexp> |
-| escape-string-regexp | 5.0.0 | MIT | runtime | <https://github.com/sindresorhus/escape-string-regexp> |
-| eslint | 10.10.0 | MIT | development | <https://github.com/eslint/eslint> |
-| eslint-scope | 9.1.2 | BSD-2-Clause | development | <https://github.com/eslint/js> |
-| eslint-visitor-keys | 3.4.3 | Apache-2.0 | development | <https://github.com/eslint/eslint-visitor-keys> |
-| eslint-visitor-keys | 5.0.1 | Apache-2.0 | development | <https://github.com/eslint/js> |
-| espree | 11.2.0 | BSD-2-Clause | development | <https://github.com/eslint/js> |
-| esquery | 1.7.0 | BSD-3-Clause | development | <https://github.com/estools/esquery> |
-| esrecurse | 4.3.0 | BSD-2-Clause | development | <https://github.com/estools/esrecurse> |
-| estraverse | 5.3.0 | BSD-2-Clause | development | <http://github.com/estools/estraverse> |
-| estree-walker | 3.0.3 | MIT | development | <https://github.com/Rich-Harris/estree-walker> |
-| esutils | 2.0.3 | BSD-2-Clause | development | <http://github.com/estools/esutils> |
-| execa | 9.6.1 | MIT | development | <https://github.com/sindresorhus/execa> |
-| expect-type | 1.4.0 | Apache-2.0 | development | <https://github.com/mmkal/expect-type> |
-| extend | 3.0.2 | MIT | runtime | <https://github.com/justmoon/node-extend> |
-| fast-deep-equal | 3.1.3 | MIT | runtime | <https://github.com/epoberezkin/fast-deep-equal> |
-| fast-json-stable-stringify | 2.1.0 | MIT | development | <https://github.com/epoberezkin/fast-json-stable-stringify> |
-| fast-levenshtein | 2.0.6 | MIT | development | <https://github.com/hiddentao/fast-levenshtein> |
-| fast-string-truncated-width | 3.0.3 | MIT | development | <https://github.com/fabiospampinato/fast-string-truncated-width> |
-| fast-string-width | 3.0.2 | MIT | development | <https://github.com/fabiospampinato/fast-string-width> |
-| fast-uri | 3.1.7 | BSD-3-Clause | runtime | <https://github.com/fastify/fast-uri> |
-| fast-wrap-ansi | 0.2.2 | MIT | development | <https://github.com/43081j/fast-wrap-ansi> |
-| fast-xml-builder | 1.3.1 | MIT | runtime | <https://github.com/NaturalIntelligence/fast-xml-builder> |
-| fast-xml-parser | 5.11.1 | MIT | runtime | <https://github.com/NaturalIntelligence/fast-xml-parser> |
-| fault | 2.0.1 | MIT | runtime | <https://github.com/wooorm/fault> |
-| fdir | 6.5.0 | MIT | development | <https://github.com/thecodrr/fdir> |
-| fflate | 0.8.3 | MIT | runtime | <https://github.com/101arrowz/fflate> |
-| figures | 6.1.0 | MIT | development | <https://github.com/sindresorhus/figures> |
-| file-entry-cache | 11.1.5 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| find-up | 5.0.0 | MIT | development | <https://github.com/sindresorhus/find-up> |
-| flat-cache | 6.1.23 | MIT | development | <https://github.com/jaredwray/cacheable> |
-| flatted | 3.4.4 | ISC | development | <https://github.com/WebReflection/flatted> |
-| format | 0.2.2 | MIT | runtime | <https://github.com/samsonjs/format> |
-| function-bind | 1.1.2 | MIT | development | <https://github.com/Raynos/function-bind> |
-| gensync | 1.0.0-beta.2 | MIT | development | <https://github.com/loganfsmyth/gensync> |
-| get-intrinsic | 1.3.0 | MIT | development | <https://github.com/ljharb/get-intrinsic> |
-| get-proto | 1.0.1 | MIT | development | <https://github.com/ljharb/get-proto> |
-| get-stream | 9.0.1 | MIT | development | <https://github.com/sindresorhus/get-stream> |
-| glob-parent | 6.0.2 | ISC | development | <https://github.com/gulpjs/glob-parent> |
-| gopd | 1.2.0 | MIT | development | <https://github.com/ljharb/gopd> |
-| happy-dom | 20.14.5 | MIT | development | <https://github.com/capricorn86/happy-dom> |
-| has-flag | 4.0.0 | MIT | development | <https://github.com/sindresorhus/has-flag> |
-| has-symbols | 1.1.0 | MIT | development | <https://github.com/inspect-js/has-symbols> |
-| hashery | 1.5.1 | MIT | development | <https://github.com/jaredwray/hashery> |
-| hasown | 2.0.4 | MIT | development | <https://github.com/inspect-js/hasOwn> |
-| hast-util-sanitize | 5.0.2 | MIT | runtime | <https://github.com/syntax-tree/hast-util-sanitize> |
-| hast-util-to-html | 9.0.5 | MIT | runtime | <https://github.com/syntax-tree/hast-util-to-html> |
-| hast-util-whitespace | 3.0.0 | MIT | runtime | <https://github.com/syntax-tree/hast-util-whitespace> |
-| hookified | 1.15.1 | MIT | development | <https://github.com/jaredwray/hookified> |
-| hookified | 2.2.0 | MIT | development | <https://github.com/jaredwray/hookified> |
-| html-escaper | 2.0.2 | MIT | development | <https://github.com/WebReflection/html-escaper> |
-| html-void-elements | 3.0.0 | MIT | runtime | <https://github.com/wooorm/html-void-elements> |
-| human-id | 4.2.1 | MIT | development | <https://github.com/RienNeVaPlus/human-id> |
-| human-signals | 8.0.1 | Apache-2.0 | development | <https://github.com/ehmicky/human-signals> |
-| iconv-lite | 0.7.3 | MIT | development | <https://github.com/pillarjs/iconv-lite> |
-| ignore | 5.3.2 | MIT | development | <https://github.com/kaelzhang/node-ignore> |
-| ignore | 7.0.9 | MIT | development | <https://github.com/kaelzhang/node-ignore> |
-| import-meta-resolve | 4.2.0 | MIT | development | <https://github.com/wooorm/import-meta-resolve> |
-| imurmurhash | 0.1.4 | MIT | development | <https://github.com/jensyt/imurmurhash-js> |
-| inherits | 2.0.4 | ISC | development | <https://github.com/isaacs/inherits> |
-| intl-messageformat | 11.2.15 | BSD-3-Clause | runtime | <https://github.com/formatjs/formatjs> |
-| is-extglob | 2.1.1 | MIT | development | <https://github.com/jonschlinkert/is-extglob> |
-| is-glob | 4.0.3 | MIT | development | <https://github.com/micromatch/is-glob> |
-| is-plain-obj | 4.1.0 | MIT | runtime | <https://github.com/sindresorhus/is-plain-obj> |
-| is-stream | 4.0.1 | MIT | development | <https://github.com/sindresorhus/is-stream> |
-| is-unicode-supported | 2.1.0 | MIT | development | <https://github.com/sindresorhus/is-unicode-supported> |
-| is-unsafe | 2.0.2 | MIT | runtime | <https://github.com/NaturalIntelligence/is-unsafe> |
-| isexe | 2.0.0 | ISC | development | <https://github.com/isaacs/isexe> |
-| istanbul-lib-coverage | 3.2.2 | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
-| istanbul-lib-report | 3.0.1 | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
-| istanbul-reports | 3.2.0 | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
-| jju | 1.4.0 | MIT | development | <https://github.com/rlidwka/jju> |
-| js-md4 | 0.3.2 | MIT | development | <https://github.com/emn178/js-md4> |
-| js-tokens | 10.0.0 | MIT | development | <https://github.com/lydell/js-tokens> |
-| jsesc | 3.1.0 | MIT | development | <https://github.com/mathiasbynens/jsesc> |
-| json-rpc-2.0 | 1.8.0 | MIT | development | <https://github.com/shogowada/json-rpc-2.0> |
-| json-schema-traverse | 0.4.1 | MIT | runtime | <https://github.com/epoberezkin/json-schema-traverse> |
-| json-schema-traverse | 1.0.0 | MIT | runtime | <https://github.com/epoberezkin/json-schema-traverse> |
-| json-stable-stringify-without-jsonify | 1.0.1 | MIT | development | <https://github.com/samn/json-stable-stringify> |
-| json5 | 2.2.3 | MIT | development | <https://github.com/json5/json5> |
-| jsonc-parser | 3.3.1 | MIT | development | <https://github.com/microsoft/node-jsonc-parser> |
-| keyv | 5.6.0 | MIT | development | <https://github.com/jaredwray/keyv> |
-| launch-editor | 2.14.1 | MIT | development | <https://github.com/vitejs/launch-editor> |
-| levn | 0.4.1 | MIT | development | <https://github.com/gkz/levn> |
-| lightningcss | 1.33.0 | MPL-2.0 | development | <https://github.com/parcel-bundler/lightningcss> |
-| locate-path | 6.0.0 | MIT | development | <https://github.com/sindresorhus/locate-path> |
-| lodash.groupby | 4.6.0 | MIT | development | <https://github.com/lodash/lodash> |
-| longest-streak | 3.1.0 | MIT | runtime | <https://github.com/wooorm/longest-streak> |
-| lru-cache | 11.5.2 | BlueOak-1.0.0 | development | <https://github.com/isaacs/node-lru-cache> |
-| magic-string | 0.30.21 | MIT | development | <https://github.com/Rich-Harris/magic-string> |
-| magicast | 0.5.5 | MIT | development | <https://github.com/unjs/magicast> |
-| make-dir | 4.0.0 | MIT | development | <https://github.com/sindresorhus/make-dir> |
-| markdown-table | 3.0.4 | MIT | runtime | <https://github.com/wooorm/markdown-table> |
-| math-intrinsics | 1.1.0 | MIT | development | <https://github.com/es-shims/math-intrinsics> |
-| mdast-util-find-and-replace | 3.0.2 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-find-and-replace> |
-| mdast-util-from-markdown | 2.0.3 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-from-markdown> |
-| mdast-util-frontmatter | 2.0.1 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-frontmatter> |
-| mdast-util-gfm | 3.1.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm> |
-| mdast-util-gfm-autolink-literal | 2.0.1 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-autolink-literal> |
-| mdast-util-gfm-footnote | 2.1.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-footnote> |
-| mdast-util-gfm-strikethrough | 2.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-strikethrough> |
-| mdast-util-gfm-table | 2.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-table> |
-| mdast-util-gfm-task-list-item | 2.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-task-list-item> |
-| mdast-util-phrasing | 4.1.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-phrasing> |
-| mdast-util-to-hast | 13.2.1 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-hast> |
-| mdast-util-to-markdown | 2.1.2 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-markdown> |
-| mdast-util-to-string | 4.0.0 | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-string> |
-| micromark | 4.0.2 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark> |
-| micromark-core-commonmark | 2.0.3 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-core-commonmark> |
-| micromark-extension-frontmatter | 2.0.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-frontmatter> |
-| micromark-extension-gfm | 3.0.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm> |
-| micromark-extension-gfm-autolink-literal | 2.1.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-autolink-literal> |
-| micromark-extension-gfm-footnote | 2.1.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-footnote> |
-| micromark-extension-gfm-strikethrough | 2.1.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-strikethrough> |
-| micromark-extension-gfm-table | 2.1.2 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-table> |
-| micromark-extension-gfm-tagfilter | 2.0.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-tagfilter> |
-| micromark-extension-gfm-task-list-item | 2.1.0 | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-task-list-item> |
-| micromark-factory-destination | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-destination> |
-| micromark-factory-label | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-label> |
-| micromark-factory-space | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-space> |
-| micromark-factory-title | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-title> |
-| micromark-factory-whitespace | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-whitespace> |
-| micromark-util-character | 2.1.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-character> |
-| micromark-util-chunked | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-chunked> |
-| micromark-util-classify-character | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-classify-character> |
-| micromark-util-combine-extensions | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-combine-extensions> |
-| micromark-util-decode-numeric-character-reference | 2.0.2 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-decode-numeric-character-reference> |
-| micromark-util-decode-string | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-decode-string> |
-| micromark-util-encode | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-encode> |
-| micromark-util-html-tag-name | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-html-tag-name> |
-| micromark-util-normalize-identifier | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-normalize-identifier> |
-| micromark-util-resolve-all | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-resolve-all> |
-| micromark-util-sanitize-uri | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-sanitize-uri> |
-| micromark-util-subtokenize | 2.1.0 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-subtokenize> |
-| micromark-util-symbol | 2.0.1 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-symbol> |
-| micromark-util-types | 2.0.2 | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-types> |
-| minimalistic-assert | 1.0.1 | ISC | development | <https://github.com/calvinmetcalf/minimalistic-assert> |
-| minimatch | 10.2.6 | BlueOak-1.0.0 | development | <https://github.com/isaacs/minimatch> |
-| ms | 2.1.3 | MIT | runtime | <https://github.com/vercel/ms> |
-| mutation-server-protocol | 0.4.1 | Apache-2.0 | development | <https://github.com/stryker-mutator/editor-plugins> |
-| mutation-testing-elements | 3.8.4 | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
-| mutation-testing-metrics | 3.8.4 | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
-| mutation-testing-report-schema | 3.8.4 | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
-| mute-stream | 3.0.0 | ISC | development | <https://github.com/npm/mute-stream> |
-| nanoid | 3.3.19 | MIT | development | <https://github.com/ai/nanoid> |
-| natural-compare | 1.4.0 | MIT | development | <https://github.com/litejs/natural-compare-lite> |
-| node-releases | 2.0.55 | MIT | development | <https://github.com/chicoxyzzy/node-releases> |
-| npm-run-path | 6.0.0 | MIT | development | <https://github.com/sindresorhus/npm-run-path> |
-| object-inspect | 1.13.4 | MIT | development | <https://github.com/inspect-js/object-inspect> |
-| obug | 2.2.1 | MIT | development | <https://github.com/sxzz/obug> |
-| optionator | 0.9.4 | MIT | development | <https://github.com/gkz/optionator> |
-| p-limit | 3.1.0 | MIT | development | <https://github.com/sindresorhus/p-limit> |
-| p-locate | 5.0.0 | MIT | development | <https://github.com/sindresorhus/p-locate> |
-| package-manager-detector | 1.8.0 | MIT | development | <https://github.com/antfu-collective/package-manager-detector> |
-| parse-ms | 4.0.0 | MIT | development | <https://github.com/sindresorhus/parse-ms> |
-| path-exists | 4.0.0 | MIT | development | <https://github.com/sindresorhus/path-exists> |
-| path-expression-matcher | 1.6.2 | MIT | runtime | <https://github.com/NaturalIntelligence/path-expression-matcher> |
-| path-key | 3.1.1 | MIT | development | <https://github.com/sindresorhus/path-key> |
-| path-key | 4.0.0 | MIT | development | <https://github.com/sindresorhus/path-key> |
-| pathe | 2.0.3 | MIT | development | <https://github.com/unjs/pathe> |
-| pdfjs-dist | 6.3.289 | Apache-2.0 | runtime | <https://github.com/mozilla/pdf.js> |
-| picocolors | 1.1.1 | ISC | development | <https://github.com/alexeyraspopov/picocolors> |
-| picomatch | 4.0.7 | MIT | runtime | <https://github.com/micromatch/picomatch> |
-| postcss | 8.5.28 | MIT | development | <https://github.com/postcss/postcss> |
-| postject | 1.0.0-alpha.6 | MIT | development | <https://github.com/nodejs/postject> |
-| preact | 10.29.8 | MIT | runtime | <https://github.com/preactjs/preact> |
-| preact-render-to-string | 6.7.0 | MIT | runtime | <https://github.com/preactjs/preact-render-to-string> |
-| prelude-ls | 1.2.1 | MIT | development | <https://github.com/gkz/prelude-ls> |
-| prettier | 3.9.6 | MIT | development | <https://github.com/prettier/prettier> |
-| pretty-ms | 9.3.1 | MIT | development | <https://github.com/sindresorhus/pretty-ms> |
-| progress | 2.0.3 | MIT | development | <https://github.com/visionmedia/node-progress> |
-| property-information | 7.2.0 | MIT | runtime | <https://github.com/wooorm/property-information> |
-| punycode | 2.3.1 | MIT | development | <https://github.com/mathiasbynens/punycode.js> |
-| qified | 0.10.1 | MIT | development | <https://github.com/jaredwray/qified> |
-| qs | 6.15.1 | BSD-3-Clause | development | <https://github.com/ljharb/qs> |
-| rehype-sanitize | 6.0.0 | MIT | runtime | <https://github.com/rehypejs/rehype-sanitize> |
-| rehype-stringify | 10.0.1 | MIT | runtime | <https://github.com/rehypejs/rehype/tree/main/packages/rehype-stringify> |
-| remark-frontmatter | 5.0.0 | MIT | runtime | <https://github.com/remarkjs/remark-frontmatter> |
-| remark-gfm | 4.0.1 | MIT | runtime | <https://github.com/remarkjs/remark-gfm> |
-| remark-parse | 11.0.0 | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-parse> |
-| remark-rehype | 11.1.2 | MIT | runtime | <https://github.com/remarkjs/remark-rehype> |
-| remark-stringify | 11.0.0 | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-stringify> |
-| require-from-string | 2.0.2 | MIT | runtime | <https://github.com/floatdrop/require-from-string> |
-| rolldown | 1.2.8 | MIT | development | <https://github.com/rolldown/rolldown> |
-| rxjs | 7.8.2 | Apache-2.0 | development | <https://github.com/reactivex/rxjs> |
-| safer-buffer | 2.1.2 | MIT | development | <https://github.com/ChALkeR/safer-buffer> |
-| semver | 7.8.5 | ISC | development | <https://github.com/npm/node-semver> |
-| shebang-command | 2.0.0 | MIT | development | <https://github.com/kevva/shebang-command> |
-| shebang-regex | 3.0.0 | MIT | development | <https://github.com/sindresorhus/shebang-regex> |
-| shell-quote | 1.10.0 | MIT | development | <http://github.com/ljharb/shell-quote> |
-| side-channel | 1.1.1 | MIT | development | <https://github.com/ljharb/side-channel> |
-| side-channel-list | 1.0.1 | MIT | development | <https://github.com/ljharb/side-channel-list> |
-| side-channel-map | 1.0.1 | MIT | development | <https://github.com/ljharb/side-channel-map> |
-| side-channel-weakmap | 1.0.2 | MIT | development | <https://github.com/ljharb/side-channel-weakmap> |
-| siginfo | 2.0.0 | ISC | development | <https://github.com/emilbayes/siginfo> |
-| signal-exit | 4.1.0 | ISC | development | <https://github.com/tapjs/signal-exit> |
-| sisteransi | 1.0.5 | MIT | development | <https://github.com/terkelg/sisteransi> |
-| source-map | 0.7.6 | BSD-3-Clause | development | <http://github.com/mozilla/source-map> |
-| source-map-js | 1.2.1 | BSD-3-Clause | development | <https://github.com/7rulnik/source-map-js> |
-| space-separated-tokens | 2.0.2 | MIT | runtime | <https://github.com/wooorm/space-separated-tokens> |
-| stackback | 0.0.2 | MIT | development | <https://github.com/shtylman/node-stackback> |
-| std-env | 4.2.0 | MIT | development | <https://github.com/unjs/std-env> |
-| stringify-entities | 4.0.4 | MIT | runtime | <https://github.com/wooorm/stringify-entities> |
-| strip-final-newline | 4.0.0 | MIT | development | <https://github.com/sindresorhus/strip-final-newline> |
-| strnum | 2.4.2 | MIT | runtime | <https://github.com/NaturalIntelligence/strnum> |
-| supports-color | 7.2.0 | MIT | development | <https://github.com/chalk/supports-color> |
-| tinybench | 2.9.0 | MIT | development | <https://github.com/tinylibs/tinybench> |
-| tinyexec | 1.3.1 | MIT | development | <https://github.com/tinylibs/tinyexec> |
-| tinyglobby | 0.2.17 | MIT | development | <https://github.com/SuperchupuDev/tinyglobby> |
-| tinyrainbow | 3.1.1 | MIT | development | <https://github.com/tinylibs/tinyrainbow> |
-| tree-kill | 1.2.2 | MIT | development | <https://github.com/pkrumins/node-tree-kill> |
-| trim-lines | 3.0.1 | MIT | runtime | <https://github.com/wooorm/trim-lines> |
-| trough | 2.2.0 | MIT | runtime | <https://github.com/wooorm/trough> |
-| ts-api-utils | 2.5.0 | MIT | development | <https://github.com/JoshuaKGoldberg/ts-api-utils> |
-| tslib | 2.8.1 | 0BSD | development | <https://github.com/Microsoft/tslib> |
-| tunnel | 0.0.6 | MIT | development | <https://github.com/koichik/node-tunnel> |
-| type-check | 0.4.0 | MIT | development | <https://github.com/gkz/type-check> |
-| typed-inject | 5.0.0 | Apache-2.0 | development | <https://github.com/nicojs/typed-inject> |
-| typed-rest-client | 2.3.1 | MIT | development | <https://github.com/Microsoft/typed-rest-client> |
-| typescript | 6.0.3 | Apache-2.0 | development | <https://github.com/microsoft/TypeScript> |
-| typescript-eslint | 8.70.0 | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
-| underscore | 1.13.8 | MIT | development | <https://github.com/jashkenas/underscore> |
-| undici-types | 8.9.0 | MIT | development | <https://github.com/nodejs/undici> |
-| unicorn-magic | 0.3.0 | MIT | development | <https://github.com/sindresorhus/unicorn-magic> |
-| unified | 11.0.5 | MIT | runtime | <https://github.com/unifiedjs/unified> |
-| unist-util-is | 6.0.1 | MIT | runtime | <https://github.com/syntax-tree/unist-util-is> |
-| unist-util-position | 5.0.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-position> |
-| unist-util-stringify-position | 4.0.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-stringify-position> |
-| unist-util-visit | 5.1.0 | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit> |
-| unist-util-visit-parents | 6.0.2 | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit-parents> |
-| update-browserslist-db | 1.3.3 | MIT | development | <https://github.com/browserslist/update-db> |
-| uri-js | 4.4.1 | BSD-2-Clause | development | <http://github.com/garycourt/uri-js> |
-| verkit | 0.3.2 | MIT | development | <https://github.com/sxzz/verkit> |
-| vfile | 6.0.3 | MIT | runtime | <https://github.com/vfile/vfile> |
-| vfile-message | 4.0.3 | MIT | runtime | <https://github.com/vfile/vfile-message> |
-| vite | 8.3.0 | MIT | development | <https://github.com/vitejs/vite> |
-| vitest | 4.1.11 | MIT | development | <https://github.com/vitest-dev/vitest> |
-| weapon-regex | 2.0.5 | Apache-2.0 | development | <https://github.com/stryker-mutator/weapon-regex> |
-| whatwg-mimetype | 3.0.0 | MIT | development | <https://github.com/jsdom/whatwg-mimetype> |
-| which | 2.0.2 | ISC | development | <https://github.com/isaacs/node-which> |
-| why-is-node-running | 2.3.0 | MIT | development | <https://github.com/mafintosh/why-is-node-running> |
-| word-wrap | 1.2.5 | MIT | development | <https://github.com/jonschlinkert/word-wrap> |
-| ws | 8.21.3 | MIT | development | <https://github.com/websockets/ws> |
-| xml-naming | 0.3.0 | MIT | runtime | <https://github.com/NaturalIntelligence/xml-naming> |
-| yaml | 2.9.1 | ISC | runtime | <https://github.com/eemeli/yaml> |
-| yocto-queue | 0.1.0 | MIT | development | <https://github.com/sindresorhus/yocto-queue> |
-| yoctocolors | 2.2.0 | MIT | development | <https://github.com/sindresorhus/yoctocolors> |
-| zod | 4.6.2 | MIT | development | <https://github.com/colinhacks/zod> |
-| zwitch | 2.0.4 | MIT | runtime | <https://github.com/wooorm/zwitch> |
+| Package | Licence | Scope | Repository |
+|---|---|---|---|
+| @babel/code-frame | MIT | development | <https://github.com/babel/babel> |
+| @babel/compat-data | MIT | development | <https://github.com/babel/babel> |
+| @babel/core | MIT | development | <https://github.com/babel/babel> |
+| @babel/generator | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-annotate-as-pure | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-compilation-targets | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-create-class-features-plugin | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-globals | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-member-expression-to-functions | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-module-imports | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-module-transforms | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-optimise-call-expression | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-plugin-utils | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-replace-supers | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-skip-transparent-expression-wrappers | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-string-parser | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-validator-identifier | MIT | development | <https://github.com/babel/babel> |
+| @babel/helper-validator-option | MIT | development | <https://github.com/babel/babel> |
+| @babel/helpers | MIT | development | <https://github.com/babel/babel> |
+| @babel/parser | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-proposal-decorators | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-syntax-decorators | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-syntax-jsx | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-syntax-typescript | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-destructuring | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-explicit-resource-management | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-modules-commonjs | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-react-display-name | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-react-jsx | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-react-jsx-development | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-react-pure-annotations | MIT | development | <https://github.com/babel/babel> |
+| @babel/plugin-transform-typescript | MIT | development | <https://github.com/babel/babel> |
+| @babel/preset-react | MIT | development | <https://github.com/babel/babel> |
+| @babel/preset-typescript | MIT | development | <https://github.com/babel/babel> |
+| @babel/template | MIT | development | <https://github.com/babel/babel> |
+| @babel/traverse | MIT | development | <https://github.com/babel/babel> |
+| @babel/types | MIT | development | <https://github.com/babel/babel> |
+| @bcoe/v8-coverage | MIT | development | <https://github.com/bcoe/v8-coverage> |
+| @cacheable/memory | MIT | development | <https://github.com/jaredwray/cacheable> |
+| @cacheable/utils | MIT | development | <https://github.com/jaredwray/cacheable> |
+| @changesets/apply-release-plan | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/assemble-release-plan | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/changelog-git | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/cli | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/config | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/errors | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/format | MIT | development | <https://github.com/changesets/format> |
+| @changesets/get-dependents-graph | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/git | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/parse | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/pre | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/read | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/should-skip-package | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/types | MIT | development | <https://github.com/changesets/changesets> |
+| @changesets/write | MIT | development | <https://github.com/changesets/changesets> |
+| @clack/core | MIT | development | <https://github.com/bombshell-dev/clack> |
+| @clack/prompts | MIT | development | <https://github.com/bombshell-dev/clack> |
+| @eslint-community/eslint-utils | MIT | development | <https://github.com/eslint-community/eslint-utils> |
+| @eslint-community/regexpp | MIT | development | <https://github.com/eslint-community/regexpp> |
+| @eslint/config-array | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
+| @eslint/config-helpers | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
+| @eslint/core | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
+| @eslint/js | MIT | development | <https://github.com/eslint/eslint> |
+| @eslint/object-schema | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
+| @eslint/plugin-kit | Apache-2.0 | development | <https://github.com/eslint/rewrite> |
+| @formatjs/fast-memoize | MIT | runtime | <https://github.com/formatjs/formatjs> |
+| @formatjs/icu-messageformat-parser | MIT | runtime | <https://github.com/formatjs/formatjs> |
+| @formatjs/icu-skeleton-parser | MIT | runtime | <https://github.com/formatjs/formatjs> |
+| @humanfs/core | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
+| @humanfs/node | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
+| @humanfs/types | Apache-2.0 | development | <https://github.com/humanwhocodes/humanfs> |
+| @humanwhocodes/module-importer | Apache-2.0 | development | <https://github.com/humanwhocodes/module-importer> |
+| @humanwhocodes/retry | Apache-2.0 | development | <https://github.com/humanwhocodes/retry> |
+| @inquirer/ansi | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/checkbox | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/confirm | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/core | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/editor | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/expand | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/external-editor | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/figures | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/input | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/number | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/password | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/prompts | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/rawlist | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/search | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/select | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @inquirer/type | MIT | development | <https://github.com/SBoudrias/Inquirer.js> |
+| @jridgewell/gen-mapping | MIT | development | <https://github.com/jridgewell/sourcemaps> |
+| @jridgewell/resolve-uri | MIT | development | <https://github.com/jridgewell/resolve-uri> |
+| @jridgewell/sourcemap-codec | MIT | development | <https://github.com/jridgewell/sourcemaps> |
+| @jridgewell/trace-mapping | MIT | development | <https://github.com/jridgewell/sourcemaps> |
+| @keyv/bigmap | MIT | development | <https://github.com/jaredwray/keyv> |
+| @keyv/serialize | MIT | development | <https://github.com/jaredwray/keyv> |
+| @manypkg/find-root | MIT | development | <https://github.com/Thinkmill/manypkg> |
+| @manypkg/get-packages | MIT | development | <https://github.com/Thinkmill/manypkg> |
+| @manypkg/tools | MIT | development | <https://github.com/Thinkmill/manypkg> |
+| @napi-rs/canvas | MIT | runtime | <https://github.com/Brooooooklyn/canvas> |
+| @nodable/entities | MIT | runtime | <https://github.com/nodable/val-parsers> |
+| @oxc-project/types | MIT | development | <https://github.com/oxc-project/oxc> |
+| @pnpm/deps.graph-sequencer | MIT | development | <https://github.com/pnpm/pnpm/tree/main/pnpm11/deps/graph-sequencer> |
+| @rolldown/pluginutils | MIT | development | <https://github.com/rolldown/plugins> |
+| @sec-ant/readable-stream | MIT | development | <https://github.com/Sec-ant/readable-stream> |
+| @sindresorhus/merge-streams | MIT | development | <https://github.com/sindresorhus/merge-streams> |
+| @standard-schema/spec | MIT | development | <https://github.com/standard-schema/standard-schema> |
+| @stryker-mutator/api | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
+| @stryker-mutator/core | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
+| @stryker-mutator/instrumenter | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
+| @stryker-mutator/util | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
+| @stryker-mutator/vitest-runner | Apache-2.0 | development | <https://github.com/stryker-mutator/stryker-js> |
+| @types/chai | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/debug | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/deep-eql | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/esrecurse | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/estree | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/gensync | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/hast | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/jsesc | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/json-schema | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/mdast | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/ms | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/node | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/picomatch | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/unist | MIT | runtime | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/whatwg-mimetype | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @types/ws | MIT | development | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
+| @typescript-eslint/eslint-plugin | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/parser | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/project-service | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/scope-manager | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/tsconfig-utils | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/type-utils | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/types | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/typescript-estree | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/utils | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @typescript-eslint/visitor-keys | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| @ungap/structured-clone | ISC | runtime | <https://github.com/ungap/structured-clone> |
+| @vitest/coverage-v8 | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/expect | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/mocker | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/pretty-format | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/runner | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/snapshot | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/spy | MIT | development | <https://github.com/vitest-dev/vitest> |
+| @vitest/utils | MIT | development | <https://github.com/vitest-dev/vitest> |
+| acorn | MIT | development | <https://github.com/acornjs/acorn> |
+| acorn-jsx | MIT | development | <https://github.com/acornjs/acorn-jsx> |
+| ajv | MIT | runtime | <https://github.com/ajv-validator/ajv> |
+| ajv-formats | MIT | development | <https://github.com/ajv-validator/ajv-formats> |
+| angular-html-parser | MIT | development | <https://github.com/prettier/angular-html-parser> |
+| anynum | MIT | runtime | <https://github.com/NaturalIntelligence/anynum> |
+| assertion-error | MIT | development | <https://github.com/chaijs/assertion-error> |
+| ast-v8-to-istanbul | MIT | development | <https://github.com/AriPerkkio/ast-v8-to-istanbul> |
+| axe-core | MPL-2.0 | development | <https://github.com/dequelabs/axe-core> |
+| bail | MIT | runtime | <https://github.com/wooorm/bail> |
+| balanced-match | MIT | development | <https://github.com/juliangruber/balanced-match> |
+| baseline-browser-mapping | Apache-2.0 | development | <https://github.com/web-platform-dx/baseline-browser-mapping> |
+| brace-expansion | MIT | development | <https://github.com/juliangruber/brace-expansion> |
+| browserslist | MIT | development | <https://github.com/browserslist/browserslist> |
+| buffer-image-size | MIT | development | <https://github.com/evidentpoint/buffer-image-size> |
+| cac | MIT | development | <https://github.com/cacjs/cac> |
+| cacheable | MIT | development | <https://github.com/jaredwray/cacheable> |
+| call-bind-apply-helpers | MIT | development | <https://github.com/ljharb/call-bind-apply-helpers> |
+| call-bound | MIT | development | <https://github.com/ljharb/call-bound> |
+| caniuse-lite | CC-BY-4.0 | development | <https://github.com/browserslist/caniuse-lite> |
+| ccount | MIT | runtime | <https://github.com/wooorm/ccount> |
+| chai | MIT | development | <https://github.com/chaijs/chai> |
+| chalk | MIT | development | <https://github.com/chalk/chalk> |
+| character-entities | MIT | runtime | <https://github.com/wooorm/character-entities> |
+| character-entities-html4 | MIT | runtime | <https://github.com/wooorm/character-entities-html4> |
+| character-entities-legacy | MIT | runtime | <https://github.com/wooorm/character-entities-legacy> |
+| chardet | MIT | development | <https://github.com/runk/node-chardet> |
+| cli-width | ISC | development | <https://github.com/knownasilya/cli-width> |
+| comma-separated-tokens | MIT | runtime | <https://github.com/wooorm/comma-separated-tokens> |
+| commander | MIT | development | <https://github.com/tj/commander.js> |
+| convert-source-map | MIT | development | <https://github.com/thlorenz/convert-source-map> |
+| cross-spawn | MIT | development | <https://github.com/moxystudio/node-cross-spawn> |
+| debug | MIT | runtime | <https://github.com/debug-js/debug> |
+| decode-named-character-reference | MIT | runtime | <https://github.com/wooorm/decode-named-character-reference> |
+| deep-is | MIT | development | <http://github.com/thlorenz/deep-is> |
+| dequal | MIT | runtime | <https://github.com/lukeed/dequal> |
+| des.js | MIT | development | <https://github.com/indutny/des.js> |
+| detect-libc | Apache-2.0 | development | <https://github.com/lovell/detect-libc> |
+| devlop | MIT | runtime | <https://github.com/wooorm/devlop> |
+| diff-match-patch | Apache-2.0 | development | <https://github.com/JackuB/diff-match-patch> |
+| dunder-proto | MIT | development | <https://github.com/es-shims/dunder-proto> |
+| electron-to-chromium | ISC | development | <https://github.com/Kilian/electron-to-chromium> |
+| emoji-regex | MIT | development | <https://github.com/mathiasbynens/emoji-regex> |
+| empathic | MIT | development | <https://github.com/lukeed/empathic> |
+| entities | BSD-2-Clause | development | <https://github.com/fb55/entities> |
+| es-define-property | MIT | development | <https://github.com/ljharb/es-define-property> |
+| es-errors | MIT | development | <https://github.com/ljharb/es-errors> |
+| es-module-lexer | MIT | development | <https://github.com/guybedford/es-module-lexer> |
+| es-object-atoms | MIT | development | <https://github.com/ljharb/es-object-atoms> |
+| esbuild | MIT | runtime | <https://github.com/evanw/esbuild> |
+| escalade | MIT | development | <https://github.com/lukeed/escalade> |
+| escape-string-regexp | MIT | runtime | <https://github.com/sindresorhus/escape-string-regexp> |
+| eslint | MIT | development | <https://github.com/eslint/eslint> |
+| eslint-scope | BSD-2-Clause | development | <https://github.com/eslint/js> |
+| eslint-visitor-keys | Apache-2.0 | development | <https://github.com/eslint/js> |
+| espree | BSD-2-Clause | development | <https://github.com/eslint/js> |
+| esquery | BSD-3-Clause | development | <https://github.com/estools/esquery> |
+| esrecurse | BSD-2-Clause | development | <https://github.com/estools/esrecurse> |
+| estraverse | BSD-2-Clause | development | <http://github.com/estools/estraverse> |
+| estree-walker | MIT | development | <https://github.com/Rich-Harris/estree-walker> |
+| esutils | BSD-2-Clause | development | <http://github.com/estools/esutils> |
+| execa | MIT | development | <https://github.com/sindresorhus/execa> |
+| expect-type | Apache-2.0 | development | <https://github.com/mmkal/expect-type> |
+| extend | MIT | runtime | <https://github.com/justmoon/node-extend> |
+| fast-deep-equal | MIT | runtime | <https://github.com/epoberezkin/fast-deep-equal> |
+| fast-json-stable-stringify | MIT | development | <https://github.com/epoberezkin/fast-json-stable-stringify> |
+| fast-levenshtein | MIT | development | <https://github.com/hiddentao/fast-levenshtein> |
+| fast-string-truncated-width | MIT | development | <https://github.com/fabiospampinato/fast-string-truncated-width> |
+| fast-string-width | MIT | development | <https://github.com/fabiospampinato/fast-string-width> |
+| fast-uri | BSD-3-Clause | runtime | <https://github.com/fastify/fast-uri> |
+| fast-wrap-ansi | MIT | development | <https://github.com/43081j/fast-wrap-ansi> |
+| fast-xml-builder | MIT | runtime | <https://github.com/NaturalIntelligence/fast-xml-builder> |
+| fast-xml-parser | MIT | runtime | <https://github.com/NaturalIntelligence/fast-xml-parser> |
+| fault | MIT | runtime | <https://github.com/wooorm/fault> |
+| fdir | MIT | development | <https://github.com/thecodrr/fdir> |
+| fflate | MIT | runtime | <https://github.com/101arrowz/fflate> |
+| figures | MIT | development | <https://github.com/sindresorhus/figures> |
+| file-entry-cache | MIT | development | <https://github.com/jaredwray/cacheable> |
+| find-up | MIT | development | <https://github.com/sindresorhus/find-up> |
+| flat-cache | MIT | development | <https://github.com/jaredwray/cacheable> |
+| flatted | ISC | development | <https://github.com/WebReflection/flatted> |
+| format | MIT | runtime | <https://github.com/samsonjs/format> |
+| function-bind | MIT | development | <https://github.com/Raynos/function-bind> |
+| gensync | MIT | development | <https://github.com/loganfsmyth/gensync> |
+| get-intrinsic | MIT | development | <https://github.com/ljharb/get-intrinsic> |
+| get-proto | MIT | development | <https://github.com/ljharb/get-proto> |
+| get-stream | MIT | development | <https://github.com/sindresorhus/get-stream> |
+| glob-parent | ISC | development | <https://github.com/gulpjs/glob-parent> |
+| gopd | MIT | development | <https://github.com/ljharb/gopd> |
+| happy-dom | MIT | development | <https://github.com/capricorn86/happy-dom> |
+| has-flag | MIT | development | <https://github.com/sindresorhus/has-flag> |
+| has-symbols | MIT | development | <https://github.com/inspect-js/has-symbols> |
+| hashery | MIT | development | <https://github.com/jaredwray/hashery> |
+| hasown | MIT | development | <https://github.com/inspect-js/hasOwn> |
+| hast-util-sanitize | MIT | runtime | <https://github.com/syntax-tree/hast-util-sanitize> |
+| hast-util-to-html | MIT | runtime | <https://github.com/syntax-tree/hast-util-to-html> |
+| hast-util-whitespace | MIT | runtime | <https://github.com/syntax-tree/hast-util-whitespace> |
+| hookified | MIT | development | <https://github.com/jaredwray/hookified> |
+| html-escaper | MIT | development | <https://github.com/WebReflection/html-escaper> |
+| html-void-elements | MIT | runtime | <https://github.com/wooorm/html-void-elements> |
+| human-id | MIT | development | <https://github.com/RienNeVaPlus/human-id> |
+| human-signals | Apache-2.0 | development | <https://github.com/ehmicky/human-signals> |
+| iconv-lite | MIT | development | <https://github.com/pillarjs/iconv-lite> |
+| ignore | MIT | development | <https://github.com/kaelzhang/node-ignore> |
+| import-meta-resolve | MIT | development | <https://github.com/wooorm/import-meta-resolve> |
+| imurmurhash | MIT | development | <https://github.com/jensyt/imurmurhash-js> |
+| inherits | ISC | development | <https://github.com/isaacs/inherits> |
+| intl-messageformat | BSD-3-Clause | runtime | <https://github.com/formatjs/formatjs> |
+| is-extglob | MIT | development | <https://github.com/jonschlinkert/is-extglob> |
+| is-glob | MIT | development | <https://github.com/micromatch/is-glob> |
+| is-plain-obj | MIT | runtime | <https://github.com/sindresorhus/is-plain-obj> |
+| is-stream | MIT | development | <https://github.com/sindresorhus/is-stream> |
+| is-unicode-supported | MIT | development | <https://github.com/sindresorhus/is-unicode-supported> |
+| is-unsafe | MIT | runtime | <https://github.com/NaturalIntelligence/is-unsafe> |
+| isexe | ISC | development | <https://github.com/isaacs/isexe> |
+| istanbul-lib-coverage | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
+| istanbul-lib-report | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
+| istanbul-reports | BSD-3-Clause | development | <https://github.com/istanbuljs/istanbuljs> |
+| jju | MIT | development | <https://github.com/rlidwka/jju> |
+| js-md4 | MIT | development | <https://github.com/emn178/js-md4> |
+| js-tokens | MIT | development | <https://github.com/lydell/js-tokens> |
+| jsesc | MIT | development | <https://github.com/mathiasbynens/jsesc> |
+| json-rpc-2.0 | MIT | development | <https://github.com/shogowada/json-rpc-2.0> |
+| json-schema-traverse | MIT | runtime | <https://github.com/epoberezkin/json-schema-traverse> |
+| json-stable-stringify-without-jsonify | MIT | development | <https://github.com/samn/json-stable-stringify> |
+| json5 | MIT | development | <https://github.com/json5/json5> |
+| jsonc-parser | MIT | development | <https://github.com/microsoft/node-jsonc-parser> |
+| keyv | MIT | development | <https://github.com/jaredwray/keyv> |
+| launch-editor | MIT | development | <https://github.com/vitejs/launch-editor> |
+| levn | MIT | development | <https://github.com/gkz/levn> |
+| lightningcss | MPL-2.0 | development | <https://github.com/parcel-bundler/lightningcss> |
+| locate-path | MIT | development | <https://github.com/sindresorhus/locate-path> |
+| lodash.groupby | MIT | development | <https://github.com/lodash/lodash> |
+| longest-streak | MIT | runtime | <https://github.com/wooorm/longest-streak> |
+| lru-cache | BlueOak-1.0.0 | development | <https://github.com/isaacs/node-lru-cache> |
+| magic-string | MIT | development | <https://github.com/Rich-Harris/magic-string> |
+| magicast | MIT | development | <https://github.com/unjs/magicast> |
+| make-dir | MIT | development | <https://github.com/sindresorhus/make-dir> |
+| markdown-table | MIT | runtime | <https://github.com/wooorm/markdown-table> |
+| math-intrinsics | MIT | development | <https://github.com/es-shims/math-intrinsics> |
+| mdast-util-find-and-replace | MIT | runtime | <https://github.com/syntax-tree/mdast-util-find-and-replace> |
+| mdast-util-from-markdown | MIT | runtime | <https://github.com/syntax-tree/mdast-util-from-markdown> |
+| mdast-util-frontmatter | MIT | runtime | <https://github.com/syntax-tree/mdast-util-frontmatter> |
+| mdast-util-gfm | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm> |
+| mdast-util-gfm-autolink-literal | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-autolink-literal> |
+| mdast-util-gfm-footnote | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-footnote> |
+| mdast-util-gfm-strikethrough | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-strikethrough> |
+| mdast-util-gfm-table | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-table> |
+| mdast-util-gfm-task-list-item | MIT | runtime | <https://github.com/syntax-tree/mdast-util-gfm-task-list-item> |
+| mdast-util-phrasing | MIT | runtime | <https://github.com/syntax-tree/mdast-util-phrasing> |
+| mdast-util-to-hast | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-hast> |
+| mdast-util-to-markdown | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-markdown> |
+| mdast-util-to-string | MIT | runtime | <https://github.com/syntax-tree/mdast-util-to-string> |
+| micromark | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark> |
+| micromark-core-commonmark | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-core-commonmark> |
+| micromark-extension-frontmatter | MIT | runtime | <https://github.com/micromark/micromark-extension-frontmatter> |
+| micromark-extension-gfm | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm> |
+| micromark-extension-gfm-autolink-literal | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-autolink-literal> |
+| micromark-extension-gfm-footnote | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-footnote> |
+| micromark-extension-gfm-strikethrough | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-strikethrough> |
+| micromark-extension-gfm-table | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-table> |
+| micromark-extension-gfm-tagfilter | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-tagfilter> |
+| micromark-extension-gfm-task-list-item | MIT | runtime | <https://github.com/micromark/micromark-extension-gfm-task-list-item> |
+| micromark-factory-destination | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-destination> |
+| micromark-factory-label | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-label> |
+| micromark-factory-space | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-space> |
+| micromark-factory-title | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-title> |
+| micromark-factory-whitespace | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-factory-whitespace> |
+| micromark-util-character | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-character> |
+| micromark-util-chunked | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-chunked> |
+| micromark-util-classify-character | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-classify-character> |
+| micromark-util-combine-extensions | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-combine-extensions> |
+| micromark-util-decode-numeric-character-reference | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-decode-numeric-character-reference> |
+| micromark-util-decode-string | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-decode-string> |
+| micromark-util-encode | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-encode> |
+| micromark-util-html-tag-name | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-html-tag-name> |
+| micromark-util-normalize-identifier | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-normalize-identifier> |
+| micromark-util-resolve-all | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-resolve-all> |
+| micromark-util-sanitize-uri | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-sanitize-uri> |
+| micromark-util-subtokenize | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-subtokenize> |
+| micromark-util-symbol | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-symbol> |
+| micromark-util-types | MIT | runtime | <https://github.com/micromark/micromark/tree/main/packages/micromark-util-types> |
+| minimalistic-assert | ISC | development | <https://github.com/calvinmetcalf/minimalistic-assert> |
+| minimatch | BlueOak-1.0.0 | development | <https://github.com/isaacs/minimatch> |
+| ms | MIT | runtime | <https://github.com/vercel/ms> |
+| mutation-server-protocol | Apache-2.0 | development | <https://github.com/stryker-mutator/editor-plugins> |
+| mutation-testing-elements | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
+| mutation-testing-metrics | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
+| mutation-testing-report-schema | Apache-2.0 | development | <https://github.com/stryker-mutator/mutation-testing-elements> |
+| mute-stream | ISC | development | <https://github.com/npm/mute-stream> |
+| nanoid | MIT | development | <https://github.com/ai/nanoid> |
+| natural-compare | MIT | development | <https://github.com/litejs/natural-compare-lite> |
+| node-releases | MIT | development | <https://github.com/chicoxyzzy/node-releases> |
+| npm-run-path | MIT | development | <https://github.com/sindresorhus/npm-run-path> |
+| object-inspect | MIT | development | <https://github.com/inspect-js/object-inspect> |
+| obug | MIT | development | <https://github.com/sxzz/obug> |
+| optionator | MIT | development | <https://github.com/gkz/optionator> |
+| p-limit | MIT | development | <https://github.com/sindresorhus/p-limit> |
+| p-locate | MIT | development | <https://github.com/sindresorhus/p-locate> |
+| package-manager-detector | MIT | development | <https://github.com/antfu-collective/package-manager-detector> |
+| parse-ms | MIT | development | <https://github.com/sindresorhus/parse-ms> |
+| path-exists | MIT | development | <https://github.com/sindresorhus/path-exists> |
+| path-expression-matcher | MIT | runtime | <https://github.com/NaturalIntelligence/path-expression-matcher> |
+| path-key | MIT | development | <https://github.com/sindresorhus/path-key> |
+| pathe | MIT | development | <https://github.com/unjs/pathe> |
+| pdfjs-dist | Apache-2.0 | runtime | <https://github.com/mozilla/pdf.js> |
+| picocolors | ISC | development | <https://github.com/alexeyraspopov/picocolors> |
+| picomatch | MIT | runtime | <https://github.com/micromatch/picomatch> |
+| postcss | MIT | development | <https://github.com/postcss/postcss> |
+| postject | MIT | development | <https://github.com/nodejs/postject> |
+| preact | MIT | runtime | <https://github.com/preactjs/preact> |
+| preact-render-to-string | MIT | runtime | <https://github.com/preactjs/preact-render-to-string> |
+| prelude-ls | MIT | development | <https://github.com/gkz/prelude-ls> |
+| prettier | MIT | development | <https://github.com/prettier/prettier> |
+| pretty-ms | MIT | development | <https://github.com/sindresorhus/pretty-ms> |
+| progress | MIT | development | <https://github.com/visionmedia/node-progress> |
+| property-information | MIT | runtime | <https://github.com/wooorm/property-information> |
+| punycode | MIT | development | <https://github.com/mathiasbynens/punycode.js> |
+| qified | MIT | development | <https://github.com/jaredwray/qified> |
+| qs | BSD-3-Clause | development | <https://github.com/ljharb/qs> |
+| rehype-sanitize | MIT | runtime | <https://github.com/rehypejs/rehype-sanitize> |
+| rehype-stringify | MIT | runtime | <https://github.com/rehypejs/rehype/tree/main/packages/rehype-stringify> |
+| remark-frontmatter | MIT | runtime | <https://github.com/remarkjs/remark-frontmatter> |
+| remark-gfm | MIT | runtime | <https://github.com/remarkjs/remark-gfm> |
+| remark-parse | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-parse> |
+| remark-rehype | MIT | runtime | <https://github.com/remarkjs/remark-rehype> |
+| remark-stringify | MIT | runtime | <https://github.com/remarkjs/remark/tree/main/packages/remark-stringify> |
+| require-from-string | MIT | runtime | <https://github.com/floatdrop/require-from-string> |
+| rolldown | MIT | development | <https://github.com/rolldown/rolldown> |
+| rxjs | Apache-2.0 | development | <https://github.com/reactivex/rxjs> |
+| safer-buffer | MIT | development | <https://github.com/ChALkeR/safer-buffer> |
+| semver | ISC | development | <https://github.com/npm/node-semver> |
+| shebang-command | MIT | development | <https://github.com/kevva/shebang-command> |
+| shebang-regex | MIT | development | <https://github.com/sindresorhus/shebang-regex> |
+| shell-quote | MIT | development | <http://github.com/ljharb/shell-quote> |
+| side-channel | MIT | development | <https://github.com/ljharb/side-channel> |
+| side-channel-list | MIT | development | <https://github.com/ljharb/side-channel-list> |
+| side-channel-map | MIT | development | <https://github.com/ljharb/side-channel-map> |
+| side-channel-weakmap | MIT | development | <https://github.com/ljharb/side-channel-weakmap> |
+| siginfo | ISC | development | <https://github.com/emilbayes/siginfo> |
+| signal-exit | ISC | development | <https://github.com/tapjs/signal-exit> |
+| sisteransi | MIT | development | <https://github.com/terkelg/sisteransi> |
+| source-map | BSD-3-Clause | development | <http://github.com/mozilla/source-map> |
+| source-map-js | BSD-3-Clause | development | <https://github.com/7rulnik/source-map-js> |
+| space-separated-tokens | MIT | runtime | <https://github.com/wooorm/space-separated-tokens> |
+| stackback | MIT | development | <https://github.com/shtylman/node-stackback> |
+| std-env | MIT | development | <https://github.com/unjs/std-env> |
+| stringify-entities | MIT | runtime | <https://github.com/wooorm/stringify-entities> |
+| strip-final-newline | MIT | development | <https://github.com/sindresorhus/strip-final-newline> |
+| strnum | MIT | runtime | <https://github.com/NaturalIntelligence/strnum> |
+| supports-color | MIT | development | <https://github.com/chalk/supports-color> |
+| tinybench | MIT | development | <https://github.com/tinylibs/tinybench> |
+| tinyexec | MIT | development | <https://github.com/tinylibs/tinyexec> |
+| tinyglobby | MIT | development | <https://github.com/SuperchupuDev/tinyglobby> |
+| tinyrainbow | MIT | development | <https://github.com/tinylibs/tinyrainbow> |
+| tree-kill | MIT | development | <https://github.com/pkrumins/node-tree-kill> |
+| trim-lines | MIT | runtime | <https://github.com/wooorm/trim-lines> |
+| trough | MIT | runtime | <https://github.com/wooorm/trough> |
+| ts-api-utils | MIT | development | <https://github.com/JoshuaKGoldberg/ts-api-utils> |
+| tslib | 0BSD | development | <https://github.com/Microsoft/tslib> |
+| tunnel | MIT | development | <https://github.com/koichik/node-tunnel> |
+| type-check | MIT | development | <https://github.com/gkz/type-check> |
+| typed-inject | Apache-2.0 | development | <https://github.com/nicojs/typed-inject> |
+| typed-rest-client | MIT | development | <https://github.com/Microsoft/typed-rest-client> |
+| typescript | Apache-2.0 | development | <https://github.com/microsoft/TypeScript> |
+| typescript-eslint | MIT | development | <https://github.com/typescript-eslint/typescript-eslint> |
+| underscore | MIT | development | <https://github.com/jashkenas/underscore> |
+| undici-types | MIT | development | <https://github.com/nodejs/undici> |
+| unicorn-magic | MIT | development | <https://github.com/sindresorhus/unicorn-magic> |
+| unified | MIT | runtime | <https://github.com/unifiedjs/unified> |
+| unist-util-is | MIT | runtime | <https://github.com/syntax-tree/unist-util-is> |
+| unist-util-position | MIT | runtime | <https://github.com/syntax-tree/unist-util-position> |
+| unist-util-stringify-position | MIT | runtime | <https://github.com/syntax-tree/unist-util-stringify-position> |
+| unist-util-visit | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit> |
+| unist-util-visit-parents | MIT | runtime | <https://github.com/syntax-tree/unist-util-visit-parents> |
+| update-browserslist-db | MIT | development | <https://github.com/browserslist/update-db> |
+| uri-js | BSD-2-Clause | development | <http://github.com/garycourt/uri-js> |
+| verkit | MIT | development | <https://github.com/sxzz/verkit> |
+| vfile | MIT | runtime | <https://github.com/vfile/vfile> |
+| vfile-message | MIT | runtime | <https://github.com/vfile/vfile-message> |
+| vite | MIT | development | <https://github.com/vitejs/vite> |
+| vitest | MIT | development | <https://github.com/vitest-dev/vitest> |
+| weapon-regex | Apache-2.0 | development | <https://github.com/stryker-mutator/weapon-regex> |
+| whatwg-mimetype | MIT | development | <https://github.com/jsdom/whatwg-mimetype> |
+| which | ISC | development | <https://github.com/isaacs/node-which> |
+| why-is-node-running | MIT | development | <https://github.com/mafintosh/why-is-node-running> |
+| word-wrap | MIT | development | <https://github.com/jonschlinkert/word-wrap> |
+| ws | MIT | development | <https://github.com/websockets/ws> |
+| xml-naming | MIT | runtime | <https://github.com/NaturalIntelligence/xml-naming> |
+| yaml | ISC | runtime | <https://github.com/eemeli/yaml> |
+| yocto-queue | MIT | development | <https://github.com/sindresorhus/yocto-queue> |
+| yoctocolors | MIT | development | <https://github.com/sindresorhus/yoctocolors> |
+| zod | MIT | development | <https://github.com/colinhacks/zod> |
+| zwitch | MIT | runtime | <https://github.com/wooorm/zwitch> |
 
 ## Native binaries
 
