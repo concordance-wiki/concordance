@@ -216,6 +216,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | execa | MIT | development | <https://github.com/sindresorhus/execa> |
 | expect-type | Apache-2.0 | development | <https://github.com/mmkal/expect-type> |
 | extend | MIT | runtime | <https://github.com/justmoon/node-extend> |
+| fast-check | MIT | development | <https://github.com/dubzzz/fast-check> |
 | fast-deep-equal | MIT | runtime | <https://github.com/epoberezkin/fast-deep-equal> |
 | fast-json-stable-stringify | MIT | development | <https://github.com/epoberezkin/fast-json-stable-stringify> |
 | fast-levenshtein | MIT | development | <https://github.com/hiddentao/fast-levenshtein> |
@@ -370,6 +371,7 @@ Every package of this repository is published under the [GNU General Public Lice
 | progress | MIT | development | <https://github.com/visionmedia/node-progress> |
 | property-information | MIT | runtime | <https://github.com/wooorm/property-information> |
 | punycode | MIT | development | <https://github.com/mathiasbynens/punycode.js> |
+| pure-rand | MIT | development | <https://github.com/dubzzz/pure-rand> |
 | qified | MIT | development | <https://github.com/jaredwray/qified> |
 | qs | BSD-3-Clause | development | <https://github.com/ljharb/qs> |
 | rehype-sanitize | MIT | runtime | <https://github.com/rehypejs/rehype-sanitize> |
