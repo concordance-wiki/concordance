@@ -13,9 +13,7 @@ import { cpus, tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-
-// Code-unit order, never the collation of the runtime: the output is the same on every machine.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const bin = resolve(root, "packages/cli/dist/bin.js");

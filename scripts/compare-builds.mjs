@@ -9,9 +9,7 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+import { byCodeUnit } from "./lib.mjs";
 
 function whereOf(inFirst, inSecond) {
   if (!inFirst) return "missing from the first build";

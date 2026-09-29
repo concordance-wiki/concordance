@@ -95,6 +95,7 @@ export {
 } from "./model/entity.js";
 export { compareFindings, type Finding, type Severity } from "./model/finding.js";
 export {
+  byCodeUnit,
   compareLinks,
   compareProvenances,
   sortCanonically,

@@ -9,11 +9,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
+import { byCodeUnit } from "./lib.mjs";
 
 const bumps = ["Major", "Minor", "Patch"];
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
 /** The published packages of the workspace (every `<folder>/*` entry of pnpm-workspace.yaml that is not private), by name. */
 export function publishedPackages(root) {

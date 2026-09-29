@@ -1,9 +1,10 @@
 import {
-  compareFindings,
-  compareLinks,
   type Finding,
   type Link,
   type Provenance,
+  byCodeUnit,
+  compareFindings,
+  compareLinks,
 } from "@concordance-wiki/core";
 import type { AttributeDefinition, Profile } from "@concordance-wiki/profile";
 
@@ -47,11 +48,6 @@ function isReference(definition: AttributeDefinition): definition is ReferenceDe
   return (
     (definition.type === "ref" || definition.type === "ref[]") && definition.relation !== undefined
   );
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function canonical(attributes: Record<string, unknown>): string {

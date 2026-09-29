@@ -1,6 +1,12 @@
 import { join } from "node:path";
 
-import { pagePath, type Config, type Entity, type FileSystem } from "@concordance-wiki/core";
+import {
+  type Config,
+  type Entity,
+  type FileSystem,
+  byCodeUnit,
+  pagePath,
+} from "@concordance-wiki/core";
 import { locateLink, type LocatedLink, type SourceFiles } from "@concordance-wiki/inference";
 import type { IngestedSource } from "@concordance-wiki/ingest";
 import type { KeywordMention } from "@concordance-wiki/nlp";
@@ -50,10 +56,6 @@ export const DEFAULT_EXTRACTED_TEXT_MAX_CHARS = 20_000;
 
 function fileKey(source: string, path: string): string {
   return `${source}/${path}`;
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** The markdown note of an entity: its markdown representation, else its own file when it is markdown. */

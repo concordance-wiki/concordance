@@ -1,4 +1,9 @@
-import type { ContractError, ContractField, ContractSchema } from "@concordance-wiki/core";
+import {
+  type ContractError,
+  type ContractField,
+  type ContractSchema,
+  byCodeUnit,
+} from "@concordance-wiki/core";
 
 import {
   childNamed,
@@ -86,10 +91,6 @@ const DIALECTS = new Map<string, Dialect>([
 /** Whether a document is a WSDL, decided on the name of its root element only. */
 export function isWsdlRoot(name: string | undefined): boolean {
   return name !== undefined && DIALECTS.has(name);
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function nameOf(element: XmlElement): string {

@@ -1,4 +1,4 @@
-import type { Neighbours } from "@concordance-wiki/core";
+import { type Neighbours, byCodeUnit } from "@concordance-wiki/core";
 import {
   accumulateCooccurrences,
   neighbourhoodToModel,
@@ -13,11 +13,6 @@ export interface KeywordNeighboursInput {
   /** The mentions of every keyword page by identifier. */
   keywordMentions: ReadonlyMap<string, readonly KeywordMention[]>;
   options: NeighbourhoodOptions;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function paragraphKey(occurrence: { source?: string; path: string; line: number }): string {

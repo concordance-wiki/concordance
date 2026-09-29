@@ -1,4 +1,5 @@
-import { byCodeUnit } from "../neighbourhood/order.js";
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import type { DomainEdge, DomainNode } from "./types.js";
 
 /** Every node with its distinct neighbours in identifier order; an edge naming an unknown node or joining a node to itself is dropped. */

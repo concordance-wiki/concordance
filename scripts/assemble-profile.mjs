@@ -11,9 +11,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isMap, isSeq, parse as parseYaml, parseDocument } from "yaml";
-
-// Code-unit order, never the collation of the runtime: the output is the same on every machine.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const baseFile = join(root, "packages/profile/base.yaml");

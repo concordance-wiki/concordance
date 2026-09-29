@@ -1,5 +1,7 @@
 import type { MessageId } from "./ids.js";
-import { byCodeUnit, byMessageId, french, source } from "./ids.js";
+import { byCodeUnit } from "@concordance-wiki/core";
+
+import { byMessageId, french, source } from "./ids.js";
 
 export const SOURCE_LANGUAGE = "en";
 

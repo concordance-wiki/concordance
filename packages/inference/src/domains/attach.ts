@@ -1,4 +1,5 @@
-import { byCodeUnit } from "../neighbourhood/order.js";
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import { buildGraph, distancesFrom } from "./graph.js";
 import { selectPivots } from "./pivots.js";
 import type {

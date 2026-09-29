@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { posix } from "node:path";
 
 import {
-  compareFindings,
   type Config,
   type ConversionLimits,
   type Converter,
@@ -11,6 +10,8 @@ import {
   type Finding,
   type Reader,
   type ReaderOutput,
+  byCodeUnit,
+  compareFindings,
 } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource } from "@concordance-wiki/ingest";
 import type { ScannedParagraph } from "@concordance-wiki/nlp";
@@ -82,10 +83,6 @@ export const DEFAULT_MAX_SIZE_MB = 50;
 
 /** The check that reports a document without a markdown representation, once the twins are reconciled. */
 export const DOCUMENT_WITHOUT_MARKDOWN = "W-DOC-NOMD";
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 export function documentKey(source: string, path: string): string {
   return `${source}/${path}`;

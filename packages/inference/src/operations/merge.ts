@@ -1,4 +1,9 @@
-import type { Entity, EntityRepresentation, Link } from "@concordance-wiki/core";
+import {
+  type Entity,
+  type EntityRepresentation,
+  type Link,
+  byCodeUnit,
+} from "@concordance-wiki/core";
 
 import type { ImportedOperation, MatchRung } from "./match.js";
 
@@ -11,11 +16,6 @@ function representationFormat(path: string): string {
   if (dot === -1) return "file";
   const extension = name.slice(dot + 1).toLowerCase();
   return extension === "md" ? "markdown" : extension;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function sortedAttributes(attributes: Record<string, unknown>): Record<string, unknown> {

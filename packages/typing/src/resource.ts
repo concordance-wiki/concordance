@@ -1,10 +1,11 @@
 import {
-  identifierFor,
   type ApplicationConfig,
   type Entity,
   type EntitySource,
   type Finding,
   type SourceConfig,
+  byCodeUnit,
+  identifierFor,
 } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
@@ -44,11 +45,6 @@ const RENAMED: Readonly<Record<string, string | undefined>> = {
 };
 
 const DEFAULT_STATUS = "valid";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 function fileTitle(path: string): string {
   const name = path.slice(path.lastIndexOf("/") + 1);

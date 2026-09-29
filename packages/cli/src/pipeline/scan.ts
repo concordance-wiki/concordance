@@ -1,4 +1,4 @@
-import type { Config } from "@concordance-wiki/core";
+import { type Config, byCodeUnit } from "@concordance-wiki/core";
 import { scannableText, type IngestedSource } from "@concordance-wiki/ingest";
 import {
   compareOccurrences,
@@ -31,10 +31,6 @@ const defaultScale: OccurrenceScale = {
   homonym_factor: 0.5,
   type_prefix_bonus: 0.1,
 };
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /** The `confidence.glossary_occurrence` block of the profile, every key resolved. */
 export function occurrenceScale(profile: Profile): OccurrenceScale {

@@ -1,5 +1,5 @@
 import type { CheckId } from "@concordance-wiki/checks";
-import type { Finding, Severity } from "@concordance-wiki/core";
+import { type Finding, type Severity, byCodeUnit } from "@concordance-wiki/core";
 
 import { GLOBAL_CHECKS } from "../global/checks.js";
 import { LOCAL_CHECKS } from "../local.js";
@@ -36,11 +36,6 @@ export interface JsonReport {
   reason?: string;
   findings: JsonFinding[];
   summary: Record<Severity, number>;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** The checks that ran, sorted: the global ones join the local ones only when the model could be read. */

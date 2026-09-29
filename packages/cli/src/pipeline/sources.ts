@@ -1,8 +1,4 @@
 import {
-  compareContracts,
-  compareEntities,
-  compareFindings,
-  compareLinks,
   type CandidateObject,
   type ContractRecord,
   type Entity,
@@ -11,6 +7,11 @@ import {
   type PluginContext,
   type ProvenanceMethod,
   type SourceProvider,
+  byCodeUnit,
+  compareContracts,
+  compareEntities,
+  compareFindings,
+  compareLinks,
 } from "@concordance-wiki/core";
 import type { Profile } from "@concordance-wiki/profile";
 
@@ -34,10 +35,6 @@ export interface PluginSourcesOutput {
   objects: CandidateObject[];
   contracts: ContractRecord[];
   findings: Finding[];
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function compareObjects(a: CandidateObject, b: CandidateObject): number {

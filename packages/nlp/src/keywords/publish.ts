@@ -1,4 +1,10 @@
-import { slugify, type Config, type Entity, type EntitySource } from "@concordance-wiki/core";
+import {
+  type Config,
+  type Entity,
+  type EntitySource,
+  byCodeUnit,
+  slugify,
+} from "@concordance-wiki/core";
 
 import type { KeywordCandidate, KeywordMention } from "./score.js";
 
@@ -47,10 +53,6 @@ export const KEYWORD_TYPE = "term";
 
 /** The status the profile gives an entity that declares none. */
 const KEYWORD_STATUS = "valid";
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 function compareByScore(a: KeywordCandidate, b: KeywordCandidate): number {
   return b.score - a.score || byCodeUnit(a.key, b.key);

@@ -12,8 +12,12 @@ export interface ProvenanceOrder {
   line?: number;
 }
 
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
+/**
+ * Compares two strings by code unit, never by locale: every order the tool writes down (a model, a
+ * page, a report, an index) must be the same on every machine, whatever collation data the runtime
+ * carries. Anything a reader sorts by their own alphabet goes through `collation` instead.
+ */
+export function byCodeUnit(a: string, b: string): number {
   return Number(a > b) - Number(a < b);
 }
 

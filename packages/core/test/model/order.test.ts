@@ -1,12 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  byCodeUnit,
   compareLinks,
   compareProvenances,
   sortCanonically,
   type LinkOrder,
   type ProvenanceOrder,
 } from "../../src/model/order.js";
+
+describe("Strings are compared by code unit, never by the collation of the runtime", () => {
+  it("orders by code unit and reports equality", () => {
+    expect(byCodeUnit("a", "b")).toBe(-1);
+    expect(byCodeUnit("b", "a")).toBe(1);
+    expect(byCodeUnit("a", "a")).toBe(0);
+    // "Z" (0x5A) sorts before "a" (0x61), whatever the locale of the runtime says.
+    expect(byCodeUnit("Z", "a")).toBe(-1);
+  });
+});
 
 describe("Entities are sorted by identifier, links by the source-target-relation triple, provenances by method, path and line", () => {
   // The entity model does not exist yet; its comparator will order by identifier the same way.

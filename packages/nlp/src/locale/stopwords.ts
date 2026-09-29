@@ -1,7 +1,4 @@
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
+import { byCodeUnit } from "@concordance-wiki/core";
 
 /** One word per line, `#` starts a comment; returns the unique lowercase words in code unit order. */
 export function loadStopwords(text: string): string[] {

@@ -1,9 +1,10 @@
-import type {
-  ContractError,
-  ContractField,
-  ContractParameter,
-  ContractResponse,
-  ContractSchema,
+import {
+  type ContractError,
+  type ContractField,
+  type ContractParameter,
+  type ContractResponse,
+  type ContractSchema,
+  byCodeUnit,
 } from "@concordance-wiki/core";
 import { parse as parseYaml } from "yaml";
 
@@ -111,10 +112,6 @@ function collectSchemas(
       collectSchemas(document, value, seen, names);
     }
   }
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** The node itself, or the component a local reference names; a reference that points nowhere is nothing. */

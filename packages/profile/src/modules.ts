@@ -1,6 +1,11 @@
 import { fileURLToPath } from "node:url";
 
-import { compiledSchema, type ConfigIssue, type FileSystem } from "@concordance-wiki/core";
+import {
+  type ConfigIssue,
+  type FileSystem,
+  byCodeUnit,
+  compiledSchema,
+} from "@concordance-wiki/core";
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
@@ -77,11 +82,6 @@ const SLUG_PATTERN = /^[a-z][a-z0-9_]*$/;
 // The run starts right after a non-separator: retrying inside it would make the runtime quadratic.
 const TRAILING_SEPARATORS = /(?<![\\/])[\\/]+$/;
 const MESSAGES_FILE_PATTERN = /^messages\/([a-z]{2,3})\.json$/;
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

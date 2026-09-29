@@ -1,4 +1,4 @@
-import type { Finding } from "@concordance-wiki/core";
+import { type Finding, byCodeUnit } from "@concordance-wiki/core";
 
 import type { LanguagePack } from "../locale/pack.js";
 import { languagePack } from "../locale/registry.js";
@@ -19,11 +19,6 @@ export interface BuildDictionaryInput {
   stopwords: ReadonlySet<string>;
   /** Terms shorter than three characters that stay in the dictionary. */
   shortTerms: ReadonlySet<string>;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function comparisonSet(forms: ReadonlySet<string>, pack: LanguagePack): Set<string> {

@@ -1,9 +1,6 @@
-import type { Neighbour } from "./types.js";
+import { byCodeUnit } from "@concordance-wiki/core";
 
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-export function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
+import type { Neighbour } from "./types.js";
 
 /** Best first: the larger count, then the lower identifier. */
 export function compareNeighbours(a: Neighbour, b: Neighbour): number {

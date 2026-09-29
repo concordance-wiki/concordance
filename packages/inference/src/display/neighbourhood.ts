@@ -1,7 +1,6 @@
-import type { Link } from "@concordance-wiki/core";
+import { type Link, byCodeUnit } from "@concordance-wiki/core";
 import { neighbourOrder } from "@concordance-wiki/profile";
 
-import { byCodeUnit } from "../neighbourhood/order.js";
 import type {
   DisplayableEntity,
   DisplayedNeighbour,

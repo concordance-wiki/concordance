@@ -1,3 +1,5 @@
+import { byCodeUnit } from "../model/order.js";
+
 export type Severity = "error" | "warning" | "info";
 
 /** What a check, or a pipeline step, reports about the corpus. Never an exception. */
@@ -11,11 +13,6 @@ export interface Finding {
   path?: string;
   line?: number;
   entity?: string;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** Canonical order: check, source, path, line, message, each compared code unit by code unit. */

@@ -1,3 +1,4 @@
+import { byCodeUnit } from "../model/order.js";
 import type { BuildConfig } from "../config/types.js";
 import { compareContracts, type ContractRecord } from "./contract.js";
 import { compareFindings, type Finding, type Severity } from "./finding.js";
@@ -71,10 +72,6 @@ export interface BuildLog {
 }
 
 const failOnDefaults = { errors: true, unconverted_max: 10 };
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /** Occurrences of each key, keys in code-unit order. */
 function countBy(keys: Iterable<string>): Record<string, number> {

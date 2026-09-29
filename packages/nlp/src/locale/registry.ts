@@ -1,4 +1,4 @@
-import type { Locale } from "@concordance-wiki/core";
+import { type Locale, byCodeUnit } from "@concordance-wiki/core";
 
 import { loadLanguagePack } from "./load-pack.js";
 import type { LanguagePack } from "./pack.js";
@@ -9,11 +9,6 @@ const shipped = ["en", "fr"].map((locale) =>
   loadLanguagePack(new URL(`../../locales/${locale}/`, import.meta.url)),
 );
 const packs = new Map<string, LanguagePack>(shipped.map((pack) => [pack.locale, pack]));
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /**
  * The pack of a locale: the exact tag first, then its language alone, so that `fr-CA`

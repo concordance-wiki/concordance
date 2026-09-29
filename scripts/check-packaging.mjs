@@ -12,6 +12,7 @@ import { join, relative } from "node:path";
 
 import { pnpmCommand } from "./executables.mjs";
 import { publishedPackages } from "./release-notes.mjs";
+import { byCodeUnit } from "./lib.mjs";
 
 const repositoryUrl = "git+https://github.com/concordance-wiki/concordance.git";
 // The folders a manifest may list: the built code, the executables and the data read at run time.
@@ -28,9 +29,6 @@ const required = ["package.json", "README.md", "LICENSE"];
 // A published README is what the registry shows, where a link into the repository is dead: a
 // target starting with `./` or `../`, or any target without a scheme that ends in `.md`.
 const relativeLink = /\]\(((?:\.\.?\/|[^:)]+\.md)[^)]*)\)/gu;
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
 const isObject = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 

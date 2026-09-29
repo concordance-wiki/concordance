@@ -1,9 +1,6 @@
-import type { AllowedPair, Profile } from "./types.js";
+import { byCodeUnit } from "@concordance-wiki/core";
 
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
+import type { AllowedPair, Profile } from "./types.js";
 
 /** `type` ends designate a type rather than an entity, so no entity pair ever matches them. */
 function endMatches(end: string, type: string, other: string): boolean {

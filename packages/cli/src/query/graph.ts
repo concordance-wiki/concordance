@@ -1,9 +1,4 @@
-import type { CanonicalModel, Entity } from "@concordance-wiki/core";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
+import { type CanonicalModel, type Entity, byCodeUnit } from "@concordance-wiki/core";
 
 /** One link walked on the way, in the direction it was walked. */
 export interface Step {
