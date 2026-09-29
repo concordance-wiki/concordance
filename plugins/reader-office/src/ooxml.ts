@@ -1,14 +1,8 @@
+import type { XmlElement } from "@concordance-wiki/core";
 import { unzipSync } from "fflate";
 
 import { compact, count, nonBlank, splitKeywords, type OfficeMetadata } from "./metadata.js";
-import {
-  childNamed,
-  descendantsNamed,
-  parseXml,
-  textOf,
-  textOfChild,
-  type XmlElement,
-} from "./xml.js";
+import { childNamed, descendantsNamed, parseXml, textOf, textOfChild } from "./xml.js";
 
 export type OoxmlKind = "docx" | "pptx" | "xlsx";
 

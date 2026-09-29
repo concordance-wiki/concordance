@@ -15,6 +15,7 @@ describe("@concordance-wiki/core", () => {
       "LINT_CONFIG_FILE",
       "LintConfigError",
       "ModelError",
+      "ORDERED_XML_OPTIONS",
       "PLUGIN_API_VERSION",
       "PluginDefinitionError",
       "PluginLoadError",
@@ -110,6 +111,7 @@ describe("@concordance-wiki/core", () => {
       "withoutCredentials",
       "writeCachedContract",
       "writeCachedContractView",
+      "xmlElementsOf",
       "xmlRootOf",
     ]);
   });

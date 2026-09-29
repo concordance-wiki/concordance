@@ -1,48 +1,14 @@
-import { refusedXml } from "@concordance-wiki/core";
+import {
+  ORDERED_XML_OPTIONS,
+  refusedXml,
+  xmlElementsOf,
+  type OrderedXmlNode,
+  type XmlElement,
+} from "@concordance-wiki/core";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 
-/** An element of the document; text nodes are elements named `#text` whose `text` is the content. */
-export interface XmlElement {
-  name: string;
-  attributes: Record<string, string>;
-  children: XmlElement[];
-  text: string;
-}
-
-/** The parser's ordered output: one tag key per node, plus the attributes under `:@`. */
-interface OrderedNode {
-  ":@"?: Record<string, string>;
-  [tag: string]: unknown;
-}
-
-const parser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: "",
-  removeNSPrefix: true,
-  parseTagValue: false,
-  parseAttributeValue: false,
-  trimValues: true,
-  ignoreDeclaration: true,
-  ignorePiTags: true,
-});
-
-function elementsOf(nodes: OrderedNode[]): XmlElement[] {
-  const elements: XmlElement[] = [];
-  for (const node of nodes) {
-    const attributes = node[":@"] ?? {};
-    for (const [key, value] of Object.entries(node)) {
-      if (key === ":@") continue;
-      elements.push(
-        key === "#text"
-          ? { name: key, attributes, children: [], text: String(value) }
-          : // A tag key always maps to the ordered list of its children.
-            { name: key, attributes, children: elementsOf(value as OrderedNode[]), text: "" },
-      );
-    }
-  }
-  return elements;
-}
+// A contract names things: the whitespace around a name is never part of it.
+const parser = new XMLParser({ ...ORDERED_XML_OPTIONS, trimValues: true });
 
 /**
  * The root element of a well-formed document, namespace prefixes dropped from tag and attribute
@@ -60,7 +26,9 @@ export function parseXml(text: string): { root: XmlElement } | { error: string }
     return { error: `${validation.err.msg} (line ${String(validation.err.line)})` };
   }
   // With no DOCTYPE to expand, what the validator accepts the parser parses: the ordered node list described above.
-  const root = elementsOf(parser.parse(text) as OrderedNode[]).find((e) => e.name !== "#text");
+  const root = xmlElementsOf(parser.parse(text) as OrderedXmlNode[]).find(
+    (e) => e.name !== "#text",
+  );
   // The validator refuses a document without a root element.
   return { root: root as XmlElement };
 }
