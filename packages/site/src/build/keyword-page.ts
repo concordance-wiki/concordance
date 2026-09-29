@@ -1,4 +1,4 @@
-import { pagePath, type Entity } from "@concordance-wiki/core";
+import { type Entity, fileKey, pagePath } from "@concordance-wiki/core";
 import { formatMessage, formatMonth } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
@@ -13,7 +13,6 @@ import type {
 } from "../slots.js";
 import {
   createNoteHref,
-  fileKey,
   glyphNameOf,
   message,
   spaceTitle,

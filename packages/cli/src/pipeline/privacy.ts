@@ -1,14 +1,6 @@
 import { resolve } from "node:path";
 
 import {
-  compareFindings,
-  formatIssue,
-  parsePseudonymDictionary,
-  pseudonymizeText,
-  pseudonymizeTranscript,
-  substituteStrings,
-  transcriptSubstitution,
-  transcriptsPublished,
   type Config,
   type Entity,
   type FileSystem,
@@ -16,10 +8,19 @@ import {
   type PseudonymDictionary,
   type PseudonymizeOptions,
   type Reader,
+  compareFindings,
+  fileKey,
+  formatIssue,
+  parsePseudonymDictionary,
+  pseudonymizeText,
+  pseudonymizeTranscript,
+  substituteStrings,
+  transcriptSubstitution,
+  transcriptsPublished,
 } from "@concordance-wiki/core";
 import { parseMarkdown, type IngestedSource } from "@concordance-wiki/ingest";
 
-import { documentKey, type DocumentPage, type ReadDocument } from "./documents.js";
+import { type DocumentPage, type ReadDocument } from "./documents.js";
 import type { ParsedDocument } from "./parse.js";
 
 export const PRIVACY_DICTIONARY = "W-PRIVACY-DICTIONARY";
@@ -255,15 +256,15 @@ export function pseudonymizeScope(input: PseudonymizeScopeInput): PseudonymizedS
   const scoped = new Set(
     input.entities
       .filter((entity) => scope.has(entity.type))
-      .map((entity) => documentKey(entity.source.name, entity.source.path)),
+      .map((entity) => fileKey(entity.source.name, entity.source.path)),
   );
   const files = new Map(
     input.sources.flatMap((source) =>
-      source.files.map((file) => [documentKey(source.name, file.path), file.absolutePath] as const),
+      source.files.map((file) => [fileKey(source.name, file.path), file.absolutePath] as const),
     ),
   );
   const documents = input.documents.map((note) => {
-    const key = documentKey(note.source, note.path);
+    const key = fileKey(note.source, note.path);
     const file = files.get(key);
     if (!scoped.has(key) || file === undefined) return note;
     const replaced = pseudonymizeText(input.fs.readText(file), dictionary, options);
@@ -272,7 +273,7 @@ export function pseudonymizeScope(input: PseudonymizeScopeInput): PseudonymizedS
     return { ...note, document: parseMarkdown(replaced.text, { path: note.path }) };
   });
   const resources = input.resources.map((document) =>
-    document.unit === "cue" || !scoped.has(documentKey(document.source, document.path))
+    document.unit === "cue" || !scoped.has(fileKey(document.source, document.path))
       ? document
       : {
           ...document,
@@ -282,7 +283,7 @@ export function pseudonymizeScope(input: PseudonymizeScopeInput): PseudonymizedS
         },
   );
   const entities = input.entities.map((entity) =>
-    scoped.has(documentKey(entity.source.name, entity.source.path))
+    scoped.has(fileKey(entity.source.name, entity.source.path))
       ? {
           ...entity,
           title: substitute(entity.title),

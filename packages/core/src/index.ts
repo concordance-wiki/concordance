@@ -8,7 +8,7 @@ export {
   type LintConfigValidation,
   type LintOverrides,
 } from "./config/lint.js";
-export { parseConfig, parseLock, parseTheme, parseYaml } from "./config/load.js";
+export { parseConfig, parseLock, parseTheme, parseYaml, yamlDocument } from "./config/load.js";
 export { validateLock } from "./config/lock.js";
 export { formatIssue, formatValidation } from "./config/report.js";
 export { compiledSchema, readSchema, type SchemaName } from "./config/schema.js";
@@ -103,6 +103,7 @@ export {
   type ProvenanceOrder,
 } from "./model/order.js";
 export { collation, type CollationOptions } from "./model/collation.js";
+export { fileKey, isPlainObject } from "./model/value.js";
 export {
   type Link,
   type Provenance,

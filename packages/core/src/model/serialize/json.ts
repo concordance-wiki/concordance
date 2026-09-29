@@ -1,8 +1,5 @@
-import { byCodeUnit } from "../../model/order.js";
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+import { byCodeUnit } from "../order.js";
+import { isPlainObject } from "../value.js";
 
 /** A copy with the keys of every object sorted, code unit by code unit, at every depth. */
 export function sortKeysDeep(value: unknown): unknown {

@@ -4,6 +4,7 @@ import {
   byCodeUnit,
   compareLinks,
   compareProvenances,
+  fileKey,
 } from "@concordance-wiki/core";
 import { allowedRelations, type Profile } from "@concordance-wiki/profile";
 
@@ -47,10 +48,6 @@ interface Candidate {
   link: Link;
   /** Serialised attributes, the part of the identity of a link that `compareLinks` ignores. */
   attributes: string;
-}
-
-function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
 }
 
 /** The passage of a mention and the words matched, kept on its provenance when the scan reported them. */

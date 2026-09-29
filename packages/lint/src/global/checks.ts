@@ -2,13 +2,14 @@ import { posix } from "node:path";
 
 import type { CheckId, StepFinding } from "@concordance-wiki/checks";
 import {
-  identifierFor,
   type CanonicalModel,
   type Config,
   type Entity,
   type FileSystem,
   type LintOverrides,
   type SourceConfig,
+  fileKey,
+  identifierFor,
 } from "@concordance-wiki/core";
 import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wiki/ingest";
 import {
@@ -79,10 +80,6 @@ interface Remote {
 }
 
 const NO_FILES: ReadonlySet<string> = new Set();
-
-function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
-}
 
 function titleOf(document: ParsedMarkdown, path: string): string {
   const declared = document.frontmatter["title"];

@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { byCodeUnit, compiledSchema } from "@concordance-wiki/core";
+import { byCodeUnit, compiledSchema, isPlainObject, yamlDocument } from "@concordance-wiki/core";
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
-import { parse, type YAMLParseError } from "yaml";
+import { parse } from "yaml";
 
 import { describeErrors } from "./issues.js";
 import { typesOf, type TypeModule } from "./modules.js";
@@ -19,10 +19,6 @@ import type {
 const defaultProfileUrl = new URL("../default.yaml", import.meta.url);
 
 const wildcardEnds = new Set(["any", "same", "type"]);
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /** Deep copy with object keys sorted, so that neither the fingerprint nor iteration depends on the input order. */
 function canonical(value: unknown): unknown {
@@ -200,16 +196,13 @@ export function validateProfile(document: unknown): ProfileValidation {
 type ParsedDocument = { ok: true; document: unknown } | { ok: false; issues: ProfileIssue[] };
 
 function parseYaml(text: string): ParsedDocument {
-  try {
-    return { ok: true, document: parse(text) };
-  } catch (error) {
-    // The parser only throws YAMLParseError instances.
-    const detail = (error as YAMLParseError).message.split("\n", 1).join("");
-    return {
-      ok: false,
-      issues: [{ severity: "error", path: "", message: `not valid YAML: ${detail}` }],
-    };
-  }
+  const parsed = yamlDocument(text);
+  return "detail" in parsed
+    ? {
+        ok: false,
+        issues: [{ severity: "error", path: "", message: `not valid YAML: ${parsed.detail}` }],
+      }
+    : { ok: true, document: parsed.document };
 }
 
 export function parseProfile(text: string): ProfileValidation {

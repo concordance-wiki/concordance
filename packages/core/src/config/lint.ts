@@ -1,9 +1,8 @@
 import { posix } from "node:path";
 
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
-import { parse, type YAMLParseError } from "yaml";
-
 import type { FileSystem } from "../io/file-system.js";
+import { yamlDocument } from "./load.js";
 import { formatIssue } from "./report.js";
 import { compiledSchema } from "./schema.js";
 import type { CheckOverrides, ConfigIssue } from "./types.js";
@@ -69,17 +68,14 @@ function describe(error: ErrorObject, document: unknown): ConfigIssue {
 }
 
 export function parseLintConfig(text: string): LintConfigValidation {
-  let document: unknown;
-  try {
-    document = parse(text);
-  } catch (error) {
-    // The parser only throws YAMLParseError instances.
-    const detail = (error as YAMLParseError).message.split("\n", 1).join("");
+  const parsed = yamlDocument(text);
+  if ("detail" in parsed) {
     return {
       ok: false,
-      issues: [{ severity: "error", path: "", message: `not valid YAML: ${detail}` }],
+      issues: [{ severity: "error", path: "", message: `not valid YAML: ${parsed.detail}` }],
     };
   }
+  const { document } = parsed;
   // An empty file overrides nothing.
   const candidate: unknown = document ?? {};
   const validate = validator();

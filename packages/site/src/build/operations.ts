@@ -1,8 +1,8 @@
-import { CONTRACT_METHOD, CONTRACT_RELATION, type Entity } from "@concordance-wiki/core";
+import { CONTRACT_METHOD, CONTRACT_RELATION, type Entity, fileKey } from "@concordance-wiki/core";
 
 import { byCodeUnit } from "../order.js";
 import { OPERATION_TYPE } from "../slots.js";
-import { fileKey, type SiteContext } from "./context.js";
+import { type SiteContext } from "./context.js";
 
 /** The check that reports an operation note the contract of its API does not declare: the only finding the API page reads. */
 export const OPERATION_UNMATCHED = "W-OPERATION-UNMATCHED";

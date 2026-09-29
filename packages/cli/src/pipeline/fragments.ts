@@ -5,6 +5,7 @@ import {
   type Entity,
   type FileSystem,
   byCodeUnit,
+  fileKey,
   pagePath,
 } from "@concordance-wiki/core";
 import { locateLink, type LocatedLink, type SourceFiles } from "@concordance-wiki/inference";
@@ -27,7 +28,7 @@ import {
   type RecognisedSpan,
 } from "@concordance-wiki/site";
 
-import { documentKey, type ReadDocument } from "./documents.js";
+import { type ReadDocument } from "./documents.js";
 import type { KeywordLead } from "./keywords.js";
 import type { RecognisedWord } from "./recognised.js";
 
@@ -53,10 +54,6 @@ export interface FragmentsInput {
 
 /** How many characters of extracted text a document keeps in its fragment when `build.extracted_text_max_chars` is unset. */
 export const DEFAULT_EXTRACTED_TEXT_MAX_CHARS = 20_000;
-
-function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
-}
 
 /** The markdown note of an entity: its markdown representation, else its own file when it is markdown. */
 function notePath(entity: Entity): string | undefined {
@@ -171,7 +168,7 @@ export function documentsOf(
     config.sources.find((source) => source.name === entity.source.name)?.previews !== false;
   const found: FragmentDocument[] = [];
   for (const path of [...new Set(paths)].sort(byCodeUnit)) {
-    const document = documents.get(documentKey(entity.source.name, path));
+    const document = documents.get(fileKey(entity.source.name, path));
     if (document === undefined || document.download?.kind === "withheld") continue;
     const target = fileTarget(entity, path);
     const preview = previews ? previewTarget(entity, path, document, target) : undefined;
@@ -325,9 +322,7 @@ function spansOf(
 
 /** The documents keyed by `<source>/<path>`. */
 function indexDocuments(documents: readonly ReadDocument[] = []): Map<string, ReadDocument> {
-  return new Map(
-    documents.map((document) => [documentKey(document.source, document.path), document]),
-  );
+  return new Map(documents.map((document) => [fileKey(document.source, document.path), document]));
 }
 
 /**
@@ -458,7 +453,7 @@ export function writeFragments(input: FragmentsInput, output: string): number {
     }
     for (const document of fragment.documents ?? []) {
       // documentsOf only lists documents the step read, and only gives a preview to one with a PDF.
-      const read = documents.get(documentKey(document.source, document.path)) as ReadDocument;
+      const read = documents.get(fileKey(document.source, document.path)) as ReadDocument;
       if (read.download === undefined) {
         copy(read.absolutePath, document.target);
       } else {

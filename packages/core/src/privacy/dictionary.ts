@@ -1,7 +1,6 @@
 import type { ErrorObject } from "ajv/dist/2020.js";
-import { parse, type YAMLParseError } from "yaml";
-
 import { formatIssue } from "../config/report.js";
+import { yamlDocument } from "../config/load.js";
 import { compiledSchema } from "../config/schema.js";
 import type { ConfigIssue } from "../config/types.js";
 import { describeSchemaError } from "../config/validate.js";
@@ -77,16 +76,14 @@ export type PseudonymDictionaryResult =
 
 /** Parses and validates the text of `pseudonyms.yaml`; an invalid file is a list of issues, never a failure. */
 export function parsePseudonymDictionary(text: string): PseudonymDictionaryResult {
-  let document: unknown;
-  try {
-    document = parse(text);
-  } catch (error) {
-    const detail = (error as YAMLParseError).message.replace(/\n[^]*/, "");
+  const parsed = yamlDocument(text);
+  if ("detail" in parsed) {
     return {
       ok: false,
-      issues: [{ severity: "error", path: "", message: `not valid YAML: ${detail}` }],
+      issues: [{ severity: "error", path: "", message: `not valid YAML: ${parsed.detail}` }],
     };
   }
+  const { document } = parsed;
   const issues = schemaIssues(document);
   if (issues.length > 0) return { ok: false, issues };
   // Validated against the schema just above.

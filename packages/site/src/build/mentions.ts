@@ -1,16 +1,17 @@
 import {
-  canonicalJson,
-  pagePath,
   type Entity,
   type Link,
   type Provenance,
+  canonicalJson,
+  fileKey,
+  pagePath,
 } from "@concordance-wiki/core";
 import { formatMessage } from "@concordance-wiki/i18n";
 
 import { byCodeUnit } from "../order.js";
 import type { Mention, MentionsPanelProps, RelatedLabels } from "../slots.js";
 import { groupByPage, RELATED_INLINE } from "../theme/default/mention-list.js";
-import { fileKey, message, typeLabel, type SiteContext } from "./context.js";
+import { message, typeLabel, type SiteContext } from "./context.js";
 import type { FragmentPassage } from "./fragments.js";
 import { DECISION_TYPE } from "./decision.js";
 import { MEETING_TYPE } from "./meeting.js";
