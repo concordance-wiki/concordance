@@ -12,18 +12,23 @@ export interface KeywordUnit extends QuotedText {
   text: string;
 }
 
+/**
+ * One n-gram met once. It carries where it was met, never what it looked like: a corpus yields
+ * millions of these and only the few thousand above the thresholds ever need their surface form
+ * or their context, which `ngramSurface` and `ngramContext` read from the unit on demand.
+ */
 export interface NgramOccurrence {
   /** The words in comparison form, joined by a single space. */
   key: string;
-  /** The span as written in the text. */
-  surface: string;
   source?: string;
   path: string;
   line: number;
   /** Code unit offset of the span in the unit text. */
   position: number;
-  /** 160 characters of the unit text as written, inline code included, centred on the span, an ellipsis marking each cut. */
-  context: string;
+  /** Code unit offset of the end of the span in the unit text. */
+  end: number;
+  /** The unit the span was read in, which holds the text the surface and the context are cut from. */
+  unit: KeywordUnit;
 }
 
 export interface ExtractNgramsOptions {
@@ -67,11 +72,25 @@ function isCandidate(words: readonly string[], last: string, rules: NgramRules):
   return words.join(" ").length >= rules.minLength;
 }
 
+/** The span as written in the text of its unit. */
+export function ngramSurface(occurrence: NgramOccurrence): string {
+  return occurrence.unit.text.slice(occurrence.position, occurrence.end);
+}
+
+/**
+ * 160 characters of the unit text as written, inline code included, centred on the span, an
+ * ellipsis marking each cut.
+ */
+export function ngramContext(occurrence: NgramOccurrence): string {
+  return occurrenceContext(occurrence.unit, occurrence.position, occurrence.end, contextWidth);
+}
+
 /** The n-grams of one unit starting at each token that is not a stopword, in text order. */
 function ngramsOf(
   unit: KeywordUnit,
   tokens: readonly Token[],
   rules: NgramRules,
+  keys: Map<string, string>,
 ): NgramOccurrence[] {
   const occurrences: NgramOccurrence[] = [];
   for (const [start, first] of tokens.entries()) {
@@ -81,14 +100,19 @@ function ngramsOf(
     for (const last of tokens.slice(start, start + rules.maxWords)) {
       words.push(last.word);
       if (!isCandidate(words, last.word, rules)) continue;
+      const written = words.join(" ");
+      // One string per distinct key for the whole run: the same expression is met again and again,
+      // and the copies the join makes are dropped instead of being held until the scoring.
+      const key = keys.get(written) ?? written;
+      keys.set(key, key);
       occurrences.push({
-        key: words.join(" "),
-        surface: unit.text.slice(first.start, last.end),
+        key,
         ...(unit.source === undefined ? {} : { source: unit.source }),
         path: unit.path,
         line: unit.line,
         position: first.start,
-        context: occurrenceContext(unit, first.start, last.end, contextWidth),
+        end: last.end,
+        unit,
       });
     }
   }
@@ -113,5 +137,6 @@ export function extractNgrams(
     minLength: options.minLength,
     stopwords: keywordForms(options.stopwords ?? pack.stopwords, pack),
   };
-  return units.flatMap((unit) => ngramsOf(unit, tokenize(unit.text, pack), rules));
+  const keys = new Map<string, string>();
+  return units.flatMap((unit) => ngramsOf(unit, tokenize(unit.text, pack), rules, keys));
 }

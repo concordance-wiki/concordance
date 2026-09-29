@@ -8,7 +8,7 @@ import {
   type ConfidencePenalty,
   type ConfidenceSignals,
 } from "./confidence.js";
-import { keywordForms, type NgramOccurrence } from "./ngrams.js";
+import { keywordForms, ngramContext, ngramSurface, type NgramOccurrence } from "./ngrams.js";
 
 export interface KeywordMention {
   source?: string;
@@ -214,7 +214,7 @@ function display(occurrences: readonly NgramOccurrence[]): string {
   const counts = new Map<string, number>();
   let best = "";
   let bestCount = 0;
-  for (const { surface } of occurrences) {
+  for (const surface of occurrences.map(ngramSurface)) {
     const count = (counts.get(surface) ?? 0) + 1;
     counts.set(surface, count);
     if (count > bestCount) {
@@ -231,8 +231,8 @@ function mentionOf(occurrence: NgramOccurrence): KeywordMention {
     path: occurrence.path,
     line: occurrence.line,
     position: occurrence.position,
-    surface: occurrence.surface,
-    context: occurrence.context,
+    surface: ngramSurface(occurrence),
+    context: ngramContext(occurrence),
   };
 }
 
