@@ -86,7 +86,13 @@ const bannedMarkers = [
 const scannedExtensions = /\.(md|html|ts|tsx|mjs|js|yaml|yml|json|txt|css)$/u;
 for (const path of tracked) {
   if (!scannedExtensions.test(path) || !existsSync(path)) continue;
-  const text = readFileSync(path, "utf8");
+  const bytes = readFileSync(path);
+  // A NUL byte makes git read the file as binary: no diff, no review, no three-way merge, so a
+  // rebase of two branches that both touched it can only conflict. A separator is written \u0000.
+  if (bytes.includes(0)) {
+    failures.push(`${path} carries a raw NUL byte; write it as the escape \\u0000`);
+  }
+  const text = bytes.toString("utf8");
   for (const marker of bannedMarkers) {
     if (marker.except?.includes(path)) continue;
     if (marker.pattern.test(text)) failures.push(`${path} carries ${marker.name}`);
@@ -134,5 +140,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file, no banned marker, no secret",
+  "no attribution trailer, no unexpected dot file, no unexpected uppercase markdown file, no banned marker, no secret, no raw NUL byte",
 );
