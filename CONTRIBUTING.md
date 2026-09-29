@@ -82,6 +82,8 @@ One pull request does one thing. A pull request that fixes a bug and renames a m
 
 A pull request from a fork runs every blocking test without any secret or private repository.
 
+The `parity` job reads the demonstration repositories at `main` to check that the wiki keeps pace with the tool. It reports on a pull request and blocks on `main`: a request that adds a check cannot be green before its note is merged into the wiki, and that note does not lint before the check is published. Read the job when it is red, and land the pair.
+
 ## Review
 
 - Every pull request needs a green pipeline and one approval from the maintainer named in `.github/CODEOWNERS` before it is merged; that review is required on every path of the repository. A maintainer's own small change (documentation, a dependency bump, a fix under fifty lines with its test) may be merged by its author once the pipeline is green; a story is always reviewed by someone else.
