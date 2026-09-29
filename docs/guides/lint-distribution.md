@@ -62,7 +62,7 @@ pnpm build:binary
 ./dist-bin/concordance-linux-x64 lint --scope repo
 ```
 
-`scripts/build-binary.mjs` deploys the built command line with its production dependencies (`pnpm deploy`), packs the tree into one compressed asset, generates the single executable blob with `node --experimental-sea-config` and injects it with the loader `scripts/sea-loader.cjs` into a copy of the running Node.js executable, through `postject`. `--output <dir>` picks the folder, `--node <path>` the Node.js executable to embed. The workflow builds the Linux binary on every change to the linter and keeps it as the `concordance-linux-x64` artifact of the run.
+`scripts/build-binary.mjs` deploys the built command line with its production dependencies (`pnpm deploy`), packs the tree into one compressed asset, generates the single executable blob with `node --experimental-sea-config` and injects it with the loader `scripts/sea-loader.cjs` into a copy of the running Node.js executable, through `postject`. `--output <dir>` picks the folder, `--node <path>` the Node.js executable to embed. Without `--node` the script embeds the Node.js that runs it and refuses to run under any version other than the one `.nvmrc` pins, so that the same commit always produces the same binary. The workflow builds the Linux binary on every change to the linter and keeps it as the `concordance-linux-x64` artifact of the run.
 
 ## GitHub action
 
