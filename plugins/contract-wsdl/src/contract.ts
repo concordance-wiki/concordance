@@ -2,18 +2,11 @@ import {
   type ContractError,
   type ContractField,
   type ContractSchema,
+  type XmlElement,
   byCodeUnit,
 } from "@concordance-wiki/core";
 
-import {
-  childNamed,
-  childrenNamed,
-  descendantsOf,
-  localName,
-  parseXml,
-  textOf,
-  type XmlElement,
-} from "./xml.js";
+import { childNamed, childrenNamed, descendantsOf, localName, parseXml, textOf } from "./xml.js";
 
 export type WsdlVersion = "1.1" | "2.0";
 

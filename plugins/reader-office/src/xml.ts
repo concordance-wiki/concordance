@@ -1,50 +1,16 @@
-import { refusedXml } from "@concordance-wiki/core";
+import {
+  ORDERED_XML_OPTIONS,
+  refusedXml,
+  xmlElementsOf,
+  type OrderedXmlNode,
+  type XmlElement,
+} from "@concordance-wiki/core";
 import { XMLParser } from "fast-xml-parser";
 
-/** An element of an XML part; text nodes are elements named `#text` whose `text` is the content. */
-export interface XmlElement {
-  name: string;
-  attributes: Record<string, string>;
-  children: XmlElement[];
-  text: string;
-}
-
-/** The parser's ordered output: one tag key per node, plus the attributes under `:@`. */
-interface OrderedNode {
-  ":@"?: Record<string, string>;
-  [tag: string]: unknown;
-}
-
-const parser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: "",
-  removeNSPrefix: true,
-  parseTagValue: false,
-  parseAttributeValue: false,
-  trimValues: false,
-  ignoreDeclaration: true,
-  ignorePiTags: true,
-});
+// The text of a document keeps its whitespace: a run of a paragraph may begin or end with a space.
+const parser = new XMLParser({ ...ORDERED_XML_OPTIONS, trimValues: false });
 
 const decoder = new TextDecoder();
-
-function elementsOf(nodes: OrderedNode[]): XmlElement[] {
-  const elements: XmlElement[] = [];
-  for (const node of nodes) {
-    const attributes = node[":@"] ?? {};
-    for (const [key, value] of Object.entries(node)) {
-      if (key === ":@") continue;
-      elements.push(
-        key === "#text"
-          ? { name: key, attributes, children: [], text: String(value) }
-          : // A tag key always maps to the ordered list of its children.
-            { name: key, attributes, children: elementsOf(value as OrderedNode[]), text: "" },
-      );
-    }
-  }
-  return elements;
-}
 
 /** Namespace prefixes are dropped, so that `dc:title` and `title` are the same element; a part with a DOCTYPE is not read. */
 export function parseXml(bytes: Uint8Array): XmlElement[] {
@@ -52,7 +18,7 @@ export function parseXml(bytes: Uint8Array): XmlElement[] {
   const refused = refusedXml(text);
   if (refused !== undefined) throw new Error(refused);
   // The parser returns the ordered node list described above.
-  return elementsOf(parser.parse(text) as OrderedNode[]);
+  return xmlElementsOf(parser.parse(text) as OrderedXmlNode[]);
 }
 
 export function childNamed(elements: XmlElement[], name: string): XmlElement | undefined {
