@@ -13,9 +13,17 @@ const encoder = new TextEncoder();
 // Starting LibreOffice is slow, loads the machine and, on a desktop, opens the application:
 // the run is opted into with CONCORDANCE_INTEGRATION=1, as the pipeline does.
 const optedIn = process.env["CONCORDANCE_INTEGRATION"] === "1";
-const soffice = optedIn && (await commandExists("soffice"));
+const installed = await commandExists("soffice");
 
-describe.skipIf(!soffice)("convertToPdf through the installed LibreOffice", () => {
+describe.skipIf(!optedIn)("the conversion against the installed LibreOffice", () => {
+  // The opt-in says the machine has LibreOffice. When it has not, the run fails here instead of
+  // reporting one skipped test: a pipeline that opted in and converted nothing was green for weeks.
+  it("finds the soffice command CONCORDANCE_INTEGRATION=1 promises", () => {
+    expect(installed).toBe(true);
+  });
+});
+
+describe.skipIf(!optedIn || !installed)("convertToPdf through the installed LibreOffice", () => {
   let cacheDirectory = "";
   beforeEach(() => {
     cacheDirectory = mkdtempSync(join(tmpdir(), "concordance-convert-"));
