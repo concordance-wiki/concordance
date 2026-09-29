@@ -88,6 +88,6 @@ Two `converter` contributions, both producing `pdf` and `text`: one for the thre
 
 ### Testing
 
-Unit tests replace LibreOffice with a fake command runner. The integration test runs the installed `soffice` only when `CONCORDANCE_INTEGRATION=1` is set (the pipeline sets it) and there is one; it is skipped otherwise, and every line is covered without it.
+Unit tests replace LibreOffice with a fake command runner. The integration test runs the installed `soffice` only when `CONCORDANCE_INTEGRATION=1` is set, which the `conversion` job of the pipeline does after installing LibreOffice; it is skipped otherwise, it fails when the opt-in finds no command, and every line is covered without it.
 
 </details>
