@@ -5,6 +5,12 @@
 // `--check`, nothing is written: the script fails when the committed inventory
 // differs from what it would write, so that the file cannot drift.
 //
+// The inventory names packages and licences, never versions: the lockfile
+// already pins every version, and a page that carried them would be rewritten
+// by each bump, which turned every dependency update red on a page nobody had
+// to read. A package installed at two versions under two different licences
+// keeps one row per licence.
+//
 // Allow-list. The project is GPL-3.0-or-later; every runtime dependency must
 // be compatible with it, and the development dependencies are held to the
 // same rule so that nobody has to reason about which is which. Permissive
@@ -120,7 +126,6 @@ for (const entry of listLicenses([])) {
     if (manifest.os || manifest.cpu) return;
     rows.push({
       name: entry.name,
-      version,
       license: license || "none",
       scope: runtime.has(entry.name) ? "runtime" : "development",
       repository: repositoryUrl(manifest),
@@ -131,27 +136,29 @@ for (const entry of listLicenses([])) {
 
 // Code-unit order, not locale order: the page must not depend on the collation data of the runtime.
 const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
-rows.sort((a, b) => byCodeUnit(a.name, b.name) || byCodeUnit(a.version, b.version));
+// One row per package and licence: the versions of a package share a row unless their licence differs.
+const unique = [...new Map(rows.map((row) => [`${row.name}\u0000${row.license}`, row])).values()];
+unique.sort((a, b) => byCodeUnit(a.name, b.name) || byCodeUnit(a.license, b.license));
 
 // An optional dependency that is not installed as a regular package is a
 // native binary, present for another platform or for this one.
-const listed = new Set(rows.map((row) => row.name));
+const listed = new Set(unique.map((row) => row.name));
 const binariesOf = (row) => row.optional.filter((name) => !listed.has(name)).sort();
-const parents = rows.filter((row) => binariesOf(row).length > 0);
+const parents = unique.filter((row) => binariesOf(row).length > 0);
 const escape = (text) => text.replaceAll("|", String.raw`\|`);
 const link = (url) => (url ? `<${url}>` : "");
 const lines = [
   "# Third-party licences",
   "",
-  "Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance.",
+  "Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.",
   "",
   "`scripts/licenses.mjs` generates this page from the installed dependencies and fails when a licence is outside its allow-list; `pnpm licenses:update` refreshes it, `pnpm licenses:check` verifies it in continuous integration. The scope says whether a package ships with the published packages (runtime) or serves the build, the tests and the linting only (development).",
   "",
-  "| Package | Version | Licence | Scope | Repository |",
-  "|---|---|---|---|---|",
-  ...rows.map(
+  "| Package | Licence | Scope | Repository |",
+  "|---|---|---|---|",
+  ...unique.map(
     (row) =>
-      `| ${escape(row.name)} | ${row.version} | ${escape(row.license)} | ${row.scope} | ${link(row.repository)} |`,
+      `| ${escape(row.name)} | ${escape(row.license)} | ${row.scope} | ${link(row.repository)} |`,
   ),
 ];
 if (parents.length > 0) {
@@ -187,5 +194,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  `${rows.length} dependencies, every licence in the allow-list, ${relative(root, inventory)} ${check ? "up to date" : "written"}`,
+  `${unique.length} dependencies, every licence in the allow-list, ${relative(root, inventory)} ${check ? "up to date" : "written"}`,
 );
