@@ -7,7 +7,10 @@
 # dependencies into one self-contained folder; stage 2 copies that folder onto a
 # fresh base image so that the build toolchain never reaches the published image.
 
-ARG NODE_IMAGE=node:22-bookworm-slim
+# Pinned by digest, and by full version so that a reader knows what runs: two builds of the same
+# commit then carry the same Node.js, whatever the day. Dependabot follows the digest. The version
+# is the one of .nvmrc, which every workflow reads.
+ARG NODE_IMAGE=node:22.23.3-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
 
 FROM ${NODE_IMAGE} AS build
 RUN npm install --global --ignore-scripts pnpm@10.34.5

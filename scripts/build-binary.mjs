@@ -35,6 +35,17 @@ const { values: options } = parseArgs({
   },
 });
 
+// The binary embeds the Node.js that runs this script, so the version of that Node.js is part of
+// the output: the same commit must be built with the version .nvmrc names, or with an executable
+// the caller names explicitly. Without this, two runs a month apart ship two different binaries.
+const pinned = readFileSync(join(root, ".nvmrc"), "utf8").trim();
+if (options.node === process.execPath && process.versions.node !== pinned) {
+  console.error(
+    `build-binary: this Node.js is ${process.versions.node}, .nvmrc pins ${pinned}; run it under that version, or pass --node <path> to embed another one`,
+  );
+  process.exit(1);
+}
+
 const fuse = "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2";
 const skippedDirectories = new Set([".bin", ".pnpm", ".modules.yaml"]);
 const skippedSuffixes = [".d.ts", ".d.ts.map", ".js.map"];
