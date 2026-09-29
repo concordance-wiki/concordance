@@ -46,6 +46,8 @@ describe("@concordance-wiki/nlp", () => {
       "loadStopwords",
       "loadSuffixes",
       "longestMatches",
+      "ngramContext",
+      "ngramSurface",
       "occurrenceConfidence",
       "occurrenceContext",
       "publishKeywords",

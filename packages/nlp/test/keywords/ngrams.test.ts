@@ -4,6 +4,8 @@ import {
   extractNgrams,
   keywordForm,
   languagePack,
+  ngramContext,
+  ngramSurface,
   type ExtractNgramsOptions,
   type KeywordUnit,
   type NgramOccurrence,
@@ -84,15 +86,16 @@ describe("extractNgrams", () => {
   });
 
   it("excludes n-grams under a minimum length", () => {
-    const units = [{ path: "a.md", line: 1, text: "EL MS api" }];
+    const unit: KeywordUnit = { path: "a.md", line: 1, text: "EL MS api" };
+    const units = [unit];
     expect(keysOf(units)).toEqual(["el ms", "el ms api", "ms api", "api"]);
     expect(extractNgrams(units, en, defaults)[3]).toStrictEqual({
       key: "api",
-      surface: "api",
       path: "a.md",
       line: 1,
       position: 6,
-      context: "EL MS api",
+      end: 9,
+      unit,
     });
   });
 
@@ -102,7 +105,7 @@ describe("extractNgrams", () => {
       { path: "b.md", line: 1, text: "build summary" },
     ];
     const occurrences = extractNgrams(units, en, defaults);
-    expect(occurrences.map((occurrence) => [occurrence.key, occurrence.surface])).toEqual([
+    expect(occurrences.map((occurrence) => [occurrence.key, ngramSurface(occurrence)])).toEqual([
       ["build", "Build"],
       ["build summary", "Build summaries"],
       ["summary", "summaries"],
@@ -112,39 +115,30 @@ describe("extractNgrams", () => {
     ]);
   });
 
-  it("carries the surface form, the position and the source of every occurrence", () => {
-    const units = [{ source: "specs", path: "a.md", line: 4, text: "In the Mentions API." }];
+  it("carries where every occurrence was met, its surface and context read on demand", () => {
+    const unit: KeywordUnit = {
+      source: "specs",
+      path: "a.md",
+      line: 4,
+      text: "In the Mentions API.",
+    };
+    const units = [unit];
     const occurrences = extractNgrams(units, en, { maxWords: 2, minLength: 3 });
     const expected: NgramOccurrence[] = [
-      {
-        key: "mention",
-        surface: "Mentions",
-        source: "specs",
-        path: "a.md",
-        line: 4,
-        position: 7,
-        context: "In the Mentions API.",
-      },
-      {
-        key: "mention api",
-        surface: "Mentions API",
-        source: "specs",
-        path: "a.md",
-        line: 4,
-        position: 7,
-        context: "In the Mentions API.",
-      },
-      {
-        key: "api",
-        surface: "API",
-        source: "specs",
-        path: "a.md",
-        line: 4,
-        position: 16,
-        context: "In the Mentions API.",
-      },
+      { key: "mention", source: "specs", path: "a.md", line: 4, position: 7, end: 15, unit },
+      { key: "mention api", source: "specs", path: "a.md", line: 4, position: 7, end: 19, unit },
+      { key: "api", source: "specs", path: "a.md", line: 4, position: 16, end: 19, unit },
     ];
     expect(occurrences).toEqual(expected);
+    expect(occurrences.map(ngramSurface)).toEqual(["Mentions", "Mentions API", "API"]);
+    expect(occurrences.map(ngramContext)).toEqual([
+      "In the Mentions API.",
+      "In the Mentions API.",
+      "In the Mentions API.",
+    ]);
+    // The key of an expression met twice is one string, not one per occurrence.
+    const twice = extractNgrams([...units, ...units], en, { maxWords: 1, minLength: 3 });
+    expect(twice[0]?.key).toBe(twice[2]?.key);
   });
 
   it("quotes the inline code of a unit back in the context, the span and its position staying in the text read", () => {
@@ -160,28 +154,26 @@ describe("extractNgrams", () => {
       en,
       { minWords: 2, maxWords: 2, minLength: 4 },
     );
-    expect(occurrence).toMatchObject({
-      key: "mention api",
-      surface: "Mentions API",
-      position: 8,
-      context: "In the site Mentions API.",
-    });
+    expect(occurrence).toMatchObject({ key: "mention api", position: 8 });
+    expect(occurrence && ngramSurface(occurrence)).toBe("Mentions API");
+    expect(occurrence && ngramContext(occurrence)).toBe("In the site Mentions API.");
   });
 
   it("trims the context to 160 characters around the span with an ellipsis", () => {
     const text = `${"word ".repeat(20)}target span${" word".repeat(20)}`;
     const units = [{ path: "a.md", line: 1, text }];
     const occurrence = extractNgrams(units, en, defaults).find((o) => o.key === "target span");
-    expect(occurrence).toMatchObject({ position: 100, surface: "target span" });
-    expect(occurrence?.context).toBe(`…${text.slice(25, 185)}…`);
-    expect(occurrence?.context).toHaveLength(162);
+    expect(occurrence).toMatchObject({ position: 100 });
+    expect(occurrence && ngramSurface(occurrence)).toBe("target span");
+    expect(occurrence && ngramContext(occurrence)).toBe(`…${text.slice(25, 185)}…`);
+    expect(occurrence && ngramContext(occurrence)).toHaveLength(162);
   });
 
   it("marks only the cut side when the span sits near an edge of a long unit", () => {
     const text = `target span${" word".repeat(40)}`;
     const units = [{ path: "a.md", line: 1, text }];
     const occurrence = extractNgrams(units, en, defaults).find((o) => o.key === "target span");
-    expect(occurrence?.context).toBe(`${text.slice(0, 160)}…`);
+    expect(occurrence && ngramContext(occurrence)).toBe(`${text.slice(0, 160)}…`);
   });
 });
 

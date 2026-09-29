@@ -55,6 +55,8 @@ export {
   extractNgrams,
   keywordForm,
   keywordForms,
+  ngramContext,
+  ngramSurface,
   type ExtractNgramsOptions,
   type KeywordUnit,
   type NgramOccurrence,
