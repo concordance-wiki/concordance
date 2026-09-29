@@ -47,6 +47,7 @@ describe("@concordance-wiki/lint", () => {
       "readLintOverrides",
       "resolveGlobalConfig",
       "rewriteRenamedLinks",
+      "whereOf",
     ]);
   });
 });

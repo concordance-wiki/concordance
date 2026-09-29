@@ -27,7 +27,7 @@ operation_id: listEntities
 ```
 
 ```
-warning: W-OPERATION-AMBIGUOUS (specs:api/contracts/model-query.openapi.json): operation specs/api/model-query/listentities of specs/api/model-query is claimed by 2 notes on the operation identifier: specs/endpoints/entities-of-the-last-build, specs/endpoints/list-entities; none is attached
+warning: specs:api/contracts/model-query.openapi.json: W-OPERATION-AMBIGUOUS: operation specs/api/model-query/listentities of specs/api/model-query is claimed by 2 notes on the operation identifier: specs/endpoints/entities-of-the-last-build, specs/endpoints/list-entities; none is attached (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-OPERATION-AMBIGUOUS.md)
 ```
 
 ## After

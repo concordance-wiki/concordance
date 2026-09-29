@@ -10,9 +10,10 @@ import {
 import type { TypeModule } from "@concordance-wiki/profile";
 import { defaultThemeManifest } from "@concordance-wiki/site";
 
+import { formatFinding } from "@concordance-wiki/lint";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { templatesDirectory } from "../templates.js";
-import { formatFinding } from "./findings.js";
 import { nodeThemeDependencies, specifier } from "./theme.js";
 import { pluginTypeModules, type TypeModuleDependencies } from "./types.js";
 import { defaultConfigFile } from "./validate-config.js";

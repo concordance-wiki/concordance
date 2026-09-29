@@ -177,10 +177,10 @@ Each source can check itself before pushing, without the global build. From the 
 npx concordance lint
 ```
 
-The command reads every markdown file under the current directory, one file at a time, and prints one line per finding, sorted by check, path and line, then a count:
+The command reads every markdown file under the current directory, one file at a time, and prints one line per finding, sorted by check, path and line, then a count. A line names the severity, where the finding was met (the source, the path and the line), the check, the message and the page of the check; `build` prints its own findings in the same form:
 
 ```
-error: screens/entity-page.md:3: E-LINK-BROKEN: link "threshold.md" in screens/entity-page.md points to no file of source repo (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
+error: repo:screens/entity-page.md:3: E-LINK-BROKEN: link "threshold.md" in screens/entity-page.md points to no file of source repo (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)
 1 finding: 1 error, 0 warnings, 0 info
 ```
 

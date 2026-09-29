@@ -665,7 +665,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     io.stderr.length = 0;
     expect(await renderCommand([], io, deps)).toBe(0);
     expect(io.stderr).toEqual([
-      "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency a tool is missing, command a-tool is not available",
+      "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency a tool is missing, command a-tool is not available (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PLUGIN-DISABLED.md)",
     ]);
   });
 

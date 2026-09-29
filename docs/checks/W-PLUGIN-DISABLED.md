@@ -14,7 +14,7 @@ plugins:
 ```
 
 ```
-warning: W-PLUGIN-DISABLED: plugin @concordance-wiki/plugin-convert-libreoffice is disabled: its system dependency LibreOffice is missing, command soffice is not available
+warning: W-PLUGIN-DISABLED: plugin @concordance-wiki/plugin-convert-libreoffice is disabled: its system dependency LibreOffice is missing, command soffice is not available (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PLUGIN-DISABLED.md)
 ```
 
 ## After

@@ -409,7 +409,7 @@ describe("Every theme override is visible there", () => {
     deps.commandAvailable = () => Promise.resolve(false);
     expect(await galleryCommand(["--theme", "@example/theme"], io, deps)).toBe(0);
     expect(io.stderr).toEqual([
-      "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency Ghostscript is missing, command gs is not available",
+      "warning: W-PLUGIN-DISABLED: plugin @example/theme is disabled: its system dependency Ghostscript is missing, command gs is not available (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PLUGIN-DISABLED.md)",
     ]);
   });
 

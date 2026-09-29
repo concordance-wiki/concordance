@@ -35,7 +35,7 @@ describe("concordance lint", () => {
       const io = repository();
       expect(await lintCommand([], io)).toBe(1);
       expect(io.stdout).toEqual([
-        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)`,
+        `error: repo:README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)`,
         "1 finding: 1 error, 0 warnings, 0 info",
       ]);
       expect(io.stderr).toEqual([]);
@@ -73,7 +73,7 @@ describe("concordance lint", () => {
       const io = ignored();
       expect(await lintCommand(["--no-gitignore"], io)).toBe(1);
       expect(io.stdout.map((line) => line.split(": ").slice(0, 3).join(": "))).toEqual([
-        "error: site/index.md:1: E-FM-INVALID",
+        "error: repo:site/index.md:1: E-FM-INVALID",
         "1 finding: 1 error, 0 warnings, 0 info",
       ]);
     });
@@ -126,7 +126,7 @@ describe("concordance lint", () => {
       const io = repository();
       expect(await lintCommand(["--output", "/elsewhere/lint.txt"], io)).toBe(1);
       expect(io.fs.readText("/elsewhere/lint.txt")).toBe(
-        `error: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)\n1 finding: 1 error, 0 warnings, 0 info\n`,
+        `error: repo:README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source repo (${documentation}/E-LINK-BROKEN.md)\n1 finding: 1 error, 0 warnings, 0 info\n`,
       );
       expect(io.stdout).toEqual([]);
     });
@@ -149,8 +149,8 @@ describe("concordance lint", () => {
       const io = repository({ "/work/concordance.yaml": config });
       expect(await lintCommand(["--config", "concordance.yaml", "--source", "notes"], io)).toBe(1);
       expect(io.stdout).toEqual([
-        `error: rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
-        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
+        `error: notes:rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
+        `warning: notes:README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
         "2 findings: 1 error, 1 warning, 0 info",
       ]);
     });
@@ -158,7 +158,7 @@ describe("concordance lint", () => {
     it("treats every file as a document when no configuration is given", async () => {
       const io = repository();
       expect(await lintCommand(["--source", "notes"], io)).toBe(1);
-      expect(io.stdout[0]).toMatch(/^error: README\.md:3: E-LINK-BROKEN: /);
+      expect(io.stdout[0]).toMatch(/^error: notes:README\.md:3: E-LINK-BROKEN: /);
       expect(io.stdout).toHaveLength(2);
     });
 
@@ -212,8 +212,8 @@ describe("concordance lint", () => {
       expect(io.stdout).toEqual([
         "fix: notes/entry.md:1: order the frontmatter keys: id, status",
         'fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
-        `error: rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
-        `warning: README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
+        `error: notes:rules/cap.rule.md: E-ID-DUP: notes/rules/cap.rule.md resolves to notes/rules/cap, already taken by notes/rules/cap.md, which is kept (${documentation}/E-ID-DUP.md)`,
+        `warning: notes:README.md:3: E-LINK-BROKEN: link "gone.md" in README.md points to no file of source notes (${documentation}/E-LINK-BROKEN.md)`,
         "2 findings: 1 error, 1 warning, 0 info",
       ]);
       expect(io.fs.readText("/work/notes/entry.md")).toBe(fixedEntry);
@@ -228,8 +228,8 @@ describe("concordance lint", () => {
         "would fix: notes/entry.md:1: order the frontmatter keys: id, status",
         'would fix: notes/entry.md:7: rewrite link "cap.rule.md#limits" to "../rules/cap.rule.md#limits", the only file named cap.rule.md',
       ]);
-      expect(io.stdout[2]).toMatch(/^error: README\.md:3: E-LINK-BROKEN: /);
-      expect(io.stdout[3]).toMatch(/^error: notes\/entry\.md:7: E-LINK-BROKEN: /);
+      expect(io.stdout[2]).toMatch(/^error: repo:README\.md:3: E-LINK-BROKEN: /);
+      expect(io.stdout[3]).toMatch(/^error: repo:notes\/entry\.md:7: E-LINK-BROKEN: /);
       expect(write).not.toHaveBeenCalled();
     });
 
@@ -396,8 +396,8 @@ describe("concordance lint", () => {
       await lintCommand(["--config", "concordance.yaml", "--source", "notes"], second);
       expect(first.stdout).toEqual(second.stdout);
       expect(first.stdout.map((line) => line.split(": ")[1])).toEqual([
-        "rules/cap.rule.md",
-        "README.md:3",
+        "notes:rules/cap.rule.md",
+        "notes:README.md:3",
         "1 error, 1 warning, 0 info",
       ]);
     });
@@ -499,9 +499,9 @@ describe("concordance lint", () => {
       expect(await lintCommand(["--scope", "global", "--source", "specs"], state.io)).toBe(1);
       expect(state.calls).toBe(1);
       expect(state.io.stdout).toEqual([
-        `error: screens/entity-page.md:3: E-LINK-BROKEN: link "glossary:remediation.md" in screens/entity-page.md points to remediation.md in source glossary, which has no entity in the published model of ${builtAt} (${documentation}/E-LINK-BROKEN.md)`,
-        `info: rules/finding.rule.md: I-TERM-HOMONYM: "Finding" is the title or an alias of rules/finding.rule.md (document) and of glossary/finding (term) in the published model of ${builtAt} (${documentation}/I-TERM-HOMONYM.md)`,
-        `warning: screens/entity-page.md:3: W-LINK-CROSS-SOURCE: link "glossary:finding.md" in screens/entity-page.md reaches glossary/finding in source glossary, but the published model of ${builtAt} was built with cross-source links disabled (${documentation}/W-LINK-CROSS-SOURCE.md)`,
+        `error: specs:screens/entity-page.md:3: E-LINK-BROKEN: link "glossary:remediation.md" in screens/entity-page.md points to remediation.md in source glossary, which has no entity in the published model of ${builtAt} (${documentation}/E-LINK-BROKEN.md)`,
+        `info: specs:rules/finding.rule.md: I-TERM-HOMONYM: "Finding" is the title or an alias of rules/finding.rule.md (document) and of glossary/finding (term) in the published model of ${builtAt} (${documentation}/I-TERM-HOMONYM.md)`,
+        `warning: specs:screens/entity-page.md:3: W-LINK-CROSS-SOURCE: link "glossary:finding.md" in screens/entity-page.md reaches glossary/finding in source glossary, but the published model of ${builtAt} was built with cross-source links disabled (${documentation}/W-LINK-CROSS-SOURCE.md)`,
         "3 findings: 1 error, 1 warning, 1 info",
       ]);
       expect(state.io.stderr).toEqual([]);
@@ -590,7 +590,7 @@ describe("concordance lint", () => {
         `global: model ${modelUrl}: getaddrinfo ENOTFOUND concordance-wiki.github.io; local checks only`,
       ]);
       expect(io.stdout).toHaveLength(2);
-      expect(io.stdout[0]).toMatch(/^error: note\.md:3: E-LINK-BROKEN: /);
+      expect(io.stdout[0]).toMatch(/^error: repo:note\.md:3: E-LINK-BROKEN: /);
       const clean = offline(`global:\n  model: ${modelUrl}\n`);
       clean.fs.writeText("/work/note.md", "# Note\n");
       clean.fetch = () => Promise.resolve(new Response("gone", { status: 404 }));

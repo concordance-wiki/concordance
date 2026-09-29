@@ -27,9 +27,10 @@ import {
   type SiteNames,
 } from "@concordance-wiki/site";
 
+import { formatFinding } from "@concordance-wiki/lint";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { defaultOutputDirectory, loadProfile, modelFile } from "./build.js";
-import { formatFinding } from "./findings.js";
 import { nodeThemeDependencies, siteTheme, specifier, type ThemeDependencies } from "./theme.js";
 import { loadConfigFile } from "./validate-config.js";
 

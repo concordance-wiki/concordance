@@ -18,7 +18,7 @@ people:
 ```
 
 ```
-error: W-PRIVACY-DICTIONARY: pseudonyms.yaml: people["Firstname Lastname"]: must be object
+error: W-PRIVACY-DICTIONARY: pseudonyms.yaml: people["Firstname Lastname"]: must be object (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PRIVACY-DICTIONARY.md)
 ```
 
 ## After

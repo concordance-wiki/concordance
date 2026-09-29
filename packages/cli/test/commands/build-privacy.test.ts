@@ -166,7 +166,7 @@ describe("concordance build with pseudonymisation", () => {
     );
     expect(await buildCommand([], missing, deps)).toBe(1);
     expect(missing.stderr).toContain(
-      "error: W-PRIVACY-DICTIONARY (./absent.yaml): pseudonymisation dictionary ./absent.yaml not found",
+      "error: ./absent.yaml: W-PRIVACY-DICTIONARY: pseudonymisation dictionary ./absent.yaml not found (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PRIVACY-DICTIONARY.md)",
     );
     expect(missing.fs.exists("/work/dist/notes/2026-03-12-review/2026-03-12-review.vtt")).toBe(
       false,
@@ -177,7 +177,7 @@ describe("concordance build with pseudonymisation", () => {
     );
     expect(await buildCommand([], malformed, deps)).toBe(1);
     expect(malformed.stderr).toContain(
-      'error: W-PRIVACY-DICTIONARY (./pseudonyms.yaml): error: ./pseudonyms.yaml: people["A B"]: wrong type; received "Participant-1"; expected object',
+      'error: ./pseudonyms.yaml: W-PRIVACY-DICTIONARY: error: ./pseudonyms.yaml: people["A B"]: wrong type; received "Participant-1"; expected object (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PRIVACY-DICTIONARY.md)',
     );
     expect(malformed.stderr.at(-1)).toBe("build failed: 1 error finding(s)");
     for (const [path, text] of output(malformed)) {
@@ -191,7 +191,7 @@ describe("concordance build with pseudonymisation", () => {
     );
     expect(await buildCommand([], io, deps)).toBe(0);
     expect(io.stderr).toContain(
-      "warning: W-PRIVACY-DICTIONARY (./absent.yaml): pseudonymisation dictionary ./absent.yaml not found",
+      "warning: ./absent.yaml: W-PRIVACY-DICTIONARY: pseudonymisation dictionary ./absent.yaml not found (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PRIVACY-DICTIONARY.md)",
     );
     expect(io.fs.readText("/work/dist/notes/2026-03-12-review/2026-03-12-review.vtt")).toBe(
       transcript,
@@ -225,7 +225,7 @@ describe("concordance build with pseudonymisation", () => {
     );
     expect(await buildCommand([], io, { ...deps, load: () => Promise.resolve(plugin) })).toBe(0);
     expect(io.stderr).toContain(
-      "warning: W-PRIVACY-WITHHELD (notes:2026-03-12-review.vtt): 2026-03-12-review.vtt is not published: its reader cannot rewrite it with the pseudonyms",
+      "warning: notes:2026-03-12-review.vtt: W-PRIVACY-WITHHELD: 2026-03-12-review.vtt is not published: its reader cannot rewrite it with the pseudonyms (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PRIVACY-WITHHELD.md)",
     );
     expect(io.fs.exists("/work/dist/notes/2026-03-12-review/2026-03-12-review.vtt")).toBe(false);
     for (const [path, text] of output(io)) {
