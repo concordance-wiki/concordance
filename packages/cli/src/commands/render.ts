@@ -3,8 +3,8 @@ import { parseArgs } from "node:util";
 
 import {
   loadPlugins,
+  ModelError,
   parseModel,
-  type ModelError,
   type CanonicalModel,
   type Config,
   type DomainConfig,
@@ -364,8 +364,10 @@ export async function renderCommand(
   try {
     model = parseModel(io.fs.readText(file), file);
   } catch (error) {
-    // parseModel only throws ModelError instances, one line per issue.
-    for (const line of (error as ModelError).message.split("\n")) {
+    // The model itself is the only thing this reports on: a file that cannot be read, or anything
+    // else the read throws, is not a model that fails its schema and must not be told as one.
+    if (!(error instanceof ModelError)) throw error;
+    for (const line of error.message.split("\n")) {
       io.err(line);
     }
     io.err("render stopped: the model does not match its schema");

@@ -547,6 +547,21 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(io.stderr[0]).toContain("not valid JSON");
   });
 
+  it("passes on an error that is not the model's, rather than blaming the schema", async () => {
+    const io = corpus();
+    io.fs.writeText("/work/dist/model.json", '{"version": 1}\n');
+    const unreadable = new Error("EIO: the disk gave up");
+    // The model alone is unreadable: the configuration and the profile must load, so that the run
+    // reaches the reading of the model and not something before it.
+    const readText = io.fs.readText.bind(io.fs);
+    io.fs.readText = (path: string) => {
+      if (path === "/work/dist/model.json") throw unreadable;
+      return readText(path);
+    };
+    await expect(renderCommand([], io)).rejects.toThrow("EIO: the disk gave up");
+    expect(io.stderr).toEqual([]);
+  });
+
   it("validates the configuration and the profile first", async () => {
     const invalid = recordedIo({ "/work/concordance.yaml": "version: 1\n" });
     expect(await renderCommand([], invalid)).toBe(1);
