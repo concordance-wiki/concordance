@@ -18,7 +18,7 @@ operation_id: deleteEntity
 ```
 
 ```
-warning: W-OPERATION-UNMATCHED (specs:endpoints/delete-entity.md:1): operation note specs/endpoints/delete-entity matches no operation of specs/api/model-query (contracts/model-query.openapi.json): the operation disappeared from the contract, or the note is ahead of it
+warning: specs:endpoints/delete-entity.md:1: W-OPERATION-UNMATCHED: operation note specs/endpoints/delete-entity matches no operation of specs/api/model-query (contracts/model-query.openapi.json): the operation disappeared from the contract, or the note is ahead of it (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-OPERATION-UNMATCHED.md)
 ```
 
 ## After

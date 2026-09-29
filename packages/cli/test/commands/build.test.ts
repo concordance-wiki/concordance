@@ -29,12 +29,7 @@ import { h, type JSX } from "preact";
 import { beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
-import {
-  buildCommand,
-  formatFinding,
-  formatSummary,
-  modelSources,
-} from "../../src/commands/build.js";
+import { buildCommand, formatSummary, modelSources } from "../../src/commands/build.js";
 import { sectionLabels } from "../../src/pipeline/keywords.js";
 import { toolVersion } from "../../src/version.js";
 import { FakeGit, recordedIo, validConfig, type RecordedIo } from "../helpers.js";
@@ -163,8 +158,8 @@ describe("concordance build", () => {
     // The home, the index, the to-do page and the page of the one entity.
     expectSiteSummary(io.stdout, 4, "/work/dist");
     expect(io.stderr).toEqual([
-      "warning: W-APP-MISSING (specs:README.md): specs/readme resolves to no application",
-      "info: W-DOMAIN-UNCLASSIFIED (specs:README.md): specs/readme matches no declared domain",
+      "warning: specs:README.md: W-APP-MISSING: specs/readme resolves to no application (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-APP-MISSING.md)",
+      "info: specs:README.md: W-DOMAIN-UNCLASSIFIED: specs/readme matches no declared domain (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-DOMAIN-UNCLASSIFIED.md)",
     ]);
   });
 
@@ -186,7 +181,7 @@ describe("concordance build", () => {
     expect(await buildCommand([], io)).toBe(0);
     expect(io.stderr).toEqual([
       expect.stringMatching(
-        /^warning: W-SOURCE-UNREACHABLE \(gone\): source "gone" could not be fetched: fatal: repository/,
+        /^warning: gone: W-SOURCE-UNREACHABLE: source "gone" could not be fetched: fatal: repository/,
       ) as string,
     ]);
     expect(io.stdout.slice(1, 5)).toEqual(["sources: 0", "files: 0", "entities: 0", "links: 0"]);
@@ -280,7 +275,7 @@ describe("concordance build", () => {
     it("exits 0 on the same corpus when fail_on.errors is false", async () => {
       const io = faultyCorpus(`${validConfig}build: { fail_on: { errors: false } }\n`);
       expect(await buildCommand([], io)).toBe(0);
-      expect(io.stderr.at(-1)).toMatch(/^error: E-FM-INVALID/);
+      expect(io.stderr.at(-1)).toMatch(/^error: notes:invalid-frontmatter\.md:1: E-FM-INVALID/);
       expect(readLog(io).summary.findings.bySeverity).toEqual({ error: 2, warning: 0, info: 0 });
     });
 
@@ -288,9 +283,9 @@ describe("concordance build", () => {
       const io = faultyCorpus();
       await buildCommand([], io);
       expect(io.stderr).toEqual([
-        "error: E-ENCODING (notes:resume.md): resume.md is not valid UTF-8; the file is skipped",
+        "error: notes:resume.md: E-ENCODING: resume.md is not valid UTF-8; the file is skipped (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-ENCODING.md)",
         expect.stringMatching(
-          /^error: E-FM-INVALID \(notes:invalid-frontmatter\.md:1\): frontmatter of invalid-frontmatter\.md is not valid YAML: /,
+          /^error: notes:invalid-frontmatter\.md:1: E-FM-INVALID: frontmatter of invalid-frontmatter\.md is not valid YAML: /,
         ) as string,
         "build failed: 2 error finding(s)",
       ]);
@@ -1671,33 +1666,6 @@ describe("concordance build", () => {
         "specs",
       ]);
     });
-  });
-});
-
-describe("formatFinding", () => {
-  const base: Finding = {
-    check: "E-LINK-BROKEN",
-    severity: "error",
-    message: "m",
-    remediation: "r",
-  };
-
-  it("names the source, path and line when the finding has them", () => {
-    expect(formatFinding({ ...base, source: "specs", path: "a.md", line: 3 })).toBe(
-      "error: E-LINK-BROKEN (specs:a.md:3): m",
-    );
-  });
-
-  it("omits the line when the finding has none", () => {
-    expect(formatFinding({ ...base, source: "specs", path: "a.md" })).toBe(
-      "error: E-LINK-BROKEN (specs:a.md): m",
-    );
-  });
-
-  it("omits the location when the finding has none", () => {
-    expect(formatFinding({ ...base, check: "W-STALE", severity: "warning" })).toBe(
-      "warning: W-STALE: m",
-    );
   });
 });
 

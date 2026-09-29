@@ -69,4 +69,5 @@ export {
   formatFindings,
   hasFindingAtOrAbove,
   locationOf,
+  whereOf,
 } from "./report.js";

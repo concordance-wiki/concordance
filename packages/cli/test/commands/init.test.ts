@@ -190,7 +190,7 @@ describe("concordance init", () => {
         expect(await initCommand(["--templates"], io, "/shipped", withPlugin(io, false))).toBe(2);
         expect(io.stderr).toEqual([
           "/work/concordance.yaml: already exists, kept",
-          "info: W-PLUGIN-DISABLED: plugin runbook-plugin runs without its optional system dependency a tool: command a-tool is not available",
+          "info: W-PLUGIN-DISABLED: plugin runbook-plugin runs without its optional system dependency a tool: command a-tool is not available (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-PLUGIN-DISABLED.md)",
         ]);
         expect(io.fs.listFiles("/work/templates")).toEqual(["a.md", "runbook.md"]);
       });

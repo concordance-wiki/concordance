@@ -28,13 +28,26 @@ export function locationOf(finding: Finding): string {
     .join(":");
 }
 
+/**
+ * Where a finding was met, for a person reading a line of the report: the source, the path and the
+ * line, any part the finding carries. The source belongs there because a build reads several
+ * repositories and two of them may hold the same path; the machine formats keep `locationOf`, whose
+ * shape their consumers already read.
+ */
+export function whereOf(finding: Finding): string {
+  return [finding.source, finding.path, finding.line]
+    .filter((part) => part !== undefined)
+    .map(String)
+    .join(":");
+}
+
 export function documentationOf(check: string): string {
   // The registry only returns registered checks, whose identifiers follow the pattern.
   return documentationUrl(check as CheckId);
 }
 
 export function formatFinding(finding: Finding): string {
-  const where = locationOf(finding);
+  const where = whereOf(finding);
   return [
     finding.severity,
     ...(where === "" ? [] : [where]),

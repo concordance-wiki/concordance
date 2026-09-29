@@ -17,7 +17,7 @@ contract: https://example.invalid/model-query/openapi.json   (the server answers
 ```
 
 ```
-warning: W-CONTRACT-UNREACHABLE (specs:api/model-query.md): contract https://example.invalid/model-query/openapi.json of specs/api/model-query could not be read: HTTP 404
+warning: specs:api/model-query.md: W-CONTRACT-UNREACHABLE: contract https://example.invalid/model-query/openapi.json of specs/api/model-query could not be read: HTTP 404 (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONTRACT-UNREACHABLE.md)
 ```
 
 ## After

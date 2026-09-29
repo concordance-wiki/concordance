@@ -26,8 +26,9 @@ import {
 
 import type { TypeModule } from "@concordance-wiki/profile";
 
+import { formatFinding } from "@concordance-wiki/lint";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
-import { formatFinding } from "./findings.js";
 import type { TypeModuleDependencies } from "./types.js";
 
 export const defaultThemeFile = "theme.yaml";

@@ -596,7 +596,7 @@ describe("concordance build writes the suggested domains in the summary and the 
     ]);
     expect(log.summary.findings.byCheck[DOMAIN_SUGGESTED_CHECK]).toBe(3);
     expect(io.stderr).toContain(
-      'info: I-DOMAIN-SUGGESTED (glossary:finding.md): glossary/finding lies within 1 of glossary/check (degree 4): a candidate for a domain named "check" after it',
+      'info: glossary:finding.md: I-DOMAIN-SUGGESTED: glossary/finding lies within 1 of glossary/check (degree 4): a candidate for a domain named "check" after it (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/I-DOMAIN-SUGGESTED.md)',
     );
   });
 

@@ -25,11 +25,12 @@ import { resolveProfile, type Profile, type TypeModule } from "@concordance-wiki
 
 import { defaultThemeManifest } from "@concordance-wiki/site";
 
+import { formatFinding } from "@concordance-wiki/lint";
+
 import { exitCodes, type CommandIo, type ExitCode } from "../io.js";
 import { writeContractFragments } from "../pipeline/contracts.js";
 import { writeFragments } from "../pipeline/fragments.js";
 import { loadLock, lockCountsOf } from "../pipeline/lock.js";
-import { formatFinding } from "./findings.js";
 import { runPipeline, stepMarker } from "../pipeline/run.js";
 import { toolVersion } from "../version.js";
 import { renderSite } from "./render.js";

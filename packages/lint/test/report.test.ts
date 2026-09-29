@@ -38,20 +38,28 @@ const unreachable: Finding = {
 };
 
 describe("formatFinding", () => {
-  it("prints the severity, the path and line, the check, the message and the documentation URL", () => {
+  it("prints the severity, the source, path and line, the check, the message and the URL", () => {
     expect(formatFinding(broken)).toBe(
-      'error: specs/entry.md:3: E-LINK-BROKEN: link "gone.md" in specs/entry.md points to specs/gone.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)',
+      'error: notes:specs/entry.md:3: E-LINK-BROKEN: link "gone.md" in specs/entry.md points to specs/gone.md, which does not exist (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/E-LINK-BROKEN.md)',
     );
   });
 
   it("omits the line when the finding has none", () => {
     expect(formatFinding(duplicate)).toMatch(
-      /^warning: dup\/a\.rule\.md: E-ID-DUP: notes\/dup\/a\.rule\.md resolves/,
+      /^warning: notes:dup\/a\.rule\.md: E-ID-DUP: notes\/dup\/a\.rule\.md resolves/,
     );
   });
 
-  it("omits the location when the finding has no path", () => {
+  it("names the source alone when the finding has no path", () => {
     expect(formatFinding(unreachable)).toBe(
+      "info: notes: W-SOURCE-UNREACHABLE: source notes could not be read (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-SOURCE-UNREACHABLE.md)",
+    );
+  });
+
+  it("writes no location at all for a finding that names neither a source nor a path", () => {
+    const { source: named, ...nowhere } = unreachable;
+    expect(named).toBe("notes");
+    expect(formatFinding(nowhere)).toBe(
       "info: W-SOURCE-UNREACHABLE: source notes could not be read (https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-SOURCE-UNREACHABLE.md)",
     );
   });
