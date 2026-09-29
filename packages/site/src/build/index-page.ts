@@ -1,6 +1,8 @@
 import type { Entity } from "@concordance-wiki/core";
 import { formatMessage } from "@concordance-wiki/i18n";
 
+import { fileKey } from "@concordance-wiki/core";
+
 import { byCodeUnit } from "../order.js";
 import { NOTELESS_FACET } from "../search/shared.js";
 import type {
@@ -11,7 +13,7 @@ import type {
   IndexLetter,
   IndexProps,
 } from "../slots.js";
-import { fileKey, glyphOf, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
+import { glyphOf, message, spaceTitle, typeLabel, type SiteContext } from "./context.js";
 import type { FragmentPassage } from "./fragments.js";
 import { entityHref, INDEX_PAGE, relativeHref, searchFilterHref } from "./paths.js";
 

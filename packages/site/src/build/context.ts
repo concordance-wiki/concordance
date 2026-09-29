@@ -7,7 +7,7 @@ import type {
   Locale,
   StalenessConfig,
 } from "@concordance-wiki/core";
-import { collation } from "@concordance-wiki/core";
+import { collation, fileKey } from "@concordance-wiki/core";
 import {
   formatMessage,
   type Catalogue,
@@ -81,10 +81,6 @@ export interface SiteContext extends SiteContextInput {
 /** The collation the shipped language packs declare: accents and case set aside, digits compared by value. */
 export function defaultCollation(): (a: string, b: string) => number {
   return collation({ sensitivity: "base", numeric: true });
-}
-
-export function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
 }
 
 export function siteContext(input: SiteContextInput): SiteContext {

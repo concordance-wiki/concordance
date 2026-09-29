@@ -1,6 +1,8 @@
 import type { IngestedSource } from "@concordance-wiki/ingest";
 import { languagePack, tokenize, type LanguagePack, type Occurrence } from "@concordance-wiki/nlp";
 
+import { fileKey } from "@concordance-wiki/core";
+
 import type { ParsedDocument } from "./parse.js";
 
 /** A word the scan recognised in a note, as written there, and the entity it names. */
@@ -18,10 +20,6 @@ export interface RecognisedWordsInput {
   occurrences: readonly Occurrence[];
   documents: readonly ParsedDocument[];
   sources: readonly IngestedSource[];
-}
-
-function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
 }
 
 /**

@@ -1,11 +1,12 @@
 import {
-  compareFindings,
-  compareLinks,
-  compareProvenances,
-  identifierFor,
   type Finding,
   type Link,
   type Provenance,
+  compareFindings,
+  compareLinks,
+  compareProvenances,
+  fileKey,
+  identifierFor,
 } from "@concordance-wiki/core";
 import { resolveLink, type MarkdownLink } from "@concordance-wiki/ingest";
 
@@ -29,10 +30,6 @@ export type LocatedLink =
   | { kind: "file"; source: string; path: string; anchor?: string };
 
 const NO_FILES: ReadonlySet<string> = new Set();
-
-function fileKey(source: string, path: string): string {
-  return `${source}/${path}`;
-}
 
 function anchorOf(anchor: string | undefined): { anchor?: string } {
   return anchor === undefined ? {} : { anchor };

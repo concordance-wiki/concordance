@@ -45,12 +45,14 @@ describe("@concordance-wiki/core", () => {
       "epochClock",
       "fetchFailure",
       "fetchWithin",
+      "fileKey",
       "fingerprintOf",
       "fixedClock",
       "formatIssue",
       "formatValidation",
       "identifierFor",
       "importPlugin",
+      "isPlainObject",
       "isWellFormedGlob",
       "loadContracts",
       "loadPlugins",
@@ -111,6 +113,7 @@ describe("@concordance-wiki/core", () => {
       "writeCachedContract",
       "writeCachedContractView",
       "xmlRootOf",
+      "yamlDocument",
     ]);
   });
 });

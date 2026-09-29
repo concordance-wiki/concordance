@@ -1,5 +1,6 @@
 import type { FileSystem, Finding } from "@concordance-wiki/core";
 import { readMarkdown, type IngestedSource, type ParsedMarkdown } from "@concordance-wiki/ingest";
+import { fileKey } from "@concordance-wiki/core";
 
 /** One markdown note as the parsing step hands it to the next ones. */
 export interface ParsedDocument {
@@ -12,11 +13,6 @@ export interface ParsedDocument {
 export interface ParsedSources {
   documents: ParsedDocument[];
   findings: Finding[];
-}
-
-/** The key under which the inference steps look a note up: `<source name>/<path>`. */
-export function documentKey(source: string, path: string): string {
-  return `${source}/${path}`;
 }
 
 /** Parses every markdown file of the ingested sources; an unreadable file is a finding, never a failure. */
@@ -42,5 +38,5 @@ export function parseSources(sources: readonly IngestedSource[], fs: FileSystem)
 
 /** The parsed notes keyed the way typing and inference read them. */
 export function indexDocuments(documents: readonly ParsedDocument[]): Map<string, ParsedMarkdown> {
-  return new Map(documents.map((item) => [documentKey(item.source, item.path), item.document]));
+  return new Map(documents.map((item) => [fileKey(item.source, item.path), item.document]));
 }

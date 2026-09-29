@@ -12,6 +12,7 @@ import {
   type ReaderOutput,
   byCodeUnit,
   compareFindings,
+  fileKey,
 } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource } from "@concordance-wiki/ingest";
 import type { ScannedParagraph } from "@concordance-wiki/nlp";
@@ -83,10 +84,6 @@ export const DEFAULT_MAX_SIZE_MB = 50;
 
 /** The check that reports a document without a markdown representation, once the twins are reconciled. */
 export const DOCUMENT_WITHOUT_MARKDOWN = "W-DOC-NOMD";
-
-export function documentKey(source: string, path: string): string {
-  return `${source}/${path}`;
-}
 
 function extensionOf(path: string): string {
   return posix.extname(path).toLowerCase();
@@ -371,7 +368,7 @@ export async function readDocuments(input: ReadDocumentsInput): Promise<ReadDocu
 export function resourcesOf(documents: readonly ReadDocument[]): Map<string, Resource> {
   return new Map(
     documents.map((document) => [
-      documentKey(document.source, document.path),
+      fileKey(document.source, document.path),
       { format: document.format, metadata: document.metadata },
     ]),
   );
@@ -404,13 +401,13 @@ export function documentsWithoutMarkdown(
   entities: readonly Entity[],
   documents: readonly ReadDocument[],
 ): Finding[] {
-  const keys = new Set(documents.map((document) => documentKey(document.source, document.path)));
+  const keys = new Set(documents.map((document) => fileKey(document.source, document.path)));
   return entities
     .filter(
       (entity) =>
         // A keyword page is located on the file of its first mention, which may be a document.
         entity.keyword !== true &&
-        keys.has(documentKey(entity.source.name, entity.source.path)) &&
+        keys.has(fileKey(entity.source.name, entity.source.path)) &&
         !hasMarkdown(entity),
     )
     .map((entity) => ({

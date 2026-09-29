@@ -1,11 +1,10 @@
-import type { Finding } from "@concordance-wiki/core";
+import { isPlainObject, yamlDocument, type Finding } from "@concordance-wiki/core";
 import type { List, Nodes, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
-import { parse as parseYaml, type YAMLParseError } from "yaml";
 
 import { scannableUnits } from "./scannable.js";
 import { plainText } from "./text.js";
@@ -35,24 +34,21 @@ function invalidFrontmatter(path: string, detail: string): Finding {
 }
 
 function readFrontmatter(text: string, path: string, findings: Finding[]): Record<string, unknown> {
-  let value: unknown;
-  try {
-    value = parseYaml(text);
-  } catch (error) {
-    findings.push(
-      invalidFrontmatter(path, (error as YAMLParseError).message.split("\n", 1).join("")),
-    );
+  const parsed = yamlDocument(text);
+  if ("detail" in parsed) {
+    findings.push(invalidFrontmatter(path, parsed.detail));
     return {};
   }
-  if (value === null) {
+  const { document } = parsed;
+  if (document === null) {
     return {};
   }
-  if (typeof value !== "object" || Array.isArray(value)) {
+  if (!isPlainObject(document)) {
     findings.push(invalidFrontmatter(path, "the frontmatter is not a mapping"));
     return {};
   }
   // A YAML mapping parses to a plain object keyed by strings.
-  return value as Record<string, unknown>;
+  return document;
 }
 
 function listItems(list: List): MarkdownListItem[] {

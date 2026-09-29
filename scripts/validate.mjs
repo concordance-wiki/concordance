@@ -12,6 +12,7 @@ import { parse as parseYaml } from "yaml";
 
 import { assembleProfileText, profileFile, typesDirectory } from "./assemble-profile.mjs";
 import { checkDistribution } from "./check-distribution.mjs";
+import { checkSharedHelpers } from "./check-helpers.mjs";
 import { checkPackaging, checkVersions } from "./check-packaging.mjs";
 import { generateReference } from "./config-reference.mjs";
 import { checkStylesheets } from "./check-stylesheets.mjs";
@@ -523,34 +524,10 @@ for (const message of checkPackaging(root)) fail(message);
 //     .changeset/config.json and a release bumps them together (scripts/check-packaging.mjs).
 for (const message of checkVersions(root)) fail(message);
 
-// 17. One comparator by code unit, in two places only: `@concordance-wiki/core` for everything
-//     built and `packages/site/src/order.ts` for the browser bundle, which must not carry the
-//     core package. A copy elsewhere is how a canonical order starts to diverge.
-const comparatorHomes = new Set(["packages/core/src/model/order.ts", "packages/site/src/order.ts"]);
-const sourceFiles = (directory) => {
-  const found = [];
-  const visit = (current) => {
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      const path = join(current, entry.name);
-      if (entry.isDirectory()) {
-        if (entry.name !== "node_modules" && entry.name !== "dist") visit(path);
-      } else if (/\.(?:ts|tsx|mjs|js)$/.test(entry.name)) found.push(path);
-    }
-  };
-  visit(join(root, directory));
-  return found;
-};
-for (const directory of ["packages", "plugins", "presets", "scripts"]) {
-  for (const path of sourceFiles(directory)) {
-    const relativePath = relative(root, path).split("\\").join("/");
-    if (comparatorHomes.has(relativePath) || relativePath === "scripts/lib.mjs") continue;
-    if (/(?:function|const) byCodeUnit\b/.test(readFileSync(path, "utf8"))) {
-      fail(
-        `${relativePath}: defines byCodeUnit again; import it from @concordance-wiki/core, or from scripts/lib.mjs in a script`,
-      );
-    }
-  }
-}
+// 17. The helpers every package needs live in one place: the code-unit comparator, the plain-object
+//     guard, the `<source>/<path>` key and the YAML primitive (scripts/check-helpers.mjs).
+for (const message of checkSharedHelpers(root)) fail(message);
+
 // 18. The stylesheets of the site: one rule one place, every deliberate pair named with its reason,
 //     and every class styled is one the templates, the islands or a rendered page emit.
 for (const message of checkStylesheets(root)) fail(message);
@@ -561,5 +538,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, usage text, package manifests, versions, the single code-unit comparator and the stylesheets are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, usage text, package manifests, versions, the shared helpers and the stylesheets are valid",
 );

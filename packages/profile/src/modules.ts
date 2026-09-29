@@ -5,9 +5,10 @@ import {
   type FileSystem,
   byCodeUnit,
   compiledSchema,
+  isPlainObject,
+  yamlDocument,
 } from "@concordance-wiki/core";
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
-import { parse, type YAMLParseError } from "yaml";
 
 import { describeErrors } from "./issues.js";
 import type {
@@ -83,10 +84,6 @@ const SLUG_PATTERN = /^[a-z][a-z0-9_]*$/;
 const TRAILING_SEPARATORS = /(?<![\\/])[\\/]+$/;
 const MESSAGES_FILE_PATTERN = /^messages\/([a-z]{2,3})\.json$/;
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function problem(path: string, message: string, detail: Partial<ConfigIssue> = {}): ConfigIssue {
   return { severity: "error", path, message, ...detail };
 }
@@ -108,13 +105,10 @@ function prefixed(file: string, issue: ConfigIssue): ConfigIssue {
 type Parsed = { ok: true; document: unknown } | { ok: false; issue: ConfigIssue };
 
 function parseYamlFile(text: string): Parsed {
-  try {
-    return { ok: true, document: parse(text) };
-  } catch (error) {
-    // The parser only throws YAMLParseError instances.
-    const detail = (error as YAMLParseError).message.split("\n", 1).join("");
-    return { ok: false, issue: problem("", `not valid YAML: ${detail}`) };
-  }
+  const parsed = yamlDocument(text);
+  return "detail" in parsed
+    ? { ok: false, issue: problem("", `not valid YAML: ${parsed.detail}`) }
+    : { ok: true, document: parsed.document };
 }
 
 function parseJsonFile(text: string): Parsed {

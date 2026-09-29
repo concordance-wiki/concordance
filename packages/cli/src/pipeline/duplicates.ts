@@ -1,7 +1,6 @@
 import { posix } from "node:path";
 
 import {
-  compareFindings,
   type Clock,
   type Config,
   type DuplicateCandidate,
@@ -9,6 +8,8 @@ import {
   type Entity,
   type Finding,
   type Link,
+  compareFindings,
+  fileKey,
 } from "@concordance-wiki/core";
 import {
   duplicateOptions,
@@ -24,7 +25,6 @@ import type { Profile } from "@concordance-wiki/profile";
 
 import { combineProducedLinks } from "./combine.js";
 import type { ReadDocument } from "./documents.js";
-import { documentKey } from "./parse.js";
 
 export interface ReconcileTwinsInput {
   entities: readonly Entity[];
@@ -110,7 +110,7 @@ function resourcesOf(
   const resources: DuplicateResource[] = [];
   for (const entity of entities) {
     if (entity.source.name !== source.name) continue;
-    const key = documentKey(entity.source.name, entity.source.path);
+    const key = fileKey(entity.source.name, entity.source.path);
     const resource = read.get(key);
     if (resource !== undefined) {
       const title = titleOf(resource);
@@ -224,10 +224,7 @@ export function reconcileTwins(input: ReconcileTwinsInput): ReconciledTwins {
   };
   let timeMs = 0;
   const read = new Map(
-    (input.resources ?? []).map((document) => [
-      documentKey(document.source, document.path),
-      document,
-    ]),
+    (input.resources ?? []).map((document) => [fileKey(document.source, document.path), document]),
   );
   for (const [locale, stopwords] of input.stopwords) {
     const pack = languagePack(locale);
