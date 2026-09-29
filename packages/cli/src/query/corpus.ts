@@ -1,18 +1,14 @@
-import type {
-  CanonicalModel,
-  Config,
-  Entity,
-  Finding,
-  TermCandidate,
+import {
+  type CanonicalModel,
+  type Config,
+  type Entity,
+  type Finding,
+  type TermCandidate,
+  byCodeUnit,
 } from "@concordance-wiki/core";
 import { comparisonForm, languagePack } from "@concordance-wiki/nlp";
 
 import { siteNames, sourceDescriptions } from "../commands/render.js";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /** What an entity is counted under when it has no value: no domain, no application. */
 const NONE = "(none)";

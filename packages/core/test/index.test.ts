@@ -21,6 +21,7 @@ describe("@concordance-wiki/core", () => {
       "RESERVED_SOURCE_NAMES",
       "TRUSTED_DIRECTORIES",
       "assembleModel",
+      "byCodeUnit",
       "cachedContractPath",
       "cachedContractViewPath",
       "canonicalJson",

@@ -1,9 +1,10 @@
 import {
   CONTRACT_METHOD,
   CONTRACT_RELATION,
-  compareEntities,
   type Entity,
   type Link,
+  byCodeUnit,
+  compareEntities,
 } from "@concordance-wiki/core";
 import type { Profile } from "@concordance-wiki/profile";
 
@@ -48,10 +49,6 @@ export type Ambiguity =
 export interface MatchResult {
   matches: OperationMatch[];
   ambiguities: Ambiguity[];
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function stringAttribute(entity: Entity, key: string): string | undefined {

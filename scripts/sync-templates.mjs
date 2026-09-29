@@ -7,9 +7,7 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
-// Code-unit order, never the collation of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
+import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const modules = join(root, "packages/profile/types");

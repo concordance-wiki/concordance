@@ -1,14 +1,9 @@
 import { resolve } from "node:path";
 
-import type { CanonicalModel, Entity } from "@concordance-wiki/core";
+import { type CanonicalModel, type Entity, byCodeUnit } from "@concordance-wiki/core";
 import { fragmentPath, type EntityFragment } from "@concordance-wiki/site";
 
 import type { CommandIo } from "../io.js";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /** Characters kept on each side of a match in the excerpt. */
 const EXCERPT_RADIUS = 80;

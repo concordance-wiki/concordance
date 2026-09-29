@@ -10,6 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
+import { byCodeUnit } from "../model/order.js";
 
 /** The file system operations the tool needs, injected so that tests run against doubles. */
 export interface FileSystem {
@@ -31,11 +32,6 @@ export interface FileSystem {
 
 /** Folders never read: a repository's own history and installed packages, whose READMEs are not notes. */
 const SKIPPED_FOLDERS = new Set([".git", "node_modules"]);
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 /**
  * Lists the regular files under a folder. A symbolic link is never followed, whether it points

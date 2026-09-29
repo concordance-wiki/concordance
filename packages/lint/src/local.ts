@@ -2,25 +2,22 @@ import { posix } from "node:path";
 
 import { createRegistry, type CheckId, type StepFinding } from "@concordance-wiki/checks";
 import {
-  identifierFor,
-  readLintConfig,
-  type LintOverrides,
-  resolveDuplicates,
   type Config,
   type FileSystem,
   type Finding,
   type Identified,
+  type LintOverrides,
   type SourceConfig,
+  byCodeUnit,
+  identifierFor,
+  readLintConfig,
+  resolveDuplicates,
 } from "@concordance-wiki/core";
 import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wiki/ingest";
 
 import { lintedFiles } from "./files.js";
 
 /** Code-unit order, never the collation of the runtime: the same report on every machine. */
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
-
 /** Identifier prefix of a repository linted without a declared source. */
 export const DEFAULT_SOURCE_NAME = "repo";
 

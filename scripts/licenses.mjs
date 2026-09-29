@@ -28,6 +28,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { pnpmCommand } from "./executables.mjs";
+import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const inventory = join(root, "docs/licenses.md");
@@ -134,8 +135,6 @@ for (const entry of listLicenses([])) {
   });
 }
 
-// Code-unit order, not locale order: the page must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 // One row per package and licence: the versions of a package share a row unless their licence differs.
 const unique = [...new Map(rows.map((row) => [`${row.name}\u0000${row.license}`, row])).values()];
 unique.sort((a, b) => byCodeUnit(a.name, b.name) || byCodeUnit(a.license, b.license));

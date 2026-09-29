@@ -1,3 +1,4 @@
+import { byCodeUnit } from "../../model/order.js";
 import { compareContracts, type CandidateObject, type ContractRecord } from "../contract.js";
 import { compareEntities, type Entity } from "../entity.js";
 import { compareFindings, type Finding } from "../finding.js";
@@ -33,11 +34,6 @@ export interface AssembleModelInput {
   displayedNeighbourhood?: DisplayedNeighbourhood;
   /** The contracts the source plugins imported; recorded under `build.contracts` when any. */
   contracts?: readonly ContractRecord[];
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function compareSources(a: ModelSource, b: ModelSource): number {

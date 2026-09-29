@@ -47,9 +47,20 @@ const npx: Tool = { command: "npx", args: ["--no-install"] };
 const pnpm = locatePnpm();
 const tooling = available(npm) && available(pnpm) && existsSync(join(cli, "dist/bin.js"));
 
+/**
+ * What the command itself printed on the error stream. npm writes its own warnings and notices
+ * there ("npm notice run npx", "npm warn Unknown env config"), which say nothing about the run and
+ * differ from one npm to the next.
+ */
+function withoutNpmChatter(stderr: string): string {
+  return stderr.replace(/^npm (?:warn|notice).*$/gmu, "").trim();
+}
+
 function expectSuccess(run: SpawnSyncReturns<string>): void {
   expect(run.error).toBeUndefined();
-  expect(run.stderr.replace(/^npm warn.*$/gmu, "").trim()).toBe("");
+  // npm writes its own warnings and notices ("npm notice run npx") on the error stream: what the
+  // test reads is what the command itself printed, whatever the npm of the machine says around it.
+  expect(withoutNpmChatter(run.stderr)).toBe("");
   expect(run.status).toBe(0);
 }
 
@@ -131,7 +142,7 @@ describe.skipIf(!tooling)(
     it("runs npx concordance lint on the faulty corpus with the same report as the in-process command", async () => {
       const run = runTool(npx, ["concordance", "lint", ...lintOptions], join(repository, "notes"));
       expect(run.error).toBeUndefined();
-      expect(run.stderr).toBe("");
+      expect(withoutNpmChatter(run.stderr)).toBe("");
       expect(run.status).toBe(1);
 
       const lines: string[] = [];

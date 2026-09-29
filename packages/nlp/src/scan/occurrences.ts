@@ -1,3 +1,5 @@
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import type { Dictionary, DictionaryEntry, DictionaryTarget } from "../dictionary/types.js";
 import type { LanguagePack } from "../locale/pack.js";
 import {
@@ -62,10 +64,6 @@ export interface ScanDocumentInput {
   /** Type slug to the words announcing it, for the locale of the dictionary. */
   typePrefixes: Readonly<Record<string, readonly string[]>>;
   scale: OccurrenceScale;
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 // The same dictionary is scanned against every document: its automaton is built once.

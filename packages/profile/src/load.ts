@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { compiledSchema } from "@concordance-wiki/core";
+import { byCodeUnit, compiledSchema } from "@concordance-wiki/core";
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { parse, type YAMLParseError } from "yaml";
 
@@ -19,11 +19,6 @@ import type {
 const defaultProfileUrl = new URL("../default.yaml", import.meta.url);
 
 const wildcardEnds = new Set(["any", "same", "type"]);
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
-}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

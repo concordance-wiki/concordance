@@ -1,4 +1,5 @@
-import { byCodeUnit } from "../neighbourhood/order.js";
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import type { DisplayedNeighbour, DisplayedNeighbourhood } from "./types.js";
 
 /**

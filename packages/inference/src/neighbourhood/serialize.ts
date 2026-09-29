@@ -1,4 +1,5 @@
-import { byCodeUnit } from "./order.js";
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import type { Neighbour, Neighbourhood } from "./types.js";
 
 /** The `neighbours` block of `model.json`: keys in identifier order, each list best first. */

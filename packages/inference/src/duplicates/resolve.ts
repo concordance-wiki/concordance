@@ -1,4 +1,4 @@
-import { compareFindings, type Clock, type Finding } from "@concordance-wiki/core";
+import { type Clock, type Finding, byCodeUnit, compareFindings } from "@concordance-wiki/core";
 
 import { contentSimilarities, type ContentSimilarity } from "./content.js";
 import {
@@ -42,10 +42,6 @@ interface Edge {
   a: string;
   b: string;
   criterion: string;
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function ordered(a: DuplicateResource, b: DuplicateResource): Pair {

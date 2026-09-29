@@ -1,8 +1,13 @@
-import { compareFindings, type Finding, type Link, type Provenance } from "@concordance-wiki/core";
+import {
+  type Finding,
+  type Link,
+  type Provenance,
+  byCodeUnit,
+  compareFindings,
+} from "@concordance-wiki/core";
 import { allowedRelations, singleRelation, type Profile } from "@concordance-wiki/profile";
 
 import { combineLinks, combineOptions } from "../combine/links.js";
-import { byCodeUnit } from "../neighbourhood/order.js";
 
 /** What the typing step needs of an entity; the file lets a finding name the source it was read in. */
 export interface TypedEntity {

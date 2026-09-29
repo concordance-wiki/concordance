@@ -7,6 +7,8 @@ import {
   type MarkdownLink,
 } from "@concordance-wiki/ingest";
 
+import { byCodeUnit } from "@concordance-wiki/core";
+
 import { leavesRoot } from "../local.js";
 import type { FixChange, FixRefusal } from "./types.js";
 
@@ -23,11 +25,6 @@ function offsetOf(text: string, link: MarkdownLink): number {
     offset = text.indexOf("\n", offset) + 1;
   }
   return offset + link.column - 1;
-}
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** Files carrying the same name and extension as the missing target, wherever they are filed. */

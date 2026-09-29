@@ -1,10 +1,11 @@
 import {
-  slugify,
   type Config,
   type Entity,
   type Finding,
   type KeywordCounts,
   type TermCandidate,
+  byCodeUnit,
+  slugify,
 } from "@concordance-wiki/core";
 import { foldHeading } from "@concordance-wiki/inference";
 import { scannableText, type IngestedSource, type ScannableUnit } from "@concordance-wiki/ingest";
@@ -72,10 +73,6 @@ export interface DiscoveredKeywords {
    */
   takenOver: Map<string, string[]>;
   counts: KeywordCounts;
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** A colon further into a list item punctuates prose; a label is short. */

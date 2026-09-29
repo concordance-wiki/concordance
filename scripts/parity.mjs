@@ -9,6 +9,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
+import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const demoRoot = resolve(root, process.env.DEMO_ROOT ?? "..");
@@ -18,9 +19,6 @@ const gap = (message) => gaps.push(message);
 // The slots that draw the chrome around every page rather than a page of their own.
 const CHROME_SLOTS = new Set(["Shell", "Header", "Footer"]);
 const FALLBACK_TYPE = "document";
-
-// Code-unit order, not locale order: the output must not depend on the collation data of the runtime.
-const byCodeUnit = (a, b) => Number(a > b) - Number(a < b);
 
 function walk(dir, predicate, out = []) {
   for (const name of readdirSync(dir).sort(byCodeUnit)) {

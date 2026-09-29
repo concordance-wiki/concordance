@@ -1,8 +1,9 @@
 import {
-  compareLinks,
-  compareProvenances,
   type Link,
   type Provenance,
+  byCodeUnit,
+  compareLinks,
+  compareProvenances,
 } from "@concordance-wiki/core";
 import { allowedRelations, type Profile } from "@concordance-wiki/profile";
 
@@ -46,10 +47,6 @@ interface Candidate {
   link: Link;
   /** Serialised attributes, the part of the identity of a link that `compareLinks` ignores. */
   attributes: string;
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 function fileKey(source: string, path: string): string {

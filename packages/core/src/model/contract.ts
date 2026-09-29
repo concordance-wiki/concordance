@@ -1,3 +1,5 @@
+import { byCodeUnit } from "../model/order.js";
+
 /** An object a contract names that has no note yet; offered to the author, never linked automatically. */
 export interface CandidateObject {
   kind: "object";
@@ -51,10 +53,6 @@ export interface ContractSchema {
   type?: string;
   /** In declaration order; empty for a schema without properties. */
   fields: ContractField[];
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** Canonical order of contract records: by API identifier, then by location. */

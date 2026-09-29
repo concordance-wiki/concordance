@@ -1,4 +1,10 @@
-import type { Config, Entity, FileSystem, Finding } from "@concordance-wiki/core";
+import {
+  type Config,
+  type Entity,
+  type FileSystem,
+  type Finding,
+  byCodeUnit,
+} from "@concordance-wiki/core";
 import type { IngestedSource } from "@concordance-wiki/ingest";
 import {
   buildDictionary,
@@ -40,10 +46,6 @@ export interface Dictionaries {
   byLocale: ReadonlyMap<string, LocaleDictionary>;
   /** The homonym findings of every dictionary. */
   findings: Finding[];
-}
-
-function byCodeUnit(a: string, b: string): number {
-  return Number(a > b) - Number(a < b);
 }
 
 /** The distinct locales of the sources, sorted. */
