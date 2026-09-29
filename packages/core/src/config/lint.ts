@@ -1,6 +1,7 @@
 import { posix } from "node:path";
 
 import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import { schemaErrors } from "../config/validate.js";
 import type { FileSystem } from "../io/file-system.js";
 import { yamlDocument } from "./load.js";
 import { formatIssue } from "./report.js";
@@ -81,7 +82,7 @@ export function parseLintConfig(text: string): LintConfigValidation {
   const validate = validator();
   if (!validate(candidate)) {
     // The validator fills `errors` whenever it returns false; the propertyNames error only repeats the key's own.
-    const errors = (validate.errors as ErrorObject[]).filter(
+    const errors = schemaErrors(validate.errors).filter(
       (error) => error.keyword !== "propertyNames",
     );
     return { ok: false, issues: errors.map((error) => describe(error, candidate)) };

@@ -1,5 +1,6 @@
-import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 
+import { schemaErrors } from "../config/validate.js";
 import { compiledSchema } from "./schema.js";
 import type { LockFile, LockValidation } from "./types.js";
 import { describeSchemaError } from "./validate.js";
@@ -18,8 +19,6 @@ export function validateLock(document: unknown): LockValidation {
     return { ok: true, lock: document, issues: [] };
   }
   // The validator fills `errors` whenever it returns false.
-  const issues = (validate.errors as ErrorObject[]).map((error) =>
-    describeSchemaError(error, document),
-  );
+  const issues = schemaErrors(validate.errors).map((error) => describeSchemaError(error, document));
   return { ok: false, issues };
 }

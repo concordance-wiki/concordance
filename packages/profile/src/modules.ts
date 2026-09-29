@@ -6,9 +6,10 @@ import {
   byCodeUnit,
   compiledSchema,
   isPlainObject,
+  schemaErrors,
   yamlDocument,
 } from "@concordance-wiki/core";
-import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 
 import { describeErrors } from "./issues.js";
 import type {
@@ -131,7 +132,7 @@ function declarationOf(
     return { ok: true, declaration: parsed.document };
   }
   // The validator fills `errors` whenever it returns false.
-  const errors = validate.errors as ErrorObject[];
+  const errors = schemaErrors(validate.errors);
   return {
     ok: false,
     issues: describeErrors(errors, parsed.document).map((issue) =>

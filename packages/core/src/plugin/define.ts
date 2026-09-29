@@ -1,9 +1,9 @@
-import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 
 import { formatIssue } from "../config/report.js";
 import { compiledSchema } from "../config/schema.js";
 import type { ConfigIssue } from "../config/types.js";
-import { describeSchemaError } from "../config/validate.js";
+import { describeSchemaError, schemaErrors } from "../config/validate.js";
 import type { PluginManifest } from "./api.js";
 
 // A global symbol, so that a plugin built against another copy of the core is still recognised.
@@ -38,7 +38,7 @@ export function definePlugin(manifest: PluginManifest): PluginManifest {
   const validate = validator();
   if (!validate(document)) {
     // The validator fills `errors` whenever it returns false.
-    const issues = (validate.errors as ErrorObject[]).map((error) =>
+    const issues = schemaErrors(validate.errors).map((error) =>
       describeSchemaError(error, document),
     );
     throw new PluginDefinitionError(labelOf(document), issues);

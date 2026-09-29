@@ -1,8 +1,14 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { byCodeUnit, compiledSchema, isPlainObject, yamlDocument } from "@concordance-wiki/core";
-import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import {
+  byCodeUnit,
+  compiledSchema,
+  isPlainObject,
+  schemaErrors,
+  yamlDocument,
+} from "@concordance-wiki/core";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
 import { describeErrors } from "./issues.js";
@@ -187,7 +193,7 @@ export function validateProfile(document: unknown): ProfileValidation {
   const validate = validator();
   if (!validate(document)) {
     // The validator fills `errors` whenever it returns false.
-    return { ok: false, issues: describeErrors(validate.errors as ErrorObject[], document) };
+    return { ok: false, issues: describeErrors(schemaErrors(validate.errors), document) };
   }
   const issues = referenceIssues(document);
   return issues.length > 0 ? { ok: false, issues } : { ok: true, profile: document, issues: [] };

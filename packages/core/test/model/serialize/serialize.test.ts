@@ -8,6 +8,7 @@ import { assembleModel } from "../../../src/model/serialize/assemble.js";
 import { canonicalJson, sortKeysDeep } from "../../../src/model/serialize/json.js";
 import {
   ModelError,
+  describeModelFailure,
   parseModel,
   serializeModel,
   validateModel,
@@ -203,5 +204,31 @@ describe("The file is validated by schemas/model.schema.json, published with the
         expected: "one of the documented keys",
       },
     ]);
+  });
+});
+
+describe("describeModelFailure", () => {
+  it("names the first issue of a model that does not match its schema, with its path", () => {
+    const error = new ModelError("model.json", [
+      { severity: "error", path: "version", message: "required key is missing" },
+    ]);
+    expect(describeModelFailure(error)).toBe("invalid model: version: required key is missing");
+  });
+
+  it("says the issue alone when it has no path", () => {
+    const error = new ModelError("model.json", [
+      { severity: "error", path: "", message: "not valid JSON" },
+    ]);
+    expect(describeModelFailure(error)).toBe("invalid model: not valid JSON");
+  });
+
+  it("says nothing more than invalid for a failure carrying no issue", () => {
+    expect(describeModelFailure(new ModelError("model.json", []))).toBe("invalid model");
+  });
+
+  it("reads a failure of another kind as itself, since it is not the model's", () => {
+    expect(describeModelFailure(new Error("EIO: the disk gave up"))).toBe(
+      "Error: EIO: the disk gave up",
+    );
   });
 });
