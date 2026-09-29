@@ -14,6 +14,7 @@ import { assembleProfileText, profileFile, typesDirectory } from "./assemble-pro
 import { checkDistribution } from "./check-distribution.mjs";
 import { checkPackaging, checkVersions } from "./check-packaging.mjs";
 import { generateReference } from "./config-reference.mjs";
+import { checkStylesheets } from "./check-stylesheets.mjs";
 import { byCodeUnit } from "./lib.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -550,6 +551,9 @@ for (const directory of ["packages", "plugins", "presets", "scripts"]) {
     }
   }
 }
+// 18. The stylesheets of the site: one rule one place, every deliberate pair named with its reason,
+//     and every class styled is one the templates, the islands or a rendered page emit.
+for (const message of checkStylesheets(root)) fail(message);
 
 if (failures.length > 0) {
   for (const message of failures) console.error(message);
@@ -557,5 +561,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, usage text, package manifests, versions and the single code-unit comparator are valid",
+  "schemas, profile and its type modules, theme, fixtures, expected results, templates and their copies, links, message catalogues, check pages, home page, licences, distribution manifests, reference pages, pipeline examples, usage text, package manifests, versions, the single code-unit comparator and the stylesheets are valid",
 );

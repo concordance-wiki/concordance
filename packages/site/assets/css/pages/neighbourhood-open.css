@@ -89,12 +89,6 @@
   margin-inline-start: auto;
 }
 
-.neighbourhood-type-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .neighbourhood-type {
   display: flex;
   align-items: center;
