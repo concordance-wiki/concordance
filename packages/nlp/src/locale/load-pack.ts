@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 
 import {
-  collation,
-  describeSchemaError,
-  formatIssue,
-  compiledSchema,
   type CollationOptions,
   type Locale,
+  collation,
+  compiledSchema,
+  describeSchemaError,
+  formatIssue,
+  schemaErrors,
 } from "@concordance-wiki/core";
-import type { ErrorObject } from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
 import { normalizer } from "./normalize.js";
@@ -37,7 +37,7 @@ function readDocument(directory: URL): PackDocument {
   const document: unknown = parse(readFileSync(new URL("pack.yaml", directory), "utf8"));
   if (!validate(document)) {
     // The validator fills `errors` whenever it returns false.
-    const detail = (validate.errors as ErrorObject[])
+    const detail = schemaErrors(validate.errors)
       .map((error) => formatIssue(describeSchemaError(error, document), "pack.yaml"))
       .join("; ");
     throw new LanguagePackError(directory.pathname, detail);

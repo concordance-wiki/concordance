@@ -1,13 +1,26 @@
-import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 
 import { formatIssue } from "../../config/report.js";
 import { compiledSchema } from "../../config/schema.js";
 import type { ConfigIssue } from "../../config/types.js";
-import { describeSchemaError } from "../../config/validate.js";
+import { describeSchemaError, schemaErrors } from "../../config/validate.js";
 import { canonicalJson } from "./json.js";
 import type { CanonicalModel } from "./types.js";
 
 /** What a model text failed on: the JSON itself, or the schema; one issue per schema error. */
+/**
+ * What a failure of `parseModel` reads as, in one line: the first issue of the model, its path when
+ * it has one. A caller catching a failure says this rather than asserting what it caught, and the
+ * shape of an error is decided here, next to the error itself.
+ */
+export function describeModelFailure(error: unknown): string {
+  if (!(error instanceof ModelError)) return String(error);
+  const [issue] = error.issues;
+  if (issue === undefined) return "invalid model";
+  const at = issue.path === "" ? "" : `${issue.path}: `;
+  return `invalid model: ${at}${issue.message}`;
+}
+
 export class ModelError extends Error {
   readonly file: string;
   readonly issues: readonly ConfigIssue[];
@@ -40,7 +53,7 @@ function check(document: unknown): Checked {
     return { ok: true, model: document };
   }
   // The validator fills `errors` whenever it returns false.
-  const errors = validate.errors as ErrorObject[];
+  const errors = schemaErrors(validate.errors);
   return { ok: false, issues: errors.map((error) => describeSchemaError(error, document)) };
 }
 

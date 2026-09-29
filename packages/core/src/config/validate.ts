@@ -27,6 +27,15 @@ function pathOf(error: ErrorObject): string {
   return segments.join("").replace(/^\./, "");
 }
 
+/**
+ * The errors of a validator that refused a document. Ajv fills `errors` whenever it returns false
+ * and leaves it null otherwise; a caller reads them here rather than asserting that they are there,
+ * and the empty case is a value, not a cast.
+ */
+export function schemaErrors(errors: ErrorObject[] | null | undefined): ErrorObject[] {
+  return errors ?? [];
+}
+
 export function describeSchemaError(error: ErrorObject, document: unknown): ConfigIssue {
   const path = pathOf(error);
   const received = valueAt(document, error.instancePath);
@@ -116,8 +125,7 @@ export function schemaIssues(name: SchemaName, document: unknown): ConfigIssue[]
   if (validate(document)) {
     return [];
   }
-  // The validator fills `errors` whenever it returns false.
-  const relevant = (validate.errors as ErrorObject[]).filter(
+  const relevant = schemaErrors(validate.errors).filter(
     (error) => !isInsideFailedBranch(error) && !isPropertyNamesSummary(error),
   );
   return relevant.map((error) => describeKeyError(error, document));

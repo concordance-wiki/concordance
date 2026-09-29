@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  describeSchemaError,
   RESERVED_SOURCE_NAMES,
+  describeSchemaError,
   isWellFormedGlob,
+  schemaErrors,
   validateConfig,
 } from "../../src/config/validate.js";
 
@@ -707,6 +708,15 @@ describe("validateConfig beyond the schema", () => {
       "domains[0].match[0]",
       "privacy.pseudonymize.dictionary",
     ]);
+  });
+});
+
+describe("schemaErrors", () => {
+  it("reads the errors a refusal filled, and nothing as an empty list", () => {
+    const error = { instancePath: "/x", keyword: "type", params: {}, schemaPath: "#/type" };
+    expect(schemaErrors([error])).toEqual([error]);
+    expect(schemaErrors(null)).toEqual([]);
+    expect(schemaErrors(undefined)).toEqual([]);
   });
 });
 

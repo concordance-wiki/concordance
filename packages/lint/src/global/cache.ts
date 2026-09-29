@@ -4,13 +4,13 @@ import {
   canonicalJson,
   fetchFailure,
   fetchWithin,
+  describeModelFailure,
+  isPlainObject,
   parseModel,
   readBounded,
   type CanonicalModel,
   type Clock,
-  type ConfigIssue,
   type FileSystem,
-  type ModelError,
 } from "@concordance-wiki/core";
 
 import type { ResolvedGlobalConfig } from "./config.js";
@@ -64,18 +64,11 @@ type ReadModel = { ok: true; model: CanonicalModel } | { ok: false; reason: stri
 
 const HOUR = 3_600_000;
 
-function invalidModel(error: unknown): string {
-  // parseModel only throws ModelError, which always carries at least one issue.
-  const issue = (error as ModelError).issues[0] as ConfigIssue;
-  const at = issue.path === "" ? "" : `${issue.path}: `;
-  return `invalid model: ${at}${issue.message}`;
-}
-
 function readModelText(text: string, file: string): ReadModel {
   try {
     return { ok: true, model: parseModel(text, file) };
   } catch (error) {
-    return { ok: false, reason: invalidModel(error) };
+    return { ok: false, reason: describeModelFailure(error) };
   }
 }
 
@@ -91,9 +84,8 @@ function readLocalModel(input: LoadModelInput): LoadModelResult {
 }
 
 function isMeta(value: unknown): value is CacheMeta {
-  if (typeof value !== "object" || value === null) return false;
-  const meta = value as Record<string, unknown>;
-  return typeof meta["fetched_at"] === "string" && typeof meta["source"] === "string";
+  if (!isPlainObject(value)) return false;
+  return typeof value["fetched_at"] === "string" && typeof value["source"] === "string";
 }
 
 /** The cached copy of this very URL, when both files exist and still read as a model; anything else is no cache. */

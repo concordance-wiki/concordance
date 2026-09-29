@@ -1,9 +1,8 @@
-import type { ErrorObject } from "ajv/dist/2020.js";
 import { formatIssue } from "../config/report.js";
 import { yamlDocument } from "../config/load.js";
 import { compiledSchema } from "../config/schema.js";
 import type { ConfigIssue } from "../config/types.js";
-import { describeSchemaError } from "../config/validate.js";
+import { describeSchemaError, schemaErrors } from "../config/validate.js";
 import { fold, foldSegment, segment } from "./words.js";
 
 export interface PseudonymEntry {
@@ -36,7 +35,7 @@ function schemaIssues(document: unknown): ConfigIssue[] {
   const validate = compiledSchema<PseudonymsDocument>("pseudonyms");
   if (validate(document)) return [];
   // The validator fills `errors` whenever it returns false.
-  return (validate.errors as ErrorObject[]).map((error) => describeSchemaError(error, document));
+  return schemaErrors(validate.errors).map((error) => describeSchemaError(error, document));
 }
 
 function nameIssues(document: PseudonymsDocument): ConfigIssue[] {

@@ -25,6 +25,7 @@ export {
   RESERVED_SOURCE_NAMES,
   describeSchemaError,
   isWellFormedGlob,
+  schemaErrors,
   schemaIssues,
   validateConfig,
 } from "./config/validate.js";
@@ -120,6 +121,7 @@ export {
   assembleModel,
   canonicalJson,
   ModelError,
+  describeModelFailure,
   parseModel,
   quote,
   relationshipType,
