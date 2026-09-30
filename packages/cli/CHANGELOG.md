@@ -1,5 +1,31 @@
 # @concordance-wiki/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- 5afd7ca: The build and the linter print a finding in one form, which names the source, and the machine formats are untouched.
+- 73c6413: The build accepts the version it records as the tool's from its dependencies, so that fixtures built in memory never change with a release.
+- bad1921: `render` no longer reports a failure of its own reading as a model that does not match its schema.
+- Updated dependencies [2772a81]
+- Updated dependencies [4f15eff]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [786b1a3]
+- Updated dependencies [73c7209]
+- Updated dependencies [5afd7ca]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@0.4.1
+  - @concordance-wiki/inference@0.4.1
+  - @concordance-wiki/ingest@0.4.1
+  - @concordance-wiki/lint@0.4.1
+  - @concordance-wiki/nlp@0.4.1
+  - @concordance-wiki/profile@0.4.1
+  - @concordance-wiki/site@0.4.1
+  - @concordance-wiki/typing@0.4.1
+  - @concordance-wiki/checks@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes

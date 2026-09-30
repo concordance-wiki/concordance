@@ -1,5 +1,15 @@
 # @concordance-wiki/core
 
+## 0.4.1
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- c0fd5eb: The errors of a refused schema and the reading of a model failure are values the core returns, not shapes a caller asserts.
+- 73c7209: The code-unit comparator is part of the public surface: `byCodeUnit`.
+- aac99c8: The core names the XML parser options a plugin reads a document with, and walks the ordered output.
+- 25dcc4b: The core exports the plain-object guard, the key of a file of a source and the YAML primitive every reader shapes into its own issue.
+
 ## 0.4.0
 
 ### Minor Changes
