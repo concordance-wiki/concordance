@@ -1,5 +1,17 @@
 # @concordance-wiki/plugin-reader-office
 
+## 0.4.1
+
+### Patch Changes
+
+- aac99c8: The core names the XML parser options a plugin reads a document with, and walks the ordered output.
+- Updated dependencies [2772a81]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [73c7209]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @concordance-wiki/ingest
 
+## 0.4.1
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- 25dcc4b: The core exports the plain-object guard, the key of a file of a source and the YAML primitive every reader shapes into its own issue.
+- Updated dependencies [2772a81]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [73c7209]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@0.4.1
+
 ## 0.4.0
 
 ### Patch Changes
