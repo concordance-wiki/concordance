@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@concordance-wiki/core": "workspace:*",
-    "fast-xml-parser": "5.11.1",
+    "fast-xml-parser": "5.11.2",
     "fflate": "0.8.3"
   },
   "devDependencies": {
