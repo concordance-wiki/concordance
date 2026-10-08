@@ -58,7 +58,7 @@
     "@concordance-wiki/plugin-reader-office": "workspace:*",
     "@concordance-wiki/plugin-reader-vtt": "workspace:*",
     "ajv": "8.20.0",
-    "preact": "10.29.8",
+    "preact": "11.0.0",
     "vitest": "4.1.11",
     "yaml": "2.9.1"
   }
