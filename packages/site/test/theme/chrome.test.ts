@@ -40,11 +40,11 @@ const full: ResolvedThemeConfig = {
 };
 
 describe("chromeOf", () => {
-  it("gives the name, the tool's stylesheet and no credit for a theme with nothing else", () => {
+  it("gives the name, the tool's stylesheet and the credit for a theme with nothing else", () => {
     expect(chromeOf(bare, "../assets/")).toEqual({
       siteTitle: "Pipeline notes",
       stylesheets: ["../assets/site.css"],
-      footer: { credit: false },
+      footer: { credit: true },
     });
   });
 

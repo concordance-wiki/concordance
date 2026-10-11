@@ -73,7 +73,7 @@ The footer of every page.
 |---|---|---|---|---|
 | `text` | string | — | — | A paragraph shown in the footer. |
 | `links` | object[] | — | — | Links shown in the footer, in order. See [`footer.links[]`](#footerlinks). |
-| `credit` | boolean | `false` | — | Whether the footer credits the tool with a discreet link to its repository; nothing else in the interface names it. |
+| `credit` | boolean | `true` | — | Whether the footer credits the tool with a discreet link to its repository; nothing else in the interface names it. A white-label site sets it to false. |
 
 ### `footer.links[]`
 

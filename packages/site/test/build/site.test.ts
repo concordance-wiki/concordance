@@ -391,7 +391,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
     expect(page).toContain('<dt>weight</dt><dd><span class="value">3</span></dd>');
   });
 
-  it("writes the project name as the site title, the spaces, index and recent links in the top bar, the footer with what the tool knows and the to-do link on its build line, and no credit without a theme", () => {
+  it("writes the project name as the site title, the spaces, index and recent links in the top bar, the footer with what the tool knows and the to-do link on its build line, and the credit without a theme", () => {
     const home = fileSystem.readText(`/dist/${HOME_PAGE}`);
     expect(home).toContain("<title>Concordance notes</title>");
     expect(home).toContain(
@@ -412,10 +412,9 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<p class="site-footer-published">Published on September 12, 2026 at 12:00 PM, from <a href="spaces/index.html">3 repositories</a>. <a href="about/index.html">See the sources and their versions</a>.</p>',
     );
     expect(home).toContain(
-      '<p class="site-footer-licence">Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
     );
     expect(home).not.toContain("site-footer-declared");
-    expect(home).not.toContain("Concordance</a>");
     expect(home).toContain(
       '<p class="site-footer-build">publication <time datetime="2026-09-12T12:00:00.000Z">Sep 12, 2026 12:00 PM</time> · profile default@1 · 5 pages · ',
     );

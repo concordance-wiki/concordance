@@ -185,9 +185,9 @@
           }
         },
         "credit": {
-          "description": "Whether the footer credits the tool with a discreet link to its repository; nothing else in the interface names it.",
+          "description": "Whether the footer credits the tool with a discreet link to its repository; nothing else in the interface names it. A white-label site sets it to false.",
           "type": "boolean",
-          "default": false
+          "default": true
         }
       }
     },

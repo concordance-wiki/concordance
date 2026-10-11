@@ -27,7 +27,7 @@ export function chromeOf(theme: ResolvedThemeConfig, assetsBase: string): ThemeC
   const chrome: ThemeChrome = {
     siteTitle: config.name,
     stylesheets: [`${assetsBase}${SITE_STYLESHEET}`],
-    footer: { credit: config.footer?.credit ?? false },
+    footer: { credit: config.footer?.credit ?? true },
   };
   if (theme.logo !== undefined) {
     chrome.logo =
