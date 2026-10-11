@@ -1,22 +1,22 @@
 ---
-"@concordance-wiki/checks": minor
-"@concordance-wiki/cli": minor
-"@concordance-wiki/concordance": minor
-"@concordance-wiki/core": minor
-"@concordance-wiki/i18n": minor
-"@concordance-wiki/inference": minor
-"@concordance-wiki/ingest": minor
-"@concordance-wiki/lint": minor
-"@concordance-wiki/nlp": minor
-"@concordance-wiki/plugin-contract-openapi": minor
-"@concordance-wiki/plugin-contract-wsdl": minor
-"@concordance-wiki/plugin-convert-libreoffice": minor
-"@concordance-wiki/plugin-reader-office": minor
-"@concordance-wiki/plugin-reader-vtt": minor
-"@concordance-wiki/profile": minor
-"@concordance-wiki/site": minor
-"@concordance-wiki/typing": minor
-"@concordance-wiki/ui": minor
+"@concordance-wiki/checks": major
+"@concordance-wiki/cli": major
+"@concordance-wiki/concordance": major
+"@concordance-wiki/core": major
+"@concordance-wiki/i18n": major
+"@concordance-wiki/inference": major
+"@concordance-wiki/ingest": major
+"@concordance-wiki/lint": major
+"@concordance-wiki/nlp": major
+"@concordance-wiki/plugin-contract-openapi": major
+"@concordance-wiki/plugin-contract-wsdl": major
+"@concordance-wiki/plugin-convert-libreoffice": major
+"@concordance-wiki/plugin-reader-office": major
+"@concordance-wiki/plugin-reader-vtt": major
+"@concordance-wiki/profile": major
+"@concordance-wiki/site": major
+"@concordance-wiki/typing": major
+"@concordance-wiki/ui": major
 ---
 
-Concordance is published under the MIT licence from this version on. The versions published before it stay under the GNU General Public License, version 3 or later.
+Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
