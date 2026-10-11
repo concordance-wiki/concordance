@@ -175,7 +175,7 @@ function themeChrome(input: SiteInput, assetsBase: string): ThemeChrome {
     ? {
         siteTitle: input.projectName,
         stylesheets: [`${assetsBase}${SITE_STYLESHEET}`],
-        footer: { credit: false },
+        footer: { credit: true },
       }
     : chromeOf(input.theme.config, assetsBase);
 }
