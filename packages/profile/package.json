@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/profile",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Profile loading, validation and merge; the allowed relation matrix.",
   "license": "MIT",
   "repository": {

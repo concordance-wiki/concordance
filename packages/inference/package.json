@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/inference",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Link production, confidence combination, relation typing, bounded neighbourhood, term candidates.",
   "license": "MIT",
   "repository": {

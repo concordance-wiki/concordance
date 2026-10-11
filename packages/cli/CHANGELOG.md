@@ -1,5 +1,20 @@
 # @concordance-wiki/cli
 
+## 1.0.1
+
+### Patch Changes
+
+- a87d57f: The command line opens its standard input only for `concordance mcp`, which reads it. Every other command exits when its work is done, even when the program that started it leaves that input open.
+- @concordance-wiki/checks@1.0.1
+  - @concordance-wiki/core@1.0.1
+  - @concordance-wiki/inference@1.0.1
+  - @concordance-wiki/ingest@1.0.1
+  - @concordance-wiki/lint@1.0.1
+  - @concordance-wiki/nlp@1.0.1
+  - @concordance-wiki/profile@1.0.1
+  - @concordance-wiki/site@1.0.1
+  - @concordance-wiki/typing@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

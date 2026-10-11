@@ -1,5 +1,16 @@
 # @concordance-wiki/lint
 
+## 1.0.1
+
+### Patch Changes
+
+- @concordance-wiki/checks@1.0.1
+  - @concordance-wiki/core@1.0.1
+  - @concordance-wiki/ingest@1.0.1
+  - @concordance-wiki/nlp@1.0.1
+  - @concordance-wiki/profile@1.0.1
+  - @concordance-wiki/typing@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
