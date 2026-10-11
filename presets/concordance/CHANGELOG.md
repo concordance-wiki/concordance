@@ -1,5 +1,27 @@
 # @concordance-wiki/concordance
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Patch Changes
+
+- Updated dependencies [da3b997]
+- Updated dependencies [2772a81]
+- Updated dependencies [eabcdc1]
+- Updated dependencies [5afd7ca]
+- Updated dependencies [aac99c8]
+- Updated dependencies [73c6413]
+- Updated dependencies [bad1921]
+  - @concordance-wiki/plugin-contract-wsdl@1.0.0
+  - @concordance-wiki/plugin-reader-office@1.0.0
+  - @concordance-wiki/cli@1.0.0
+  - @concordance-wiki/plugin-contract-openapi@1.0.0
+  - @concordance-wiki/plugin-convert-libreoffice@1.0.0
+  - @concordance-wiki/plugin-reader-vtt@1.0.0
+
 ## 0.4.0
 
 ### Minor Changes

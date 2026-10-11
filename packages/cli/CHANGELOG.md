@@ -1,5 +1,38 @@
 # @concordance-wiki/cli
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- 5afd7ca: The build and the linter print a finding in one form, which names the source, and the machine formats are untouched.
+- 73c6413: The build accepts the version it records as the tool's from its dependencies, so that fixtures built in memory never change with a release.
+- bad1921: `render` no longer reports a failure of its own reading as a model that does not match its schema.
+- Updated dependencies [865f55f]
+- Updated dependencies [2772a81]
+- Updated dependencies [210af6e]
+- Updated dependencies [4f15eff]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [eabcdc1]
+- Updated dependencies [786b1a3]
+- Updated dependencies [73c7209]
+- Updated dependencies [5afd7ca]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@1.0.0
+  - @concordance-wiki/site@1.0.0
+  - @concordance-wiki/inference@1.0.0
+  - @concordance-wiki/ingest@1.0.0
+  - @concordance-wiki/lint@1.0.0
+  - @concordance-wiki/nlp@1.0.0
+  - @concordance-wiki/profile@1.0.0
+  - @concordance-wiki/typing@1.0.0
+  - @concordance-wiki/checks@1.0.0
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,31 @@
 # @concordance-wiki/lint
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- c0fd5eb: The errors of a refused schema and the reading of a model failure are values the core returns, not shapes a caller asserts.
+- 5afd7ca: The build and the linter print a finding in one form, which names the source, and the machine formats are untouched.
+- Updated dependencies [865f55f]
+- Updated dependencies [2772a81]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [eabcdc1]
+- Updated dependencies [786b1a3]
+- Updated dependencies [73c7209]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@1.0.0
+  - @concordance-wiki/ingest@1.0.0
+  - @concordance-wiki/nlp@1.0.0
+  - @concordance-wiki/profile@1.0.0
+  - @concordance-wiki/typing@1.0.0
+  - @concordance-wiki/checks@1.0.0
+
 ## 0.4.0
 
 ### Patch Changes
