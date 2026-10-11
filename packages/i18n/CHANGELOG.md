@@ -1,5 +1,11 @@
 # @concordance-wiki/i18n
 
+## 1.0.1
+
+### Patch Changes
+
+- @concordance-wiki/core@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

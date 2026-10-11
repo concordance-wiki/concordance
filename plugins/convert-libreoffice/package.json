@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/plugin-convert-libreoffice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts docx, pptx and xlsx documents to PDF through headless LibreOffice, with a fingerprint cache.",
   "license": "MIT",
   "repository": {
