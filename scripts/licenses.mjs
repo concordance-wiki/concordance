@@ -11,13 +11,15 @@
 // to read. A package installed at two versions under two different licences
 // keeps one row per licence.
 //
-// Allow-list. The project is GPL-3.0-or-later; every runtime dependency must
-// be compatible with it, and the development dependencies are held to the
-// same rule so that nobody has to reason about which is which. Permissive
-// licences (MIT, ISC, BSD, Apache-2.0, 0BSD, BlueOak-1.0.0, Python-2.0,
-// Unlicense, CC0-1.0) and weak copyleft licences (MPL-2.0, LGPL) are compatible
-// with GPL-3.0-or-later; so are GPL-3.0 itself and its "or later" variants.
-// Anything else, including a package with no licence declared, fails.
+// Allow-list. The project is MIT, and what it ships must stay shippable under MIT:
+// the standalone binary and the container image bundle the production
+// dependencies. Permissive licences (MIT, ISC, BSD, Apache-2.0, 0BSD,
+// BlueOak-1.0.0, Python-2.0, Unlicense, CC0-1.0) pass, and so does MPL-2.0,
+// whose copyleft stays inside the files it covers. A copyleft that reaches the
+// whole program (GPL, LGPL) would carry its terms into the binary and the image,
+// so it fails like a package with no licence at all. The development
+// dependencies are held to the same rule, so that nobody has to reason about
+// which is which.
 //
 // Exceptions. A package whose licence is outside the allow-list can be
 // accepted individually, with the reason written next to it. The exception
@@ -41,16 +43,7 @@ const allowed = new Set([
   "BSD-2-Clause",
   "BSD-3-Clause",
   "CC0-1.0",
-  "GPL-3.0",
-  "GPL-3.0-only",
-  "GPL-3.0-or-later",
   "ISC",
-  "LGPL-2.1",
-  "LGPL-2.1-only",
-  "LGPL-2.1-or-later",
-  "LGPL-3.0",
-  "LGPL-3.0-only",
-  "LGPL-3.0-or-later",
   "MIT",
   "MPL-2.0",
   "Python-2.0",
@@ -149,7 +142,7 @@ const link = (url) => (url ? `<${url}>` : "");
 const lines = [
   "# Third-party licences",
   "",
-  "Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.",
+  "Every package of this repository is published under the [MIT licence](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.",
   "",
   "`scripts/licenses.mjs` generates this page from the installed dependencies and fails when a licence is outside its allow-list; `pnpm licenses:update` refreshes it, `pnpm licenses:check` verifies it in continuous integration. The scope says whether a package ships with the published packages (runtime) or serves the build, the tests and the linting only (development).",
   "",

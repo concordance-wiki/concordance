@@ -69,7 +69,7 @@ A mutant gets the time its covering tests took, times `timeoutFactor`, plus `tim
 - Inference and checks are pure functions. Git, file system, network, LibreOffice and the clock are injected interfaces, replaced by doubles in tests.
 - Deterministic output: canonical sorting everywhere (`sortCanonically` with the comparators of `core`), no timestamp outside the `build` block of `model.json` and the `at` field of the build log, no random value. Parallel steps sort their results before writing. `SOURCE_DATE_EPOCH` pins the clock; the determinism step relies on it.
 - No proper noun anywhere: no person, company, client or real project in code, fixtures, tests or labels. Corpora, templates, examples and gallery samples take Concordance itself as their subject, with pseudonymous participants.
-- A new dependency needs a justification in the pull request: function, size, licence compatible with GPL-3.0-or-later, maintenance. Pin the exact version, run `pnpm licenses:update` and commit the regenerated inventory; a licence outside the allow-list of `scripts/licenses.mjs` fails the check, and widening the allow-list is a decision for the maintainers, not a side effect of a pull request.
+- A new dependency needs a justification in the pull request: function, size, licence in the allow-list of `scripts/licenses.mjs`, maintenance. Pin the exact version, run `pnpm licenses:update` and commit the regenerated inventory; a licence outside the allow-list of `scripts/licenses.mjs` fails the check, and widening the allow-list is a decision for the maintainers, not a side effect of a pull request.
 
 ## Code style
 
@@ -116,6 +116,6 @@ Versions and the changelog are managed by Changesets. Every pull request that ch
 
 ## Licence
 
-Every contribution is published under the [GNU General Public License, version 3 or later](LICENSE), like the rest of the project, and the project will stay free software.
+Every contribution is published under the [MIT licence](LICENSE), like the rest of the project, and the project will stay free software.
 
 On your first pull request you are asked to sign the [contributor licence agreement](CLA.md). It is not an assignment: you keep the copyright on what you write and you stay free to use it anywhere. It grants the maintainer a licence broad enough to defend the code, answer for its provenance and adapt how the project is licensed without tracking down every past author, which is what keeps one legal basis under a project that many hands touch. You sign it once, by a comment on the pull request; a check reminds you and holds the merge until the signature is recorded. If you contribute for an employer, the employer signs it as an entity.

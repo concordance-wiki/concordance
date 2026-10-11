@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@concordance-wiki/plugin-convert-libreoffice"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/plugin-convert-libreoffice?style=flat-square"></a>
-  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-MIT-16181B?style=flat-square"></a>
   <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
 </p>
 
@@ -67,7 +67,7 @@ A source that must stay downloadable without a preview declares `convert: false`
 - [W-CONV-FAILED](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONV-FAILED.md) and [W-CONV-SUSPECT](https://github.com/concordance-wiki/concordance/blob/main/docs/checks/W-CONV-SUSPECT.md)
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/plugins/convert-libreoffice/CHANGELOG.md)
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+Part of [Concordance](https://github.com/concordance-wiki/concordance), MIT licence.
 
 <details>
 <summary>Inside the package</summary>

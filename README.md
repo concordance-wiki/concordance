@@ -17,7 +17,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@concordance-wiki/concordance"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/concordance?style=flat-square"></a>
   <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
-  <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-MIT-16181B?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -145,4 +145,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The bar is high on purpose: stric
 
 ## Licence
 
-[GNU General Public License, version 3 or later](LICENSE), for every package of this repository. The [licence inventory](docs/licenses.md) lists the third-party dependencies and their licences. Contributions are accepted under the [contributor licence agreement](CLA.md): you keep your copyright, the project keeps one legal basis.
+[MIT](LICENSE), for every package of this repository. The [licence inventory](docs/licenses.md) lists the third-party dependencies and their licences. Contributions are accepted under the [contributor licence agreement](CLA.md): you keep your copyright, the project keeps one legal basis.

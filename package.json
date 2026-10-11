@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "description": "Turns git repositories of markdown into a wiki that shows where every business word is used.",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22"

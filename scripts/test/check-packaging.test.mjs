@@ -13,7 +13,7 @@ import {
 } from "../check-packaging.mjs";
 
 const repository = join(import.meta.dirname, "../..");
-const licence = "GNU GENERAL PUBLIC LICENSE\n";
+const licence = "MIT License\n";
 const roots = [];
 
 /** A manifest ready to publish under packages/<folder>, before the overrides of a test. */
@@ -22,7 +22,7 @@ function manifest(folder, overrides = {}) {
     name: `@concordance-wiki/${folder}`,
     version: "0.1.0",
     description: `The ${folder} package.`,
-    license: "GPL-3.0-or-later",
+    license: "MIT",
     repository: {
       type: "git",
       url: "git+https://github.com/concordance-wiki/concordance.git",

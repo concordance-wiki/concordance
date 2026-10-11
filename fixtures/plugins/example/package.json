@@ -2,7 +2,7 @@
   "name": "@concordance-wiki/fixture-plugin-example",
   "version": "0.0.0",
   "description": "Example plugin exercising every contribution point; used by the core tests.",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "exports": "./index.mjs",

@@ -15,7 +15,7 @@ const english = {
   sources: "See the sources and their versions",
   builtWith: "Built with",
   generator: "a static site generator",
-  licence: "under the GNU GPL v3 or later licence.",
+  licence: "under the MIT licence.",
   content: "The content belongs to its organisation.",
   declared: "Declared by the organisation",
   publication: "publication",

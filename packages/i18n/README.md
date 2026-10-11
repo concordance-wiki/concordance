@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@concordance-wiki/i18n"><img alt="npm" src="https://img.shields.io/npm/v/@concordance-wiki/i18n?style=flat-square"></a>
-  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-16181B?style=flat-square"></a>
+  <a href="https://github.com/concordance-wiki/concordance/blob/main/LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-MIT-16181B?style=flat-square"></a>
   <a href="https://github.com/concordance-wiki/concordance/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/concordance-wiki/concordance/ci.yml?branch=main&label=ci&style=flat-square"></a>
 </p>
 
@@ -56,7 +56,7 @@ An unknown identifier, a missing variable or an extra one does not compile: `Mes
 - [Configuration reference](https://github.com/concordance-wiki/concordance/blob/main/docs/guides/configuration.md), `project.locale`
 - [Home page](https://concordance-wiki.github.io/concordance/), the [demo wiki](https://concordance-wiki.github.io/demo-wiki/) and the [changelog](https://github.com/concordance-wiki/concordance/blob/main/packages/i18n/CHANGELOG.md)
 
-Part of [Concordance](https://github.com/concordance-wiki/concordance), GNU GPL v3 or later.
+Part of [Concordance](https://github.com/concordance-wiki/concordance), MIT licence.
 
 <details>
 <summary>Inside the package</summary>
