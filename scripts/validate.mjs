@@ -452,7 +452,7 @@ for (const path of walk(join(root, "fixtures/corpora"), (p) =>
 }
 
 // 11. Every workspace package carries the licence of the project.
-const licence = "GPL-3.0-or-later";
+const licence = "MIT";
 for (const path of walk(root, (p) => p.endsWith("/package.json"))) {
   const manifest = JSON.parse(readFileSync(path, "utf8"));
   if (manifest.license !== licence) {

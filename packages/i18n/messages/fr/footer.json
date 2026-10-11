@@ -7,7 +7,7 @@
   "footer.content": "Le contenu appartient à son organisation.",
   "footer.declared": "Déclaré par l’organisation",
   "footer.generator": "un générateur de site statique",
-  "footer.licence": "sous licence GNU GPL v3 ou ultérieure.",
+  "footer.licence": "sous licence MIT.",
   "footer.mentions": "Mentions légales",
   "footer.nonCompliant": "non conforme",
   "footer.pages": "{count, plural, one {# page} other {# pages}}",

@@ -32,7 +32,7 @@
     "description": "What the site is built with, after Built with; linked to the repository when the theme credits the tool."
   },
   "footer.licence": {
-    "defaultMessage": "under the GNU GPL v3 or later licence.",
+    "defaultMessage": "under the MIT licence.",
     "description": "End of the sentence naming the generator: its licence."
   },
   "footer.mentions": {

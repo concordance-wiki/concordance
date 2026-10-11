@@ -412,7 +412,7 @@ describe("concordance render reads model.json and writes dist/: one HTML page pe
       '<p class="site-footer-published">Published on September 12, 2026 at 12:00 PM, from <a href="spaces/index.html">3 repositories</a>. <a href="about/index.html">See the sources and their versions</a>.</p>',
     );
     expect(home).toContain(
-      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the MIT licence. The content belongs to its organisation.</p>',
     );
     expect(home).not.toContain("site-footer-declared");
     expect(home).toContain(
@@ -899,7 +899,7 @@ describe("The labels of the site come from the message catalogue of the project 
     expect(home).toContain("Kept by its maintainers.");
     expect(home).toContain('<a href="https://forge.example/wiki">Forge</a>');
     expect(home).toContain(
-      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+      '<p class="site-footer-licence">Built with <a class="site-footer-credit" href="https://github.com/concordance-wiki/concordance">Concordance</a>, a static site generator under the MIT licence. The content belongs to its organisation.</p>',
     );
     expect(home).toContain(
       '<a class="site-footer-todo" href="todo/index.html">Backlog<span class="count">5</span></a>',

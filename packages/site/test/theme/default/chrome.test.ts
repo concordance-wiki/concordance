@@ -180,7 +180,7 @@ describe("Footer", () => {
       '<p class="site-footer-published">Published on 13 September 2026 at 10:04, from <a href="../spaces/">7 repositories</a>. <a href="../about/">See the sources and their versions</a>.</p>',
     );
     expect(html).toContain(
-      '<p class="site-footer-licence">Built with a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>',
+      '<p class="site-footer-licence">Built with a static site generator under the MIT licence. The content belongs to its organisation.</p>',
     );
     expect(html).toContain(
       '<div class="site-footer-declared"><h2 class="site-footer-heading">Declared by the organisation</h2><ul class="site-footer-links"><li><a href="https://forge.example/legal/mentions">Legal notice</a></li><li><a href="https://forge.example/legal/accessibility">Accessibility — partially compliant</a></li><li><a href="https://forge.example/legal/privacy">Personal data</a></li></ul></div>',
@@ -214,7 +214,7 @@ describe("Footer", () => {
   it("names the tool and links it to its repository in the sentence naming the generator only when the theme credits it", () => {
     const html = renderSlot("Footer", footer, defaultTheme);
     expect(html).toContain(
-      `<p class="site-footer-licence">Built with <a class="site-footer-credit" href="${REPOSITORY_URL}">Concordance</a>, a static site generator under the GNU GPL v3 or later licence. The content belongs to its organisation.</p>`,
+      `<p class="site-footer-licence">Built with <a class="site-footer-credit" href="${REPOSITORY_URL}">Concordance</a>, a static site generator under the MIT licence. The content belongs to its organisation.</p>`,
     );
     expect(html).toContain(
       '<ul class="site-footer-links"><li><a href="https://forge.example/wiki">Forge</a></li></ul>',

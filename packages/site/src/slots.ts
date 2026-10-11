@@ -277,7 +277,7 @@ export interface FooterLabels {
   published: string;
   /** The link to the about page. */
   sources: string;
-  /** The sentence naming the generator, in three parts: "Built with", "a static site generator", "under the GNU GPL v3 or later licence." */
+  /** The sentence naming the generator, in three parts: "Built with", "a static site generator", "under the MIT licence." */
   builtWith: string;
   generator: string;
   licence: string;

@@ -14,7 +14,7 @@ A release publishes, under one version number:
 
 Every form of the tool at one version names one commit: the npm version, the git tag, the container image, the GitHub action, the GitLab component and the pre-commit hook of `v<x.y.z>` all come from the merge commit of the version pull request, and the tarballs published to npm are the bytes attached to the release, verified by their checksums.
 
-Every package is published under the [GNU General Public License, version 3 or later](../../LICENSE).
+Every package is published under the [MIT licence](../../LICENSE).
 
 ## Versions
 

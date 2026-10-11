@@ -1,6 +1,6 @@
 # Third-party licences
 
-Every package of this repository is published under the [GNU General Public License, version 3 or later](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.
+Every package of this repository is published under the [MIT licence](../LICENSE). This page lists the third-party packages that `pnpm install` brings in, with their licence, so that the compatibility of the whole can be checked at a glance. Versions are not listed: the lockfile pins them, and a licence is a property of the package, not of one of its releases.
 
 `scripts/licenses.mjs` generates this page from the installed dependencies and fails when a licence is outside its allow-list; `pnpm licenses:update` refreshes it, `pnpm licenses:check` verifies it in continuous integration. The scope says whether a package ships with the published packages (runtime) or serves the build, the tests and the linting only (development).
 

@@ -27,7 +27,7 @@ LABEL org.opencontainers.image.title="Concordance" \
       org.opencontainers.image.description="Turns git repositories of markdown into a wiki that shows where every business word is used." \
       org.opencontainers.image.source="https://github.com/concordance-wiki/concordance" \
       org.opencontainers.image.documentation="https://github.com/concordance-wiki/concordance/blob/main/docs/guides/getting-started.md" \
-      org.opencontainers.image.licenses="GPL-3.0-or-later" \
+      org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.version="${VERSION}"
 
 # git and ca-certificates: the build clones the declared sources over https.
