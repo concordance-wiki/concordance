@@ -9,6 +9,7 @@ import type {
   CategoryRow,
   CategorySort,
 } from "../../slots.js";
+import { optionalHref } from "./optional-href.js";
 import { fill } from "./mention-list.js";
 
 export const CATEGORY_ISLAND = "category-list";
@@ -194,7 +195,7 @@ function Pages({ view }: { view: CategoryView }): JSX.Element | null {
             ) : entry.number === page ? (
               <span aria-current="page">{entry.number}</span>
             ) : (
-              <a href={entry.href}>{entry.number}</a>
+              <a {...optionalHref(entry.href)}>{entry.number}</a>
             )}
           </li>
         ))}
