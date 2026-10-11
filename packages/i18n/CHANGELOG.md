@@ -1,5 +1,24 @@
 # @concordance-wiki/i18n
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Patch Changes
+
+- ccc5614: The message parser of the interface catalogue moves to 3.5.20.
+- 609fcdd: The message formatter of the interface catalogue moves to intl-messageformat 12; a full build of the demonstration wiki is byte-identical to the one before.
+- Updated dependencies [865f55f]
+- Updated dependencies [2772a81]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [eabcdc1]
+- Updated dependencies [73c7209]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@1.0.0
+
 ## 0.4.0
 
 ### Patch Changes

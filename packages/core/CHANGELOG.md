@@ -1,5 +1,23 @@
 # @concordance-wiki/core
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Minor Changes
+
+- 865f55f: The footer credits the tool by default, "Built with Concordance", linked to its repository; a white-label site sets `footer.credit: false` in its theme.
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- c0fd5eb: The errors of a refused schema and the reading of a model failure are values the core returns, not shapes a caller asserts.
+- 73c7209: The code-unit comparator is part of the public surface: `byCodeUnit`.
+- aac99c8: The core names the XML parser options a plugin reads a document with, and walks the ordered output.
+- 25dcc4b: The core exports the plain-object guard, the key of a file of a source and the YAML primitive every reader shapes into its own issue.
+
 ## 0.4.0
 
 ### Minor Changes

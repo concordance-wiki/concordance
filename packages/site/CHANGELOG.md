@@ -1,5 +1,33 @@
 # @concordance-wiki/site
 
+## 1.0.0
+
+### Major Changes
+
+- eabcdc1: Concordance 1.0.0 is published under the MIT licence; the versions published before it stay under the GNU General Public License, version 3 or later. From this version on, the configuration schema, the plugin API, the format of `model.json`, the command line and the text answer of `query` follow semantic versioning: a change that breaks one of them waits for a major version.
+
+### Minor Changes
+
+- 865f55f: The footer credits the tool by default, "Built with Concordance", linked to its repository; a white-label site sets `footer.credit: false` in its theme.
+
+### Patch Changes
+
+- 2772a81: `ajv` 8.20.0 and `yaml` 2.9.1, the minor releases Dependabot proposed, with the licence inventory regenerated.
+- 210af6e: The islands and the rendering move to preact 11. Every page of a full build of the demonstration wiki is identical to the one before; the island bundles, which carry preact, grow by about 0.1 kB each.
+- 4f15eff: The islands read the `hidden` flag of an element as the platform now types it (a boolean or the `until-found` keyword), so that the site builds under TypeScript 6; nothing changes in a page.
+- Updated dependencies [865f55f]
+- Updated dependencies [ccc5614]
+- Updated dependencies [609fcdd]
+- Updated dependencies [2772a81]
+- Updated dependencies [c0fd5eb]
+- Updated dependencies [eabcdc1]
+- Updated dependencies [73c7209]
+- Updated dependencies [aac99c8]
+- Updated dependencies [25dcc4b]
+  - @concordance-wiki/core@1.0.0
+  - @concordance-wiki/i18n@1.0.0
+  - @concordance-wiki/profile@1.0.0
+
 ## 0.4.0
 
 ### Patch Changes
