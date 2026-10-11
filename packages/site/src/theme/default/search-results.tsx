@@ -74,23 +74,29 @@ function FacetBox({
   if (value.active === true) classes.push("facet-active");
   if (value.disabled === true) classes.push("facet-disabled");
   if (value.keyword === true) classes.push("facet-keyword");
+  // Everything but the type, which preact 11 checks per kind of input: the radio of the words
+  // without a note and the checkbox of every other facet are two elements of one shape.
+  const field = {
+    id,
+    name: facet.name,
+    value: value.value,
+    checked: value.active === true,
+    disabled: value.disabled === true,
+    ...(navigate === undefined
+      ? {}
+      : {
+          onChange: () => {
+            navigate(value.href);
+          },
+        }),
+  };
   return (
     <li class={classes.join(" ")}>
-      <input
-        type={facet.name === NOTELESS_FACET ? "radio" : "checkbox"}
-        id={id}
-        name={facet.name}
-        value={value.value}
-        checked={value.active === true}
-        disabled={value.disabled === true}
-        {...(navigate === undefined
-          ? {}
-          : {
-              onChange: () => {
-                navigate(value.href);
-              },
-            })}
-      />
+      {facet.name === NOTELESS_FACET ? (
+        <input type="radio" {...field} />
+      ) : (
+        <input type="checkbox" {...field} />
+      )}
       <label for={id}>
         <span class="facet-label">{value.label ?? value.value}</span>
         <span class="count">{value.count}</span>

@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 
 import type { SpaceNode, SpaceTree as SpaceTreeModel } from "../../slots.js";
+import { optionalHref } from "./optional-href.js";
 import { PanelHandle } from "./panel-handle.js";
 
 /** A page of the tree links to itself; the current one is a plain entry marked `aria-current`, bold and ruled by the stylesheet, its passage count after its name when it is a word filed among the notes, the pages hung under it listed after it. */
@@ -15,7 +16,7 @@ function Page({ node }: { node: SpaceNode }): JSX.Element {
     </li>
   ) : (
     <li class="space-page">
-      <a href={node.href}>{node.label}</a>
+      <a {...optionalHref(node.href)}>{node.label}</a>
     </li>
   );
 }
