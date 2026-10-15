@@ -52,7 +52,7 @@ jobs:
         # Every slot rendered with fixture data; fails on a page over budget or an accessibility finding.
         run: node packages/cli/dist/bin.js gallery --output reports/gallery
       - name: Publish component gallery
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: gallery
           path: reports/gallery
@@ -68,7 +68,7 @@ jobs:
         run: node scripts/check-quiet-log.mjs test.log
       - name: Publish coverage report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage
           path: coverage/lcov.info
