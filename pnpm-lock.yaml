@@ -64,7 +64,7 @@ importers:
         version: link:../../../packages/core
       preact:
         specifier: 11.0.0
-        version: 11.0.0(preact-render-to-string@6.7.0)
+        version: 11.0.0(preact-render-to-string@6.8.0)
 
   fixtures/plugins/theme-example:
     dependencies:
@@ -73,7 +73,7 @@ importers:
         version: link:../../../packages/core
       preact:
         specifier: 11.0.0
-        version: 11.0.0(preact-render-to-string@6.7.0)
+        version: 11.0.0(preact-render-to-string@6.8.0)
 
   fixtures/plugins/theme-white-label:
     dependencies:
@@ -144,7 +144,7 @@ importers:
         version: 8.20.0
       preact:
         specifier: 11.0.0
-        version: 11.0.0(preact-render-to-string@6.7.0)
+        version: 11.0.0(preact-render-to-string@6.8.0)
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@26.6.5)(@vitest/coverage-v8@4.1.11)(happy-dom@20.14.5)(vite@8.3.0(@types/node@26.6.5)(esbuild@0.28.2)(yaml@2.9.1))
@@ -331,10 +331,10 @@ importers:
         version: 6.3.289
       preact:
         specifier: 11.0.0
-        version: 11.0.0(preact-render-to-string@6.7.0)
+        version: 11.0.0(preact-render-to-string@6.8.0)
       preact-render-to-string:
-        specifier: 6.7.0
-        version: 6.7.0(preact@11.0.0)
+        specifier: 6.8.0
+        version: 6.8.0(preact@11.0.0)
       rehype-sanitize:
         specifier: 6.0.0
         version: 6.0.0
@@ -2406,8 +2406,8 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
-  preact-render-to-string@6.7.0:
-    resolution: {integrity: sha512-Z4WR8fmLMRpdYqJ9i7vrlXSsSrxVJydwrkEXHapexfARbWfGb7vGcnvNQnIzN0cXciMVOlz/XLoiMCi9gUsy9Q==}
+  preact-render-to-string@6.8.0:
+    resolution: {integrity: sha512-2qiMrReQz+MZ5+/bT27kbVnFE7QNCC2fku/Tnc2H5bFUS3I3ASbRy0q72XLZ+2p2KyDE5xMfvSEtkmVo6TRNyA==}
     peerDependencies:
       preact: '>=10 || >= 11.0.0-0'
 
@@ -4869,13 +4869,13 @@ snapshots:
     dependencies:
       commander: 9.5.0
 
-  preact-render-to-string@6.7.0(preact@11.0.0):
+  preact-render-to-string@6.8.0(preact@11.0.0):
     dependencies:
-      preact: 11.0.0(preact-render-to-string@6.7.0)
+      preact: 11.0.0(preact-render-to-string@6.8.0)
 
-  preact@11.0.0(preact-render-to-string@6.7.0):
+  preact@11.0.0(preact-render-to-string@6.8.0):
     optionalDependencies:
-      preact-render-to-string: 6.7.0(preact@11.0.0)
+      preact-render-to-string: 6.8.0(preact@11.0.0)
 
   prelude-ls@1.2.1: {}
 
