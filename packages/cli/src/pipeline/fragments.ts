@@ -380,7 +380,11 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
       locateLink(target, { name: source.name, path }, files, crossSource);
     const text =
       input.notes?.get(fileKey(source.name, path)) ?? input.fs.readText(file.absolutePath);
+    const headings = input.config.sources.find(
+      (declared) => declared.name === source.name,
+    )?.headings;
     const rendered = renderMarkdown(text, {
+      headings,
       // A link to a file of the sources leads to its page; a file without a page is not published,
       // so the link goes. An image of the sources is copied next to the page and, on a line of its
       // own, captioned with its path in the source; any other image, an external URL typically, is

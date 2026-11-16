@@ -289,6 +289,11 @@
             "type": "boolean",
             "default": false
           },
+          "headings": {
+            "description": "What the level-one headings of the notes of the source are. auto: the first is the title, unless a note has several, which then head its sections one level down. sections: every one heads a section, the title coming from the frontmatter or the file name.",
+            "enum": ["auto", "sections"],
+            "default": "auto"
+          },
           "previews": {
             "description": "Whether the previews of the converted documents of the source are published with the site; false keeps them out of the artefact.",
             "type": "boolean",

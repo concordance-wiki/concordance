@@ -31,6 +31,7 @@ const specified = [
   "W-CONV-SUSPECT",
   "W-DOC-NOMD",
   "W-DUP-CANDIDATE",
+  "W-TITLE-SHARED",
   "W-TERM-UNDEFINED",
   "I-TERM-HOMONYM",
   "W-TERM-UNUSED",
@@ -126,7 +127,7 @@ describe("catalogue", () => {
 
   it("computes from the model exactly the checks whose data the model carries today", () => {
     const computed = catalogue.filter((d) => d.kind === "model").map((d) => d.id);
-    expect(computed).toEqual(["W-API-NOCONSUMER", "W-API-CONSUMER-MISMATCH"]);
+    expect(computed).toEqual(["W-TITLE-SHARED", "W-API-NOCONSUMER", "W-API-CONSUMER-MISMATCH"]);
     const others = catalogue.filter((d) => !computed.includes(d.id));
     expect(others.map((d) => d.kind)).toEqual(others.map(() => "step"));
   });
@@ -153,6 +154,10 @@ describe("catalogue", () => {
           source: { name: "specs", path: "rules/cap.md" },
           attributes: {},
         },
+        ...["a", "b", "c"].map((name) => ({
+          ...filed(`specs/rules/${name}`, "rule"),
+          title: "Rule",
+        })),
       ],
       links: [
         link("specs/api/model-query", "specs/screens/entry", "serves"),

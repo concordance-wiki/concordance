@@ -42,6 +42,7 @@ Every check listed here is registered once, with its default severity, descripti
 | [`W-CONV-SUSPECT`](W-CONV-SUSPECT.md) | warning | A converted PDF contains no extractable text although the document is large. |
 | [`W-DOC-NOMD`](W-DOC-NOMD.md) | info | A document has no markdown representation. |
 | [`W-DUP-CANDIDATE`](W-DUP-CANDIDATE.md) | info | Two resources look like representations of the same document, but not enough to merge them. |
+| [`W-TITLE-SHARED`](W-TITLE-SHARED.md) | warning | At least three entities of one source share a title, the mark of a template heading kept by every file. |
 | [`W-PRIVACY-WITHHELD`](W-PRIVACY-WITHHELD.md) | warning | A transcript was kept out of the site because its reader cannot rewrite it with the pseudonyms; the raw file is never published. |
 
 ## Vocabulary and filing

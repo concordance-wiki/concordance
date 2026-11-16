@@ -12,6 +12,8 @@ export interface CheckEntity {
   type: string;
   source: CheckEntitySource;
   attributes: Record<string, unknown>;
+  /** The title the page shows; absent for a page the build made for a word, which never shares one. */
+  title?: string;
 }
 
 /** Where a link was read: the method, and the path and line in the note that carries it. */

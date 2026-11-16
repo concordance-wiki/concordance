@@ -1,8 +1,10 @@
-import type { Finding } from "@concordance-wiki/core";
+import type { Finding, HeadingsMode } from "@concordance-wiki/core";
 
 export interface ParseContext {
   /** Forward-slash path of the file, relative to the source root. */
   path: string;
+  /** The `headings` of the source: `auto` when absent. */
+  headings?: HeadingsMode | undefined;
 }
 
 export interface MarkdownListItem {
@@ -17,7 +19,10 @@ export interface MarkdownListItem {
 export interface MarkdownSection {
   heading: string;
   line: number;
-  /** Plain text of everything under the heading until the next H1 or H2, code blocks excluded. */
+  /**
+   * Plain text of everything under the heading until the next H1 or H2, code blocks excluded;
+   * the headings read one level deeper when the H1s of the note head its sections.
+   */
   text: string;
   /** Items of the lists placed directly under the heading, nested lists excluded. */
   items: MarkdownListItem[];
@@ -88,7 +93,7 @@ export interface ScannableUnit {
 export interface ParsedMarkdown {
   /** Empty when the file has no frontmatter or an invalid one. */
   frontmatter: Record<string, unknown>;
-  /** Text of the first H1. */
+  /** Text of the first H1; absent when the note has none or its H1s head its sections. */
   title: string | undefined;
   sections: MarkdownSection[];
   links: MarkdownLink[];

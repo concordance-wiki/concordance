@@ -132,7 +132,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
   const { config, profile, sources, fs, clock } = input;
   const mark = stepMarker(input.observe);
   mark("parse");
-  const parsed = parseSources(sources, fs);
+  const parsed = parseSources(sources, fs, config.sources);
   const readers = input.plugins.readers();
   mark("read documents");
   const read = await readDocuments({

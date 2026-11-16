@@ -130,14 +130,18 @@ function unitsOf(
   }
 }
 
-/** The text units of a tree that a scan may read, excluded zones removed, in document order. */
-export function scannableUnits(root: Root): ScannableUnit[] {
+/**
+ * The text units of a tree that a scan may read, excluded zones removed, in document order;
+ * `shift` is how many levels deeper the headings read, one when the H1s head the sections.
+ */
+export function scannableUnits(root: Root, shift: 0 | 1 = 0): ScannableUnit[] {
   const units: ScannableUnit[] = [];
   let section: string | undefined;
   for (const block of root.children) {
-    if (block.type === "heading" && block.depth === 1) {
+    const depth = block.type === "heading" ? block.depth + shift : undefined;
+    if (depth === 1) {
       section = undefined;
-    } else if (block.type === "heading" && block.depth === 2) {
+    } else if (depth === 2) {
       section = visibleText(block);
     }
     units.push(...unitsOf(block, section, false));

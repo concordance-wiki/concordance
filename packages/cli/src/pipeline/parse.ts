@@ -1,4 +1,4 @@
-import type { FileSystem, Finding } from "@concordance-wiki/core";
+import type { FileSystem, Finding, HeadingsMode, SourceConfig } from "@concordance-wiki/core";
 import { readMarkdown, type IngestedSource, type ParsedMarkdown } from "@concordance-wiki/ingest";
 import { fileKey } from "@concordance-wiki/core";
 
@@ -8,6 +8,8 @@ export interface ParsedDocument {
   /** Forward-slash path relative to the source root. */
   path: string;
   document: ParsedMarkdown;
+  /** The `headings` of its source, for a step that parses the note again; `auto` when absent. */
+  headings?: HeadingsMode | undefined;
 }
 
 export interface ParsedSources {
@@ -15,16 +17,29 @@ export interface ParsedSources {
   findings: Finding[];
 }
 
-/** Parses every markdown file of the ingested sources; an unreadable file is a finding, never a failure. */
-export function parseSources(sources: readonly IngestedSource[], fs: FileSystem): ParsedSources {
+/**
+ * Parses every markdown file of the ingested sources, each under the `headings` its declaration
+ * gives; an unreadable file is a finding, never a failure.
+ */
+export function parseSources(
+  sources: readonly IngestedSource[],
+  fs: FileSystem,
+  declared: readonly SourceConfig[] = [],
+): ParsedSources {
   const documents: ParsedDocument[] = [];
   const findings: Finding[] = [];
   for (const source of sources) {
+    const headings = declared.find((candidate) => candidate.name === source.name)?.headings;
     for (const file of source.files) {
       if (!file.path.endsWith(".md")) continue;
-      const read = readMarkdown({ fs }, file.absolutePath, file.path);
+      const read = readMarkdown({ fs }, file.absolutePath, file.path, headings);
       if (read.ok) {
-        documents.push({ source: source.name, path: file.path, document: read.document });
+        documents.push({
+          source: source.name,
+          path: file.path,
+          document: read.document,
+          headings,
+        });
         for (const finding of read.document.findings) {
           findings.push({ ...finding, source: source.name });
         }

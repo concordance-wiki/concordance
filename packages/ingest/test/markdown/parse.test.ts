@@ -55,9 +55,37 @@ describe("parseMarkdown", () => {
       expect(parse("# Explicit *link* entry\n\nBody.\n").title).toBe("Explicit link entry");
     });
 
-    it("keeps the first H1 when the document has two", () => {
-      const document = parse("# First\n\n# Second\n");
-      expect(document.title).toBe("First");
+    it("reads a note with several H1s one level down: no title, each H1 heading a section, the H2s inside it", () => {
+      const document = parse(
+        "# Purpose of the document\n\nWhy.\n\n# Context\n\nBefore.\n\n## History\n\nLong ago.\n",
+      );
+      expect(document.title).toBeUndefined();
+      expect(document.sections).toEqual([
+        { heading: "Purpose of the document", line: 1, text: "Why.", items: [] },
+        { heading: "Context", line: 5, text: "Before.\nHistory\nLong ago.", items: [] },
+      ]);
+      expect(document.paragraphs.map((paragraph) => paragraph.section)).toEqual([
+        "Purpose of the document",
+        "Context",
+        "Context",
+      ]);
+    });
+
+    it("reads a single H1 as a section under headings: sections", () => {
+      const document = parseMarkdown("# Purpose of the document\n\nWhy.\n", {
+        path: PATH,
+        headings: "sections",
+      });
+      expect(document.title).toBeUndefined();
+      expect(document.sections.map((section) => section.heading)).toEqual([
+        "Purpose of the document",
+      ]);
+    });
+
+    it("keeps a single H1 as the title under headings: auto", () => {
+      const document = parseMarkdown("# Entry\n\n## Objects\n", { path: PATH, headings: "auto" });
+      expect(document.title).toBe("Entry");
+      expect(document.sections.map((section) => section.heading)).toEqual(["Objects"]);
     });
 
     it("has no title when the document has no H1", () => {
@@ -68,11 +96,11 @@ describe("parseMarkdown", () => {
 
     it("gives every H2 its heading, line and the plain text until the next H2 or H1", () => {
       const document = parse(
-        "# Title\n\nIntro.\n\n## Objects\n\nReads the `build`.\n\n### Detail\n\nMore.\n\n## Actions\n\nValidate.\n\n# Appendix\n\nOutside.\n",
+        "## Objects\n\nReads the `build`.\n\n### Detail\n\nMore.\n\n## Actions\n\nValidate.\n\n# Appendix\n\nOutside.\n",
       );
       expect(document.sections).toEqual([
-        { heading: "Objects", line: 5, text: "Reads the build.\nDetail\nMore.", items: [] },
-        { heading: "Actions", line: 13, text: "Validate.", items: [] },
+        { heading: "Objects", line: 1, text: "Reads the build.\nDetail\nMore.", items: [] },
+        { heading: "Actions", line: 9, text: "Validate.", items: [] },
       ]);
     });
 

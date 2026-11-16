@@ -22,6 +22,8 @@ export function runModelChecks(input: ModelChecksInput): Finding[] {
         type: entity.type,
         source: { name: entity.source.name, path: entity.source.path },
         attributes: entity.attributes,
+        // A page made for a word is titled by the word, unique by construction.
+        ...(entity.keyword === true ? {} : { title: entity.title }),
       })),
       links: input.links.map((link) => ({
         from: link.from,

@@ -48,6 +48,7 @@ export {
   type IdentifierResult,
 } from "./identity/identifier.js";
 export { slugify } from "./identity/slug.js";
+export { levelOneHeadsSections, titleFromPath } from "./identity/title.js";
 export { epochClock, fixedClock, systemClock, type Clock } from "./io/clock.js";
 export { commandExists } from "./io/command.js";
 export {

@@ -6,6 +6,7 @@ import {
   type SourceConfig,
   byCodeUnit,
   identifierFor,
+  titleFromPath,
 } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource, ParsedMarkdown } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
@@ -51,18 +52,13 @@ export function typeSuffixesOf(source: SourceConfig): string[] {
   );
 }
 
-function fileTitle(path: string): string {
-  const name = path.slice(path.lastIndexOf("/") + 1);
-  return name.replace(/\.[^.]+$/, "");
-}
-
 function titleOf(
   frontmatter: Record<string, unknown>,
   document: ParsedMarkdown,
   path: string,
 ): string {
   if (typeof frontmatter["title"] === "string") return frontmatter["title"];
-  return document.title ?? fileTitle(path);
+  return document.title ?? titleFromPath(path);
 }
 
 function aliasesOf(frontmatter: Record<string, unknown>): string[] {

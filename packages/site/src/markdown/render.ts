@@ -1,6 +1,7 @@
-import { slugify } from "@concordance-wiki/core";
+import { levelOneHeadsSections, slugify, type HeadingsMode } from "@concordance-wiki/core";
 import type {
   Definition,
+  Heading,
   Image,
   Link,
   LinkReference,
@@ -73,10 +74,12 @@ export interface MarkdownOptions {
    * a figure captioned with its alternative text and that path; an image among text stays inline.
    */
   imagePath?: (target: string) => string | undefined;
+  /** The `headings` of the source of the note: `auto` when absent. */
+  headings?: HeadingsMode | undefined;
 }
 
 export interface RenderedMarkdown {
-  /** Text of the first H1, which titles the page and is left out of the sections. */
+  /** Text of the first H1, which titles the page and is left out of the sections; absent when the H1s head the sections. */
   title?: string;
   /** The lead before the first H2, when there is one, then one section per H1 or H2. */
   sections: Section[];
@@ -497,11 +500,30 @@ function toHtml(nodes: RootContent[]): string {
 }
 
 /**
+ * Every heading of the tree one level deeper, an H6 staying an H6: the H1s of a note that head
+ * its sections become the H2s of its page, which keeps the single H1 of the title.
+ */
+function deepenHeadings(node: Nodes): void {
+  if (node.type === "heading" && node.depth < 6) {
+    node.depth = (node.depth + 1) as Heading["depth"];
+  }
+  if ("children" in node) {
+    for (const child of node.children) deepenHeadings(child);
+  }
+}
+
+/**
  * A note as the entity page shows it: the frontmatter and the first H1 removed, the body split
- * into sections at every H1 or H2, each rendered to sanitised HTML.
+ * into sections at every H1 or H2, each rendered to sanitised HTML. When the H1s head the
+ * sections (several of them, or `headings: sections`), every heading reads one level deeper
+ * first: none titles the page, and each former H1 opens a section.
  */
 export function renderMarkdown(text: string, options: MarkdownOptions = {}): RenderedMarkdown {
   const tree = parser.parse(text);
+  const levelOne = tree.children.filter((node) => node.type === "heading" && node.depth === 1);
+  if (levelOneHeadsSections(options.headings, levelOne.length)) {
+    deepenHeadings(tree);
+  }
   // The paths are looked up before the targets are rewritten, the figures built after: the image keeps its page href.
   const figures = options.imagePath === undefined ? [] : figuresOf(tree, options.imagePath);
   const written: WrittenMark[] = [];
