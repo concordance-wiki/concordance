@@ -31,6 +31,9 @@ export default defineConfig({
           disableJavaScriptFileLoading: true,
           disableCSSFileLoading: true,
           handleDisabledFileLoadingAsSuccess: true,
+          // happy-dom 21 turns frame loading off by default and traces an error for every frame
+          // it then skips; on, a frame loads as it did before, its address left empty by the tests.
+          enableIframePageLoading: true,
         },
       },
     },
