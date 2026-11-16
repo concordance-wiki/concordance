@@ -1,5 +1,15 @@
 # @concordance-wiki/site
 
+## 1.0.1
+
+### Patch Changes
+
+- 633bb65: The server rendering of the site pages moves to preact-render-to-string 6.8.0.
+- Updated dependencies [dd14d12]
+  - @concordance-wiki/i18n@1.0.1
+  - @concordance-wiki/core@1.0.1
+  - @concordance-wiki/profile@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

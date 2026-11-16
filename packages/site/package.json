@@ -1,6 +1,6 @@
 {
   "name": "@concordance-wiki/site",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Site generation: slots, default theme, islands, stylesheet, markdown rendering, page budget and the site build.",
   "license": "MIT",
   "repository": {
