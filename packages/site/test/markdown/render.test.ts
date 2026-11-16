@@ -280,8 +280,32 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<a>click</a>");
   });
 
-  it("numbers the sections whose headings slugify alike and splits at a second H1 as at an H2", () => {
-    const text = ["# Title", "", "## Steps", "", "one", "", "# Steps", "", "two", ""].join("\n");
+  it("renders a note with several H1s one level down: no title, a section per H1, its H2s as H3s", () => {
+    const text = "# Purpose of the document\n\nWhy.\n\n# Context\n\n## History\n\nLong ago.\n";
+    const rendered = renderMarkdown(text);
+    expect(rendered.title).toBeUndefined();
+    expect(rendered.sections).toEqual([
+      {
+        id: "section-purpose-of-the-document",
+        heading: "Purpose of the document",
+        html: "<p>Why.</p>",
+      },
+      { id: "section-context", heading: "Context", html: "<h3>History</h3>\n<p>Long ago.</p>" },
+    ]);
+  });
+
+  it("renders a single H1 as a section under headings: sections, and as the title otherwise", () => {
+    const text = "# Purpose of the document\n\nWhy.\n";
+    const sections = renderMarkdown(text, { headings: "sections" });
+    expect(sections.title).toBeUndefined();
+    expect(sections.sections.map((section) => section.heading)).toEqual([
+      "Purpose of the document",
+    ]);
+    expect(renderMarkdown(text).title).toBe("Purpose of the document");
+  });
+
+  it("numbers the sections whose headings slugify alike", () => {
+    const text = ["# Title", "", "## Steps", "", "one", "", "## Steps", "", "two", ""].join("\n");
     const rendered = renderMarkdown(text);
     expect(rendered.title).toBe("Title");
     expect(rendered.sections.map((section) => section.id)).toEqual([

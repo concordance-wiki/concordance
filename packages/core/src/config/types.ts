@@ -71,6 +71,13 @@ export interface TypingRule {
   set: Record<string, string | number | boolean>;
 }
 
+/**
+ * `auto`: the first H1 of a note is its title, unless the note has several, which then head its
+ * sections. `sections`: every H1 heads a section, the title coming from the frontmatter or the
+ * file name.
+ */
+export type HeadingsMode = "auto" | "sections";
+
 /** The title and the description of a folder of a source, as the site shows them. */
 export interface FolderConfig {
   /** The title of the folder wherever the site names it; its name as written on the paths when absent. */
@@ -96,6 +103,8 @@ export interface SourceConfig {
   /** The folders of the source titled and described, by path relative to the source root. */
   folders?: Record<string, FolderConfig>;
   glossary?: boolean;
+  /** What the level-one headings of the notes are: the title unless a note has several (`auto`), or always sections. */
+  headings?: HeadingsMode;
   convert?: boolean;
   previews?: boolean;
   defaults?: Record<string, string | number | boolean>;

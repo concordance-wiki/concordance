@@ -270,7 +270,13 @@ export function pseudonymizeScope(input: PseudonymizeScopeInput): PseudonymizedS
     const replaced = pseudonymizeText(input.fs.readText(file), dictionary, options);
     if (replaced.replaced === 0) return note;
     notes.set(key, replaced.text);
-    return { ...note, document: parseMarkdown(replaced.text, { path: note.path }) };
+    return {
+      ...note,
+      document: parseMarkdown(replaced.text, {
+        path: note.path,
+        ...(note.headings === undefined ? {} : { headings: note.headings }),
+      }),
+    };
   });
   const resources = input.resources.map((document) =>
     document.unit === "cue" || !scoped.has(fileKey(document.source, document.path))

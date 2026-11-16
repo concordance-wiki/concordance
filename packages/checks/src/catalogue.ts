@@ -1,6 +1,7 @@
 import type { Severity } from "@concordance-wiki/core";
 
 import { apiConsumerMismatch, apiWithoutConsumer } from "./checks/api-consumers.js";
+import { SHARED_TITLE_REMEDIATION, sharedTitles } from "./checks/shared-titles.js";
 import type { CheckDefinition, CheckFamily, CheckId } from "./definition.js";
 import type { Check } from "./model.js";
 
@@ -140,6 +141,14 @@ export const catalogue: readonly CheckDefinition[] = [
     "documents",
     "Two resources look like representations of the same document, but not enough to merge them.",
     "Declare the twin in the markdown frontmatter under source, or record the pair as merged or separated in the lock file.",
+  ),
+  model(
+    "W-TITLE-SHARED",
+    "warning",
+    "documents",
+    "At least three entities of one source share a title, the mark of a template heading kept by every file.",
+    SHARED_TITLE_REMEDIATION,
+    sharedTitles,
   ),
   step(
     "W-TERM-UNDEFINED",

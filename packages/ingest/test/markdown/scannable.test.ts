@@ -153,6 +153,15 @@ describe("scannableText", () => {
       ]);
     });
 
+    it("gives the units of a note with several H1s the H1 above them as their section", () => {
+      expect(units("# Purpose\n\nWhy.\n\n# Context\n\n## History\n")).toEqual([
+        { line: 1, text: "Purpose", kind: "heading", section: "Purpose" },
+        { line: 3, text: "Why.", kind: "paragraph", section: "Purpose" },
+        { line: 5, text: "Context", kind: "heading", section: "Context" },
+        { line: 7, text: "History", kind: "heading", section: "Context" },
+      ]);
+    });
+
     it("resets the section after a second H1", () => {
       expect(units("## Objects\n\n# Appendix\n\nOutside.\n")).toEqual([
         { line: 1, text: "Objects", kind: "heading", section: "Objects" },

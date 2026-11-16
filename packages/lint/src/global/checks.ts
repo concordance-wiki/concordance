@@ -10,6 +10,7 @@ import {
   type SourceConfig,
   fileKey,
   identifierFor,
+  titleFromPath,
 } from "@concordance-wiki/core";
 import { readMarkdown, resolveLink, type ParsedMarkdown } from "@concordance-wiki/ingest";
 import {
@@ -84,7 +85,7 @@ const NO_FILES: ReadonlySet<string> = new Set();
 function titleOf(document: ParsedMarkdown, path: string): string {
   const declared = document.frontmatter["title"];
   if (typeof declared === "string") return declared;
-  return document.title ?? posix.basename(path, posix.extname(path));
+  return document.title ?? titleFromPath(path);
 }
 
 function aliasesOf(document: ParsedMarkdown): string[] {
@@ -106,7 +107,7 @@ function localNotes(input: GlobalChecksInput): { notes: LocalNote[]; files: Read
   const notes: LocalNote[] = [];
   for (const path of files) {
     if (!path.endsWith(".md")) continue;
-    const read = readMarkdown({ fs }, posix.join(root, path), path);
+    const read = readMarkdown({ fs }, posix.join(root, path), path, source.headings);
     if (!read.ok) continue;
     const { document } = read;
     const { frontmatter } = document;

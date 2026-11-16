@@ -1,4 +1,4 @@
-import type { FileSystem } from "@concordance-wiki/core";
+import type { FileSystem, HeadingsMode } from "@concordance-wiki/core";
 
 import { parseMarkdown } from "./parse.js";
 import type { ReadMarkdownResult } from "./types.js";
@@ -10,6 +10,7 @@ export function readMarkdown(
   deps: { fs: FileSystem },
   absolutePath: string,
   relativePath: string,
+  headings?: HeadingsMode,
 ): ReadMarkdownResult {
   const bytes = deps.fs.readBytes(absolutePath);
   let text: string;
@@ -27,5 +28,11 @@ export function readMarkdown(
       },
     };
   }
-  return { ok: true, document: parseMarkdown(text, { path: relativePath }) };
+  return {
+    ok: true,
+    document: parseMarkdown(text, {
+      path: relativePath,
+      ...(headings === undefined ? {} : { headings }),
+    }),
+  };
 }

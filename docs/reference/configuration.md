@@ -125,6 +125,7 @@ Exactly one of: `git` is set; `path` is set; `kind` is `"tracker"`.
 | `folders` | map of object | — | keys: pattern `^[^/\s][^\s]*[^/\s]$\|^[^/\s]$` | The folders of the source the site titles and describes, keyed by their path relative to the source root, such as rules/links; a folder not listed is named as written. See [`sources[].folders.*`](#sourcesfolders). |
 | `glossary` | boolean | `false` | — | Whether the source is a glossary: its titles and aliases take priority in the recognition dictionary. |
 | `convert` | boolean | `false` | — | Whether the office documents of the source are converted, for preview and text extraction. |
+| `headings` | enum | `"auto"` | `auto`, `sections` | What the level-one headings of the notes of the source are. auto: the first is the title, unless a note has several, which then head its sections one level down. sections: every one heads a section, the title coming from the frontmatter or the file name. |
 | `previews` | boolean | `true` | — | Whether the previews of the converted documents of the source are published with the site; false keeps them out of the artefact. |
 | `defaults` | map of string \| number \| boolean | — | — | Default attribute values for the entities of the source; accepted but not read in this version. |
 | `rules` | object[] | — | — | Typing rules evaluated in order on every file of the source; the last matching rule wins, over type and under the frontmatter. See [`sources[].rules[]`](#sourcesrules). |

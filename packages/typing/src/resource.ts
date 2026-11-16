@@ -6,6 +6,7 @@ import {
   type SourceConfig,
   byCodeUnit,
   identifierFor,
+  titleFromPath,
 } from "@concordance-wiki/core";
 import type { IngestedFile, IngestedSource } from "@concordance-wiki/ingest";
 import type { Profile } from "@concordance-wiki/profile";
@@ -46,14 +47,9 @@ const RENAMED: Readonly<Record<string, string | undefined>> = {
 
 const DEFAULT_STATUS = "valid";
 
-function fileTitle(path: string): string {
-  const name = path.slice(path.lastIndexOf("/") + 1);
-  return name.replace(/\.[^.]+$/, "");
-}
-
 function titleOf(metadata: Record<string, unknown>, path: string): string {
   const title = metadata["title"];
-  return typeof title === "string" && title.trim() !== "" ? title.trim() : fileTitle(path);
+  return typeof title === "string" && title.trim() !== "" ? title.trim() : titleFromPath(path);
 }
 
 function statusOf(profile: Profile): string {

@@ -1,5 +1,10 @@
-import { isPlainObject, yamlDocument, type Finding } from "@concordance-wiki/core";
-import type { List, Nodes, RootContent } from "mdast";
+import {
+  isPlainObject,
+  levelOneHeadsSections,
+  yamlDocument,
+  type Finding,
+} from "@concordance-wiki/core";
+import type { List, Nodes, Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
@@ -128,8 +133,20 @@ function extend(section: MarkdownSection, block: RootContent): void {
   }
 }
 
+/**
+ * How many levels deeper every heading of the tree reads: none, or one when the level-one
+ * headings head the sections of the note rather than title it.
+ */
+function headingShift(root: Root, context: Pick<ParseContext, "headings">): 0 | 1 {
+  const levelOne = root.children.filter(
+    (block) => block.type === "heading" && block.depth === 1,
+  ).length;
+  return levelOneHeadsSections(context.headings, levelOne) ? 1 : 0;
+}
+
 export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdown {
   const root = processor.parse(text);
+  const shift = headingShift(root, context);
   const document: ParsedMarkdown = {
     frontmatter: {},
     title: undefined,
@@ -140,7 +157,7 @@ export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdo
     quotes: [],
     tables: [],
     paragraphs: [],
-    scannable: scannableUnits(root),
+    scannable: scannableUnits(root, shift),
     findings: [],
   };
   let section: MarkdownSection | undefined;
@@ -149,10 +166,11 @@ export function parseMarkdown(text: string, context: ParseContext): ParsedMarkdo
       document.frontmatter = readFrontmatter(block.value, context.path, document.findings);
       continue;
     }
-    if (block.type === "heading" && block.depth === 1) {
+    const depth = block.type === "heading" ? block.depth + shift : undefined;
+    if (depth === 1) {
       section = undefined;
       document.title ??= plainText(block);
-    } else if (block.type === "heading" && block.depth === 2) {
+    } else if (depth === 2) {
       section = {
         heading: plainText(block),
         line: positionOf(block).start.line,
