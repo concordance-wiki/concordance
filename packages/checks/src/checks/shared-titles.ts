@@ -28,7 +28,7 @@ function listed(paths: readonly string[]): string {
  * The entities stay as they are; the finding only names them.
  */
 export function sharedTitles(input: CheckInput): Finding[] {
-  const groups = new Map<string, { source: string; title: string; entities: CheckEntity[] }>();
+  const groups = new Map<string, { source: string; entities: CheckEntity[] }>();
   for (const entity of input.entities) {
     if (entity.title === undefined) continue;
     const key = titleKey(entity.title);
@@ -36,7 +36,7 @@ export function sharedTitles(input: CheckInput): Finding[] {
     const groupKey = `${entity.source.name}\u0000${key}`;
     const group = groups.get(groupKey);
     if (group === undefined) {
-      groups.set(groupKey, { source: entity.source.name, title: entity.title, entities: [entity] });
+      groups.set(groupKey, { source: entity.source.name, entities: [entity] });
     } else {
       group.entities.push(entity);
     }
@@ -45,15 +45,15 @@ export function sharedTitles(input: CheckInput): Finding[] {
   for (const group of groups.values()) {
     if (group.entities.length < SHARED_TITLE_THRESHOLD) continue;
     const entities = [...group.entities].sort((a, b) => byCodeUnit(a.source.path, b.source.path));
-    // The group holds at least the threshold, so a first entity exists.
-    const first = entities[0] as CheckEntity;
+    // The group holds at least the threshold, so a first entity exists, and only a titled entity joins one.
+    const first = entities[0] as CheckEntity & { title: string };
     findings.push({
       check: "W-TITLE-SHARED",
       severity: "warning",
       source: group.source,
       path: first.source.path,
       entity: first.id,
-      message: `"${first.title ?? group.title}" titles ${String(entities.length)} entities of the source ${group.source}: ${listed(entities.map((entity) => entity.source.path))}`,
+      message: `"${first.title}" titles ${String(entities.length)} entities of the source ${group.source}: ${listed(entities.map((entity) => entity.source.path))}`,
       remediation: SHARED_TITLE_REMEDIATION,
     });
   }

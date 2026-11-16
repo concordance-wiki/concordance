@@ -171,6 +171,23 @@ describe("The build writes fragments/<id>.json next to the model: rendered secti
     expect(lead).not.toContain("word page");
   });
 
+  it("renders the single H1 of a note as its first section when its source declares headings: sections", () => {
+    const declared: Config = {
+      ...config,
+      sources: [{ name: "specs", path: "../specs", headings: "sections" }],
+    };
+    const panel = fragmentsOf(input({ config: declared })).find(
+      (fragment) => fragment.id === "specs/screens/mentions-panel",
+    );
+    expect(panel?.sections).toEqual([
+      {
+        id: "section-mentions-panel",
+        heading: "Mentions panel",
+        html: "<p>Lists the mentions.</p>",
+      },
+    ]);
+  });
+
   it("links every recognised word of the note in the text, the words inside written links, the entity's own name, a lost target and a page a written link already leads to left alone", () => {
     const [keywordPage] = fragmentsOf(input());
     expect(keywordPage?.sections[0]?.html).toContain(

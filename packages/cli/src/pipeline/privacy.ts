@@ -274,7 +274,7 @@ export function pseudonymizeScope(input: PseudonymizeScopeInput): PseudonymizedS
       ...note,
       document: parseMarkdown(replaced.text, {
         path: note.path,
-        ...(note.headings === undefined ? {} : { headings: note.headings }),
+        headings: note.headings,
       }),
     };
   });

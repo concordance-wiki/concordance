@@ -280,8 +280,9 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<a>click</a>");
   });
 
-  it("renders a note with several H1s one level down: no title, a section per H1, its H2s as H3s", () => {
-    const text = "# Purpose of the document\n\nWhy.\n\n# Context\n\n## History\n\nLong ago.\n";
+  it("renders a note with several H1s one level down: no title, a section per H1, its H2s as H3s, an H6 staying one", () => {
+    const text =
+      "# Purpose of the document\n\nWhy.\n\n# Context\n\n## History\n\nLong ago.\n\n###### Aside\n";
     const rendered = renderMarkdown(text);
     expect(rendered.title).toBeUndefined();
     expect(rendered.sections).toEqual([
@@ -290,7 +291,11 @@ describe("renderMarkdown", () => {
         heading: "Purpose of the document",
         html: "<p>Why.</p>",
       },
-      { id: "section-context", heading: "Context", html: "<h3>History</h3>\n<p>Long ago.</p>" },
+      {
+        id: "section-context",
+        heading: "Context",
+        html: "<h3>History</h3>\n<p>Long ago.</p>\n<h6>Aside</h6>",
+      },
     ]);
   });
 

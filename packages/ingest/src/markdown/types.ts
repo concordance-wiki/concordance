@@ -4,7 +4,7 @@ export interface ParseContext {
   /** Forward-slash path of the file, relative to the source root. */
   path: string;
   /** The `headings` of the source: `auto` when absent. */
-  headings?: HeadingsMode;
+  headings?: HeadingsMode | undefined;
 }
 
 export interface MarkdownListItem {

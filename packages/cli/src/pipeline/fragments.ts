@@ -384,7 +384,7 @@ export function fragmentsOf(input: FragmentsInput): EntityFragment[] {
       (declared) => declared.name === source.name,
     )?.headings;
     const rendered = renderMarkdown(text, {
-      ...(headings === undefined ? {} : { headings }),
+      headings,
       // A link to a file of the sources leads to its page; a file without a page is not published,
       // so the link goes. An image of the sources is copied next to the page and, on a line of its
       // own, captioned with its path in the source; any other image, an external URL typically, is

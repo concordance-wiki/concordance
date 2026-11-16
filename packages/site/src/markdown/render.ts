@@ -75,7 +75,7 @@ export interface MarkdownOptions {
    */
   imagePath?: (target: string) => string | undefined;
   /** The `headings` of the source of the note: `auto` when absent. */
-  headings?: HeadingsMode;
+  headings?: HeadingsMode | undefined;
 }
 
 export interface RenderedMarkdown {

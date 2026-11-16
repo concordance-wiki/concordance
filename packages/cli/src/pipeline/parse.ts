@@ -9,7 +9,7 @@ export interface ParsedDocument {
   path: string;
   document: ParsedMarkdown;
   /** The `headings` of its source, for a step that parses the note again; `auto` when absent. */
-  headings?: HeadingsMode;
+  headings?: HeadingsMode | undefined;
 }
 
 export interface ParsedSources {
@@ -38,7 +38,7 @@ export function parseSources(
           source: source.name,
           path: file.path,
           document: read.document,
-          ...(headings === undefined ? {} : { headings }),
+          headings,
         });
         for (const finding of read.document.findings) {
           findings.push({ ...finding, source: source.name });

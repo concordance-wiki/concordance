@@ -32,7 +32,7 @@ export function readMarkdown(
     ok: true,
     document: parseMarkdown(text, {
       path: relativePath,
-      ...(headings === undefined ? {} : { headings }),
+      headings,
     }),
   };
 }
