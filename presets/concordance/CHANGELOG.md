@@ -1,5 +1,17 @@
 # @concordance-wiki/concordance
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [a87d57f]
+  - @concordance-wiki/cli@1.0.1
+  - @concordance-wiki/plugin-contract-openapi@1.0.1
+  - @concordance-wiki/plugin-contract-wsdl@1.0.1
+  - @concordance-wiki/plugin-convert-libreoffice@1.0.1
+  - @concordance-wiki/plugin-reader-office@1.0.1
+  - @concordance-wiki/plugin-reader-vtt@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

@@ -1,5 +1,12 @@
 # @concordance-wiki/i18n
 
+## 1.0.1
+
+### Patch Changes
+
+- dd14d12: The message parser of the interface catalogue moves to @formatjs/icu-messageformat-parser 3.5.21.
+- @concordance-wiki/core@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
