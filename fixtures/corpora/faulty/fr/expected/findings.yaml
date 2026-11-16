@@ -18,4 +18,5 @@
 - { check: W-REF-UNRESOLVED, source: notes, path: ecrans/reference-non-resolue.md, line: 2 }
 - { check: W-TERM-UNDEFINED, text: expression récurrente, min_occurrences: 3, min_files: 2 }
 - { check: W-TERM-UNUSED, source: notes, path: termes/jamais-cite.md }
+- { check: W-TITLE-SHARED, source: notes, path: gabarit-client.md, entity: notes/gabarit-client }
 - { check: W-TYPE-UNKNOWN, source: notes, path: type-inconnu.md }

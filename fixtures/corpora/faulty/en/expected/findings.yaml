@@ -18,4 +18,5 @@
 - { check: W-REF-UNRESOLVED, source: notes, path: screens/unresolved-reference.md, line: 2 }
 - { check: W-TERM-UNDEFINED, text: recurring expression, min_occurrences: 3, min_files: 2 }
 - { check: W-TERM-UNUSED, source: notes, path: terms/never-cited.md }
+- { check: W-TITLE-SHARED, source: notes, path: template-billing.md, entity: notes/template-billing }
 - { check: W-TYPE-UNKNOWN, source: notes, path: unknown-type.md }
